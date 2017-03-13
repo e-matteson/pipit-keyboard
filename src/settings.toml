@@ -1,0 +1,36 @@
+
+[options]
+
+normal_mode                = "keymaps/dvorak24.kmap"
+onehand_mode               = "keymaps/dvorak24_onehand.kmap"
+chord_delay                = 30
+has_battery                = true
+battery_level_pin          = 9
+row_pins                   = [1, 0, 19]
+# test_2d                    = [[0, 1], [2, 3]]
+board_name                 = "FEATHER_M0_BLE"
+
+
+[plain_keys]
+
+modifierkey_shift = [["0","MODIFIERKEY_SHIFT"]]
+key_a             = [["KEY_A","0"]]
+
+[macros]
+
+macro_save = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"], ["KEY_W", "0"], ["KEY_ENTER", "0"]]
+macro_ls = [["KEY_L","0"], ["KEY_S", "0"], ["KEY_ENTER", "0"]]
+
+
+[lists]
+
+special_functions = [
+"special_pause",
+"special_delete_word",
+]
+
+words = [
+["abandon"],
+["difference", "diff"],
+["<ing", "~ing"],
+]
