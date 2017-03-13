@@ -1,0 +1,23 @@
+[root]
+name = "rusty-pipit"
+version = "0.1.0"
+dependencies = [
+ "toml 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "serde"
+version = "0.9.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "toml"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "serde 0.9.11 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[metadata]
+"checksum serde 0.9.11 (registry+https://github.com/rust-lang/crates.io-index)" = "a702319c807c016e51f672e5c77d6f0b46afddd744b5e437d6b8436b888b458f"
+"checksum toml 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3474f3c6eaf32eedb4f4a66a26214f020f828a6d96c37e38a35e3a379bbcfd11"

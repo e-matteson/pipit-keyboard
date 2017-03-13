@@ -1,0 +1,7 @@
+[package]
+name = "rusty-pipit"
+version = "0.1.0"
+authors = ["em <e.r.matteson@gmail.com>"]
+
+[dependencies]
+toml = "0.3"
