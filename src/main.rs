@@ -7,4 +7,5 @@ fn main() {
     let parsed = get_parsed_settings();
     // println!("{:#?}", parsed);
     set_options(&mut op_def_map, &parsed["options"]);
+    println!("{:#?}", op_def_map["kmap_format"]);
 }
