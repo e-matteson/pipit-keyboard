@@ -1,15 +1,28 @@
 
 [options]
 
+output_directory           = "pipit-firmware/"
 normal_mode                = "keymaps/dvorak24.kmap"
 onehand_mode               = "keymaps/dvorak24_onehand.kmap"
 chord_delay                = 30
+held_delay                 = 200
+debounce_delay             = 15
+stickymod_key              = "KEY_INSERT"
+enable_audio_feedback      = false
+debug_messages             = 2
+enable_unknown_deletion    = true
+collapse_unknown_deletions = true
+
+# hardware-specific options:
+
+board_name                 = "FEATHER_M0_BLE"
 has_battery                = true
 battery_level_pin          = 9
+enable_rgb_led             = true
+enable_color_feedback      = true
+rgb_led_pins               = [10, 11, 12]
 row_pins                   = [1, 0, 19]
-test_2d                    = [[0, 1], [2, 3]]
-board_name                 = "FEATHER_M0_BLE"
-
+column_pins                = [15,16,17,18, 20,21,5,6]
 
 kmap_format                = [
 [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
@@ -29,7 +42,7 @@ macro_save = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"], ["KEY_W", "0"], ["KEY_ENTER
 macro_ls = [["KEY_L","0"], ["KEY_S", "0"], ["KEY_ENTER", "0"]]
 
 
-[lists]
+[other]
 
 special_functions = [
 "special_pause",
