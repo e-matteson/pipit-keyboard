@@ -1,3 +1,5 @@
+// TODO replace all this with a struct-based settings.rs?
+
 use std::collections::HashMap;
 use std::collections::BTreeMap;
 use std::io::prelude::*;
@@ -27,7 +29,7 @@ impl TomlLoader{
         let parsed = parse_toml(toml_path);
 
         let mut options = Options::new();
-        options.set(&parsed["options"]);
+        options.load(&parsed["options"]);
 
         let macros = load_sequence_map(&parsed["macros"]);
         let plain_keys = load_sequence_map(&parsed["plain_keys"]);

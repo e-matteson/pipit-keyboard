@@ -10,7 +10,7 @@ pub struct Maps{
     pub plains: HashMap<String, Sequence>,
     pub macros: HashMap<String, Sequence>,
     pub words: HashMap<String, Sequence>,
-    pub specials: HashMap<String, Sequence>,
+    pub specials: HashMap<String, usize>,
     len_chord: usize,
 }
 
@@ -24,6 +24,14 @@ impl Maps{
             specials: HashMap::new(),
             len_chord: 8*num_bytes_in_chord,
         }
+    }
+
+    pub fn add_special(&mut self, entry: &str) {
+        let num = self.specials.len() + 1;
+        if self.specials.contains_key(entry){
+            panic!(format!("specials map already contains key: {}", entry));
+        }
+        self.specials.insert(entry.to_owned(), num);
     }
 
     pub fn add_word(&mut self, entry: &Vec<String>) {

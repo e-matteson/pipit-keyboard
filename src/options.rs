@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::cmp::PartialOrd;
+// use std::ops::{Index, IndexMut};
 
 use toml::Value;
 use key_types::SwitchPos;
@@ -13,6 +14,14 @@ pub struct OpDef {
     default: Option<OpVal>,
     required: OpReq,
     internal: bool,
+}
+
+impl OpDef{
+    fn is_auto(&self) -> bool{
+        self.required == OpReq::Auto
+    }
+
+    // fn set_val(&mut self){}
 }
 
 // impl PartiaLord for OpDef{
@@ -46,6 +55,7 @@ pub enum OpType {
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Eq)]
+// TODO make OpVals unwrap()-able
 pub enum OpVal {
     Str (String),
     Int (i64),
@@ -58,6 +68,7 @@ pub enum OpVal {
 
 
 #[derive(Debug)]
+#[derive(PartialEq)]
 pub enum OpReq {
     Required,
     Optional,
@@ -125,7 +136,60 @@ impl OpDefBuilder {
 #[derive(Debug)]
 pub struct Options (HashMap<String, OpDef>);
 
+// impl <'a> Index<&'a str> for Options{
+//     type Output = OpDef;
+
+//     fn index(&self, key: &str) -> &OpDef{
+//         &self.0.index(key)
+//     }
+// }
+
+// impl <'a> IndexMut<&'a str> for Options{
+//     // type Output = OpDef;
+//     fn index_mut(&mut self, key: &str) -> &mut OpDef{
+//         &mut self.0.index_mut(key)
+//     }
+// }
+
 impl Options{
+    pub fn get(&self, key: &str) -> &OpDef{
+        match self.0.get(key){
+            Some(opdef) => opdef,
+            None => panic!(format!("option not found: {}", key)),
+        }
+    }
+
+    pub fn get_mut(&mut self, key: &str) -> &mut OpDef{
+        match self.0.get_mut(key){
+            Some(opdef) => opdef,
+            None => panic!(format!("option not found: {}", key)),
+        }
+    }
+
+    fn set_val(&mut self, name: &str, val: OpVal){
+        self.0.get_mut(name)
+            .expect(&format!("option not found: {}", name))
+            .val = Some(val);
+    }
+
+    pub fn get_val(&self, name: &str) -> &OpVal{
+        let wrapped_val =  &self.0.get(name)
+            .expect(&format!("option not found: {}", &name));
+
+        match wrapped_val.val{
+            Some(ref val) => val,
+            _ => panic!(format!("value is None: {}", &name)),
+        }
+    }
+
+    fn get_val_len(&self, name: &str) -> usize{
+        // TODO implement for other vector-based variants?
+        match self.get_val(name){
+            &OpVal::Vec(ref v) => v.len(),
+            _ => panic!("expected OpVal::Vec"),
+        }
+    }
+
     pub fn new() -> Options{
         let mut options = Options(HashMap::new());
         options.initialize();
@@ -283,9 +347,10 @@ impl Options{
                 .finalize());
     }
 
-    pub fn set(&mut self, parsed_options: &Value) {
+    pub fn load(&mut self, parsed_options: &Value) {
         self.from_parsed(parsed_options);
         self.check_requirements();
+        self.set_immediate_auto_options();
         // TODO generate auto values
     }
 
@@ -366,14 +431,14 @@ impl Options{
         for (name, op) in self.0.iter(){
             if let Some(_) = op.val{
                 // The option was provided in the settings file.
-                 continue
+                continue
             }
 
             match &op.required {
                 &OpReq::Auto => continue,
                 &OpReq::Optional => continue,
                 &OpReq::Required => (),
-                &OpReq::Dependent{key: ref key, val: ref val} =>
+                &OpReq::Dependent{ref key, ref val} =>
                     match (val, &self.0[key].val){
                         (&Some(ref expected), &Some(ref actual)) =>
                             if expected != actual {
@@ -387,7 +452,27 @@ impl Options{
             }
             panic!("Missing required option: {}", name)
         }
-
-
     }
+
+    fn set_immediate_auto_options(&mut self){
+        /// Automatically generate the options that depend only on other options,
+        ///  not outside information like layouts etc.
+
+        // TODO write another function for chord-based autos
+        self.set_val("blank_mapping" , OpVal::Int(0));
+
+        let num_rows: i64 = self.get_val_len("row_pins") as i64;
+        let num_cols: i64 = self.get_val_len("column_pins") as i64;
+        let num_matrix_positions: i64 = num_rows * num_cols as i64;
+        let num_bytes_in_chord: i64 = num_bits_to_bytes(num_matrix_positions);
+        self.set_val("num_rows" , OpVal::Int(num_rows));
+        self.set_val("num_cols" , OpVal::Int(num_cols));
+        self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
+        self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
+    }
+
+}
+
+fn num_bits_to_bytes(num_bits: i64) -> i64{
+    (num_bits as f64 / 8.0).ceil() as i64
 }

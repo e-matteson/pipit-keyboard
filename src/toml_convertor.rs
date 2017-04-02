@@ -87,7 +87,7 @@ fn toml_to_switchpos(toml_array: &Value) -> SwitchPos {
     if int_vec.len() != 2 {
         panic!("Expected vector of length 2");
     }
-    SwitchPos {row: int_vec[0], col: int_vec[1]}
+    SwitchPos {row: int_vec[0] as usize, col: int_vec[1] as usize}
 }
 
 fn toml_to_keypress(toml_array: &Value) -> KeyPress {
