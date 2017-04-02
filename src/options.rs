@@ -65,6 +65,44 @@ pub enum OpVal {
     VecKmap (Vec<Vec<SwitchPos>>),
 }
 
+impl OpVal{
+    pub fn unwrap_int(&self) -> i64{
+        match self{
+            &OpVal::Int(x) => x,
+            _ => panic!("Expected OpVal::Int"),
+        }
+    }
+    pub fn unwrap_str(&self) -> &str{
+        match self{
+            &OpVal::Str(ref x) => x,
+            _ => panic!("Expected OpVal::Str"),
+        }
+    }
+    pub fn unwrap_bool(&self) -> bool{
+        match self{
+            &OpVal::Bool(x) => x,
+            _ => panic!("Expected OpVal::Bool"),
+        }
+    }
+    pub fn unwrap_vec(&self) -> &Vec<i64>{
+        match self{
+            &OpVal::Vec(ref x) => x,
+            _ => panic!("Expected OpVal::Vec"),
+        }
+    }
+    pub fn unwrap_vec2(&self) -> &Vec<Vec<i64>>{
+        match self{
+            &OpVal::Vec2(ref x) => x,
+            _ => panic!("Expected OpVal::Vec2"),
+        }
+    }
+    pub fn unwrap_vec_kmap(&self) -> &Vec<Vec<SwitchPos>>{
+        match self{
+            &OpVal::VecKmap(ref x) => x,
+            _ => panic!("Expected OpVal::VecKmap"),
+        }
+    }
+}
 
 
 #[derive(Debug)]
@@ -80,13 +118,6 @@ pub enum OpReq {
     // If val is None, required if option value is Some.
     Dependent {key:String, val:Option<OpVal>}
 }
-
-// impl PartiaLord for OpReq{
-//     // Order on required, so ops with dependencies can be sorted to the end.
-//     fn partial_cmp(&self, other: &OpDef) -> Option<Ordering> {
-//         self.required.partial_cmp(&other.required)
-//     }
-// }
 
 
 struct OpDefBuilder {
@@ -136,21 +167,6 @@ impl OpDefBuilder {
 #[derive(Debug)]
 pub struct Options (HashMap<String, OpDef>);
 
-// impl <'a> Index<&'a str> for Options{
-//     type Output = OpDef;
-
-//     fn index(&self, key: &str) -> &OpDef{
-//         &self.0.index(key)
-//     }
-// }
-
-// impl <'a> IndexMut<&'a str> for Options{
-//     // type Output = OpDef;
-//     fn index_mut(&mut self, key: &str) -> &mut OpDef{
-//         &mut self.0.index_mut(key)
-//     }
-// }
-
 impl Options{
     pub fn get(&self, key: &str) -> &OpDef{
         match self.0.get(key){
@@ -184,16 +200,19 @@ impl Options{
 
     fn get_val_len(&self, name: &str) -> usize{
         // TODO implement for other vector-based variants?
-        match self.get_val(name){
-            &OpVal::Vec(ref v) => v.len(),
-            _ => panic!("expected OpVal::Vec"),
-        }
+        self.get_val(name).unwrap_vec().len()
     }
 
     pub fn new() -> Options{
         let mut options = Options(HashMap::new());
         options.initialize();
         options
+    }
+
+    pub fn load(&mut self, parsed_options: &Value) {
+        self.from_parsed(parsed_options);
+        self.check_requirements();
+        self.set_immediate_auto_options();
     }
 
     fn initialize(&mut self) {
@@ -345,13 +364,6 @@ impl Options{
             OpDefBuilder::new(OpType::DefineInt)
                 .required(OpReq::Auto)
                 .finalize());
-    }
-
-    pub fn load(&mut self, parsed_options: &Value) {
-        self.from_parsed(parsed_options);
-        self.check_requirements();
-        self.set_immediate_auto_options();
-        // TODO generate auto values
     }
 
     fn from_parsed( &mut self, parsed_options: &Value) {

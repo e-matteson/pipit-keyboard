@@ -22,14 +22,8 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(ops: &Options) -> Parser {
-        let format = match ops.get_val("kmap_format") {
-            &OpVal::VecKmap(ref v) => v,
-            _ => panic!("expected VecKmap"),
-        };
-        let bytes_in_chord = match ops.get_val("num_bytes_in_chord") {
-            &OpVal::Int(i) => i as usize,
-            _ => panic!("expected Int"),
-        };
+        let format = ops.get_val("kmap_format").unwrap_vec_kmap();
+        let bytes_in_chord = ops.get_val("num_bytes_in_chord").unwrap_int();
 
         let lines_in_block = 1+format.len(); // 1 extra for the top name line
         let items_per_line: Vec<_> = format.iter().map(|v| v.len()).collect();
@@ -44,7 +38,7 @@ impl Parser {
 
     pub fn parse(&mut self, path: &str, chords: &mut HashMap<String, Chord>) {
         let all_lines = load_lines(path);
-        let mut lines_iter =
+        let lines_iter =
             &all_lines.iter()
             .map(|l| l.trim())
             .filter(|l| !l.is_empty() && !l.starts_with(COMMENT_START))
@@ -130,10 +124,11 @@ fn make_permutation(ops: &Options) -> Vec<usize> {
 }
 
 fn make_kmap_order(ops: &Options) -> Vec<SwitchPos> {
-    let format = match ops.get_val("kmap_format") {
-        &OpVal::VecKmap(ref v) => v,
-        _ => panic!("expected VecKmap"),
-    };
+    let format = ops.get_val("kmap_format").unwrap_vec_kmap();
+    // let format = match ops.get_val("kmap_format") {
+    //     &OpVal::VecKmap(ref v) => v,
+    //     _ => panic!("expected VecKmap"),
+    // };
     let mut order: Vec<SwitchPos> = Vec::new();
     for line in format.iter(){
         order.extend_from_slice(line);
@@ -143,16 +138,9 @@ fn make_kmap_order(ops: &Options) -> Vec<SwitchPos> {
 
 fn make_firmware_order(ops: &Options) -> Vec<(SwitchPos)> {
     // must match the algorithm used in the firmware"s scanMatrix()!
-    fn extract_vec(val: &OpVal) -> &Vec<i64>  {
-        match val{
-            &OpVal::Vec(ref v) => v,
-            _ => panic!("expected Vec"),
-        }
-    }
     let mut order: Vec<SwitchPos> = Vec::new();
-    let row_pins = extract_vec(ops.get_val("row_pins"));
-    let column_pins = extract_vec(ops.get_val("column_pins"));
-
+    let row_pins = ops.get_val("row_pins").unwrap_vec();
+    let column_pins = ops.get_val("column_pins").unwrap_vec();
     for c in column_pins {
         for r in row_pins {
             order.push(SwitchPos::new(*r, *c));
