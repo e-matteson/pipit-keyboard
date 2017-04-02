@@ -4,8 +4,9 @@ use std::cmp::PartialOrd;
 
 use toml::Value;
 use key_types::SwitchPos;
+use maps::*;
 
-use toml_convertor::*;
+use options::toml_convertor::*;
 
 #[derive(Debug)]
 pub struct OpDef {
@@ -20,22 +21,8 @@ impl OpDef{
     fn is_auto(&self) -> bool{
         self.required == OpReq::Auto
     }
-
-    // fn set_val(&mut self){}
 }
 
-// impl PartiaLord for OpDef{
-//     // Order on required, so ops with dependencies can be sorted to the end.
-//     fn partial_cmp(&self, other: &OpDef) -> Option<Ordering> {
-//         self.required.partial_cmp(&other.required)
-//     }
-// }
-
-// impl PartialEq for OpDef {
-//     fn eq(&self, other: &Person) -> bool {
-//         self.height == other.height
-//     }
-// }
 
 #[derive(Debug)]
 pub enum OpType {
@@ -54,8 +41,22 @@ pub enum OpType {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+pub enum OpReq {
+    Required,
+    Optional,
+
+    // will be automatically generated, user should not supply it
+    Auto,
+
+    // Required only if key option has value val.
+    // If val is None, required if option value is Some.
+    Dependent {key:String, val:Option<OpVal>}
+}
+
+
+#[derive(Debug)]
+#[derive(PartialEq)]
 #[derive(Eq)]
-// TODO make OpVals unwrap()-able
 pub enum OpVal {
     Str (String),
     Int (i64),
@@ -102,21 +103,6 @@ impl OpVal{
             _ => panic!("Expected OpVal::VecKmap"),
         }
     }
-}
-
-
-#[derive(Debug)]
-#[derive(PartialEq)]
-pub enum OpReq {
-    Required,
-    Optional,
-
-    // will be automatically generated, user should not supply it
-    Auto,
-
-    // Required only if key option has value val.
-    // If val is None, required if option value is Some.
-    Dependent {key:String, val:Option<OpVal>}
 }
 
 
@@ -463,6 +449,20 @@ impl Options{
                     },
             }
             panic!("Missing required option: {}", name)
+        }
+    }
+
+    pub fn set_auto(&mut self, maps: &Maps){
+        /// Automatically generate the options that depend on chords
+
+        let mods = vec![("modifierkey_shift", "shift_position"),
+                        ("modifierkey_ctrl",  "ctrl_position"),
+                        ("modifierkey_alt",   "alt_position"),
+                        ("modifierkey_gui",   "gui_position")];
+
+        for (op_name, mod_name) in mods{
+            let position: i64 = maps.get_modifier_position(op_name) as i64;
+            self.set_val(mod_name, OpVal::Int(position))
         }
     }
 

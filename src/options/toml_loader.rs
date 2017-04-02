@@ -12,7 +12,8 @@ use toml::Value;
 use options::*;
 use maps::*;
 // use words::*;
-use toml_convertor::*;
+use self::toml_convertor::*;
+use self::options::*;
 use key_types::*;
 
 pub struct TomlLoader{

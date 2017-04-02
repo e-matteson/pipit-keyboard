@@ -7,7 +7,7 @@ use std::iter::Peekable;
 use itertools::{Itertools, multizip};
 use key_types::*;
 
-use options::*;
+use options::options::*;
 
 const COMMENT_START: &str = "#";
 const UNPRESSED_CHAR: char = '.';

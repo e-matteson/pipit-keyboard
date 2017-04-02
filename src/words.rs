@@ -10,7 +10,7 @@ pub fn make_word_sequence(word: &str) -> Sequence {
         seq.push(KeyPress{key: get_key_name_for_seq(letter),
                           modifier: get_mod_name_for_seq(letter)})
     }
-    println!("{:?}", seq);
+    // println!("{:?}", seq);
     seq
 }
 

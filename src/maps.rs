@@ -46,4 +46,15 @@ impl Maps{
         self.chords.insert(name.clone(), word_chord);
     }
 
+    pub fn get_modifier_position(&self, name: &str) -> usize{
+        // TODO take arg for layout
+        let error_message = format!("modifier must be mapped to exactly one switch: {}", name);
+        let chord = &self.chords[name];
+
+        if chord.iter().filter(|x| **x).count() > 1{
+            panic!(error_message);
+        }
+        chord.iter().position(|x| *x).expect(&error_message)
+   }
+
 }
