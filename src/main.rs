@@ -17,17 +17,20 @@ fn main() {
     let options = loader.options;
 
     let mut parser = Parser::new(&options);
-    let mut maps = Maps::new(3);
+    let mut maps = Maps::new(options.get_val("num_bytes_in_chord")
+                         .unwrap_int() as usize);
     parser.parse("keymaps/dvorak24.kmap", &mut maps.chords);
 
 
     // let macros = loader.macros;
     // println!("{:#?}", loader.options.get("kmap_format"));
 
-    // // let maps = Maps::new(loader.options["num_bytes_in_chord"]);
-    // for entry in loader.word_list.iter(){
-    //     maps.add_word(entry)
-    // }
+    for entry in loader.word_list.iter(){
+        maps.add_word(entry)
+    }
+
+    println!("{:?}", maps.chords["word_the"]);
+
     // for entry in loader.special_list.iter(){
     //     maps.add_special(entry)
     // }

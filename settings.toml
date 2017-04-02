@@ -53,4 +53,5 @@ words = [
 ["abandon"],
 ["difference", "diff"],
 ["<ing", "~ing"],
+["the"],
 ]

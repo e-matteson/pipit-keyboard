@@ -42,21 +42,26 @@ pub fn get_mod_name_for_seq(character: char) -> String {
 pub fn make_word_chord(word: &str,
                        chords: &HashMap<String, Chord>,
                        len_chord: usize) -> Chord {
-
-    // TODO set the chord correctly!
-
-
+    // TODO test if the chord is right
     let ignored = vec!['<', '.']; //TODO make this static?
 
     // let chord = Vec::new();
-    let chord = vec![false ; len_chord];
+    let mut chord = vec![false ; len_chord];
     for letter in word.chars(){
         if ignored.contains(&letter){
             continue;
         }
         let name = get_key_name_for_chord(letter);
+        chord_intersect(&mut chord, &chords[&name]);
     }
     chord
+}
+
+fn chord_intersect(a: &mut Chord, b: &Chord){
+    assert_eq!(a.len(), b.len());
+    for i in 0..a.len(){
+        a[i] |= b[i];
+    }
 }
 
 pub fn get_key_name_for_chord(character: char) -> String {

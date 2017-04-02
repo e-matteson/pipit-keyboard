@@ -44,10 +44,6 @@ impl Maps{
 
         let word_chord = make_word_chord(chord_spelling, &self.chords, self.len_chord);
         self.chords.insert(name.clone(), word_chord);
-        // println!("{:?}", name);
     }
 
-    // pub fn add_chord(&mut self, entry: &Vec<String>) {
 }
-
-
