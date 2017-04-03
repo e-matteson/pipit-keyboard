@@ -37,25 +37,6 @@ impl Parser {
         }
     }
 
-    // pub fn parse(&mut self, path: &str, chords: &mut HashMap<String, Chord>) {
-    //     let all_lines = load_lines(path);
-    //     let lines_iter =
-    //         &all_lines.iter()
-    //         .map(|l| l.trim())
-    //         .filter(|l| !l.is_empty() && !l.starts_with(COMMENT_START))
-    //         .map(|l| split(l))
-    //         .chunks(self.lines_in_block);
-
-    //     let mut pairs: Vec<(String, Chord)> = Vec::new();
-    //     for chunk in lines_iter{
-    //         let section: Vec<_> = chunk.collect();
-    //         pairs.extend(self.parse_section(section));
-    //     }
-    //     for (key, val) in pairs{
-    //         chords.insert(key, val);
-    //     }
-    // }
-
     pub fn parse(&mut self, path: &str, chords: &mut HashMap<String, Chord>) {
         let all_lines = load_lines(path);
         let lines_iter =
@@ -121,7 +102,7 @@ impl Parser {
         (names, strings)
     }
 
-    fn panic_syntax_error(&self, line_num: usize){
+    fn panic_syntax_error(&self, line_num: usize) {
         panic!(format!("syntax error in kmap file near line {}", line_num));
     }
 
@@ -141,7 +122,7 @@ fn make_permutation(ops: &Options) -> Vec<usize> {
     let kmap_order = make_kmap_order(ops);
     let firmware_order = make_firmware_order(ops);
     let mut permutation: Vec<usize> = Vec::new();
-    for pos in kmap_order{
+    for pos in kmap_order {
         permutation.push(
             firmware_order.iter()
                 .position(|p| *p == pos)
@@ -154,10 +135,6 @@ fn make_permutation(ops: &Options) -> Vec<usize> {
 
 fn make_kmap_order(ops: &Options) -> Vec<SwitchPos> {
     let format = ops.get_val("kmap_format").unwrap_vec_kmap();
-    // let format = match ops.get_val("kmap_format") {
-    //     &OpVal::VecKmap(ref v) => v,
-    //     _ => panic!("expected VecKmap"),
-    // };
     let mut order: Vec<SwitchPos> = Vec::new();
     for line in format.iter(){
         order.extend_from_slice(line);

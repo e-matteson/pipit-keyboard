@@ -144,14 +144,6 @@ pub fn format_wordmod(name: &str, maps: &Maps) -> Format {
     format_c_array(&full_name, &chord_to_ints(&maps.chords[name]), "uint8_t")
 }
 
-pub fn format_(name: &str, maps: &Maps) -> Format {
-    let full_name = format!("{}_chord_bytes", name);
-    format_c_array(&full_name, &chord_to_ints(&maps.chords[name]), "uint8_t")
-}
-
-
-
-
 
 fn chord_to_ints(chord: &Chord) -> Vec<i64> {
     let mut v: Vec<i64> = Vec::new();

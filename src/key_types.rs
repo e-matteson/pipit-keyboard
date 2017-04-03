@@ -8,7 +8,6 @@ pub type Sequence = Vec<KeyPress>;
 #[derive(Eq)]
 #[derive(Clone)]
 pub struct KeyPress{
-    /// Used for defining key sequences
     pub key: String,
     pub modifier: String,
 }

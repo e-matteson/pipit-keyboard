@@ -55,7 +55,7 @@ impl Maps{
 
     pub fn check_for_duplicate_chords(&self) {
         // TODO handle layouts
-        fn vec_to_string(v: &Vec<bool>) -> String{
+        fn vec_to_string(v: &Vec<bool>) -> String {
             let tmp: Vec<_> = v.iter().map(|&b| if b {"1"} else {"0"}).collect();
             tmp.join("")
         }
@@ -73,7 +73,7 @@ impl Maps{
                 && !self.wordmods.contains(&name.to_string())
                 && !self.wordmods.contains(&last_name.to_string());
 
-            if is_duplicate{
+            if is_duplicate {
                 println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
             }
             last_chord = chord;
@@ -85,15 +85,12 @@ impl Maps{
     pub fn check_for_missing_seqs(&self) {
         // Print warnings if any chords were never assigned a key sequence.
         for name in self.chords.keys() {
+            if self.wordmods.contains(name) { continue }
+            if self.specials.contains_key(name) { continue }
             if self.plains.contains_key(name) { continue }
             if self.macros.contains_key(name) { continue }
-            if self.specials.contains_key(name) { continue }
             if self.words.contains_key(name) { continue }
-            if self.wordmods.contains(name) { continue }
             println!("WARNING: no key sequence: '{}'", name);
         }
     }
-
-
 }
-

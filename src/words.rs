@@ -59,8 +59,8 @@ fn get_mod_name_for_seq(character: char) -> String {
 }
 
 fn make_word_chord(word: &str,
-                       chords: &HashMap<String, Chord>,
-                       len_chord: usize) -> Chord {
+                   chords: &HashMap<String, Chord>,
+                   len_chord: usize) -> Chord {
     // TODO test if the chord is right
     let ignored = vec!['<', '.']; //TODO make this static?
 

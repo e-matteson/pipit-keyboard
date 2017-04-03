@@ -12,15 +12,14 @@ type LenMap = HashMap<usize, Vec<String>>;
 type SeqMap = HashMap<String, Sequence>;
 
 // pub fn format_options() -> Format{
-
 // }
 
 // pub fn format_lookups(seq_map: &SeqMap) -> Format{
 pub fn format_lookups(seq_map: &SeqMap){
-    let len_map = make_length_map(seq_map);
+    let names_by_len = make_length_map(seq_map);
     // let chord_arrays: Vec<Chord>
-    for length in len_map.keys() {
-        let flat_seq = make_flat_sequence(seq_map, &len_map, 3);
+    for length in names_by_len.keys() {
+        let flat_seq = make_flat_sequence(seq_map, &names_by_len, 3);
         println!("{:?}", flat_seq);
         // seq_arrays[length] = self._raw_seq_bytes(flat_sequence, use_mods=True)
         // ...
@@ -28,24 +27,25 @@ pub fn format_lookups(seq_map: &SeqMap){
 }
 
 
-fn make_flat_sequence(seq_map: &SeqMap, len_map: &LenMap, length: usize)
+fn make_flat_sequence(seq_map: &SeqMap, names_by_len: &LenMap, length: usize)
                       -> Sequence {
     let mut flat_seq = Vec::new();
-    for name in &len_map[&length]{
+    for name in &names_by_len[&length]{
         flat_seq.extend(seq_map[name].clone());
     }
     flat_seq
 }
 
 fn make_length_map(seq_map: &HashMap<String, Sequence>) -> LenMap {
-    let mut len_map = HashMap::new();
+    // TODO layouts: weave name order
+    let mut names_by_len = HashMap::new();
     let mut names: Vec<_> = seq_map.keys().collect();
     names.sort();
     for name in names{
         let length = seq_map[name].len();
-        len_map.entry(length).or_insert(Vec::new()).push(name.to_owned());
+        names_by_len.entry(length).or_insert(Vec::new()).push(name.to_owned());
     }
-    len_map
+    names_by_len
 }
 
 pub fn format_intro(h_file_name: &str) -> Format{
