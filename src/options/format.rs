@@ -1,10 +1,31 @@
 use options::options::*;
+use maps::*;
+use compression::*;
+use key_types::*;
 use itertools::Itertools;
 
 #[derive(Debug)]
 pub struct Format {
     pub h: String,   // for header file
     pub c: String,   // for cpp file
+}
+
+impl Format {
+    pub fn append(&mut self, other: &Format) {
+        self.h += &other.h;
+        self.c += &other.c;
+    }
+}
+
+impl KeyPress{
+    pub fn as_bytes(&self, use_mods: bool) -> Vec<String> {
+        let mut v: Vec<String> = Vec::new();
+        v.push(format!("{}&0xff", self.key));
+        if use_mods{
+            v.push(format!("({})&0xff", self.modifier));
+        }
+        v
+    }
 }
 
 impl OpDef {
@@ -104,6 +125,48 @@ impl OpDef {
 }
 
 
+pub fn format_special(name: &str, maps: &Maps) -> Format {
+    Format{
+        h: format!("#define {} {}\n", name, maps.specials[name]),
+        c: String::new(),
+    }
+}
+
+pub fn format_wordmod(name: &str, maps: &Maps) -> Format {
+    let full_name = format!("{}_chord_bytes", name);
+    format_c_array(&full_name, &chord_to_ints(&maps.chords[name]), "uint8_t")
+}
+
+pub fn format_(name: &str, maps: &Maps) -> Format {
+    let full_name = format!("{}_chord_bytes", name);
+    format_c_array(&full_name, &chord_to_ints(&maps.chords[name]), "uint8_t")
+}
+
+
+
+
+
+fn chord_to_ints(chord: &Chord) -> Vec<i64> {
+    let mut v: Vec<i64> = Vec::new();
+    for chunk in &chord.iter().cloned().chunks(8){
+        let byte: Vec<_> = chunk.collect();
+        v.push(byte_to_int(&byte));
+    }
+    v
+}
+
+fn byte_to_int(v: &Vec<bool>) -> i64 {
+    assert_eq!(v.len(), 8);
+    let mut num: i64 = 0;
+    let tmp: Vec<_> = v.iter().map(|&b| if b {1} else {0}).collect();
+    let base: i64 = 2;
+    for b in 0..8{
+        num +=  base.pow(b) * tmp[b as usize]
+    }
+    num
+}
+
+
 pub fn format_c_array(name: &str, v: &Vec<i64>, ctype: &str) -> Format {
     let contents = make_c_array(&v);
     Format {
@@ -122,6 +185,7 @@ pub fn format_c_array2(name: &str, v: &Vec<Vec<i64>>, ctype: &str) -> Format {
                    ctype, name, len_2nd_dim, contents),
     }
 }
+
 
 pub fn make_c_array(v: &Vec<i64>) -> String {
     let lines = wrap_in_braces(&to_string_vec(v));

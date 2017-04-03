@@ -23,6 +23,7 @@ pub struct Loader{
     pub plain_keys: HashMap<String, Sequence>,
     pub special_list: Vec<String>,
     pub word_list: Vec<Vec<String>>,
+    pub wordmod_list: Vec<String>,
 }
 
 impl Loader{
@@ -38,6 +39,7 @@ impl Loader{
 
         let other = toml_to_map(&parsed["other"]);
         let special_list = toml_to_vec1_string(&other["special_functions"]);
+        let wordmod_list = toml_to_vec1_string(&other["wordmods"]);
         let word_list = toml_to_vec2_string(&other["words"]);
 
         Loader{
@@ -46,6 +48,7 @@ impl Loader{
             plain_keys: plain_keys,
             special_list: special_list,
             word_list: word_list,
+            wordmod_list: wordmod_list,
         }
     }
 }

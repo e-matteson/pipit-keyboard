@@ -44,6 +44,13 @@ macro_ls = [["KEY_L","0"], ["KEY_S", "0"], ["KEY_ENTER", "0"]]
 
 [other]
 
+wordmods = [
+    "wordmod_anagram1",
+    "wordmod_anagram2",
+    "wordmod_capital",
+    "wordmod_nospace",
+]
+
 special_functions = [
 "special_pause",
 "special_delete_word",

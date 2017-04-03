@@ -17,3 +17,4 @@ pub mod parser;
 pub mod key_types;
 pub mod words;
 pub mod maps;
+pub mod compression;

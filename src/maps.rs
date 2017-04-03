@@ -11,6 +11,7 @@ pub struct Maps{
     pub macros: HashMap<String, Sequence>,
     pub words: HashMap<String, Sequence>,
     pub specials: HashMap<String, usize>,
+    pub wordmods: Vec<String>,
     len_chord: usize,
 }
 
@@ -22,6 +23,7 @@ impl Maps{
             macros: HashMap::new(),
             words: HashMap::new(),
             specials: HashMap::new(),
+            wordmods: Vec::new(),
             len_chord: 8*num_bytes_in_chord,
         }
     }
@@ -53,7 +55,6 @@ impl Maps{
 
     pub fn check_for_duplicate_chords(&self) {
         // TODO handle layouts
-        // TODO ignore wordmod duplicates
         fn vec_to_string(v: &Vec<bool>) -> String{
             let tmp: Vec<_> = v.iter().map(|&b| if b {"1"} else {"0"}).collect();
             tmp.join("")
@@ -68,7 +69,11 @@ impl Maps{
         let mut last_chord = String::new();
         let mut last_name = "";
         for (chord, name) in foo {
-            if chord == last_chord {
+            let is_duplicate = chord == last_chord
+                && !self.wordmods.contains(&name.to_string())
+                && !self.wordmods.contains(&last_name.to_string());
+
+            if is_duplicate{
                 println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
             }
             last_chord = chord;
@@ -84,6 +89,7 @@ impl Maps{
             if self.macros.contains_key(name) { continue }
             if self.specials.contains_key(name) { continue }
             if self.words.contains_key(name) { continue }
+            if self.wordmods.contains(name) { continue }
             println!("WARNING: no key sequence: '{}'", name);
         }
     }

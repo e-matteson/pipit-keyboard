@@ -31,12 +31,17 @@ fn main() {
 
     maps.plains = loader.plain_keys;
     maps.macros = loader.macros;
+    maps.wordmods = loader.wordmod_list;
+
     for entry in loader.special_list.iter(){
         maps.add_special(entry)
     }
     for entry in loader.word_list.iter(){
         maps.add_word(entry)
     }
+
+    // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));
+    // println!("{:?}", format_wordmod("wordmod_anagram1", &maps));
 
     // println!("{}", format_intro("foo.h").h);
     // println!("{}", format_intro("foo.h").c);
