@@ -12,6 +12,8 @@ use rusty_pipit::maps::*;
 use rusty_pipit::options::load::Loader;
 use rusty_pipit::options::format::*;
 use rusty_pipit::parser::*;
+use rusty_pipit::write::*;
+
 // use rusty_pipit::settings::SETTINGS;
 
 fn main() {
@@ -36,8 +38,11 @@ fn main() {
         maps.add_word(entry)
     }
 
-    maps.check_for_missing_seqs();
-    maps.check_for_duplicate_chords();
+    // println!("{}", format_intro("foo.h").h);
+    // println!("{}", format_intro("foo.h").c);
+
+    // maps.check_for_missing_seqs();
+    // maps.check_for_duplicate_chords();
     // println!("{:?}", options.get("debug_messages").format("debug_messages"));
     // println!("{:?}", options.get("stickymod_key").format("stickymod_key"));
     // println!("{:?}", options.get("board_name").format("board_name"));
@@ -46,7 +51,6 @@ fn main() {
     // println!("{:?}", options.get("row_pins").format("row_pins"));
     // println!("{:?}", make_c_array2());
     // println!("{:?}", make_c_array(vec![0,1,2,3,4,5,6,7,8,9,10,11,12,13]));
-
     // println!("{}", make_c_array2(&vec![vec![0,1,2,3,4,5], vec![6,7,8,9,10,11]]));
     // println!("{}\n\n***\n", make_c_array(vec![0,1,2,3,4,5]));
     // println!("{}", make_c_array2(vec![vec![0,1,2,3,4,5], vec![6,7,8,9,10,11]]));

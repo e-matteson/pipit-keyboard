@@ -26,6 +26,7 @@ pub struct Loader{
 }
 
 impl Loader{
+
     pub fn load(toml_path: &str) -> Loader{
         let parsed = parse_toml(toml_path);
 

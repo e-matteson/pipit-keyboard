@@ -3,8 +3,8 @@ use itertools::Itertools;
 
 #[derive(Debug)]
 pub struct Format {
-    h: String,   // for header file
-    c: String,   // for cpp file
+    pub h: String,   // for header file
+    pub c: String,   // for cpp file
 }
 
 impl OpDef {
