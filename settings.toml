@@ -61,4 +61,6 @@ words = [
 ["difference", "diff"],
 ["<ing", "~ing"],
 ["the"],
+["and"],
+["for"],
 ]

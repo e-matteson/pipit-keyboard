@@ -11,11 +11,18 @@ pub struct Format {
 }
 
 impl Format {
+    pub fn new() -> Format {
+        Format {
+            h: String::new(),
+            c: String::new(),
+        }
+    }
     pub fn append(&mut self, other: &Format) {
         self.h += &other.h;
         self.c += &other.c;
     }
 }
+
 
 impl KeyPress{
     pub fn as_bytes(&self, use_mods: bool) -> Vec<String> {

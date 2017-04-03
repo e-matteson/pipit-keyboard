@@ -1,16 +1,55 @@
+use std::collections::HashMap;
 use std::path::Path;
 use std::ffi::OsStr;
 use time::*;
 
 use options::format::*;
+use key_types::*;
 
 const AUTHOR: &str = "rusty-pipit";
 
+type LenMap = HashMap<usize, Vec<String>>;
+type SeqMap = HashMap<String, Sequence>;
+
+// pub fn format_options() -> Format{
+
+// }
+
+// pub fn format_lookups(seq_map: &SeqMap) -> Format{
+pub fn format_lookups(seq_map: &SeqMap){
+    let len_map = make_length_map(seq_map);
+    // let chord_arrays: Vec<Chord>
+    for length in len_map.keys() {
+        let flat_seq = make_flat_sequence(seq_map, &len_map, 3);
+        println!("{:?}", flat_seq);
+        // seq_arrays[length] = self._raw_seq_bytes(flat_sequence, use_mods=True)
+        // ...
+    }
+}
+
+
+fn make_flat_sequence(seq_map: &SeqMap, len_map: &LenMap, length: usize)
+                      -> Sequence {
+    let mut flat_seq = Vec::new();
+    for name in &len_map[&length]{
+        flat_seq.extend(seq_map[name].clone());
+    }
+    flat_seq
+}
+
+fn make_length_map(seq_map: &HashMap<String, Sequence>) -> LenMap {
+    let mut len_map = HashMap::new();
+    let mut names: Vec<_> = seq_map.keys().collect();
+    names.sort();
+    for name in names{
+        let length = seq_map[name].len();
+        len_map.entry(length).or_insert(Vec::new()).push(name.to_owned());
+    }
+    len_map
+}
+
 pub fn format_intro(h_file_name: &str) -> Format{
-    let mut f = Format {
-        h: String::new(),
-        c: String::new(),
-    };
+    let mut f = Format::new();
     let guard_name = make_guard_name(h_file_name);
     let autogen_message = make_autogen_message();
 
@@ -29,10 +68,6 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f.c += &format!("#include \"{}\"\n\n", h_file_name);
     f
 }
-
-// pub fn format_options() -> Format{
-
-// }
 
 pub fn format_outro() -> Format{
     Format {

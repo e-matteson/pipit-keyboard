@@ -40,6 +40,8 @@ fn main() {
         maps.add_word(entry)
     }
 
+    format_lookups(&maps.words);
+
     // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));
     // println!("{:?}", format_wordmod("wordmod_anagram1", &maps));
 
