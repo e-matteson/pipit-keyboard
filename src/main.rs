@@ -36,13 +36,14 @@ fn main() {
         maps.add_word(entry)
     }
 
-
-    println!("{:?}", options.get("debug_messages").format("debug_messages"));
-    println!("{:?}", options.get("stickymod_key").format("stickymod_key"));
-    println!("{:?}", options.get("board_name").format("board_name"));
-    println!("{:?}", options.get("has_battery").format("has_battery"));
-    println!("{:?}", options.get("battery_level_pin").format("battery_level_pin"));
-    println!("{:?}", options.get("row_pins").format("row_pins"));
+    maps.check_for_missing_seqs();
+    maps.check_for_duplicate_chords();
+    // println!("{:?}", options.get("debug_messages").format("debug_messages"));
+    // println!("{:?}", options.get("stickymod_key").format("stickymod_key"));
+    // println!("{:?}", options.get("board_name").format("board_name"));
+    // println!("{:?}", options.get("has_battery").format("has_battery"));
+    // println!("{:?}", options.get("battery_level_pin").format("battery_level_pin"));
+    // println!("{:?}", options.get("row_pins").format("row_pins"));
     // println!("{:?}", make_c_array2());
     // println!("{:?}", make_c_array(vec![0,1,2,3,4,5,6,7,8,9,10,11,12,13]));
 

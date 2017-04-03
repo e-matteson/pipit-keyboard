@@ -3,8 +3,27 @@ use std::collections::HashMap;
 use options::*;
 use key_types::*;
 
+pub struct Word{
+    pub name: String,
+    pub seq: Sequence,
+    pub chord: Chord,
+}
 
-pub fn make_word_sequence(word: &str) -> Sequence {
+pub fn make_word(entry: &Vec<String>, chords: &HashMap<String, Chord>, len_chord: usize)
+                 -> Word {
+    let name = get_word_name(entry);
+    let seq_spelling = entry.first().unwrap();
+    let chord_spelling = entry.last().unwrap();
+
+    Word{
+        name: name,
+        seq: make_word_sequence(seq_spelling),
+        chord: make_word_chord(chord_spelling, chords, len_chord),
+    }
+}
+
+
+fn make_word_sequence(word: &str) -> Sequence {
     let mut seq: Sequence = Vec::new();
     for letter in word.chars(){
         seq.push(KeyPress{key: get_key_name_for_seq(letter),
@@ -14,11 +33,11 @@ pub fn make_word_sequence(word: &str) -> Sequence {
     seq
 }
 
-pub fn get_word_name(entry: &Vec<String>) -> String{
+fn get_word_name(entry: &Vec<String>) -> String{
     format!("word_{}", entry.join("_"))
 }
 
-pub fn get_key_name_for_seq(character: char) -> String {
+fn get_key_name_for_seq(character: char) -> String {
     if character.is_alphabetic() {
         return format!("KEY_{}", character.to_uppercase());
     }
@@ -31,7 +50,7 @@ pub fn get_key_name_for_seq(character: char) -> String {
     }
 }
 
-pub fn get_mod_name_for_seq(character: char) -> String {
+fn get_mod_name_for_seq(character: char) -> String {
     if character.is_uppercase() {
         "MODIFIERKEY_SHIFT".to_owned()
     } else {
@@ -39,7 +58,7 @@ pub fn get_mod_name_for_seq(character: char) -> String {
     }
 }
 
-pub fn make_word_chord(word: &str,
+fn make_word_chord(word: &str,
                        chords: &HashMap<String, Chord>,
                        len_chord: usize) -> Chord {
     // TODO test if the chord is right
@@ -64,7 +83,7 @@ fn chord_intersect(a: &mut Chord, b: &Chord){
     }
 }
 
-pub fn get_key_name_for_chord(character: char) -> String {
+fn get_key_name_for_chord(character: char) -> String {
     if character.is_alphabetic() {
         return format!("key_{}", character)
     }

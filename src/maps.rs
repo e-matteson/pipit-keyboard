@@ -35,15 +35,9 @@ impl Maps{
     }
 
     pub fn add_word(&mut self, entry: &Vec<String>) {
-        let name = get_word_name(entry);
-        let seq_spelling = entry.first().unwrap();
-        let chord_spelling = entry.last().unwrap();
-
-        self.words.insert(name.clone(),
-                          make_word_sequence(seq_spelling));
-
-        let word_chord = make_word_chord(chord_spelling, &self.chords, self.len_chord);
-        self.chords.insert(name.clone(), word_chord);
+        let word = make_word(entry, &self.chords, self.len_chord);
+        self.words.insert(word.name.clone(),  word.seq);
+        self.chords.insert(word.name.clone(), word.chord);
     }
 
     pub fn get_modifier_position(&self, name: &str) -> usize{
@@ -57,4 +51,43 @@ impl Maps{
         chord.iter().position(|x| *x).expect(&error_message)
    }
 
+    pub fn check_for_duplicate_chords(&self) {
+        // TODO handle layouts
+        // TODO ignore wordmod duplicates
+        fn vec_to_string(v: &Vec<bool>) -> String{
+            let tmp: Vec<_> = v.iter().map(|&b| if b {"1"} else {"0"}).collect();
+            tmp.join("")
+        }
+
+        let mut foo: Vec<_> = self.chords.iter()
+            .map(|(k, v)|
+                 (vec_to_string(v), k))
+            .collect();
+
+        foo.sort();
+        let mut last_chord = String::new();
+        let mut last_name = "";
+        for (chord, name) in foo {
+            if chord == last_chord {
+                println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
+            }
+            last_chord = chord;
+            last_name = name;
+        }
+    }
+
+
+    pub fn check_for_missing_seqs(&self) {
+        // Print warnings if any chords were never assigned a key sequence.
+        for name in self.chords.keys() {
+            if self.plains.contains_key(name) { continue }
+            if self.macros.contains_key(name) { continue }
+            if self.specials.contains_key(name) { continue }
+            if self.words.contains_key(name) { continue }
+            println!("WARNING: no key sequence: '{}'", name);
+        }
+    }
+
+
 }
+

@@ -129,13 +129,6 @@ pub fn make_c_array(v: &Vec<i64>) -> String {
     lines.join("\n")
 }
 
-fn is_rectangular(v: &Vec<Vec<i64>>) -> bool {
-    let len_2nd_dim = v[0].len();
-    v.iter()
-        .map(|v| v.len())
-        .all(|x| x == len_2nd_dim)
-}
-
 pub fn make_c_array2(v: &Vec<Vec<i64>>) -> String {
     // TODO assert rectangular
     assert!(is_rectangular(v));
@@ -165,3 +158,9 @@ pub fn to_string_vec(v: &Vec<i64>) -> Vec<String> {
     lines
 }
 
+fn is_rectangular(v: &Vec<Vec<i64>>) -> bool {
+    let len_2nd_dim = v[0].len();
+    v.iter()
+        .map(|v| v.len())
+        .all(|x| x == len_2nd_dim)
+}
