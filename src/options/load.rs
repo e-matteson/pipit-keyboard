@@ -16,7 +16,7 @@ use self::toml_convertor::*;
 use self::options::*;
 use key_types::*;
 
-pub struct TomlLoader{
+pub struct Loader{
     // For temporarily holding the loaded values
     pub options: Options,
     pub macros: HashMap<String, Sequence>,
@@ -25,8 +25,8 @@ pub struct TomlLoader{
     pub word_list: Vec<Vec<String>>,
 }
 
-impl TomlLoader{
-    pub fn load(toml_path: &str) -> TomlLoader{
+impl Loader{
+    pub fn load(toml_path: &str) -> Loader{
         let parsed = parse_toml(toml_path);
 
         let mut options = Options::new();
@@ -39,7 +39,7 @@ impl TomlLoader{
         let special_list = toml_to_vec1_string(&other["special_functions"]);
         let word_list = toml_to_vec2_string(&other["words"]);
 
-        TomlLoader{
+        Loader{
             options: options,
             macros: macros,
             plain_keys: plain_keys,

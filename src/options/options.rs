@@ -10,16 +10,23 @@ use options::toml_convertor::*;
 
 #[derive(Debug)]
 pub struct OpDef {
-    op_type: OpType,
-    val: Option<OpVal>,
-    default: Option<OpVal>,
-    required: OpReq,
-    internal: bool,
+    pub op_type: OpType,
+    pub val: Option<OpVal>,
+    pub default: Option<OpVal>,
+    pub required: OpReq,
+    pub internal: bool,
 }
 
 impl OpDef{
     fn is_auto(&self) -> bool{
         self.required == OpReq::Auto
+    }
+
+    pub fn get_val(&self) -> &OpVal{
+        match self.val{
+            Some(ref val) => val,
+            _ => panic!(format!("value is None")),
+        }
     }
 }
 
@@ -175,13 +182,13 @@ impl Options{
     }
 
     pub fn get_val(&self, name: &str) -> &OpVal{
-        let wrapped_val =  &self.0.get(name)
+        let op_def =  &self.0.get(name)
             .expect(&format!("option not found: {}", &name));
-
-        match wrapped_val.val{
-            Some(ref val) => val,
-            _ => panic!(format!("value is None: {}", &name)),
-        }
+        op_def.get_val()
+        // match wrapped_val.val{
+        //     Some(ref val) => val,
+        //     _ => panic!(format!("value is None: {}", &name)),
+        // }
     }
 
     fn get_val_len(&self, name: &str) -> usize{

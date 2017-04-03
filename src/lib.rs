@@ -8,11 +8,8 @@ extern crate itertools;
 #[macro_use]
 pub mod options;
 
-pub mod settings;
-pub mod test;
 // pub mod format;
 // pub mod toml_convertor;
-// pub mod toml_loader;
 
 pub mod parser;
 pub mod key_types;
