@@ -1,24 +1,27 @@
 use std::collections::HashMap;
 
 use options::*;
-use key_types::*;
+use chord::*;
+use sequence::*;
 
-pub struct Word{
+pub struct Word {
     pub name: String,
     pub seq: Sequence,
     pub chord: Chord,
 }
 
-pub fn make_word(entry: &Vec<String>, chords: &HashMap<String, Chord>, len_chord: usize)
-                 -> Word {
-    let name = get_word_name(entry);
-    let seq_spelling = entry.first().unwrap();
-    let chord_spelling = entry.last().unwrap();
 
-    Word{
-        name: name,
-        seq: make_word_sequence(seq_spelling),
-        chord: make_word_chord(chord_spelling, chords, len_chord),
+impl Word {
+    pub fn new(entry: &Vec<String>, chords: &HashMap<String, Chord>) -> Word {
+        let name = make_word_name(entry);
+        let seq_spelling = entry.first().unwrap();
+        let chord_spelling = entry.last().unwrap();
+
+        Word{
+            name: name,
+            seq: make_word_sequence(seq_spelling),
+            chord: make_word_chord(chord_spelling, chords),
+        }
     }
 }
 
@@ -29,11 +32,10 @@ fn make_word_sequence(word: &str) -> Sequence {
         seq.push(KeyPress{key: get_key_name_for_seq(letter),
                           modifier: get_mod_name_for_seq(letter)})
     }
-    // println!("{:?}", seq);
     seq
 }
 
-fn get_word_name(entry: &Vec<String>) -> String{
+fn make_word_name(entry: &Vec<String>) -> String{
     format!("word_{}", entry.join("_"))
 }
 
@@ -58,30 +60,20 @@ fn get_mod_name_for_seq(character: char) -> String {
     }
 }
 
-fn make_word_chord(word: &str,
-                   chords: &HashMap<String, Chord>,
-                   len_chord: usize) -> Chord {
-    // TODO test if the chord is right
+fn make_word_chord(word: &str, chords: &HashMap<String, Chord>) -> Chord {
     let ignored = vec!['<', '.']; //TODO make this static?
 
-    // let chord = Vec::new();
-    let mut chord = vec![false ; len_chord];
+    let mut chord = Chord::new();
     for letter in word.chars(){
         if ignored.contains(&letter){
             continue;
         }
         let name = get_key_name_for_chord(letter);
-        chord_intersect(&mut chord, &chords[&name]);
+        chord.intersect(&chords[&name]);
     }
     chord
 }
 
-fn chord_intersect(a: &mut Chord, b: &Chord){
-    assert_eq!(a.len(), b.len());
-    for i in 0..a.len(){
-        a[i] |= b[i];
-    }
-}
 
 fn get_key_name_for_chord(character: char) -> String {
     if character.is_alphabetic() {

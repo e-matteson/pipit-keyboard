@@ -4,7 +4,7 @@ use std::ffi::OsStr;
 use time::*;
 
 use options::format::*;
-use key_types::*;
+use sequence::*;
 
 const AUTHOR: &str = "rusty-pipit";
 

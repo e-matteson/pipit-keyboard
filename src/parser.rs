@@ -1,13 +1,15 @@
-/// For parsing kmap files
+/// For parsing kmap files to get chords
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::collections::HashMap;
 use std::iter::Peekable;
 use itertools::{Itertools, multizip};
-use key_types::*;
 
 use options::options::*;
+use chord::*;
+use switch_pos::*;
+
 
 const COMMENT_START: &str = "#";
 const UNPRESSED_CHAR: char = '.';
@@ -75,7 +77,7 @@ impl Parser {
 
         let (line_nums, lines): (Vec<_>, Vec<_>) = section.into_iter().unzip();
         if lines.len() != self.lines_in_block {
-            self.panic_syntax_error(*line_nums.last().unwrap());
+            panic_syntax_error(*line_nums.last().unwrap());
         }
 
         let names: Vec<String> = lines[0].iter().cloned().map(|s| s.to_owned()).collect();
@@ -91,7 +93,7 @@ impl Parser {
         for l in 0..body.len(){
             let num_items = self.items_per_line[l];
             if body[l].len() != num_items * num_blocks {
-                self.panic_syntax_error(line_nums[l]);
+                panic_syntax_error(line_nums[l]);
             }
             for b in 0..num_blocks {
                 let end = indices[l]+num_items;
@@ -102,20 +104,17 @@ impl Parser {
         (names, strings)
     }
 
-    fn panic_syntax_error(&self, line_num: usize) {
-        panic!(format!("syntax error in kmap file near line {}", line_num));
-    }
-
     fn to_firmware_order(&self, vector: Vec<bool>) -> Chord {
         // Convert a vector with switches given in kmap order to a vector in
         //  firmware order.
-        let mut chord: Chord = vec![false; 8*self.bytes_in_chord];
-        assert_eq!(vector.len(), self.permutation.len());
-        for i in 0..vector.len(){
-            chord[self.permutation[i]] = vector[i];
-        }
+        let mut chord = Chord::from_vec(vector);
+        chord.permute(&self.permutation);
         chord
     }
+}
+
+fn panic_syntax_error(line_num: usize) {
+    panic!(format!("syntax error in kmap file near line {}", line_num));
 }
 
 fn make_permutation(ops: &Options) -> Vec<usize> {

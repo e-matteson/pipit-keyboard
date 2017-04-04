@@ -14,7 +14,9 @@ pub mod options;
 
 pub mod write;
 pub mod parser;
-pub mod key_types;
+pub mod switch_pos;
+pub mod chord;
+pub mod sequence;
 pub mod words;
 pub mod maps;
 pub mod compression;

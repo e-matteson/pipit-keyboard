@@ -1,11 +1,9 @@
 use std::collections::BTreeMap;
-
 use toml::Value;
 
-use key_types::*;
-
-
-// Public Functions
+use sequence::*;
+use chord::*;
+use switch_pos::*;
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -55,9 +53,7 @@ pub fn toml_to_vec3_int(toml_array: &Value) -> Vec<Vec<Vec<i64>>>{
 }
 
 
-
-
-pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {
+fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {
     match toml_array {
         &Value::Array(ref vector) => {
             vector.iter()

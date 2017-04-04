@@ -1,5 +1,6 @@
-use key_types::*;
 use itertools::Itertools;
+
+use sequence::*;
 
 const NUM_BYTES: usize =  3;
 const NUM_KEYS: usize = 4;

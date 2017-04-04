@@ -40,7 +40,9 @@ fn main() {
         maps.add_word(entry)
     }
 
-    format_lookups(&maps.words);
+    // format_lookups(&maps.words);
+
+    // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));
 
     // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));
     // println!("{:?}", format_wordmod("wordmod_anagram1", &maps));
@@ -56,6 +58,8 @@ fn main() {
     // println!("{:?}", options.get("has_battery").format("has_battery"));
     // println!("{:?}", options.get("battery_level_pin").format("battery_level_pin"));
     // println!("{:?}", options.get("row_pins").format("row_pins"));
+    // println!("{:?}", maps.get_modifier_position("modifierkey_shift"));
+    // println!("{:?}", maps.get_modifier_position("blank_mapping"));
     // println!("{:?}", make_c_array2());
     // println!("{:?}", make_c_array(vec![0,1,2,3,4,5,6,7,8,9,10,11,12,13]));
     // println!("{}", make_c_array2(&vec![vec![0,1,2,3,4,5], vec![6,7,8,9,10,11]]));

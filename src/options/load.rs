@@ -8,13 +8,11 @@ use std::fs::File;
 
 use toml::Value;
 
-// use config::*;
+use sequence::*;
 use options::*;
 use maps::*;
-// use words::*;
 use self::toml_convertor::*;
 use self::options::*;
-use key_types::*;
 
 pub struct Loader{
     // For temporarily holding the loaded values

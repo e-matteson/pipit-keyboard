@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::cmp::PartialOrd;
-// use std::ops::{Index, IndexMut};
-
 use toml::Value;
-use key_types::SwitchPos;
-use maps::*;
 
 use options::toml_convertor::*;
+use switch_pos::*;
+use maps::*;
+use chord::*;
+
 
 #[derive(Debug)]
 pub struct OpDef {
@@ -204,7 +204,7 @@ impl Options{
 
     pub fn load(&mut self, parsed_options: &Value) {
         self.from_parsed(parsed_options);
-        self.check_requirements();
+        self.verify_requirements();
         self.set_immediate_auto_options();
     }
 
@@ -223,8 +223,9 @@ impl Options{
         self.0.insert(
             "rgb_led_pins".to_string(),
             OpDefBuilder::new(OpType::Array1D)
-                .required(OpReq::Dependent {key: "enable_rgb_led".to_string(),
-                                            val: Some(OpVal::Bool(true))})
+                .required(OpReq::Dependent
+                          {key: "enable_rgb_led".to_string(),
+                           val: Some(OpVal::Bool(true))})
                 .finalize());
         self.0.insert(
             "kmap_format".to_string(),
@@ -265,8 +266,9 @@ impl Options{
         self.0.insert(
             "battery_level_pin".to_string(),
             OpDefBuilder::new(OpType::Uint8)
-                .required(OpReq::Dependent {key: "has_battery".to_string(),
-                                            val: Some(OpVal::Bool(true))})
+                .required(OpReq::Dependent
+                          {key: "has_battery".to_string(),
+                           val: Some(OpVal::Bool(true))})
                 .finalize());
         self.0.insert(
             "has_battery".to_string(),
@@ -432,7 +434,8 @@ impl Options{
         }
     }
 
-    fn check_requirements(&self){
+    fn verify_requirements(&self){
+        /// Verify that whether option dependencies are satisfied.
         for (name, op) in self.0.iter(){
             if let Some(_) = op.val{
                 // The option was provided in the settings file.
@@ -461,6 +464,7 @@ impl Options{
 
     pub fn set_auto(&mut self, maps: &Maps){
         /// Automatically generate the options that depend on chords
+        // TODO name better
 
         let mods = vec![("modifierkey_shift", "shift_position"),
                         ("modifierkey_ctrl",  "ctrl_position"),
@@ -476,22 +480,24 @@ impl Options{
     fn set_immediate_auto_options(&mut self){
         /// Automatically generate the options that depend only on other options,
         ///  not outside information like layouts etc.
+        // TODO name better
 
-        // TODO write another function for chord-based autos
         self.set_val("blank_mapping" , OpVal::Int(0));
 
         let num_rows: i64 = self.get_val_len("row_pins") as i64;
         let num_cols: i64 = self.get_val_len("column_pins") as i64;
         let num_matrix_positions: i64 = num_rows * num_cols as i64;
-        let num_bytes_in_chord: i64 = num_bits_to_bytes(num_matrix_positions);
+        let num_bytes_in_chord: i64 = round_up_to_bytes(num_matrix_positions);
         self.set_val("num_rows" , OpVal::Int(num_rows));
         self.set_val("num_cols" , OpVal::Int(num_cols));
         self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
         self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
+
+        Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int());
     }
 
 }
 
-fn num_bits_to_bytes(num_bits: i64) -> i64{
+fn round_up_to_bytes(num_bits: i64) -> i64{
     (num_bits as f64 / 8.0).ceil() as i64
 }

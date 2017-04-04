@@ -1,7 +1,8 @@
 use options::options::*;
 use maps::*;
 use compression::*;
-use key_types::*;
+use sequence::*;
+use chord::*;
 use itertools::Itertools;
 
 #[derive(Debug)]
@@ -141,29 +142,10 @@ pub fn format_special(name: &str, maps: &Maps) -> Format {
 
 pub fn format_wordmod(name: &str, maps: &Maps) -> Format {
     let full_name = format!("{}_chord_bytes", name);
-    format_c_array(&full_name, &chord_to_ints(&maps.chords[name]), "uint8_t")
+    format_c_array(&full_name, &maps.chords[name].to_ints(), "uint8_t")
 }
 
 
-fn chord_to_ints(chord: &Chord) -> Vec<i64> {
-    let mut v: Vec<i64> = Vec::new();
-    for chunk in &chord.iter().cloned().chunks(8){
-        let byte: Vec<_> = chunk.collect();
-        v.push(byte_to_int(&byte));
-    }
-    v
-}
-
-fn byte_to_int(v: &Vec<bool>) -> i64 {
-    assert_eq!(v.len(), 8);
-    let mut num: i64 = 0;
-    let tmp: Vec<_> = v.iter().map(|&b| if b {1} else {0}).collect();
-    let base: i64 = 2;
-    for b in 0..8{
-        num +=  base.pow(b) * tmp[b as usize]
-    }
-    num
-}
 
 
 pub fn format_c_array(name: &str, v: &Vec<i64>, ctype: &str) -> Format {
@@ -186,14 +168,13 @@ pub fn format_c_array2(name: &str, v: &Vec<Vec<i64>>, ctype: &str) -> Format {
 }
 
 
-pub fn make_c_array(v: &Vec<i64>) -> String {
+fn make_c_array(v: &Vec<i64>) -> String {
     let lines = wrap_in_braces(&to_string_vec(v));
     // println!("{:?}", lines);
     lines.join("\n")
 }
 
-pub fn make_c_array2(v: &Vec<Vec<i64>>) -> String {
-    // TODO assert rectangular
+fn make_c_array2(v: &Vec<Vec<i64>>) -> String {
     assert!(is_rectangular(v));
 
     let mut rows: Vec<String> = Vec::new();
@@ -211,7 +192,8 @@ fn wrap_in_braces(lines: &Vec<String>) -> Vec<String> {
     new
 }
 
-pub fn to_string_vec(v: &Vec<i64>) -> Vec<String> {
+fn to_string_vec(v: &Vec<i64>) -> Vec<String> {
+    // TODO generalize types? need to make c arrays of pointer names
     let mut lines: Vec<String> = Vec::new();
     let chunks = &v.iter().map(|x| x.to_string()).chunks(5);
     for chunk in chunks {
