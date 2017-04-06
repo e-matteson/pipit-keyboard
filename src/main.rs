@@ -18,7 +18,6 @@ use rusty_pipit::write::*;
 
 fn main() {
 
-
     let loader = Loader::load("settings.toml");
     let mut options = loader.options;
 
@@ -36,12 +35,17 @@ fn main() {
     for entry in loader.special_list.iter(){
         maps.add_special(entry)
     }
+
     for entry in loader.word_list.iter(){
         maps.add_word(entry)
     }
 
-    // format_lookups(&maps.words);
+    // let f = format_plains(&maps.plains, &maps.chords);
+    let f = format_words(&maps.words, &maps.chords);
+    println!("{}", f.h);
+    println!("{}", f.c);
 
+    // let f = format_lookups(&maps.words, &maps.chords, "word", false, false);
     // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));
 
     // println!("{:?}", chord_to_ints(&maps.chords["key_0"]));

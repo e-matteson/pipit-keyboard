@@ -68,12 +68,17 @@ fn make_word_chord(word: &str, chords: &HashMap<String, Chord>) -> Chord {
         if ignored.contains(&letter){
             continue;
         }
-        let name = get_key_name_for_chord(letter);
-        chord.intersect(&chords[&name]);
+        chord.intersect(get_letter_chord(letter, chords));
     }
     chord
 }
 
+
+fn get_letter_chord(letter: char, chords: &HashMap<String, Chord>) -> &Chord {
+    let name = get_key_name_for_chord(letter);
+    chords.get(&name)
+        .expect(&format!("no chord for letter: {}", name))
+}
 
 fn get_key_name_for_chord(character: char) -> String {
     if character.is_alphabetic() {

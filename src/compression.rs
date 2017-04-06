@@ -1,19 +1,28 @@
 use itertools::Itertools;
-
+use std::cmp::max;
 use sequence::*;
 
 const NUM_BYTES: usize =  3;
 const NUM_KEYS: usize = 4;
 
-pub fn make_raw_sequence(sequence: &Sequence, use_mods: bool) -> Vec<String> {
+pub fn seq_to_bytes(seq: &Sequence, use_compression: bool, use_mods: bool) -> Vec<String>{
+    if use_compression{
+        make_compressed_sequence(seq, use_mods)
+    }
+    else {
+        make_raw_sequence(seq, use_mods)
+    }
+}
+
+fn make_raw_sequence(sequence: &Sequence, use_mods: bool) -> Vec<String> {
     let mut v: Vec<String> = Vec::new();
-    for keypress in sequence{
+    for keypress in sequence {
         v.extend(keypress.as_bytes(use_mods));
     }
     v
 }
 
-pub fn compress_sequence(seq: &Sequence, use_mods: bool) -> Vec<String> {
+fn make_compressed_sequence(seq: &Sequence, use_mods: bool) -> Vec<String> {
     let mut compressed: Vec<String> = Vec::new();
     let chunks = &seq.iter().cloned().chunks(NUM_KEYS);
     for chunk in chunks{
@@ -33,15 +42,19 @@ fn compress_chunk(mut data: Vec<KeyPress>) -> Vec<String> {
     // aaaaaabb         bbbbcccc         ccdddddd
 
     pad(&mut data, NUM_KEYS);
+
     let mut bytes: Vec<String> = Vec::new();
     for i in 0..NUM_BYTES {
+        let s1 = &data[i].key;
+        let s2 = &data[i+1].key;
+        let m = format_mask(i, s1, s2);
         // we don't use the modifiers, just the keys
-        bytes.push(format_mask(i, &data[i].key, &data[i+1].key))
+        bytes.push(m);
     }
     bytes
 }
 
-fn format_mask(i: usize, s1: &str, s2: &str) -> String{
+fn format_mask(i: usize, s1: &str, s2: &str) -> String {
     match i{
         0 => format!("(({}&0x3F)<<2)|(({}&0x30)>>4)", s1, s2),
         1 => format!("({}&0x0F)<<4|(({}&0x3C)>>2)", s1, s2),
@@ -52,7 +65,8 @@ fn format_mask(i: usize, s1: &str, s2: &str) -> String{
 
 fn pad(v: &mut Vec<KeyPress>, length: usize) {
     assert!(v.len() <= length);
-    for i in 0..(v.len() - length){
+    let num_to_pad = length.saturating_sub(v.len());
+    for i in 0..num_to_pad {
         v.push( KeyPress::new_blank());
     }
 }

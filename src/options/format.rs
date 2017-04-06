@@ -1,8 +1,8 @@
 use options::options::*;
-use maps::*;
 use compression::*;
 use sequence::*;
 use chord::*;
+use c_array::*;
 use itertools::Itertools;
 
 #[derive(Debug)]
@@ -115,97 +115,27 @@ impl OpDef {
     }
 
     fn format_array1d(&self, name: &str) -> Format {
-        format_c_array(
-            name,
-            self.get_val().unwrap_vec(),
-            "uint8_t")
+        // format_c_array(
+        //     name,
+        //     self.get_val().unwrap_vec(),
+        //     "uint8_t")
+        CArray::new(name)
+            .fill_1d(self.get_val().unwrap_vec())
+            .format()
     }
 
 
     fn format_array2d(&self, name: &str) -> Format {
-        format_c_array2(
-            name,
-            self.get_val().unwrap_vec2(),
-            "uint8_t"
-        )
+        // format_c_array2(
+        //     name,
+        //     self.get_val().unwrap_vec2(),
+        //     "uint8_t"
+        // )
+            CArray::new(name)
+            .fill_2d(self.get_val().unwrap_vec2())
+            .format()
     }
 
 }
 
 
-pub fn format_special(name: &str, maps: &Maps) -> Format {
-    Format{
-        h: format!("#define {} {}\n", name, maps.specials[name]),
-        c: String::new(),
-    }
-}
-
-pub fn format_wordmod(name: &str, maps: &Maps) -> Format {
-    let full_name = format!("{}_chord_bytes", name);
-    format_c_array(&full_name, &maps.chords[name].to_ints(), "uint8_t")
-}
-
-
-
-
-pub fn format_c_array(name: &str, v: &Vec<i64>, ctype: &str) -> Format {
-    let contents = make_c_array(&v);
-    Format {
-        h: format!("extern const {} {}[];\n", ctype, name),
-        c: format!("extern const {} {}[] = {};\n\n", ctype, name, contents),
-    }
-}
-
-pub fn format_c_array2(name: &str, v: &Vec<Vec<i64>>, ctype: &str) -> Format {
-    let contents = make_c_array2(&v);
-    let len_2nd_dim = v[0].len();
-    Format {
-        h: format!("extern const {} {}[][{}];\n",
-                   ctype, name, len_2nd_dim),
-        c: format!("extern const {} {}[][{}] = {};\n\n",
-                   ctype, name, len_2nd_dim, contents),
-    }
-}
-
-
-fn make_c_array(v: &Vec<i64>) -> String {
-    let lines = wrap_in_braces(&to_string_vec(v));
-    // println!("{:?}", lines);
-    lines.join("\n")
-}
-
-fn make_c_array2(v: &Vec<Vec<i64>>) -> String {
-    assert!(is_rectangular(v));
-
-    let mut rows: Vec<String> = Vec::new();
-    for row in v {
-        rows.extend(wrap_in_braces(&to_string_vec(&row)));
-    }
-    println!("{:?}", rows);
-    wrap_in_braces(&rows).join("\n")
-}
-
-fn wrap_in_braces(lines: &Vec<String>) -> Vec<String> {
-    let mut new: Vec<_> = lines.iter().map(|s| format!(" {}", s)).collect();
-    new.insert(0, "{".to_owned());
-    new.push("}".to_owned());
-    new
-}
-
-fn to_string_vec(v: &Vec<i64>) -> Vec<String> {
-    // TODO generalize types? need to make c arrays of pointer names
-    let mut lines: Vec<String> = Vec::new();
-    let chunks = &v.iter().map(|x| x.to_string()).chunks(5);
-    for chunk in chunks {
-        let tmp: Vec<_> = chunk.collect();
-        lines.push(tmp.join(", ") + ", ");
-    }
-    lines
-}
-
-fn is_rectangular(v: &Vec<Vec<i64>>) -> bool {
-    let len_2nd_dim = v[0].len();
-    v.iter()
-        .map(|v| v.len())
-        .all(|x| x == len_2nd_dim)
-}

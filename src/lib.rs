@@ -19,4 +19,5 @@ pub mod chord;
 pub mod sequence;
 pub mod words;
 pub mod maps;
+pub mod c_array;
 pub mod compression;
