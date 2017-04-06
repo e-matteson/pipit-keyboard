@@ -1,5 +1,4 @@
 use options::options::*;
-use compression::*;
 use sequence::*;
 use chord::*;
 use c_array::*;

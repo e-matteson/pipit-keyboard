@@ -27,7 +27,7 @@ impl Word {
 
 
 fn make_word_sequence(word: &str) -> Sequence {
-    let mut seq: Sequence = Vec::new();
+    let mut seq = Sequence::new();
     for letter in word.chars(){
         seq.push(KeyPress{key: get_key_name_for_seq(letter),
                           modifier: get_mod_name_for_seq(letter)})

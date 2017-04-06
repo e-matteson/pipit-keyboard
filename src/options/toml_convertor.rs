@@ -16,7 +16,8 @@ pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
 }
 
 pub fn toml_to_sequence(toml_array: &Value) -> Sequence {
-    toml_to_vec(toml_array, toml_to_keypress)
+    Sequence(toml_to_vec(toml_array, toml_to_keypress))
+
 }
 
 pub fn toml_to_kmap(toml_array: &Value) -> Vec<Vec<SwitchPos>>{

@@ -11,7 +11,6 @@ use chord::*;
 use maps::*;
 use c_array::*;
 use options::format::*;
-use compression::*;
 
 const AUTHOR: &str = "rusty-pipit";
 
@@ -68,7 +67,7 @@ fn format_lookups (seq_map: &SeqMap,
         let flat_seq = make_flat_sequence(seq_map, &names_by_len, length);
         println!("{:?}", flat_seq);
         // length + 1;
-        seq_arrays[length] = seq_to_bytes(&flat_seq, use_compression, use_mods);
+        seq_arrays[length] = flat_seq.to_bytes(use_compression, use_mods);
         for name in &names_by_len[&length]{
             chord_arrays[length].extend(chord_map[name].to_ints());
             // TODO what happens if a chord is missing?
@@ -110,9 +109,9 @@ fn format_length_arrays <T> (arrays: Vec<Vec<T>>, name: &str) -> Format
 
 fn make_flat_sequence(seq_map: &SeqMap, names_by_len: &LenMap, length: usize)
                       -> Sequence {
-    let mut flat_seq = Vec::new();
+    let mut flat_seq = Sequence::new();
     println!("{:?}, {}", names_by_len, length);
-    for name in &names_by_len[&length]{
+    for name in &names_by_len[&length] {
         flat_seq.extend(seq_map[name].clone());
     }
     flat_seq
