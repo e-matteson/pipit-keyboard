@@ -7,6 +7,8 @@ const NUM_BYTES: usize =  3;
 const NUM_KEYS: usize = 4;
 
 
+// TODO KeyPress is also used to store special codes, which is kinda a hack. Rename?
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Eq)]
@@ -17,11 +19,20 @@ pub struct KeyPress{
 }
 
 impl KeyPress{
+    pub fn new(key: usize, modifier: usize) -> KeyPress {
+        KeyPress{
+            key: format!("{}", key),
+            modifier: format!("{}", modifier),
+        }
+    }
     pub fn new_blank() -> KeyPress {
         KeyPress{
             key: "0".to_owned(),
             modifier: "0".to_owned(),
         }
+    }
+    pub fn is_mod_blank(&self) -> bool {
+        self.modifier == "0"
     }
 }
 
@@ -51,6 +62,14 @@ impl Sequence {
 
     pub fn keypresses(&self) -> Iter<KeyPress> {
         self.0.iter()
+    }
+
+    pub fn get_only_value(&self) -> &str{
+
+        assert_eq!(self.len(), 1);
+        let only_key = &self.0[0];
+        assert!(only_key.is_mod_blank());
+        &only_key.key
     }
 
     pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<String>{

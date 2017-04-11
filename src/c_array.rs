@@ -98,7 +98,6 @@ fn make_c_array2<T>(v: &Vec<Vec<T>>) -> String
     for row in v {
         rows.extend(wrap_in_braces(&to_string_vec(&row)));
     }
-    println!("{:?}", rows);
     wrap_in_braces(&rows).join("\n")
 }
 
@@ -113,8 +112,9 @@ fn to_string_vec<T>(v: &Vec<T>) -> Vec<String>
     where T: Display
 {
     // TODO generalize types? need to make c arrays of pointer names
+    let items_per_line = 4;
     let mut lines: Vec<String> = Vec::new();
-    let chunks = &v.iter().map(|x| x.to_string()).chunks(5);
+    let chunks = &v.iter().map(|x| x.to_string()).chunks(items_per_line);
     for chunk in chunks {
         let tmp: Vec<_> = chunk.collect();
         lines.push(tmp.join(", ") + ", ");

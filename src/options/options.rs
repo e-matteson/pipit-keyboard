@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::cmp::PartialOrd;
 use toml::Value;
 
@@ -9,6 +9,7 @@ use chord::*;
 
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub struct OpDef {
     pub op_type: OpType,
     pub val: Option<OpVal>,
@@ -21,6 +22,10 @@ impl OpDef{
     fn is_auto(&self) -> bool{
         self.required == OpReq::Auto
     }
+    fn is_internal(&self) -> bool {
+        self.internal
+    }
+
 
     pub fn get_val(&self) -> &OpVal{
         match self.val{
@@ -32,6 +37,7 @@ impl OpDef{
 
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub enum OpType {
     // TODO how to handle internal options? just with boolean flag, and abusing a
     //  similar variant?
@@ -48,6 +54,7 @@ pub enum OpType {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum OpReq {
     Required,
     Optional,
@@ -64,6 +71,7 @@ pub enum OpReq {
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Eq)]
+#[derive(Clone)]
 pub enum OpVal {
     Str (String),
     Int (i64),
@@ -158,7 +166,7 @@ impl OpDefBuilder {
 }
 
 #[derive(Debug)]
-pub struct Options (HashMap<String, OpDef>);
+pub struct Options (BTreeMap<String, OpDef>);
 
 impl Options{
     pub fn get(&self, key: &str) -> &OpDef{
@@ -197,7 +205,7 @@ impl Options{
     }
 
     pub fn new() -> Options{
-        let mut options = Options(HashMap::new());
+        let mut options = Options(BTreeMap::new());
         options.initialize();
         options
     }
@@ -318,11 +326,13 @@ impl Options{
             "normal_mode".to_string(),
             OpDefBuilder::new(OpType::Mode {use_words: true})
                 .required(OpReq::Required)
+                .internal(true)
                 .finalize());
         self.0.insert(
             "onehand_mode".to_string(),
             OpDefBuilder::new(OpType::Mode {use_words: false})
                 .required(OpReq::Required)
+                .internal(true)
                 .finalize());
         self.0.insert(
             "num_bytes_in_chord".to_string(),
@@ -494,6 +504,13 @@ impl Options{
         self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
 
         Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int());
+    }
+
+    pub fn get_non_internal(&self) -> BTreeMap<String, OpDef> {
+        let map: BTreeMap<_,_> = self.0.clone().into_iter()
+            .filter(|&(_, ref val)| !val.is_internal())
+            .collect();
+        map
     }
 
 }

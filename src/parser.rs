@@ -2,7 +2,7 @@
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::iter::Peekable;
 use itertools::{Itertools, multizip};
 
@@ -39,7 +39,7 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self, path: &str, chords: &mut HashMap<String, Chord>) {
+    pub fn parse(&mut self, path: &str, chords: &mut BTreeMap<String, Chord>) {
         let all_lines = load_lines(path);
         let lines_iter =
             &all_lines.iter()

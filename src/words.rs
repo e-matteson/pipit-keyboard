@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use options::*;
 use chord::*;
@@ -12,7 +12,7 @@ pub struct Word {
 
 
 impl Word {
-    pub fn new(entry: &Vec<String>, chords: &HashMap<String, Chord>) -> Word {
+    pub fn new(entry: &Vec<String>, chords: &BTreeMap<String, Chord>) -> Word {
         let name = make_word_name(entry);
         let seq_spelling = entry.first().unwrap();
         let chord_spelling = entry.last().unwrap();
@@ -40,7 +40,7 @@ fn make_word_name(entry: &Vec<String>) -> String{
 }
 
 fn get_key_name_for_seq(character: char) -> String {
-    if character.is_alphabetic() {
+    if character.is_alphanumeric() {
         return format!("KEY_{}", character.to_uppercase());
     }
     match character{
@@ -60,7 +60,7 @@ fn get_mod_name_for_seq(character: char) -> String {
     }
 }
 
-fn make_word_chord(word: &str, chords: &HashMap<String, Chord>) -> Chord {
+fn make_word_chord(word: &str, chords: &BTreeMap<String, Chord>) -> Chord {
     let ignored = vec!['<', '.']; //TODO make this static?
 
     let mut chord = Chord::new();
@@ -74,15 +74,15 @@ fn make_word_chord(word: &str, chords: &HashMap<String, Chord>) -> Chord {
 }
 
 
-fn get_letter_chord(letter: char, chords: &HashMap<String, Chord>) -> &Chord {
+fn get_letter_chord(letter: char, chords: &BTreeMap<String, Chord>) -> &Chord {
     let name = get_key_name_for_chord(letter);
     chords.get(&name)
         .expect(&format!("no chord for letter: {}", name))
 }
 
 fn get_key_name_for_chord(character: char) -> String {
-    if character.is_alphabetic() {
-        return format!("key_{}", character)
+    if character.is_alphanumeric() {
+        return format!("key_{}", character.to_lowercase())
     }
     match character{
         ' '  => "key_space".to_owned(),

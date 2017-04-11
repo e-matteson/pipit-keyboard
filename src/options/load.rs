@@ -1,6 +1,5 @@
 // TODO replace all this with a struct-based settings.rs?
 
-use std::collections::HashMap;
 use std::collections::BTreeMap;
 use std::io::prelude::*;
 use std::fs::File;
@@ -17,8 +16,8 @@ use self::options::*;
 pub struct Loader{
     // For temporarily holding the loaded values
     pub options: Options,
-    pub macros: HashMap<String, Sequence>,
-    pub plain_keys: HashMap<String, Sequence>,
+    pub macros: BTreeMap<String, Sequence>,
+    pub plain_keys: BTreeMap<String, Sequence>,
     pub special_list: Vec<String>,
     pub word_list: Vec<Vec<String>>,
     pub wordmod_list: Vec<String>,
@@ -51,9 +50,9 @@ impl Loader{
     }
 }
 
-fn load_sequence_map(parsed_toml: &Value) -> HashMap<String, Sequence>{
+fn load_sequence_map(parsed_toml: &Value) -> BTreeMap<String, Sequence>{
     let map = toml_to_map(parsed_toml);
-    let mut new_map: HashMap<String, Sequence> = HashMap::new();
+    let mut new_map: BTreeMap<String, Sequence> = BTreeMap::new();
     for (key,val) in map.iter(){
         new_map.insert(key.clone(), toml_to_sequence(&val));
     }

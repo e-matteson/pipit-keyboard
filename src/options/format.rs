@@ -1,8 +1,12 @@
+use itertools::Itertools;
+use std::path::Path;
+use std::io::{Write};
+use std::fs::OpenOptions;
+
 use options::options::*;
 use sequence::*;
 use chord::*;
 use c_array::*;
-use itertools::Itertools;
 
 #[derive(Debug)]
 pub struct Format {
@@ -21,6 +25,29 @@ impl Format {
         self.h += &other.h;
         self.c += &other.c;
     }
+
+    pub fn append_newline(&mut self) {
+        self.h += "\n";
+        self.c += "\n";
+    }
+
+    pub fn save(&self, path_base: &str) {
+        write_to_file(&format!("{}.h", path_base), &self.h);
+        write_to_file(&format!("{}.cpp", path_base), &self.c);
+    }
+
+
+}
+
+fn write_to_file(full_path: &str, s: &str) {
+    let path = Path::new(full_path);
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(path)
+        .expect("failed to open output file");
+    file.set_len(0).expect("failed to clear output file");
+    file.write_all(s.as_bytes()).expect("failed to write to output file");
 }
 
 
@@ -32,6 +59,17 @@ impl KeyPress{
             v.push(format!("({})&0xff", self.modifier));
         }
         v
+    }
+}
+
+impl Options {
+    pub fn format(&self) -> Format {
+        let mut f = Format::new();
+        for (name, op) in self.get_non_internal() {
+            f.append(&op.format(&name));
+        }
+        f.append_newline();
+        f
     }
 }
 
@@ -59,13 +97,13 @@ impl OpDef {
             OpType::Array2D => {
                 self.format_array2d(name)
             }
-            _ => panic!("option type cannot be formatted"),
+            _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
 
     fn format_define_int(&self, name: &str) -> Format {
         Format {
-            h: format!("#define {} {}",
+            h: format!("#define {} {}\n",
                        name.to_uppercase(),
                        self.get_val().unwrap_int()),
             c: String::new(),
@@ -74,7 +112,7 @@ impl OpDef {
 
     fn format_define_string(&self, name: &str) -> Format {
         Format {
-            h: format!("#define {} {}",
+            h: format!("#define {} {}\n",
                         name.to_uppercase(),
                         self.get_val().unwrap_str()),
             c: String::new(),
@@ -83,7 +121,7 @@ impl OpDef {
 
     fn format_ifdef_value(&self, name: &str) -> Format {
         Format {
-            h: format!("#define {}",
+            h: format!("#define {}\n",
                        self.get_val().unwrap_str()),
             c: String::new(),
         }
@@ -92,7 +130,7 @@ impl OpDef {
     fn format_ifdef_key(&self, name: &str) -> Format {
         Format {
             h: if self.get_val().unwrap_bool() {
-                format!("#define {}",
+                format!("#define {}\n",
                         name.to_uppercase())
             } else {
                 String::new()
@@ -105,19 +143,15 @@ impl OpDef {
     fn format_uint8(&self, name: &str) -> Format {
         Format {
             h: format!("extern const uint8_t {};\n",
-                       name.to_uppercase()),
+                       name),
 
             c: format!("extern const uint8_t {} = {};\n\n",
-                       name.to_uppercase(),
+                       name,
                        self.get_val().unwrap_int()),
         }
     }
 
     fn format_array1d(&self, name: &str) -> Format {
-        // format_c_array(
-        //     name,
-        //     self.get_val().unwrap_vec(),
-        //     "uint8_t")
         CArray::new(name)
             .fill_1d(self.get_val().unwrap_vec())
             .format()
@@ -125,11 +159,6 @@ impl OpDef {
 
 
     fn format_array2d(&self, name: &str) -> Format {
-        // format_c_array2(
-        //     name,
-        //     self.get_val().unwrap_vec2(),
-        //     "uint8_t"
-        // )
             CArray::new(name)
             .fill_2d(self.get_val().unwrap_vec2())
             .format()
