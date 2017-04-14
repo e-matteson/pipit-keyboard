@@ -1,9 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use sequence::*;
-use chord::*;
-use switch_pos::*;
+use types::{Chord, Sequence, KeyPress, SwitchPos};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{

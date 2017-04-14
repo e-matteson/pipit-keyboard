@@ -1,8 +1,7 @@
 use std::collections::BTreeMap;
 
 use options::*;
-use chord::*;
-use sequence::*;
+use types::{Chord, Sequence, KeyPress};
 
 pub struct Word {
     pub name: String,

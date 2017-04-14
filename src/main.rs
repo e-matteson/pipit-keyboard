@@ -7,7 +7,7 @@ extern crate rusty_pipit;
 // use rusty_pipit::options::*;
 use rusty_pipit::maps::Maps;
 use rusty_pipit::options::load::Loader;
-use rusty_pipit::options::format::*;
+use rusty_pipit::format::*;
 use rusty_pipit::parser::Parser;
 use rusty_pipit::write::*;
 

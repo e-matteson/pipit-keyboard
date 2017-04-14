@@ -7,8 +7,7 @@ use std::iter::Peekable;
 use itertools::{Itertools, multizip};
 
 use options::options::*;
-use chord::*;
-use switch_pos::*;
+use types::{Chord, SwitchPos};
 
 
 const COMMENT_START: &str = "#";

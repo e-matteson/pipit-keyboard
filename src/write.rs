@@ -4,23 +4,18 @@ use std::path::Path;
 use std::ffi::OsStr;
 use time::*;
 
-use options::format::*;
-use sequence::*;
-use chord::*;
+use format::Format;
+
 
 use maps::*;
-use c_array::*;
-use options::format::*;
 use options::options::Options;
 
 const AUTHOR: &str = "rusty-pipit";
 
 
-
 pub fn format_autoconfig(maps: &Maps, ops: &Options, file_name_base: &str) -> Format {
     let mut f = Format::new();
     f.append(&format_intro(&format!("{}.h", file_name_base)));
-    // f.append(&)
     f.append(&ops.format());
     f.append(&maps.format_wordmods());
     f.append(&maps.format_specials());

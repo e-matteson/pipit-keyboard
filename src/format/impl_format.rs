@@ -1,54 +1,8 @@
-use itertools::Itertools;
-use std::path::Path;
-use std::io::{Write};
-use std::fs::OpenOptions;
-
+use types::{Chord, Sequence, KeyPress, SwitchPos};
 use options::options::*;
-use sequence::*;
-use chord::*;
-use c_array::*;
+use format::{Format, CArray, format_lookups, compress};
 
-#[derive(Debug)]
-pub struct Format {
-    pub h: String,   // for header file
-    pub c: String,   // for cpp file
-}
-
-impl Format {
-    pub fn new() -> Format {
-        Format {
-            h: String::new(),
-            c: String::new(),
-        }
-    }
-    pub fn append(&mut self, other: &Format) {
-        self.h += &other.h;
-        self.c += &other.c;
-    }
-
-    pub fn append_newline(&mut self) {
-        self.h += "\n";
-        self.c += "\n";
-    }
-
-    pub fn save(&self, path_base: &str) {
-        write_to_file(&format!("{}.h", path_base), &self.h);
-        write_to_file(&format!("{}.cpp", path_base), &self.c);
-    }
-
-
-}
-
-fn write_to_file(full_path: &str, s: &str) {
-    let path = Path::new(full_path);
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open(path)
-        .expect("failed to open output file");
-    file.set_len(0).expect("failed to clear output file");
-    file.write_all(s.as_bytes()).expect("failed to write to output file");
-}
+use maps::*;
 
 
 impl KeyPress{
@@ -167,3 +121,74 @@ impl OpDef {
 }
 
 
+impl Maps{
+
+    pub fn format_words (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.words, chord_map, "word", true, false)
+    }
+
+    pub fn format_plains (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.plains, chord_map, "plain", false, true)
+    }
+
+    pub fn format_macros (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.macros, chord_map, "macro", false, true)
+    }
+
+    pub fn format_specials (&self) -> Format {
+        let mut f = Format {
+            h: self.specials.keys()
+                .fold(String::new(),
+                      |acc, name|
+                      acc + &format!("#define {} {}\n",
+                                     name,
+                                     self.specials[name].get_only_value()))
+                + "\n",
+            c: String::new(),
+        };
+        let chord_map = &self.chords;
+        f.append(&format_lookups(&self.specials, chord_map, "special", false, false));
+        f
+    }
+
+    pub fn format_wordmods(&self) -> Format {
+        let mut f = Format::new();
+        for name in &self.wordmods {
+            let full_name = format!("{}_chord_bytes", name);
+            f.append(&CArray::new(&full_name)
+                     .fill_1d(&self.chords[name].to_ints())
+                     .format())
+        }
+        f
+    }
+}
+
+
+impl Sequence {
+
+    pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<String>{
+        // TODO different name for "bytes"?
+        if use_compression{
+            self.to_compressed_bytes(use_mods)
+        }
+        else {
+            self.to_raw_bytes(use_mods)
+        }
+    }
+
+    fn to_raw_bytes(&self, use_mods: bool) -> Vec<String> {
+        let mut v: Vec<String> = Vec::new();
+        for keypress in self.0.iter() {
+            v.extend(keypress.as_bytes(use_mods));
+        }
+        v
+    }
+
+    fn to_compressed_bytes(&self, use_mods: bool) -> Vec<String> {
+        compress(self, use_mods)
+    }
+
+}

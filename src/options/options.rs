@@ -3,9 +3,11 @@ use std::cmp::PartialOrd;
 use toml::Value;
 
 use options::toml_convertor::*;
-use switch_pos::*;
+// use switch_pos::*;
+use types::*;
 use maps::*;
-use chord::*;
+// use chord::*;
+use types::{Chord, SwitchPos};
 
 
 #[derive(Debug)]

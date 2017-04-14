@@ -7,7 +7,7 @@ use std::fs::File;
 
 use toml::Value;
 
-use sequence::*;
+use types::Sequence;
 use options::*;
 use maps::*;
 use self::toml_convertor::*;

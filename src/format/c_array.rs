@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use std::clone::Clone;
-use options::format::Format;
+use format::format::Format;
 use itertools::Itertools;
 
 

@@ -5,7 +5,6 @@ use itertools::Itertools;
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
 
-// TODO stop using static!
 static mut CHORD_LENGTH: usize = 0;
 
 fn set_chord_length(len: usize) {
