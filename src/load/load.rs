@@ -14,6 +14,8 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     let options = Options::load(&toml["options"]);
     let other = toml_to_map(&toml["other"]);
 
+    maps.add_modes(&options.get_modes());
+
     load_chords(&options, maps);
     load_macros(&toml, maps);
     load_plains(&toml, maps);
@@ -27,10 +29,10 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
 fn load_chords(options: &Options, maps: &mut Maps) {
     let mut kmap_parser = KmapParser::new(options);
 
-    // TODO get path from options
-    let kmap_path = "keymaps/dvorak24.kmap";
-
-    kmap_parser.parse(kmap_path, &mut maps.chords);
+    for mode in &options.get_modes(){
+        let kmap_path = options.get_val(mode).unwrap_str();
+        maps.add_chords(mode, kmap_parser.parse(kmap_path));
+    }
 }
 
 fn load_macros(toml: &Value, maps: &mut Maps) {
@@ -56,10 +58,13 @@ fn load_special_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 }
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    // TODO use separate word lists for different modes?
     let mut word_list = toml_to_vec2_string(&other["words"]);
     word_list.sort();
-    for entry in word_list.iter() {
-        maps.add_word(entry)
+    for mode in &maps.options.get_modes_with_words(){
+        for entry in word_list.iter() {
+            maps.add_word(entry, mode)
+        }
     }
 }
 

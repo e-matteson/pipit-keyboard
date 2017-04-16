@@ -1,7 +1,7 @@
 use time::*;
 use std::path::Path;
 
-use types::{Sequence, KeyPress, Maps, Options, OpDef, OpType};
+use types::{Sequence, KeyPress, Chord, Maps, Options, OpDef, OpType};
 use format::{Format, CArray, format_lookups, compress, make_compression_macros};
 
 
@@ -23,9 +23,27 @@ impl Options {
         for (name, op) in self.get_non_internal() {
             f.append(&op.format(&name));
         }
+        f.append(&self.format_modes());
         f.append_newline();
         f
     }
+
+    fn format_modes (&self) -> Format {
+        Format{
+            h: self.get_modes()
+                .iter()
+                .enumerate()
+                .fold(String::new(),
+                      |acc, (index, name)|
+                      acc + &format!("#define {} {}\n",
+                                     name.to_uppercase(),
+                                     index))
+                + "\n",
+            c: String::new(),
+        }
+    }
+
+
 }
 
 impl OpDef {
@@ -164,19 +182,17 @@ impl Maps {
         f
     }
 
+
     fn format_words (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.words, chord_map, "word", true, false)
+        format_lookups(&self.words, &self.chords, "word", true, false)
     }
 
     fn format_plains (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.plains, chord_map, "plain", false, true)
+        format_lookups(&self.plains, &self.chords, "plain", false, true)
     }
 
     fn format_macros (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.macros, chord_map, "macro", false, true)
+        format_lookups(&self.macros, &self.chords, "macro", false, true)
     }
 
     fn format_specials (&self) -> Format {
@@ -198,9 +214,17 @@ impl Maps {
     fn format_wordmods(&self) -> Format {
         let mut f = Format::new();
         for name in &self.wordmods {
+            let all_chord_bytes: Vec<Vec<i64>> =
+                self.options.get_modes().iter()
+                .map(|mode|
+                     match self.chords[mode].get(name) {
+                         Some(c) => c.to_ints(),
+                         None => Chord::new().to_ints(),})
+                .collect();
+
             let full_name = format!("{}_chord_bytes", name);
             f.append(&CArray::new(&full_name)
-                     .fill_1d(&self.chords[name].to_ints())
+                     .fill_2d(&all_chord_bytes)
                      .format())
         }
         f

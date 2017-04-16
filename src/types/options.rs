@@ -139,22 +139,22 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .finalize()),
 
         ("shift_position",
-         OpDefBuilder::new(OpType::DefineInt)
+         OpDefBuilder::new(OpType::Array1D)
          .required(OpReq::Auto)
          .finalize()),
 
         ("ctrl_position",
-         OpDefBuilder::new(OpType::DefineInt)
+         OpDefBuilder::new(OpType::Array1D)
          .required(OpReq::Auto)
          .finalize()),
 
         ("alt_position",
-         OpDefBuilder::new(OpType::DefineInt)
+         OpDefBuilder::new(OpType::Array1D)
          .required(OpReq::Auto)
          .finalize()),
 
         ("gui_position",
-         OpDefBuilder::new(OpType::DefineInt)
+         OpDefBuilder::new(OpType::Array1D)
          .required(OpReq::Auto)
          .finalize()),
     ]
@@ -176,10 +176,22 @@ impl OpDef{
     // fn is_auto(&self) -> bool{
     //     self.required == OpReq::Auto
     // }
-    fn is_internal(&self) -> bool {
-        self.internal
+
+    #[allow(unused_variables)]
+    pub fn is_mode(&self) -> bool {
+        match self.op_type {
+            OpType::Mode{use_words} => true,
+            _ => false,
+        }
     }
 
+    #[allow(unused_variables)]
+    pub fn is_mode_with_words(&self) -> bool {
+        match self.op_type {
+            OpType::Mode{use_words} => use_words,
+            _ => false,
+        }
+    }
 
     pub fn get_val(&self) -> &OpVal{
         match self.val{
@@ -187,6 +199,11 @@ impl OpDef{
             _ => panic!(format!("value is None")),
         }
     }
+
+    fn is_internal(&self) -> bool {
+        self.internal
+    }
+
 }
 
 
@@ -363,6 +380,20 @@ impl Options {
         self.get_val(name).unwrap_vec().len()
     }
 
+    pub fn get_modes(&self) -> Vec<String> {
+        self.0.iter()
+            .filter(|&(_, val)| val.is_mode())
+            .map(|(key, _)| key.to_string())
+            .collect()
+    }
+
+    pub fn get_modes_with_words(&self) -> Vec<String> {
+        self.0.iter()
+            .filter(|&(_, val)| val.is_mode_with_words())
+            .map(|(key, _)| key.to_string())
+            .collect()
+    }
+
     pub fn verify_requirements(&self){
         /// Verify that whether option dependencies are satisfied.
         for (name, op) in self.0.iter(){
@@ -399,9 +430,12 @@ impl Options {
                         ("modifierkey_alt",   "alt_position"),
                         ("modifierkey_gui",   "gui_position")];
 
-        for (op_name, mod_name) in mods{
-            let position: i64 = maps.get_modifier_position(op_name) as i64;
-            self.set_val(mod_name, OpVal::Int(position))
+        for (op_name, mod_name) in mods {
+            let mut positions: Vec<i64> = Vec::new();
+            for mode in &maps.options.get_modes() {
+                positions.push(maps.get_modifier_position(op_name, mode) as i64);
+            }
+            self.set_val(mod_name, OpVal::Vec(positions))
         }
     }
 

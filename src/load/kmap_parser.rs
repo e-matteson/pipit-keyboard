@@ -31,7 +31,7 @@ impl KmapParser {
         }
     }
 
-    pub fn parse(&mut self, path: &str, chords: &mut BTreeMap<String, Chord>) {
+    pub fn parse(&mut self, path: &str) -> BTreeMap<String, Chord> {
         let all_lines = load_lines(path);
         let lines_iter =
             &all_lines.iter()
@@ -48,9 +48,7 @@ impl KmapParser {
             let section: Vec<_> = chunk.collect();
             pairs.extend(self.parse_section(section));
         }
-        for (key, val) in pairs{
-            chords.insert(key, val);
-        }
+        pairs.into_iter().collect()
     }
 
     fn parse_section(&mut self, section: Section) -> Vec<(String, Chord)>{
