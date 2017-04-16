@@ -23,27 +23,29 @@ impl Options {
         for (name, op) in self.get_non_internal() {
             f.append(&op.format(&name));
         }
-        f.append(&self.format_modes());
         f.append_newline();
+        f.append(&self.format_modes());
         f
     }
 
     fn format_modes (&self) -> Format {
         Format{
-            h: self.get_modes()
-                .iter()
-                .enumerate()
-                .fold(String::new(),
-                      |acc, (index, name)|
-                      acc + &format!("#define {} {}\n",
-                                     name.to_uppercase(),
-                                     index))
-                + "\n",
+            h: make_enum(&self.get_modes(), "mode_enum"),
             c: String::new(),
         }
     }
+}
 
+fn make_enum(variants: &Vec<String>, name: &str) -> String {
+    // TODO move somewhere?
+    let contents = variants
+        .iter()
+        .enumerate()
+        .fold(String::new(),
+              |acc, (index, name)|
+              format!("{}  {} = {},\n", acc, name.to_uppercase(), index));
 
+    format!("enum {}{{\n{}}}\n", name, contents)
 }
 
 impl OpDef {
@@ -212,6 +214,7 @@ impl Maps {
     }
 
     fn format_wordmods(&self) -> Format {
+        // TODO 2d
         let mut f = Format::new();
         for name in &self.wordmods {
             let all_chord_bytes: Vec<Vec<i64>> =
