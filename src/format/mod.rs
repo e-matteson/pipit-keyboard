@@ -1,7 +1,7 @@
 use self::format::Format;
 use self::c_array::CArray;
 use self::lookups::format_lookups;
-use self::compress::compress;
+use self::compress::*;
 
 mod impl_format;
 mod format;

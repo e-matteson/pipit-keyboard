@@ -2,11 +2,11 @@ use time::*;
 use std::path::Path;
 
 use types::{Sequence, KeyPress, Maps, Options, OpDef, OpType};
-use format::{Format, CArray, format_lookups, compress};
+use format::{Format, CArray, format_lookups, compress, make_compression_macros};
 
 
 
-impl KeyPress{
+impl KeyPress {
     pub fn as_bytes(&self, use_mods: bool) -> Vec<String> {
         let mut v: Vec<String> = Vec::new();
         v.push(format!("{}&0xff", self.key));
@@ -219,11 +219,13 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f.h += "#include <Arduino.h>\n";
     f.h += "#include \"keycodes.h\"\n\n";
     f.h += "typedef void (*voidFuncPtr)(void);\n\n";
+    f.h += &make_compression_macros();
 
     f.c += &autogen_message;
     f.c += &format!("#include \"{}\"\n\n", h_file_name);
     f
 }
+
 
 fn make_debug_macros() -> String {
     // TODO clean up debug macros
