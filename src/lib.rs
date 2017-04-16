@@ -1,18 +1,11 @@
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(dead_code)]
 
 extern crate time;
 extern crate toml;
 extern crate itertools;
 
+pub use types::Maps;
+
 #[macro_use]
-pub mod options;
-
-pub mod format;
-// pub mod toml_convertor;
-
-pub mod write;
-pub mod parser;
-pub mod maps;
-pub mod types;
+mod load;
+mod format;
+mod types;

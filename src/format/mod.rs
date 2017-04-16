@@ -1,7 +1,7 @@
-pub use format::format::Format;
-pub use format::c_array::CArray;
-pub use format::lookups::format_lookups;
-pub use format::compress::compress;
+use self::format::Format;
+use self::c_array::CArray;
+use self::lookups::format_lookups;
+use self::compress::compress;
 
 mod impl_format;
 mod format;

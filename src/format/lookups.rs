@@ -5,20 +5,15 @@ use types::{Chord, Sequence};
 use format::*;
 use format::c_array::CArray;
 
-//  TODO don't redefine type here...
-type SeqMap = BTreeMap<String, Sequence>;
+type SeqMap =   BTreeMap<String, Sequence>;
 type ChordMap = BTreeMap<String, Chord>;
-type LenMap = BTreeMap<usize, Vec<String>>;
+type LenMap =   BTreeMap<usize, Vec<String>>;
 
 
-pub fn format_lookups (seq_map: &SeqMap,
-                   chord_map: &ChordMap,
-                   name: &str,
-                   use_compression: bool,
-                   use_mods: bool)
-                   -> Format
+pub fn format_lookups (seq_map: &SeqMap, chord_map: &ChordMap,
+                       name: &str, use_compression: bool,
+                       use_mods: bool) -> Format
 {
-
     let names_by_len = make_length_map(&seq_map);
     let max_len: usize = *names_by_len.keys().max()
         .expect("failed to get max length");

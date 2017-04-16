@@ -3,11 +3,9 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
-use std::iter::Peekable;
-use itertools::{Itertools, multizip};
+use itertools::Itertools;
 
-use options::options::*;
-use types::{Chord, SwitchPos};
+use types::{Chord, SwitchPos, Options};
 
 
 const COMMENT_START: &str = "#";
@@ -16,25 +14,20 @@ const UNPRESSED_CHAR: char = '.';
 
 type Section<'a> = Vec<(usize, Vec<&'a str>)>;
 
-pub struct Parser {
+pub struct KmapParser {
     items_per_line: Vec<usize>,
     lines_in_block: usize,
-    lines_parsed: usize,
     permutation: Vec<usize>,
-    bytes_in_chord: usize,
 }
 
-impl Parser {
-    pub fn new(ops: &Options) -> Parser {
+impl KmapParser {
+    pub fn new(ops: &Options) -> KmapParser {
         let format = ops.get_val("kmap_format").unwrap_vec_kmap();
         let items_per_line: Vec<_> = format.iter().map(|v| v.len()).collect();
-        Parser {
+        KmapParser {
             items_per_line: items_per_line,
             lines_in_block: 1+format.len(), // 1 extra for the top name line
-            lines_parsed: 0,
             permutation: make_permutation(ops),
-            bytes_in_chord: ops.get_val("num_bytes_in_chord")
-                .unwrap_int() as usize,
         }
     }
 
@@ -44,7 +37,7 @@ impl Parser {
             &all_lines.iter()
             .enumerate()                     // track line numbers
             .map(|(i, l)| (i, l.trim()))     // trim whitespace
-            .filter(|&(i, l)|                // remove comments and empty lines
+            .filter(|&(_, l)|                // remove comments and empty lines
                     !l.is_empty() && !l.starts_with(COMMENT_START))
             .map(|(i, l)|                    // split on whitespace
                  (i, split(l)))

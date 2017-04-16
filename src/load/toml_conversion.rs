@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use types::{Chord, Sequence, KeyPress, SwitchPos};
+use types::{Sequence, KeyPress, SwitchPos};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -44,12 +44,12 @@ pub fn toml_to_vec2_int(toml_array: &Value) -> Vec<Vec<i64>>{
     )
 }
 
-pub fn toml_to_vec3_int(toml_array: &Value) -> Vec<Vec<Vec<i64>>>{
-    toml_to_vec(&toml_array,
-                |d1| toml_to_vec(d1,
-                                 |d2| toml_to_vec(d2, toml_to_int))
-    )
-}
+// pub fn toml_to_vec3_int(toml_array: &Value) -> Vec<Vec<Vec<i64>>>{
+//     toml_to_vec(&toml_array,
+//                 |d1| toml_to_vec(d1,
+//                                  |d2| toml_to_vec(d2, toml_to_int))
+//     )
+// }
 
 
 fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {

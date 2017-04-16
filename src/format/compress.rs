@@ -9,6 +9,9 @@ const NUM_KEYS: usize = 4;
 
 
 pub fn compress(seq: &Sequence, use_mods: bool) -> Vec<String> {
+    if use_mods {
+        panic!("Not implemented: compression with stored modifiers")
+    }
     let mut compressed: Vec<String> = Vec::new();
     let chunks = &seq.0.iter().cloned().chunks(NUM_KEYS);
     for chunk in chunks {
@@ -52,7 +55,7 @@ fn format_mask(i: usize, s1: &str, s2: &str) -> String {
 fn pad(v: &mut Vec<KeyPress>, length: usize) {
     assert!(v.len() <= length);
     let num_to_pad = length.saturating_sub(v.len());
-    for i in 0..num_to_pad {
+    for _ in 0..num_to_pad {
         v.push( KeyPress::new_blank());
     }
 }

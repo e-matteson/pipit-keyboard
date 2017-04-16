@@ -111,7 +111,6 @@ fn wrap_in_braces(lines: &Vec<String>) -> Vec<String> {
 fn to_string_vec<T>(v: &Vec<T>) -> Vec<String>
     where T: Display
 {
-    // TODO generalize types? need to make c arrays of pointer names
     let items_per_line = 4;
     let mut lines: Vec<String> = Vec::new();
     let chunks = &v.iter().map(|x| x.to_string()).chunks(items_per_line);

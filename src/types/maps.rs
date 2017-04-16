@@ -1,25 +1,18 @@
 use std::collections::BTreeMap;
-use std::fmt::Display;
 use std::clone::Clone;
 
-use options::*;
-use types::{Chord, Sequence, KeyPress, SwitchPos, Word};
-
-type LenMap = BTreeMap<usize, Vec<String>>;
-type SeqMap = BTreeMap<String, Sequence>;
-// type SpecialMap = BTreeMap<String, usize>;
-type SpecialMap = BTreeMap<String, Sequence>;
-type ChordMap = BTreeMap<String, Chord>;
+use types::{Chord, Sequence, KeyPress, Word, Options};
 
 
 #[derive(Debug)]
 pub struct Maps {
-    pub chords: ChordMap,
-    pub plains: SeqMap,
-    pub macros: SeqMap,
-    pub words:  SeqMap,
-    pub specials: SpecialMap,
+    pub chords:   BTreeMap<String, Chord>,
+    pub plains:   BTreeMap<String, Sequence>,
+    pub macros:   BTreeMap<String, Sequence>,
+    pub words:    BTreeMap<String, Sequence>,
+    pub specials: BTreeMap<String, Sequence>,
     pub wordmods: Vec<String>,
+    pub options:  Options,
 }
 
 impl Maps {
@@ -31,6 +24,7 @@ impl Maps {
             words: BTreeMap::new(),
             specials: BTreeMap::new(),
             wordmods: Vec::new(),
+            options: Options::new(),
         }
     }
 

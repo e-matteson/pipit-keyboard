@@ -1,8 +1,9 @@
-use types::{Chord, Sequence, KeyPress, SwitchPos};
-use options::options::*;
+use time::*;
+use std::path::Path;
+
+use types::{Sequence, KeyPress, Maps, Options, OpDef, OpType};
 use format::{Format, CArray, format_lookups, compress};
 
-use maps::*;
 
 
 impl KeyPress{
@@ -37,7 +38,7 @@ impl OpDef {
                 self.format_define_string(name)
             }
             OpType::IfdefValue => {
-                self.format_ifdef_value(name)
+                self.format_ifdef_value()
             }
             OpType::IfdefKey => {
                 self.format_ifdef_key(name)
@@ -73,7 +74,7 @@ impl OpDef {
         }
     }
 
-    fn format_ifdef_value(&self, name: &str) -> Format {
+    fn format_ifdef_value(&self) -> Format {
         Format {
             h: format!("#define {}\n",
                        self.get_val().unwrap_str()),
@@ -121,52 +122,6 @@ impl OpDef {
 }
 
 
-impl Maps{
-
-    pub fn format_words (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.words, chord_map, "word", true, false)
-    }
-
-    pub fn format_plains (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.plains, chord_map, "plain", false, true)
-    }
-
-    pub fn format_macros (&self) -> Format {
-        let chord_map = &self.chords;
-        format_lookups(&self.macros, chord_map, "macro", false, true)
-    }
-
-    pub fn format_specials (&self) -> Format {
-        let mut f = Format {
-            h: self.specials.keys()
-                .fold(String::new(),
-                      |acc, name|
-                      acc + &format!("#define {} {}\n",
-                                     name,
-                                     self.specials[name].get_only_value()))
-                + "\n",
-            c: String::new(),
-        };
-        let chord_map = &self.chords;
-        f.append(&format_lookups(&self.specials, chord_map, "special", false, false));
-        f
-    }
-
-    pub fn format_wordmods(&self) -> Format {
-        let mut f = Format::new();
-        for name in &self.wordmods {
-            let full_name = format!("{}_chord_bytes", name);
-            f.append(&CArray::new(&full_name)
-                     .fill_1d(&self.chords[name].to_ints())
-                     .format())
-        }
-        f
-    }
-}
-
-
 impl Sequence {
 
     pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<String>{
@@ -191,4 +146,142 @@ impl Sequence {
         compress(self, use_mods)
     }
 
+}
+
+
+impl Maps {
+
+    pub fn format(&self, file_name_base: &str) -> Format {
+        let mut f = Format::new();
+        f.append(&format_intro(&format!("{}.h", file_name_base)));
+        f.append(&self.options.format());
+        f.append(&self.format_wordmods());
+        f.append(&self.format_specials());
+        f.append(&self.format_plains());
+        f.append(&self.format_macros());
+        f.append(&self.format_words());
+        f.append(&format_outro());
+        f
+    }
+
+
+    fn format_words (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.words, chord_map, "word", true, false)
+    }
+
+    fn format_plains (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.plains, chord_map, "plain", false, true)
+    }
+
+    fn format_macros (&self) -> Format {
+        let chord_map = &self.chords;
+        format_lookups(&self.macros, chord_map, "macro", false, true)
+    }
+
+    fn format_specials (&self) -> Format {
+        let mut f = Format {
+            h: self.specials.keys()
+                .fold(String::new(),
+                      |acc, name|
+                      acc + &format!("#define {} {}\n",
+                                     name,
+                                     self.specials[name].get_only_value()))
+                + "\n",
+            c: String::new(),
+        };
+        let chord_map = &self.chords;
+        f.append(&format_lookups(&self.specials, chord_map, "special", false, false));
+        f
+    }
+
+    fn format_wordmods(&self) -> Format {
+        let mut f = Format::new();
+        for name in &self.wordmods {
+            let full_name = format!("{}_chord_bytes", name);
+            f.append(&CArray::new(&full_name)
+                     .fill_1d(&self.chords[name].to_ints())
+                     .format())
+        }
+        f
+    }
+}
+
+
+pub fn format_intro(h_file_name: &str) -> Format{
+    let autogen_message = make_autogen_message();
+    let guard_name = make_guard_name(h_file_name);
+    let mut f = Format::new();
+
+    f.h += &autogen_message;
+    f.h += &format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
+    f.h += "#include <Arduino.h>\n";
+    f.h += "#include \"keycodes.h\"\n\n";
+    f.h += "typedef void (*voidFuncPtr)(void);\n\n";
+    f.h += make_debug_macros().as_ref();
+
+    f.c += &autogen_message;
+    f.c += &format!("#include \"{}\"\n\n", h_file_name);
+    f
+}
+
+fn make_debug_macros() -> String {
+    // TODO clean up debug macros
+    let mut s = String::new();
+    s += "#if DEBUG_MESSAGES == 0\n";
+    s += "#define DEBUG1(msg)\n";
+    s += "#define DEBUG1_LN(msg)\n";
+    s += "#define DEBUG2(msg)\n";
+    s += "#define DEBUG2_LN(msg)\n";
+    s += "#endif\n\n";
+    s += "#if DEBUG_MESSAGES == 1\n";
+    s += "#define DEBUG1(msg) Serial.print(msg)\n";
+    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
+    s += "#define DEBUG2(msg)\n";
+    s += "#define DEBUG2_LN(msg)\n";
+    s += "#endif\n\n";
+    s += "#if DEBUG_MESSAGES == 2\n";
+    s += "#define DEBUG1(msg) Serial.print(msg)\n";
+    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
+    s += "#define DEBUG2(msg) Serial.print(msg)\n";
+    s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
+    s += "#endif\n\n ";
+    s
+}
+
+pub fn format_outro() -> Format {
+    Format {
+        h: "\n#endif\n".to_string(),
+        c: String::new(),
+    }
+}
+
+fn make_autogen_message( ) -> String {
+    const AUTHOR: &str = "rusty-pipit";
+
+    let s = format!("/**\n * Automatically generated by {} on:  {}\n",
+                    AUTHOR,
+                    now().strftime("%c").unwrap()
+    );
+    s + " * Do not make changes here, they will be overwritten.\n */\n\n"
+}
+
+fn make_guard_name(h_file_name: &str) -> String {
+    // TODO remove unsafe characters, like the python version
+    let error_message = format!("invalid header file name: {}", h_file_name);
+    let p: String = Path::new(h_file_name)
+        .file_name()
+        .expect("failed to get file name")
+        .to_str().unwrap().to_string()
+        .to_uppercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() {c} else {'_'})
+        .collect();
+    let first = p.chars().nth(0)
+        .expect(&error_message);
+    if !first.is_alphabetic() && first != '_' {
+        panic!(error_message);
+    }
+    p + "_"
 }

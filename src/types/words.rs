@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 
-use options::*;
 use types::{Chord, Sequence, KeyPress};
 
 pub struct Word {
@@ -76,7 +75,7 @@ fn make_word_chord(word: &str, chords: &BTreeMap<String, Chord>) -> Chord {
 fn get_letter_chord(letter: char, chords: &BTreeMap<String, Chord>) -> &Chord {
     let name = get_key_name_for_chord(letter);
     chords.get(&name)
-        .expect(&format!("no chord for letter: {}", name))
+        .expect(&format!("no chord for key name: {}", name))
 }
 
 fn get_key_name_for_chord(character: char) -> String {
