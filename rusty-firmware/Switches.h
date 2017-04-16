@@ -44,7 +44,7 @@ private:
   void stopDebouncingRelease(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-  bool isModifier(uint8_t switch_index);
+  bool isModifier(uint8_t switch_index, mode_enum mode);
 
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);

@@ -18,30 +18,31 @@ public:
   uint8_t special(const Chord* chord, uint8_t* data);
   uint8_t word(const Chord* chord, uint8_t* data);
 
-  const uint8_t* wordmod_nospace();
-  const uint8_t* wordmod_anagram1();
-  const uint8_t* wordmod_anagram2();
-  const uint8_t* wordmod_capital();
-
 private:
   uint8_t lookupChord(const Chord* chord, uint8_t* data, const uint8_t** chord_lookup,
-                      const uint8_t** seq_lookup, bool use_mods, bool is_word);
+                      const uint8_t** seq_lookup, bool use_mods, bool use_compression);
+  uint8_t readOffset(const uint8_t* start_of_entry);
+  uint8_t* getChordAddress(const uint8_t* start_of_entry);
+  bool isZero(const uint8_t* start_of_entry);
+  uint8_t* nextChordEntry(uint8_t* start_of_entry);
 
-  uint8_t readRaw(uint8_t* data_out, const uint8_t* seq_lookup_subarray,
-                  uint8_t length_index, uint32_t chord_index, bool use_mods);
-  uint8_t readCompressed(uint8_t* data_out, const uint8_t* seq_lookup_subarray,
-                         uint8_t length_index, uint32_t chord_index);
+
+  uint8_t readRaw(uint8_t* data_out, const uint8_t** seq_lookup,
+                  uint8_t length_index, uint32_t seq_num, bool use_mods);
+  uint8_t readCompressed(uint8_t* data_out, const uint8_t** seq_lookup,
+                         uint8_t length_index, uint32_t seq_num);
   uint32_t decompressKey(const uint8_t* compressed, uint32_t key_index, uint8_t* key_out);
   uint32_t getStartCompressedIndex(uint32_t key_index);
-  uint32_t getStartKeyIndex(uint32_t chord_index, uint8_t num_keys);
 
-  bool isZero(const uint8_t* address);
 
   // void printData(const uint8_t* data, uint8_t data_length);
   // void printBinary(uint8_t byte);
 
   const uint8_t decompressed_cycle_length = 4;
   const uint8_t compressed_cycle_length = 3;
+
+  // length of prefix that stores offset, and maybe other info someday
+  const uint8_t num_bytes_in_prefix = 1;
 };
 
 #endif

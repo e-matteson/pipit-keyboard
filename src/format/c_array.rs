@@ -110,11 +110,13 @@ fn make_c_array<T>(v: &Vec<T>) -> String
 fn make_c_array2<T>(v: &Vec<Vec<T>>) -> String
     where T: Display
 {
+    // TODO format better, don't put commas on separate line
     assert!(is_rectangular(v));
 
     let mut rows: Vec<String> = Vec::new();
     for row in v {
         rows.extend(wrap_in_braces(&to_string_vec(&row)));
+        rows.push(",".to_owned());
     }
     wrap_in_braces(&rows).join("\n")
 }

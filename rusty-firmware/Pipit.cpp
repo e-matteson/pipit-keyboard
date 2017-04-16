@@ -1,10 +1,11 @@
 #include "Pipit.h"
 
 Pipit::Pipit(){
+  mode = mode_enum::NORMAL_MODE;
+
   comms = new Comms();
   lookup = new Lookup();
-  chord = new Chord();
-  saved_chord = new Chord();
+  saved_chord = new Chord(mode);
   wordhistory = new WordHistory();
 
   switches = new Switches();
@@ -50,9 +51,9 @@ void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   if(switches->readyToPress()){
     // Lookup the chord and send the corresponding key sequence.
-    chord->clear();
-    switches->makeChordBytes(chord);
-    processChord(chord);
+    Chord new_chord(mode);
+    switches->makeChordBytes(&new_chord);
+    processChord(&new_chord);
   }
   else if(switches->readyToRelease()){
     // Make sure all keys are released
@@ -111,7 +112,7 @@ void Pipit::processChordHelper(Chord* new_chord){
   // If chord is a known word, send it and return.
   if((data_length=lookup->word(new_chord, data))){
     sender->sendWord(data, data_length, new_chord);
-    storeLastWord();
+    storeLastWord(new_chord);
     feedback->triggerWord();
     return;
   }
@@ -150,7 +151,7 @@ void Pipit::resetLastWord(){
   was_last_send_a_word = 0;
 }
 
-void Pipit::storeLastWord(){
+void Pipit::storeLastWord(Chord* chord){
   was_last_send_a_word = 1;
   saved_chord->copy(chord);
 }
@@ -167,6 +168,7 @@ void Pipit::cycleAnagram(){
 /************** word deletion ***************/
 
 int16_t  Pipit::deleteLastWord(){
+  // TODO what happens to word history when mode changes?
   // Delete the last sent key sequence by sending the right number of backspaces.
   int16_t length = wordhistory->peek();
 

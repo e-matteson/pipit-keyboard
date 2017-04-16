@@ -45,7 +45,7 @@ fn make_enum(variants: &Vec<String>, name: &str) -> String {
               |acc, (index, name)|
               format!("{}  {} = {},\n", acc, name.to_uppercase(), index));
 
-    format!("enum {}{{\n{}}}\n", name, contents)
+    format!("enum {}{{\n{}}};\n", name, contents)
 }
 
 impl OpDef {

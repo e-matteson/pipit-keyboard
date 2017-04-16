@@ -4,79 +4,106 @@ Lookup::Lookup(){
 }
 
 uint8_t Lookup::plain(const Chord* chord, uint8_t* data){
-  return lookupChord(chord, data, plain_chord_lookup, plain_seq_lookup,  1, 0);
+  mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, plain_chord_lookup[mode], plain_seq_lookup,  1, 0);
 }
 
 uint8_t Lookup::macro(const Chord* chord, uint8_t* data){
-  return lookupChord(chord, data, macro_chord_lookup, macro_seq_lookup, 1, 0);
+  mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, macro_chord_lookup[mode], macro_seq_lookup, 1, 0);
 }
 
 uint8_t Lookup::special(const Chord* chord, uint8_t* data){
-  return lookupChord(chord, data, special_chord_lookup, special_seq_lookup, 0, 0);
+  mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, special_chord_lookup[mode], special_seq_lookup, 0, 0);
 }
 
 uint8_t Lookup::word(const Chord* chord, uint8_t* data){
-  return lookupChord(chord, data, word_chord_lookup, word_seq_lookup, 0, 1);
+  mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, word_chord_lookup[mode], word_seq_lookup, 0, 1);
 }
 
 uint8_t Lookup::lookupChord(const Chord* chord, uint8_t* data,
                             const uint8_t** chord_lookup, const uint8_t** seq_lookup,
-                            bool use_mods, bool is_word){
+                            bool use_mods, bool use_compression){
   // If chord is found in lookup, store data and return its length.
   // Otherwise, return 0.
   uint8_t length_index = 0;
   while(chord_lookup[length_index] != NULL){ // for each length subarray
-    uint32_t chord_index = 0;
-    while(!isZero(chord_lookup[length_index] + chord_index)){ // for each entry/chunk
-      if(chord->isEqual(chord_lookup[length_index] + chord_index)){
+    uint8_t* entry = (uint8_t*) chord_lookup[length_index];
+    uint32_t seq_num = 0;
+    while(!isZero(entry)){ // for each entry/chunk
+      seq_num += readOffset(entry);
+      if(chord->isEqual(getChordAddress(entry))){
         // Found match!
-        if(is_word){
-          // It's a word! Decompress the key sequence.
-          return readCompressed(data, seq_lookup[length_index], length_index, chord_index);
+        if(use_compression){
+          return readCompressed(data, seq_lookup, length_index, seq_num);
         }
         else{
-          // Not a word, so the key sequence is not compressed.
-          return readRaw(data, seq_lookup[length_index], length_index, chord_index, use_mods);
+          return readRaw(data, seq_lookup, length_index, seq_num, use_mods);
         }
       }
-      chord_index += NUM_BYTES_IN_CHORD;
+      // Keep looking.
+      entry = nextChordEntry(entry);
     }
     length_index++;
   }
   return 0; // Fail! No match found.
 }
 
-uint8_t Lookup::readRaw(uint8_t* data_out, const uint8_t* seq_lookup_subarray,
-                        uint8_t length_index, uint32_t chord_index, bool use_mods){
+/**** Chord lookup utilities ****/
+
+uint8_t Lookup::readOffset(const uint8_t* start_of_entry) {
+  return start_of_entry[0];
+}
+
+uint8_t* Lookup::getChordAddress(const uint8_t* start_of_entry) {
+  return (uint8_t*) start_of_entry + num_bytes_in_prefix;
+}
+
+bool Lookup::isZero(const uint8_t* start_of_entry){
+  // return true if the chord bytes of the entry at the address are all zero
+  const uint8_t* chord_address = getChordAddress(start_of_entry);
+  bool is_zero = 1;
+  for(uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++){
+    is_zero &= (chord_address[k] == 0);
+  }
+  return is_zero;
+}
+
+uint8_t* Lookup::nextChordEntry(uint8_t* start_of_entry){
+  return start_of_entry + num_bytes_in_prefix + NUM_BYTES_IN_CHORD;
+}
+
+/**** Sequence lookup utilities ****/
+
+uint8_t Lookup::readRaw(uint8_t* data_out, const uint8_t** seq_lookup,
+                        uint8_t length_index, uint32_t seq_num, bool use_mods){
   uint8_t num_keys = length_index * (use_mods ? 2 : 1);
-  uint32_t start_key_index = getStartKeyIndex(chord_index, num_keys);
-  memcpy(data_out, seq_lookup_subarray + start_key_index, num_keys);
+  uint32_t start_key_index = seq_num * num_keys;
+  memcpy(data_out, seq_lookup[length_index] + start_key_index, num_keys);
   return num_keys;
 }
 
-uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t* seq_lookup_subarray,
-                               uint8_t length_index, uint32_t chord_index){
+uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t** seq_lookup,
+                               uint8_t length_index, uint32_t seq_num){
   // Decompress data. Return the number of keys that were decompressed.
   uint8_t num_keys = length_index;
-  uint32_t start_key_index = getStartKeyIndex(chord_index, num_keys);
+  uint32_t start_key_index = seq_num * num_keys;
   uint32_t compressed_index = getStartCompressedIndex(start_key_index);
 
   uint8_t key_index_offset;
   for(key_index_offset = 0; key_index_offset < num_keys; key_index_offset++){
-    compressed_index += decompressKey(seq_lookup_subarray + compressed_index,
+    compressed_index += decompressKey(seq_lookup[length_index] + compressed_index,
                                       start_key_index + key_index_offset,
                                       data_out + key_index_offset);
   }
   return key_index_offset;
 }
 
-uint32_t Lookup::getStartKeyIndex(uint32_t chord_index, uint8_t num_keys){
-  return chord_index / NUM_BYTES_IN_CHORD * num_keys;
-}
-
 uint32_t Lookup::getStartCompressedIndex(uint32_t key_index){
   const uint8_t byte_offsets[] = {0,0,1,2};
-  return (((key_index  / decompressed_cycle_length) * compressed_cycle_length)
+  return (((key_index / decompressed_cycle_length) * compressed_cycle_length)
           + (byte_offsets[key_index % this->decompressed_cycle_length]));
 }
 
@@ -102,30 +129,7 @@ uint32_t Lookup::decompressKey(const uint8_t* compressed, uint32_t key_index, ui
   }
 }
 
-const uint8_t* Lookup::wordmod_nospace  (){
-  return  wordmod_nospace_chord_bytes;
-}
-
-const uint8_t* Lookup::wordmod_anagram1 (){
-  return  wordmod_anagram1_chord_bytes;
-}
-
-const uint8_t* Lookup::wordmod_anagram2 (){
-  return  wordmod_anagram2_chord_bytes;
-}
-
-const uint8_t* Lookup::wordmod_capital  (){
-  return  wordmod_capital_chord_bytes;
-}
-
-bool Lookup::isZero(const uint8_t* address){
-  // return true if the chord bytes at the address are all zero
-  bool is_zero = 1;
-  for(uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++){
-    is_zero &= (address[k] == 0);
-  }
-  return is_zero;
-}
+/***** Debugging *****/
 
 // void Lookup::printData(const uint8_t* data, uint8_t data_length){
 //   Serial.print("data: ");

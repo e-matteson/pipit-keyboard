@@ -181,7 +181,8 @@ void Switches::makeChordBytes(Chord* chord){
         if(switch_status[index] == Switches::PRESSED){
           // Let modifiers be immediately re-used in future chords.
           // TODO document this special case
-          switch_status[index] = isModifier(index) ? Switches::HELD : Switches::ALREADY_SENT;
+          switch_status[index] = isModifier(index, chord->getMode()) ?
+            Switches::HELD : Switches::ALREADY_SENT;
         }
       }
       index++;
@@ -193,11 +194,11 @@ void Switches::makeChordBytes(Chord* chord){
   }
 }
 
-bool Switches::isModifier(uint8_t switch_index){
-  return ((switch_index == SHIFT_POSITION) ||
-          (switch_index == ALT_POSITION )  ||
-          (switch_index == CTRL_POSITION)  ||
-          (switch_index == GUI_POSITION));
+bool Switches::isModifier(uint8_t switch_index, mode_enum mode){
+  return ((switch_index == shift_position[mode]) ||
+          (switch_index == alt_position[mode])  ||
+          (switch_index == ctrl_position[mode])  ||
+          (switch_index == gui_position[mode]));
 }
 
 void Switches::printStatusArray(){

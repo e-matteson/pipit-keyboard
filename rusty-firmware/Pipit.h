@@ -47,7 +47,7 @@ private:
   void processChordHelper(Chord* new_chord);
 
   void resetLastWord();
-  void storeLastWord();
+  void storeLastWord(Chord* chord);
   void cycleAnagram();
   int16_t deleteLastWord();
   void handleUnknownDeletion();
@@ -60,13 +60,13 @@ private:
   Feedback* feedback;
   Sender* sender;
   WordHistory* wordhistory;
-  Chord* chord;
   Chord* saved_chord;
   Comms* comms;
 
   /***** word anagram cycling *****/
   bool was_last_send_a_word = 0;
 
+  mode_enum mode = mode_enum::NORMAL_MODE;
 
   bool is_paused = 0;
 

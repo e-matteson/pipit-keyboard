@@ -1,15 +1,16 @@
 #include "Chord.h"
 
-Chord::Chord(){
+Chord::Chord(mode_enum mode) : mode(mode){
 }
 
-void Chord::clear(){
-  mod_byte = 0;
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    chord_bytes[i] = 0;
-    wordmod_storage[i] = 0;
-  }
-}
+
+// void Chord::clear(){
+//   mod_byte = 0;
+//   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
+//     chord_bytes[i] = 0;
+//     wordmod_storage[i] = 0;
+//   }
+// }
 
 void Chord::setChordArray(const uint8_t* new_chord_bytes){
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
@@ -31,7 +32,12 @@ uint8_t Chord::getModByte() const{
   return mod_byte;
 }
 
+mode_enum Chord::getMode() const{
+  return mode;
+}
+
 void Chord::copy(const Chord* chord){
+  mode = chord->mode;
   mod_byte = chord->mod_byte;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = chord->chord_bytes[i];
@@ -66,16 +72,16 @@ void Chord::blankModifier(uint32_t modifier){
   uint8_t position;
   switch(modifier){
   case MODIFIERKEY_SHIFT:
-    position = SHIFT_POSITION;
+    position = shift_position[mode];
     break;
   case MODIFIERKEY_GUI:
-    position = GUI_POSITION;
+    position = gui_position[mode];
     break;
   case MODIFIERKEY_CTRL:
-    position = CTRL_POSITION;
+    position = ctrl_position[mode];
     break;
   case MODIFIERKEY_ALT:
-    position = ALT_POSITION;
+    position = alt_position[mode];
     break;
   default:
     DEBUG1("ERROR: blankModifier: unknown modifier: ");
@@ -93,11 +99,11 @@ void Chord::blankModifier(uint32_t modifier){
 }
 
 void Chord::blankWordmodCapital(){
-  blankWordmod(wordmod_capital_chord_bytes);
+  blankWordmod(wordmod_capital_chord_bytes[mode]);
 }
 
 void Chord::blankWordmodNospace(){
-  blankWordmod(wordmod_nospace_chord_bytes);
+  blankWordmod(wordmod_nospace_chord_bytes[mode]);
 }
 
 void Chord::blankWordmod(const uint8_t* wordmod_chord_bytes){
@@ -116,11 +122,11 @@ void Chord::restoreWordmods(){
 }
 
 bool Chord::hasCapitalWordmod() const{
-  return areMaskBitsSet(wordmod_capital_chord_bytes, wordmod_storage);
+  return areMaskBitsSet(wordmod_capital_chord_bytes[mode], wordmod_storage);
 }
 
 bool Chord::hasNospaceWordmod() const{
-  return areMaskBitsSet(wordmod_nospace_chord_bytes, wordmod_storage);
+  return areMaskBitsSet(wordmod_nospace_chord_bytes[mode], wordmod_storage);
 }
 
 
@@ -165,26 +171,26 @@ uint8_t Chord::countBitsSet(const uint8_t* _chord_bytes) const{
 void Chord::cycleAnagramModifier(){
 
   // Needed in case one anagram modifier chord is a subset of the other
-  static const uint8_t length_anagram1 = countBitsSet(wordmod_anagram1_chord_bytes);
-  static const uint8_t length_anagram2 = countBitsSet(wordmod_anagram2_chord_bytes);
+  static const uint8_t length_anagram1 = countBitsSet(wordmod_anagram1_chord_bytes[mode]);
+  static const uint8_t length_anagram2 = countBitsSet(wordmod_anagram2_chord_bytes[mode]);
 
-  bool fits_anagram1 = areMaskBitsSet(wordmod_anagram1_chord_bytes, chord_bytes);
-  bool fits_anagram2 = areMaskBitsSet(wordmod_anagram2_chord_bytes, chord_bytes);
+  bool fits_anagram1 = areMaskBitsSet(wordmod_anagram1_chord_bytes[mode], chord_bytes);
+  bool fits_anagram2 = areMaskBitsSet(wordmod_anagram2_chord_bytes[mode], chord_bytes);
 
   if((fits_anagram1 && (!fits_anagram2)) ||
      (fits_anagram1 && fits_anagram2 && (length_anagram1 > length_anagram2))){
     // Anagram1 modifier was pressed! Switch to anagram2.
-    unsetMask(wordmod_anagram1_chord_bytes, chord_bytes);
-    setMask(wordmod_anagram2_chord_bytes, chord_bytes);
+    unsetMask(wordmod_anagram1_chord_bytes[mode], chord_bytes);
+    setMask(wordmod_anagram2_chord_bytes[mode], chord_bytes);
   }
   else if((fits_anagram2 && (!fits_anagram1)) ||
           (fits_anagram1 && fits_anagram2 && (length_anagram2>length_anagram1))){
     // Anagram2 modifier was pressed! Switch to no modifier.
-    unsetMask(wordmod_anagram2_chord_bytes, chord_bytes);
+    unsetMask(wordmod_anagram2_chord_bytes[mode], chord_bytes);
   }
   else{
     // No modifier was pressed! Switch to anagram1.
-    setMask(wordmod_anagram1_chord_bytes, chord_bytes);
+    setMask(wordmod_anagram1_chord_bytes[mode], chord_bytes);
   }
 }
 
