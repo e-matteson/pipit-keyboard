@@ -186,7 +186,7 @@ impl Maps {
                 .fold(String::new(),
                       |acc, name|
                       acc + &format!("#define {} {}\n",
-                                     name,
+                                     name.to_uppercase(),
                                      self.specials[name].get_only_value()))
                 + "\n",
             c: String::new(),

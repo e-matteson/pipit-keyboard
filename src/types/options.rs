@@ -34,7 +34,7 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .required(OpReq::Auto)
          .finalize()),
 
-        ("num_cols",
+        ("num_columns",
          OpDefBuilder::new(OpType::DefineInt)
          .required(OpReq::Auto)
          .finalize()),
@@ -412,8 +412,8 @@ impl Options {
         self.set_val("blank_mapping" , OpVal::Int(0));
 
         let num_rows: i64 = self.get_val_len("row_pins") as i64;
-        let num_cols: i64 = self.get_val_len("column_pins") as i64;
-        let num_matrix_positions: i64 = num_rows * num_cols as i64;
+        let num_columns: i64 = self.get_val_len("column_pins") as i64;
+        let num_matrix_positions: i64 = num_rows * num_columns as i64;
         let num_bytes_in_chord: i64 = round_up_to_num_bytes(num_matrix_positions);
 
         let mut num_rgb_led_pins: i64 = 0;
@@ -422,7 +422,7 @@ impl Options {
         }
 
         self.set_val("num_rows" , OpVal::Int(num_rows));
-        self.set_val("num_cols" , OpVal::Int(num_cols));
+        self.set_val("num_columns" , OpVal::Int(num_columns));
         self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
         self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
         self.set_val("num_rgb_led_pins" , OpVal::Int(num_rgb_led_pins));
