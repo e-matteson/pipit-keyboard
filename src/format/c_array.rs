@@ -45,10 +45,10 @@ impl <T> CArray<T> where T: Display + Clone
     }
     pub fn format(self) -> Format {
         if let Some(contents) = self.contents_1d {
-            return format_c_array(&self.name, &contents, &self.c_type);
+            return format_c_array(&self.name, &contents, &self.c_type, self.is_extern);
         }
         else if let Some(contents) = self.contents_2d {
-           return format_c_array2(&self.name, &contents, &self.c_type);
+           return format_c_array2(&self.name, &contents, &self.c_type, self.is_extern);
         }
         else {
             panic!("CArray: no array contents were given");
@@ -57,27 +57,44 @@ impl <T> CArray<T> where T: Display + Clone
 }
 
 
-fn format_c_array<T>(name: &str, v: &Vec<T>, ctype: &str) -> Format
+fn format_c_array<T>(name: &str, v: &Vec<T>, ctype: &str, is_extern: bool) -> Format
     where T: Display + Clone
 {
     let contents = make_c_array(&v);
-    // println!("{:?}", contents);
-    Format {
-        h: format!("extern const {} {}[];\n", ctype, name),
-        c: format!("extern const {} {}[] = {};\n\n", ctype, name, contents),
+    if is_extern {
+        Format {
+            h: format!("extern const {} {}[];\n", ctype, name),
+            c: format!("extern const {} {}[] = {};\n\n", ctype, name, contents),
+        }
+    }
+    else {
+        Format {
+            h: String::new(),
+            c: format!("const {} {}[] = {};\n\n", ctype, name, contents),
+        }
     }
 }
 
-fn format_c_array2<T>(name: &str, v: &Vec<Vec<T>>, ctype: &str) -> Format
+fn format_c_array2<T>(name: &str, v: &Vec<Vec<T>>, ctype: &str, is_extern: bool) -> Format
     where T: Display
 {
     let contents = make_c_array2(&v);
     let len_2nd_dim = v[0].len();
-    Format {
-        h: format!("extern const {} {}[][{}];\n",
-                   ctype, name, len_2nd_dim),
-        c: format!("extern const {} {}[][{}] = {};\n\n",
-                   ctype, name, len_2nd_dim, contents),
+
+    if is_extern {
+        Format {
+            h: format!("extern const {} {}[][{}];\n",
+                       ctype, name, len_2nd_dim),
+            c: format!("extern const {} {}[][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, contents),
+        }
+    }
+    else {
+        Format {
+            h: String::new(),
+            c: format!("const {} {}[][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, contents),
+        }
     }
 }
 

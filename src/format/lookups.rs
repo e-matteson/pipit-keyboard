@@ -53,13 +53,16 @@ fn format_length_arrays <T> (arrays: Vec<Vec<T>>, name: &str) -> Format
     let mut f = Format::new();
     for i in 0..subarray_names.len() {
         f.append(&CArray::new(&subarray_names[i])
+                 .is_extern(false)
                  .fill_1d(&arrays[i])
                  .format()
         );
     }
 
     subarray_names.push("NULL".to_string());
-    f.append(&CArray::new(&name).is_extern(true).c_type("uint8_t*")
+    f.append(&CArray::new(&name)
+             .is_extern(true)
+             .c_type("uint8_t*")
              .fill_1d(&subarray_names)
              .format());
     f

@@ -164,7 +164,6 @@ impl Maps {
         f
     }
 
-
     fn format_words (&self) -> Format {
         let chord_map = &self.chords;
         format_lookups(&self.words, chord_map, "word", true, false)
@@ -226,31 +225,6 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f
 }
 
-
-fn make_debug_macros() -> String {
-    // TODO clean up debug macros
-    let mut s = String::new();
-    s += "#if DEBUG_MESSAGES == 0\n";
-    s += "#define DEBUG1(msg)\n";
-    s += "#define DEBUG1_LN(msg)\n";
-    s += "#define DEBUG2(msg)\n";
-    s += "#define DEBUG2_LN(msg)\n";
-    s += "#endif\n\n";
-    s += "#if DEBUG_MESSAGES == 1\n";
-    s += "#define DEBUG1(msg) Serial.print(msg)\n";
-    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
-    s += "#define DEBUG2(msg)\n";
-    s += "#define DEBUG2_LN(msg)\n";
-    s += "#endif\n\n";
-    s += "#if DEBUG_MESSAGES == 2\n";
-    s += "#define DEBUG1(msg) Serial.print(msg)\n";
-    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
-    s += "#define DEBUG2(msg) Serial.print(msg)\n";
-    s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
-    s += "#endif\n\n ";
-    s
-}
-
 pub fn format_outro() -> Format {
     let mut f = Format::new();
     f.h += make_debug_macros().as_ref();
@@ -285,4 +259,28 @@ fn make_guard_name(h_file_name: &str) -> String {
         panic!(error_message);
     }
     p + "_"
+}
+
+fn make_debug_macros() -> String {
+    // TODO clean up debug macros
+    let mut s = String::new();
+    s += "\n#if DEBUG_MESSAGES == 0\n";
+    s += "#define DEBUG1(msg)\n";
+    s += "#define DEBUG1_LN(msg)\n";
+    s += "#define DEBUG2(msg)\n";
+    s += "#define DEBUG2_LN(msg)\n";
+    s += "#endif\n\n";
+    s += "#if DEBUG_MESSAGES == 1\n";
+    s += "#define DEBUG1(msg) Serial.print(msg)\n";
+    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
+    s += "#define DEBUG2(msg)\n";
+    s += "#define DEBUG2_LN(msg)\n";
+    s += "#endif\n\n";
+    s += "#if DEBUG_MESSAGES == 2\n";
+    s += "#define DEBUG1(msg) Serial.print(msg)\n";
+    s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
+    s += "#define DEBUG2(msg) Serial.print(msg)\n";
+    s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
+    s += "#endif\n\n ";
+    s
 }
