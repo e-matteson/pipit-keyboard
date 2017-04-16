@@ -47,7 +47,7 @@ pub fn format_lookups (seq_map: &SeqMap, chord_map: &ChordMap,
 fn format_length_arrays <T> (arrays: Vec<Vec<T>>, name: &str) -> Format
     where T: Display + Clone
 {
-    let subarray_names: Vec<_> = (0..arrays.len())
+    let mut subarray_names: Vec<_> = (0..arrays.len())
         .map(|x| format!("{}_{}", name, x))
         .collect();
     let mut f = Format::new();
@@ -57,6 +57,8 @@ fn format_length_arrays <T> (arrays: Vec<Vec<T>>, name: &str) -> Format
                  .format()
         );
     }
+
+    subarray_names.push("NULL".to_string());
     f.append(&CArray::new(&name).is_extern(true).c_type("uint8_t*")
              .fill_1d(&subarray_names)
              .format());

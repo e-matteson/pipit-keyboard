@@ -8,7 +8,7 @@ held_delay                 = 200
 debounce_delay             = 15
 stickymod_key              = "KEY_INSERT"
 enable_audio_feedback      = false
-debug_messages             = 2
+debug_messages             = 1
 enable_unknown_deletion    = true
 collapse_unknown_deletions = true
 

@@ -219,7 +219,6 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f.h += "#include <Arduino.h>\n";
     f.h += "#include \"keycodes.h\"\n\n";
     f.h += "typedef void (*voidFuncPtr)(void);\n\n";
-    f.h += make_debug_macros().as_ref();
 
     f.c += &autogen_message;
     f.c += &format!("#include \"{}\"\n\n", h_file_name);
@@ -251,10 +250,10 @@ fn make_debug_macros() -> String {
 }
 
 pub fn format_outro() -> Format {
-    Format {
-        h: "\n#endif\n".to_string(),
-        c: String::new(),
-    }
+    let mut f = Format::new();
+    f.h += make_debug_macros().as_ref();
+    f.h += "\n#endif\n";
+    f
 }
 
 fn make_autogen_message( ) -> String {

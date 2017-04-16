@@ -61,6 +61,7 @@ fn format_c_array<T>(name: &str, v: &Vec<T>, ctype: &str) -> Format
     where T: Display + Clone
 {
     let contents = make_c_array(&v);
+    // println!("{:?}", contents);
     Format {
         h: format!("extern const {} {}[];\n", ctype, name),
         c: format!("extern const {} {}[] = {};\n\n", ctype, name, contents),

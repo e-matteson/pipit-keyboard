@@ -63,7 +63,8 @@ void Feedback::updateLED(){
   }
 
   switch(led_routine){
-
+  case NO_ROUTINE:
+    return;
   case BOOT_ROUTINE:
     switch(led_subroutine){
     case 0:
@@ -268,7 +269,8 @@ void Feedback::updateLED(){
     break;
 
   default:
-    DEBUG1_LN("WARNING: unknown LED routine");
+    DEBUG1("WARNING: invalid LED routine: ");
+    DEBUG1_LN(led_routine);
   }
 }
 
