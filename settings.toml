@@ -895,18 +895,16 @@ wordmods = [
 ]
 
 commands = [
-"command_delete_word",
-"command_pause",
-"command_stickymod",
-"command_leftright",
-"command_led_battery",
-"command_led_colors",
-"command_led_rainbow",
-"command_cycle_anagram",
-# "command_flymacro_toggle",
-# "command_flymacro_play",
-"command_krita_mode",
-"command_normal_mode",
+    "command_delete_word",
+    "command_pause",
+    "command_stickymod",
+    "command_leftright",
+    "command_led_battery",
+    "command_led_colors",
+    "command_led_rainbow",
+    "command_cycle_anagram",
+    "command_krita_mode",
+    "command_normal_mode",
 ]
 
 words = [

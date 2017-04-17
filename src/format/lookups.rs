@@ -14,30 +14,10 @@ pub fn format_lookups (seq_map: &SeqMap, chord_maps: &BTreeMap<String, ChordMap>
                        name: &str, use_compression: bool,
                        use_mods: bool) -> Format
 {
-    // TODO refactor!!!
     let names_by_len = make_length_map(&seq_map, &chord_maps);
-    let max_len: usize = *names_by_len.keys().max()
-        .expect("failed to get max length");
 
-    let mut seq_arrays: Vec<Vec<String>> = vec![Vec::new() ; 1+max_len];
-    // TODO hashmap by mode instead?
-    let mut chord_arrays: Vec<Vec<Vec<i64>>> =
-        vec![vec![Vec::new() ; 1+max_len] ; chord_maps.keys().len()];
-
-    for length in 0..max_len+1 {
-        seq_arrays[length] =
-            match names_by_len.get(&length) {
-                Some(names) =>
-                    make_flat_sequence(seq_map, names)
-                    .to_bytes(use_compression, use_mods) ,
-                None => Vec::new(),
-            };
-
-        for (mode_index, mode) in chord_maps.keys().enumerate(){
-            chord_arrays[mode_index][length] =
-                make_chord_array(&names_by_len, length, &chord_maps[mode]);
-        }
-    }
+    let seq_arrays = make_seq_arrays(seq_map, &names_by_len, use_compression, use_mods);
+    let chord_arrays = make_chord_arrays(chord_maps, &names_by_len);
 
     let mut f = Format::new();
 
@@ -59,13 +39,55 @@ pub fn format_lookups (seq_map: &SeqMap, chord_maps: &BTreeMap<String, ChordMap>
              .fill_1d(&chord_mode_array_names)
              .format());
 
-   f.append(&format_length_arrays(seq_arrays,
-                                  &format!("{}_seq_lookup", name)));
+    f.append(&format_length_arrays(seq_arrays,
+                                   &format!("{}_seq_lookup", name)));
     f
 }
 
-fn make_chord_array(names_by_len: &LenMap, length: usize, chords: &ChordMap) -> Vec<i64>{
-    // names: &Vec<String>
+fn max_len(names_by_len: &LenMap) -> usize {
+    *names_by_len.keys().max()
+        .expect("failed to get max length")
+}
+
+fn make_seq_arrays(seq_map: &SeqMap, names_by_len: &LenMap,
+                   use_compression: bool, use_mods: bool)
+                   -> Vec<Vec<String>>
+{
+    let mut seq_arrays = Vec::new();
+    for length in 0..max_len(names_by_len)+1 {
+        let subarray =
+            match names_by_len.get(&length) {
+                Some(names) =>
+                    make_flat_sequence(seq_map, names)
+                    .to_bytes(use_compression, use_mods) ,
+                None => Vec::new(),
+            };
+        seq_arrays.push(subarray);
+    }
+    seq_arrays
+}
+
+fn make_chord_arrays(chord_maps: &BTreeMap<String, ChordMap>,
+                     names_by_len: &LenMap)
+                     -> Vec<Vec<Vec<i64>>>
+{
+    let mut chord_arrays = Vec::new();
+    for mode in chord_maps.keys() {
+        let mut mode_array = Vec::new();
+
+        for length in 0..max_len(names_by_len)+1 {
+            mode_array.push(
+                make_chord_subarray(&names_by_len, length, &chord_maps[mode])
+            );
+        }
+        chord_arrays.push(mode_array);
+    }
+    chord_arrays
+}
+
+fn make_chord_subarray(names_by_len: &LenMap, length: usize, chords: &ChordMap)
+                       -> Vec<i64>
+{
     let mut ints: Vec<i64> = Vec::new();
     if let Some(names) = names_by_len.get(&length) {
         let mut last_index: usize = 0;
@@ -129,26 +151,47 @@ fn make_length_map(seq_map: &SeqMap, chord_maps: &BTreeMap<String, ChordMap>) ->
         let length = seq_map[name].len();
         names_by_len.entry(length).or_insert(Vec::new()).push(name.to_owned());
     }
-    // re-order the names
-    // TODO clone less?
-    let mut new_names_by_len: LenMap = BTreeMap::new();
-    for (length, mut list) in names_by_len.into_iter() {
-        new_names_by_len.insert(length, Vec::new());
+    reorder_length_map(names_by_len, chord_maps)
+}
 
-        while !list.is_empty() {
-            for chords in chord_maps.values() {
-                match list.iter().position(|name| chords.contains_key(name)) {
-                    Some(index) => {
-                        new_names_by_len
-                            .get_mut(&length)
-                            .unwrap()
-                            .push(list[index].clone());
-                        list.swap_remove(index);
+fn reorder_length_map(names_by_len: LenMap, chord_maps: &BTreeMap<String, ChordMap>)
+                      -> LenMap
+{
+    /// Alternately pick one name from each mode, so no 2 successive chords for
+    /// a mode will be too far apart.
+
+    // Find the first name that's used in the given mode.
+    let find_name =
+        |names: &Vec<String>, mode| names.iter()
+        .position(|name| chord_maps[mode].contains_key(name));
+
+    let mut new_map: LenMap = BTreeMap::new();
+    for (length, mut names) in names_by_len.into_iter() {
+        let mut v: Vec<String> = Vec::new();
+        let mut remaining_modes: Vec<_> = chord_maps.keys().collect();
+        while !names.is_empty() {   // For each entry/sequence:
+            if remaining_modes.len() == 1 {
+                // Just dump in all the remaining entries.
+                v.extend(names.clone());
+                // Done with this length!
+                break;
+            }
+            for (mode_index, &mode) in remaining_modes.clone().iter().enumerate() {
+                match find_name(&names, mode) {
+                    Some(position) => {
+                        // Move the entry to the new map
+                        v.push(names[position].clone());
+                        names.swap_remove(position);
                     },
-                    None => (), //TODO remove mode from a list
+                    None => {
+                        // All of this mode's entries have already been moved.
+                        // Skip it from now on.
+                        remaining_modes.remove(mode_index);
+                    },
                 }
             }
         }
+        new_map.insert(length, v);
     }
-    new_names_by_len
+    new_map
 }
