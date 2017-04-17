@@ -36,17 +36,6 @@ impl Options {
     }
 }
 
-fn make_enum(variants: &Vec<String>, name: &str) -> String {
-    // TODO move somewhere?
-    let contents = variants
-        .iter()
-        .enumerate()
-        .fold(String::new(),
-              |acc, (index, name)|
-              format!("{}  {} = {},\n", acc, name.to_uppercase(), index));
-
-    format!("enum {}{{\n{}}};\n", name, contents)
-}
 
 impl OpDef {
     pub fn format(&self, name: &str) -> Format {
@@ -176,7 +165,7 @@ impl Maps {
         f.append(&format_intro(&format!("{}.h", file_name_base)));
         f.append(&self.options.format());
         f.append(&self.format_wordmods());
-        f.append(&self.format_specials());
+        f.append(&self.format_commands());
         f.append(&self.format_plains());
         f.append(&self.format_macros());
         f.append(&self.format_words());
@@ -197,24 +186,20 @@ impl Maps {
         format_lookups(&self.macros, &self.chords, "macro", false, true)
     }
 
-    fn format_specials (&self) -> Format {
+    fn format_commands (&self) -> Format {
+        let command_list: Vec<_> = self.commands.keys()
+            .map(|s| s.to_owned())
+            .collect();
         let mut f = Format {
-            h: self.specials.keys()
-                .fold(String::new(),
-                      |acc, name|
-                      acc + &format!("#define {} {}\n",
-                                     name.to_uppercase(),
-                                     self.specials[name].get_only_value()))
-                + "\n",
+            h: make_enum(&command_list, "command_enum"),
             c: String::new(),
         };
         let chord_map = &self.chords;
-        f.append(&format_lookups(&self.specials, chord_map, "special", false, false));
+        f.append(&format_lookups(&self.commands, chord_map, "command", false, false));
         f
     }
 
     fn format_wordmods(&self) -> Format {
-        // TODO 2d
         let mut f = Format::new();
         for name in &self.wordmods {
             let all_chord_bytes: Vec<Vec<i64>> =
@@ -230,6 +215,7 @@ impl Maps {
                      .fill_2d(&all_chord_bytes)
                      .format())
         }
+        f.append_newline();
         f
     }
 }
@@ -310,4 +296,17 @@ fn make_debug_macros() -> String {
     s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
     s += "#endif\n\n ";
     s
+}
+
+
+fn make_enum(variants: &Vec<String>, name: &str) -> String {
+    // TODO move somewhere?
+    let contents = variants
+        .iter()
+        .enumerate()
+        .fold(String::new(),
+              |acc, (index, name)|
+              format!("{}  {} = {},\n", acc, name.to_uppercase(), index));
+
+    format!("enum {}{{\n{}}};\n\n", name, contents)
 }

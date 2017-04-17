@@ -6,6 +6,24 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
 
     vec![
+        ("normal_mode",
+         OpDefBuilder::new(OpType::Mode {use_words: true})
+         .required(OpReq::Required)
+         .internal(true)
+         .finalize()),
+
+        // ("onehand_mode",
+        //  OpDefBuilder::new(OpType::Mode {use_words: false})
+        //  .required(OpReq::Required)
+        //  .internal(true)
+        //  .finalize()),
+
+        ("krita_mode",
+         OpDefBuilder::new(OpType::Mode {use_words: false})
+         .required(OpReq::Required)
+         .internal(true)
+         .finalize()),
+
         ("row_pins",
          OpDefBuilder::new(OpType::Array1D) .finalize()),
 
@@ -109,18 +127,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
 
         ("debug_messages",
          OpDefBuilder::new(OpType::DefineInt)
-         .finalize()),
-
-        ("normal_mode",
-         OpDefBuilder::new(OpType::Mode {use_words: true})
-         .required(OpReq::Required)
-         .internal(true)
-         .finalize()),
-
-        ("onehand_mode",
-         OpDefBuilder::new(OpType::Mode {use_words: false})
-         .required(OpReq::Required)
-         .internal(true)
          .finalize()),
 
         ("num_bytes_in_chord",

@@ -14,7 +14,7 @@
 // #define PLAIN3_FEEDBACK_CODE 'C'
 #define WORD_FEEDBACK_CODE 'W'
 #define MACRO_FEEDBACK_CODE 'M'
-#define SPECIAL_FEEDBACK_CODE 'S'
+#define COMMAND_FEEDBACK_CODE 'S'
 #define UNKNOWN_FEEDBACK_CODE 'U'
 
 
@@ -34,7 +34,7 @@ enum led_routine_enum{
   MACRO_FEEDBACK_ROUTINE,
   WORD_FEEDBACK_ROUTINE,
   UNKNOWN_FEEDBACK_ROUTINE,
-  SPECIAL_FEEDBACK_ROUTINE,
+  COMMAND_FEEDBACK_ROUTINE,
   WARNING_ROUTINE,
   TEST_ROUTINE,
   ALL_COLORS_ROUTINE,
@@ -68,7 +68,7 @@ public:
   void triggerPlain();
   void triggerMacro();
   void triggerWord();
-  void triggerSpecial();
+  void triggerCommand();
   void triggerUnknown();
   void updateLED();
   void startRoutine(led_routine_enum routine);

@@ -1,7 +1,7 @@
 use std::slice::Iter;
 
 
-// TODO KeyPress is also used to store special codes, which is kinda a hack. Rename?
+// TODO KeyPress is also used to store command codes, which is kinda a hack. Rename?
 
 #[derive(Debug)]
 #[derive(PartialEq)]
@@ -17,6 +17,13 @@ impl KeyPress{
         KeyPress{
             key: format!("{}", key),
             modifier: format!("{}", modifier),
+        }
+    }
+    pub fn new_fake(code: &str) -> KeyPress {
+        // We also use KeyPresses to store command codes
+        KeyPress{
+            key: code.to_owned(),
+            modifier: "0".to_owned(),
         }
     }
     pub fn new_blank() -> KeyPress {

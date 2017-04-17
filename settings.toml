@@ -2,7 +2,8 @@
 
 output_directory           = "pipit-firmware/"
 normal_mode                = "keymaps/dvorak24.kmap"
-onehand_mode               = "keymaps/dvorak24_onehand.kmap"
+krita_mode                 = "keymaps/krita.kmap"
+# onehand_mode               = "keymaps/dvorak24_onehand.kmap"
 chord_delay                = 30
 held_delay                 = 200
 debounce_delay             = 15
@@ -893,18 +894,19 @@ wordmods = [
     "wordmod_nospace",
 ]
 
-special_functions = [
-"special_delete_word",
-"special_pause",
-"special_stickymod",
-"special_leftright",
-"special_led_battery",
-"special_led_colors",
-"special_led_rainbow",
-"special_cycle_anagram",
-# "special_flymacro_toggle",
-# "special_flymacro_play",
-"special_command_mode",
+commands = [
+"command_delete_word",
+"command_pause",
+"command_stickymod",
+"command_leftright",
+"command_led_battery",
+"command_led_colors",
+"command_led_rainbow",
+"command_cycle_anagram",
+# "command_flymacro_toggle",
+# "command_flymacro_play",
+"command_krita_mode",
+"command_normal_mode",
 ]
 
 words = [

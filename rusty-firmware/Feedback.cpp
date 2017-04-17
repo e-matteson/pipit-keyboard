@@ -23,9 +23,9 @@ void Feedback::triggerWord(){
   triggerAudioFeedback(WORD_FEEDBACK_CODE);
   // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
 }
-void Feedback::triggerSpecial(){
-  triggerAudioFeedback(SPECIAL_FEEDBACK_CODE);
-  // triggerLEDFeedback(SPECIAL_FEEDBACK_ROUTINE);
+void Feedback::triggerCommand(){
+  triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
+  // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
 }
 void Feedback::triggerUnknown(){
   triggerAudioFeedback(UNKNOWN_FEEDBACK_CODE);
@@ -200,7 +200,7 @@ void Feedback::updateLED(){
     }
     break;
 
-  case SPECIAL_FEEDBACK_ROUTINE:
+  case COMMAND_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
       led_timer.start( 500);

@@ -15,7 +15,7 @@ public:
   Lookup();
   uint8_t plain(const Chord* chord, uint8_t* data);
   uint8_t macro(const Chord* chord, uint8_t* data);
-  uint8_t special(const Chord* chord, uint8_t* data);
+  uint8_t command(const Chord* chord, uint8_t* data);
   uint8_t word(const Chord* chord, uint8_t* data);
 
 private:

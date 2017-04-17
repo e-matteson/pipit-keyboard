@@ -13,9 +13,9 @@ uint8_t Lookup::macro(const Chord* chord, uint8_t* data){
   return lookupChord(chord, data, macro_chord_lookup[mode], macro_seq_lookup, 1, 0);
 }
 
-uint8_t Lookup::special(const Chord* chord, uint8_t* data){
+uint8_t Lookup::command(const Chord* chord, uint8_t* data){
   mode_enum mode = chord->getMode();
-  return lookupChord(chord, data, special_chord_lookup[mode], special_seq_lookup, 0, 0);
+  return lookupChord(chord, data, command_chord_lookup[mode], command_seq_lookup, 0, 0);
 }
 
 uint8_t Lookup::word(const Chord* chord, uint8_t* data){

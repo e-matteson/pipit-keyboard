@@ -52,7 +52,7 @@ private:
   int16_t deleteLastWord();
   void handleUnknownDeletion();
 
-  void doSpecialFunction(uint8_t code);
+  void doCommand(uint8_t code);
 
 
   Switches* switches;

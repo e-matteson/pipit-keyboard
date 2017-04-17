@@ -227,56 +227,24 @@ key_delete    key_printscreen  key_caps_lock
   ... ...  	    ... ...          ... ...
 
 
-###### special functions ######
-special_command_mode   special_delete_word  special_pause   special_stickymod
-....   ....            ....   ....          ****   ****     ....   ....
-..*.   .*..            ....   ***.          ....   ....     ..*.   .*.*
-  .     .                .     .              .     .         .     .
-  ... .*.                ... ...              ... ...         ... .*.
+###### commands ######
+command_delete_word  command_pause   command_stickymod  command_led_rainbow
+....   ....          ****   ****     ....   ....        ****   ..*.
+....   ***.          ....   ....     ..*.   .*.*        ....   ....
+  .     .              .     .         .     .            .     .
+  ... ...              ... ...         ... .*.            ... .*.
 
-special_leftright   special_cycle_anagram  special_led_battery special_led_colors
+command_leftright   command_cycle_anagram  command_led_battery command_led_colors
 ....   ****         ....   ....            ****   ....         ****   .*..
 ....   ....         .***   ....            ....   *...         ....   ....
   .     .             .     .                .     .             .     .
   ... ...             ... ...                ... .*.             ... .*.
 
-special_led_rainbow
-****   ..*.
+command_krita_mode
+****   ....
 ....   ....
   .     .
   ... .*.
-
-
-
-# special_flymacro_toggle  special_flymacro_play
-# ....   ....              ....   ....
-# .***   ....              ***.   ....
-#   .     .                  .     .
-#   ... .*.                  ... .*.
-
-command_text_mode    command_pause
-....   ....          ...*   ....
-...*   ....          ....   ....
-  .     .              .     .
-  ... .*.              ... ...
-
-command_flymacro_toggle  command_flymacro_play
-..*.   ....              ..*.   ..*.
-....   .*..              ....   ....
-  .     .                  .     .
-  ... ...                  ... ...
-
-command_0    command_2    command_4    command_6    command_8
-....   **..  ....   .**.  ....   ..**  ....   *.*.  ....   .*.*
-....   ....  ....   ....  ....   ....  ....   ....  ....   ....
-  .     .      .     .      .     .      .     .      .     .
-  ... ...      ... ...      ... ...      ... ...      ... ...
-
-command_5    command_3    command_1    command_9    command_7
-**..   ....  .**.   ....  ..**   ....  *.*.   ....  .*.*   ....
-....   ....  ....   ....  ....   ....  ....   ....  ....   ....
-  .     .      .     .      .     .      .     .      .     .
-  ... ...      ... ...      ... ...      ... ...      ... ...
 
 
 ## text macros ##

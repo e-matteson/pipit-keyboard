@@ -10,7 +10,7 @@ pub struct Maps {
     pub plains:   BTreeMap<String, Sequence>,
     pub macros:   BTreeMap<String, Sequence>,
     pub words:    BTreeMap<String, Sequence>,
-    pub specials: BTreeMap<String, Sequence>,
+    pub commands: BTreeMap<String, Sequence>,
     pub wordmods: Vec<String>,
     pub options:  Options,
 }
@@ -22,24 +22,23 @@ impl Maps {
             plains: BTreeMap::new(),
             macros: BTreeMap::new(),
             words: BTreeMap::new(),
-            specials: BTreeMap::new(),
+            commands: BTreeMap::new(),
             wordmods: Vec::new(),
             options: Options::new(),
         }
     }
 
-    pub fn add_special(&mut self, entry: &str) {
-        let num = self.specials.len() + 1;
-        if self.specials.contains_key(entry){
-            panic!(format!("specials map already contains key: {}", entry));
+    pub fn add_command(&mut self, entry: &str) {
+        if self.commands.contains_key(entry){
+            panic!(format!("commands map already contains key: {}", entry));
         }
-        // Specials are a single byte code, not an actual key sequence.
+        // commands are a single byte code, not an actual key sequence.
         // But we'll store it as a KeyPress for convenience.
-        let mut fake_seq_with_special_code = Sequence::new();
-        fake_seq_with_special_code.push(KeyPress::new(num, 0));
+        let mut fake_seq_with_command_code = Sequence::new();
+        fake_seq_with_command_code.push(KeyPress::new_fake(&entry.to_uppercase()));
 
-        self.specials.insert(entry.to_owned(),
-                             fake_seq_with_special_code);
+        self.commands.insert(entry.to_owned(),
+                             fake_seq_with_command_code);
     }
 
     pub fn add_word(&mut self, entry: &Vec<String>, mode: &str) {
@@ -50,8 +49,11 @@ impl Maps {
 
     pub fn get_modifier_position(&self, name: &str, mode: &str) -> usize {
         // TODO take arg for layout
-        self.get_chords(mode)[name].get_single_switch_index()
-            .expect("modifier must be mapped to exactly one switch")
+        self.get_chords(mode).get(name)
+            .expect(&format!("modifier not found in mode: {}, {}", name, mode))
+            .get_single_switch_index()
+            .expect(&format!("modifier must be mapped to exactly one switch: {}, {}",
+                             name, mode))
     }
 
     pub fn get_chords(&self, mode: &str) -> &BTreeMap<String, Chord>{
@@ -110,7 +112,7 @@ impl Maps {
         for mode in self.chords.keys(){
             for name in self.chords[mode].keys() {
                 if self.wordmods.contains(name) { continue }
-                if self.specials.contains_key(name) { continue }
+                if self.commands.contains_key(name) { continue }
                 if self.plains.contains_key(name) { continue }
                 if self.macros.contains_key(name) { continue }
                 if self.words.contains_key(name) { continue }

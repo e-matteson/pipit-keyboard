@@ -87,10 +87,10 @@ void Pipit::processChordHelper(Chord* new_chord){
   // uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
 
 
-  // If chord is a known special_function, do it and return.
-  if((data_length=lookup->special(new_chord, data))){
-    doSpecialFunction(data[0]);
-    feedback->triggerSpecial();
+  // If chord is a known command, do it and return.
+  if((data_length=lookup->command(new_chord, data))){
+    doCommand(data[0]);
+    feedback->triggerCommand();
     return;
   }
 
@@ -191,12 +191,12 @@ int16_t  Pipit::deleteLastWord(){
 
 
 
-/************** Special functions *************/
+/************** Commands *************/
 
-void Pipit::doSpecialFunction(uint8_t code){
-  // First check if we should un-pause, because that's the only special function
+void Pipit::doCommand(uint8_t code){
+  // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
-  if(code == SPECIAL_PAUSE){
+  if(code == COMMAND_PAUSE){
     // toggle temporary disabling of typing
     is_paused ^= 1;
     return;
@@ -207,43 +207,51 @@ void Pipit::doSpecialFunction(uint8_t code){
     return;
   }
   switch(code){
-    /**** add cases for new special_functions here ****/
-  case SPECIAL_DELETE_WORD:
+    /**** add cases for new commands here ****/
+  case COMMAND_DELETE_WORD:
     deleteLastWord();
     break;
 
-  case SPECIAL_STICKYMOD:
+  case COMMAND_STICKYMOD:
     // Prepare to send the stickymod key together with the next pressed key,
     //  or abort an unused stickymod.
     sender->setOrAbortStickymod();
     break;
 
-  case SPECIAL_LEFTRIGHT:
+  case COMMAND_LEFTRIGHT:
     // abuse the stickymod feature to send left and right arrows at the same time
     sender->setOrAbortStickymod(KEY_RIGHT & 0xff);
     sender->sendKey(KEY_LEFT & 0xff, 0);
     sender->sendKey(0,0);
     break;
 
-  case SPECIAL_LED_BATTERY:
+  case COMMAND_LED_BATTERY:
     feedback->startRoutine(BATTERY_ROUTINE);
     break;
 
-  case SPECIAL_LED_COLORS:
+  case COMMAND_LED_COLORS:
     feedback->startRoutine(ALL_COLORS_ROUTINE);
     break;
 
-  case SPECIAL_LED_RAINBOW:
+  case COMMAND_LED_RAINBOW:
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
-  case SPECIAL_CYCLE_ANAGRAM:
+  case COMMAND_CYCLE_ANAGRAM:
     cycleAnagram();
     break;
 
+  case COMMAND_NORMAL_MODE:
+    // TODO should anything else change when changing mode?
+    mode = mode_enum::NORMAL_MODE;
+    break;
+
+  case COMMAND_KRITA_MODE:
+    mode = mode_enum::KRITA_MODE;
+    break;
 
   default:
-    DEBUG1("WARNING: Unknown special function: ");
+    DEBUG1("WARNING: Unknown command: ");
     DEBUG1_LN(code);
     break;
   }

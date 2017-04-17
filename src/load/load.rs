@@ -21,7 +21,7 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     load_plains(&toml, maps);
     load_word_list(&other, maps);
     load_wordmod_list(&other, maps);
-    load_special_list(&other, maps);
+    load_command_list(&other, maps);
 
     options
 }
@@ -49,11 +49,12 @@ fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     maps.wordmods = wordmod_list;
 }
 
-fn load_special_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let mut special_list = toml_to_vec1_string(&other["special_functions"]);
-    special_list.sort();
-    for entry in special_list.iter() {
-        maps.add_special(entry)
+fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    let mut command_list = toml_to_vec1_string(&other["commands"]);
+    command_list.sort();
+    // maps.commands = command_list;
+    for entry in command_list.iter() {
+        maps.add_command(entry)
     }
 }
 
