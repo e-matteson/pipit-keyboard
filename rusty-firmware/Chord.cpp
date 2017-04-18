@@ -18,6 +18,11 @@ void Chord::setChordArray(const uint8_t* new_chord_bytes){
   }
 }
 
+void setAnagram(const uint8_t anagram_number){
+  // TODO check if num is in valid range?
+  self.anagram_number = anagram_number;
+}
+
 void Chord::setWordmod(const uint8_t* new_wordmod_storage){
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     wordmod_storage[i] = new_wordmod_storage[i];
@@ -25,7 +30,9 @@ void Chord::setWordmod(const uint8_t* new_wordmod_storage){
 }
 
 bool Chord::isEmpty() const{
-  return !countBitsSet(chord_bytes);
+  // TODO should you be allowed to use a blank chord with a non-zero anagram?
+  // return !countBitsSet(chord_bytes);
+  return !countBitsSet(chord_bytes) && anagram_number == 0;
 }
 
 uint8_t Chord::getModByte() const{
@@ -39,6 +46,7 @@ mode_enum Chord::getMode() const{
 void Chord::copy(const Chord* chord){
   mode = chord->mode;
   mod_byte = chord->mod_byte;
+  anagram_number = chord->anagram_number;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = chord->chord_bytes[i];
     wordmod_storage[i] = chord->wordmod_storage[i];
@@ -96,6 +104,10 @@ void Chord::blankModifier(uint32_t modifier){
     mod_byte |= modifier&0xff;
     chord_bytes[position/8] &= ~(1<<position%8);
   }
+}
+
+void Chord::blankWordmodAnagrams(){
+  self.anagram_number =
 }
 
 void Chord::blankWordmodCapital(){
@@ -168,6 +180,25 @@ uint8_t Chord::countBitsSet(const uint8_t* _chord_bytes) const{
   return count;
 }
 
+uint8_t Chord::calculateAnagramNumber(){
+
+  // get only the anagram-relevant bits
+  uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
+  memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
+  andMask(wordmod_all_anagram_chord_bytes, anagram_bytes);
+
+  // check which anagram wordmod matches
+  for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
+    if (isEqual(wordmod_anagram_chord_bytes[mode][i],
+                anagram_bytes)){
+      return i;
+    }
+  }
+  // This will happen normally sometimes, like when you press a chord that
+  // contains one of the bits included in a multi-bit anagram modifier.
+  DEBUG1_LN("WARNING: Maybe unknown anagram modifier");
+}
+
 void Chord::cycleAnagramModifier(){
 
   // Needed in case one anagram modifier chord is a subset of the other
@@ -194,17 +225,31 @@ void Chord::cycleAnagramModifier(){
   }
 }
 
-bool Chord::isEqual(const uint8_t* other_chord_bytes) const{
-  bool is_equal = 1;
-  for(uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++){
-    is_equal &= (chord_bytes[k] == other_chord_bytes[k]);
+bool Chord::matches(const uint8_t* other_chord_bytes, uint8_t other_anagram_num) const{
+  if !isEqual(chord_bytes, other_chord_bytes){
+      return 0;
   }
-  return is_equal;
+  if (self.anagram_number != other_anagram_num) {
+    return 0;
+  }
+  return 1;
+}
+
+bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
+  for (uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++) {
+    if (chord1[k] != chord2[k]) {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 void Chord::printChord(){
   //for debugging
   // Serial.print("chord: ");
+  Serial.print("anagram ");
+  Serial.print(self.anagram_number);
+  Serial.print(", ");
   printBytes(chord_bytes);
 }
 

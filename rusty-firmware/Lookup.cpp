@@ -34,7 +34,7 @@ uint8_t Lookup::lookupChord(const Chord* chord, uint8_t* data,
     uint32_t seq_num = 0;
     while(!isZero(entry)){ // for each entry/chunk
       seq_num += readOffset(entry);
-      if(chord->isEqual(getChordAddress(entry))){
+      if(chord->isEqual(getChordAddress(entry), readAnagramNum(entry))){
         // Found match!
         if(use_compression){
           return readCompressed(data, seq_lookup, length_index, seq_num);
@@ -54,7 +54,14 @@ uint8_t Lookup::lookupChord(const Chord* chord, uint8_t* data,
 /**** Chord lookup utilities ****/
 
 uint8_t Lookup::readOffset(const uint8_t* start_of_entry) {
-  return start_of_entry[0];
+  // Offset is in the 4 least significant bits of the first byte
+  return start_of_entry[0] & 0x0F;
+}
+
+uint8_t Lookup::readAnagramNum(const uint8_t* start_of_entry) {
+  // Anagram number is in the 4 most significant bits of the first byte
+  // return start_of_entry[0] >> 4; // equivalent?
+  return (start_of_entry[0] & 0xF0) >> 4;
 }
 
 uint8_t* Lookup::getChordAddress(const uint8_t* start_of_entry) {

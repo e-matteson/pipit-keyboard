@@ -23,7 +23,7 @@ public:
   void restoreWordmods();
   void cycleAnagramModifier();
 
-  bool isEqual(const uint8_t* other_chord_bytes) const;
+  bool isEqual(const uint8_t* other_chord_bytes, uint8_t other_anagram_num) const;
   // bool isEqual(const uint8_t* other_chord_bytes);
   bool isEmpty() const;
   uint8_t getModByte() const;
@@ -36,6 +36,7 @@ public:
 
 private:
   void setWordmod(const uint8_t* new_wordmod_storage);
+  void setAnagram(const uint8_t anagram_number);
   void blankModifier(uint32_t modifier);
   void blankWordmod(const uint8_t* wordmod_chord_bytes);
 
@@ -48,6 +49,8 @@ private:
   void printBytes(const uint8_t* bytes) const;
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
+  uint8_t anagram_number = 0;
+
   uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
   uint8_t mod_byte = 0;
   mode_enum mode;

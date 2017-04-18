@@ -39,8 +39,8 @@ impl ChordEntry {
     }
 
     pub fn make_prefix_byte(&self) -> Vec<i64> {
-        const MAX_ANAGRAM_NUMBER: u64 = 15; // 4 bits for anagram
-        const MAX_OFFSET: u64 = 15;         // 4 bits for offset
+        const MAX_ANAGRAM_NUMBER: u64 = 15; // 4 bits for anagram (most significant)
+        const MAX_OFFSET: u64 = 15;         // 4 bits for offset (least significant)
 
         if self.chord.anagram > MAX_ANAGRAM_NUMBER {
             panic!("anagram number is too large");

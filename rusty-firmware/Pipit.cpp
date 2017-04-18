@@ -49,9 +49,9 @@ void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   if(switches->readyToPress()){
     // Lookup the chord and send the corresponding key sequence.
-    Chord new_chord(mode);
-    switches->makeChordBytes(&new_chord);
-    processChord(&new_chord);
+    Chord chord(mode);
+    switches->makeChordBytes(&chord);
+    processChord(&chord);
   }
   else if(switches->readyToRelease()){
     // Make sure all keys are released
@@ -61,32 +61,32 @@ void Pipit::sendIfReady(){
   }
 }
 
-void Pipit::processChord(Chord* new_chord){
+void Pipit::processChord(Chord* chord){
   wordhistory->startWord();
-  processChordHelper(new_chord);
+  processChordHelper(chord);
   wordhistory->endWord();
 }
 
-void Pipit::processChordHelper(Chord* new_chord){
+void Pipit::processChordHelper(Chord* chord){
   // Lookup the chord in the lookup arrays and perform the corresponding action.
   // last_wordmod should be null, unless called from cycleAnagram().
 
   // If the chord is all zeros (meaning no switch is pressed),
   //  just send zero and be done with it.
-  if(!sender->sendIfEmpty(new_chord)){
+  if(!sender->sendIfEmpty(chord)){
     return;
   };
-  // uint8_t mod_byte_storage = 0;
+
+  // TODO why did I initialize data to 1's? just debugging?
   uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
   for(int i = 0; i < MAX_LOOKUP_DATA_LENGTH; i++){
     data[i] = 1;
   }
   uint8_t data_length = 0;
-  // uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
 
 
   // If chord is a known command, do it and return.
-  if((data_length=lookup->command(new_chord, data))){
+  if((data_length=lookup->command(chord, data))){
     doCommand(data[0]);
     feedback->triggerCommand();
     return;
@@ -97,41 +97,42 @@ void Pipit::processChordHelper(Chord* new_chord){
   }
 
   // If chord is a known macro, send it and return.
-  if((data_length=lookup->macro(new_chord, data))){
-    sender->sendMacro(data, data_length, new_chord);
+  if((data_length=lookup->macro(chord, data))){
+    sender->sendMacro(data, data_length, chord);
     resetLastWord();
     feedback->triggerMacro();
     return;
   }
 
-  new_chord->blankWordmodCapital();
-  new_chord->blankWordmodNospace();
+  chord->blankWordmodAnagrams();
+  chord->blankWordmodCapital();
+  chord->blankWordmodNospace();
 
   // If chord is a known word, send it and return.
-  if((data_length=lookup->word(new_chord, data))){
-    sender->sendWord(data, data_length, new_chord);
-    storeLastWord(new_chord);
+  if((data_length=lookup->word(chord, data))){
+    sender->sendWord(data, data_length, chord);
+    storeLastWord(chord);
     feedback->triggerWord();
     return;
   }
-  new_chord->restoreWordmods();
+  chord->restoreWordmods();
 
   // Blank out all modifier switches.
-  new_chord->blankCtrl();
-  new_chord->blankGUI();
-  new_chord->blankShift();
-  new_chord->blankAlt();
+  chord->blankCtrl();
+  chord->blankGUI();
+  chord->blankShift();
+  chord->blankAlt();
 
   // If chord is a known plain key, send it and return.
-  if((data_length=lookup->plain(new_chord, data))){
-    sender->sendPlain(data, data_length, new_chord);
+  if((data_length=lookup->plain(chord, data))){
+    sender->sendPlain(data, data_length, chord);
     resetLastWord();
     feedback->triggerPlain();
     return;
   }
 
   // Else, chord not found anywhere!
-  if(!sender->sendIfEmpty(new_chord)){
+  if(!sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
     feedback->triggerPlain();
     resetLastWord();
