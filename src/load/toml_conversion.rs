@@ -28,11 +28,12 @@ pub fn toml_to_vec1_string(toml_array: &Value) -> Vec<String>{
     toml_to_vec(&toml_array, toml_to_string)
 }
 
-pub fn toml_to_vec2_string(toml_array: &Value) -> Vec<Vec<String>>{
-    toml_to_vec(&toml_array,
-                |d1| toml_to_vec(d1, toml_to_string)
-    )
-}
+
+// pub fn toml_to_vec2_string(toml_array: &Value) -> Vec<Vec<String>>{
+//     toml_to_vec(&toml_array,
+//                 |d1| toml_to_vec(d1, toml_to_string)
+//     )
+// }
 
 pub fn toml_to_vec1_int(toml_array: &Value) -> Vec<i64>{
     toml_to_vec(&toml_array, toml_to_int)
@@ -50,6 +51,10 @@ pub fn toml_to_vec2_int(toml_array: &Value) -> Vec<Vec<i64>>{
 //                                  |d2| toml_to_vec(d2, toml_to_int))
 //     )
 // }
+
+pub fn toml_to_vec1_map(toml_array: &Value) -> Vec<BTreeMap<String, Value>>{
+    toml_to_vec(&toml_array, toml_to_map)
+}
 
 
 fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {

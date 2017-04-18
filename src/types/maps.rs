@@ -41,8 +41,10 @@ impl Maps {
                              fake_seq_with_command_code);
     }
 
-    pub fn add_word(&mut self, entry: &Vec<String>, mode: &str) {
-        let word = Word::new(entry, &self.chords[mode]);
+    pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
+                    anagram: u64, mode: &str)
+    {
+        let word = Word::new(seq_spelling, chord_spelling, anagram, &self.chords[mode]);
         self.words.insert(word.name.clone(),  word.seq);
         self.get_chords_mut(mode).insert(word.name.clone(), word.chord);
     }

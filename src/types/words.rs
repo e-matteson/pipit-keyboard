@@ -10,17 +10,31 @@ pub struct Word {
 
 
 impl Word {
-    pub fn new(entry: &Vec<String>, chords: &BTreeMap<String, Chord>) -> Word {
-        let name = make_word_name(entry);
-        let seq_spelling = entry.first().unwrap();
-        let chord_spelling = entry.last().unwrap();
+    pub fn new(seq_spelling: &str, chord_spelling: &str, anagram: u64,
+               chords: &BTreeMap<String, Chord>) -> Word
+    {
+        let name = make_word_name(seq_spelling, chord_spelling, anagram);
 
         Word{
             name: name,
             seq: make_word_sequence(seq_spelling),
-            chord: make_word_chord(chord_spelling, chords),
+            chord: make_word_chord(chord_spelling, anagram, chords),
         }
     }
+}
+
+fn make_word_name(seq_spelling: &str, chord_spelling: &str,
+                  anagram: u64) -> String {
+    // Ensure that each word has a unique name.
+
+    let mut name = format!("word_{}", seq_spelling);
+    if chord_spelling != seq_spelling {
+        name += &format!("_{}", chord_spelling);
+    }
+    if anagram != 0 {
+        name += &format!("_{}", anagram);
+    }
+    name
 }
 
 
@@ -33,9 +47,6 @@ fn make_word_sequence(word: &str) -> Sequence {
     seq
 }
 
-fn make_word_name(entry: &Vec<String>) -> String{
-    format!("word_{}", entry.join("_"))
-}
 
 fn get_key_name_for_seq(character: char) -> String {
     if character.is_alphanumeric() {
@@ -58,10 +69,11 @@ fn get_mod_name_for_seq(character: char) -> String {
     }
 }
 
-fn make_word_chord(word: &str, chords: &BTreeMap<String, Chord>) -> Chord {
+fn make_word_chord(word: &str, anagram: u64, chords: &BTreeMap<String, Chord>) -> Chord {
     let ignored = vec!['<', '.']; //TODO make this static?
 
     let mut chord = Chord::new();
+    chord.set_anagram(anagram);
     for letter in word.chars(){
         if ignored.contains(&letter){
             continue;
@@ -85,8 +97,6 @@ fn get_key_name_for_chord(character: char) -> String {
     match character{
         ' '  => "key_space".to_owned(),
         '\'' => "key_quote".to_owned(),
-        '~'  => "wordmod_anagram1".to_owned(),
-        '+'  => "wordmod_anagram2".to_owned(),
         _ => panic!("illegal character in chord: {}", character),
     }
 }

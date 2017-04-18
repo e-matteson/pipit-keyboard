@@ -44,14 +44,14 @@ fn load_plains(toml: &Value, maps: &mut Maps) {
 }
 
 fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let mut wordmod_list = toml_to_vec1_string(&other["wordmods"]);
-    wordmod_list.sort();
+    let wordmod_list = toml_to_vec1_string(&other["wordmods"]);
+    // wordmod_list.sort();
     maps.wordmods = wordmod_list;
 }
 
 fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let mut command_list = toml_to_vec1_string(&other["commands"]);
-    command_list.sort();
+    let command_list = toml_to_vec1_string(&other["commands"]);
+    // command_list.sort();
     // maps.commands = command_list;
     for entry in command_list.iter() {
         maps.add_command(entry)
@@ -60,14 +60,51 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     // TODO use separate word lists for different modes?
-    let mut word_list = toml_to_vec2_string(&other["words"]);
-    word_list.sort();
+
+    // let map = toml_to_map(parsed_toml);
+    // let mut new_map: BTreeMap<String, Sequence> = BTreeMap::new();
+    // for (key,val) in map.iter(){
+    //     new_map.insert(key.clone(), toml_to_sequence(&val));
+    // }
+
+
+    let word_list = toml_to_vec1_map(&other["words"]);
+    // println!("{:?}", word_list);
     for mode in &maps.options.get_modes_with_words(){
         for entry in word_list.iter() {
-            maps.add_word(entry, mode)
+            let (seq_spelling, chord_spelling, anagram) = parse_word_entry(entry);
+            maps.add_word(&seq_spelling, &chord_spelling, anagram, mode)
         }
     }
 }
+
+fn parse_word_entry(entry: &BTreeMap<String, Value>) -> (String, String, u64){
+    let seq_spelling = match entry.get("word") {
+        Some(x) => match x {
+            &Value::String(ref s) => s.clone(),
+            _ => panic!("expected string")
+        },
+        _ => panic!("No word provided in word_list entry")
+    };
+
+    let chord_spelling = match entry.get("chord") {
+        Some(x) => match x {
+            &Value::String(ref s) => s.clone(),
+            _ => panic!("expected string"),
+        },
+        _ => seq_spelling.clone(),
+    };
+
+    let anagram: u64 = match entry.get("anagram") {
+        Some(a) => match a {
+            &Value::Integer(i) => i as u64,
+            _ => panic!("expected integer"),
+        },
+        _ => 0,
+    };
+    (seq_spelling, chord_spelling, anagram)
+}
+
 
 fn load_sequence_map(parsed_toml: &Value) -> BTreeMap<String, Sequence>{
     let map = toml_to_map(parsed_toml);

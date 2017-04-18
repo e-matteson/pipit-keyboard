@@ -1,6 +1,6 @@
 use self::format::Format;
 use self::c_array::CArray;
-use self::lookups::format_lookups;
+use self::lookups::Lookup;
 use self::compress::*;
 
 mod impl_format;

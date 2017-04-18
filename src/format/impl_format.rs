@@ -2,7 +2,7 @@ use time::*;
 use std::path::Path;
 
 use types::{Sequence, KeyPress, Chord, Maps, Options, OpDef, OpType};
-use format::{Format, CArray, format_lookups, compress, make_compression_macros};
+use format::{Format, CArray, Lookup, compress, make_compression_macros};
 
 
 
@@ -10,7 +10,7 @@ impl KeyPress {
     pub fn as_bytes(&self, use_mods: bool) -> Vec<String> {
         let mut v: Vec<String> = Vec::new();
         v.push(format!("{}&0xff", self.key));
-        if use_mods{
+        if use_mods {
             v.push(format!("({})&0xff", self.modifier));
         }
         v
@@ -175,15 +175,21 @@ impl Maps {
 
 
     fn format_words (&self) -> Format {
-        format_lookups(&self.words, &self.chords, "word", true, false)
+        // format_lookups(&self.words, &self.chords, "word", true, false)
+        let l = Lookup::new(&self.words, &self.chords, &self.options, "word", true, false);
+        l.format()
     }
 
     fn format_plains (&self) -> Format {
-        format_lookups(&self.plains, &self.chords, "plain", false, true)
+        // format_lookups(&self.plains, &self.chords, "plain", false, true)
+        let l = Lookup::new(&self.plains, &self.chords, &self.options, "plain", false, true);
+        l.format()
     }
 
     fn format_macros (&self) -> Format {
-        format_lookups(&self.macros, &self.chords, "macro", false, true)
+        // format_lookups(&self.macros, &self.chords, "macro", false, true)
+        let l = Lookup::new(&self.macros, &self.chords, &self.options, "macro", false, true);
+        l.format()
     }
 
     fn format_commands (&self) -> Format {
@@ -195,7 +201,9 @@ impl Maps {
             c: String::new(),
         };
         let chord_map = &self.chords;
-        f.append(&format_lookups(&self.commands, chord_map, "command", false, false));
+        // f.append(&format_lookups(&self.commands, chord_map, "command", false, false));
+        let l = Lookup::new(&self.commands, chord_map, &self.options, "command", false, false);;
+        f.append(&l.format());
         f
     }
 

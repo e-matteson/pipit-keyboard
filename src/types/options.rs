@@ -6,7 +6,7 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
 
     vec![
-        ("normal_mode",
+        ("default_mode",
          OpDefBuilder::new(OpType::Mode {use_words: true})
          .required(OpReq::Required)
          .internal(true)

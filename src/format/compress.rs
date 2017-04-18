@@ -9,9 +9,9 @@ const NUM_KEYS: usize = 4;
 
 pub fn make_compression_macros() -> String {
     let mut s = String::new();
-    s += "#define B0(X,Y) (( X &0x3F)<<2) | (( Y &0x30)>>4)\n";
-    s += "#define B1(X,Y) (( X &0x0F)<<4) | (( Y &0x3C)>>2)\n";
-    s += "#define B2(X,Y) (( X &0x03)<<6) | ( Y &0x3F)\n\n";
+    s += "#define BY0(X,Y) (( X &0x3F)<<2) | (( Y &0x30)>>4)\n";
+    s += "#define BY1(X,Y) (( X &0x0F)<<4) | (( Y &0x3C)>>2)\n";
+    s += "#define BY2(X,Y) (( X &0x03)<<6) | ( Y &0x3F)\n\n";
     s
 }
 
@@ -56,9 +56,9 @@ fn format_mask(i: usize, s1: &str, s2: &str) -> String {
         // 0 => format!("(({}&0x3F)<<2)|(({}&0x30)>>4)", s1, s2),
         // 1 => format!("({}&0x0F)<<4|(({}&0x3C)>>2)", s1, s2),
         // 2 => format!("({}&0x03)<<6|({}&0x3F)", s1, s2),
-        0 => format!("B0({},{})", s1, s2),
-        1 => format!("B1({},{})", s1, s2),
-        2 => format!("B2({},{})", s1, s2),
+        0 => format!("BY0({},{})", s1, s2),
+        1 => format!("BY1({},{})", s1, s2),
+        2 => format!("BY2({},{})", s1, s2),
         _ => panic!("format_mask: bad index"),
     }
 }

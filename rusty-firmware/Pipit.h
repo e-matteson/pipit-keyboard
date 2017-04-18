@@ -66,7 +66,7 @@ private:
   /***** word anagram cycling *****/
   bool was_last_send_a_word = 0;
 
-  mode_enum mode = mode_enum::NORMAL_MODE;
+  mode_enum mode = mode_enum::DEFAULT_MODE;
 
   bool is_paused = 0;
 

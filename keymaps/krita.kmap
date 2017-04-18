@@ -1,4 +1,4 @@
-command_normal_mode   command_led_rainbow
+command_default_mode   command_led_rainbow
 ****   ....           ****   ..*.
 ....   ....           ....   ....
   .     .               .     .

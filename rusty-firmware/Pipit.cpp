@@ -1,8 +1,6 @@
 #include "Pipit.h"
 
 Pipit::Pipit(){
-  mode = mode_enum::NORMAL_MODE;
-
   comms = new Comms();
   lookup = new Lookup();
   saved_chord = new Chord(mode);
@@ -241,9 +239,9 @@ void Pipit::doCommand(uint8_t code){
     cycleAnagram();
     break;
 
-  case COMMAND_NORMAL_MODE:
+  case COMMAND_DEFAULT_MODE:
     // TODO should anything else change when changing mode?
-    mode = mode_enum::NORMAL_MODE;
+    mode = mode_enum::DEFAULT_MODE;
     break;
 
   case COMMAND_KRITA_MODE:

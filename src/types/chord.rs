@@ -20,9 +20,11 @@ fn get_chord_length() -> usize {
 
 
 #[derive(Debug)]
-pub struct Chord (
-    Vec<bool>,
- );
+#[derive(Clone)]
+pub struct Chord {
+    bits: Vec<bool>,
+    pub anagram: u64,
+}
 
 impl Chord {
     pub fn set_num_bytes(x: i64) {
@@ -30,7 +32,14 @@ impl Chord {
     }
 
     pub fn new() -> Chord {
-        Chord( vec![false; get_chord_length()] )
+        Chord {
+            bits: vec![false; get_chord_length()],
+            anagram: 0,
+        }
+    }
+
+    pub fn set_anagram(&mut self, x: u64) {
+        self.anagram = x;
     }
 
     pub fn from_vec(v: Vec<bool>) -> Chord {
@@ -40,27 +49,30 @@ impl Chord {
         if v.len() != get_chord_length() {
             panic!("wrong chord length");
         }
-        Chord(v)
+        Chord {
+            bits: v,
+            anagram: 0,
+        }
     }
 
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.bits.len()
     }
 
     pub fn get_single_switch_index(&self) -> Option<usize>{
         // If chord contains exactly 1 pressed switch, return its index.
         // Otherwise, return None.
-        if self.0.iter().filter(|x| **x).count() > 1 {
+        if self.bits.iter().filter(|x| **x).count() > 1 {
             return None;
         }
-        self.0.iter().position(|x| *x)
+        self.bits.iter().position(|x| *x)
     }
 
 
     pub fn intersect(&mut self, other: &Chord){
         assert_eq!(self.len(), other.len());
         for i in 0..self.len(){
-            self.0[i] |= other.0[i];
+            self.bits[i] |= other.bits[i];
         }
     }
 
@@ -68,19 +80,19 @@ impl Chord {
         assert_eq!(self.len(), order.len());
         let mut new = Chord::new();
         for i in 0..self.len(){
-            new.0[order[i]] = self.0[i];
+            new.bits[order[i]] = self.bits[i];
         }
-        self.0 = new.0;
+        self.bits = new.bits;
     }
 
     pub fn to_string(&self) -> String {
-        let tmp: Vec<_> = self.0.iter().map(|&b| if b {"1"} else {"0"}).collect();
+        let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else {"0"}).collect();
         tmp.join("")
     }
 
     pub fn to_ints(&self) -> Vec<i64> {
         let mut v: Vec<i64> = Vec::new();
-        for chunk in &self.0.iter().cloned().chunks(8) {
+        for chunk in &self.bits.iter().cloned().chunks(8) {
             let byte: Vec<_> = chunk.collect();
             v.push(byte_to_int(&byte));
         }
