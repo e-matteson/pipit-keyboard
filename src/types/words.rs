@@ -11,14 +11,15 @@ pub struct Word {
 
 impl Word {
     pub fn new(seq_spelling: &str, chord_spelling: &str, anagram: u64,
-               chords: &BTreeMap<String, Chord>) -> Word
+               anagram_list: &Vec<String>, chords: &BTreeMap<String, Chord>)
+               -> Word
     {
         let name = make_word_name(seq_spelling, chord_spelling, anagram);
 
         Word{
             name: name,
             seq: make_word_sequence(seq_spelling),
-            chord: make_word_chord(chord_spelling, anagram, chords),
+            chord: make_word_chord(chord_spelling, anagram, anagram_list, chords),
         }
     }
 }
@@ -69,17 +70,24 @@ fn get_mod_name_for_seq(character: char) -> String {
     }
 }
 
-fn make_word_chord(word: &str, anagram: u64, chords: &BTreeMap<String, Chord>) -> Chord {
+fn make_word_chord(word: &str, anagram: u64, anagram_list: &Vec<String>,
+                   chords: &BTreeMap<String, Chord>) -> Chord
+{
     let ignored = vec!['<', '.']; //TODO make this static?
 
     let mut chord = Chord::new();
-    chord.set_anagram(anagram);
     for letter in word.chars(){
         if ignored.contains(&letter){
             continue;
         }
         chord.intersect(get_letter_chord(letter, chords));
     }
+    let anagram_name = anagram_list.iter()
+        .nth(anagram as usize)
+        .expect("invalid anagram number");
+    let anagram_chord = chords.get(anagram_name)
+        .expect("invalid anagram name");
+    chord.intersect(anagram_chord);
     chord
 }
 

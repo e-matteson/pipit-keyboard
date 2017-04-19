@@ -39,6 +39,11 @@ int16_t WordHistory::peek(){
   return word_length_stack[0];
 }
 
+bool WordHistory::peekIsUnknown(){
+  // Return the value at the front of word_length_stack.
+  return word_length_stack[0] == -1;
+}
+
 void WordHistory::clear(){
   // Set all history entries to zero.
   for(uint8_t j = 0; j != WORD_LENGTH_HISTORY_SIZE; j++){

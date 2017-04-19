@@ -23,7 +23,6 @@ fn get_chord_length() -> usize {
 #[derive(Clone)]
 pub struct Chord {
     bits: Vec<bool>,
-    pub anagram: u64,
 }
 
 impl Chord {
@@ -34,12 +33,7 @@ impl Chord {
     pub fn new() -> Chord {
         Chord {
             bits: vec![false; get_chord_length()],
-            anagram: 0,
         }
-    }
-
-    pub fn set_anagram(&mut self, x: u64) {
-        self.anagram = x;
     }
 
     pub fn from_vec(v: Vec<bool>) -> Chord {
@@ -51,7 +45,6 @@ impl Chord {
         }
         Chord {
             bits: v,
-            anagram: 0,
         }
     }
 

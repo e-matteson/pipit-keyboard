@@ -12,6 +12,7 @@ pub struct Maps {
     pub words:    BTreeMap<String, Sequence>,
     pub commands: BTreeMap<String, Sequence>,
     pub wordmods: Vec<String>,
+    pub anagrams: Vec<String>,
     pub options:  Options,
 }
 
@@ -23,6 +24,7 @@ impl Maps {
             macros: BTreeMap::new(),
             words: BTreeMap::new(),
             commands: BTreeMap::new(),
+            anagrams: Vec::new(),
             wordmods: Vec::new(),
             options: Options::new(),
         }
@@ -44,7 +46,8 @@ impl Maps {
     pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
                     anagram: u64, mode: &str)
     {
-        let word = Word::new(seq_spelling, chord_spelling, anagram, &self.chords[mode]);
+        let word = Word::new(seq_spelling, chord_spelling, anagram,
+                             &self.anagrams, &self.chords[mode]);
         self.words.insert(word.name.clone(),  word.seq);
         self.get_chords_mut(mode).insert(word.name.clone(), word.chord);
     }
@@ -121,6 +124,25 @@ impl Maps {
                 println!("WARNING: no key sequence: '{}'", name);
             }
         }
+    }
+
+    pub fn make_anagram_bit_masks(&self) -> Vec<Chord> {
+        println!("bit masks!");
+        let mut v: Vec<Chord> = Vec::new();
+
+        for mode in &self.options.get_modes() {
+            let mut all_bits = Chord::new();
+
+            for name in &self.anagrams {
+                if let Some(chord) = self.chords[mode].get(name) {
+                    all_bits.intersect(chord);
+                }
+                // Else this mode doesn't have this anagram mod, fine.
+                // TODO should we explicitly handle non-word modes differently?
+            }
+            v.push(all_bits);
+        }
+        v
     }
 
 }

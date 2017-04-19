@@ -57,6 +57,11 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .required(OpReq::Auto)
          .finalize()),
 
+        ("num_anagrams",
+         OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
+         .finalize()),
+
         ("chord_delay",
          OpDefBuilder::new(OpType::DefineInt)
          .finalize()),
@@ -430,15 +435,23 @@ impl Options {
 
     pub fn update_after_loading_chords(&mut self, maps: &Maps){
         /// Automatically generate the options that depend on chords
+        self.set_modifierkey_positions(maps);
 
+        self.set_val("num_anagrams",
+                     OpVal::Int(maps.anagrams.len() as i64));
+    }
+
+
+    fn set_modifierkey_positions(&mut self, maps: &Maps) {
         let mods = vec![("modifierkey_shift", "shift_position"),
                         ("modifierkey_ctrl",  "ctrl_position"),
                         ("modifierkey_alt",   "alt_position"),
                         ("modifierkey_gui",   "gui_position")];
 
+        // TODO swapped names?
         for (op_name, mod_name) in mods {
             let mut positions: Vec<i64> = Vec::new();
-            for mode in &maps.options.get_modes() {
+            for mode in &self.get_modes() {
                 positions.push(maps.get_modifier_position(op_name, mode) as i64);
             }
             self.set_val(mod_name, OpVal::Vec(positions))

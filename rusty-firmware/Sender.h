@@ -11,7 +11,7 @@
 
 class Sender{
 public:
-  Sender(WordHistory* wordlength, Comms* comms);
+  Sender(Comms* comms);
 
   uint8_t sendIfEmpty(Chord* chord);
   void sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord);
@@ -19,8 +19,12 @@ public:
   void sendWord(const uint8_t* data, uint8_t data_length, Chord* chord);
   void sendKey(uint8_t key_code, uint8_t mod_byte);
 
+  void deleteLastWord();
+  void handleUnknown();
+
   void setOrAbortStickymod();
   void setOrAbortStickymod(uint8_t key_code);
+
 
 private:
   bool isSameAsLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte);
@@ -30,7 +34,7 @@ private:
 
   Comms* comms;
   Feedback* feedback;
-  WordHistory* wordhistory;
+  WordHistory* word_history;
 
   uint8_t stickymod = 0; //For programs that use a key like Insert as a fake modifier
 

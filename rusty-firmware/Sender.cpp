@@ -1,7 +1,7 @@
 #include "Sender.h"
 
-Sender::Sender(WordHistory* wordhistory, Comms* comms){
-  this->wordhistory = wordhistory;
+Sender::Sender(Comms* comms){
+  this->word_history = new WordHistory();
   this->comms = comms;
 }
 
@@ -20,22 +20,27 @@ uint8_t Sender::sendIfEmpty(Chord* chord){
 }
 
 void Sender::sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord){
+  word_history->startWord();
   for(uint8_t i = 0; i<data_length-1; i+=2){
     //  get the key, followed by the modifier.
     sendKey(data[i], chord->getModByte() | data[i+1]);
   }
+  word_history->endWord();
 }
 
 void Sender::sendMacro(const uint8_t* data, uint8_t data_length, Chord* chord){
+  word_history->startWord();
   for(uint8_t i = 0; i<data_length-1; i+=2){
     //  get the key, followed by the modifier.
     sendKey(data[i], chord->getModByte() | data[i+1]);
     delay(comms->proportionalDelay(data_length));
   }
   sendKey(0,0);
+  word_history->endWord();
 }
 
 void Sender::sendWord(const uint8_t* data, uint8_t data_length, Chord* chord){
+  word_history->startWord();
   // This is the first letter, so send shift if CAPITALIZATION_MODIFIER pressed.
   bool capitalMod = chord->hasCapitalWordmod();
   bool nospaceMod = chord->hasNospaceWordmod();
@@ -53,6 +58,7 @@ void Sender::sendWord(const uint8_t* data, uint8_t data_length, Chord* chord){
     sendKey(KEY_SPACE&0xff, 0);
   }
   sendKey(0,0);
+  word_history->endWord();
 }
 
 void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
@@ -77,7 +83,7 @@ void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
   }
 
   // Update word length history, for word deletion.
-  wordhistory->update(key_code, mod_byte);
+  word_history->update(key_code, mod_byte);
 }
 
 bool Sender::isSameAsLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
@@ -116,3 +122,29 @@ void Sender::press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
   this->comms->press(key_code1, key_code2, mod_byte);
 }
 
+
+/************** deletion and history ***************/
+
+void Sender::deleteLastWord(){
+  // Delete the last sent key sequence by sending the right number of backspaces.
+  // TODO what happens to word history when mode changes?
+
+  if(word_history->peekIsUnknown()){
+    // Last chord was unknown. Pop stack entry, don't delete anything.
+    word_history->pop();
+    return;
+  }
+
+  int16_t length = word_history->peek();
+  for(int16_t i = 0; i < length; i++){
+    sendKey(KEY_BACKSPACE&0xff, 0);
+    // For some reason the backspaces get dropped more easily then word letters
+    //  so add a longer delay between sends.
+    delay(6*comms->proportionalDelay(length));
+  }
+}
+
+
+void Sender::handleUnknown() {
+  word_history->handleUnknown();
+}

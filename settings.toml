@@ -887,12 +887,16 @@ macro_f_comma     = [["KEY_F","0"],
 
 [other]
 
-wordmods = [
-    "wordmod_anagram1",
-    "wordmod_anagram2",
+word_modifiers = [
     "wordmod_capital",
-    "wordmod_nospace",
+    "wordmod_nospace"
 ]
+
+anagram_modifiers = [
+    "wordmod_anagram0",
+    "wordmod_anagram1",
+    "wordmod_anagram2"
+ ]
 
 commands = [
     "command_delete_word",

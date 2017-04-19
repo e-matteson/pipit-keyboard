@@ -17,10 +17,11 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     maps.add_modes(&options.get_modes());
 
     load_chords(&options, maps);
+    load_wordmod_list(&other, maps);
+    load_anagram_list(&other, maps);
     load_macros(&toml, maps);
     load_plains(&toml, maps);
     load_word_list(&other, maps);
-    load_wordmod_list(&other, maps);
     load_command_list(&other, maps);
 
     options
@@ -44,9 +45,13 @@ fn load_plains(toml: &Value, maps: &mut Maps) {
 }
 
 fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let wordmod_list = toml_to_vec1_string(&other["wordmods"]);
-    // wordmod_list.sort();
+    let wordmod_list = toml_to_vec1_string(&other["word_modifiers"]);
     maps.wordmods = wordmod_list;
+}
+
+fn load_anagram_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    let anagram_list = toml_to_vec1_string(&other["anagram_modifiers"]);
+    maps.anagrams = anagram_list;
 }
 
 fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {

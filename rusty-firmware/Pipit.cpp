@@ -4,11 +4,10 @@ Pipit::Pipit(){
   comms = new Comms();
   lookup = new Lookup();
   saved_chord = new Chord(mode);
-  wordhistory = new WordHistory();
 
   switches = new Switches();
   feedback = new Feedback();
-  sender = new Sender(wordhistory, comms);
+  sender = new Sender(comms);
 }
 
 void Pipit::setup(){
@@ -62,14 +61,7 @@ void Pipit::sendIfReady(){
 }
 
 void Pipit::processChord(Chord* chord){
-  wordhistory->startWord();
-  processChordHelper(chord);
-  wordhistory->endWord();
-}
-
-void Pipit::processChordHelper(Chord* chord){
   // Lookup the chord in the lookup arrays and perform the corresponding action.
-  // last_wordmod should be null, unless called from cycleAnagram().
 
   // If the chord is all zeros (meaning no switch is pressed),
   //  just send zero and be done with it.
@@ -77,13 +69,9 @@ void Pipit::processChordHelper(Chord* chord){
     return;
   };
 
-  // TODO why did I initialize data to 1's? just debugging?
-  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
-  for(int i = 0; i < MAX_LOOKUP_DATA_LENGTH; i++){
-    data[i] = 1;
-  }
-  uint8_t data_length = 0;
 
+  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
+  uint8_t data_length = 0;
 
   // If chord is a known command, do it and return.
   if((data_length=lookup->command(chord, data))){
@@ -104,7 +92,6 @@ void Pipit::processChordHelper(Chord* chord){
     return;
   }
 
-  chord->blankWordmodAnagrams();
   chord->blankWordmodCapital();
   chord->blankWordmodNospace();
 
@@ -115,6 +102,7 @@ void Pipit::processChordHelper(Chord* chord){
     feedback->triggerWord();
     return;
   }
+
   chord->restoreWordmods();
 
   // Blank out all modifier switches.
@@ -140,7 +128,7 @@ void Pipit::processChordHelper(Chord* chord){
   else{
     // Unknown chord, release all keys
     sender->sendKey(0,0);
-    wordhistory->handleUnknown();
+    sender->handleUnknown();
     feedback->triggerUnknown();
  }
   DEBUG1_LN("chord not found");
@@ -159,38 +147,27 @@ void Pipit::cycleAnagram(){
   if(!was_last_send_a_word){
     return;
   }
-  saved_chord->cycleAnagramModifier();
-  deleteLastWord();
-  processChord(saved_chord);
-}
 
-/************** word deletion ***************/
+  uint8_t original_num = saved_chord->getAnagramNum();
+  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
+  uint8_t data_length = 0;
 
-int16_t  Pipit::deleteLastWord(){
-  // TODO what happens to word history when mode changes?
-  // Delete the last sent key sequence by sending the right number of backspaces.
-  int16_t length = wordhistory->peek();
-
-  // TODO nothing outside WordHistory should need to know what -1 means...
-  //  But, nothing in WordHistory should call sender
-  if(length == -1){
-    // Last chord was unknown. Pop stack entry, don't delete anything.
-    wordhistory->pop();
-  }
-  else{
-    for(int16_t i = 0; i != length; i++){
-      sender->sendKey(KEY_BACKSPACE&0xff, 0);
-      // For some reason the backspaces get dropped more easily then word letters
-      //  so add a longer delay between sends.
-      delay(6*comms->proportionalDelay(length));
+  while (saved_chord->cycleAnagramModifier() != original_num) {
+    if((data_length=lookup->word(saved_chord, data))){
+      sender->deleteLastWord();
+      sender->sendWord(data, data_length, saved_chord);
+      feedback->triggerWord();
+      return;
     }
   }
-  return length;
+
+  DEBUG1_LN("WARNING: no anagram found");
+  sender->handleUnknown();
+  feedback->triggerUnknown();
 }
 
 
 
-/************** Commands *************/
 
 void Pipit::doCommand(uint8_t code){
   // First check if we should un-pause, because that's the only command
@@ -207,8 +184,9 @@ void Pipit::doCommand(uint8_t code){
   }
   switch(code){
     /**** add cases for new commands here ****/
+
   case COMMAND_DELETE_WORD:
-    deleteLastWord();
+    sender->deleteLastWord();
     break;
 
   case COMMAND_STICKYMOD:
@@ -255,5 +233,4 @@ void Pipit::doCommand(uint8_t code){
     break;
   }
 }
-
 

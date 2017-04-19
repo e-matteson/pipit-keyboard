@@ -21,10 +21,9 @@ public:
   void blankWordmodCapital();
   void blankWordmodNospace();
   void restoreWordmods();
-  void cycleAnagramModifier();
-
-  bool isEqual(const uint8_t* other_chord_bytes, uint8_t other_anagram_num) const;
-  // bool isEqual(const uint8_t* other_chord_bytes);
+  uint8_t getAnagramNum();
+  uint8_t cycleAnagramModifier();
+  bool matches(const uint8_t* lookup_chord_bytes) const;
   bool isEmpty() const;
   uint8_t getModByte() const;
   mode_enum getMode() const;
@@ -35,10 +34,14 @@ public:
   void printWordmod();
 
 private:
+  bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
+
   void setWordmod(const uint8_t* new_wordmod_storage);
-  void setAnagram(const uint8_t anagram_number);
   void blankModifier(uint32_t modifier);
   void blankWordmod(const uint8_t* wordmod_chord_bytes);
+
+  void unsetAnagram(uint8_t num);
+  void setAnagram(uint8_t num);
 
   void setMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
   void unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const;

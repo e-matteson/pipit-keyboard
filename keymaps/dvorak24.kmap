@@ -6,7 +6,7 @@
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
 
-##### thumb keys #####
+##### modifier keys #####
 
 modifierkey_shift    key_backspace     modifierkey_ctrl
 ....   ....	       	 ....   ....   	   ....   ....
@@ -20,17 +20,17 @@ modifierkey_gui       key_space        modifierkey_alt
   .     .               .     .          .     .
   ... *..     	        ... .*.  	       ... ..*
 
-key_enter 
-....   ....
-....   ....
-  .     .
-  .*. .*.
+wordmod_capital  wordmod_nospace
+....   ....      ....   ....
+....   ....      ....   ....
+  .     .          .     .
+  *.. ...          ... ..*
 
-wordmod_anagram1  wordmod_anagram2   wordmod_capital  wordmod_nospace
-....   ....       ....   ....        ....   ....      ....   ....
-....   ....       ....   ....        ....   ....      ....   ....
-  .     .           .     .            .     .          .     .
-  .*. ...           .*. .*.            *.. ...          ... ..*
+wordmod_anagram0  wordmod_anagram1  wordmod_anagram2
+....   ....       ....   ....       ....   ....
+....   ....       ....   ....       ....   ....
+  .     .           .     .           .     .
+  ... ...           .*. ...           .*. .*.
 
 ##### single switch plain-keys #####
 
@@ -159,11 +159,17 @@ key_right_paren   key_right_curly    key_right_brace   key_right_angle
   .     .           .     .            .     .           .     .
   ... ...  	        ... ...     	     ... ...  	       ... ...
 
-key_equal     key_plus
+key_equal     key_plus        
 ....   *...		 ....   .*..
 ...*   ....		 ...*   ....
   .     .        .     .
   ... ...  	     ... ...
+
+key_enter
+....   ....
+....   ....
+  .     .
+  .*. .*.
 
 ######## number plain-keys ###########
 

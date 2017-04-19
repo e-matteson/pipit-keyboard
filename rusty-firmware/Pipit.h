@@ -44,12 +44,10 @@ private:
   // void updateConnection();
 
   void processChord(Chord* new_chord);
-  void processChordHelper(Chord* new_chord);
 
   void resetLastWord();
   void storeLastWord(Chord* chord);
   void cycleAnagram();
-  int16_t deleteLastWord();
   void handleUnknownDeletion();
 
   void doCommand(uint8_t code);
@@ -59,7 +57,6 @@ private:
   Lookup* lookup;
   Feedback* feedback;
   Sender* sender;
-  WordHistory* wordhistory;
   Chord* saved_chord;
   Comms* comms;
 

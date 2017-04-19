@@ -164,6 +164,7 @@ impl Maps {
         let mut f = Format::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
         f.append(&self.options.format());
+        f.append(&self.format_anagrams());
         f.append(&self.format_wordmods());
         f.append(&self.format_commands());
         f.append(&self.format_plains());
@@ -226,6 +227,54 @@ impl Maps {
         f.append_newline();
         f
     }
+
+    pub fn format_anagrams(&self) -> Format {
+        let mut f = Format::new();
+        f.append(&self.format_anagram_masks());
+        f.append(&self.format_anagram_lookup());
+        f
+    }
+
+    fn format_anagram_masks(&self) -> Format {
+        // TODO consistent naming
+        let mut f = Format::new();
+        let anagram_masks: Vec<Chord> = self.make_anagram_bit_masks();
+        let anagram_bytes: Vec<_> = anagram_masks.iter()
+            .map(|c| c.to_ints())
+            .collect();
+
+        f.append(&CArray::new("wordmod_anagram_mask_chord_bytes")
+                 .fill_2d(&anagram_bytes)
+                 .format());
+        f.append_newline();
+        f
+    }
+
+    fn format_anagram_lookup(&self) -> Format {
+        // TODO consistent naming
+        let mut f = Format::new();
+        let mut anagram_ints: Vec<Vec<Vec<i64>>> = Vec::new();
+        for mode in self.options.get_modes() {
+            let v: Vec<Vec<i64>> = self.anagrams.iter()
+                .map(|name|
+                     match self.chords[&mode].get(name){
+                         Some(c) => c.clone(),
+                         None => Chord::new(),
+                         // If this mode doesn't have anagram mods, they'll all be zero.
+                         // TODO make sure the firmware doesn't try to use them...
+                     })
+                .map(|chord|
+                     chord.to_ints())
+                .collect();
+            anagram_ints.push(v);
+        }
+        f.append(&CArray::new("wordmod_anagram_chord_bytes")
+                 .fill_3d(&anagram_ints)
+                 .format());
+        f
+    }
+
+
 }
 
 

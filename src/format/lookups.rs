@@ -39,23 +39,13 @@ impl ChordEntry {
     }
 
     pub fn make_prefix_byte(&self) -> Vec<i64> {
-        const MAX_ANAGRAM_NUMBER: u64 = 15; // 4 bits for anagram (most significant)
-        const MAX_OFFSET: u64 = 15;         // 4 bits for offset (least significant)
+        const MAX_OFFSET: usize = 15;         // 4 bits for offset (least significant)
 
-        if self.chord.anagram > MAX_ANAGRAM_NUMBER {
-            panic!("anagram number is too large");
-        }
-        if self.offset as u64 > MAX_OFFSET {
-            panic!("offset is too large");
+        if self.offset > MAX_OFFSET {
+            panic!("offset is too large - too many layouts?");
         }
 
-        // This relies on architecture-specific representation of numbers!
-        let offset = self.offset as u8;
-        let anagram = self.chord.anagram as u8;
-        let combined: u8 = offset + anagram.checked_shl(4)
-            .expect("failed to shift anagram number");
-        // println!("{}, {} -> {}", anagram, offset, combined);
-        vec![combined as i64]
+        vec![self.offset as i64]
     }
 }
 
@@ -157,7 +147,6 @@ impl <'a> Lookup<'a> {
     fn make_chord_arrays(&self, names_by_len: &LenMap)
                          -> BTreeMap<String, Vec<Vec<ChordEntry>>>
     {
-        // TODO anagram info
         let mut chord_arrays = BTreeMap::new();
         for mode in self.chord_maps.keys() {
             let mut mode_array = Vec::new();
