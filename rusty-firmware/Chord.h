@@ -18,8 +18,7 @@ public:
   void blankAlt();
   void blankShift();
   void blankGUI();
-  void blankWordmodCapital();
-  void blankWordmodNospace();
+  void blankWordmods();
   void restoreWordmods();
   uint8_t getAnagramNum();
   uint8_t cycleAnagramModifier();

@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "auto_config.h"
-#include "WordHistory.h"
+#include "History.h"
 #include "Feedback.h"
 #include "Chord.h"
 #include "Comms.h"
@@ -13,7 +13,7 @@ class Sender{
 public:
   Sender(Comms* comms);
 
-  uint8_t sendIfEmpty(Chord* chord);
+  bool sendIfEmpty(Chord* chord);
   void sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord);
   void sendMacro(const uint8_t* data, uint8_t data_length, Chord* chord);
   void sendWord(const uint8_t* data, uint8_t data_length, Chord* chord);
@@ -34,7 +34,7 @@ private:
 
   Comms* comms;
   Feedback* feedback;
-  WordHistory* word_history;
+  History* history;
 
   uint8_t stickymod = 0; //For programs that use a key like Insert as a fake modifier
 

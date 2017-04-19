@@ -243,7 +243,7 @@ impl Maps {
             .map(|c| c.to_ints())
             .collect();
 
-        f.append(&CArray::new("wordmod_anagram_mask_chord_bytes")
+        f.append(&CArray::new("anagram_mask_chord_bytes")
                  .fill_2d(&anagram_bytes)
                  .format());
         f.append_newline();
@@ -268,7 +268,7 @@ impl Maps {
                 .collect();
             anagram_ints.push(v);
         }
-        f.append(&CArray::new("wordmod_anagram_chord_bytes")
+        f.append(&CArray::new("anagram_chord_bytes")
                  .fill_3d(&anagram_ints)
                  .format());
         f

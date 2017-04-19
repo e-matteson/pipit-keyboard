@@ -1,13 +1,12 @@
 #include "Pipit.h"
 
 Pipit::Pipit(){
-  comms = new Comms();
-  lookup = new Lookup();
-  saved_chord = new Chord(mode);
-
   switches = new Switches();
-  feedback = new Feedback();
+  lookup = new Lookup();
+  comms = new Comms();
   sender = new Sender(comms);
+  feedback = new Feedback();
+  saved_chord = new Chord(mode);
 }
 
 void Pipit::setup(){
@@ -20,16 +19,17 @@ void Pipit::setup(){
 void Pipit::loop(){
   switches->update();
   sendIfReady();
-  delayMicroseconds(50);
+  // delayMicroseconds(50);
+  delayMicroseconds(500);
   feedback->updateLED();
 }
 
-
+// TODO re-introduce this when we have a global standby mode
 // void Pipit::updateConnection(){
-//   if(timers->connectionCheck()->isDone()){
+//   if(connection_timer->isDone()){
 //     if(!comms->isConnected()){
 //       num_disconnect_readings++;
-//       timers->connectionCheck()->setResetValue(CONNECTION_CHECK_DELAY_SHORT);
+//       connection_timer->setResetValue(CONNECTION_CHECK_DELAY_SHORT);
 //       if(num_disconnect_readings > disconnect_readings_threshold){
 //         DEBUG1_LN("not connected");
 //         feedback->startRoutine(BLE_NO_CONNECTION_ROUTINE);
@@ -37,10 +37,10 @@ void Pipit::loop(){
 //     }
 //     else{
 //       DEBUG1_LN("connected");
-//       timers->connectionCheck()->setResetValue(CONNECTION_CHECK_DELAY_LONG);
+//       connection_timer->setResetValue(CONNECTION_CHECK_DELAY_LONG);
 //       num_disconnect_readings = 0;
 //     }
-//     timers->connectionCheck()->reset();
+//     connection_timer->reset();
 //   }
 // }
 
@@ -63,12 +63,10 @@ void Pipit::sendIfReady(){
 void Pipit::processChord(Chord* chord){
   // Lookup the chord in the lookup arrays and perform the corresponding action.
 
-  // If the chord is all zeros (meaning no switch is pressed),
-  //  just send zero and be done with it.
-  if(!sender->sendIfEmpty(chord)){
+  // If no switch is pressed, just send zero and be done with it.
+  if(sender->sendIfEmpty(chord)){
     return;
   };
-
 
   uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
   uint8_t data_length = 0;
@@ -92,10 +90,8 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
-  chord->blankWordmodCapital();
-  chord->blankWordmodNospace();
-
   // If chord is a known word, send it and return.
+  chord->blankWordmods();
   if((data_length=lookup->word(chord, data))){
     sender->sendWord(data, data_length, chord);
     storeLastWord(chord);
@@ -119,8 +115,7 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
-  // Else, chord not found anywhere!
-  if(!sender->sendIfEmpty(chord)){
+  if(sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
     feedback->triggerPlain();
     resetLastWord();
@@ -133,40 +128,6 @@ void Pipit::processChord(Chord* chord){
  }
   DEBUG1_LN("chord not found");
 }
-
-void Pipit::resetLastWord(){
-  was_last_send_a_word = 0;
-}
-
-void Pipit::storeLastWord(Chord* chord){
-  was_last_send_a_word = 1;
-  saved_chord->copy(chord);
-}
-
-void Pipit::cycleAnagram(){
-  if(!was_last_send_a_word){
-    return;
-  }
-
-  uint8_t original_num = saved_chord->getAnagramNum();
-  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
-  uint8_t data_length = 0;
-
-  while (saved_chord->cycleAnagramModifier() != original_num) {
-    if((data_length=lookup->word(saved_chord, data))){
-      sender->deleteLastWord();
-      sender->sendWord(data, data_length, saved_chord);
-      feedback->triggerWord();
-      return;
-    }
-  }
-
-  DEBUG1_LN("WARNING: no anagram found");
-  sender->handleUnknown();
-  feedback->triggerUnknown();
-}
-
-
 
 
 void Pipit::doCommand(uint8_t code){
@@ -234,3 +195,36 @@ void Pipit::doCommand(uint8_t code){
   }
 }
 
+
+
+void Pipit::storeLastWord(Chord* chord){
+  was_last_send_a_word = 1;
+  saved_chord->copy(chord);
+}
+
+void Pipit::resetLastWord(){
+  was_last_send_a_word = 0;
+}
+
+void Pipit::cycleAnagram(){
+  if(!was_last_send_a_word){
+    feedback->triggerUnknown();
+    return;
+  }
+
+  uint8_t original_num = saved_chord->getAnagramNum();
+  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
+  uint8_t data_length = 0;
+
+  while (saved_chord->cycleAnagramModifier() != original_num) {
+    if((data_length=lookup->word(saved_chord, data))){
+      sender->deleteLastWord();
+      sender->sendWord(data, data_length, saved_chord);
+      feedback->triggerWord();
+      return;
+    }
+  }
+
+  DEBUG1_LN("WARNING: no anagram found");
+  feedback->triggerUnknown();
+}

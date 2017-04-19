@@ -53,7 +53,6 @@ impl Maps {
     }
 
     pub fn get_modifier_position(&self, name: &str, mode: &str) -> usize {
-        // TODO take arg for layout
         self.get_chords(mode).get(name)
             .expect(&format!("modifier not found in mode: {}, {}", name, mode))
             .get_single_switch_index()
@@ -87,7 +86,6 @@ impl Maps {
     }
 
     pub fn check_for_duplicate_chords(&self) {
-        // TODO handle layouts
         for mode in self.chords.keys(){
             let mut foo: Vec<_> = self.chords[mode].iter()
                 .map(|(k, v)|
@@ -127,7 +125,6 @@ impl Maps {
     }
 
     pub fn make_anagram_bit_masks(&self) -> Vec<Chord> {
-        println!("bit masks!");
         let mut v: Vec<Chord> = Vec::new();
 
         for mode in &self.options.get_modes() {

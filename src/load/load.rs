@@ -56,8 +56,6 @@ fn load_anagram_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     let command_list = toml_to_vec1_string(&other["commands"]);
-    // command_list.sort();
-    // maps.commands = command_list;
     for entry in command_list.iter() {
         maps.add_command(entry)
     }
@@ -65,16 +63,7 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     // TODO use separate word lists for different modes?
-
-    // let map = toml_to_map(parsed_toml);
-    // let mut new_map: BTreeMap<String, Sequence> = BTreeMap::new();
-    // for (key,val) in map.iter(){
-    //     new_map.insert(key.clone(), toml_to_sequence(&val));
-    // }
-
-
-    let word_list = toml_to_vec1_map(&other["words"]);
-    // println!("{:?}", word_list);
+    let word_list = toml_to_vec1_map(&other["dictionary"]);
     for mode in &maps.options.get_modes_with_words(){
         for entry in word_list.iter() {
             let (seq_spelling, chord_spelling, anagram) = parse_word_entry(entry);

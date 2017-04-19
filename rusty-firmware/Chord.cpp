@@ -99,12 +99,8 @@ void Chord::blankModifier(uint32_t modifier){
   }
 }
 
-
-void Chord::blankWordmodCapital(){
+void Chord::blankWordmods(){
   blankWordmod(wordmod_capital_chord_bytes[mode]);
-}
-
-void Chord::blankWordmodNospace(){
   blankWordmod(wordmod_nospace_chord_bytes[mode]);
 }
 
@@ -175,11 +171,11 @@ uint8_t Chord::getAnagramNum(){
   // get only the anagram-relevant bits
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(wordmod_anagram_mask_chord_bytes[mode], anagram_bytes);
+  andMask(anagram_mask_chord_bytes[mode], anagram_bytes);
 
-  // check which anagram wordmod matches
+  // check which anagram modifier matches
   for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
-    if (isEqual(wordmod_anagram_chord_bytes[mode][i],
+    if (isEqual(anagram_chord_bytes[mode][i],
                 anagram_bytes)){
       return i;
     }
@@ -194,14 +190,14 @@ void Chord::unsetAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
   }
-  unsetMask(wordmod_anagram_chord_bytes[mode][num], chord_bytes);
+  unsetMask(anagram_chord_bytes[mode][num], chord_bytes);
 }
 
 void Chord::setAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to set anagram modifiers");
   }
-  setMask(wordmod_anagram_chord_bytes[mode][num], chord_bytes);
+  setMask(anagram_chord_bytes[mode][num], chord_bytes);
 }
 
 uint8_t Chord::cycleAnagramModifier(){
@@ -210,28 +206,6 @@ uint8_t Chord::cycleAnagramModifier(){
   unsetAnagram(current_num);
   setAnagram(next_num);
   return next_num;
-  // // Needed in case one anagram modifier chord is a subset of the other
-  // static const uint8_t length_anagram1 = countBitsSet(wordmod_anagram1_chord_bytes[mode]);
-  // static const uint8_t length_anagram2 = countBitsSet(wordmod_anagram2_chord_bytes[mode]);
-
-  // bool fits_anagram1 = areMaskBitsSet(wordmod_anagram1_chord_bytes[mode], chord_bytes);
-  // bool fits_anagram2 = areMaskBitsSet(wordmod_anagram2_chord_bytes[mode], chord_bytes);
-
-  // if((fits_anagram1 && (!fits_anagram2)) ||
-  //    (fits_anagram1 && fits_anagram2 && (length_anagram1 > length_anagram2))){
-  //   // Anagram1 modifier was pressed! Switch to anagram2.
-  //   unsetMask(wordmod_anagram1_chord_bytes[mode], chord_bytes);
-  //   setMask(wordmod_anagram2_chord_bytes[mode], chord_bytes);
-  // }
-  // else if((fits_anagram2 && (!fits_anagram1)) ||
-  //         (fits_anagram1 && fits_anagram2 && (length_anagram2>length_anagram1))){
-  //   // Anagram2 modifier was pressed! Switch to no modifier.
-  //   unsetMask(wordmod_anagram2_chord_bytes[mode], chord_bytes);
-  // }
-  // else{
-  //   // No modifier was pressed! Switch to anagram1.
-  //   setMask(wordmod_anagram1_chord_bytes[mode], chord_bytes);
-  // }
 }
 
 bool Chord::matches(const uint8_t* lookup_chord_bytes) const{

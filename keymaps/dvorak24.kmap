@@ -26,7 +26,7 @@ wordmod_capital  wordmod_nospace
   .     .          .     .
   *.. ...          ... ..*
 
-wordmod_anagram0  wordmod_anagram1  wordmod_anagram2
+anagram_0         anagram_1         anagram_2
 ....   ....       ....   ....       ....   ....
 ....   ....       ....   ....       ....   ....
   .     .           .     .           .     .

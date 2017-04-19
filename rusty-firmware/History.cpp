@@ -1,64 +1,64 @@
-#include "WordHistory.h"
+#include "History.h"
 
 
-WordHistory::WordHistory(){
+History::History(){
 }
 
-void WordHistory::startWord(){
-  current_word_length = 0;
+void History::startGroup(){
+  current_group_length = 0;
 }
 
-void WordHistory::endWord(){
-  if (current_word_length){
+void History::endGroup(){
+  if (current_group_length){
     // If any printed/deletable keys were sent, or the chord was unknown,
     //   push the number to the history.
-    push(current_word_length);
+    push(current_group_length);
   }
 }
 
-void WordHistory::push(int16_t value){
-  // Push a value to the front of word_length_stack.
-  for(uint8_t i = WORD_LENGTH_HISTORY_SIZE-1; i != 0; i--){
-    word_length_stack[i] = word_length_stack[i-1];
+void History::push(int16_t value){
+  // Push a value to the front of length_stack.
+  for(uint8_t i = HISTORY_SIZE-1; i != 0; i--){
+    length_stack[i] = length_stack[i-1];
   }
-  word_length_stack[0] = value;
+  length_stack[0] = value;
 }
 
-int16_t WordHistory::pop(){
-  // Pop and return the value at the front of word_length_stack.
-  uint8_t front = word_length_stack[0];
-  for(uint8_t i = 0; i != WORD_LENGTH_HISTORY_SIZE-1; i++){
-    word_length_stack[i] = word_length_stack[i+1];
+int16_t History::pop(){
+  // Pop and return the value at the front of length_stack.
+  uint8_t front = length_stack[0];
+  for(uint8_t i = 0; i != HISTORY_SIZE-1; i++){
+    length_stack[i] = length_stack[i+1];
   }
-  word_length_stack[WORD_LENGTH_HISTORY_SIZE-1] = 0;
+  length_stack[HISTORY_SIZE-1] = 0;
   return front;
 }
 
-int16_t WordHistory::peek(){
-  // Return the value at the front of word_length_stack.
-  return word_length_stack[0];
+int16_t History::peek(){
+  // Return the value at the front of length_stack.
+  return length_stack[0];
 }
 
-bool WordHistory::peekIsUnknown(){
-  // Return the value at the front of word_length_stack.
-  return word_length_stack[0] == -1;
+bool History::peekIsUnknown(){
+  // Return the value at the front of length_stack.
+  return length_stack[0] == -1;
 }
 
-void WordHistory::clear(){
+void History::clear(){
   // Set all history entries to zero.
-  for(uint8_t j = 0; j != WORD_LENGTH_HISTORY_SIZE; j++){
-    word_length_stack[j] = 0;
+  for(uint8_t j = 0; j != HISTORY_SIZE; j++){
+    length_stack[j] = 0;
   }
 }
 
-void WordHistory::update(uint8_t key_code, uint8_t mod_byte){
-  // Update the word_length_stack when key_code and mod_byte are sent.
+void History::update(uint8_t key_code, uint8_t mod_byte){
+  // Update the length_stack when key_code and mod_byte are sent.
   if(key_code == (KEY_BACKSPACE&0xff)){
-    if(word_length_stack[0] > 0){
-      // if previous word length is non-zero, decrement it
-      word_length_stack[0]--;
-      if(!word_length_stack[0]){
-        // If previous word length is now zero, pop if off the stack
+    if(length_stack[0] > 0){
+      // if previous length is non-zero, decrement it
+      length_stack[0]--;
+      if(!length_stack[0]){
+        // If previous length is now zero, pop if off the stack
         pop();
       }
     }
@@ -67,18 +67,17 @@ void WordHistory::update(uint8_t key_code, uint8_t mod_byte){
     // If certain keys (movement etc) are sent, reset entire history to zeroes
     //  so that movement keys etc don't misalign the history
     //  and cause you to delete the wrong characters.
-    current_word_length = 0;
+    current_group_length = 0;
     clear();
   }
   else if(key_code){
-    // If any other non-zero key is sent, increment the current word length.
-    current_word_length++;
+    // If any other non-zero key is sent, increment the current length.
+    current_group_length++;
   }
 }
 
-bool WordHistory::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
+bool History::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
   // This is a list of non-printing / movement keys that should reset deletion history.
-  // Don't include backspace, because then deleteLastWord() will reset history.
   static const uint8_t reset_keys[] = {
     KEY_UP&0xff, KEY_DOWN&0xff, KEY_LEFT&0xff, KEY_RIGHT&0xff, KEY_HOME&0xff,
     KEY_END&0xff, KEY_PAGE_UP&0xff, KEY_PAGE_DOWN&0xff, KEY_ESC&0xff,
@@ -108,10 +107,9 @@ bool WordHistory::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
   return false;
 }
 
-/************** word deletion ***************/
 
 
-void WordHistory::handleUnknown(){
+void History::handleUnknown(){
   // -1 means an unknown chord was pressed.
 #ifndef ENABLE_UNKNOWN_DELETION
   return;
@@ -124,7 +122,7 @@ void WordHistory::handleUnknown(){
   }
 #endif
 
-  // Add the unknown to the word deletion history.
-  current_word_length = -1;
+  // Add the unknown to the deletion history.
+  current_group_length = -1;
 }
 

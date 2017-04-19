@@ -67,6 +67,7 @@ private:
 
   bool is_paused = 0;
 
+  Timer* connection_timer;
   bool is_connected = 0;
   const uint8_t disconnect_readings_threshold = 3;
   uint8_t num_disconnect_readings = disconnect_readings_threshold;
