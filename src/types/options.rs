@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 use types::{Chord, SwitchPos, Maps};
 
+const DEFAULT_OUTPUT_DIRECTORY: &str = "pipit-firmware/";
+
 fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
 
@@ -12,17 +14,17 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .internal(true)
          .finalize()),
 
-        // ("onehand_mode",
-        //  OpDefBuilder::new(OpType::Mode {use_words: false})
-        //  .required(OpReq::Required)
-        //  .internal(true)
-        //  .finalize()),
-
-        ("krita_mode",
+        ("left_hand_mode",
          OpDefBuilder::new(OpType::Mode {use_words: false})
          .required(OpReq::Required)
          .internal(true)
          .finalize()),
+
+        // ("krita_mode",
+        //  OpDefBuilder::new(OpType::Mode {use_words: false})
+        //  .required(OpReq::Required)
+        //  .internal(true)
+        //  .finalize()),
 
         ("row_pins",
          OpDefBuilder::new(OpType::Array1D) .finalize()),
@@ -68,6 +70,8 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
 
         ("output_directory",
          OpDefBuilder::new(OpType::DefineString)
+         .required(OpReq::Optional)
+         .default(OpVal::Str(DEFAULT_OUTPUT_DIRECTORY.to_owned()))
          .internal(true)
          .finalize()),
 

@@ -246,11 +246,11 @@ command_leftright   command_cycle_anagram  command_led_battery command_led_color
   .     .             .     .                .     .             .     .
   ... ...             ... ...                ... .*.             ... .*.
 
-command_krita_mode
+command_left_hand_mode
 ****   ....
 ....   ....
   .     .
-  ... .*.
+  ... ...
 
 
 ## text macros ##

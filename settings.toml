@@ -1,11 +1,10 @@
 [options]
 
-output_directory           = "pipit-firmware/"
+# output_directory           = "pipit-firmware/"
 default_mode               = "keymaps/dvorak24.kmap"
-krita_mode                 = "keymaps/krita.kmap"
-# onehand_mode               = "keymaps/dvorak24_onehand.kmap"
-# chord_delay                = 30
-chord_delay                = 100
+left_hand_mode             = "keymaps/dvorak24_left.kmap"
+
+chord_delay                = 30
 held_delay                 = 200
 debounce_delay             = 15
 enable_audio_feedback      = false
@@ -901,12 +900,15 @@ commands = [
     "command_delete_word",
     "command_pause",
     "command_sticky_ctrl",
+    "command_sticky_alt",
+    "command_sticky_shift",
+    "command_sticky_gui",
     "command_leftright",
     "command_led_battery",
     "command_led_colors",
     "command_led_rainbow",
     "command_cycle_anagram",
-    "command_krita_mode",
+    "command_left_hand_mode",
     "command_default_mode",
 ]
 

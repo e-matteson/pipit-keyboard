@@ -152,17 +152,20 @@ void Pipit::doCommand(uint8_t code){
     sender->deleteLastWord();
     break;
 
-  case COMMAND_STICKYMOD:
-    // Prepare to send the stickymod key together with the next pressed key,
-    //  or abort an unused stickymod.
-    sender->setOrAbortStickymod();
+  case COMMAND_STICKY_CTRL:
+    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
-  case COMMAND_LEFTRIGHT:
-    // abuse the stickymod feature to send left and right arrows at the same time
-    sender->setOrAbortStickymod(KEY_RIGHT & 0xff);
-    sender->sendKey(KEY_LEFT & 0xff, 0);
-    sender->sendKey(0,0);
+  case COMMAND_STICKY_SHIFT:
+    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    break;
+
+  case COMMAND_STICKY_ALT:
+    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    break;
+
+  case COMMAND_STICKY_GUI:
+    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
   case COMMAND_LED_BATTERY:
@@ -186,9 +189,13 @@ void Pipit::doCommand(uint8_t code){
     mode = mode_enum::DEFAULT_MODE;
     break;
 
-  case COMMAND_KRITA_MODE:
-    mode = mode_enum::KRITA_MODE;
+  case COMMAND_LEFT_HAND_MODE:
+    mode = mode_enum::LEFT_HAND_MODE;
     break;
+
+  // case COMMAND_KRITA_MODE:
+  //   mode = mode_enum::KRITA_MODE;
+  //   break;
 
   default:
     DEBUG1("WARNING: Unknown command: ");

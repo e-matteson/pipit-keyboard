@@ -66,59 +66,46 @@ void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
   DEBUG1("sending key: ");
   DEBUG1(key_code);
   DEBUG1(", mod: ");
-  DEBUG1_LN(mod_byte);
+  DEBUG1_LN(mod_byte | stickymod);
 
   if(stickymod && key_code){
-    // For programs that use a key like Insert as a fake modifier.
-    // Don't send the stickymod yet if the keycode is zero
-    // The stickymod MUST be sent slightly before the other key
-    this->press(0, stickymod,  mod_byte);
-    delay(1);
-    this->press(key_code, stickymod,  mod_byte);
-    // unset stickymod after 1 use
-    stickymod = 0;
+    this->press(key_code, mod_byte | stickymod);
+    stickymod = 0; // reset stickymod after 1 use
   }
+
   else{
-    this->press(key_code, 0, mod_byte);
+    this->press(key_code, mod_byte);
   }
 
   history->update(key_code, mod_byte);
 }
 
-bool Sender::isSameAsLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
-  return ((last_sent_keycode1 == key_code1)
-          && (last_sent_keycode2 == key_code2)
+bool Sender::isSameAsLastSend(uint8_t key_code, uint8_t mod_byte){
+  return ((last_sent_keycode == key_code)
           && (last_sent_mod_byte == mod_byte));
 }
 
-void Sender::setLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
-  last_sent_keycode1 = key_code1;
-  last_sent_keycode2 = key_code2;
+void Sender::setLastSend(uint8_t key_code, uint8_t mod_byte){
+  last_sent_keycode = key_code;
   last_sent_mod_byte = mod_byte;
 }
 
-void Sender::setOrAbortStickymod(uint8_t key_code){
-  // set stickymod to any key
-  stickymod = stickymod ? 0 : key_code;
+void Sender::setStickymod(uint8_t mod_byte){
+  stickymod = mod_byte;
 }
 
-void Sender::setOrAbortStickymod(){
-  // set stickymod to its default key
-  setOrAbortStickymod(STICKYMOD_KEY & 0xff);
-}
-
-void Sender::press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
+void Sender::press(uint8_t key_code, uint8_t mod_byte){
   // If this is a repeated press, send a release first to separate them.
-  if(isSameAsLastSend(key_code1, key_code2, mod_byte)){
-    if(!(key_code1 || key_code2 || mod_byte)){
+  if(isSameAsLastSend(key_code, mod_byte)){
+    if(!(key_code || mod_byte)){
       return; //repeated release, don't send anything
     }
-    this->press(0, 0, 0); //repeated press, send release first
+    this->press(0, 0); //repeated press, send release first
   }
-  setLastSend(key_code1, key_code2, mod_byte);
+  setLastSend(key_code, mod_byte);
 
   // Actually send the keypress, over USB or bluetooth:
-  this->comms->press(key_code1, key_code2, mod_byte);
+  this->comms->press(key_code, mod_byte);
 }
 
 

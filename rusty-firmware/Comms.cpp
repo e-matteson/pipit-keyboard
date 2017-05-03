@@ -46,11 +46,11 @@ void Comms::setupBluetooth(){
 #endif
 }
 
-void Comms::press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
+void Comms::press(uint8_t key_code, uint8_t mod_byte){
 #if defined(TEENSY_LC)
 
-  Keyboard.set_key1(key_code1);
-  Keyboard.set_key2(key_code2);
+  Keyboard.set_key1(key_code);
+  Keyboard.set_key2(0);
   Keyboard.set_key3(0);
   Keyboard.set_key4(0);
   Keyboard.set_key5(0);
@@ -60,9 +60,9 @@ void Comms::press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte){
 
 #elif defined(FEATHER_M0_BLE)
 
-  static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-%02x-00-00-00-00";
+  static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-00-00-00-00-00";
   char cmd[45] = {0};
-  sprintf(cmd, cmd_template, mod_byte, key_code1, key_code2);
+  sprintf(cmd, cmd_template, mod_byte, key_code);
   bluetooth->println(cmd);
 
 #endif

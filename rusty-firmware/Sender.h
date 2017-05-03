@@ -22,14 +22,13 @@ public:
   void deleteLastWord();
   void handleUnknown();
 
-  void setOrAbortStickymod();
-  void setOrAbortStickymod(uint8_t key_code);
+  void setStickymod(uint8_t mod_byte);
 
 
 private:
-  bool isSameAsLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte);
-  void setLastSend(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte);
-  void press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte);
+  bool isSameAsLastSend(uint8_t key_code, uint8_t mod_byte);
+  void setLastSend(uint8_t key_code, uint8_t mod_byte);
+  void press(uint8_t key_code, uint8_t mod_byte);
 
 
   Comms* comms;
@@ -40,8 +39,7 @@ private:
   // TODO store stickymod as a Chord?
 
   /***** optimized releases *****/
-  uint8_t last_sent_keycode1 = 0;
-  uint8_t last_sent_keycode2 = 0;
+  uint8_t last_sent_keycode = 0;
   uint8_t last_sent_mod_byte = 0;
 
 

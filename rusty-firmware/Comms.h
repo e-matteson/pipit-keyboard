@@ -12,11 +12,11 @@
 // Bluetooth or Wired connection. It also includes some bluetooth status and
 // configuration functions, which are not meaningful for a wired connection.
 
-class Comms{
+class Comms {
 public:
   Comms();
   void setup();
-  void press(uint8_t key_code1, uint8_t key_code2, uint8_t mod_byte);
+  void press(uint8_t key_code, uint8_t mod_byte);
   bool isConnected();
   uint8_t proportionalDelay(uint8_t data_length);
 
