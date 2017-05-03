@@ -71,10 +71,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .internal(true)
          .finalize()),
 
-        ("stickymod_key",
-         OpDefBuilder::new(OpType::DefineString)
-         .finalize()),
-
         ("held_delay",
          OpDefBuilder::new(OpType::DefineInt)
          .finalize()),

@@ -37,7 +37,7 @@ private:
   History* history;
 
   uint8_t stickymod = 0; //For programs that use a key like Insert as a fake modifier
-
+  // TODO store stickymod as a Chord?
 
   /***** optimized releases *****/
   uint8_t last_sent_keycode1 = 0;

@@ -4,13 +4,14 @@ output_directory           = "pipit-firmware/"
 default_mode               = "keymaps/dvorak24.kmap"
 krita_mode                 = "keymaps/krita.kmap"
 # onehand_mode               = "keymaps/dvorak24_onehand.kmap"
-chord_delay                = 30
+# chord_delay                = 30
+chord_delay                = 100
 held_delay                 = 200
 debounce_delay             = 15
-stickymod_key              = "KEY_INSERT"
 enable_audio_feedback      = false
 debug_messages             = 0
-enable_unknown_deletion    = true
+# enable_unknown_deletion    = true
+enable_unknown_deletion    = false
 collapse_unknown_deletions = true
 
 # hardware-specific options:
@@ -899,7 +900,7 @@ anagram_modifiers = [
 commands = [
     "command_delete_word",
     "command_pause",
-    "command_stickymod",
+    "command_sticky_ctrl",
     "command_leftright",
     "command_led_battery",
     "command_led_colors",

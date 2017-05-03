@@ -21,7 +21,6 @@
 #endif
 
 
-#include "WordHistory.h"
 #include "Switches.h"
 #include "Lookup.h"
 #include "Sender.h"

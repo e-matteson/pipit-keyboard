@@ -51,11 +51,11 @@ private:
   void printBytes(const uint8_t* bytes) const;
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
-  uint8_t anagram_number = 0;
-
-  uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
   uint8_t mod_byte = 0;
+  // bool has_capital_wordmod;
+  // bool has_nospace_wordmod;
   mode_enum mode;
+  uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
 };
 
 #endif

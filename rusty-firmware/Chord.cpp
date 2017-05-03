@@ -3,7 +3,6 @@
 Chord::Chord(mode_enum mode) : mode(mode){
 }
 
-
 // void Chord::clear(){
 //   mod_byte = 0;
 //   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
@@ -11,6 +10,7 @@ Chord::Chord(mode_enum mode) : mode(mode){
 //     wordmod_storage[i] = 0;
 //   }
 // }
+
 
 void Chord::setChordArray(const uint8_t* new_chord_bytes){
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
@@ -25,7 +25,7 @@ void Chord::setWordmod(const uint8_t* new_wordmod_storage){
 }
 
 bool Chord::isEmpty() const{
-  // return !countBitsSet(chord_bytes);
+  // Doesn't check the modbyte, just the current chord bytes.
   return countBitsSet(chord_bytes) == 0;
 }
 
@@ -50,6 +50,53 @@ void Chord::copyWordmod(const Chord* chord){
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     wordmod_storage[i] = chord->wordmod_storage[i];
   }
+}
+
+uint8_t Chord::getAnagramNum(){
+
+  // get only the anagram-relevant bits
+  uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
+  memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
+  andMask(anagram_mask_chord_bytes[mode], anagram_bytes);
+
+  // check which anagram modifier matches
+  for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
+    if (isEqual(anagram_chord_bytes[mode][i],
+                anagram_bytes)){
+      return i;
+    }
+  }
+  // This will happen normally sometimes, like when you press a chord that
+  // contains one of the bits included in a multi-bit anagram modifier.
+  DEBUG1_LN("WARNING: Maybe unknown anagram modifier");
+  return 0;
+}
+
+void Chord::unsetAnagram(uint8_t num){
+  if (num > NUM_ANAGRAMS) {
+    DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
+  }
+  unsetMask(anagram_chord_bytes[mode][num], chord_bytes);
+}
+
+void Chord::setAnagram(uint8_t num){
+  if (num > NUM_ANAGRAMS) {
+    DEBUG1_LN("WARNING: Failed to set anagram modifiers");
+  }
+  setMask(anagram_chord_bytes[mode][num], chord_bytes);
+}
+
+uint8_t Chord::cycleAnagramModifier(){
+  uint8_t current_num = getAnagramNum();
+  uint8_t next_num = (current_num + 1) % NUM_ANAGRAMS;
+  unsetAnagram(current_num);
+  setAnagram(next_num);
+  return next_num;
+}
+
+bool Chord::matches(const uint8_t* lookup_chord_bytes) const{
+  // Use this for checking whether a lookup table entry matches this chord.
+  return isEqual(chord_bytes, lookup_chord_bytes);
 }
 
 void Chord::blankCtrl(){
@@ -106,6 +153,8 @@ void Chord::blankWordmods(){
 
 void Chord::blankWordmod(const uint8_t* wordmod_chord_bytes){
   // Store the bit(s) of wordmod that are set in the current chord.
+  // TODO refactor to be more like anagram setting?
+
   uint8_t tmp[NUM_BYTES_IN_CHORD] = {0};
   memcpy(tmp, chord_bytes, NUM_BYTES_IN_CHORD);
   andMask(wordmod_chord_bytes, tmp);
@@ -166,53 +215,6 @@ uint8_t Chord::countBitsSet(const uint8_t* _chord_bytes) const{
   return count;
 }
 
-uint8_t Chord::getAnagramNum(){
-
-  // get only the anagram-relevant bits
-  uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
-  memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(anagram_mask_chord_bytes[mode], anagram_bytes);
-
-  // check which anagram modifier matches
-  for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
-    if (isEqual(anagram_chord_bytes[mode][i],
-                anagram_bytes)){
-      return i;
-    }
-  }
-  // This will happen normally sometimes, like when you press a chord that
-  // contains one of the bits included in a multi-bit anagram modifier.
-  DEBUG1_LN("WARNING: Maybe unknown anagram modifier");
-  return 0;
-}
-
-void Chord::unsetAnagram(uint8_t num){
-  if (num > NUM_ANAGRAMS) {
-    DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
-  }
-  unsetMask(anagram_chord_bytes[mode][num], chord_bytes);
-}
-
-void Chord::setAnagram(uint8_t num){
-  if (num > NUM_ANAGRAMS) {
-    DEBUG1_LN("WARNING: Failed to set anagram modifiers");
-  }
-  setMask(anagram_chord_bytes[mode][num], chord_bytes);
-}
-
-uint8_t Chord::cycleAnagramModifier(){
-  uint8_t current_num = getAnagramNum();
-  uint8_t next_num = (current_num + 1) % NUM_ANAGRAMS;
-  unsetAnagram(current_num);
-  setAnagram(next_num);
-  return next_num;
-}
-
-bool Chord::matches(const uint8_t* lookup_chord_bytes) const{
-  // Use this for checking whether a lookup table entry matches this chord.
-  return isEqual(chord_bytes, lookup_chord_bytes);
-}
-
 bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
   for (uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++) {
     if (chord1[k] != chord2[k]) {
@@ -221,6 +223,9 @@ bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
   }
   return 1;
 }
+
+
+/******* Debugging *******/
 
 void Chord::printChord(){
   //for debugging

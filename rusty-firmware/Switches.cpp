@@ -144,6 +144,7 @@ void Switches::checkForHeldSwitches(){
   //  or 1 switch in a chord was released and re-pressed:
   //  let the held switches be reused in future chords.
 
+  // always re-use modifers here?
   if(held_timer->isDone()){
     held_timer->disable();
     reuseHeldSwitches();
@@ -181,6 +182,7 @@ void Switches::makeChordBytes(Chord* chord){
         if(switch_status[index] == Switches::PRESSED){
           // Let modifiers be immediately re-used in future chords.
           // TODO document this special case
+          // TODO multi-switch mods? what if those switches are also used in macros? trigger this from pipit, after plain-key recognition?
           switch_status[index] = isModifier(index, chord->getMode()) ?
             Switches::HELD : Switches::ALREADY_SENT;
         }

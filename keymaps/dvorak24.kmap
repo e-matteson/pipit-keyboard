@@ -234,11 +234,11 @@ key_delete    key_printscreen  key_caps_lock
 
 
 ###### commands ######
-command_delete_word  command_pause   command_stickymod  command_led_rainbow
-....   ....          ****   ****     ....   ....        ****   ..*.
-....   ***.          ....   ....     ..*.   .*.*        ....   ....
-  .     .              .     .         .     .            .     .
-  ... ...              ... ...         ... .*.            ... .*.
+command_delete_word  command_pause   command_led_rainbow
+....   ....          ****   ****     ****   ..*.
+....   ***.          ....   ....     ....   ....
+  .     .              .     .         .     .
+  ... ...              ... ...         ... .*.
 
 command_leftright   command_cycle_anagram  command_led_battery command_led_colors
 ....   ****         ....   ....            ****   ....         ****   .*..

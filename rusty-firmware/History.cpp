@@ -9,7 +9,7 @@ void History::startGroup(){
 }
 
 void History::endGroup(){
-  if (current_group_length){
+  if (current_group_length != 0){
     // If any printed/deletable keys were sent, or the chord was unknown,
     //   push the number to the history.
     push(current_group_length);

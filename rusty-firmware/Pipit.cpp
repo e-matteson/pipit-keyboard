@@ -94,6 +94,7 @@ void Pipit::processChord(Chord* chord){
   chord->blankWordmods();
   if((data_length=lookup->word(chord, data))){
     sender->sendWord(data, data_length, chord);
+    // switches->reuseWordmods(chord)
     storeLastWord(chord);
     feedback->triggerWord();
     return;
@@ -110,6 +111,7 @@ void Pipit::processChord(Chord* chord){
   // If chord is a known plain key, send it and return.
   if((data_length=lookup->plain(chord, data))){
     sender->sendPlain(data, data_length, chord);
+    // switches->reuseMods(chord)
     resetLastWord();
     feedback->triggerPlain();
     return;
