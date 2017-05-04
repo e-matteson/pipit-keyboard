@@ -115,12 +115,6 @@ void Sender::deleteLastWord(){
   // Delete the last sent key sequence by sending the correct number of backspaces.
   // TODO what happens to word history when mode changes?
 
-  if(history->peekIsUnknown()){
-    // Last chord was unknown. Pop stack entry, don't delete anything.
-    history->pop();
-    return;
-  }
-
   int16_t length = history->peek();
   for(int16_t i = 0; i < length; i++){
     sendKey(KEY_BACKSPACE&0xff, 0);
@@ -131,6 +125,3 @@ void Sender::deleteLastWord(){
 }
 
 
-void Sender::handleUnknown() {
-  history->handleUnknown();
-}

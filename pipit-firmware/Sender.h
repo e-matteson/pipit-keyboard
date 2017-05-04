@@ -20,7 +20,6 @@ public:
   void sendKey(uint8_t key_code, uint8_t mod_byte);
 
   void deleteLastWord();
-  void handleUnknown();
 
   void setStickymod(uint8_t mod_byte);
 

@@ -10,7 +10,7 @@ void History::startGroup(){
 
 void History::endGroup(){
   if (current_group_length != 0){
-    // If any printed/deletable keys were sent, or the chord was unknown,
+    // If any printed/deletable keys were sent
     //   push the number to the history.
     push(current_group_length);
   }
@@ -39,10 +39,6 @@ int16_t History::peek(){
   return length_stack[0];
 }
 
-bool History::peekIsUnknown(){
-  // Return the value at the front of length_stack.
-  return length_stack[0] == -1;
-}
 
 void History::clear(){
   // Set all history entries to zero.
@@ -106,23 +102,3 @@ bool History::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
   }
   return false;
 }
-
-
-
-void History::handleUnknown(){
-  // -1 means an unknown chord was pressed.
-#ifndef ENABLE_UNKNOWN_DELETION
-  return;
-#endif
-
-#ifdef COLLAPSE_UNKNOWN_DELETIONS
-  if(peek() == -1){
-    // There's already an unknown on the front of the stack, don't add any more.
-    return;
-  }
-#endif
-
-  // Add the unknown to the deletion history.
-  current_group_length = -1;
-}
-

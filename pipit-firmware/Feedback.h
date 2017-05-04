@@ -7,18 +7,6 @@
 #include "Battery.h"
 #include "Timer.h"
 
-
-// Codes to send over serial, trigger audio feedback.
-#define PLAIN_FEEDBACK_CODE 'A'
-// #define PLAIN2_FEEDBACK_CODE 'B'
-// #define PLAIN3_FEEDBACK_CODE 'C'
-#define WORD_FEEDBACK_CODE 'W'
-#define MACRO_FEEDBACK_CODE 'M'
-#define COMMAND_FEEDBACK_CODE 'S'
-#define UNKNOWN_FEEDBACK_CODE 'U'
-
-
-
 // Possible routines for the rgb led:
 enum led_routine_enum{
   NO_ROUTINE = 0,
@@ -57,6 +45,7 @@ enum led_color_enum{
   WHITE,
   BLACK,
 };
+
 
 
 class Feedback{

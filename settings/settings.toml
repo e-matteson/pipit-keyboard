@@ -6,12 +6,9 @@ left_hand_mode             = "keymaps/dvorak24_left.kmap"
 chord_delay                = 30
 held_delay                 = 200
 debounce_delay             = 15
-enable_audio_feedback      = false
 debug_messages             = 0
-enable_unknown_deletion    = false
-collapse_unknown_deletions = true
 
-# hardware-specific options:
+##### hardware-specific options:
 
 board_name                 = "FEATHER_M0_BLE"
 has_battery                = true
@@ -23,10 +20,10 @@ row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 
 kmap_format                = [
-[[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
-[[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
-[                [1,18],                     [1,6]                ],
-[         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
+    [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
+    [[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
+    [                [1,18],                     [1,6]                ],
+    [         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
 
 
 [plain_keys]

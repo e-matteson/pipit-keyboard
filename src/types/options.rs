@@ -96,23 +96,11 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .required(OpReq::Optional)
          .finalize()),
 
-        ("collapse_unknown_deletions",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
-         .finalize()),
-
-        ("enable_unknown_deletion",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
-         .finalize()),
-
-        ("enable_audio_feedback",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
-         .finalize()),
+        // ("enable_audio_feedback",
+        //  OpDefBuilder::new(OpType::IfdefKey)
+        //  .default(OpVal::Bool(false))
+        //  .required(OpReq::Optional)
+        //  .finalize()),
 
         ("enable_color_feedback",
          OpDefBuilder::new(OpType::IfdefKey)

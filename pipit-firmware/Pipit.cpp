@@ -125,7 +125,6 @@ void Pipit::processChord(Chord* chord){
   else{
     // Unknown chord, release all keys
     sender->sendKey(0,0);
-    sender->handleUnknown();
     feedback->triggerUnknown();
  }
   DEBUG1_LN("chord not found");

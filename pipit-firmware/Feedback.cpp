@@ -1,5 +1,13 @@
 #include "Feedback.h"
 
+// Codes to send over serial, trigger audio feedback.
+#define PLAIN_FEEDBACK_CODE 'A'
+#define WORD_FEEDBACK_CODE 'W'
+#define MACRO_FEEDBACK_CODE 'M'
+#define COMMAND_FEEDBACK_CODE 'S'
+#define UNKNOWN_FEEDBACK_CODE 'U'
+
+
 Feedback::Feedback(){
   this->battery = new Battery;
 

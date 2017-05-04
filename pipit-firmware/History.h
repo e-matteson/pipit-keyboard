@@ -14,9 +14,7 @@ public:
   History();
   void update(uint8_t key_code, uint8_t mod_byte);
   int16_t peek();
-  bool peekIsUnknown();
   int16_t pop();
-  void handleUnknown();
   void startGroup();
   void endGroup();
 
