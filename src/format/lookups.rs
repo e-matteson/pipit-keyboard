@@ -233,7 +233,7 @@ impl <'a> Lookup<'a> {
 
         // Find the first name that's used in the given mode.
         let find_name =
-            |names: &Vec<String>, mode| names.iter()
+            |names: &Vec<String>, mode: &str| names.iter()
             .position(|name| self.chord_maps[mode].contains_key(name));
 
         let mut new_map: LenMap = BTreeMap::new();
@@ -241,14 +241,14 @@ impl <'a> Lookup<'a> {
             let mut v: Vec<String> = Vec::new();
             let mut remaining_modes: Vec<_> = self.chord_maps.keys().collect();
             while !names.is_empty() {   // For each entry/sequence:
-                if remaining_modes.len() == 1 {
+                if remaining_modes.len() <= 1 {
                     // Just dump in all the remaining entries.
                     v.extend(names.clone());
                     // Done with this length!
                     break;
                 }
-                for (mode_index, &mode) in remaining_modes.clone().iter().enumerate() {
-                    match find_name(&names, mode) {
+                for mode in remaining_modes.clone() {
+                    match find_name(&names, mode.as_ref()) {
                         Some(position) => {
                             // Move the entry to the new map
                             v.push(names[position].clone());
@@ -257,6 +257,8 @@ impl <'a> Lookup<'a> {
                         None => {
                             // All of this mode's entries have already been moved.
                             // Skip it from now on.
+                            let mode_index = remaining_modes.iter()
+                                .position(|&x| x==mode).unwrap();
                             remaining_modes.remove(mode_index);
                         },
                     }

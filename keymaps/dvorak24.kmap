@@ -240,11 +240,11 @@ command_delete_word  command_pause   command_led_rainbow
   .     .              .     .         .     .
   ... ...              ... ...         ... .*.
 
-command_leftright   command_cycle_anagram  command_led_battery command_led_colors
-....   ****         ....   ....            ****   ....         ****   .*..
-....   ....         .***   ....            ....   *...         ....   ....
-  .     .             .     .                .     .             .     .
-  ... ...             ... ...                ... .*.             ... .*.
+command_cycle_anagram  command_led_battery
+....   ....            ****   ....
+.***   ....            ....   *...
+  .     .                .     .
+  ... ...                ... .*.
 
 command_left_hand_mode
 ****   ....
@@ -261,340 +261,30 @@ macro_in_paren   macro_in_curly     macro_in_brace   macro_in_angle
   .     .          .     .            .     .          .     .
   ... ...          ... ...            ... ...          ... ...
 
-macro_out_paren   macro_out_curly   macro_out_brace   macro_out_angle
-....   *...      ....   .*..        ....   ..*.      ....   ...*
-.**.   ....      .**.   ....        .**.   ....      .**.   ....
-  .     .          .     .            .     .          .     .
-  ... .*.          ... .*.            ... .*.          ... .*.
 
-macro_in_quote macro_in_doublequote macro_in_equal
-....   ....      ....   ....        ....   *...
-.*..   ...*      *...   ...*        ...*   ....
-  .     .          .     .            .     .
-  ... .*.          ... .*.            ... .*.
-
-macro_bang_dollar macro_backslash_n
-.*..   ....       ...*   .*..
-...*   ..*.       ....   ..*.
-  .     .           .     .
-  ... ...           ... ...
-
-# macro_out_quote macro_out_doublequote
-# ....   ....      ....   ....
-# .*..   ...*      *...   ...*
-#   .     .          .     .
-#   .*. .*.          .*. .*.
-
-macro_gmail       macro_bmail       macro_ls          macro_todo
-*.*.   ...*       *.*.   *..*       ....   ...*       ....   *...
-*..*   *...       *..*   ....       ....   ...*       .*..   .*..
-  .     .           .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.           ... ...
-
-macro_hash_bang   macro_exit_py     macro_self_dot    macro_docstr_py
-.*.*   ..*.       ...*   ....       .*..   ...*       ...*   ....
-....   ..*.       ..**   .*..       ..*.   ...*       *...   *..*
-  .     .           .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.           ... .*.
-
-macro_printf    macro_print_py
-.*.*   ..*.      ...*   ..*.
-*..*   .**.      ...*   ***.
+macro_in_quote macro_in_doublequote
+....   ....      ....   ....
+.*..   ...*      *...   ...*
   .     .          .     .
   ... .*.          ... .*.
 
-macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
-.*..   .*..       ....   .*.*       .*..   .**.        .*..   *...
-...*   ....       ..*.   ...*       .*..   ....        ..**   ....
-  .     .           .     .           .     .            .     .
-  ... .*.           ... .*.           ... .*.            ... .*.
 
-macro_arg_c       macro_while_c    macro_right_arrow    macro_left_arrow
-....   **..       ...*   **.*      ....   ...*          ....   ...*
-.**.   ....       ..**   *...      *.*.   *...          **..   *...
-  .     .           .     .          .     .              .     .
-  ... .*.           ... .*.          ... ...              ... ...
+macro_email
+*.*.   ...*
+*..*   *...
+  .     .
+  ... .*.
 
-macro_cout        macro_endl        macro_cerr          macro_this_arrow
-..*.   .*..       ....   *..*       ....   .**.         ....   ....
-.*..   .*..       ..*.   ..*.       ..*.   ....         ...*   **.*
-  .     .           .     .           .     .             .     .
-  ... .*.           ... .*.           ... .*.             ... .*.
-
-macro_arduino_print   macro_arduino_println
-...*   ....           ...*   ...*
-....   ...*           ....   ...*
-  .     .               .     .
-  ... .*.               ... .*.
-
-macro_tex_item
-*...   ....
-..**   .*..
+macro_if_c
+.*..   .*..
+...*   ....
   .     .
   ... .*.
 
 
-## vim/spacemacs macros ##
-
-macro_save             macro_quit
+macro_vim_save         macro_vim_quit
 ....   ....            ....   ....
 ....   *...            ****   *...
   .     .                .     .
   ... .*.                ... .*.
 
-macro_helm_mini        macro_helm_imenu      macro_find_file    macro_mx
-..*.   ....   	       ...*   ....           ....   .*..        ....   *...
-..*.   ....   	       ...*   ....           ....   .*..        ....   *...
-  .     .                .     .               .     .            .     .
-  ... ...     	         ... ...               ... ...            ... ...
-
-macro_find_other_file  macro_proj_find_file   macro_recentf      macro_kill_buffer
-.*..   ....            ....   .*..            ..*.   ....        ..*.   *...
-.*..   ....            ....   .*..            ..*.   ....        ....   ....
-  .     .                .     .                .     .            .     .
-  ... .*.                ... .*.                ... .*.            ... .*.
-
-macro_del_win          macro_del_other_wins   macro_other_win
-..*.   ....            ..*.   ....            ....   ....
-....   **..            ....   .*..            ...*   *...
-  .     .                .     .                .     .
-  ... .*.                ... .*.                ... .*.
-
-macro_next_buffer      macro_prev_buffer
-....   ....            ....   ....
-...*   .**.            ...*   ..**
-  .     .                .     .
-  ... .*.                ... .*.
-
-macro_other_buffer1    macro_other_buffer2    macro_other_buffer3 macro_other_buffer4
-....   ....            ....   ....             ....   ....         ....   ....
-...*   .*..            ...*   **..             ...*   ***.         ...*   ****
-  .     .                .     .                 .     .             .     .
-  ... .*.                ... .*.                 ... .*.             ... .*.
-
-macro_kill_ring        macro_comment      macro_comment_copy     macro_nohlsearch
-...*   ....            ....   .*.*        ...*   .*..            ..**   **..
-....   ....            ....   ....        ....   *...            ....   ....
-  .     .                .     .            .     .                .     .
-  ... .*.                ... .*.            ... .*.                ... .*.
-
-macro_compile          macro_run          macro_error_prev       macro_error_next
-.***   ....            ***.   ....        ...*   ....            ....   ....
-....   ....            ....   ....        ..*.   ....            ..*.   ..*.
-  .     .                .     .            .     .                .     .
-  ... ...                ... ...            ... .*.                ... .*.
-
-macro_eval            macro_eval_region
-....   ....           ....   ....
-.**.   ....           .**.   *...
-  .     .               .     .
-  ... .*.               ... .*.
-
-# macro_eval_scad     macro_eval_count      macro_eval_nth
-# ....   ....         ....   ....           ....   ....
-# .**.   ...*         .**.   .*..           .**.   ..*.
-#   .     .             .     .               .     .
-#   ... .*.             ... .*.               ... .*.
-
-# macro_lisp_slurpf    macro_lisp_slurpb    macro_lisp_barff    macro_lisp_barfb
-# .*..   ...*         .*..   ...*          *...   ...*         *...   ...*
-# ....   ....         ....   ....          ....   ....         ....   ....
-#   .     .             .     .              .     .             .     .
-#   ... .*.             *.. .*.              ... .*.             *.. .*.
-
-# macro_lisp_wrap1    macro_lisp_splice    macro_lisp_splicef    macro_lisp_spliceb
-# ...*   ...*          ...*   ...*          ..*.   ...*         ..*.   ...*
-# ....   ....          ....   ....          ....   ....         ....   ....
-#   .     .              .     .              .     .             .     .
-#   ... .*.              *.. .*.              ... .*.             *.. .*.
-
-# macro_lisp_split    macro_lisp_join       macro_lisp_eos      macro_lisp_bos
-# ....   ...*         ....   ...*           ....   ...*         ....   ...*
-# .*.*   ....         ..**   ....           ...*   ....         ..*.   ....
-#   .     .             .     .               .     .             .     .
-#   ... .*.             ... .*.               ... .*.             ... .*.
-
-# macro_lisp_wrap2    macro_lisp_wrap3
-# ....   .*.*         ....   ..**
-# ..*.   ....         ..*.   ....
-#   .     .             .     .
-#   ... .*.             ... .*.
-
-# macro_lisp_wrap4   macro_lisp_next    macro_lisp_prev
-# ....   *..*        ....   ...*         ....   ...*
-# ..*.   ....        ..*.   ....         ...*   ....
-#   .     .            .     .             .     .
-#   ... .*.            ... .*.             ... .*.
-
-macro_dotspacemacs     macro_reload_emacs
-.*..   *...            .*..   ..*.
-..*.   ....            ..*.   ....
-  .     .                .     .
-  ... .*.                *.. .*.
-
-macro_describe_key     macro_describe_var  macro_describe_fun
-.*..   **..            .*..   *.*.         .*..   *...
-....   *...            ....   *...         ....   *...
-  .     .                .     .             .     .
-  ... .*.                ... .*.             ... .*.
-
-macro_magit_status     macro_undo          macro_comment_op
-..*.   ....            ..*.   ....         ....   .*..
-....   *..*            ....   ....         ....   ....
-  .     .                .     .             .     .
-  ... .*.                ... .*.             ... .*.
-
-# macro_kill_compile
-# .*..   .*..
-# ....   ....
-#   .     .
-#   ... .*.
-
-macro_calendar         macro_agenda       macro_org_capture
-....   .*..            ....   ....        ....   .*..
-**..   ....            **..   .*..        .*..   ....
-  .     .                .     .            .     .
-  ... .*.                ... .*.            ... .*.
-
-macro_open_planner    macro_open_timeline  macro_open_settings  macro_open_dvorak
-...*   ....           ...*   ....          ...*   ....          ...*   *...
-.*..   ....           .*..   .*..          .*..   ...*          .*..   ....
-  .     .               .     .              .     .              .     .
-  ... .*.               ... .*.              ... .*.              ... .*.
-
-macro_open_starred    macro_set_starred    macro_open_scratch    macro_open_messages
-...*   .*..           ..**   ....          ..*.   *...           *..*   ....
-.*..   ....           .*..   .*..          ....   ...*           .*..   ....
-  .     .               .     .              .     .               .     .
-  ... .*.               ... .*.              ... .*.               ... .*.
-
-macro_ins_heading      macro_ins_notes    macro_ins_heading_after
-....   ....            ....   ....        ....   ....
-..**   *...            ..**   *.*.        ..**   *...
-  .     .                .     .            .     .
-  *.. .*.                ... .*.            ... .*.
-
-macro_org_cycle_ctrl   macro_org_cycle_shift  macro_org_cycle
-....   ...*            ....   ...*            ....   ...*
-...*   ....            ...*   ....            ...*   ....
-  .     .                .     .                .     .
-  ..* ...                *.. ...                ... ...
-
-macro_org_insert_link  macro_org_store_link
-*...   ...*            ....   ...*
-...*   ....            **..   ....
-  .     .                .     .
-  ... .*.                ... .*.
-
-macro_g_comma         macro_g_semicolon       macro_gi           macro_gx
-....   ....           ....   ....             ..*.   ....        ..**   ....
-...*   ....           .*..   ....             ...*   *...        ....   **..
-  .     .               .     .                 .     .            .     .
-  ... .*.               ... .*.                 ... .*.            ... .*.
-
-macro_f_comma         macro_cap_f_comma       macro_blackhole
-....   *...           ....   *...             ....   ....
-..*.   ....           .*..   ....             **..   *..*
-  .     .               .     .                 .     .
-  ... .*.               ... .*.                 ... ...
-
-macro_aspace          macro_aspace_p      macro_cap_aspace   macro_cap_aspace_p
-....   ....           ...*   ....         ....   ....        ...*   ....
-*.*.   .*..           *.*.   .*..         *.*.   .*..        *.*.   .*..
-  .     .               .     .             .     .            .     .
-  ... .*.               ... .*.             *.. .*.            *.. .*.
-
-macro_decrement        macro_increment    macro_prev_search
-...*   ....            ....   ....        ..*.   .*..
-....   .*..            *...   ....        ....   ..*.
-  .     .                .     .            .     .
-  ... .*.                ... .*.            ... .*.
-
-macro_at_at            macro_yank_eol
-..*.   ..*.            ...*   ....
-....   ....            ....   *...
-  .     .                .     .
-  ... .*.                ... .*.
-
-macro_col_eighty       macro_inbox      macro_helm_mark
-....   ....            ....   ....      *...   ..*.
-...*   ..*.            .*.*   ....      ....   ....
-  .     .                .     .          .     .
-  ... .*.                ... .*.          ... .*.
-
-macro_space_m          macro_bibtex
-*...   ....            ...*   ....
-....   ....            ..*.   .*..
-  .     .                .     .
-  ... .*.                ... .*.
-
-# macro_dragon_xfer macro_dragon_toggle
-# ....   ..*.       ....   ..*.
-# ....   ....       ....   .*..
-#   .     .           .     .
-#   ... .*.           ... .*.
-
-## window manager macros ##
-
-macro_swap_master    macro_swap_master2
-....   ....          ...*   ....
-...*   ....          ....   ....
-  .     .              .     .
-  .*. *..              .*. *..
-
-# macro_speak_toggle macro_speak_slower macro_speak_faster
-# ....   ....        ....   *...        ....   .*..
-# ....   *..*        ....   ...*        ....   ...*
-#   .     .            .     .            .     .
-#   ... .*.            ... .*.            ... .*.
-
-# macro_speak_start  macro_speak_line_s macro_speak_line_r
-# ....   ....        ....   ....        ....   ....
-# ....   ...*        .*.*   *...        .*.*   ...*
-#   .     .            .     .            .     .
-#   ... .*.            ... .*.            ... .*.
-
-# macro_speak_line   macro_speak_silence
-# ....   ....        ....   ....
-# .*.*   .*..        .*.*   ***.
-#   .     .            .     .
-#   ... .*.            ... .*.
-
-#  macro_eloud
-#  ....   ....
-#  .**.   ....
-#    .     .
-#    ... .*.
-
-# macro_mate_wsl   macro_mate_wsr  macro_next_ws
-# ....   *...      ....   ...*     ....   ....
-# ....   ....      ....   ....     ..*.   ....
-#   .     .          .     .         .     .
-#   ... .*.          ... .*.         ... **.
-
-
-## web browser macros ##
-
-macro_browser_tab_search  macro_zotero_save   macro_zotero_zoom
-....   ....               ....   ....           ....   .*..
-....   .*..               *...   ..*.           *..*   ..*.
-  .     .                   .     .               .     .
-  ... .*.                   ... .*.               ... .*.
-
-macro_zotero_focus macro_zotero_rename  macro_zotero_toggle  macro_zotero_attach
-.*..   ....           ....   ..*.            ....   ....            ....   ....
-*...   ..*.           *...   ..*.            *...   .**.            *...   ..**
-  .     .               .     .                .     .                .     .
-  ... .*.               ... .*.                ... .*.                ... .*.
-
-macro_zotero_metadata
-....   *...
-*...   ..*.
-  .     .
-  ... .*.
-
-# macro_     macro_     macro_    macro_    macro_
-# ....   ....      ....   ....        ....   ....       ....   ....
-# ....   ....      ....   ....        ....   ....       ....   ....
-#   .     .          .     .            .     .           .     .
-#   ... ...          ... ...            ... ...           ... ...
