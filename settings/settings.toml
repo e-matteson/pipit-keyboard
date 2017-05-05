@@ -219,6 +219,7 @@ commands = [
     "command_sticky_shift",
     "command_sticky_gui",
     "command_led_battery",
+    "command_led_colors",
     "command_led_rainbow",
     "command_cycle_anagram",
     "command_left_hand_mode",
