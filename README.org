@@ -11,7 +11,7 @@ The firmware is compatible with several varieties of arduino-compatible ARM micr
 
 A [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][guide to building the hardware]] for this keyboard will be posted to the wiki soon.
 
-** See the [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][wiki]] for more documentation
+** See the [[https://github.com/e-matteson/pipit-keyboard/wiki/][wiki]] for more documentation
 
 ** Brief instructions
 
@@ -21,7 +21,7 @@ A [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][gui
 - Run the pipit-config tool to generate the firmware: =$ cargo run=
 - Open =pipit-firmware/pipit-firmware.ino= in the Arduino IDE, and upload to your microcontroller.
 
-See [[https://github.com/e-matteson/pipit-keyboard/wiki][here]] for more detail.
+See [[https://github.com/e-matteson/pipit-keyboard/wiki/Running-the-code][here]] for more detail.
 
 ** Contributing
 Feedback, issue reports, and pull requests are very welcome. If you make new settings files or =.kmap= files, consider contributing them to the repository for others to use.
