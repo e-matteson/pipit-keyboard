@@ -1,0 +1,34 @@
+
+* Pipit Keyboard
+
+Firmware and configuration tools for a small, ergonomic chording keyboard with only 24 switches.
+
+Common letters are typed by pressing a single switch, and rarer letters are typed by pressing 2 switches at once - like playing a piano chord. The keyboard also stores a customizable dictionary of 4000+ words and macros that can each be entered with a single chord.
+
+You can change the keymap, dictionary, and other settings by editing simple text files. You then run the configuration tool once to generate updated firmware, and then load the new firmware onto the keyboard's microcontroller.
+
+The firmware is compatible with several varieties of arduino-compatible ARM microcontroller boards. It currently suppports the =Adafruit Feather BLE M0= (for a wireless keyboard) and the =Teensy LC= (for a wired keyboard), and support for the =Teensy 3= is planned.
+
+A [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][guide to building the hardware]] for this keyboard will be posted to the wiki soon.
+
+** See the [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][wiki]] for more documentation
+
+** Brief instructions
+
+- Install [[https://www.rust-lang.org][rust]] and the [[https://www.arduino.cc/en/Main/Software][Arduino IDE]] (along with support for your microcontroller).
+- Clone this repository.
+- [[Configuration][configure the keyboard]] by editing =settings/settings.toml=.
+- Run the pipit-config tool to generate the firmware: =$ cargo run=
+- Open =pipit-firmware/pipit-firmware.ino= in the Arduino IDE, and upload to your microcontroller.
+
+See [[https://github.com/e-matteson/pipit-keyboard/wiki/Running-the-code][here]] for more detail.
+
+** Contributing
+Feedback, issue reports, and pull requests are very welcome. If you make new settings files or =.kmap= files, consider contributing them to the repository for others to use.
+
+This project is hosted on github at https://github.com/e-matteson/pipit-keyboard.
+
+
+** License
+
+The code in this project is licensed under GPLv3 or later. The original author is e-matteson (e.r.matteson@gmail.com).
