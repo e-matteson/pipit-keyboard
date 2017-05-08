@@ -1,5 +1,6 @@
 #include "Switches.h"
 
+
 Switches::Switches(){
   matrix = new Matrix();
 
@@ -11,6 +12,7 @@ Switches::Switches(){
     switch_status[i] = Switches::NOT_PRESSED;
     debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
     debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
+    first_press_timers[i] = new Timer(3*DEBOUNCE_DELAY, 1);
   }
 }
 
@@ -24,9 +26,29 @@ void Switches::setup(){
   matrix->setup();
 }
 
+bool Switches::isAnySwitchStillBouncing(){
+  // Check if any switches have been repeatedly bouncing for a while.
+  for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
+    if(first_press_timers[i]->isRunning()
+       && first_press_timers[i]->elapsed() > DEBOUNCE_DELAY){
+      return 1;
+    }
+  }
+  return 0;
+}
 
 bool Switches::readyToPress(){
-  return chord_timer->isDone();
+  if(!chord_timer->peekDone()){
+    // Not ready
+    return 0;
+  }
+  if(isAnySwitchStillBouncing()){
+    // Let's give this bouncy switch a little more time to settle before sending.
+    return 0;
+  }
+  // Ready!
+  chord_timer->disable();
+  return 1;
 }
 
 bool Switches::readyToRelease(){
@@ -35,11 +57,9 @@ bool Switches::readyToRelease(){
 
 void Switches::updateSwitchStatuses(){
 
-  // printStatusArray();
-  // printStatusChange(16);
-
   is_any_switch_down = 0;
   for(uint8_t i=0; i!=NUM_MATRIX_POSITIONS; i++){
+
     if(matrix->get(i)){ // Switch is physically down now.
       is_any_switch_down = 1;
 
@@ -85,21 +105,42 @@ bool Switches::debouncePress(uint8_t switch_index){
   if(debounce_press_timers[switch_index]->isDisabled()){
     // Start debouncing, don't change status.
     debounce_press_timers[switch_index]->start();
+
+    if(!first_press_timers[switch_index]->isRunning()){
+      // This switch hasn't been pressed recently, consider this its first press
+      first_press_timers[switch_index]->start();
+    }
   }
   else if(debounce_press_timers[switch_index]->isDone()){
     // Debounce done, it's a real press!
     switch_status[switch_index] = Switches::PRESSED;
     debounce_press_timers[switch_index]->disable();
+
     chord_timer->start();
     held_timer->start();
+
+    if(first_press_timers[switch_index]->isRunning()){
+      // If this switch bounced for longer than DEBOUNCE_DELAY, subtract that
+      //  extra time from the chord_timer, so the bounces don't make the chord
+      //  delay longer than it really should be. The effect is small, but might
+      //  matter if a broken switch is really bouncy.
+      int32_t elapsed = first_press_timers[switch_index]->elapsed();
+      chord_timer->jumpAhead(max(0, elapsed - DEBOUNCE_DELAY));
+      first_press_timers[switch_index]->disable();
+    }
+
     // Check if the switch was double tapped.
     was_switch_double_tapped |= (switch_index == last_released_switch);
     last_released_switch = NO_SWITCH;
 
     is_debounce_done = 1;
   }
-  // Else, keep debdownouncing, don't change status.
+  // Else, keep debouncing, don't change status.
   return is_debounce_done;
+}
+
+int32_t Switches::maximum(int32_t x, int32_t y){
+  return x > y ? x : y;
 }
 
 bool Switches::debounceRelease(uint8_t switch_index){
@@ -132,12 +173,6 @@ void Switches::stopDebouncingRelease(uint8_t i){
   // It was not a real release.
   debounce_release_timers[i]->disable();
 }
-
-// void Switches::resetInactivityTimers(){
-//   // Call this when something changes, to reset all the timers that care about changes.
-//   timers->setHeld(HELD_DELAY);
-//   // timers->setDoze(DOZE_DELAY);
-// }
 
 void Switches::checkForHeldSwitches(){
   // If any switches have been held for a while,
@@ -216,36 +251,31 @@ void Switches::printStatusArray(){
 
 void Switches::printStatusChange(uint8_t index){
   // Print the new status of a particular key every time it changes
-  static switch_status_enum old_val = Switches::NOT_PRESSED;
+  // static switch_status_enum old_val = Switches::NOT_PRESSED;
+  static uint8_t old_vals[NUM_MATRIX_POSITIONS] = {0};
+
   switch_status_enum val = switch_status[index];
-    if (val != old_val){
+    if (val != old_vals[index]){
+      Serial.print(index);
+      Serial.print(": ");
       Serial.println(val);
-      old_val = val;
+      old_vals[index] = val;
     }
 }
 
 void Switches::printMatrixChange(uint8_t index){
   // Print whether a particular key is physically up or down, every time it changes
-  static bool old_val = 0;
+  static bool old_vals[NUM_MATRIX_POSITIONS] = {0};
   bool val = matrix->get(index);
-  if (val != old_val){
-    Serial.println(val);
-    old_val = val;
+  if (val != old_vals[index]){
+    Serial.print(index);
+    Serial.print(": ");
+    Serial.println(val ? "  d" : "   u");
+    old_vals[index] = val;
   }
 }
 
 bool Switches::isActive(){
   return is_any_switch_down;
 }
-
-// void Switches::attachPinInterrupts(voidFuncPtr isr){
-//   matrix->setAllColumnsLow();
-//   matrix->attachRowPinInterrupts(isr);
-// }
-
-// void Switches::detachPinInterrupts(){
-//   matrix->detachRowPinInterrupts();
-//   matrix->setAllColumnsHiZ();
-// }
-
 
