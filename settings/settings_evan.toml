@@ -6,7 +6,7 @@ left_hand_mode             = "keymaps/dvorak24_left.kmap"
 
 chord_delay                = 30
 held_delay                 = 200
-debounce_delay             = 15
+debounce_delay             = 5
 debug_messages             = 0
 
 ##### hardware-specific options:
