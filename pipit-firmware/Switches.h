@@ -45,6 +45,8 @@ private:
   void resetInactivityTimers();
   void reuseHeldSwitches();
   bool isModifier(uint8_t switch_index, mode_enum mode);
+  bool isAnySwitchStillBouncing();
+  int32_t maximum(int32_t x, int32_t y);
 
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);
@@ -56,6 +58,8 @@ private:
   Timer* held_timer;
   Timer* debounce_press_timers[NUM_MATRIX_POSITIONS];
   Timer* debounce_release_timers[NUM_MATRIX_POSITIONS];
+
+  Timer* first_press_timers[NUM_MATRIX_POSITIONS];
 
   switch_status_enum switch_status[NUM_MATRIX_POSITIONS] = {(switch_status_enum)0};
   bool was_switch_double_tapped = 0;

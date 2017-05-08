@@ -13,9 +13,12 @@ public:
   void disable();
   bool isDisabled();
   bool isDone();
+  bool peekDone();
   bool isRunning();
   void forceDone();
   void setDefaultValue(int32_t new_default_value);
+  uint32_t elapsed();
+  void jumpAhead(uint32_t millis_ahead);
 
 private:
   bool is_disabled = 1;

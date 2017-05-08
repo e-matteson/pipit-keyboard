@@ -36,8 +36,14 @@ bool Timer::isDisabled(){
   return is_disabled;
 }
 
+bool Timer::peekDone(){
+  // Check if done, but don't change anything!
+  return !isDisabled() && (value <= (millis() - start_millis));
+}
+
 bool Timer::isDone(){
-  bool is_done = !isDisabled() && (value <= (millis() - start_millis));
+  // Check if done, and disable timer if it is.
+  bool is_done = peekDone();
   if(is_done){
     disable();
   }
@@ -50,4 +56,14 @@ bool Timer::isRunning(){
 
 void Timer::setDefaultValue(int32_t new_default_value){
   default_value = new_default_value;
+}
+
+uint32_t Timer::elapsed(){
+  // For use as a stopwatch
+  // This can never be negative right? The clock is monotonic, right?
+  return  millis() - start_millis;
+}
+
+void Timer::jumpAhead(uint32_t millis_ahead){
+  start_millis -= millis_ahead;
 }
