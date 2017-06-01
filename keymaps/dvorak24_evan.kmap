@@ -384,11 +384,17 @@ macro_compile          macro_run          macro_error_prev       macro_error_nex
   .     .                .     .            .     .                .     .
   ... ...                ... ...            ... .*.                ... .*.
 
-macro_eval            macro_eval_region
-....   ....           ....   ....
-.**.   ....           .**.   *...
-  .     .               .     .
-  ... .*.               ... .*.
+macro_eval
+....   ....
+....   .*..
+  .     .
+  ... .*.
+
+# macro_eval            macro_eval_region
+# ....   ....           ....   ....
+# .**.   ....           .**.   *...
+#   .     .               .     .
+#   ... .*.               ... .*.
 
 # macro_eval_scad     macro_eval_count      macro_eval_nth
 # ....   ....         ....   ....           ....   ....
@@ -575,11 +581,11 @@ macro_swap_master    macro_swap_master2
 
 ## web browser macros ##
 
-macro_browser_tab_search  macro_zotero_save   macro_zotero_zoom
-....   ....               ....   ....           ....   .*..
-....   .*..               *...   ..*.           *..*   ..*.
-  .     .                   .     .               .     .
-  ... .*.                   ... .*.               ... .*.
+macro_zotero_save   macro_zotero_zoom
+....   ....           ....   .*..
+*...   ..*.           *..*   ..*.
+  .     .               .     .
+  ... .*.               ... .*.
 
 macro_zotero_focus macro_zotero_rename  macro_zotero_toggle  macro_zotero_attach
 .*..   ....           ....   ..*.            ....   ....            ....   ....
