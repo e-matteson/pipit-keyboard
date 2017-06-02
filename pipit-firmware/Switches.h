@@ -11,7 +11,6 @@
 // (also all positive values up to NUM_MATRIX_POSITIONS)
 #define NO_SWITCH -1
 
-
 // Possible statuses for the switch_status array:
 
 class Switches{
@@ -59,7 +58,7 @@ private:
   Timer* debounce_press_timers[NUM_MATRIX_POSITIONS];
   Timer* debounce_release_timers[NUM_MATRIX_POSITIONS];
 
-  Timer* first_press_timers[NUM_MATRIX_POSITIONS];
+  Timer* first_contact_timers[NUM_MATRIX_POSITIONS];
 
   switch_status_enum switch_status[NUM_MATRIX_POSITIONS] = {(switch_status_enum)0};
   bool was_switch_double_tapped = 0;
