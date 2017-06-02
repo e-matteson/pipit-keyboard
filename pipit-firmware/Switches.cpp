@@ -12,7 +12,7 @@ Switches::Switches(){
     switch_status[i] = Switches::NOT_PRESSED;
     debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
     debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
-    first_contact_timers[i] = new Timer(3*DEBOUNCE_DELAY, 1);
+    first_contact_timers[i] = new Timer(5*DEBOUNCE_DELAY, 1);
   }
 }
 
