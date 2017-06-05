@@ -6,7 +6,7 @@ Pipit::Pipit(){
   comms = new Comms();
   sender = new Sender(comms);
   feedback = new Feedback();
-  saved_chord = new Chord(mode);
+  // saved_chord = new Chord(mode);
 }
 
 void Pipit::setup(){
@@ -48,9 +48,13 @@ void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   if(switches->readyToPress()){
     // Lookup the chord and send the corresponding key sequence.
+    // Serial.print("start send: ");
+    // sender->history->printStack();
     Chord chord(mode);
     switches->makeChordBytes(&chord);
     processChord(&chord);
+    // Serial.print("end send: ");
+    // sender->history->printStack();
   }
   else if(switches->readyToRelease()){
     // Make sure all keys are released
@@ -85,7 +89,6 @@ void Pipit::processChord(Chord* chord){
   // If chord is a known macro, send it and return.
   if((data_length=lookup->macro(chord, data))){
     sender->sendMacro(data, data_length, chord);
-    resetLastWord();
     feedback->triggerMacro();
     return;
   }
@@ -95,7 +98,6 @@ void Pipit::processChord(Chord* chord){
   if((data_length=lookup->word(chord, data))){
     sender->sendWord(data, data_length, chord);
     // switches->reuseWordmods(chord)
-    storeLastWord(chord);
     feedback->triggerWord();
     return;
   }
@@ -112,7 +114,6 @@ void Pipit::processChord(Chord* chord){
   if((data_length=lookup->plain(chord, data))){
     sender->sendPlain(data, data_length, chord);
     // switches->reuseMods(chord)
-    resetLastWord();
     feedback->triggerPlain();
     return;
   }
@@ -120,7 +121,6 @@ void Pipit::processChord(Chord* chord){
   if(sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
     feedback->triggerPlain();
-    resetLastWord();
   }
   else{
     // Unknown chord, release all keys
@@ -204,33 +204,32 @@ void Pipit::doCommand(uint8_t code){
 }
 
 
-
-void Pipit::storeLastWord(Chord* chord){
-  was_last_send_a_word = 1;
-  saved_chord->copy(chord);
-}
-
-void Pipit::resetLastWord(){
-  was_last_send_a_word = 0;
-}
-
 void Pipit::cycleAnagram(){
-  if(!was_last_send_a_word){
+  Chord new_chord;
+  new_chord.copy(sender->history->peek());
+  if(!new_chord.isAnagrammable()){
     feedback->triggerUnknown();
     return;
   }
+  new_chord.clearNumKeys(); // TODO clear in cycleAnagramModifier()?
+  uint8_t original_num = new_chord.getAnagramNum();
 
-  uint8_t original_num = saved_chord->getAnagramNum();
   uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
   uint8_t data_length = 0;
 
-  while (saved_chord->cycleAnagramModifier() != original_num) {
-    if((data_length=lookup->word(saved_chord, data))){
+  while(1) {
+    if(new_chord.cycleAnagramModifier() == original_num){
+      // We've tried all the anagram modifiers, stop.
+      return;
+    }
+    if((data_length=lookup->word(&new_chord, data))){
+      // This anagram mod was found!
       sender->deleteLastWord();
-      sender->sendWord(data, data_length, saved_chord);
+      sender->sendWord(data, data_length, &new_chord);
       feedback->triggerWord();
       return;
     }
+    // Else, this anagram mod wasn't found, try the next one right away.
   }
 
   DEBUG1_LN("WARNING: no anagram found");

@@ -56,7 +56,7 @@ private:
   Lookup* lookup;
   Feedback* feedback;
   Sender* sender;
-  Chord* saved_chord;
+  // Chord* saved_chord;
   Comms* comms;
 
   /***** word anagram cycling *****/

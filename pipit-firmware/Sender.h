@@ -23,6 +23,7 @@ public:
 
   void setStickymod(uint8_t mod_byte);
 
+  History* history;
 
 private:
   bool isSameAsLastSend(uint8_t key_code, uint8_t mod_byte);
@@ -32,7 +33,6 @@ private:
 
   Comms* comms;
   Feedback* feedback;
-  History* history;
 
   uint8_t stickymod = 0; //For programs that use a key like Insert as a fake modifier
   // TODO store stickymod as a Chord?

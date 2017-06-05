@@ -1,5 +1,6 @@
 #include "Sender.h"
 
+
 Sender::Sender(Comms* comms){
   this->history = new History();
   this->comms = comms;
@@ -16,11 +17,12 @@ bool Sender::sendIfEmpty(Chord* chord){
     return 0;
   }
   sendKey(0, chord->getModByte());
+  chord->setAnagrammable(0);
   return 1;
 }
 
 void Sender::sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord){
-  history->startGroup();
+  history->startGroup(chord, 0);
   for(uint8_t i = 0; i<data_length-1; i+=2){
     //  get the key, followed by the modifier.
     sendKey(data[i], chord->getModByte() | data[i+1]);
@@ -29,7 +31,7 @@ void Sender::sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord){
 }
 
 void Sender::sendMacro(const uint8_t* data, uint8_t data_length, Chord* chord){
-  history->startGroup();
+  history->startGroup(chord, 0);
   for(uint8_t i = 0; i<data_length-1; i+=2){
     //  get the key, followed by the modifier.
     sendKey(data[i], chord->getModByte() | data[i+1]);
@@ -40,7 +42,7 @@ void Sender::sendMacro(const uint8_t* data, uint8_t data_length, Chord* chord){
 }
 
 void Sender::sendWord(const uint8_t* data, uint8_t data_length, Chord* chord){
-  history->startGroup();
+  history->startGroup(chord, 1);
   // This is the first letter, so send shift if CAPITALIZATION_MODIFIER pressed.
   bool capitalMod = chord->hasCapitalWordmod();
   bool nospaceMod = chord->hasNospaceWordmod();
@@ -114,14 +116,16 @@ void Sender::press(uint8_t key_code, uint8_t mod_byte){
 void Sender::deleteLastWord(){
   // Delete the last sent key sequence by sending the correct number of backspaces.
   // TODO what happens to word history when mode changes?
-
-  int16_t length = history->peek();
+  // Serial.println("delete");
+  // history->printStack();
+  int16_t length = history->peek()->getNumKeys();
+  Serial.println(length);
   for(int16_t i = 0; i < length; i++){
     sendKey(KEY_BACKSPACE&0xff, 0);
     // For some reason the backspaces get dropped more easily then word letters
     //  so add a longer delay between sends.
     delay(6*comms->proportionalDelay(length));
   }
+  // Serial.println("deleted");
+  // history->printStack();
 }
-
-

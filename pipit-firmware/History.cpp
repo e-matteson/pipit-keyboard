@@ -2,59 +2,68 @@
 
 
 History::History(){
+  // Fill up the stack with new chords. We'll copy their member values around,
+  //  instead of creating or destroying chord objects.
+  for(uint8_t i = 0; i < HISTORY_SIZE; i++){
+    // Assume mode 0 exists and is a reasonable default
+    stack[i] = new Chord();
+  }
 }
 
-void History::startGroup(){
-  current_group_length = 0;
+void History::startGroup(const Chord* new_chord, bool is_anagrammable){
+  // Store the chord we're sending, and whether we're allowed to try anagramming
+  //  it later (like a word, but not a macro).
+  current.copy(new_chord);
+  current.setAnagrammable(is_anagrammable);
 }
 
 void History::endGroup(){
-  if (current_group_length != 0){
+  if (current.getNumKeys() != 0){
     // If any printed/deletable keys were sent
     //   push the number to the history.
-    push(current_group_length);
+    push(&current);
   }
 }
 
-void History::push(int16_t value){
-  // Push a value to the front of length_stack.
+void History::push(const Chord* new_chord){
+  // Push a chord to the front of the stack.
   for(uint8_t i = HISTORY_SIZE-1; i != 0; i--){
-    length_stack[i] = length_stack[i-1];
+    stack[i]->copy(stack[i-1]);
   }
-  length_stack[0] = value;
+  stack[0]->copy(new_chord);
 }
 
 int16_t History::pop(){
-  // Pop and return the value at the front of length_stack.
-  uint8_t front = length_stack[0];
+  // Remove the chord at the front of the stack. Return its num_keys_sent.
+  uint8_t out = stack[0]->getNumKeys();
   for(uint8_t i = 0; i != HISTORY_SIZE-1; i++){
-    length_stack[i] = length_stack[i+1];
+    stack[i]->copy(stack[i+1]);
   }
-  length_stack[HISTORY_SIZE-1] = 0;
-  return front;
+  stack[HISTORY_SIZE-1]->clear();
+  return out;
 }
 
-int16_t History::peek(){
-  // Return the value at the front of length_stack.
-  return length_stack[0];
+Chord* History::peek(){
+  // Return a pointer to the chord at the front of stack.
+  return stack[0];
 }
-
 
 void History::clear(){
   // Set all history entries to zero.
-  for(uint8_t j = 0; j != HISTORY_SIZE; j++){
-    length_stack[j] = 0;
+  for(uint8_t i = 0; i != HISTORY_SIZE; i++){
+    stack[i]->clear();
   }
 }
 
 void History::update(uint8_t key_code, uint8_t mod_byte){
-  // Update the length_stack when key_code and mod_byte are sent.
+  // Update the stack when key_code and mod_byte are sent.
   if(key_code == (KEY_BACKSPACE&0xff)){
-    if(length_stack[0] > 0){
+    if(stack[0]->getNumKeys() > 0){
       // if previous length is non-zero, decrement it
-      length_stack[0]--;
-      if(!length_stack[0]){
+      stack[0]->decrementNumKeys();
+      if(stack[0]->getNumKeys() == 0){
         // If previous length is now zero, pop if off the stack
+        // And if this chord was just a backspace, it pops itself
         pop();
       }
     }
@@ -63,12 +72,14 @@ void History::update(uint8_t key_code, uint8_t mod_byte){
     // If certain keys (movement etc) are sent, reset entire history to zeroes
     //  so that movement keys etc don't misalign the history
     //  and cause you to delete the wrong characters.
-    current_group_length = 0;
+    // TODO how will this interact with moving back a word?
+    current.clear();
     clear();
   }
-  else if(key_code){
+  else if(key_code > 0){
     // If any other non-zero key is sent, increment the current length.
-    current_group_length++;
+    // current_group_length++;
+    current.incrementNumKeys();
   }
 }
 
@@ -101,4 +112,15 @@ bool History::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
     }
   }
   return false;
+}
+
+void History::printStack(){
+  Serial.print("hist: ");
+  for(int i = 0; i < HISTORY_SIZE; i++){
+    Serial.print(stack[i]->getNumKeys());
+    Serial.print(":");
+    Serial.print(stack[i]->isAnagrammable());
+    Serial.print(", ");
+  }
+  Serial.println("");
 }
