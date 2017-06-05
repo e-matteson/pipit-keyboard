@@ -17,7 +17,6 @@ bool Sender::sendIfEmpty(Chord* chord){
     return 0;
   }
   sendKey(0, chord->getModByte());
-  chord->setAnagrammable(0);
   return 1;
 }
 
@@ -118,8 +117,7 @@ void Sender::deleteLastWord(){
   // TODO what happens to word history when mode changes?
   // Serial.println("delete");
   // history->printStack();
-  int16_t length = history->peek()->getNumKeys();
-  Serial.println(length);
+  int16_t length = history->peek()->getLength();
   for(int16_t i = 0; i < length; i++){
     sendKey(KEY_BACKSPACE&0xff, 0);
     // For some reason the backspaces get dropped more easily then word letters

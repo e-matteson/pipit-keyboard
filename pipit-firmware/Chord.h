@@ -10,15 +10,9 @@ public:
   Chord();
   Chord(mode_enum mode);
   void clear();
-  uint8_t clearNumKeys();
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
   void copyWordmod(const Chord* chord);
-  void incrementNumKeys();
-  void decrementNumKeys();
-  uint8_t getNumKeys();
-  bool isAnagrammable();
-  void setAnagrammable(bool value);
 
   // TODO s/blank/extract/
   void blankCtrl();
@@ -61,8 +55,6 @@ private:
   uint8_t mod_byte = 0;
   mode_enum mode;
   uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
-  uint8_t num_keys_sent = 0;
-  bool is_anagrammable = 0;
   // bool has_capital_wordmod;
   // bool has_nospace_wordmod;
 };

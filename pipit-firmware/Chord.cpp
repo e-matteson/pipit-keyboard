@@ -36,8 +36,6 @@ mode_enum Chord::getMode() const{
 void Chord::copy(const Chord* chord){
   mode = chord->mode;
   mod_byte = chord->mod_byte;
-  num_keys_sent = chord->num_keys_sent;
-  is_anagrammable = chord->is_anagrammable;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = chord->chord_bytes[i];
     wordmod_storage[i] = chord->wordmod_storage[i];
@@ -47,7 +45,6 @@ void Chord::copy(const Chord* chord){
 void Chord::clear(){
   mode = (mode_enum) 0;
   mod_byte = 0;
-  num_keys_sent = 0;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
     wordmod_storage[i] = 0;
@@ -182,32 +179,6 @@ bool Chord::hasCapitalWordmod() const{
 
 bool Chord::hasNospaceWordmod() const{
   return areMaskBitsSet(wordmod_nospace_chord_bytes[mode], wordmod_storage);
-}
-
-/************* Word deletion stuff *********/
-
-void Chord::incrementNumKeys(){
-  num_keys_sent++;
-}
-
-void Chord::decrementNumKeys(){
-  num_keys_sent--;
-}
-
-uint8_t Chord::getNumKeys(){
-  return num_keys_sent;
-}
-
-uint8_t Chord::clearNumKeys(){
-  num_keys_sent = 0;
-}
-
-bool Chord::isAnagrammable(){
-  return is_anagrammable;
-}
-
-void Chord::setAnagrammable(bool value){
-  is_anagrammable = value;
 }
 
 /************* Chord int array operations ********/

@@ -205,13 +205,13 @@ void Pipit::doCommand(uint8_t code){
 
 
 void Pipit::cycleAnagram(){
-  Chord new_chord;
-  new_chord.copy(sender->history->peek());
-  if(!new_chord.isAnagrammable()){
+  Entry* entry = sender->history->peek();
+  if(!entry->isAnagrammable()){
     feedback->triggerUnknown();
     return;
   }
-  new_chord.clearNumKeys(); // TODO clear in cycleAnagramModifier()?
+  Chord new_chord;
+  new_chord.copy(entry->getChord());
   uint8_t original_num = new_chord.getAnagramNum();
 
   uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
