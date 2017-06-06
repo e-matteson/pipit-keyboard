@@ -134,7 +134,7 @@ void Pipit::processChord(Chord* chord){
 void Pipit::doCommand(uint8_t code){
   // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
-  if(code == COMMAND_PAUSE){
+  if(code == conf::COMMAND_PAUSE){
     // toggle temporary disabling of typing
     is_paused ^= 1;
     return;
@@ -147,53 +147,53 @@ void Pipit::doCommand(uint8_t code){
   switch(code){
     /**** add cases for new commands here ****/
 
-  case COMMAND_DELETE_WORD:
+  case conf::COMMAND_DELETE_WORD:
     sender->deleteLastWord();
     break;
 
-  case COMMAND_STICKY_CTRL:
+  case conf::COMMAND_STICKY_CTRL:
     sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
-  case COMMAND_STICKY_SHIFT:
+  case conf::COMMAND_STICKY_SHIFT:
     sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
-  case COMMAND_STICKY_ALT:
+  case conf::COMMAND_STICKY_ALT:
     sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
-  case COMMAND_STICKY_GUI:
+  case conf::COMMAND_STICKY_GUI:
     sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
     break;
 
-  case COMMAND_LED_BATTERY:
+  case conf::COMMAND_LED_BATTERY:
     feedback->startRoutine(BATTERY_ROUTINE);
     break;
 
-  case COMMAND_LED_COLORS:
+  case conf::COMMAND_LED_COLORS:
     feedback->startRoutine(ALL_COLORS_ROUTINE);
     break;
 
-  case COMMAND_LED_RAINBOW:
+  case conf::COMMAND_LED_RAINBOW:
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
-  case COMMAND_CYCLE_ANAGRAM:
+  case conf::COMMAND_CYCLE_ANAGRAM:
     cycleAnagram();
     break;
 
-  case COMMAND_DEFAULT_MODE:
+  case conf::COMMAND_DEFAULT_MODE:
     // TODO should anything else change when changing mode?
-    mode = mode_enum::DEFAULT_MODE;
+    mode = conf::mode_enum::DEFAULT_MODE;
     break;
 
-  case COMMAND_LEFT_HAND_MODE:
-    mode = mode_enum::LEFT_HAND_MODE;
+  case conf::COMMAND_LEFT_HAND_MODE:
+    mode = conf::mode_enum::LEFT_HAND_MODE;
     break;
 
-  // case COMMAND_KRITA_MODE:
-  //   mode = mode_enum::KRITA_MODE;
+  // case conf::COMMAND_KRITA_MODE:
+  //   mode = conf::mode_enum::KRITA_MODE;
   //   break;
 
   default:

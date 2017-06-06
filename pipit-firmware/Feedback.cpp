@@ -13,7 +13,7 @@ Feedback::Feedback(){
 
 #ifdef ENABLE_RGB_LED
   for(uint8_t p = 0; p != NUM_RGB_LED_PINS; p++){
-    pinMode(rgb_led_pins[p], OUTPUT);
+    pinMode(conf::rgb_led_pins[p], OUTPUT);
   }
 #endif
 }
@@ -360,9 +360,9 @@ void Feedback::setLEDRGB(uint8_t red, uint8_t green, uint8_t blue){
     177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
     215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
-  analogWrite(rgb_led_pins[0], gamma8[red]);
-  analogWrite(rgb_led_pins[1], gamma8[green]);
-  analogWrite(rgb_led_pins[2], gamma8[blue]);
+  analogWrite(conf::rgb_led_pins[0], gamma8[red]);
+  analogWrite(conf::rgb_led_pins[1], gamma8[green]);
+  analogWrite(conf::rgb_led_pins[2], gamma8[blue]);
 #endif
 
   // For debugging

@@ -8,7 +8,7 @@
 class Chord{
 public:
   Chord();
-  Chord(mode_enum mode);
+  Chord(conf::mode_enum mode);
   void clear();
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
@@ -26,7 +26,7 @@ public:
   bool matches(const uint8_t* lookup_chord_bytes) const;
   bool isEmpty() const;
   uint8_t getModByte() const;
-  mode_enum getMode() const;
+  conf::mode_enum getMode() const;
   bool hasCapitalWordmod() const;
   bool hasNospaceWordmod() const;
 
@@ -53,7 +53,7 @@ private:
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
   uint8_t mod_byte = 0;
-  mode_enum mode;
+  conf::mode_enum mode;
   uint8_t wordmod_storage[NUM_BYTES_IN_CHORD] = {0};
   // bool has_capital_wordmod;
   // bool has_nospace_wordmod;

@@ -231,11 +231,11 @@ void Switches::makeChordBytes(Chord* chord){
   }
 }
 
-bool Switches::isModifier(uint8_t switch_index, mode_enum mode){
-  return ((switch_index == shift_position[mode]) ||
-          (switch_index == alt_position[mode])  ||
-          (switch_index == ctrl_position[mode])  ||
-          (switch_index == gui_position[mode]));
+bool Switches::isModifier(uint8_t switch_index, conf::mode_enum mode){
+  return ((switch_index == conf::shift_position[mode]) ||
+          (switch_index == conf::alt_position[mode])  ||
+          (switch_index == conf::ctrl_position[mode])  ||
+          (switch_index == conf::gui_position[mode]));
 }
 
 void Switches::printStatusArray(){

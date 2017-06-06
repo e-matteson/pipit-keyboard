@@ -281,6 +281,7 @@ impl Maps {
 pub fn format_intro(h_file_name: &str) -> Format{
     let autogen_message = make_autogen_message();
     let guard_name = make_guard_name(h_file_name);
+    let start_namespace = "namespace conf{\n\n";
     let mut f = Format::new();
 
     f.h += &autogen_message;
@@ -289,16 +290,23 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f.h += "#include \"keycodes.h\"\n\n";
     f.h += "typedef void (*voidFuncPtr)(void);\n\n";
     f.h += &make_compression_macros();
+    f.h += start_namespace;
 
     f.c += &autogen_message;
     f.c += &format!("#include \"{}\"\n\n", h_file_name);
+    f.c += start_namespace;
     f
 }
 
 pub fn format_outro() -> Format {
+    let end_namespace = "\n} // end namespace\n";
     let mut f = Format::new();
+
     f.h += make_debug_macros().as_ref();
+    f.h += end_namespace;
     f.h += "\n#endif\n";
+
+    f.c += end_namespace;
     f
 }
 

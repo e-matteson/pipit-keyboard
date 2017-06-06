@@ -1,10 +1,10 @@
 #include "Chord.h"
 
-Chord::Chord(mode_enum mode) : mode(mode){
+Chord::Chord(conf::mode_enum mode) : mode(mode){
 }
 
 Chord::Chord(){
-  mode = (mode_enum) 0;
+  mode = (conf::mode_enum) 0;
 }
 
 
@@ -29,7 +29,7 @@ uint8_t Chord::getModByte() const{
   return mod_byte;
 }
 
-mode_enum Chord::getMode() const{
+conf::mode_enum Chord::getMode() const{
   return mode;
 }
 
@@ -43,7 +43,7 @@ void Chord::copy(const Chord* chord){
 }
 
 void Chord::clear(){
-  mode = (mode_enum) 0;
+  mode = (conf::mode_enum) 0;
   mod_byte = 0;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
@@ -62,11 +62,11 @@ uint8_t Chord::getAnagramNum(){
   // get only the anagram-relevant bits
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(anagram_mask_chord_bytes[mode], anagram_bytes);
+  andMask(conf::anagram_mask_chord_bytes[mode], anagram_bytes);
 
   // check which anagram modifier matches
   for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
-    if (isEqual(anagram_chord_bytes[mode][i],
+    if (isEqual(conf::anagram_chord_bytes[mode][i],
                 anagram_bytes)){
       return i;
     }
@@ -81,14 +81,14 @@ void Chord::unsetAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
   }
-  unsetMask(anagram_chord_bytes[mode][num], chord_bytes);
+  unsetMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
 }
 
 void Chord::setAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to set anagram modifiers");
   }
-  setMask(anagram_chord_bytes[mode][num], chord_bytes);
+  setMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
 }
 
 uint8_t Chord::cycleAnagramModifier(){
@@ -125,16 +125,16 @@ void Chord::blankModifier(uint32_t modifier){
   uint8_t position;
   switch(modifier){
   case MODIFIERKEY_SHIFT:
-    position = shift_position[mode];
+    position = conf::shift_position[mode];
     break;
   case MODIFIERKEY_GUI:
-    position = gui_position[mode];
+    position = conf::gui_position[mode];
     break;
   case MODIFIERKEY_CTRL:
-    position = ctrl_position[mode];
+    position = conf::ctrl_position[mode];
     break;
   case MODIFIERKEY_ALT:
-    position = alt_position[mode];
+    position = conf::alt_position[mode];
     break;
   default:
     DEBUG1("ERROR: blankModifier: unknown modifier: ");
@@ -152,8 +152,8 @@ void Chord::blankModifier(uint32_t modifier){
 }
 
 void Chord::blankWordmods(){
-  blankWordmod(wordmod_capital_chord_bytes[mode]);
-  blankWordmod(wordmod_nospace_chord_bytes[mode]);
+  blankWordmod(conf::wordmod_capital_chord_bytes[mode]);
+  blankWordmod(conf::wordmod_nospace_chord_bytes[mode]);
 }
 
 void Chord::blankWordmod(const uint8_t* wordmod_chord_bytes){
@@ -174,11 +174,11 @@ void Chord::restoreWordmods(){
 }
 
 bool Chord::hasCapitalWordmod() const{
-  return areMaskBitsSet(wordmod_capital_chord_bytes[mode], wordmod_storage);
+  return areMaskBitsSet(conf::wordmod_capital_chord_bytes[mode], wordmod_storage);
 }
 
 bool Chord::hasNospaceWordmod() const{
-  return areMaskBitsSet(wordmod_nospace_chord_bytes[mode], wordmod_storage);
+  return areMaskBitsSet(conf::wordmod_nospace_chord_bytes[mode], wordmod_storage);
 }
 
 /************* Chord int array operations ********/

@@ -53,7 +53,7 @@ uint16_t Battery::readBattery(){
 #ifndef HAS_BATTERY
   return 0;
 #else
-  return analogRead(battery_level_pin);
+  return analogRead(conf::battery_level_pin);
 #endif
 }
 

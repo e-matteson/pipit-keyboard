@@ -37,22 +37,22 @@ void Matrix::disablePinChangeInterrupt(){
 
 void Matrix::setRowsInput(){
   for(uint8_t r = 0; r != NUM_ROWS; r++){
-    pinMode(row_pins[r], INPUT_PULLUP);
+    pinMode(conf::row_pins[r], INPUT_PULLUP);
   }
 }
 
 void Matrix::setColumnsLow(){
   // To prepare for setting pin interrupts, to wake from standby
   for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(column_pins[c], OUTPUT);
-    digitalWrite(column_pins[c], LOW);
+    pinMode(conf::column_pins[c], OUTPUT);
+    digitalWrite(conf::column_pins[c], LOW);
   }
 }
 
 void Matrix::setColumnsHiZ(){
   // To prepare for scanning, after waking from standby
   for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(column_pins[c], HI_Z);
+    pinMode(conf::column_pins[c], HI_Z);
   }
 }
 
@@ -61,14 +61,14 @@ void Matrix::attachRowPinInterrupts(voidFuncPtr isr){
   for(uint8_t r = 0; r != NUM_ROWS; r++){
     // Triggering on FALLING/RISING/CHANGE requires some clocks, which could be a problem in deep sleep.
     // But it's fine for normal use. Although it seems to trigger as soon as it's attached, if a switch is already down.
-    attachInterrupt(digitalPinToInterrupt(row_pins[r]), isr, CHANGE);
-    // attachInterrupt(digitalPinToInterrupt(row_pins[r]), isr, LOW);
+    attachInterrupt(digitalPinToInterrupt(conf::row_pins[r]), isr, CHANGE);
+    // attachInterrupt(digitalPinToInterrupt(conf::row_pins[r]), isr, LOW);
   }
 }
 
 void Matrix::detachRowPinInterrupts(){
   for(uint8_t r = 0; r != NUM_ROWS; r++){
-    detachInterrupt(digitalPinToInterrupt(row_pins[r]));
+    detachInterrupt(digitalPinToInterrupt(conf::row_pins[r]));
   }
 }
 
@@ -114,15 +114,15 @@ void Matrix::scan(){
   bool is_any_switch_down = 0;
   int i = 0;
   for (uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(column_pins[c], OUTPUT);
-    digitalWrite(column_pins[c], LOW);
+    pinMode(conf::column_pins[c], OUTPUT);
+    digitalWrite(conf::column_pins[c], LOW);
     // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
     // The required length can depend on the properties of the ethernet cable.
     delayMicroseconds(10);
     for(uint8_t r = 0; r != NUM_ROWS; r++){
       // Reading is low if the switch is pressed.
-      digitalRead(row_pins[r]);
-      pressed[i] = (digitalRead(row_pins[r]) == LOW);
+      digitalRead(conf::row_pins[r]);
+      pressed[i] = (digitalRead(conf::row_pins[r]) == LOW);
       is_any_switch_down |= pressed[i];
 
         if(pressed[i]){
@@ -130,7 +130,7 @@ void Matrix::scan(){
         }
         i++;
       }
-      pinMode(column_pins[c], HI_Z);
+      pinMode(conf::column_pins[c], HI_Z);
     }
     if (is_any_switch_down) {
       standby_timer->start();
@@ -140,9 +140,9 @@ void Matrix::scan(){
 void Matrix::printPressedSwitch(uint8_t c, uint8_t r){
   // TODO This should get optimized away if DEBUG_MESSAGES < 2, right?
   DEBUG2("pressed: pins (");
-  DEBUG2(column_pins[c]);
+  DEBUG2(conf::column_pins[c]);
   DEBUG2(", ");
-  DEBUG2(row_pins[r]);
+  DEBUG2(conf::row_pins[r]);
   DEBUG2("), \tindices (");
   DEBUG2(c);
   DEBUG2(", ");

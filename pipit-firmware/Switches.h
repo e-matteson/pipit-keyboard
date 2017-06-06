@@ -44,7 +44,7 @@ private:
   void stopDebouncingRelease(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-  bool isModifier(uint8_t switch_index, mode_enum mode);
+  bool isModifier(uint8_t switch_index, conf::mode_enum mode);
   bool isAnySwitchStillBouncing();
   int32_t maximum(int32_t x, int32_t y);
 

@@ -4,23 +4,27 @@ Lookup::Lookup(){
 }
 
 uint8_t Lookup::plain(const Chord* chord, uint8_t* data){
-  mode_enum mode = chord->getMode();
-  return lookupChord(chord, data, plain_chord_lookup[mode], plain_seq_lookup,  1, 0);
+  conf::mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, conf::plain_chord_lookup[mode],
+                     conf::plain_seq_lookup,  1, 0);
 }
 
 uint8_t Lookup::macro(const Chord* chord, uint8_t* data){
-  mode_enum mode = chord->getMode();
-  return lookupChord(chord, data, macro_chord_lookup[mode], macro_seq_lookup, 1, 0);
+  conf::mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, conf::macro_chord_lookup[mode],
+                     conf::macro_seq_lookup, 1, 0);
 }
 
 uint8_t Lookup::command(const Chord* chord, uint8_t* data){
-  mode_enum mode = chord->getMode();
-  return lookupChord(chord, data, command_chord_lookup[mode], command_seq_lookup, 0, 0);
+  conf::mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, conf::command_chord_lookup[mode],
+                     conf::command_seq_lookup, 0, 0);
 }
 
 uint8_t Lookup::word(const Chord* chord, uint8_t* data){
-  mode_enum mode = chord->getMode();
-  return lookupChord(chord, data, word_chord_lookup[mode], word_seq_lookup, 0, 1);
+  conf::mode_enum mode = chord->getMode();
+  return lookupChord(chord, data, conf::word_chord_lookup[mode],
+                     conf::word_seq_lookup, 0, 1);
 }
 
 uint8_t Lookup::lookupChord(const Chord* chord, uint8_t* data,
