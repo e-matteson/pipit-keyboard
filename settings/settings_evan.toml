@@ -153,10 +153,10 @@ macro_quit        = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"], ["KEY_Q", "0"],
 macro_ls          = [["KEY_L","0"],
                      ["KEY_S", "0"],
                      ["KEY_ENTER", "0"]]
-macro_g_comma     = [["KEY_G","0"],
-                     ["KEY_COMMA", "0"]]
-macro_g_semicolon = [["KEY_G","0"],
-                     ["KEY_SEMICOLON", "0"]]
+# macro_g_comma     = [["KEY_G","0"],
+#                      ["KEY_COMMA", "0"]]
+# macro_g_semicolon = [["KEY_G","0"],
+#                      ["KEY_SEMICOLON", "0"]]
 macro_f_comma     = [["KEY_F","0"],
                      ["KEY_COMMA", "0"]]
 macro_cap_f_comma        = [["KEY_F","MODIFIERKEY_SHIFT"],
@@ -894,6 +894,9 @@ anagram_modifiers = [
 
 commands = [
     "command_delete_word",
+    "command_left_word",
+    "command_right_word",
+    "command_cycle_word",
     "command_pause",
     "command_sticky_ctrl",
     "command_sticky_alt",
@@ -903,7 +906,6 @@ commands = [
     "command_led_battery",
     "command_led_colors",
     "command_led_rainbow",
-    "command_cycle_anagram",
     "command_left_hand_mode",
     "command_default_mode",
 ]

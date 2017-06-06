@@ -240,7 +240,7 @@ command_delete_word  command_pause   command_led_rainbow
   .     .              .     .         .     .
   ... ...              ... ...         ... .*.
 
-command_cycle_anagram  command_led_battery  command_led_colors
+command_cycle_word     command_led_battery  command_led_colors
 ....   ....            ****   ....          ****   .*..
 .***   ....            ....   *...          ....   ....
   .     .                .     .              .     .

@@ -15,15 +15,17 @@ public:
   void clear();
   Chord* getChord();
   uint8_t getLength();
+  void setLength(uint8_t value);
   void increment();
   void decrement();
 
+  bool isClear();
   bool isAnagrammable();
-  // void setAnagrammable(bool value);
+  void setAnagrammable(bool value);
 
 private:
   Chord chord;
-  bool is_clear = 1;
+  // bool is_clear = 1;
   uint8_t length = 0;
   bool is_anagrammable = 0; // TODO should this be in Entry or Chord?
 };

@@ -110,20 +110,3 @@ void Sender::press(uint8_t key_code, uint8_t mod_byte){
 }
 
 
-/************** deletion and history ***************/
-
-void Sender::deleteLastWord(){
-  // Delete the last sent key sequence by sending the correct number of backspaces.
-  // TODO what happens to word history when mode changes?
-  // Serial.println("delete");
-  // history->printStack();
-  int16_t length = history->peek()->getLength();
-  for(int16_t i = 0; i < length; i++){
-    sendKey(KEY_BACKSPACE&0xff, 0);
-    // For some reason the backspaces get dropped more easily then word letters
-    //  so add a longer delay between sends.
-    delay(6*comms->proportionalDelay(length));
-  }
-  // Serial.println("deleted");
-  // history->printStack();
-}

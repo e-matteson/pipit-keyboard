@@ -8,29 +8,59 @@
 #include "Entry.h"
 
 // The number of recent words/sends that can be deleted
+
 #define HISTORY_SIZE 20
+#define PADDING 2
+
+enum Direction{
+  LEFT,
+  RIGHT,
+};
+
+enum Motion{
+  WORD,
+  CHAR,
+  // LIMIT,
+};
 
 class History{
 
 public:
   History();
   void update(uint8_t key_code, uint8_t mod_byte);
-  Entry* peek();
-  int16_t pop();
   void startGroup(const Chord* new_chord, bool is_anagrammable);
   void endGroup();
+
+  uint16_t calcDistance(Motion motion, Direction direction);
+
+  uint16_t repositionCursor(Direction direction, uint16_t distance);
+  void backspace();
+
+  Entry* getEntryAtCursor();
+
+  bool isLeftAligned();
+  bool isRightAligned();
   void printStack();
+  void printCursor();
+
 
 private:
-
-  // void insertCurrentAtCursor();
-  void pushCurrent();
-  // void push(const Chord* new_chord);
+  bool isCursorAtLimit(Direction direction);
+  Entry* getEntryAt(uint8_t cursor_word);
+  uint16_t getLengthAtCursor();
+  void remove(uint16_t word_position);
+  void insertAtCursor(Entry* entry);
+  void splitAtCursor();
   bool shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte);
   void clear();
 
-  // int16_t length_stack[HISTORY_SIZE] = {0};
-  Entry* stack[HISTORY_SIZE] = {0}; //TODO deal with null pointers
+  struct Cursor{
+    uint8_t word = 0;
+    uint8_t letter = 0;
+  };
+  Cursor cursor;
+
+  Entry* stack[HISTORY_SIZE+PADDING] = {0}; //TODO deal with null pointers
   Entry current;
   // int16_t current_group_length = 0;
 };
