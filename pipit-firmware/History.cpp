@@ -13,19 +13,19 @@ History::History(){
   }
 }
 
-void History::startGroup(const Chord* new_chord, bool is_anagrammable){
+void History::startEntry(const Chord* new_chord, bool is_anagrammable){
   // Store the chord we're sending, and whether we're allowed to try anagramming
   //  it later (like a word, but not a macro).
   current.init(new_chord, is_anagrammable);
 }
 
-void History::endGroup(){
+void History::endEntry(){
   if (current.getLength() == 0){
-    // No printable characters to add to history.
-    // TODO how does this interact with macros containing weird characters?
+    // Nothing to add to history.
     return;
   }
   if(!atEdge(RIGHT)){
+    // Split current entry in two, so new entry will be added in the middle.
     splitAtCursor();
   }
   insertAtCursor(&current);
@@ -57,7 +57,6 @@ void History::insertAtCursor(Entry* entry){
 }
 
 void History::remove(uint16_t word_position){
-  // TODO test
   // Update cursor coordinates:
   if(cursor.word == word_position){
     // We're in this word now! Move cursor out of it.
@@ -91,8 +90,6 @@ void History::backspace(){
     // About to delete the first letter of a word.
     // Cursor will now be inside the previous word.
     repositionCursor(LEFT, 1);
-    // cursor.word += 1;
-    // cursor.letter = 0;
   }
   Entry* old_entry = getEntryAt(word_position);
   old_entry->decrement();
@@ -103,7 +100,7 @@ void History::backspace(){
 }
 
 
-void History::update(uint8_t key_code, uint8_t mod_byte){
+void History::save(uint8_t key_code, uint8_t mod_byte){
   // Update the stack when key_code and mod_byte are sent.
   if(key_code == (KEY_BACKSPACE&0xff)){
     backspace();
@@ -114,26 +111,24 @@ void History::update(uint8_t key_code, uint8_t mod_byte){
   else if(key_code == (KEY_RIGHT&0xff)){
     repositionCursor(RIGHT, 1);
   }
-  else if(shouldKeyResetDeletion(key_code, mod_byte)){
-    // If certain keys (movement etc) are sent, reset entire history to zeroes
+  else if(shouldKeyClearHistory(key_code, mod_byte)){
+    // If certain keys (movement etc) are sent, clear the entire history
     //  so that movement keys etc don't misalign the history
     //  and cause you to delete the wrong characters.
-    // TODO how will this interact with moving back a word?
     current.clear();
     clear();
   }
   else if(key_code > 0){
     // If any other non-zero key is sent, increment the current length.
-    // current_group_length++;
     current.increment();
   }
 }
 
-bool History::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
-  // This is a list of non-printing / movement keys that should reset deletion history.
+bool History::shouldKeyClearHistory(uint8_t key_code, uint8_t mod_byte){
+  // This is a list of non-printing / movement keys that should clear history.
   static const uint8_t reset_keys[] = {
-    KEY_UP&0xff, KEY_DOWN&0xff, KEY_LEFT&0xff, KEY_RIGHT&0xff, KEY_HOME&0xff,
-    KEY_END&0xff, KEY_PAGE_UP&0xff, KEY_PAGE_DOWN&0xff, KEY_ESC&0xff,
+    KEY_UP&0xff, KEY_DOWN&0xff, KEY_HOME&0xff, KEY_END&0xff,
+    KEY_PAGE_UP&0xff, KEY_PAGE_DOWN&0xff, KEY_ESC&0xff,
     KEY_TAB&0xff, KEY_CAPS_LOCK&0xff, KEY_PRINTSCREEN&0xff,
     KEY_SCROLL_LOCK&0xff, KEY_DELETE&0xff, KEY_NUM_LOCK&0xff, KEY_F1&0xff,
     KEY_F2&0xff, KEY_F3&0xff, KEY_F4&0xff, KEY_F5&0xff, KEY_F6&0xff, KEY_F7&0xff,
@@ -149,25 +144,16 @@ bool History::shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte){
 
   for(uint8_t i = 0; i != reset_keys_length; i++){
     if(key_code == reset_keys[i]){
-      return true;
+      return 1;
     }
   }
   for(uint8_t i = 0; i != reset_mods_length; i++){
     if(mod_byte & reset_mods[i]){
-      return true;
+      return 1;
     }
   }
-  return false;
+  return 0;
 }
-
-// TODO how to find out distance_moved without actually modifying anything?
-// So that we can find out how many left_arrows to send to move back a word,
-// but let sendkey modify the stack+cursor. Pass in a copy of the cursor?
-// Or make separate functions for computing distances?
-// Redesign cursor/stack coords to make distance computation trivial?
-// Store Chord as field of HistoryEntry class!
-// Each entry stores its first letter's index from origin? Then they all have to
-// be updated on push...
 
 uint16_t History::calcDistance(Motion motion, Direction direction){
   // left is positive distance, right is negative
@@ -264,8 +250,8 @@ Entry* History::getEntryAt(uint8_t cursor_word){
 bool History::atEdge(Direction direction){
   bool out;
   if(direction == LEFT){
-    out = (cursor.letter >= (getLengthAtCursor() - 1)
-            || getEntryAtCursor()->isClear());
+    out = (getEntryAtCursor()->isClear()
+           || cursor.letter >= (getLengthAtCursor() - 1));
   }
   else{ // RIGHT
     out = (cursor.letter == 0);

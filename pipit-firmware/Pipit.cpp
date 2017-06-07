@@ -48,13 +48,9 @@ void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   if(switches->readyToPress()){
     // Lookup the chord and send the corresponding key sequence.
-    Serial.print("start send: ");
-    sender->history->printStack();
     Chord chord(mode);
     switches->makeChordBytes(&chord);
     processChord(&chord);
-    Serial.print("end send: ");
-    sender->history->printStack();
   }
   else if(switches->readyToRelease()){
     // Make sure all keys are released
@@ -222,12 +218,11 @@ void Pipit::doCommand(uint8_t code){
 /********** High-level editing commands **********/
 
 void Pipit::move(Motion motion, Direction direction){
-  // TODO share code with deleteLastWord()
   uint16_t count = sender->history->calcDistance(motion, direction);
   uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
   for(int16_t i = 0; i < count; i++){
     sender->sendKey(key, 0);
-    delay(comms->proportionalDelay(count));
+    delay(6*comms->proportionalDelay(count));
   }
 }
 

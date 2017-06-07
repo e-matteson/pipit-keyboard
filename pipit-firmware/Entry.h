@@ -27,7 +27,7 @@ private:
   Chord chord;
   // bool is_clear = 1;
   uint8_t length = 0;
-  bool is_anagrammable = 0; // TODO should this be in Entry or Chord?
+  bool is_anagrammable = 0;
 };
 
 #endif

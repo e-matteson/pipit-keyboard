@@ -28,9 +28,9 @@ class History{
 
 public:
   History();
-  void update(uint8_t key_code, uint8_t mod_byte);
-  void startGroup(const Chord* new_chord, bool is_anagrammable);
-  void endGroup();
+  void save(uint8_t key_code, uint8_t mod_byte);
+  void startEntry(const Chord* new_chord, bool is_anagrammable);
+  void endEntry();
 
   uint16_t calcDistance(Motion motion, Direction direction);
 
@@ -51,7 +51,7 @@ private:
   void remove(uint16_t word_position);
   void insertAtCursor(Entry* entry);
   void splitAtCursor();
-  bool shouldKeyResetDeletion(uint8_t key_code, uint8_t mod_byte);
+  bool shouldKeyClearHistory(uint8_t key_code, uint8_t mod_byte);
   void clear();
 
   struct Cursor{
@@ -60,7 +60,7 @@ private:
   };
   Cursor cursor;
 
-  Entry* stack[HISTORY_SIZE+PADDING] = {0}; //TODO deal with null pointers
+  Entry* stack[HISTORY_SIZE+PADDING] = {0};
   Entry current;
   // int16_t current_group_length = 0;
 };

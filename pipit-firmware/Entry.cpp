@@ -40,7 +40,7 @@ uint8_t Entry::getLength(){
 
 
 void Entry::increment(){
-  static const uint32_t max_val = sizeof(length) * 8 - 1;
+  static const uint32_t max_val = exp(sizeof(length) * 8) - 1;
   if(length < max_val){
     length++;
   }
