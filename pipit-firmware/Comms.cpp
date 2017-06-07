@@ -97,7 +97,7 @@ uint8_t Comms::proportionalDelay(uint8_t data_length){
   // get lost unless there's a delay between presses. This seems to help, without
   // slowing down short words too much.
   if(data_length > 10){
-    return data_length/3;
+    return 3;
   }
   else{
     return 1;
