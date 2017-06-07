@@ -895,7 +895,9 @@ anagram_modifiers = [
 commands = [
     "command_delete_word",
     "command_left_word",
+    "command_left_limit",
     "command_right_word",
+    "command_right_limit",
     "command_cycle_word",
     "command_pause",
     "command_sticky_ctrl",

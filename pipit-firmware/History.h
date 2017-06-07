@@ -19,8 +19,9 @@ enum Direction{
 
 enum Motion{
   WORD,
+  WORD_EDGE,
   CHAR,
-  // LIMIT,
+  LIMIT,
 };
 
 class History{
@@ -38,8 +39,7 @@ public:
 
   Entry* getEntryAtCursor();
 
-  bool isLeftAligned();
-  bool isRightAligned();
+  bool atEdge(Direction direction);
   void printStack();
   void printCursor();
 

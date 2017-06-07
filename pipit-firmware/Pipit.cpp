@@ -155,8 +155,16 @@ void Pipit::doCommand(uint8_t code){
     move(WORD, LEFT);
     break;
 
+  case conf::COMMAND_LEFT_LIMIT:
+    move(LIMIT, LEFT);
+    break;
+
   case conf::COMMAND_RIGHT_WORD:
     move(WORD, RIGHT);
+    break;
+
+  case conf::COMMAND_RIGHT_LIMIT:
+    move(LIMIT, RIGHT);
     break;
 
   case conf::COMMAND_CYCLE_WORD:
@@ -216,23 +224,16 @@ void Pipit::doCommand(uint8_t code){
 void Pipit::move(Motion motion, Direction direction){
   // TODO share code with deleteLastWord()
   uint16_t count = sender->history->calcDistance(motion, direction);
-  Serial.print("move: ");
-  Serial.println(count);
   uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
   for(int16_t i = 0; i < count; i++){
     sender->sendKey(key, 0);
-    delay(6*comms->proportionalDelay(count));
+    delay(comms->proportionalDelay(count));
   }
 }
 
 void Pipit::deleteLastWord(){
   // Delete the last sent key sequence by sending the correct number of backspaces.
-  // TODO what happens to word history when mode changes?
-
-  if(!sender->history->isRightAligned()){
-    move(WORD, RIGHT);
-  }
-
+  move(WORD_EDGE, RIGHT);
   int16_t count = sender->history->calcDistance(WORD, LEFT);
   for(int16_t i = 0; i < count; i++){
     sender->sendKey(KEY_BACKSPACE&0xff, 0);
@@ -240,13 +241,9 @@ void Pipit::deleteLastWord(){
     //  so add a longer delay between sends.
     delay(6*comms->proportionalDelay(count));
   }
-  // Serial.println("deleted");
-  // sender->history->printStack();
 }
 
 void Pipit::cycleLastWord(){
-  Serial.println("cycle");
-  // wrong, should be AT if letter>0, and BEFORE if letter<0
   Entry* entry = sender->history->getEntryAtCursor();
   if(!entry->isAnagrammable()){
     feedback->triggerUnknown();

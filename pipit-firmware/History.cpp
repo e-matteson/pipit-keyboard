@@ -25,7 +25,7 @@ void History::endGroup(){
     // TODO how does this interact with macros containing weird characters?
     return;
   }
-  if(!isRightAligned()){
+  if(!atEdge(RIGHT)){
     splitAtCursor();
   }
   insertAtCursor(&current);
@@ -87,7 +87,7 @@ void History::clear(){
 
 void History::backspace(){
   uint16_t word_position = cursor.word;
-  if(isLeftAligned()){
+  if(atEdge(LEFT)){
     // About to delete the first letter of a word.
     // Cursor will now be inside the previous word.
     repositionCursor(LEFT, 1);
@@ -183,12 +183,27 @@ uint16_t History::calcDistance(Motion motion, Direction direction){
       return getLengthAtCursor() - cursor.letter;
     }
     else{ // RIGHT
-      if(isRightAligned()){
+      if(atEdge(RIGHT)){
         return getEntryAt(cursor.word - 1)->getLength();
       }
-      else{
-        return cursor.letter;
+      return cursor.letter;
+    }
+  case WORD_EDGE:
+    if(atEdge(direction)){
+      return 0;
+    }
+    return calcDistance(WORD, direction);
+  case LIMIT:
+    {
+      // First, get dist to nearest word boundary.
+      uint16_t distance = calcDistance(WORD_EDGE, direction);
+      // Then, get all the word lengths from there to the end of stack.
+      uint8_t start = (direction == LEFT) ? cursor.word+1  : 0;
+      uint8_t end = (direction == LEFT)   ? HISTORY_SIZE-1 : cursor.word-1;
+      for(uint8_t i = start; i <= end; i++){
+        distance += getEntryAt(i)->getLength();
       }
+      return distance;
     }
   default:
     DEBUG1("WARNING: Unknown motion: ");
@@ -196,7 +211,6 @@ uint16_t History::calcDistance(Motion motion, Direction direction){
     break;
   }
 }
-
 
 uint16_t History::repositionCursor(Direction direction, uint16_t distance){
   uint16_t distance_moved = 0;
@@ -206,7 +220,7 @@ uint16_t History::repositionCursor(Direction direction, uint16_t distance){
       break;
     }
     if(direction == LEFT){
-      if(isLeftAligned()){
+      if(atEdge(LEFT)){
         cursor.word += 1;
         cursor.letter = 0;
       }
@@ -215,7 +229,7 @@ uint16_t History::repositionCursor(Direction direction, uint16_t distance){
       }
     }
     else{ // RIGHT
-      if(isRightAligned()){
+      if(atEdge(RIGHT)){
         cursor.word--;
         cursor.letter = getLengthAtCursor() - 1;
       }
@@ -247,24 +261,27 @@ Entry* History::getEntryAt(uint8_t cursor_word){
   return stack[cursor_word];
 }
 
-bool History::isLeftAligned(){
-  return (cursor.letter >= (getLengthAtCursor() - 1)
-          || getEntryAtCursor()->isClear());
-}
-
-bool History::isRightAligned(){
-  return cursor.letter == 0;
+bool History::atEdge(Direction direction){
+  bool out;
+  if(direction == LEFT){
+    out = (cursor.letter >= (getLengthAtCursor() - 1)
+            || getEntryAtCursor()->isClear());
+  }
+  else{ // RIGHT
+    out = (cursor.letter == 0);
+  }
+  return out;
 }
 
 
 bool History::isCursorAtLimit(Direction direction){
   if(direction == LEFT){
     // At the beginning of an entry, and the entry to the left is empty.
-    // return isLeftAligned() && getEntryAt(cursor.word+1)->isClear();
+    // return atEdge(LEFT) && getEntryAt(cursor.word+1)->isClear();
     return getEntryAtCursor()->isClear() && getEntryAt(cursor.word+1)->isClear();
   }
   else if(direction == RIGHT){
-    return isRightAligned() && (cursor.word == 0);
+    return atEdge(RIGHT) && (cursor.word == 0);
   }
   else{
     DEBUG1_LN("WARNING: invalid direction");
