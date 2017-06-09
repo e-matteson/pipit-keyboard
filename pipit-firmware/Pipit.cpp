@@ -179,7 +179,7 @@ void Pipit::doCommand(uint8_t code){
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
-  case conf::COMMAND_CYCLE_ANAGRAM:
+  case conf::COMMAND_CYCLE_WORD:
     cycleAnagram();
     break;
 
