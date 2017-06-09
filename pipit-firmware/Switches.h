@@ -33,6 +33,7 @@ public:
   bool isActive();
   bool readyToPress();
   bool readyToRelease();
+  bool inStandby();
 
 private:
   void checkForHeldSwitches();

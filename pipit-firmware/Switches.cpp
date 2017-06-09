@@ -287,3 +287,7 @@ bool Switches::isActive(){
   return is_any_switch_down;
 }
 
+
+bool Switches::inStandby(){
+  return matrix->inStandby();
+}

@@ -18,6 +18,7 @@ public:
   void setup();
 
   bool scanIfChanged();
+  bool inStandby();
 
 
 private:

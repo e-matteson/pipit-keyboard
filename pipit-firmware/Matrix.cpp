@@ -83,11 +83,13 @@ void Matrix::exitStandby(){
   standby_timer->start();
 }
 
+bool Matrix::inStandby(){
+  return standby_timer->isDisabled();
+}
+
 bool Matrix::scanIfChanged(){
   // Return true if we scan. Handle entering and exiting standby.
-
-  if(standby_timer->isDisabled()){
-    // in standby
+  if(inStandby()){
     if(change_flag->get()){
       // an interrupt happened since the last scan
       exitStandby();

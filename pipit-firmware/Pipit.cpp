@@ -1,14 +1,17 @@
 #include "Pipit.h"
 
+#define CONNECTION_CHECK_DELAY_SHORT 3000
+#define CONNECTION_CHECK_DELAY_LONG 6000
+
 Pipit::Pipit(){
   switches = new Switches();
   lookup = new Lookup();
   comms = new Comms();
   sender = new Sender(comms);
   feedback = new Feedback();
-  // saved_chord = new Chord(mode);
 
-  loop_timer = new Timer(loop_delay_micros, 0, Timer::MICROSECONDS);
+  loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
+  connection_timer = new Timer(CONNECTION_CHECK_DELAY_LONG, 0, Timer::MILLISECONDS);
 }
 
 void Pipit::setup(){
@@ -21,30 +24,35 @@ void Pipit::setup(){
 void Pipit::loop(){
   switches->update();
   sendIfReady();
+  updateConnection();
+  feedback->updateLED();
   delayMicroseconds(loop_timer->remaining());
   loop_timer->start();
-  feedback->updateLED();
 }
 
-// TODO re-introduce this when we have a global standby mode
-// void Pipit::updateConnection(){
-//   if(connection_timer->isDone()){
-//     if(!comms->isConnected()){
-//       num_disconnect_readings++;
-//       connection_timer->setResetValue(CONNECTION_CHECK_DELAY_SHORT);
-//       if(num_disconnect_readings > disconnect_readings_threshold){
-//         DEBUG1_LN("not connected");
-//         feedback->startRoutine(BLE_NO_CONNECTION_ROUTINE);
-//       }
-//     }
-//     else{
-//       DEBUG1_LN("connected");
-//       connection_timer->setResetValue(CONNECTION_CHECK_DELAY_LONG);
-//       num_disconnect_readings = 0;
-//     }
-//     connection_timer->reset();
-//   }
-// }
+void Pipit::updateConnection(){
+  if(!switches->inStandby()){
+    // Switches have been pressed recently, don't check connection for a while
+    connection_timer->start();
+    return;
+  }
+  if(!connection_timer->isDone()){
+    return;
+  }
+  if(comms->isConnected()){
+    DEBUG1_LN("connected");
+    num_disconnect_readings = 0;
+    connection_timer->start(CONNECTION_CHECK_DELAY_LONG);
+    return;
+  }
+
+  num_disconnect_readings++;
+  if(num_disconnect_readings > disconnect_readings_threshold){
+    DEBUG1_LN("not connected");
+    feedback->startRoutine(BLE_NO_CONNECTION_ROUTINE);
+  }
+  connection_timer->start(CONNECTION_CHECK_DELAY_SHORT);
+}
 
 void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary

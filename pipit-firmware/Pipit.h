@@ -40,7 +40,7 @@ public:
 
 private:
   void sendIfReady();
-  // void updateConnection();
+  void updateConnection();
 
   void processChord(Chord* new_chord);
 
