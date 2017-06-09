@@ -33,7 +33,9 @@ public:
   bool isActive();
   bool readyToPress();
   bool readyToRelease();
-  bool inStandby();
+  // bool inStandby();
+
+  Matrix* matrix;
 
 private:
   void checkForHeldSwitches();
@@ -51,7 +53,6 @@ private:
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);
 
-  Matrix* matrix;
 
   Timer* chord_timer;
   Timer* release_timer;

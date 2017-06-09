@@ -11,7 +11,7 @@ Pipit::Pipit(){
   feedback = new Feedback();
 
   loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
-  connection_timer = new Timer(CONNECTION_CHECK_DELAY_LONG, 0, Timer::MILLISECONDS);
+  connection_timer = new Timer(CONNECTION_CHECK_DELAY_LONG, 1, Timer::MILLISECONDS);
 }
 
 void Pipit::setup(){
@@ -26,12 +26,26 @@ void Pipit::loop(){
   sendIfReady();
   updateConnection();
   feedback->updateLED();
+  shutdownIfSquished();
   delayMicroseconds(loop_timer->remaining());
   loop_timer->start();
 }
 
+void Pipit::shutdownIfSquished(){
+  if(!switches->matrix->isSquishedInBackpack()){
+    return;
+  }
+  DEBUG1_LN("WARNING: Switches have been held down too long, you might be inside a backpack.");
+  DEBUG1_LN("         Please reboot.");
+  // TODO disable other things? like bluetooth?
+  switches->matrix->shutdown();
+  sender->sendKey(0,0);
+  delay(1000);
+  exit(0); // Exit the firmware! Must reboot to use keyboard again.
+}
+
 void Pipit::updateConnection(){
-  if(!switches->inStandby()){
+  if(!switches->matrix->isInStandby()){
     // Switches have been pressed recently, don't check connection for a while
     connection_timer->start();
     return;

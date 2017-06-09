@@ -41,6 +41,7 @@ public:
 private:
   void sendIfReady();
   void updateConnection();
+  void shutdownIfSquished();
 
   void processChord(Chord* new_chord);
 

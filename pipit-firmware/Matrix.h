@@ -18,8 +18,9 @@ public:
   void setup();
 
   bool scanIfChanged();
-  bool inStandby();
-
+  bool isInStandby();
+  bool isSquishedInBackpack();
+  bool shutdown();
 
 private:
 
@@ -42,6 +43,8 @@ private:
   void printPressedSwitch(uint8_t c, uint8_t r);
 
   Timer* standby_timer;
+  Timer* squished_switch_timer;
+  const uint32_t squished_delay = 100000;
 
   bool pressed [NUM_MATRIX_POSITIONS] = {0};
 

@@ -5,6 +5,7 @@ VolatileFlag* change_flag = new VolatileFlag(0);
 Matrix::Matrix(){
   // milliseconds to wait after the last keypress before entering standby:
   standby_timer = new Timer(100, 0, Timer::MILLISECONDS);
+  squished_switch_timer = new Timer(squished_delay, 0, Timer::MILLISECONDS);
 }
 
 void Matrix::setup(){
@@ -74,6 +75,7 @@ void Matrix::detachRowPinInterrupts(){
 
 
 void Matrix::enterStandby(){
+  squished_switch_timer->disable();
   enablePinChangeInterrupt();
 }
 
@@ -81,15 +83,25 @@ void Matrix::exitStandby(){
   disablePinChangeInterrupt();
   change_flag->unsafeUnset();
   standby_timer->start();
+  squished_switch_timer->start();
 }
 
-bool Matrix::inStandby(){
+bool Matrix::isInStandby(){
   return standby_timer->isDisabled();
+}
+
+bool Matrix::isSquishedInBackpack(){
+  squished_switch_timer->isDone();
+}
+
+bool Matrix::shutdown(){
+  setColumnsHiZ();
 }
 
 bool Matrix::scanIfChanged(){
   // Return true if we scan. Handle entering and exiting standby.
-  if(inStandby()){
+
+  if(isInStandby()){
     if(change_flag->get()){
       // an interrupt happened since the last scan
       exitStandby();

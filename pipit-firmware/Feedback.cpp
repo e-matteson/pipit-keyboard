@@ -233,6 +233,21 @@ void Feedback::updateLED(){
     }
     break;
 
+  case SHUTDOWN_ROUTINE:
+    if(led_subroutine == 6){
+      endRoutine();
+    }
+    else if(led_subroutine % 2 == 0){
+      led_timer->start(500);
+      setLEDColor(PURPLE);
+    }
+    else{
+      led_timer->start(500);
+      setLEDColor(BLACK);
+    }
+    led_subroutine++;
+    break;
+
   case ALL_COLORS_ROUTINE:
     if(led_subroutine == BLACK){
       endRoutine();
@@ -241,7 +256,7 @@ void Feedback::updateLED(){
       led_timer->start(500);
       setLEDColor((led_color_enum) led_subroutine);
       led_subroutine++;
-      }
+    }
     break;
 
   case RAINBOW_ROUTINE:
