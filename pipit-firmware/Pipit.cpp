@@ -50,13 +50,9 @@ void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   if(switches->readyToPress()){
     // Lookup the chord and send the corresponding key sequence.
-    // Serial.print("start send: ");
-    // sender->history->printStack();
     Chord chord(mode);
     switches->makeChordBytes(&chord);
     processChord(&chord);
-    // Serial.print("end send: ");
-    // sender->history->printStack();
   }
   else if(switches->readyToRelease()){
     // Make sure all keys are released
@@ -150,7 +146,27 @@ void Pipit::doCommand(uint8_t code){
     /**** add cases for new commands here ****/
 
   case conf::COMMAND_DELETE_WORD:
-    sender->deleteLastWord();
+    deleteLastWord();
+    break;
+
+  case conf::COMMAND_LEFT_WORD:
+    move(WORD, LEFT);
+    break;
+
+  case conf::COMMAND_LEFT_LIMIT:
+    move(LIMIT, LEFT);
+    break;
+
+  case conf::COMMAND_RIGHT_WORD:
+    move(WORD, RIGHT);
+    break;
+
+  case conf::COMMAND_RIGHT_LIMIT:
+    move(LIMIT, RIGHT);
+    break;
+
+  case conf::COMMAND_CYCLE_WORD:
+    cycleLastWord();
     break;
 
   case conf::COMMAND_STICKY_CTRL:
@@ -181,10 +197,6 @@ void Pipit::doCommand(uint8_t code){
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
-  case conf::COMMAND_CYCLE_WORD:
-    cycleAnagram();
-    break;
-
   case conf::COMMAND_DEFAULT_MODE:
     // TODO should anything else change when changing mode?
     mode = conf::mode_enum::DEFAULT_MODE;
@@ -205,9 +217,31 @@ void Pipit::doCommand(uint8_t code){
   }
 }
 
+/********** High-level editing commands **********/
 
-void Pipit::cycleAnagram(){
-  Entry* entry = sender->history->peek();
+void Pipit::move(Motion motion, Direction direction){
+  uint16_t count = sender->history->calcDistance(motion, direction);
+  uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
+  for(int16_t i = 0; i < count; i++){
+    sender->sendKey(key, 0);
+    delay(6*comms->proportionalDelay(count));
+  }
+}
+
+void Pipit::deleteLastWord(){
+  // Delete the last sent key sequence by sending the correct number of backspaces.
+  move(WORD_EDGE, RIGHT);
+  int16_t count = sender->history->calcDistance(WORD, LEFT);
+  for(int16_t i = 0; i < count; i++){
+    sender->sendKey(KEY_BACKSPACE&0xff, 0);
+    // For some reason the backspaces get dropped more easily then word letters
+    //  so add a longer delay between sends.
+    delay(6*comms->proportionalDelay(count));
+  }
+}
+
+void Pipit::cycleLastWord(){
+  Entry* entry = sender->history->getEntryAtCursor();
   if(!entry->isAnagrammable()){
     feedback->triggerUnknown();
     return;
@@ -220,20 +254,19 @@ void Pipit::cycleAnagram(){
   uint8_t data_length = 0;
 
   while(1) {
-    if(new_chord.cycleAnagramModifier() == original_num){
+    new_chord.cycleAnagramModifier();
+    if(new_chord.getAnagramNum() == original_num){
       // We've tried all the anagram modifiers, stop.
-      return;
+      feedback->triggerUnknown();
+      return; // Fail
     }
     if((data_length=lookup->word(&new_chord, data))){
       // This anagram mod was found!
-      sender->deleteLastWord();
+      deleteLastWord();
       sender->sendWord(data, data_length, &new_chord);
       feedback->triggerWord();
-      return;
+      return; // Success
     }
     // Else, this anagram mod wasn't found, try the next one right away.
   }
-
-  DEBUG1_LN("WARNING: no anagram found");
-  feedback->triggerUnknown();
 }

@@ -12,7 +12,7 @@ Switches::Switches(){
     switch_status[i] = Switches::NOT_PRESSED;
     debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0, Timer::MILLISECONDS);
     debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0, Timer::MILLISECONDS);
-    first_press_timers[i] = new Timer(3*DEBOUNCE_DELAY, 1, Timer::MILLISECONDS);
+    first_press_timers[i] = new Timer(5*DEBOUNCE_DELAY, 1, Timer::MILLISECONDS);
   }
 }
 
@@ -29,9 +29,16 @@ void Switches::setup(){
 bool Switches::isAnySwitchStillBouncing(){
   // Check if any switches have been repeatedly bouncing for a while.
   for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
-    if(first_press_timers[i]->isRunning()
-       && first_press_timers[i]->elapsed() > DEBOUNCE_DELAY){
-      return 1;
+    if(first_contact_timers[i]->isRunning()){
+      uint32_t time = first_contact_timers[i]->elapsed();
+
+      // Serial.print(i);
+      // Serial.print(": ");
+      // Serial.println(time);
+
+      if(time > DEBOUNCE_DELAY){
+        return 1;
+      }
     }
   }
   return 0;
@@ -88,6 +95,7 @@ void Switches::updateSwitchStatuses(){
         if(debounceRelease(i)){
           // Switch was quickly tapped and released, before the chord timer even ran out.
           // Change status back to PRESSED, after debounceRelease set it to NOT_PRESSED.
+          // TODO how might this interact with the bouncy-switch grace period?
           switch_status[i] = Switches::PRESSED;
           // Force a send during this loop iteration.
           chord_timer->forceDone();
@@ -106,9 +114,9 @@ bool Switches::debouncePress(uint8_t switch_index){
     // Start debouncing, don't change status.
     debounce_press_timers[switch_index]->start();
 
-    if(!first_press_timers[switch_index]->isRunning()){
+    if(!first_contact_timers[switch_index]->isRunning()){
       // This switch hasn't been pressed recently, consider this its first press
-      first_press_timers[switch_index]->start();
+      first_contact_timers[switch_index]->start();
     }
   }
   else if(debounce_press_timers[switch_index]->isDone()){
@@ -119,14 +127,14 @@ bool Switches::debouncePress(uint8_t switch_index){
     chord_timer->start();
     held_timer->start();
 
-    if(first_press_timers[switch_index]->isRunning()){
+    if(first_contact_timers[switch_index]->isRunning()){
       // If this switch bounced for longer than DEBOUNCE_DELAY, subtract that
       //  extra time from the chord_timer, so the bounces don't make the chord
       //  delay longer than it really should be. The effect is small, but might
       //  matter if a broken switch is really bouncy.
-      int32_t elapsed = first_press_timers[switch_index]->elapsed();
+      int32_t elapsed = first_contact_timers[switch_index]->elapsed();
       chord_timer->jumpAhead(max(0, elapsed - DEBOUNCE_DELAY));
-      first_press_timers[switch_index]->disable();
+      first_contact_timers[switch_index]->disable();
     }
 
     // Check if the switch was double tapped.

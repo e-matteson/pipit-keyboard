@@ -19,8 +19,6 @@ public:
   void sendWord(const uint8_t* data, uint8_t data_length, Chord* chord);
   void sendKey(uint8_t key_code, uint8_t mod_byte);
 
-  void deleteLastWord();
-
   void setStickymod(uint8_t mod_byte);
 
   History* history;
@@ -40,8 +38,6 @@ private:
   /***** optimized releases *****/
   uint8_t last_sent_keycode = 0;
   uint8_t last_sent_mod_byte = 0;
-
-
 };
 
 #endif

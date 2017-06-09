@@ -240,11 +240,17 @@ command_delete_word  command_pause   command_led_rainbow
   .     .              .     .         .     .
   ... ...              ... ...         ... .*.
 
-command_leftright   command_cycle_anagram  command_led_battery command_led_colors
+command_leftright   command_cycle_word     command_led_battery command_led_colors
 ....   ****         ....   ....            ****   ....         ****   .*..
 ....   ....         .***   ....            ....   *...         ....   ....
   .     .             .     .                .     .             .     .
   ... ...             ... ...                ... .*.             ... .*.
+
+command_left_word   command_right_word    command_left_limit   command_right_limit
+....   ....         ....   ....           ....   ....         ....   ....
+..*.   ....         ...*   ....           .**.   ....         ..**   ....
+  .     .             .     .               .     .             .     .
+  ... .*.             ... .*.               ... .*.             ... .*.
 
 command_left_hand_mode
 ****   ....
@@ -486,17 +492,17 @@ macro_org_cycle_ctrl   macro_org_cycle_shift  macro_org_cycle
   .     .                .     .                .     .
   ..* ...                *.. ...                ... ...
 
-macro_org_insert_link  macro_org_store_link
-*...   ...*            ....   ...*
-...*   ....            **..   ....
-  .     .                .     .
-  ... .*.                ... .*.
+macro_org_insert_link  macro_org_store_link  macro_gi           macro_gx
+*...   ...*            ....   ...*           ..*.   ....        ..**   ....
+...*   ....            **..   ....           ...*   *...        ....   **..
+  .     .                .     .               .     .            .     .
+  ... .*.                ... .*.               ... .*.            ... .*.
 
-macro_g_comma         macro_g_semicolon       macro_gi           macro_gx
-....   ....           ....   ....             ..*.   ....        ..**   ....
-...*   ....           .*..   ....             ...*   *...        ....   **..
-  .     .               .     .                 .     .            .     .
-  ... .*.               ... .*.                 ... .*.            ... .*.
+# macro_g_comma         macro_g_semicolon
+# ....   ....           ....   ....
+# ...*   ....           .*..   ....
+#   .     .               .     .
+#   ... .*.               ... .*.
 
 macro_f_comma         macro_cap_f_comma       macro_blackhole
 ....   *...           ....   *...             ....   ....

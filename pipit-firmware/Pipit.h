@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_H_
-#define PROCESSOR_H_
+#ifndef PIPIT_H_
+#define PIPIT_H_
 
 #include <Arduino.h>
 #include "auto_config.h"
@@ -44,23 +44,18 @@ private:
 
   void processChord(Chord* new_chord);
 
-  void resetLastWord();
-  void storeLastWord(Chord* chord);
-  void cycleAnagram();
-  void handleUnknownDeletion();
-
   void doCommand(uint8_t code);
 
+  void cycleLastWord();
+  void deleteLastWord();
+  void move(Motion motion, Direction direction);
 
   Switches* switches;
   Lookup* lookup;
   Feedback* feedback;
   Sender* sender;
-  // Chord* saved_chord;
   Comms* comms;
 
-  /***** word anagram cycling *****/
-  bool was_last_send_a_word = 0;
 
   conf::mode_enum mode = conf::mode_enum::DEFAULT_MODE;
 
