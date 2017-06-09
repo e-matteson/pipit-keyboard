@@ -9,7 +9,8 @@
 
 
 Feedback::Feedback(){
-  this->battery = new Battery;
+  battery = new Battery;
+  led_timer = new Timer(Timer::MILLISECONDS);
 
 #ifdef ENABLE_RGB_LED
   for(uint8_t p = 0; p != NUM_RGB_LED_PINS; p++){
@@ -65,7 +66,7 @@ void Feedback::updateLED(){
 #endif
 
 
-  if(led_timer.isRunning()){
+  if(led_timer->isRunning()){
     // Timer hasn't run out, we don't need to do anything yet.
     return;
   }
@@ -76,7 +77,7 @@ void Feedback::updateLED(){
   case BOOT_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(WHITE);
       led_subroutine++;
       break;
@@ -88,7 +89,7 @@ void Feedback::updateLED(){
   case BATTERY_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(3000);
+      led_timer->start(3000);
       led_subroutine++;
       Serial.println(battery->getLevel());
       switch(battery->getLevel()){
@@ -122,7 +123,7 @@ void Feedback::updateLED(){
   case BLE_NO_CONNECTION_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(100);
+      led_timer->start(100);
       setLEDColor(DIM_BLUE);
       led_subroutine++;
       break;
@@ -135,12 +136,12 @@ void Feedback::updateLED(){
   case FLASH_GREEN_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(GREEN);
       led_subroutine++;
       break;
     default:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(BLACK);
       led_subroutine = 0;
     }
@@ -149,12 +150,12 @@ void Feedback::updateLED(){
   case FLASH_RED_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(RED);
       led_subroutine++;
       break;
     default:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(BLACK);
       led_subroutine = 0;
     }
@@ -163,7 +164,7 @@ void Feedback::updateLED(){
   case PLAIN_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(BLUE);
       led_subroutine++;
       break;
@@ -175,7 +176,7 @@ void Feedback::updateLED(){
   case MACRO_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor(YELLOW);
       led_subroutine++;
       break;
@@ -187,7 +188,7 @@ void Feedback::updateLED(){
   case WORD_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start( 500);
+      led_timer->start( 500);
       setLEDColor(GREEN);
       led_subroutine++;
       break;
@@ -199,7 +200,7 @@ void Feedback::updateLED(){
   case UNKNOWN_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start( 100);
+      led_timer->start( 100);
       setLEDColor(RED);
       led_subroutine++;
       break;
@@ -211,7 +212,7 @@ void Feedback::updateLED(){
   case COMMAND_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start( 500);
+      led_timer->start( 500);
       setLEDColor(ORANGE);
       led_subroutine++;
       break;
@@ -223,7 +224,7 @@ void Feedback::updateLED(){
   case WARNING_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer.start( 700);
+      led_timer->start( 700);
       setLEDColor(ORANGE);
       led_subroutine++;
       break;
@@ -237,7 +238,7 @@ void Feedback::updateLED(){
       endRoutine();
     }
     else{
-      led_timer.start(500);
+      led_timer->start(500);
       setLEDColor((led_color_enum) led_subroutine);
       led_subroutine++;
       }
@@ -272,7 +273,7 @@ void Feedback::updateLED(){
       // off-by-one, but whatever
       led_subroutine = 0;
     }
-    led_timer.start(3);
+    led_timer->start(3);
     led_subroutine++;
     break;
 
@@ -289,7 +290,7 @@ void Feedback::startRoutine(led_routine_enum routine){
 #endif
   led_routine = routine;
   led_subroutine = 0;
-  led_timer.disable();
+  led_timer->disable();
   setLEDColor(BLACK);
 }
 

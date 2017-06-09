@@ -4,15 +4,15 @@
 Switches::Switches(){
   matrix = new Matrix();
 
-  chord_timer = new Timer(CHORD_DELAY, 0);
-  release_timer = new Timer(CHORD_DELAY, 0);
-  held_timer = new Timer(HELD_DELAY, 0);
+  chord_timer = new Timer(CHORD_DELAY, 0, Timer::MILLISECONDS);
+  release_timer = new Timer(CHORD_DELAY, 0, Timer::MILLISECONDS);
+  held_timer = new Timer(HELD_DELAY, 0, Timer::MILLISECONDS);
 
   for(uint8_t i = 0; i != NUM_MATRIX_POSITIONS; i++){
     switch_status[i] = Switches::NOT_PRESSED;
-    debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
-    debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
-    first_press_timers[i] = new Timer(3*DEBOUNCE_DELAY, 1);
+    debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0, Timer::MILLISECONDS);
+    debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0, Timer::MILLISECONDS);
+    first_press_timers[i] = new Timer(3*DEBOUNCE_DELAY, 1, Timer::MILLISECONDS);
   }
 }
 

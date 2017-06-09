@@ -71,7 +71,7 @@ private:
   void setLEDRGB(uint8_t red, uint8_t green, uint8_t blue);
 
   Battery* battery;
-  Timer led_timer;
+  Timer* led_timer;
   // Timer led_timer(1000, 0);
   led_routine_enum led_routine = NO_ROUTINE; // The active LED routine
   uint16_t led_subroutine = 0; // The active LED subroutine

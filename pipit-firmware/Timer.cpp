@@ -1,18 +1,22 @@
 #include "Timer.h"
 
-Timer::Timer(){
+Timer::Timer(time_units_enum _units){
   // For making arrays of Timers.
   // If you use this, you must manually set the default value!
   disable();
+  units = _units;
 }
 
-Timer::Timer(uint32_t new_default_value, bool start_now){
-  setDefaultValue(new_default_value);
+
+Timer::Timer(uint32_t _default_value, bool start_now, time_units_enum _units){
+  units = _units;
+  setDefaultValue(_default_value);
   disable();
   if(start_now){
     start();
   }
 }
+
 
 void Timer::start(){
   start(default_value);
@@ -21,7 +25,7 @@ void Timer::start(){
 void Timer::start(uint32_t new_value){
   value = new_value;
   is_disabled = 0;
-  start_millis = millis();
+  start_time = getSystemTime();
 }
 
 void Timer::forceDone(){
@@ -38,7 +42,7 @@ bool Timer::isDisabled(){
 
 bool Timer::peekDone(){
   // Check if done, but don't change anything!
-  return !isDisabled() && (value <= (millis() - start_millis));
+  return !isDisabled() && (remaining() == 0);
 }
 
 bool Timer::isDone(){
@@ -58,12 +62,32 @@ void Timer::setDefaultValue(int32_t new_default_value){
   default_value = new_default_value;
 }
 
-uint32_t Timer::elapsed(){
-  // For use as a stopwatch
-  // This can never be negative right? The clock is monotonic, right?
-  return  millis() - start_millis;
+uint32_t Timer::remaining(){
+  uint32_t elapsed_time = elapsed();
+  if(elapsed_time > value){
+    // Done!
+    return 0;
+  }
+  return value - elapsed_time;
 }
 
-void Timer::jumpAhead(uint32_t millis_ahead){
-  start_millis -= millis_ahead;
+uint32_t Timer::elapsed(){
+  // This works even if the clock overflowed, because modular arithmetic
+  return getSystemTime() - start_time;
+}
+
+void Timer::jumpAhead(uint32_t units_ahead){
+  start_time -= units_ahead;
+}
+
+uint32_t Timer::getSystemTime(){
+  switch(units){
+  case Timer::MILLISECONDS:
+    return millis();
+  case Timer::MICROSECONDS:
+    return micros();
+  default:
+    DEBUG1_LN("WARNING: unknown timer units");
+    return 0;
+  }
 }
