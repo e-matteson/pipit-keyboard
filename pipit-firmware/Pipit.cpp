@@ -7,6 +7,8 @@ Pipit::Pipit(){
   sender = new Sender(comms);
   feedback = new Feedback();
   // saved_chord = new Chord(mode);
+
+  loop_timer = new Timer(loop_delay_micros, 0, Timer::MICROSECONDS);
 }
 
 void Pipit::setup(){
@@ -19,8 +21,8 @@ void Pipit::setup(){
 void Pipit::loop(){
   switches->update();
   sendIfReady();
-  // delayMicroseconds(50);
-  delayMicroseconds(500);
+  delayMicroseconds(loop_timer->remaining());
+  loop_timer->start();
   feedback->updateLED();
 }
 
