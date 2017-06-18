@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::fmt;
 
 
 // The chord length should be set once after the Options are read, and then be
@@ -19,7 +20,6 @@ fn get_chord_length() -> usize {
 }
 
 
-#[derive(Debug)]
 #[derive(Clone)]
 pub struct Chord {
     bits: Vec<bool>,
@@ -91,7 +91,12 @@ impl Chord {
         }
         v
     }
+}
 
+impl fmt::Debug for Chord{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Chord {{ {} }}", self.to_string())
+    }
 }
 
 fn byte_to_int(v: &Vec<bool>) -> i64 {
