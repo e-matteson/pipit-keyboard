@@ -1,5 +1,6 @@
 use time::*;
 use std::path::Path;
+use std::collections::BTreeMap;
 
 use types::{Sequence, KeyPress, Chord, Maps, Options, OpDef, OpType};
 use format::{Format, CArray, Lookup, compress, make_compression_macros};
@@ -23,17 +24,17 @@ impl Options {
         for (name, op) in self.get_non_internal() {
             f.append(&op.format(&name));
         }
-        f.append_newline();
-        f.append(&self.format_modes());
+        // f.append_newline();
+        // f.append(&self.format_modes());
         f
     }
 
-    fn format_modes (&self) -> Format {
-        Format{
-            h: make_enum(&self.get_modes(), "mode_enum"),
-            c: String::new(),
-        }
-    }
+    // fn format_modes (&self) -> Format {
+    //     Format{
+    //         h: make_enum(&self.get_modes(), "mode_enum"),
+    //         c: String::new(),
+    //     }
+    // }
 }
 
 
@@ -61,6 +62,9 @@ impl OpDef {
             OpType::Array2D => {
                 self.format_array2d(name)
             }
+            // OpType::Mode {..} => {
+            //     self.format_mode(name)
+            // }
             _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
@@ -127,9 +131,32 @@ impl OpDef {
             .fill_2d(self.get_val().unwrap_vec2())
             .format()
     }
-
 }
 
+// TODO put in c_array.rs
+struct ModeStruct{
+    plains: String,
+    macros: String,
+    words: String,
+    commands: String,
+    wordmod_capital_chord: Chord,
+    wordmod_nospace_chord: Chord,
+    anagram_chords: Vec<Chord>,
+}
+
+impl ModeStruct{
+    // fn format(&self, name: &str) -> Format {
+    //     let mut dict = BTreeMap::new();
+    //     dict.insert("plains", self.plains);
+    //     dict.insert("macros", self.macros);
+    //     dict.insert("words", self.words);
+    //     dict.insert("commands", self.commands);
+    //     // TODO how to make strings from vecs?
+    //     // dict.push("wordmod_capital_chord", self.wordmod_capital_chord.to_ints().to_string());
+    //     // dict.push("wordmod_nospace_chord", self.wordmod_nospace_chord.to_ints().to_string());
+    //     // dict.push("anagram_chords", self.anagram_chords.to_ints().to_string());
+    // }
+}
 
 impl Sequence {
 
@@ -164,21 +191,36 @@ impl Maps {
         let mut f = Format::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
         f.append(&self.options.format());
-        f.append(&self.format_anagrams());
-        f.append(&self.format_wordmods());
-        f.append(&self.format_commands());
-        f.append(&self.format_plains());
-        f.append(&self.format_macros());
-        f.append(&self.format_words());
+        // f.append(&self.format_anagrams());
+        // f.append(&self.format_wordmods());
+        // f.append(&self.format_commands());
+        // f.append(&self.format_plains());
+        // f.append(&self.format_macros());
+        // f.append(&self.format_words());
+
+        f.append(&self.format_modes());
+
         f.append(&format_outro());
         f
     }
 
+    fn format_modes (&self) -> Format {
+        // let mut mapping_types: BTreeMap<String, > = BTreeMap::new();
+
+        // format_lookups(&self.words, &self.chords, "word", true, false)
+        let l = Lookup::new(&self.words, &self.chords, &self.options, "word", true, false);
+        // let mut word_struct_names = BTreeMap<String, String>::new();
+        let mut word_struct_names = BTreeMap::new();
+        let f = l.format(&mut word_struct_names);
+    }
 
     fn format_words (&self) -> Format {
         // format_lookups(&self.words, &self.chords, "word", true, false)
         let l = Lookup::new(&self.words, &self.chords, &self.options, "word", true, false);
-        l.format()
+        // let mut word_struct_names = BTreeMap<String, String>::new();
+        let mut word_struct_names = BTreeMap::new();
+        let f = l.format(&mut word_struct_names);
+        f
     }
 
     fn format_plains (&self) -> Format {
@@ -230,25 +272,25 @@ impl Maps {
 
     pub fn format_anagrams(&self) -> Format {
         let mut f = Format::new();
-        f.append(&self.format_anagram_masks());
+        // f.append(&self.format_anagram_masks());
         f.append(&self.format_anagram_lookup());
         f
     }
 
-    fn format_anagram_masks(&self) -> Format {
-        // TODO consistent naming
-        let mut f = Format::new();
-        let anagram_masks: Vec<Chord> = self.make_anagram_bit_masks();
-        let anagram_bytes: Vec<_> = anagram_masks.iter()
-            .map(|c| c.to_ints())
-            .collect();
+    // fn format_anagram_masks(&self) -> Format {
+    //     // TODO consistent naming
+    //     let mut f = Format::new();
+    //     let anagram_masks: Vec<Chord> = self.make_anagram_bit_masks();
+    //     let anagram_bytes: Vec<_> = anagram_masks.iter()
+    //         .map(|c| c.to_ints())
+    //         .collect();
 
-        f.append(&CArray::new("anagram_mask_chord_bytes")
-                 .fill_2d(&anagram_bytes)
-                 .format());
-        f.append_newline();
-        f
-    }
+    //     f.append(&CArray::new("anagram_mask_chord_bytes")
+    //              .fill_2d(&anagram_bytes)
+    //              .format());
+    //     f.append_newline();
+    //     f
+    // }
 
     fn format_anagram_lookup(&self) -> Format {
         // TODO consistent naming
@@ -366,6 +408,7 @@ fn make_debug_macros() -> String {
 
 fn make_enum(variants: &Vec<String>, name: &str) -> String {
     // TODO move somewhere?
+    // TODO only assign first to 0
     let contents = variants
         .iter()
         .enumerate()

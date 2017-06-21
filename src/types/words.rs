@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, KeyPress};
+use types::{Chord, Sequence, KeyPress, Maps};
 
 pub struct Word {
     pub name: String,
@@ -8,103 +8,105 @@ pub struct Word {
     pub chord: Chord,
 }
 
+pub struct WordBuilder<'a> {
+    seq_spelling: &'a str,
+    chord_spelling: &'a str,
+    anagram: u64,
+    mode: &'a str,
+    maps: &'a Maps,
+}
 
-impl Word {
-    pub fn new(seq_spelling: &str, chord_spelling: &str, anagram: u64,
-               anagram_list: &Vec<String>, chords: &BTreeMap<String, Chord>)
-               -> Word
-    {
-        let name = make_word_name(seq_spelling, chord_spelling, anagram);
-
+impl<'a> WordBuilder<'a> {
+    pub fn finalize(&self) -> Word {
+        // TODO look for WORDKEY_* before KEY_*
         Word{
-            name: name,
-            seq: make_word_sequence(seq_spelling),
-            chord: make_word_chord(chord_spelling, anagram, anagram_list, chords),
+            name: self.make_name(),
+            seq: self.make_sequence(),
+            chord: self.make_chord(),
         }
     }
-}
 
-fn make_word_name(seq_spelling: &str, chord_spelling: &str,
-                  anagram: u64) -> String {
-    // Ensure that each word has a unique name.
+    fn make_name(&self) -> String {
+        // Ensure that each word has a unique name.
 
-    let mut name = format!("word_{}", seq_spelling);
-    if chord_spelling != seq_spelling {
-        name += &format!("_{}", chord_spelling);
-    }
-    if anagram != 0 {
-        name += &format!("_{}", anagram);
-    }
-    name
-}
-
-
-fn make_word_sequence(word: &str) -> Sequence {
-    let mut seq = Sequence::new();
-    for letter in word.chars(){
-        seq.push(KeyPress{key: get_key_name_for_seq(letter),
-                          modifier: get_mod_name_for_seq(letter)})
-    }
-    seq
-}
-
-
-fn get_key_name_for_seq(character: char) -> String {
-    if character.is_alphanumeric() {
-        return format!("KEY_{}", character.to_uppercase());
-    }
-    match character{
-        ' '  => "KEY_SPACE".to_owned(),
-        '<'  => "KEY_BACKSPACE".to_owned(),
-        '\'' => "KEY_QUOTE".to_owned(),
-        '.'  => "KEY_PERIOD".to_owned(),
-        _ => panic!("illegal character in sequence: {}", character),
-    }
-}
-
-fn get_mod_name_for_seq(character: char) -> String {
-    if character.is_uppercase() {
-        "MODIFIERKEY_SHIFT".to_owned()
-    } else {
-        "0".to_owned()
-    }
-}
-
-fn make_word_chord(word: &str, anagram: u64, anagram_list: &Vec<String>,
-                   chords: &BTreeMap<String, Chord>) -> Chord
-{
-    let ignored = vec!['<', '.']; //TODO make this static?
-
-    let mut chord = Chord::new();
-    for letter in word.chars(){
-        if ignored.contains(&letter){
-            continue;
+        let mut name = format!("word_{}", self.seq_spelling);
+        if self.chord_spelling != self.seq_spelling {
+            name += &format!("_{}", self.chord_spelling);
         }
-        chord.intersect(get_letter_chord(letter, chords));
+        if self.anagram != 0 {
+            name += &format!("_{}", self.anagram);
+        }
+        name
     }
-    let anagram_name = anagram_list.iter()
-        .nth(anagram as usize)
-        .expect("invalid anagram number");
-    let anagram_chord = chords.get(anagram_name)
-        .expect("invalid anagram name");
-    chord.intersect(anagram_chord);
-    chord
-}
 
 
-fn get_letter_chord(letter: char, chords: &BTreeMap<String, Chord>) -> &Chord {
-    let name = get_key_name_for_chord(letter);
-    chords.get(&name)
-        .expect(&format!("no chord for key name: {}", name))
-}
+    fn make_sequence(&self, word: &str) -> Sequence {
+        let mut seq = Sequence::new();
+        for letter in word.chars(){
+            seq.push(KeyPress{key: self.get_key_name_for_seq(letter),
+                              modifier: self.get_mod_name_for_seq(letter)})
+        }
+        seq
+    }
 
-fn get_key_name_for_chord(character: char) -> String {
-    if character.is_alphanumeric() {
-        return format!("key_{}", character.to_lowercase())
+
+    fn get_key_name_for_seq(&self, character: char) -> String {
+        if character.is_alphanumeric() {
+            return format!("KEY_{}", character.to_uppercase());
+        }
+        match character{
+            ' '  => "KEY_SPACE".to_owned(),
+            '<'  => "KEY_BACKSPACE".to_owned(),
+            '\'' => "KEY_QUOTE".to_owned(),
+            '.'  => "KEY_PERIOD".to_owned(),
+            _ => panic!("illegal character in sequence: {}", character),
+        }
     }
-    match character{
-        ' '  => "key_space".to_owned(),
-        '\'' => "key_quote".to_owned(),
-        _ => panic!("illegal character in chord: {}", character),
+
+    fn get_mod_name_for_seq(&self, character: char) -> String {
+        if character.is_uppercase() {
+            "MODIFIERKEY_SHIFT".to_owned()
+        } else {
+            "0".to_owned()
+        }
     }
+
+    fn make_chord(&self) -> Chord
+    {
+        let ignored = vec!['<', '.']; //TODO make this static?
+
+        let mut chord = Chord::new();
+        for letter in self.chord_spelling.chars(){
+            if ignored.contains(&letter){
+                continue;
+            }
+            chord.intersect(self.get_letter_chord(letter, self.maps));
+        }
+        let anagram_name = self.maps.anagram_list.iter()
+            .nth(self.anagram as usize)
+            .expect("invalid anagram number");
+        let anagram_chord = self.maps.get_chord(anagram_name, self.mode)
+            .expect("invalid anagram name");
+        chord.intersect(anagram_chord);
+        chord
+    }
+
+
+    fn get_letter_chord(&self, letter: char) -> &Chord {
+        // TODO return option<chord>, for if not found
+        let name = self.get_key_name_for_chord(letter);
+        self.maps.get_chord(name, )
+    }
+
+    fn get_key_name_for_chord(&self, character: char) -> String {
+        if character.is_alphanumeric() {
+            return format!("key_{}", character.to_lowercase())
+        }
+        match character{
+            ' '  => "key_space".to_owned(),
+            '\'' => "key_quote".to_owned(),
+            _ => panic!("illegal character in chord: {}", character),
+        }
+    }
+
 }

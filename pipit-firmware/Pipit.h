@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "auto_config.h"
+#include "structs.h"
 
 // Verify that the user settings match the board we're compiling for
 

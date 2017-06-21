@@ -23,5 +23,6 @@ fn main() {
 
     // TODO automatically extract path parts
     let f = maps.format("auto_config");
-    f.save("pipit-firmware/auto_config");
+    println!("DRY RUN, NOT SAVING");
+    // f.save("pipit-firmware/auto_config");
 }

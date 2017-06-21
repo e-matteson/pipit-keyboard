@@ -1,7 +1,23 @@
 use std::fmt::Display;
 use std::clone::Clone;
 use format::format::Format;
-use itertools::Itertools;
+use itertools::Itertools; // TODO unused?
+use std::collections::BTreeMap;
+
+// TODO rename file to c_types
+
+pub fn format_c_struct(struct_type: &str, name: &str, dict: &BTreeMap<String, String>) -> Format {
+    // TODO will fields be in the right order?
+    let mut c = format!("const {} {} = {{\n", struct_type, name);
+    for (field, value) in dict{
+        c += &format!("  {}, // {}\n", value, field);
+    }
+    c += "}\n";
+    Format {
+        h: format!("extern const {} {};", struct_type, name),
+        c: c
+    }
+}
 
 
 

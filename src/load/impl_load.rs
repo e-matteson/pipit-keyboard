@@ -54,8 +54,7 @@ impl Options {
                         });
                 },
                 // match all string value types
-                OpType::Mode {..}
-                | OpType::DefineString
+                OpType::DefineString
                     | OpType::IfdefValue => {
                         op_def.val = Some(
                             match parsed_map[key]{
@@ -71,6 +70,16 @@ impl Options {
                             _ => panic!("Expected boolean"),
                         });
                 },
+                // match mode (array of strings)
+                OpType::Mode {..} => {
+                    op_def.val = Some(
+                        match parsed_map[key]{
+                            Value::Array(_) => {
+                                OpVal::StrVec(toml_to_vec1_string(&parsed_map[key]))
+                            },
+                            _ => panic!("Expected string array value"),
+                        });
+                }
                 // match 1d array value types
                 OpType::Array1D => {
                     // println!("{:?}", parsed_map[key]);
@@ -79,7 +88,7 @@ impl Options {
                             Value::Array(_) => {
                                 OpVal::Vec(toml_to_vec1_int(&parsed_map[key]))
                             },
-                            _ => panic!("Expected array value"),
+                            _ => panic!("Expected 1d integer array value"),
                         });
                 },
                 // match 2d array value types
@@ -90,7 +99,7 @@ impl Options {
                             Value::Array(_) => OpVal::Vec2(
                                 toml_to_vec2_int(&parsed_map[key])
                             ),
-                            _ => panic!("Expected array value"),
+                            _ => panic!("Expected 2d integer array value"),
                         });
                 },
                 // match kmap_format

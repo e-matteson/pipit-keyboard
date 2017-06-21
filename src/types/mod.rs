@@ -1,9 +1,9 @@
 pub use self::switch_pos::SwitchPos;
 pub use self::chord::Chord;
 pub use self::sequence::{Sequence, KeyPress};
-pub use self::words::Word;
+pub use self::words::{Word, WordBuilder};
 pub use self::options::{Options, OpDef, OpType, OpVal};
-pub use self::maps::Maps;
+pub use self::maps::{Maps, SeqType};
 
 mod options;
 mod switch_pos;

@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use toml::Value;
 
-use types::{Sequence, Maps, Options};
+use types::{Sequence, Maps, SeqType, Options};
 use load::toml_conversion::*;
 use load::kmap_parser::KmapParser;
 
@@ -14,8 +14,7 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     let options = Options::load(&toml["options"]);
     let other = toml_to_map(&toml["other"]);
 
-    maps.add_modes(&options.get_modes());
-
+    load_modes(&options, maps);
     load_chords(&options, maps);
     load_wordmod_list(&other, maps);
     load_anagram_list(&other, maps);
@@ -27,21 +26,26 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     options
 }
 
+fn load_modes(options: &Options, maps: &mut Maps) {
+    // Must be called before loading chords or sequences.
+    for mode in options.get_modes(){
+        maps.add_mode(&mode, &options.get_kmaps(&mode));
+    }
+}
+
 fn load_chords(options: &Options, maps: &mut Maps) {
     let mut kmap_parser = KmapParser::new(options);
-
-    for mode in &options.get_modes(){
-        let kmap_path = options.get_val(mode).unwrap_str();
-        maps.add_chords(mode, kmap_parser.parse(kmap_path));
+    for kmap_path in maps.kmap_names.keys(){
+        maps.add_chords(kmap_path, kmap_parser.parse(kmap_path));
     }
 }
 
 fn load_macros(toml: &Value, maps: &mut Maps) {
-    maps.macros = load_sequence_map(&toml["macros"]);
+    maps.set_sequences(SeqType::Macro, load_sequence_map(&toml["macros"]));
 }
 
 fn load_plains(toml: &Value, maps: &mut Maps) {
-    maps.plains = load_sequence_map(&toml["plain_keys"]);
+    maps.set_sequences(SeqType::Plain, load_sequence_map(&toml["plain_keys"]));
 }
 
 fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
@@ -63,6 +67,7 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     // TODO use separate word lists for different modes?
+
     let word_list = toml_to_vec1_map(&other["dictionary"]);
     for mode in &maps.options.get_modes_with_words(){
         for entry in word_list.iter() {

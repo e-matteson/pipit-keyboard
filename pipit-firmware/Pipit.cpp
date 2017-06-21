@@ -19,6 +19,7 @@ void Pipit::setup(){
   feedback->startRoutine(BOOT_ROUTINE);
   feedback->updateLED();
   comms->setup();
+  Serial.println(conf::foobar.a);
 }
 
 void Pipit::loop(){

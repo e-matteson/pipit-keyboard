@@ -1,5 +1,5 @@
 use self::format::Format;
-use self::c_array::CArray;
+use self::c_array::{CArray, format_c_struct};
 use self::lookups::Lookup;
 use self::compress::*;
 
