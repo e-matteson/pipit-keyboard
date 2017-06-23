@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, SeqType, Options};
+use types::{Chord, Sequence, SeqType};
 use format::{Format, CArray, format_c_struct};
 
 type SeqMap   = BTreeMap<String, Sequence>;
@@ -49,40 +49,33 @@ impl ChordEntry {
         vec![self.offset as i64]
     }
 }
-#[allow(dead_code)]
+
 pub struct Lookup<'a> {
-    lookup_name: String,
-    chord_maps: &'a BTreeMap<String, ChordMap>,
+    seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
+    chord_maps: &'a BTreeMap<String, ChordMap>,
+    kmap_names: &'a BTreeMap<String, String>,
     use_compression: bool,
     use_mods: bool,
     // use_offsets: bool,
-    options: &'a Options,
 }
 
-pub struct Keymap<'a> {
-    seq_type: SeqType, // word, plain, macro, or command
-    chord_map: &'a ChordMap,
-    seq_map: &'a SeqMap,
-    use_compression: bool,
-    use_mods: bool,
-    // use_offsets: bool,
-}
 
 impl <'a> Lookup<'a> {
 
-    pub fn new(seq_map: &'a SeqMap, chord_maps: &'a BTreeMap<String, ChordMap>,
-               options: &'a Options, lookup_name: &str,
-               use_compression: bool, use_mods: bool)
+    pub fn new(seq_type: SeqType,
+               seq_map: &'a SeqMap,
+               chord_maps: &'a BTreeMap<String, ChordMap>,
+               kmap_names: &'a BTreeMap<String, String>)
                -> Lookup<'a>
     {
         Lookup {
-            lookup_name: lookup_name.to_owned(),
-            chord_maps: chord_maps,
+            seq_type: seq_type,
             seq_map: seq_map,
-            use_compression: use_compression,
-            use_mods: use_mods,
-            options: options,
+            chord_maps: chord_maps,
+            kmap_names: kmap_names,
+            use_compression: get_compression_config(seq_type),
+            use_mods: get_mods_config(seq_type),
         }
     }
 
@@ -95,27 +88,27 @@ impl <'a> Lookup<'a> {
         let chord_arrays = self.make_chord_arrays(&names_by_len);
 
         let mut f = Format::new();
-        f.append(&self.format_seq_arrays(seq_arrays));
-        f.append(&self.format_chord_arrays(chord_arrays));
+        f.append(&self.format_seq_arrays(&seq_arrays));
+        f.append(&self.format_chord_arrays(&chord_arrays));
 
         let seq_array_name = self.make_seq_array_name();
         for kmap in chord_arrays.keys(){
             let chord_array_name = self.make_chord_array_name(kmap);
             let s = LookupStruct {
-                chords: chord_array_name,
-                seqs: seq_array_name,
+                chords: chord_array_name.clone(),
+                sequences: seq_array_name.clone(),
                 use_compression: self.use_compression,
                 use_mods: self.use_mods,
-                use_offsets: true
+                use_offsets: true               // TODO make optional
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             f.append(&s.format(&struct_name));
-            struct_names_out.insert(kmap, struct_name);
+            struct_names_out.insert(kmap.to_string(), struct_name);
         }
         f
     }
 
-    fn format_chord_arrays(&self, chord_arrays: BTreeMap<String, Vec<Vec<ChordEntry>>>)
+    fn format_chord_arrays(&self, chord_arrays: &BTreeMap<String, Vec<Vec<ChordEntry>>>)
                            -> Format
     {
         // TODO be consistent about "array" / "subarray" terminology
@@ -127,7 +120,7 @@ impl <'a> Lookup<'a> {
                 .map(|v| flatten_chord_entries(v))
                 .collect();
 
-            let array_name = self.make_chord_array_name(kmap);
+            let array_name = self.make_chord_array_name(&kmap);
             f.append(
                 &self.format_length_arrays(
                     length_ints,
@@ -145,7 +138,7 @@ impl <'a> Lookup<'a> {
         f
     }
 
-    fn format_seq_arrays(&self, seq_arrays: Vec<Sequence>) -> Format {
+    fn format_seq_arrays(&self, seq_arrays: &Vec<Sequence>) -> Format {
         let byte_arrays: Vec<_> = seq_arrays.iter()
             .map(|keypress|
                  keypress.to_bytes(self.use_compression, self.use_mods))
@@ -298,15 +291,19 @@ impl <'a> Lookup<'a> {
     }
 
     fn make_chord_array_name(&self, kmap: &str) -> String {
-        format!("{}_{}_chord_lookup", self.lookup_name, kmap)
+        format!("{}_{}_chord_lookup",
+                self.seq_type.to_string(),
+                self.kmap_names.get(kmap).expect("kmap name not found"))
     }
 
     fn make_seq_array_name(&self) -> String {
-        format!("{}_seq_lookup", self.lookup_name)
+        format!("{}_seq_lookup", self.seq_type.to_string())
     }
 
     fn make_lookup_struct_name(&self, kmap: &str) -> String {
-        format!("{}_{}_lookup", self.lookup_name, kmap)
+        format!("{}_{}_lookup",
+                self.seq_type.to_string(),
+                self.kmap_names.get(kmap).expect("kmap name not found"))
     }
 
 }
@@ -338,6 +335,24 @@ fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<i64> {
 }
 
 
+fn get_compression_config(seq_type: SeqType) -> bool {
+    match seq_type {
+        SeqType::Plain => false,
+        SeqType::Macro => false,
+        SeqType::Command => false,
+        SeqType::Word => true,
+    }
+}
+
+fn get_mods_config(seq_type: SeqType) -> bool {
+    match seq_type {
+        SeqType::Plain => true,
+        SeqType::Macro => true,
+        SeqType::Command => false,
+        SeqType::Word => false,
+    }
+}
+
 struct LookupStruct {
     chords: String,
     sequences: String,
@@ -350,12 +365,12 @@ impl LookupStruct {
     fn format(&self, name: &str) -> Format {
         // The order of keys matters!
         let mut dict = BTreeMap::new();
-        dict.push("chords", self.chords);
-        dict.push("sequences", self.sequences);
-        dict.push("use_compression", self.use_compression.to_string());
-        dict.push("use_mods", self.use_mods.to_string());
-        dict.push("use_offsets", self.use_offsets.to_string());
-        format_c_struct("LookupStruct", name, dict)
+        dict.insert("chords".to_string(), self.chords.clone());
+        dict.insert("sequences".to_string(), self.sequences.clone());
+        dict.insert("use_compression".to_string(), self.use_compression.to_string());
+        dict.insert("use_mods".to_string(), self.use_mods.to_string());
+        dict.insert("use_offsets".to_string(), self.use_offsets.to_string());
+        format_c_struct("LookupStruct", name, &dict)
     }
 }
 

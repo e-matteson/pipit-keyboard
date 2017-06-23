@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+// use std::collections::BTreeMap;
 
 use types::{Chord, Sequence, KeyPress, Maps};
 
@@ -9,11 +9,11 @@ pub struct Word {
 }
 
 pub struct WordBuilder<'a> {
-    seq_spelling: &'a str,
-    chord_spelling: &'a str,
-    anagram: u64,
-    mode: &'a str,
-    maps: &'a Maps,
+    pub seq_spelling: &'a str,
+    pub chord_spelling: &'a str,
+    pub anagram: u64,
+    pub mode: &'a str,
+    pub maps: &'a Maps,
 }
 
 impl<'a> WordBuilder<'a> {
@@ -40,9 +40,9 @@ impl<'a> WordBuilder<'a> {
     }
 
 
-    fn make_sequence(&self, word: &str) -> Sequence {
+    fn make_sequence(&self) -> Sequence {
         let mut seq = Sequence::new();
-        for letter in word.chars(){
+        for letter in self.seq_spelling.chars(){
             seq.push(KeyPress{key: self.get_key_name_for_seq(letter),
                               modifier: self.get_mod_name_for_seq(letter)})
         }
@@ -80,22 +80,23 @@ impl<'a> WordBuilder<'a> {
             if ignored.contains(&letter){
                 continue;
             }
-            chord.intersect(self.get_letter_chord(letter, self.maps));
+            chord.intersect(&self.get_letter_chord(letter));
         }
-        let anagram_name = self.maps.anagram_list.iter()
+        let anagram_name = self.maps.anagrams.iter()
             .nth(self.anagram as usize)
             .expect("invalid anagram number");
         let anagram_chord = self.maps.get_chord(anagram_name, self.mode)
             .expect("invalid anagram name");
-        chord.intersect(anagram_chord);
+        chord.intersect(&anagram_chord);
         chord
     }
 
 
-    fn get_letter_chord(&self, letter: char) -> &Chord {
+    fn get_letter_chord(&self, letter: char) -> Chord {
         // TODO return option<chord>, for if not found
         let name = self.get_key_name_for_chord(letter);
-        self.maps.get_chord(name, )
+        self.maps.get_chord(&name, self.mode)
+            .expect(&format!("no chord for key name: {}", name))
     }
 
     fn get_key_name_for_chord(&self, character: char) -> String {

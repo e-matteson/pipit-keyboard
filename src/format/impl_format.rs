@@ -2,7 +2,7 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{Sequence, KeyPress, Chord, Maps, Options, OpDef, OpType};
+use types::{Sequence, KeyPress, Chord, Maps, SeqType, Options, OpDef, OpType};
 use format::{Format, CArray, Lookup, compress, make_compression_macros};
 
 
@@ -205,49 +205,34 @@ impl Maps {
     }
 
     fn format_modes (&self) -> Format {
-        // let mut mapping_types: BTreeMap<String, > = BTreeMap::new();
+        let mut f = Format::new();
+        f.append(&self.format_command_enum());
 
-        // format_lookups(&self.words, &self.chords, "word", true, false)
-        let l = Lookup::new(&self.words, &self.chords, &self.options, "word", true, false);
-        // let mut word_struct_names = BTreeMap<String, String>::new();
-        let mut word_struct_names = BTreeMap::new();
-        let f = l.format(&mut word_struct_names);
-    }
-
-    fn format_words (&self) -> Format {
-        // format_lookups(&self.words, &self.chords, "word", true, false)
-        let l = Lookup::new(&self.words, &self.chords, &self.options, "word", true, false);
-        // let mut word_struct_names = BTreeMap<String, String>::new();
-        let mut word_struct_names = BTreeMap::new();
-        let f = l.format(&mut word_struct_names);
+        // Format all keymap structs, and get their names
+        let mut all_struct_names: BTreeMap<SeqType, BTreeMap<String, String>>
+            = BTreeMap::new();
+        for seq_type in self.sequences.keys() {
+            let l = Lookup::new(seq_type.clone(),
+                                &self.sequences[seq_type],
+                                &self.chords,
+                                &self.kmap_names);
+            let mut struct_names = BTreeMap::new();
+            f.append(&l.format(&mut struct_names));
+            all_struct_names.insert(seq_type.clone(), struct_names);
+        }
+        // TODO anagrams and wordmods
+        // TODO mode structs
         f
     }
 
-    fn format_plains (&self) -> Format {
-        // format_lookups(&self.plains, &self.chords, "plain", false, true)
-        let l = Lookup::new(&self.plains, &self.chords, &self.options, "plain", false, true);
-        l.format()
-    }
-
-    fn format_macros (&self) -> Format {
-        // format_lookups(&self.macros, &self.chords, "macro", false, true)
-        let l = Lookup::new(&self.macros, &self.chords, &self.options, "macro", false, true);
-        l.format()
-    }
-
-    fn format_commands (&self) -> Format {
-        let command_list: Vec<_> = self.commands.keys()
+    fn format_command_enum (&self) -> Format {
+        let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
             .map(|s| s.to_owned())
             .collect();
-        let mut f = Format {
+        Format {
             h: make_enum(&command_list, "command_enum"),
             c: String::new(),
-        };
-        let chord_map = &self.chords;
-        // f.append(&format_lookups(&self.commands, chord_map, "command", false, false));
-        let l = Lookup::new(&self.commands, chord_map, &self.options, "command", false, false);;
-        f.append(&l.format());
-        f
+        }
     }
 
     fn format_wordmods(&self) -> Format {
@@ -271,28 +256,6 @@ impl Maps {
     }
 
     pub fn format_anagrams(&self) -> Format {
-        let mut f = Format::new();
-        // f.append(&self.format_anagram_masks());
-        f.append(&self.format_anagram_lookup());
-        f
-    }
-
-    // fn format_anagram_masks(&self) -> Format {
-    //     // TODO consistent naming
-    //     let mut f = Format::new();
-    //     let anagram_masks: Vec<Chord> = self.make_anagram_bit_masks();
-    //     let anagram_bytes: Vec<_> = anagram_masks.iter()
-    //         .map(|c| c.to_ints())
-    //         .collect();
-
-    //     f.append(&CArray::new("anagram_mask_chord_bytes")
-    //              .fill_2d(&anagram_bytes)
-    //              .format());
-    //     f.append_newline();
-    //     f
-    // }
-
-    fn format_anagram_lookup(&self) -> Format {
         // TODO consistent naming
         let mut f = Format::new();
         let mut anagram_ints: Vec<Vec<Vec<i64>>> = Vec::new();

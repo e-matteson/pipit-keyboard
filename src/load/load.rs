@@ -15,7 +15,7 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     let other = toml_to_map(&toml["other"]);
 
     load_modes(&options, maps);
-    load_chords(&options, maps);
+    load_chords(&options, maps.get_kmap_paths(), maps);
     load_wordmod_list(&other, maps);
     load_anagram_list(&other, maps);
     load_macros(&toml, maps);
@@ -33,10 +33,10 @@ fn load_modes(options: &Options, maps: &mut Maps) {
     }
 }
 
-fn load_chords(options: &Options, maps: &mut Maps) {
+fn load_chords(options: &Options, kmap_paths: Vec<String>, maps: &mut Maps) {
     let mut kmap_parser = KmapParser::new(options);
-    for kmap_path in maps.kmap_names.keys(){
-        maps.add_chords(kmap_path, kmap_parser.parse(kmap_path));
+    for kmap in kmap_paths {
+        maps.add_chords(&kmap, kmap_parser.parse(&kmap));
     }
 }
 
@@ -60,6 +60,7 @@ fn load_anagram_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     let command_list = toml_to_vec1_string(&other["commands"]);
+    maps.set_sequences(SeqType::Command, BTreeMap::new());
     for entry in command_list.iter() {
         maps.add_command(entry)
     }
@@ -67,8 +68,9 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     // TODO use separate word lists for different modes?
-
     let word_list = toml_to_vec1_map(&other["dictionary"]);
+    // Initialize empty word sequence map before adding words to it
+    maps.set_sequences(SeqType::Word, BTreeMap::new());
     for mode in &maps.options.get_modes_with_words(){
         for entry in word_list.iter() {
             let (seq_spelling, chord_spelling, anagram) = parse_word_entry(entry);
