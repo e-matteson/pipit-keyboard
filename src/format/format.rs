@@ -9,6 +9,7 @@ pub struct Format {
     pub c: String,   // for cpp file
 }
 
+// TODO rename to a noun
 impl Format {
 
     pub fn new() -> Format {

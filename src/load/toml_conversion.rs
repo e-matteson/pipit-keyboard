@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use types::{Sequence, KeyPress, SwitchPos};
+use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -15,13 +15,33 @@ pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
 
 pub fn toml_to_sequence(toml_array: &Value) -> Sequence {
     Sequence(toml_to_vec(toml_array, toml_to_keypress))
-
 }
 
 pub fn toml_to_kmap(toml_array: &Value) -> Vec<Vec<SwitchPos>>{
     toml_to_vec(&toml_array,
                 |d1| toml_to_vec(d1, |d2| toml_to_switchpos(d2))
     )
+}
+
+
+pub fn toml_to_kmap_info(toml_array: &Value) -> KmapInfo {
+    println!("info: {:?}", toml_array);
+    let map = toml_to_map(toml_array);
+    KmapInfo {
+        path: toml_to_kmap_path(map.get("file").expect("Missing file for mode")),
+        use_words: match map.get("words") {
+            Some(x) => toml_to_bool(x),
+            None => false,
+        }
+    }
+}
+
+pub fn toml_to_kmap_path(toml_value: &Value) -> KmapPath {
+    KmapPath(toml_to_string(toml_value))
+}
+
+pub fn toml_to_name(toml_value: &Value) -> Name {
+    Name(toml_to_string(toml_value))
 }
 
 pub fn toml_to_vec1_string(toml_array: &Value) -> Vec<String>{
@@ -57,7 +77,7 @@ pub fn toml_to_vec1_map(toml_array: &Value) -> Vec<BTreeMap<String, Value>>{
 }
 
 
-fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {
+pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)->T {
     match toml_array {
         &Value::Array(ref vector) => {
             vector.iter()
@@ -72,6 +92,13 @@ fn toml_to_int(toml_value: &Value) -> i64 {
     match toml_value {
         &Value::Integer(i) => i,
         _ => panic!("Expected integer value"),
+    }
+}
+
+fn toml_to_bool(toml_value: &Value) -> bool {
+    match toml_value {
+        &Value::Boolean(b) => b,
+        _ => panic!("Expected boolean value"),
     }
 }
 

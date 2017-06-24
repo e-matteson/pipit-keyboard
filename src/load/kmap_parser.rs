@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
 use itertools::Itertools;
 
-use types::{Chord, SwitchPos, Options};
+use types::{Chord, SwitchPos, Options, KmapPath, Name};
 
 
 const COMMENT_START: &str = "#";
@@ -31,7 +31,7 @@ impl KmapParser {
         }
     }
 
-    pub fn parse(&mut self, path: &str) -> BTreeMap<String, Chord> {
+    pub fn parse(&mut self, path: &KmapPath) -> BTreeMap<Name, Chord> {
         let all_lines = load_lines(path);
         let lines_iter =
             &all_lines.iter()
@@ -43,7 +43,7 @@ impl KmapParser {
                  (i, split(l)))
             .chunks(self.lines_in_block);    // chunk into sections
 
-        let mut pairs: Vec<(String, Chord)> = Vec::new();
+        let mut pairs: Vec<(Name, Chord)> = Vec::new();
         for chunk in lines_iter{
             let section: Vec<_> = chunk.collect();
             pairs.extend(self.parse_section(section));
@@ -51,26 +51,26 @@ impl KmapParser {
         pairs.into_iter().collect()
     }
 
-    fn parse_section(&mut self, section: Section) -> Vec<(String, Chord)>{
+    fn parse_section(&mut self, section: Section) -> Vec<(Name, Chord)>{
         let (names, blocks) = self.get_block_strings(section);
-        let mut pairs: Vec<(String, Chord)> = Vec::new();
+        let mut pairs: Vec<(Name, Chord)> = Vec::new();
         for (block, name) in blocks.iter().zip(names.iter()){
             let chord = self.to_firmware_order(block.chars()
                                                .map(|c| c != UNPRESSED_CHAR)
                                                .collect());
-            pairs.push(((*name).to_owned(), chord));
+            pairs.push(((*name).clone(), chord));
         }
         pairs
     }
 
-    fn get_block_strings(&mut self, section: Section) -> (Vec<String>, Vec<String>) {
+    fn get_block_strings(&mut self, section: Section) -> (Vec<Name>, Vec<String>) {
 
         let (line_nums, lines): (Vec<_>, Vec<_>) = section.into_iter().unzip();
         if lines.len() != self.lines_in_block {
             panic_syntax_error(*line_nums.last().unwrap());
         }
 
-        let names: Vec<String> = lines[0].iter().cloned().map(|s| s.to_owned()).collect();
+        let names: Vec<Name> = lines[0].iter().cloned().map(|s| Name(s.to_owned())).collect();
         let body: Vec<_> = lines[1..].iter().map(|l| l.join("")).collect();
         let num_blocks = names.len();
 
@@ -145,8 +145,8 @@ fn make_firmware_order(ops: &Options) -> Vec<(SwitchPos)> {
 }
 
 
-fn load_lines(path: &str) -> Vec<String> {
-    let file = File::open(path).expect("failed to open words file");
+fn load_lines(path: &KmapPath) -> Vec<String> {
+    let file = File::open(path.0.clone()).expect("failed to open words file");
     let buf = BufReader::new(file);
     let mut lines: Vec<String> =
         buf.lines()

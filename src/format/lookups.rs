@@ -1,12 +1,12 @@
 use std::fmt::Display;
 use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, SeqType};
+use types::{Chord, Sequence, KmapPath, SeqType, Name};
 use format::{Format, CArray, format_c_struct};
 
-type SeqMap   = BTreeMap<String, Sequence>;
-type ChordMap = BTreeMap<String, Chord>;
-type LenMap   = BTreeMap<usize, Vec<String>>;
+type SeqMap   = BTreeMap<Name, Sequence>;
+type ChordMap = BTreeMap<Name, Chord>;
+type LenMap   = BTreeMap<usize, Vec<Name>>;
 
 // TODO Rename lookup -> keymap
 // TODO refactor this whole file
@@ -53,8 +53,8 @@ impl ChordEntry {
 pub struct Lookup<'a> {
     seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
-    chord_maps: &'a BTreeMap<String, ChordMap>,
-    kmap_names: &'a BTreeMap<String, String>,
+    chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
+    kmap_ids: &'a BTreeMap<KmapPath, String>,
     use_compression: bool,
     use_mods: bool,
     // use_offsets: bool,
@@ -65,21 +65,21 @@ impl <'a> Lookup<'a> {
 
     pub fn new(seq_type: SeqType,
                seq_map: &'a SeqMap,
-               chord_maps: &'a BTreeMap<String, ChordMap>,
-               kmap_names: &'a BTreeMap<String, String>)
+               chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
+               kmap_ids: &'a BTreeMap<KmapPath, String>)
                -> Lookup<'a>
     {
         Lookup {
             seq_type: seq_type,
             seq_map: seq_map,
             chord_maps: chord_maps,
-            kmap_names: kmap_names,
+            kmap_ids: kmap_ids,
             use_compression: get_compression_config(seq_type),
             use_mods: get_mods_config(seq_type),
         }
     }
 
-    pub fn format(&self, struct_names_out: &mut BTreeMap<String, String>) -> Format {
+    pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, String>) -> Format {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
         let names_by_len = self.make_length_map();
@@ -103,12 +103,12 @@ impl <'a> Lookup<'a> {
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             f.append(&s.format(&struct_name));
-            struct_names_out.insert(kmap.to_string(), struct_name);
+            struct_names_out.insert(kmap.clone(), struct_name);
         }
         f
     }
 
-    fn format_chord_arrays(&self, chord_arrays: &BTreeMap<String, Vec<Vec<ChordEntry>>>)
+    fn format_chord_arrays(&self, chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>)
                            -> Format
     {
         // TODO be consistent about "array" / "subarray" terminology
@@ -166,7 +166,7 @@ impl <'a> Lookup<'a> {
     }
 
     fn make_chord_arrays(&self, names_by_len: &LenMap)
-                         -> BTreeMap<String, Vec<Vec<ChordEntry>>>
+                         -> BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>
     {
         let mut chord_arrays = BTreeMap::new();
         for kmap in self.chord_maps.keys() {
@@ -183,7 +183,7 @@ impl <'a> Lookup<'a> {
     }
 
 
-    fn make_chord_subarray(&self, names_by_len: &LenMap, length: usize, kmap: &str)
+    fn make_chord_subarray(&self, names_by_len: &LenMap, length: usize, kmap: &KmapPath)
                            -> Vec<ChordEntry>
     {
         let chords = &self.chord_maps[kmap];
@@ -254,12 +254,12 @@ impl <'a> Lookup<'a> {
 
         // Find the first name that's used in the given kmap.
         let find_name =
-            |names: &Vec<String>, kmap: &str| names.iter()
+            |names: &Vec<Name>, kmap: &KmapPath| names.iter()
             .position(|name| self.chord_maps[kmap].contains_key(name));
 
         let mut new_map: LenMap = BTreeMap::new();
         for (length, mut names) in names_by_len.into_iter() {
-            let mut v: Vec<String> = Vec::new();
+            let mut v: Vec<Name> = Vec::new();
             let mut remaining_kmaps: Vec<_> = self.chord_maps.keys().collect();
             while !names.is_empty() {   // For each entry/sequence:
                 if remaining_kmaps.len() <= 1 {
@@ -269,7 +269,7 @@ impl <'a> Lookup<'a> {
                     break;
                 }
                 for kmap in remaining_kmaps.clone() {
-                    match find_name(&names, kmap.as_ref()) {
+                    match find_name(&names, &kmap) {
                         Some(position) => {
                             // Move the entry to the new map
                             v.push(names[position].clone());
@@ -290,25 +290,25 @@ impl <'a> Lookup<'a> {
         new_map
     }
 
-    fn make_chord_array_name(&self, kmap: &str) -> String {
+    fn make_chord_array_name(&self, kmap: &KmapPath) -> String {
         format!("{}_{}_chord_lookup",
                 self.seq_type.to_string(),
-                self.kmap_names.get(kmap).expect("kmap name not found"))
+                self.kmap_ids.get(kmap).expect("kmap name not found"))
     }
 
     fn make_seq_array_name(&self) -> String {
         format!("{}_seq_lookup", self.seq_type.to_string())
     }
 
-    fn make_lookup_struct_name(&self, kmap: &str) -> String {
+    fn make_lookup_struct_name(&self, kmap: &KmapPath) -> String {
         format!("{}_{}_lookup",
                 self.seq_type.to_string(),
-                self.kmap_names.get(kmap).expect("kmap name not found"))
+                self.kmap_ids.get(kmap).expect("kmap name not found"))
     }
 
 }
 
-fn make_flat_sequence(seq_map: &SeqMap, names: &Vec<String>)
+fn make_flat_sequence(seq_map: &SeqMap, names: &Vec<Name>)
                       -> Sequence
 {
     let mut flat_seq = Sequence::new();

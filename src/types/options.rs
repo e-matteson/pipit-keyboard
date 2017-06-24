@@ -8,17 +8,17 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
 
     vec![
-        ("default_mode",
-         OpDefBuilder::new(OpType::Mode {use_words: true})
-         .required(OpReq::Required)
-         .internal(true)
-         .finalize()),
+        // ("default_mode",
+        //  OpDefBuilder::new(OpType::Mode {use_words: true})
+        //  .required(OpReq::Required)
+        //  .internal(true)
+        //  .finalize()),
 
-        ("left_hand_mode",
-         OpDefBuilder::new(OpType::Mode {use_words: false})
-         .required(OpReq::Required)
-         .internal(true)
-         .finalize()),
+        // ("left_hand_mode",
+        //  OpDefBuilder::new(OpType::Mode {use_words: false})
+        //  .required(OpReq::Required)
+        //  .internal(true)
+        //  .finalize()),
 
         // ("krita_mode",
         //  OpDefBuilder::new(OpType::Mode {use_words: false})
@@ -384,24 +384,6 @@ impl Options {
     fn get_val_len(&self, name: &str) -> usize{
         // TODO implement for other vector-based variants?
         self.get_val(name).unwrap_vec().len()
-    }
-
-    pub fn get_modes(&self) -> Vec<String> {
-        self.0.iter()
-            .filter(|&(_, val)| val.is_mode())
-            .map(|(key, _)| key.to_string())
-            .collect()
-    }
-
-    pub fn get_modes_with_words(&self) -> Vec<String> {
-        self.0.iter()
-            .filter(|&(_, val)| val.is_mode_with_words())
-            .map(|(key, _)| key.to_string())
-            .collect()
-    }
-
-    pub fn get_kmaps(&self, mode: &str) -> Vec<String> {
-        self.get_val(mode).unwrap_strvec().clone()
     }
 
     pub fn verify_requirements(&self){

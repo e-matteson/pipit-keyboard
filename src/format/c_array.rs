@@ -61,11 +61,11 @@ impl <T> CArray<T> where T: Display + Clone
         assert!(self.contents_1d.is_none() && self.contents_3d.is_none());
         self
     }
-    pub fn fill_3d(mut self, contents: &Vec<Vec<Vec<T>>>) -> CArray<T> {
-        self.contents_3d = Some(contents.to_vec());
-        assert!(self.contents_1d.is_none() && self.contents_2d.is_none());
-        self
-    }
+    // pub fn fill_3d(mut self, contents: &Vec<Vec<Vec<T>>>) -> CArray<T> {
+    //     self.contents_3d = Some(contents.to_vec());
+    //     assert!(self.contents_1d.is_none() && self.contents_2d.is_none());
+    //     self
+    // }
     pub fn format(self) -> Format {
         if let Some(contents) = self.contents_1d {
             return format_c_array(&self.name, &contents, &self.c_type, self.is_extern);

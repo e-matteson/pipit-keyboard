@@ -1,8 +1,12 @@
 ###### EVAN'S PERSONAL SETTINGS ######
-[options]
 
-default_mode               = ["keymaps/dvorak24_evan.kmap"]
-left_hand_mode             = ["keymaps/dvorak24_left.kmap"]
+[modes]
+
+default_mode               = [{file="keymaps/swap_ei.kmap"},
+                              {file="keymaps/dvorak24_evan.kmap", words=true}]
+left_hand_mode             = [{file="keymaps/dvorak24_left.kmap", words=false}]
+
+[options]
 
 chord_delay                = 30
 held_delay                 = 200

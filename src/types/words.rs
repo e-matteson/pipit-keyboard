@@ -1,9 +1,9 @@
 // use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, KeyPress, Maps};
+use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name};
 
 pub struct Word {
-    pub name: String,
+    pub name: Name,
     pub seq: Sequence,
     pub chord: Chord,
 }
@@ -12,7 +12,7 @@ pub struct WordBuilder<'a> {
     pub seq_spelling: &'a str,
     pub chord_spelling: &'a str,
     pub anagram: u64,
-    pub mode: &'a str,
+    pub kmap: &'a KmapPath,
     pub maps: &'a Maps,
 }
 
@@ -26,7 +26,7 @@ impl<'a> WordBuilder<'a> {
         }
     }
 
-    fn make_name(&self) -> String {
+    fn make_name(&self) -> Name {
         // Ensure that each word has a unique name.
 
         let mut name = format!("word_{}", self.seq_spelling);
@@ -36,7 +36,7 @@ impl<'a> WordBuilder<'a> {
         if self.anagram != 0 {
             name += &format!("_{}", self.anagram);
         }
-        name
+        Name(name)
     }
 
 
@@ -85,7 +85,7 @@ impl<'a> WordBuilder<'a> {
         let anagram_name = self.maps.anagrams.iter()
             .nth(self.anagram as usize)
             .expect("invalid anagram number");
-        let anagram_chord = self.maps.get_chord(anagram_name, self.mode)
+        let anagram_chord = self.maps.get_chord(anagram_name, self.kmap)
             .expect("invalid anagram name");
         chord.intersect(&anagram_chord);
         chord
@@ -95,19 +95,19 @@ impl<'a> WordBuilder<'a> {
     fn get_letter_chord(&self, letter: char) -> Chord {
         // TODO return option<chord>, for if not found
         let name = self.get_key_name_for_chord(letter);
-        self.maps.get_chord(&name, self.mode)
+        self.maps.get_chord(&name, self.kmap)
             .expect(&format!("no chord for key name: {}", name))
     }
 
-    fn get_key_name_for_chord(&self, character: char) -> String {
+    fn get_key_name_for_chord(&self, character: char) -> Name {
         if character.is_alphanumeric() {
-            return format!("key_{}", character.to_lowercase())
+            return Name(format!("key_{}", character.to_lowercase()))
         }
-        match character{
+        Name(match character{
             ' '  => "key_space".to_owned(),
             '\'' => "key_quote".to_owned(),
             _ => panic!("illegal character in chord: {}", character),
-        }
+        })
     }
 
 }

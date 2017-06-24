@@ -18,15 +18,49 @@ impl fmt::Display for SeqType {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct KmapInfo {
+    pub path: KmapPath,
+    pub use_words: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub struct ModeName ( pub String );
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub struct Name ( pub String );
+
+impl Name {
+    pub fn to_uppercase(&self) -> Name {
+        Name(self.0.to_uppercase())
+    }
+}
+
+impl fmt::Display for Name {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub struct KmapPath ( pub String );
+
+impl fmt::Display for KmapPath {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 // TODO typealias kmap names
 #[derive(Debug)]
 pub struct Maps {
-    pub chords:     BTreeMap<String, BTreeMap<String, Chord>>, // full kmap name to chord map
-    pub sequences:  BTreeMap<SeqType, BTreeMap<String, Sequence>>,
-    pub wordmods:   Vec<String>,
-    pub anagrams:   Vec<String>,
-    pub modes:      BTreeMap<String, Vec<String>>, // mode name to full kmap name
-    pub kmap_names: BTreeMap<String, String>, // kmap path to short kmap nickname
+    pub chords:     BTreeMap<KmapPath, BTreeMap<Name, Chord>>, // full kmap name to chord map
+    pub sequences:  BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
+    pub wordmods:   Vec<Name>,
+    pub anagrams:   Vec<Name>,
+    pub modes:      BTreeMap<ModeName, Vec<KmapInfo>>,
+    pub kmap_ids:   BTreeMap<KmapPath, String>, // kmap path to short kmap nickname
     pub options:    Options,
 }
 
@@ -38,37 +72,36 @@ impl Maps {
             wordmods: Vec::new(),
             anagrams: Vec::new(),
             modes: BTreeMap::new(),
-            kmap_names: BTreeMap::new(),
+            kmap_ids: BTreeMap::new(),
             options: Options::new(),
         }
     }
 
-    pub fn add_command(&mut self, entry: &str) {
+    pub fn add_command(&mut self, entry: &Name) {
         if self.get_sequences(SeqType::Command).contains_key(entry){
             panic!(format!("commands map already contains key: {}", entry));
         }
         // commands are a single byte code, not an actual key sequence.
         // But we'll store it as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
-        fake_seq_with_command_code.push(KeyPress::new_fake(&entry.to_uppercase()));
+        fake_seq_with_command_code.push(KeyPress::new_fake(&entry.0.to_uppercase()));
 
         self.get_sequences_mut(SeqType::Command)
             .insert(entry.to_owned(), fake_seq_with_command_code);
     }
 
     pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
-                    anagram: u64, mode: &str)
+                    anagram: u64, kmap: &KmapPath)
     {
         // TODO build word in loader code instead?
         let word = WordBuilder {
             seq_spelling: seq_spelling,
             chord_spelling: chord_spelling,
             anagram: anagram,
-            mode: mode,
+            kmap: kmap,
             maps: &self,
         }.finalize();
         self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq);
-        let kmap = self.modes[mode][0].to_string(); // TODO which kmap should the word be added to?
         self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord);
     }
 
@@ -82,74 +115,90 @@ impl Maps {
     //                          name, kmap))
     // }
 
-    pub fn set_sequences(&mut self, seq_type: SeqType, val: BTreeMap<String, Sequence>) {
+    pub fn set_sequences(&mut self, seq_type: SeqType, val: BTreeMap<Name, Sequence>) {
         assert!(!self.sequences.contains_key(&seq_type));
         self.sequences.insert(seq_type, val);
     }
 
-    pub fn get_sequences(&self, seq_type: SeqType) -> &BTreeMap<String, Sequence>{
+    pub fn get_sequences(&self, seq_type: SeqType) -> &BTreeMap<Name, Sequence>{
         self.sequences.get(&seq_type)
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
 
-    pub fn get_sequences_mut(&mut self, seq_type: SeqType) -> &mut BTreeMap<String, Sequence>{
+    pub fn get_sequences_mut(&mut self, seq_type: SeqType) -> &mut BTreeMap<Name, Sequence>{
         self.sequences.get_mut(&seq_type)
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
 
-    pub fn get_chord(&self, chord_name: &str, mode: &str) -> Option<Chord>{
-        for kmap in self.modes.get(mode).expect("unknown mode"){
-            if self.chords[kmap].contains_key(chord_name){
-                return match self.chords[kmap].get(chord_name) {
-                    Some(chord) => Some(chord.clone()),
-                    None => None,
-                }
+    pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Option<Chord>{
+        for kmap_info in self.modes.get(mode).expect("unknown mode"){
+            if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {
+                return Some(chord);
             }
         }
         None
     }
+    pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
+        match self.chords[kmap].get(chord_name) {
+            Some(chord) => Some(chord.clone()),
+            None => None,
+        }
+    }
 
-    pub fn get_chords(&self, kmap: &str) -> &BTreeMap<String, Chord>{
+    pub fn get_chords(&self, kmap: &KmapPath) -> &BTreeMap<Name, Chord>{
         self.chords.get(kmap)
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
 
-    pub fn get_chords_mut(&mut self, kmap: &str) -> &mut BTreeMap<String, Chord>{
+    pub fn get_chords_mut(&mut self, kmap: &KmapPath) -> &mut BTreeMap<Name, Chord>{
         self.chords.get_mut(kmap)
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
 
-    pub fn get_kmap_paths(&self) -> Vec<String> {
-        let v: Vec<_> = self.kmap_names.keys()
-            .map(|s| s.to_string())
+    pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
+        let v: Vec<_> = self.kmap_ids.keys()
+            .map(|s| s.clone())
             .collect();
         v
     }
 
-    // fn get_all_chords_for_mode(&self, mode: &str) -> &Vec<BTreeMap<String, Chord>>{
+    pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
+        let mut out = Vec::new();
+        for mode in self.modes.values() {
+            for kmap_info in mode.iter() {
+                if kmap_info.use_words {
+                    out.push(kmap_info.path.clone());
+                }
+            }
+        }
+        out
+    }
+
+    // fn get_all_chords_for_mode(&self, mode: &str) -> &Vec<BTreeMap<Name, Chord>>{
     //     self.chords.iter()
     //         .filter(|(key,_)| self.modes[mode].contains_key(key))
     //         .map(|(_,val)| val)
     //         .collect()
     // }
 
-    pub fn add_mode(&mut self, mode: &str, kmaps: &Vec<String>) {
-        assert!(!self.modes.contains_key(mode));
+    pub fn add_mode(&mut self, mode: ModeName, kmaps: Vec<KmapInfo>) {
+        assert!(!self.modes.contains_key(&mode));
         // Store the kmaps that are included in this mode
-        self.modes.insert(mode.to_string(), kmaps.clone());
-        for kmap in kmaps{
-            if self.kmap_names.contains_key(kmap){
+        for kmap_info in kmaps.iter() {
+            let kmap_path = &kmap_info.path;
+            if self.kmap_ids.contains_key(kmap_path){
                 continue;
             }
             // Initialize new chord map
-            self.chords.insert(kmap.to_owned(), BTreeMap::new());
+            self.chords.insert(kmap_path.clone(), BTreeMap::new());
             // Generate nickname, for later formatting
-            let nickname = format!("kmap{}", self.kmap_names.len());
-            self.kmap_names.insert(kmap.to_owned(), nickname);
+            let nickname = format!("kmap{}", self.kmap_ids.len());
+            self.kmap_ids.insert(kmap_path.clone(), nickname);
         }
+        self.modes.insert(mode, kmaps);
     }
 
-    pub fn add_chords(&mut self, kmap: &str, mut new_chords: BTreeMap<String, Chord>) {
+    pub fn add_chords(&mut self, kmap: &KmapPath, mut new_chords: BTreeMap<Name, Chord>) {
         self.chords
             .get_mut(kmap)
             .expect(&format!("Failed to add chord because kmap is unknown: {}",
@@ -157,29 +206,29 @@ impl Maps {
             .append(&mut new_chords);
     }
 
-    pub fn check_for_duplicate_chords(&self) {
-        for kmap in self.chords.keys(){
-            let mut foo: Vec<_> = self.chords[kmap].iter()
-                .map(|(k, v)|
-                     (v.to_string(), k))
-                .collect();
+    // pub fn check_for_duplicate_chords(&self) {
+    //     for kmap in self.chords.keys(){
+    //         let mut foo: Vec<_> = self.chords[kmap].iter()
+    //             .map(|(k, v)|
+    //                  (v.to_string(), k))
+    //             .collect();
 
-            foo.sort();
-            let mut last_chord = String::new();
-            let mut last_name = "";
-            for (chord, name) in foo {
-                let is_duplicate = chord == last_chord
-                    && !self.wordmods.contains(&name.to_string())
-                    && !self.wordmods.contains(&last_name.to_string());
+    //         foo.sort();
+    //         let mut last_chord = String::new();
+    //         let mut last_name = "";
+    //         for (chord, name) in foo {
+    //             let is_duplicate = chord == last_chord
+    //                 && !self.wordmods.contains(&name.to_string())
+    //                 && !self.wordmods.contains(&last_name.to_string());
 
-                if is_duplicate {
-                    println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
-                }
-                last_chord = chord;
-                last_name = name;
-            }
-        }
-    }
+    //             if is_duplicate {
+    //                 println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
+    //             }
+    //             last_chord = chord;
+    //             last_name = name;
+    //         }
+    //     }
+    // }
 
 
     // pub fn check_for_missing_seqs(&self) {

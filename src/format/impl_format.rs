@@ -2,7 +2,7 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{Sequence, KeyPress, Chord, Maps, SeqType, Options, OpDef, OpType};
+use types::{Sequence, KeyPress, Chord, Maps, SeqType, KmapPath, Name, Options, OpDef, OpType};
 use format::{Format, CArray, Lookup, compress, make_compression_macros};
 
 
@@ -134,7 +134,7 @@ impl OpDef {
 }
 
 // TODO put in c_array.rs
-struct ModeStruct{
+struct ModeStruct {
     plains: String,
     macros: String,
     words: String,
@@ -209,19 +209,21 @@ impl Maps {
         f.append(&self.format_command_enum());
 
         // Format all keymap structs, and get their names
-        let mut all_struct_names: BTreeMap<SeqType, BTreeMap<String, String>>
+        let mut all_struct_names: BTreeMap<SeqType, BTreeMap<KmapPath, String>>
             = BTreeMap::new();
         for seq_type in self.sequences.keys() {
             let l = Lookup::new(seq_type.clone(),
                                 &self.sequences[seq_type],
                                 &self.chords,
-                                &self.kmap_names);
+                                &self.kmap_ids);
             let mut struct_names = BTreeMap::new();
             f.append(&l.format(&mut struct_names));
             all_struct_names.insert(seq_type.clone(), struct_names);
         }
         // TODO anagrams and wordmods
+        // TODO mod positions
         // TODO mode structs
+        // TODO mode struct array, enum
         f
     }
 
@@ -235,51 +237,49 @@ impl Maps {
         }
     }
 
-    fn format_wordmods(&self) -> Format {
-        let mut f = Format::new();
-        for name in &self.wordmods {
-            let all_chord_bytes: Vec<Vec<i64>> =
-                self.options.get_modes().iter()
-                .map(|mode|
-                     match self.chords[mode].get(name) {
-                         Some(c) => c.to_ints(),
-                         None => Chord::new().to_ints(),})
-                .collect();
+    // fn format_wordmods(&self) -> Format {
+    //     let mut f = Format::new();
+    //     for name in &self.wordmods {
+    //         let all_chord_bytes: Vec<Vec<i64>> =
+    //             self.options.get_modes().iter()
+    //             .map(|mode|
+    //                  match self.chords[mode].get(name) {
+    //                      Some(c) => c.to_ints(),
+    //                      None => Chord::new().to_ints(),})
+    //             .collect();
 
-            let full_name = format!("{}_chord_bytes", name);
-            f.append(&CArray::new(&full_name)
-                     .fill_2d(&all_chord_bytes)
-                     .format())
-        }
-        f.append_newline();
-        f
-    }
+    //         let full_name = format!("{}_chord_bytes", name);
+    //         f.append(&CArray::new(&full_name)
+    //                  .fill_2d(&all_chord_bytes)
+    //                  .format())
+    //     }
+    //     f.append_newline();
+    //     f
+    // }
 
-    pub fn format_anagrams(&self) -> Format {
-        // TODO consistent naming
-        let mut f = Format::new();
-        let mut anagram_ints: Vec<Vec<Vec<i64>>> = Vec::new();
-        for mode in self.options.get_modes() {
-            let v: Vec<Vec<i64>> = self.anagrams.iter()
-                .map(|name|
-                     match self.chords[&mode].get(name){
-                         Some(c) => c.clone(),
-                         None => Chord::new(),
-                         // If this mode doesn't have anagram mods, they'll all be zero.
-                         // TODO make sure the firmware doesn't try to use them...
-                     })
-                .map(|chord|
-                     chord.to_ints())
-                .collect();
-            anagram_ints.push(v);
-        }
-        f.append(&CArray::new("anagram_chord_bytes")
-                 .fill_3d(&anagram_ints)
-                 .format());
-        f
-    }
-
-
+    // pub fn format_anagrams(&self) -> Format {
+    //     // TODO consistent naming
+    //     let mut f = Format::new();
+    //     let mut anagram_ints: Vec<Vec<Vec<i64>>> = Vec::new();
+    //     for mode in self.options.get_modes() {
+    //         let v: Vec<Vec<i64>> = self.anagrams.iter()
+    //             .map(|name|
+    //                  match self.chords[&mode].get(name){
+    //                      Some(c) => c.clone(),
+    //                      None => Chord::new(),
+    //                      // If this mode doesn't have anagram mods, they'll all be zero.
+    //                      // TODO make sure the firmware doesn't try to use them...
+    //                  })
+    //             .map(|chord|
+    //                  chord.to_ints())
+    //             .collect();
+    //         anagram_ints.push(v);
+    //     }
+    //     f.append(&CArray::new("anagram_chord_bytes")
+    //              .fill_3d(&anagram_ints)
+    //              .format());
+    //     f
+    // }
 }
 
 
@@ -369,7 +369,7 @@ fn make_debug_macros() -> String {
 }
 
 
-fn make_enum(variants: &Vec<String>, name: &str) -> String {
+fn make_enum(variants: &Vec<Name>, name: &str) -> String {
     // TODO move somewhere?
     // TODO only assign first to 0
     let contents = variants

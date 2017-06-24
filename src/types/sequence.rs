@@ -65,12 +65,12 @@ impl Sequence {
         self.0.iter()
     }
 
-    pub fn get_only_value(&self) -> &str{
+    // pub fn get_only_value(&self) -> &str{
 
-        assert_eq!(self.len(), 1);
-        let only_key = &self.0[0];
-        assert!(only_key.is_mod_blank());
-        &only_key.key
-    }
+    //     assert_eq!(self.len(), 1);
+    //     let only_key = &self.0[0];
+    //     assert!(only_key.is_mod_blank());
+    //     &only_key.key
+    // }
 
 }

@@ -80,6 +80,7 @@ uint8_t Chord::getAnagramNum(){
 void Chord::unsetAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
+    return;
   }
   unsetMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
 }
@@ -87,6 +88,7 @@ void Chord::unsetAnagram(uint8_t num){
 void Chord::setAnagram(uint8_t num){
   if (num > NUM_ANAGRAMS) {
     DEBUG1_LN("WARNING: Failed to set anagram modifiers");
+    return;
   }
   setMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
 }
