@@ -1,8 +1,8 @@
 use std::fmt::Display;
 use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, KmapPath, SeqType, Name};
-use format::{Format, CArray, format_c_struct};
+use types::{Chord, Sequence, KmapPath, SeqType, Name, CCode, ToC};
+use format::{Format, CArray};
 
 type SeqMap   = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
@@ -79,9 +79,10 @@ impl <'a> Lookup<'a> {
         }
     }
 
-    pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, String>) -> Format {
+    pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, CCode>) -> Format {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
+        // TODO skip words for kmap if never used?
         let names_by_len = self.make_length_map();
 
         let seq_arrays = self.make_seq_arrays(&names_by_len);
@@ -113,7 +114,7 @@ impl <'a> Lookup<'a> {
     {
         // TODO be consistent about "array" / "subarray" terminology
         let mut f = Format::new();
-        let mut array_names: Vec<String> = Vec::new();
+        let mut array_names: Vec<CCode> = Vec::new();
         for (kmap, length_entries) in chord_arrays.into_iter(){
 
             let length_ints: Vec<Vec<i64>> = length_entries.iter()
@@ -209,11 +210,14 @@ impl <'a> Lookup<'a> {
     }
 
 
-    fn format_length_arrays <T> (&self, arrays: Vec<Vec<T>>, name: &str, is_extern: bool) -> Format
+    fn format_length_arrays <T> (&self,
+                                 arrays: Vec<Vec<T>>,
+                                 name: &CCode,
+                                 is_extern: bool) -> Format
         where T: Display + Clone
     {
         let mut subarray_names: Vec<_> = (0..arrays.len())
-            .map(|x| format!("{}_{}", name, x))
+            .map(|x| CCode(format!("{}_{}", name, x)))
             .collect();
         let mut f = Format::new();
         for i in 0..subarray_names.len() {
@@ -224,10 +228,10 @@ impl <'a> Lookup<'a> {
             );
         }
 
-        subarray_names.push("NULL".to_string());
-        f.append(&CArray::new(&name)
+        subarray_names.push("NULL".to_c());
+        f.append(&CArray::new(name)
                  .is_extern(is_extern)
-                 .c_type("uint8_t*")
+                 .c_type(&"uint8_t*".to_c())
                  .fill_1d(&subarray_names)
                  .format());
         f
@@ -290,22 +294,21 @@ impl <'a> Lookup<'a> {
         new_map
     }
 
-    fn make_chord_array_name(&self, kmap: &KmapPath) -> String {
-        format!("{}_{}_chord_lookup",
+    fn make_chord_array_name(&self, kmap: &KmapPath) -> CCode {
+        CCode(format!("{}_{}_chord_lookup",
                 self.seq_type.to_string(),
-                self.kmap_ids.get(kmap).expect("kmap name not found"))
+                self.kmap_ids.get(kmap).expect("kmap name not found")))
     }
 
-    fn make_seq_array_name(&self) -> String {
-        format!("{}_seq_lookup", self.seq_type.to_string())
+    fn make_seq_array_name(&self) -> CCode {
+        CCode(format!("{}_seq_lookup", self.seq_type.to_string()))
     }
 
-    fn make_lookup_struct_name(&self, kmap: &KmapPath) -> String {
-        format!("{}_{}_lookup",
+    fn make_lookup_struct_name(&self, kmap: &KmapPath) -> CCode {
+        CCode(format!("{}_{}_lookup",
                 self.seq_type.to_string(),
-                self.kmap_ids.get(kmap).expect("kmap name not found"))
+                self.kmap_ids.get(kmap).expect("kmap name not found")))
     }
-
 }
 
 fn make_flat_sequence(seq_map: &SeqMap, names: &Vec<Name>)
@@ -353,24 +356,26 @@ fn get_mods_config(seq_type: SeqType) -> bool {
     }
 }
 
-struct LookupStruct {
-    chords: String,
-    sequences: String,
-    use_compression: bool,
-    use_mods: bool,
-    use_offsets: bool,
-}
 
-impl LookupStruct {
-    fn format(&self, name: &str) -> Format {
-        // The order of keys matters!
-        let mut dict = BTreeMap::new();
-        dict.insert("chords".to_string(), self.chords.clone());
-        dict.insert("sequences".to_string(), self.sequences.clone());
-        dict.insert("use_compression".to_string(), self.use_compression.to_string());
-        dict.insert("use_mods".to_string(), self.use_mods.to_string());
-        dict.insert("use_offsets".to_string(), self.use_offsets.to_string());
-        format_c_struct("LookupStruct", name, &dict)
+c_struct!(
+    struct LookupStruct {
+        chords: CCode,
+        sequences: CCode,
+        use_compression: bool,
+        use_mods: bool,
+        use_offsets: bool
     }
-}
+);
 
+// impl LookupStruct {
+//     fn format(&self, name: &CCode) -> Format {
+//         // The order of keys matters!
+//         let mut dict = BTreeMap::new();
+//         dict.insert("chords".to_c(), self.chords.to_c());
+//         dict.insert("sequences".to_c(), self.sequences.to_c());
+//         dict.insert("use_compression".to_c(), self.use_compression.to_c());
+//         dict.insert("use_mods".to_c(), self.use_mods.to_c());
+//         dict.insert("use_offsets".to_c(), self.use_offsets.to_c());
+//         format_c_struct(&"LookupStruct".to_c(), name, &dict)
+//     }
+// }

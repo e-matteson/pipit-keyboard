@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name};
+use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name, ToC};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -25,7 +25,7 @@ pub fn toml_to_kmap(toml_array: &Value) -> Vec<Vec<SwitchPos>>{
 
 
 pub fn toml_to_kmap_info(toml_array: &Value) -> KmapInfo {
-    println!("info: {:?}", toml_array);
+    // println!("info: {:?}", toml_array);
     let map = toml_to_map(toml_array);
     KmapInfo {
         path: toml_to_kmap_path(map.get("file").expect("Missing file for mode")),
@@ -122,5 +122,5 @@ fn toml_to_keypress(toml_array: &Value) -> KeyPress {
     if string_vec.len() != 2 {
         panic!("Expected vector of length 2");
     }
-    KeyPress {key: string_vec[0].to_owned(), modifier: string_vec[1].to_owned()}
+    KeyPress {key: string_vec[0].to_c(), modifier: string_vec[1].to_c()}
 }

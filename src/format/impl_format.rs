@@ -2,17 +2,18 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{Sequence, KeyPress, Chord, Maps, SeqType, KmapPath, Name, Options, OpDef, OpType};
+use types::{Sequence, KeyPress, Maps, SeqType, KmapPath, CCode,
+            ToC, Options, OpDef, OpType};
 use format::{Format, CArray, Lookup, compress, make_compression_macros};
 
 
 
 impl KeyPress {
-    pub fn as_bytes(&self, use_mods: bool) -> Vec<String> {
-        let mut v: Vec<String> = Vec::new();
-        v.push(format!("{}&0xff", self.key));
+    pub fn as_bytes(&self, use_mods: bool) -> Vec<CCode> {
+        let mut v: Vec<CCode> = Vec::new();
+        v.push(CCode(format!("{}&0xff", self.key)));
         if use_mods {
-            v.push(format!("({})&0xff", self.modifier));
+            v.push(CCode(format!("({})&0xff", self.modifier)));
         }
         v
     }
@@ -22,7 +23,7 @@ impl Options {
     pub fn format(&self) -> Format {
         let mut f = Format::new();
         for (name, op) in self.get_non_internal() {
-            f.append(&op.format(&name));
+            f.append(&op.format(&name.to_c()));
         }
         // f.append_newline();
         // f.append(&self.format_modes());
@@ -39,128 +40,80 @@ impl Options {
 
 
 impl OpDef {
-    pub fn format(&self, name: &str) -> Format {
+    // TODO use CCode here?
+    pub fn format(&self, name: &CCode) -> Format {
         match self.op_type {
             OpType::DefineInt => {
-                self.format_define_int(name)
+                format_define(name,
+                              &self.get_val().unwrap_int().to_c())
             }
             OpType::DefineString => {
-                self.format_define_string(name)
+                format_define(name,
+                              &self.get_val().unwrap_str().to_c())
             }
             OpType::IfdefValue => {
-                self.format_ifdef_value()
+                format_define(&self.get_val().unwrap_str().to_c(),
+                              &CCode::new())
             }
             OpType::IfdefKey => {
-                self.format_ifdef_key(name)
+                let blank = "".to_c();
+                let x = if self.get_val().unwrap_bool() {
+                    name
+                } else {
+                    &blank
+                };
+                format_define(x, &blank)
             }
             OpType::Uint8 => {
-                self.format_uint8(name)
+                format_uint8(&name, self.get_val().unwrap_int())
             }
             OpType::Array1D => {
-                self.format_array1d(name)
+                CArray::new(name)
+                    .fill_1d(self.get_val().unwrap_vec())
+                    .format()
             }
             OpType::Array2D => {
-                self.format_array2d(name)
+                CArray::new(name)
+                    .fill_2d(self.get_val().unwrap_vec2())
+                    .format()
             }
-            // OpType::Mode {..} => {
-            //     self.format_mode(name)
-            // }
             _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
 
-    fn format_define_int(&self, name: &str) -> Format {
-        Format {
-            h: format!("#define {} {}\n",
-                       name.to_uppercase(),
-                       self.get_val().unwrap_int()),
-            c: String::new(),
-        }
-    }
-
-    fn format_define_string(&self, name: &str) -> Format {
-        Format {
-            h: format!("#define {} {}\n",
-                        name.to_uppercase(),
-                        self.get_val().unwrap_str()),
-            c: String::new(),
-        }
-    }
-
-    fn format_ifdef_value(&self) -> Format {
-        Format {
-            h: format!("#define {}\n",
-                       self.get_val().unwrap_str()),
-            c: String::new(),
-        }
-    }
-
-    fn format_ifdef_key(&self, name: &str) -> Format {
-        Format {
-            h: if self.get_val().unwrap_bool() {
-                format!("#define {}\n",
-                        name.to_uppercase())
-            } else {
-                String::new()
-            },
-
-            c: String::new(),
-        }
-    }
-
-    fn format_uint8(&self, name: &str) -> Format {
-        Format {
-            h: format!("extern const uint8_t {};\n",
-                       name),
-
-            c: format!("extern const uint8_t {} = {};\n\n",
-                       name,
-                       self.get_val().unwrap_int()),
-        }
-    }
-
-    fn format_array1d(&self, name: &str) -> Format {
-        CArray::new(name)
-            .fill_1d(self.get_val().unwrap_vec())
-            .format()
-    }
-
-
-    fn format_array2d(&self, name: &str) -> Format {
-            CArray::new(name)
-            .fill_2d(self.get_val().unwrap_vec2())
-            .format()
-    }
 }
 
 // TODO put in c_array.rs
-struct ModeStruct {
-    plains: String,
-    macros: String,
-    words: String,
-    commands: String,
-    wordmod_capital_chord: Chord,
-    wordmod_nospace_chord: Chord,
-    anagram_chords: Vec<Chord>,
-}
 
-impl ModeStruct{
-    // fn format(&self, name: &str) -> Format {
-    //     let mut dict = BTreeMap::new();
-    //     dict.insert("plains", self.plains);
-    //     dict.insert("macros", self.macros);
-    //     dict.insert("words", self.words);
-    //     dict.insert("commands", self.commands);
-    //     // TODO how to make strings from vecs?
-    //     // dict.push("wordmod_capital_chord", self.wordmod_capital_chord.to_ints().to_string());
-    //     // dict.push("wordmod_nospace_chord", self.wordmod_nospace_chord.to_ints().to_string());
-    //     // dict.push("anagram_chords", self.anagram_chords.to_ints().to_string());
-    // }
-}
+// struct ModeStruct {
+//     plains: String,
+//     macros: String,
+//     words: String,
+//     commands: String,
+//     // wordmod_capital_chord: Chord,
+//     // wordmod_nospace_chord: Chord,
+//     // anagram_chords: Vec<Chord>,
+// }
+
+// impl ModeStruct{
+//     fn format(&self, name: &str) -> Format {
+//         let mut dict = BTreeMap::new();
+//         dict.insert("plains", self.plains);
+//         dict.insert("macros", self.macros);
+//         dict.insert("words", self.words);
+//         dict.insert("commands", self.commands);
+//         // TODO how to make strings from vecs?
+//         // dict.push("wordmod_capital_chord", self.wordmod_capital_chord.to_ints().to_string());
+//         // dict.push("wordmod_nospace_chord", self.wordmod_nospace_chord.to_ints().to_string());
+//         // dict.push("anagram_chords", self.anagram_chords.to_ints().to_string());
+//         format_c_struct(&"ModeStruct".to_c(), name, &dict)
+
+//     }
+// }
 
 impl Sequence {
 
-    pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<String>{
+    pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<CCode>{
         // TODO different name for "bytes"?
         if use_compression{
             self.to_compressed_bytes(use_mods)
@@ -170,15 +123,15 @@ impl Sequence {
         }
     }
 
-    fn to_raw_bytes(&self, use_mods: bool) -> Vec<String> {
-        let mut v: Vec<String> = Vec::new();
+    fn to_raw_bytes(&self, use_mods: bool) -> Vec<CCode> {
+        let mut v: Vec<CCode> = Vec::new();
         for keypress in self.0.iter() {
             v.extend(keypress.as_bytes(use_mods));
         }
         v
     }
 
-    fn to_compressed_bytes(&self, use_mods: bool) -> Vec<String> {
+    fn to_compressed_bytes(&self, use_mods: bool) -> Vec<CCode> {
         compress(self, use_mods)
     }
 
@@ -204,22 +157,51 @@ impl Maps {
         f
     }
 
-    fn format_modes (&self) -> Format {
+    fn format_kmaps(&self,
+                    struct_names: &mut BTreeMap<SeqType,
+                                                BTreeMap<KmapPath, CCode>>)
+                    -> Format
+    {
         let mut f = Format::new();
-        f.append(&self.format_command_enum());
 
-        // Format all keymap structs, and get their names
-        let mut all_struct_names: BTreeMap<SeqType, BTreeMap<KmapPath, String>>
-            = BTreeMap::new();
+        // Format all keymap structs, and return their names
         for seq_type in self.sequences.keys() {
             let l = Lookup::new(seq_type.clone(),
                                 &self.sequences[seq_type],
                                 &self.chords,
                                 &self.kmap_ids);
-            let mut struct_names = BTreeMap::new();
-            f.append(&l.format(&mut struct_names));
-            all_struct_names.insert(seq_type.clone(), struct_names);
+            let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
+            f.append(&l.format(&mut tmp));
+            struct_names.insert(seq_type.clone(), tmp);
         }
+        f.append_newline();
+        f
+    }
+
+    fn format_modes (&self) -> Format {
+        let mut f = Format::new();
+        f.append(&self.format_command_enum());
+        let mut struct_names = BTreeMap::new();
+        f.append(&self.format_kmaps(&mut struct_names));
+
+        // for (mode, kmap_infos) in self.modes {
+        //     let fields = BTreeMap::new();
+        //     for seq_type in self.sequences.keys() {
+        //         fields.insert(seq_type, Vec::new())
+        //         for info in kmap_infos {
+        //             let struct_name =
+        //                 if seq_type == SeqType::Word && !info.use_words {
+        //                     "NULL"
+        //                 } else {
+        //                     fields.get_mut(se) struct_names.get(info.path)
+        //                         .expect("kmap struct name not found")
+        //                 };
+        //         }
+        //     }
+        //     let m = ModeStruct {
+
+        //     }
+        // }
         // TODO anagrams and wordmods
         // TODO mod positions
         // TODO mode structs
@@ -229,11 +211,11 @@ impl Maps {
 
     fn format_command_enum (&self) -> Format {
         let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
-            .map(|s| s.to_owned())
+            .map(|x| x.to_uppercase().to_c())
             .collect();
         Format {
-            h: make_enum(&command_list, "command_enum"),
-            c: String::new(),
+            h: make_enum(&command_list, &"command_enum".to_c()),
+            c: CCode::new(),
         }
     }
 
@@ -284,21 +266,19 @@ impl Maps {
 
 
 pub fn format_intro(h_file_name: &str) -> Format{
-    let autogen_message = make_autogen_message();
+    let mut f = format_autogen_message();
+
     let guard_name = make_guard_name(h_file_name);
     let start_namespace = "namespace conf{\n\n";
-    let mut f = Format::new();
 
-    f.h += &autogen_message;
-    f.h += &format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
+    f.h += format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
     f.h += "#include <Arduino.h>\n";
     f.h += "#include \"keycodes.h\"\n\n";
     f.h += "typedef void (*voidFuncPtr)(void);\n\n";
-    f.h += &make_compression_macros();
+    f.h += make_compression_macros();
     f.h += start_namespace;
 
-    f.c += &autogen_message;
-    f.c += &format!("#include \"{}\"\n\n", h_file_name);
+    f.c += format!("#include \"{}\"\n\n", h_file_name);
     f.c += start_namespace;
     f
 }
@@ -307,7 +287,7 @@ pub fn format_outro() -> Format {
     let end_namespace = "\n} // end namespace\n";
     let mut f = Format::new();
 
-    f.h += make_debug_macros().as_ref();
+    f.h += make_debug_macros();
     f.h += end_namespace;
     f.h += "\n#endif\n";
 
@@ -315,17 +295,21 @@ pub fn format_outro() -> Format {
     f
 }
 
-fn make_autogen_message( ) -> String {
+fn format_autogen_message( ) -> Format {
     const AUTHOR: &str = "pipit-config";
 
-    let s = format!("/**\n * Automatically generated by {} on:  {}\n",
+    let mut s = format!("/**\n * Automatically generated by {} on:  {}\n",
                     AUTHOR,
                     now().strftime("%c").unwrap()
     );
-    s + " * Do not make changes here, they will be overwritten.\n */\n\n"
+    s += " * Do not make changes here, they will be overwritten.\n */\n\n";
+    Format{
+        h: s.to_c(),
+        c: s.to_c(),
+    }
 }
 
-fn make_guard_name(h_file_name: &str) -> String {
+fn make_guard_name(h_file_name: &str) -> CCode {
     // TODO remove unsafe characters, like the python version
     let error_message = format!("invalid header file name: {}", h_file_name);
     let p: String = Path::new(h_file_name)
@@ -341,10 +325,10 @@ fn make_guard_name(h_file_name: &str) -> String {
     if !first.is_alphabetic() && first != '_' {
         panic!(error_message);
     }
-    p + "_"
+    CCode(p + "_")
 }
 
-fn make_debug_macros() -> String {
+fn make_debug_macros() -> CCode {
     // TODO clean up debug macros
     let mut s = String::new();
     s += "\n#if DEBUG_MESSAGES == 0\n";
@@ -365,19 +349,44 @@ fn make_debug_macros() -> String {
     s += "#define DEBUG2(msg) Serial.print(msg)\n";
     s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
     s += "#endif\n\n ";
-    s
+    CCode(s)
 }
 
 
-fn make_enum(variants: &Vec<Name>, name: &str) -> String {
+fn make_enum(variants: &Vec<CCode>, name: &CCode) -> CCode {
     // TODO move somewhere?
     // TODO only assign first to 0
     let contents = variants
         .iter()
         .enumerate()
         .fold(String::new(),
-              |acc, (index, name)|
-              format!("{}  {} = {},\n", acc, name.to_uppercase(), index));
+              |acc, (index, field)|
+              format!("{}  {} = {},\n", acc, field, index));
 
-    format!("enum {}{{\n{}}};\n\n", name, contents)
+    CCode(format!("enum {}{{\n{}}};\n\n", name, contents))
+}
+
+fn format_define(name: &CCode, value: &CCode) -> Format {
+    // Name will be written in all-caps.
+
+    Format {
+        h: CCode(format!("#define {} {}\n",
+                   name.to_uppercase(),
+                   value)),
+        c: CCode::new(),
+    }
+}
+
+fn format_uint8(name: &CCode, value: i64) -> Format {
+    if value > 255 || value < 0 {
+        panic!("8-bit value out of range 0-255");
+    }
+    Format {
+        h: CCode(format!("extern const uint8_t {};\n",
+                   name)),
+
+        c: CCode(format!("extern const uint8_t {} = {};\n\n",
+                   name,
+                   value)),
+    }
 }

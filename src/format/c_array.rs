@@ -1,31 +1,16 @@
 use std::fmt::Display;
 use std::clone::Clone;
-use format::format::Format;
 use itertools::Itertools; // TODO unused?
-use std::collections::BTreeMap;
 
-// TODO rename file to c_types
-
-pub fn format_c_struct(struct_type: &str, name: &str, dict: &BTreeMap<String, String>) -> Format {
-    // TODO will fields be in the right order?
-    let mut c = format!("const {} {} = {{\n", struct_type, name);
-    for (field, value) in dict{
-        c += &format!("  {}, // {}\n", value, field);
-    }
-    c += "}\n";
-    Format {
-        h: format!("extern const {} {};", struct_type, name),
-        c: c
-    }
-}
-
+use format::format::Format;
+use types::{CCode, ToC};
 
 
 pub struct CArray <T> where T: Display + Clone
 {
-    name: String,
+    name: CCode,
     is_extern: bool,
-    c_type: String,
+    c_type: CCode,
     contents_1d: Option<Vec<T>>,
     contents_2d: Option<Vec<Vec<T>>>,
     contents_3d: Option<Vec<Vec<Vec<T>>>>,
@@ -33,11 +18,11 @@ pub struct CArray <T> where T: Display + Clone
 
 impl <T> CArray<T> where T: Display + Clone
 {
-    pub fn new(name: &str) -> CArray<T>  {
+    pub fn new(name: &CCode) -> CArray<T>  {
         CArray {
             name: name.to_owned(),
             is_extern: true,
-            c_type: "uint8_t".to_owned(),
+            c_type: "uint8_t".to_c(),
             contents_1d: None,
             contents_2d: None,
             contents_3d: None,
@@ -47,7 +32,7 @@ impl <T> CArray<T> where T: Display + Clone
         self.is_extern = is_extern;
         self
     }
-    pub fn c_type(mut self, c_type: &str) -> CArray<T> {
+    pub fn c_type(mut self, c_type: &CCode) -> CArray<T> {
         self.c_type = c_type.to_owned();
         self
     }
@@ -83,25 +68,25 @@ impl <T> CArray<T> where T: Display + Clone
 }
 
 
-fn format_c_array<T>(name: &str, v: &Vec<T>, ctype: &str, is_extern: bool) -> Format
+fn format_c_array<T>(name: &CCode, v: &Vec<T>, ctype: &CCode, is_extern: bool) -> Format
     where T: Display + Clone
 {
     let contents = make_c_array(&v);
     if is_extern {
         Format {
-            h: format!("extern const {} {}[];\n", ctype, name),
-            c: format!("extern const {} {}[] = {};\n\n", ctype, name, contents),
+            h: CCode(format!("extern const {} {}[];\n", ctype, name)),
+            c: CCode(format!("extern const {} {}[] = {};\n\n", ctype, name, contents)),
         }
     }
     else {
         Format {
-            h: String::new(),
-            c: format!("const {} {}[] = {};\n\n", ctype, name, contents),
+            h: CCode::new(),
+            c: CCode(format!("const {} {}[] = {};\n\n", ctype, name, contents)),
         }
     }
 }
 
-fn format_c_array2<T>(name: &str, v: &Vec<Vec<T>>, ctype: &str, is_extern: bool) -> Format
+fn format_c_array2<T>(name: &CCode, v: &Vec<Vec<T>>, ctype: &CCode, is_extern: bool) -> Format
     where T: Display
 {
     let contents = make_c_array2(&v);
@@ -109,23 +94,23 @@ fn format_c_array2<T>(name: &str, v: &Vec<Vec<T>>, ctype: &str, is_extern: bool)
 
     if is_extern {
         Format {
-            h: format!("extern const {} {}[][{}];\n",
-                       ctype, name, len_2nd_dim),
-            c: format!("extern const {} {}[][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, contents),
+            h: CCode(format!("extern const {} {}[][{}];\n",
+                       ctype, name, len_2nd_dim)),
+            c: CCode(format!("extern const {} {}[][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, contents)),
         }
     }
     else {
         Format {
-            h: String::new(),
-            c: format!("const {} {}[][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, contents),
+            h: CCode::new(),
+            c: CCode(format!("const {} {}[][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, contents)),
         }
     }
 }
 
 
-fn format_c_array3<T>(name: &str, v: &Vec<Vec<Vec<T>>>, ctype: &str, is_extern: bool) -> Format
+fn format_c_array3<T>(name: &CCode, v: &Vec<Vec<Vec<T>>>, ctype: &CCode, is_extern: bool) -> Format
     where T: Display
 {
     let contents = make_c_array3(&v);
@@ -135,17 +120,17 @@ fn format_c_array3<T>(name: &str, v: &Vec<Vec<Vec<T>>>, ctype: &str, is_extern: 
     // TODO combine extern cases better
     if is_extern {
         Format {
-            h: format!("extern const {} {}[][{}][{}];\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim),
-            c: format!("extern const {} {}[][{}][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim, contents),
+            h: CCode(format!("extern const {} {}[][{}][{}];\n",
+                       ctype, name, len_2nd_dim, len_3rd_dim)),
+            c: CCode(format!("extern const {} {}[][{}][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, len_3rd_dim, contents)),
         }
     }
     else {
         Format {
-            h: String::new(),
-            c: format!("const {} {}[][{}][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim, contents),
+            h: CCode::new(),
+            c: CCode(format!("const {} {}[][{}][{}] = {};\n\n",
+                       ctype, name, len_2nd_dim, len_3rd_dim, contents)),
         }
     }
 }
@@ -153,52 +138,54 @@ fn format_c_array3<T>(name: &str, v: &Vec<Vec<Vec<T>>>, ctype: &str, is_extern: 
 // TODO refactor to recursively make arrays of arbitrary dimensions?
 // Or at least re-use more code, and improve formatting
 
-fn make_c_array<T>(v: &Vec<T>) -> String
+fn make_c_array<T>(v: &Vec<T>) -> CCode
     where T: Display
 {
-    let lines = wrap_in_braces(&to_string_vec(v));
+    let lines = wrap_in_braces(&to_code_vec(v));
     // println!("{:?}", lines);
-    lines.join("\n")
+    CCode(lines.join("\n"))
 }
 
-fn make_c_array2<T>(v: &Vec<Vec<T>>) -> String
+fn make_c_array2<T>(v: &Vec<Vec<T>>) -> CCode
     where T: Display
 {
     // TODO format better, don't put commas on separate line
     assert!(is_rectangular(v));
 
-    let mut rows: Vec<String> = Vec::new();
+    let mut rows: Vec<CCode> = Vec::new();
     for row in v {
-        rows.extend(wrap_in_braces(&to_string_vec(&row)));
-        rows.push(",".to_owned());
+        rows.extend(wrap_in_braces(&to_code_vec(&row)));
+        rows.push(",".to_c());
     }
-    wrap_in_braces(&rows).join("\n")
+    CCode::join(wrap_in_braces(&rows), "\n")
 }
 
-fn make_c_array3<T>(v: &Vec<Vec<Vec<T>>>) -> String
+fn make_c_array3<T>(v: &Vec<Vec<Vec<T>>>) -> CCode
     where T: Display
 {
     // TODO format better, don't put commas on separate line!!!!
     assert!(is_cubic(v));
 
-    let mut subarrays: Vec<String> = Vec::new();
+    let mut subarrays: Vec<CCode> = Vec::new();
     for subarray in v {
-        // subarrays.extend(wrap_in_braces(&to_string_vec(&subarray)));
+        // subarrays.extend(wrap_in_braces(&to_code_vec(&subarray)));
         // subarrays.extend(wrap_in_braces(subarray));
         subarrays.push(make_c_array2(subarray));
-        subarrays.push(",".to_owned());
+        subarrays.push(",".to_c());
     }
-    wrap_in_braces(&subarrays).join("\n")
+    CCode::join(wrap_in_braces(&subarrays), ("\n"))
 }
 
-fn wrap_in_braces(lines: &Vec<String>) -> Vec<String> {
-    let mut new: Vec<_> = lines.iter().map(|s| format!(" {}", s)).collect();
-    new.insert(0, "{".to_owned());
-    new.push("}".to_owned());
+fn wrap_in_braces(lines: &Vec<CCode>) -> Vec<CCode> {
+    let mut new: Vec<_> = lines.iter()
+        .map(|s| CCode(format!(" {}", s)))
+        .collect();
+    new.insert(0, "{".to_c());
+    new.push("}".to_c());
     new
 }
 
-fn to_string_vec<T>(v: &Vec<T>) -> Vec<String>
+fn to_code_vec<T>(v: &Vec<T>) -> Vec<CCode>
     where T: Display
 {
     let items_per_line = 4;
@@ -208,7 +195,10 @@ fn to_string_vec<T>(v: &Vec<T>) -> Vec<String>
         let tmp: Vec<_> = chunk.collect();
         lines.push(tmp.join(", ") + ", ");
     }
-    lines
+    let code_lines: Vec<_> = lines.into_iter()
+        .map(|line| CCode(line))
+        .collect();
+    code_lines
 }
 
 fn is_rectangular<T>(v: &Vec<Vec<T>>) -> bool

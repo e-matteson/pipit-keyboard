@@ -1,56 +1,9 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
-use std::fmt::{self};
 
-use types::{Chord, Sequence, KeyPress, WordBuilder, Options};
+use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
+            KmapInfo, Name, ModeName};
 
-#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
-pub enum SeqType {
-    Plain,
-    Macro,
-    Command,
-    Word,
-}
-
-impl fmt::Display for SeqType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(self, f)
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct KmapInfo {
-    pub path: KmapPath,
-    pub use_words: bool,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub struct ModeName ( pub String );
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub struct Name ( pub String );
-
-impl Name {
-    pub fn to_uppercase(&self) -> Name {
-        Name(self.0.to_uppercase())
-    }
-}
-
-impl fmt::Display for Name {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub struct KmapPath ( pub String );
-
-impl fmt::Display for KmapPath {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 // TODO typealias kmap names
 #[derive(Debug)]
@@ -84,7 +37,7 @@ impl Maps {
         // commands are a single byte code, not an actual key sequence.
         // But we'll store it as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
-        fake_seq_with_command_code.push(KeyPress::new_fake(&entry.0.to_uppercase()));
+        fake_seq_with_command_code.push(KeyPress::new_fake(&entry.to_uppercase()));
 
         self.get_sequences_mut(SeqType::Command)
             .insert(entry.to_owned(), fake_seq_with_command_code);

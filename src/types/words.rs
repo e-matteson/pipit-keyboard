@@ -1,6 +1,6 @@
 // use std::collections::BTreeMap;
 
-use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name};
+use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name, CCode, ToC};
 
 pub struct Word {
     pub name: Name,
@@ -50,24 +50,25 @@ impl<'a> WordBuilder<'a> {
     }
 
 
-    fn get_key_name_for_seq(&self, character: char) -> String {
+    fn get_key_name_for_seq(&self, character: char) -> CCode {
         if character.is_alphanumeric() {
-            return format!("KEY_{}", character.to_uppercase());
+            return format!("KEY_{}", character.to_uppercase()).to_c();
         }
-        match character{
-            ' '  => "KEY_SPACE".to_owned(),
-            '<'  => "KEY_BACKSPACE".to_owned(),
-            '\'' => "KEY_QUOTE".to_owned(),
-            '.'  => "KEY_PERIOD".to_owned(),
+        let s = match character {
+            ' '  => "KEY_SPACE",
+            '<'  => "KEY_BACKSPACE",
+            '\'' => "KEY_QUOTE",
+            '.'  => "KEY_PERIOD",
             _ => panic!("illegal character in sequence: {}", character),
-        }
+        };
+        s.to_c()
     }
 
-    fn get_mod_name_for_seq(&self, character: char) -> String {
+    fn get_mod_name_for_seq(&self, character: char) -> CCode {
         if character.is_uppercase() {
-            "MODIFIERKEY_SHIFT".to_owned()
+            "MODIFIERKEY_SHIFT".to_c()
         } else {
-            "0".to_owned()
+            "0".to_c()
         }
     }
 

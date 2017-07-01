@@ -1,4 +1,5 @@
 use std::slice::Iter;
+use types::{CCode, ToC, Name};
 
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack. Rename?
@@ -8,32 +9,32 @@ use std::slice::Iter;
 #[derive(Eq)]
 #[derive(Clone)]
 pub struct KeyPress{
-    pub key: String,
-    pub modifier: String,
+    pub key: CCode,
+    pub modifier: CCode,
 }
 
 impl KeyPress{
     pub fn new(key: usize, modifier: usize) -> KeyPress {
         KeyPress{
-            key: format!("{}", key),
-            modifier: format!("{}", modifier),
+            key: CCode(format!("{}", key)),
+            modifier: CCode(format!("{}", modifier)),
         }
     }
-    pub fn new_fake(code: &str) -> KeyPress {
+    pub fn new_fake(code: &Name) -> KeyPress {
         // We also use KeyPresses to store command codes
         KeyPress{
-            key: code.to_owned(),
-            modifier: "0".to_owned(),
+            key: code.to_c(),
+            modifier: "0".to_c(),
         }
     }
     pub fn new_blank() -> KeyPress {
         KeyPress{
-            key: "0".to_owned(),
-            modifier: "0".to_owned(),
+            key: "0".to_c(),
+            modifier: "0".to_c(),
         }
     }
     pub fn is_mod_blank(&self) -> bool {
-        self.modifier == "0"
+        self.modifier == "0".to_c()
     }
 }
 
