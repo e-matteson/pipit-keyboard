@@ -8,7 +8,6 @@ use types::{CCode, ToC};
 enum Contents <T> where T: Display + Clone {
     D1(Vec<T>),
     D2(Vec<Vec<T>>),
-    D3(Vec<Vec<Vec<T>>>),
 }
 
 pub struct CArray <T> where T: Display + Clone
@@ -47,11 +46,6 @@ impl <T> CArray<T> where T: Display + Clone
         self.contents = Some(Contents::D2(contents.to_vec()));
         self
     }
-    pub fn fill_3d(mut self, contents: &Vec<Vec<Vec<T>>>) -> CArray<T> {
-        self.assert_contents_empty();
-        self.contents = Some(Contents::D3(contents.to_vec()));
-        self
-    }
     fn assert_contents_empty(&self) {
         if let Some(_) = self.contents {
             panic!("CArray cannot be filled more than once");
@@ -61,7 +55,6 @@ impl <T> CArray<T> where T: Display + Clone
         match self.contents {
             Some(Contents::D1(ref v)) => self.format_c_array1(&v),
             Some(Contents::D2(ref v)) => self.format_c_array2(&v),
-            Some(Contents::D3(ref v)) => self.format_c_array3(&v),
             None => panic!("CArray was not filled")
         }
     }
@@ -112,30 +105,6 @@ impl <T> CArray<T> where T: Display + Clone
     }
 
 
-    fn format_c_array3(&self, v: &Vec<Vec<Vec<T>>>) -> Format
-        where T: Display
-    {
-        let contents = make_c_array3(&v);
-        let len_2nd_dim = v[0].len();
-        let len_3rd_dim = v[0][0].len();
-
-        // TODO combine extern cases better
-        if self.is_extern {
-            Format {
-                h: CCode(format!("extern const {} {}[][{}][{}];\n",
-                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim)),
-                c: CCode(format!("extern const {} {}[][{}][{}] = {};\n\n",
-                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim, contents)),
-            }
-        }
-        else {
-            Format {
-                h: CCode::new(),
-                c: CCode(format!("const {} {}[][{}][{}] = {};\n\n",
-                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim, contents)),
-            }
-        }
-    }
 }
 
 // TODO refactor to recursively make arrays of arbitrary dimensions?
@@ -163,21 +132,6 @@ fn make_c_array2<T>(v: &Vec<Vec<T>>) -> CCode
     CCode::join(wrap_in_braces(&rows), "\n")
 }
 
-fn make_c_array3<T>(v: &Vec<Vec<Vec<T>>>) -> CCode
-    where T: Display
-{
-    // TODO format better, don't put commas on separate line!!!!
-    assert!(is_cubic(v));
-
-    let mut subarrays: Vec<CCode> = Vec::new();
-    for subarray in v {
-        // subarrays.extend(wrap_in_braces(&to_code_vec(&subarray)));
-        // subarrays.extend(wrap_in_braces(subarray));
-        subarrays.push(make_c_array2(subarray));
-        subarrays.push(",".to_c());
-    }
-    CCode::join(wrap_in_braces(&subarrays), ("\n"))
-}
 
 fn wrap_in_braces(lines: &Vec<CCode>) -> Vec<CCode> {
     let mut new: Vec<_> = lines.iter()
@@ -213,10 +167,3 @@ fn is_rectangular<T>(v: &Vec<Vec<T>>) -> bool
         .all(|x| x == len_2nd_dim)
 }
 
-fn is_cubic<T>(v: &Vec<Vec<Vec<T>>>) -> bool
-    where T: Display
-{
-    v.iter()
-        .fold(true,
-              |acc, x| acc && is_rectangular(x))
-}
