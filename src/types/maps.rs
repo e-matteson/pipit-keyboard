@@ -83,14 +83,56 @@ impl Maps {
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
 
-    pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Option<Chord>{
+    pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {
         for kmap_info in self.modes.get(mode).expect("unknown mode"){
             if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {
-                return Some(chord);
+                return chord;
             }
         }
-        None
+        Chord::new()
     }
+
+    pub fn get_anagrams(&self, mode: &ModeName) -> Vec<Chord> {
+        let mut out = Vec::new();
+        for name in self.anagrams.iter() {
+            out.push(self.get_chord_in_mode(&name, mode));
+        }
+        out
+    }
+
+    fn get_wordmod_helper(&self, name: &Name, mode: &ModeName) -> Chord {
+        // TODO what should happen when there's no chord?
+        if !self.wordmods.contains(name){
+            panic!(format!("Required wordmod is missing from settings: {}", name));
+        }
+        self.get_chord_in_mode(name, mode)
+    }
+
+
+    pub fn get_wordmod_capital(&self, mode: &ModeName) -> Chord {
+        self.get_wordmod_helper(&Name::from("wordmod_capital"), mode)
+    }
+
+    pub fn get_wordmod_nospace(&self, mode: &ModeName) -> Chord {
+        self.get_wordmod_helper(&Name::from("wordmod_nospace"), mode)
+    }
+
+    pub fn get_mod_ctrl(&self, mode: &ModeName) -> Chord {
+        self.get_chord_in_mode(&Name::from("modifierkey_ctrl"), mode)
+    }
+
+    pub fn get_mod_alt(&self, mode: &ModeName) -> Chord {
+        self.get_chord_in_mode(&Name::from("modifierkey_alt"), mode)
+    }
+
+    pub fn get_mod_shift(&self, mode: &ModeName) -> Chord {
+        self.get_chord_in_mode(&Name::from("modifierkey_shift"), mode)
+    }
+
+    pub fn get_mod_gui(&self, mode: &ModeName) -> Chord {
+        self.get_chord_in_mode(&Name::from("modifierkey_gui"), mode)
+    }
+
     pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
         match self.chords[kmap].get(chord_name) {
             Some(chord) => Some(chord.clone()),

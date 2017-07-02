@@ -50,7 +50,7 @@ impl ChordEntry {
     }
 }
 
-pub struct Lookup<'a> {
+pub struct LookupBuilder<'a> {
     seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
     chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
@@ -61,15 +61,15 @@ pub struct Lookup<'a> {
 }
 
 
-impl <'a> Lookup<'a> {
+impl <'a> LookupBuilder<'a> {
 
     pub fn new(seq_type: SeqType,
                seq_map: &'a SeqMap,
                chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
                kmap_ids: &'a BTreeMap<KmapPath, String>)
-               -> Lookup<'a>
+               -> LookupBuilder<'a>
     {
-        Lookup {
+        LookupBuilder {
             seq_type: seq_type,
             seq_map: seq_map,
             chord_maps: chord_maps,
@@ -221,7 +221,8 @@ impl <'a> Lookup<'a> {
             .collect();
         let mut f = Format::new();
         for i in 0..subarray_names.len() {
-            f.append(&CArray::new(&subarray_names[i])
+            f.append(&CArray::new()
+                     .name(&subarray_names[i])
                      .is_extern(false)
                      .fill_1d(&arrays[i])
                      .format()
@@ -229,7 +230,8 @@ impl <'a> Lookup<'a> {
         }
 
         subarray_names.push("NULL".to_c());
-        f.append(&CArray::new(name)
+        f.append(&CArray::new()
+                 .name(name)
                  .is_extern(is_extern)
                  .c_type(&"uint8_t*".to_c())
                  .fill_1d(&subarray_names)
@@ -367,15 +369,3 @@ c_struct!(
     }
 );
 
-// impl LookupStruct {
-//     fn format(&self, name: &CCode) -> Format {
-//         // The order of keys matters!
-//         let mut dict = BTreeMap::new();
-//         dict.insert("chords".to_c(), self.chords.to_c());
-//         dict.insert("sequences".to_c(), self.sequences.to_c());
-//         dict.insert("use_compression".to_c(), self.use_compression.to_c());
-//         dict.insert("use_mods".to_c(), self.use_mods.to_c());
-//         dict.insert("use_offsets".to_c(), self.use_offsets.to_c());
-//         format_c_struct(&"LookupStruct".to_c(), name, &dict)
-//     }
-// }

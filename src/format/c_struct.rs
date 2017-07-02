@@ -9,13 +9,13 @@ macro_rules! c_struct {
         }
         impl $struct_type {
             // TODO inline for efficiency?
+            // TODO optionally extern?
             fn format(&self, name: &CCode) -> Format {
-                let h = format!("extern const {} {};\n", stringify!($struct_type), name);
                 let mut c = format!("const {} {} = {{\n", stringify!($struct_type), name);
                 $(c += &format!("  {}, // {}\n", self.$field.to_c(), stringify!($field));)*
                 c += "}\n";
                 Format {
-                    h: CCode(h),
+                    h: CCode::new(),
                     c: CCode(c),
                 }
             }

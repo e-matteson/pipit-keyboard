@@ -1,6 +1,6 @@
 use self::format::Format;
 use self::c_array::{CArray};
-use self::lookups::Lookup;
+use self::lookups::LookupBuilder;
 use self::compress::*;
 
 #[macro_use]

@@ -5,6 +5,8 @@ use itertools::Itertools; // TODO unused?
 use format::format::Format;
 use types::{CCode, ToC};
 
+// TODO fix horrible formatting in structs
+
 enum Contents <T> where T: Display + Clone {
     D1(Vec<T>),
     D2(Vec<Vec<T>>),
@@ -12,7 +14,7 @@ enum Contents <T> where T: Display + Clone {
 
 pub struct CArray <T> where T: Display + Clone
 {
-    name: CCode,
+    name: Option<CCode>,
     is_extern: bool,
     c_type: CCode,
     contents: Option<Contents<T>>,
@@ -20,14 +22,19 @@ pub struct CArray <T> where T: Display + Clone
 
 impl <T> CArray<T> where T: Display + Clone
 {
-    pub fn new(name: &CCode) -> CArray<T>  {
+    pub fn new() -> CArray<T>  {
         CArray {
-            name: name.to_owned(),
+            name: None,
             is_extern: true,
             c_type: "uint8_t".to_c(),
             contents: None,
         }
     }
+    pub fn name(mut self, name: &CCode) -> CArray<T>  {
+        self.name = Some(name.to_owned());
+        self
+    }
+
     pub fn is_extern(mut self, is_extern: bool) -> CArray<T> {
         self.is_extern = is_extern;
         self
@@ -37,51 +44,59 @@ impl <T> CArray<T> where T: Display + Clone
         self
     }
     pub fn fill_1d(mut self, contents: &Vec<T>) -> CArray<T> {
-        self.assert_contents_empty();
+        self.assert_contents_none();
         self.contents = Some(Contents::D1(contents.to_vec()));
         self
     }
     pub fn fill_2d(mut self, contents: &Vec<Vec<T>>) -> CArray<T> {
-        self.assert_contents_empty();
+        self.assert_contents_none();
         self.contents = Some(Contents::D2(contents.to_vec()));
         self
     }
-    fn assert_contents_empty(&self) {
-        if let Some(_) = self.contents {
-            panic!("CArray cannot be filled more than once");
-        }
-    }
-    pub fn format(self) -> Format {
+
+    pub fn format_contents(self) -> CCode {
+        // Use this if you only want the contents, like as the initializer for
+        //  a struct field
         match self.contents {
-            Some(Contents::D1(ref v)) => self.format_c_array1(&v),
-            Some(Contents::D2(ref v)) => self.format_c_array2(&v),
+            Some(Contents::D1(ref v)) => make_c_array1(&v),
+            Some(Contents::D2(ref v)) => make_c_array2(&v),
             None => panic!("CArray was not filled")
         }
     }
-    // pub fn format_contents(self) -> CCode {
-    //     make_c_array1(&v);
-    // }
+
+    pub fn format(self) -> Format {
+        let name = match self.name {
+            Some(ref s) => s.to_owned(),
+            None => panic!("CArray name must be provided"),
+        };
+
+        match self.contents {
+            Some(Contents::D1(ref v)) => self.format_c_array1(&v, &name),
+            Some(Contents::D2(ref v)) => self.format_c_array2(&v, &name),
+            None => panic!("CArray was not filled")
+        }
+    }
 
 
-    fn format_c_array1 (&self, v: &Vec<T>) -> Format
+    fn format_c_array1 (&self, v: &Vec<T>, name: &CCode) -> Format
         where T: Display + Clone
     {
         let contents = make_c_array1(&v);
         if self.is_extern {
             Format {
-                h: CCode(format!("extern const {} {}[];\n", self.c_type, self.name)),
-                c: CCode(format!("extern const {} {}[] = {};\n\n", self.c_type, self.name, contents)),
+                h: CCode(format!("extern const {} {}[];\n", self.c_type, name)),
+                c: CCode(format!("extern const {} {}[] = {};\n\n", self.c_type, name, contents)),
             }
         }
         else {
             Format {
                 h: CCode::new(),
-                c: CCode(format!("const {} {}[] = {};\n\n", self.c_type, self.name, contents)),
+                c: CCode(format!("const {} {}[] = {};\n\n", self.c_type, name, contents)),
             }
         }
     }
 
-    fn format_c_array2(&self, v: &Vec<Vec<T>>) -> Format
+    fn format_c_array2(&self, v: &Vec<Vec<T>>, name: &CCode) -> Format
         where T: Display
     {
         let contents = make_c_array2(&v);
@@ -90,20 +105,25 @@ impl <T> CArray<T> where T: Display + Clone
         if self.is_extern {
             Format {
                 h: CCode(format!("extern const {} {}[][{}];\n",
-                                 self.c_type, self.name, len_2nd_dim)),
+                                 self.c_type, name, len_2nd_dim)),
                 c: CCode(format!("extern const {} {}[][{}] = {};\n\n",
-                                 self.c_type, self.name, len_2nd_dim, contents)),
+                                 self.c_type, name, len_2nd_dim, contents)),
             }
         }
         else {
             Format {
                 h: CCode::new(),
                 c: CCode(format!("const {} {}[][{}] = {};\n\n",
-                                 self.c_type, self.name, len_2nd_dim, contents)),
+                                 self.c_type, name, len_2nd_dim, contents)),
             }
         }
     }
 
+    fn assert_contents_none(&self) {
+        if let Some(_) = self.contents {
+            panic!("CArray cannot be filled more than once");
+        }
+    }
 
 }
 

@@ -2,9 +2,9 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{Sequence, KeyPress, Maps, SeqType, KmapPath, CCode,
-            ToC, Options, OpDef, OpType};
-use format::{Format, CArray, Lookup, compress, make_compression_macros};
+use types::{Sequence, KeyPress, Maps, SeqType, KmapPath, CCode, Chord,
+            KmapInfo, ModeName, ToC, Options, OpDef, OpType};
+use format::{Format, CArray, LookupBuilder, compress, make_compression_macros};
 
 
 
@@ -29,13 +29,6 @@ impl Options {
         // f.append(&self.format_modes());
         f
     }
-
-    // fn format_modes (&self) -> Format {
-    //     Format{
-    //         h: make_enum(&self.get_modes(), "mode_enum"),
-    //         c: String::new(),
-    //     }
-    // }
 }
 
 
@@ -68,48 +61,21 @@ impl OpDef {
                 format_uint8(&name, self.get_val().unwrap_int())
             }
             OpType::Array1D => {
-                CArray::new(name)
+                CArray::new()
+                    .name(name)
                     .fill_1d(self.get_val().unwrap_vec())
                     .format()
             }
             OpType::Array2D => {
-                CArray::new(name)
+                CArray::new()
+                    .name(name)
                     .fill_2d(self.get_val().unwrap_vec2())
                     .format()
             }
             _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
-
 }
-
-// TODO put in c_array.rs
-
-// struct ModeStruct {
-//     plains: String,
-//     macros: String,
-//     words: String,
-//     commands: String,
-//     // wordmod_capital_chord: Chord,
-//     // wordmod_nospace_chord: Chord,
-//     // anagram_chords: Vec<Chord>,
-// }
-
-// impl ModeStruct{
-//     fn format(&self, name: &str) -> Format {
-//         let mut dict = BTreeMap::new();
-//         dict.insert("plains", self.plains);
-//         dict.insert("macros", self.macros);
-//         dict.insert("words", self.words);
-//         dict.insert("commands", self.commands);
-//         // TODO how to make strings from vecs?
-//         // dict.push("wordmod_capital_chord", self.wordmod_capital_chord.to_ints().to_string());
-//         // dict.push("wordmod_nospace_chord", self.wordmod_nospace_chord.to_ints().to_string());
-//         // dict.push("anagram_chords", self.anagram_chords.to_ints().to_string());
-//         format_c_struct(&"ModeStruct".to_c(), name, &dict)
-
-//     }
-// }
 
 impl Sequence {
 
@@ -138,6 +104,24 @@ impl Sequence {
 }
 
 
+c_struct!(
+    struct ModeStruct {
+        num_kmaps: u8,
+        plains: CCode,
+        macros: CCode,
+        words: CCode,
+        commands: CCode,
+        mod_ctrl_chord: CCode,
+        mod_shift_chord: CCode,
+        mod_alt_chord: CCode,
+        mod_gui_chord: CCode,
+        wordmod_capital_chord: CCode,
+        wordmod_nospace_chord: CCode,
+        anagram_chords: CCode,
+        anagram_mask: CCode
+    }
+);
+
 impl Maps {
 
     pub fn format(&self, file_name_base: &str) -> Format {
@@ -158,7 +142,7 @@ impl Maps {
     }
 
     fn format_kmaps(&self,
-                    struct_names: &mut BTreeMap<SeqType,
+                    kmap_struct_names: &mut BTreeMap<SeqType,
                                                 BTreeMap<KmapPath, CCode>>)
                     -> Format
     {
@@ -166,13 +150,13 @@ impl Maps {
 
         // Format all keymap structs, and return their names
         for seq_type in self.sequences.keys() {
-            let l = Lookup::new(seq_type.clone(),
+            let l = LookupBuilder::new(seq_type.clone(),
                                 &self.sequences[seq_type],
                                 &self.chords,
                                 &self.kmap_ids);
             let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
             f.append(&l.format(&mut tmp));
-            struct_names.insert(seq_type.clone(), tmp);
+            kmap_struct_names.insert(seq_type.clone(), tmp);
         }
         f.append_newline();
         f
@@ -184,34 +168,54 @@ impl Maps {
         let mut struct_names = BTreeMap::new();
         f.append(&self.format_kmaps(&mut struct_names));
 
-        // for (mode, kmap_infos) in self.modes {
-        //     let fields = BTreeMap::new();
-        //     for seq_type in self.sequences.keys() {
-        //         fields.insert(seq_type, Vec::new())
-        //         for info in kmap_infos {
-        //             let struct_name =
-        //                 if seq_type == SeqType::Word && !info.use_words {
-        //                     "NULL"
-        //                 } else {
-        //                     fields.get_mut(se) struct_names.get(info.path)
-        //                         .expect("kmap struct name not found")
-        //                 };
-        //         }
-        //     }
-        //     let m = ModeStruct {
 
-        //     }
-        // }
-        // TODO anagrams and wordmods
+        let mut mode_struct_names = Vec::new();
+        for (mode, kmap_infos) in self.modes.iter() {
+
+            let m = ModeBuilder {
+                infos: &kmap_infos,
+                kmap_struct_names: &struct_names,
+                mode_name: &mode,
+                mod_ctrl_chord: self.get_mod_ctrl(mode),
+                mod_shift_chord: self.get_mod_shift(mode),
+                mod_alt_chord: self.get_mod_alt(mode),
+                mod_gui_chord: self.get_mod_gui(mode),
+                wordmod_capital_chord: self.get_wordmod_capital(mode),
+                wordmod_nospace_chord: self.get_wordmod_nospace(mode),
+                anagram_chords: self.get_anagrams(mode),
+            };
+            let mut mode_struct_name = CCode::new();
+            f.append(&m.format(&mut mode_struct_name));
+            mode_struct_names.push(mode_struct_name);
+        }
+
+        f.append(&CArray::new()
+                 .name(&"mode_structs".to_c())
+                 .is_extern(true)
+                 .c_type(&"ModeStruct".to_c())
+                 .fill_1d(&mode_struct_names)
+                 .format());
+
+        f.append(&self.format_mode_enum());
+        f.append_newline();
         // TODO mod positions
-        // TODO mode structs
-        // TODO mode struct array, enum
         f
     }
 
+    fn format_mode_enum (&self) -> Format {
+        let modes_list: Vec<_> = self.modes.keys()
+            .map(|x| x.to_c().to_uppercase())
+            .collect();
+        Format {
+            h: make_enum(&modes_list, &"mode_enum".to_c()),
+            c: CCode::new(),
+        }
+    }
+
+
     fn format_command_enum (&self) -> Format {
         let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
-            .map(|x| x.to_uppercase().to_c())
+            .map(|x| x.to_c().to_uppercase())
             .collect();
         Format {
             h: make_enum(&command_list, &"command_enum".to_c()),
@@ -264,6 +268,75 @@ impl Maps {
     // }
 }
 
+struct  ModeBuilder <'a> {
+    infos: &'a Vec<KmapInfo>,
+    kmap_struct_names: &'a BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>,
+    mode_name: &'a ModeName,
+    mod_ctrl_chord: Chord,
+    mod_shift_chord: Chord,
+    mod_alt_chord: Chord,
+    mod_gui_chord: Chord,
+    wordmod_capital_chord: Chord,
+    wordmod_nospace_chord: Chord,
+    anagram_chords: Vec<Chord>,
+}
+
+impl <'a> ModeBuilder <'a> {
+    pub fn format (&self, mode_struct_name: &mut CCode ) -> Format {
+        let anagrams = CArray::new()
+            .fill_2d(&self.anagram_chords.iter()
+                     .map(|c| c.to_ints())
+                     .collect())
+            .format_contents();
+
+        let mut anagram_mask = Chord::new();
+        for c in self.anagram_chords.iter() {
+            anagram_mask.intersect(c);
+        }
+
+        let m = ModeStruct {
+            num_kmaps: self.infos.len() as u8, // TODO warn if too long?
+            words: self.make_struct_list(SeqType::Word),
+            plains: self.make_struct_list(SeqType::Plain),
+            macros: self.make_struct_list(SeqType::Macro),
+            commands: self.make_struct_list(SeqType::Command),
+            mod_ctrl_chord: self.mod_ctrl_chord.to_c(),
+            mod_shift_chord: self.mod_shift_chord.to_c(),
+            mod_alt_chord: self.mod_alt_chord.to_c(),
+            mod_gui_chord: self.mod_gui_chord.to_c(),
+            wordmod_capital_chord: self.wordmod_capital_chord.to_c(),
+            wordmod_nospace_chord: self.wordmod_nospace_chord.to_c(),
+            anagram_chords: anagrams,
+            anagram_mask: anagram_mask.to_c(),
+        };
+        *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
+        m.format(&mode_struct_name)
+    }
+
+    fn make_struct_list (&self, seq_type: SeqType)
+                             -> CCode
+    {
+        let struct_names = self.kmap_struct_names.get(&seq_type)
+            .expect("struct name not found");
+        let mut out = Vec::new();
+        for info in self.infos {
+            out.push(
+                if seq_type == SeqType::Word && !info.use_words {
+                    "NULL".to_c()
+                } else {
+                    struct_names.get(&info.path)
+                        .expect("kmap struct name not found")
+                        .to_owned()
+                }
+            );
+        }
+
+        CArray::new()
+            .fill_1d(&out)
+            .format_contents()
+    }
+}
+
 
 pub fn format_intro(h_file_name: &str) -> Format{
     let mut f = format_autogen_message();
@@ -274,6 +347,7 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f.h += format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
     f.h += "#include <Arduino.h>\n";
     f.h += "#include \"keycodes.h\"\n\n";
+    f.h += "#include \"structs.h\"\n\n";
     f.h += "typedef void (*voidFuncPtr)(void);\n\n";
     f.h += make_compression_macros();
     f.h += start_namespace;
@@ -388,5 +462,16 @@ fn format_uint8(name: &CCode, value: i64) -> Format {
         c: CCode(format!("extern const uint8_t {} = {};\n\n",
                    name,
                    value)),
+    }
+}
+
+
+impl ToC for Chord {
+    // TODO is it weird to impl this here, instead of miscellaneous.rs?
+    // And to have it apply C formatting, unlike all the others?
+    fn to_c(&self) -> CCode {
+        CArray::new()
+              .fill_1d(&self.to_ints())
+              .format_contents()
     }
 }
