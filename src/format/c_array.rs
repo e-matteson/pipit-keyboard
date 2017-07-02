@@ -5,15 +5,18 @@ use itertools::Itertools; // TODO unused?
 use format::format::Format;
 use types::{CCode, ToC};
 
+enum Contents <T> where T: Display + Clone {
+    D1(Vec<T>),
+    D2(Vec<Vec<T>>),
+    D3(Vec<Vec<Vec<T>>>),
+}
 
 pub struct CArray <T> where T: Display + Clone
 {
     name: CCode,
     is_extern: bool,
     c_type: CCode,
-    contents_1d: Option<Vec<T>>,
-    contents_2d: Option<Vec<Vec<T>>>,
-    contents_3d: Option<Vec<Vec<Vec<T>>>>,
+    contents: Option<Contents<T>>,
 }
 
 impl <T> CArray<T> where T: Display + Clone
@@ -23,9 +26,7 @@ impl <T> CArray<T> where T: Display + Clone
             name: name.to_owned(),
             is_extern: true,
             c_type: "uint8_t".to_c(),
-            contents_1d: None,
-            contents_2d: None,
-            contents_3d: None,
+            contents: None,
         }
     }
     pub fn is_extern(mut self, is_extern: bool) -> CArray<T> {
@@ -37,100 +38,102 @@ impl <T> CArray<T> where T: Display + Clone
         self
     }
     pub fn fill_1d(mut self, contents: &Vec<T>) -> CArray<T> {
-        self.contents_1d = Some(contents.to_vec());
-        assert!(self.contents_2d.is_none() && self.contents_3d.is_none());
+        self.assert_contents_empty();
+        self.contents = Some(Contents::D1(contents.to_vec()));
         self
     }
     pub fn fill_2d(mut self, contents: &Vec<Vec<T>>) -> CArray<T> {
-        self.contents_2d = Some(contents.to_vec());
-        assert!(self.contents_1d.is_none() && self.contents_3d.is_none());
+        self.assert_contents_empty();
+        self.contents = Some(Contents::D2(contents.to_vec()));
         self
     }
-    // pub fn fill_3d(mut self, contents: &Vec<Vec<Vec<T>>>) -> CArray<T> {
-    //     self.contents_3d = Some(contents.to_vec());
-    //     assert!(self.contents_1d.is_none() && self.contents_2d.is_none());
-    //     self
-    // }
+    pub fn fill_3d(mut self, contents: &Vec<Vec<Vec<T>>>) -> CArray<T> {
+        self.assert_contents_empty();
+        self.contents = Some(Contents::D3(contents.to_vec()));
+        self
+    }
+    fn assert_contents_empty(&self) {
+        if let Some(_) = self.contents {
+            panic!("CArray cannot be filled more than once");
+        }
+    }
     pub fn format(self) -> Format {
-        if let Some(contents) = self.contents_1d {
-            return format_c_array(&self.name, &contents, &self.c_type, self.is_extern);
+        match self.contents {
+            Some(Contents::D1(ref v)) => self.format_c_array1(&v),
+            Some(Contents::D2(ref v)) => self.format_c_array2(&v),
+            Some(Contents::D3(ref v)) => self.format_c_array3(&v),
+            None => panic!("CArray was not filled")
         }
-        else if let Some(contents) = self.contents_2d {
-            return format_c_array2(&self.name, &contents, &self.c_type, self.is_extern);
-        }
-        else if let Some(contents) = self.contents_3d {
-           return format_c_array3(&self.name, &contents, &self.c_type, self.is_extern);
+    }
+    // pub fn format_contents(self) -> CCode {
+    //     make_c_array1(&v);
+    // }
+
+
+    fn format_c_array1 (&self, v: &Vec<T>) -> Format
+        where T: Display + Clone
+    {
+        let contents = make_c_array1(&v);
+        if self.is_extern {
+            Format {
+                h: CCode(format!("extern const {} {}[];\n", self.c_type, self.name)),
+                c: CCode(format!("extern const {} {}[] = {};\n\n", self.c_type, self.name, contents)),
+            }
         }
         else {
-            panic!("CArray: no array contents were given");
+            Format {
+                h: CCode::new(),
+                c: CCode(format!("const {} {}[] = {};\n\n", self.c_type, self.name, contents)),
+            }
         }
     }
-}
 
+    fn format_c_array2(&self, v: &Vec<Vec<T>>) -> Format
+        where T: Display
+    {
+        let contents = make_c_array2(&v);
+        let len_2nd_dim = v[0].len();
 
-fn format_c_array<T>(name: &CCode, v: &Vec<T>, ctype: &CCode, is_extern: bool) -> Format
-    where T: Display + Clone
-{
-    let contents = make_c_array(&v);
-    if is_extern {
-        Format {
-            h: CCode(format!("extern const {} {}[];\n", ctype, name)),
-            c: CCode(format!("extern const {} {}[] = {};\n\n", ctype, name, contents)),
+        if self.is_extern {
+            Format {
+                h: CCode(format!("extern const {} {}[][{}];\n",
+                                 self.c_type, self.name, len_2nd_dim)),
+                c: CCode(format!("extern const {} {}[][{}] = {};\n\n",
+                                 self.c_type, self.name, len_2nd_dim, contents)),
+            }
+        }
+        else {
+            Format {
+                h: CCode::new(),
+                c: CCode(format!("const {} {}[][{}] = {};\n\n",
+                                 self.c_type, self.name, len_2nd_dim, contents)),
+            }
         }
     }
-    else {
-        Format {
-            h: CCode::new(),
-            c: CCode(format!("const {} {}[] = {};\n\n", ctype, name, contents)),
+
+
+    fn format_c_array3(&self, v: &Vec<Vec<Vec<T>>>) -> Format
+        where T: Display
+    {
+        let contents = make_c_array3(&v);
+        let len_2nd_dim = v[0].len();
+        let len_3rd_dim = v[0][0].len();
+
+        // TODO combine extern cases better
+        if self.is_extern {
+            Format {
+                h: CCode(format!("extern const {} {}[][{}][{}];\n",
+                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim)),
+                c: CCode(format!("extern const {} {}[][{}][{}] = {};\n\n",
+                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim, contents)),
+            }
         }
-    }
-}
-
-fn format_c_array2<T>(name: &CCode, v: &Vec<Vec<T>>, ctype: &CCode, is_extern: bool) -> Format
-    where T: Display
-{
-    let contents = make_c_array2(&v);
-    let len_2nd_dim = v[0].len();
-
-    if is_extern {
-        Format {
-            h: CCode(format!("extern const {} {}[][{}];\n",
-                       ctype, name, len_2nd_dim)),
-            c: CCode(format!("extern const {} {}[][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, contents)),
-        }
-    }
-    else {
-        Format {
-            h: CCode::new(),
-            c: CCode(format!("const {} {}[][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, contents)),
-        }
-    }
-}
-
-
-fn format_c_array3<T>(name: &CCode, v: &Vec<Vec<Vec<T>>>, ctype: &CCode, is_extern: bool) -> Format
-    where T: Display
-{
-    let contents = make_c_array3(&v);
-    let len_2nd_dim = v[0].len();
-    let len_3rd_dim = v[0][0].len();
-
-    // TODO combine extern cases better
-    if is_extern {
-        Format {
-            h: CCode(format!("extern const {} {}[][{}][{}];\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim)),
-            c: CCode(format!("extern const {} {}[][{}][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim, contents)),
-        }
-    }
-    else {
-        Format {
-            h: CCode::new(),
-            c: CCode(format!("const {} {}[][{}][{}] = {};\n\n",
-                       ctype, name, len_2nd_dim, len_3rd_dim, contents)),
+        else {
+            Format {
+                h: CCode::new(),
+                c: CCode(format!("const {} {}[][{}][{}] = {};\n\n",
+                                 self.c_type, self.name, len_2nd_dim, len_3rd_dim, contents)),
+            }
         }
     }
 }
@@ -138,7 +141,7 @@ fn format_c_array3<T>(name: &CCode, v: &Vec<Vec<Vec<T>>>, ctype: &CCode, is_exte
 // TODO refactor to recursively make arrays of arbitrary dimensions?
 // Or at least re-use more code, and improve formatting
 
-fn make_c_array<T>(v: &Vec<T>) -> CCode
+fn make_c_array1<T>(v: &Vec<T>) -> CCode
     where T: Display
 {
     let lines = wrap_in_braces(&to_code_vec(v));
