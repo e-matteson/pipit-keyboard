@@ -169,6 +169,13 @@ impl Maps {
         out
     }
 
+    pub fn get_seq_types(&self) -> Vec<SeqType> {
+        let v: Vec<_> = self.sequences.keys()
+            .map(|s| s.to_owned())
+            .collect();
+        v
+    }
+
     // fn get_all_chords_for_mode(&self, mode: &str) -> &Vec<BTreeMap<Name, Chord>>{
     //     self.chords.iter()
     //         .filter(|(key,_)| self.modes[mode].contains_key(key))

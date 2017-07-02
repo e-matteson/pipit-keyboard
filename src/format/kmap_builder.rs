@@ -8,16 +8,9 @@ type SeqMap   = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
 type LenMap   = BTreeMap<usize, Vec<Name>>;
 
-// TODO Rename lookup -> keymap
 // TODO refactor this whole file
-// Can it be impl'd on a new struct?
 // At least be more consistent about terminology
 
-
-// enum ModeChords {
-//     Parent{child: String, start: usize},
-//     Other(Vec<ChordEntry>)
-// }
 
 struct ChordEntry {
     chord: Chord,
@@ -50,7 +43,9 @@ impl ChordEntry {
     }
 }
 
-pub struct LookupBuilder<'a> {
+//////////////////////
+
+pub struct KmapBuilder<'a> {
     seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
     chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
@@ -61,15 +56,15 @@ pub struct LookupBuilder<'a> {
 }
 
 
-impl <'a> LookupBuilder<'a> {
+impl <'a> KmapBuilder<'a> {
 
     pub fn new(seq_type: SeqType,
                seq_map: &'a SeqMap,
                chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
                kmap_ids: &'a BTreeMap<KmapPath, String>)
-               -> LookupBuilder<'a>
+               -> KmapBuilder<'a>
     {
-        LookupBuilder {
+        KmapBuilder {
             seq_type: seq_type,
             seq_map: seq_map,
             chord_maps: chord_maps,
@@ -95,7 +90,7 @@ impl <'a> LookupBuilder<'a> {
         let seq_array_name = self.make_seq_array_name();
         for kmap in chord_arrays.keys(){
             let chord_array_name = self.make_chord_array_name(kmap);
-            let s = LookupStruct {
+            let s = KmapStruct {
                 chords: chord_array_name.clone(),
                 sequences: seq_array_name.clone(),
                 use_compression: self.use_compression,
@@ -307,7 +302,7 @@ impl <'a> LookupBuilder<'a> {
     }
 
     fn make_lookup_struct_name(&self, kmap: &KmapPath) -> CCode {
-        CCode(format!("{}_{}_lookup",
+        CCode(format!("{}_{}_struct",
                 self.seq_type.to_string(),
                 self.kmap_ids.get(kmap).expect("kmap name not found")))
     }
@@ -360,7 +355,7 @@ fn get_mods_config(seq_type: SeqType) -> bool {
 
 
 c_struct!(
-    struct LookupStruct {
+    struct KmapStruct {
         chords: CCode,
         sequences: CCode,
         use_compression: bool,

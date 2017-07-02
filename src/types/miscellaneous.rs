@@ -33,8 +33,13 @@ pub enum SeqType {
 
 impl fmt::Display for SeqType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO to lowercase
-        fmt::Debug::fmt(self, f)
+        let s = match self {
+            &SeqType::Plain => "plain",
+            &SeqType::Macro => "macro",
+            &SeqType::Command => "command",
+            &SeqType::Word => "word",
+        };
+        fmt::Display::fmt(s, f)
     }
 }
 
@@ -248,6 +253,12 @@ impl ToC for Name {
 impl ToC for ModeName {
     fn to_c(&self) -> CCode {
         CCode(self.0.to_owned())
+    }
+}
+
+impl ToC for SeqType {
+    fn to_c(&self) -> CCode {
+        CCode(self.to_string())
     }
 }
 
