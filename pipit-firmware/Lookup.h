@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "keycodes.h"
 #include "auto_config.h"
+#include "conf.h"
 #include "Chord.h"
 
 // Max # of bytes of data in a word/macro lookup array entry.
@@ -13,14 +14,11 @@ class Lookup{
 
 public:
   Lookup();
-  uint8_t plain(const Chord* chord, uint8_t* data);
-  uint8_t macro(const Chord* chord, uint8_t* data);
-  uint8_t command(const Chord* chord, uint8_t* data);
-  uint8_t word(const Chord* chord, uint8_t* data);
+
+  uint8_t get(conf::seq_type_enum type, const Chord* chord, uint8_t* data);
 
 private:
-  uint8_t lookupChord(const Chord* chord, uint8_t* data, const uint8_t** chord_lookup,
-                      const uint8_t** seq_lookup, bool use_mods, bool use_compression);
+  uint8_t lookupChord(const Chord* chord, uint8_t* data, const KmapStruct* kmap);
   uint8_t readOffset(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);
   bool isZero(const uint8_t* start_of_entry);

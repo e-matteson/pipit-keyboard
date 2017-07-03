@@ -8,13 +8,14 @@ use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
 // TODO typealias kmap names
 #[derive(Debug)]
 pub struct Maps {
-    pub chords:     BTreeMap<KmapPath, BTreeMap<Name, Chord>>, // full kmap name to chord map
-    pub sequences:  BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
-    pub wordmods:   Vec<Name>,
-    pub anagrams:   Vec<Name>,
-    pub modes:      BTreeMap<ModeName, Vec<KmapInfo>>,
-    pub kmap_ids:   BTreeMap<KmapPath, String>, // kmap path to short kmap nickname
-    pub options:    Options,
+    pub chords:       BTreeMap<KmapPath, BTreeMap<Name, Chord>>, // full kmap name to chord map
+    pub sequences:    BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
+    pub wordmods:     Vec<Name>,
+    pub modifierkeys: Vec<Name>,
+    pub anagrams:     Vec<Name>,
+    pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
+    pub kmap_ids:     BTreeMap<KmapPath, String>, // kmap path to short kmap nickname
+    pub options:      Options,
 }
 
 impl Maps {
@@ -23,6 +24,7 @@ impl Maps {
             chords: BTreeMap::new(),
             sequences: BTreeMap::new(),
             wordmods: Vec::new(),
+            modifierkeys: Vec::new(),
             anagrams: Vec::new(),
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
@@ -58,15 +60,10 @@ impl Maps {
         self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord);
     }
 
-    // pub fn get_modifier_position(&self, name: &str, kmap: &str) -> usize {
-    //     // TODO take kmap list, return None if not found
-    //     // TODO remove single switch limitation
-    //     self.get_chords(kmap).get(name)
-    //         .expect(&format!("modifier not found in kmap: {}, {}", name, kmap))
-    //         .get_single_switch_index()
-    //         .expect(&format!("modifier must be mapped to exactly one switch: {}, {}",
-    //                          name, kmap))
-    // }
+    pub fn add_modifierkey(&mut self, name: Name, seq: Sequence) {
+        self.modifierkeys.push(name.clone());
+        self.get_sequences_mut(SeqType::Plain).insert(name, seq);
+    }
 
     pub fn set_sequences(&mut self, seq_type: SeqType, val: BTreeMap<Name, Sequence>) {
         assert!(!self.sequences.contains_key(&seq_type));
@@ -98,6 +95,21 @@ impl Maps {
             out.push(self.get_chord_in_mode(&name, mode));
         }
         out
+    }
+
+    pub fn get_mod_names(&self) -> Vec<Name> {
+        let mut names = Vec::new();
+        names.extend(self.modifierkeys.clone());
+        names.extend(self.wordmods.clone());
+        names
+    }
+
+    pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
+        let mut chords = Vec::new();
+        for name in self.get_mod_names() {
+            chords.push(self.get_chord_in_mode(&name, &mode));
+        }
+        chords
     }
 
     fn get_wordmod_helper(&self, name: &Name, mode: &ModeName) -> Chord {

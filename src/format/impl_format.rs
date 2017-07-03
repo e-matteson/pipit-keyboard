@@ -141,6 +141,7 @@ impl Maps {
         f.append(&self.format_command_enum());
         f.append(&self.format_seq_type_enum());
         f.append(&self.format_mode_enum());
+        f.append(&self.format_modifier_enum());
 
         let mut struct_names = BTreeMap::new();
         f.append(&self.format_kmaps(&mut struct_names));
@@ -152,23 +153,18 @@ impl Maps {
                 kmap_struct_names: &struct_names,
                 seq_types: self.get_seq_types(),
                 mode_name: &mode,
-                mod_ctrl_chord: self.get_mod_ctrl(mode),
-                mod_shift_chord: self.get_mod_shift(mode),
-                mod_alt_chord: self.get_mod_alt(mode),
-                mod_gui_chord: self.get_mod_gui(mode),
-                wordmod_capital_chord: self.get_wordmod_capital(mode),
-                wordmod_nospace_chord: self.get_wordmod_nospace(mode),
+                mod_chords: self.get_mod_chords(mode),
                 anagram_chords: self.get_anagrams(mode),
             };
             let mut tmp = CCode::new();
             f.append(&m.format(&mut tmp));
-            mode_struct_names.push(tmp);
+            mode_struct_names.push(CCode(format!("&{}", tmp)));
         }
 
         f.append(&CArray::new()
                  .name(&"mode_structs".to_c())
                  .is_extern(true)
-                 .c_type(&"ModeStruct".to_c())
+                 .c_type(&"ModeStruct*".to_c())
                  .fill_1d(&mode_struct_names)
                  .format());
 
@@ -186,6 +182,15 @@ impl Maps {
         }
     }
 
+    fn format_modifier_enum (&self) -> Format {
+        let mods_list: Vec<_> = self.get_mod_names().into_iter()
+            .map(|x| format!("{}_ENUM", x).to_c().to_uppercase())
+            .collect();
+        Format {
+            h: make_enum(&mods_list, &"mod_enum".to_c()),
+            c: CCode::new(),
+        }
+    }
 
     fn format_command_enum (&self) -> Format {
         let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
@@ -199,7 +204,7 @@ impl Maps {
 
     fn format_seq_type_enum (&self) -> Format {
         let v: Vec<_> = self.get_seq_types().into_iter()
-            .map(|s| s.to_c())
+            .map(|s| s.to_c().to_uppercase())
             .collect();
         Format {
             h: make_enum(&v, &"seq_type_enum".to_c()),

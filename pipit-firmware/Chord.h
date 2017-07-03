@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "auto_config.h"
 #include "keycodes.h"
+#include "conf.h"
 
 class Chord{
 public:
@@ -37,8 +38,8 @@ private:
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
   void setWordmod(const uint8_t* new_wordmod_storage);
-  void blankModifier(uint32_t modifier);
   void blankWordmod(const uint8_t* wordmod_chord_bytes);
+  void blankMod(uint32_t mod_name, const uint8_t* mod_chord_bytes);
 
   void unsetAnagram(uint8_t num);
   void setAnagram(uint8_t num);

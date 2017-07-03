@@ -11,7 +11,7 @@ left_hand_mode             = [{file="keymaps/dvorak24_left.kmap", words=false}]
 chord_delay                = 30
 held_delay                 = 200
 debounce_delay             = 5
-debug_messages             = 0
+debug_messages             = 1
 
 ##### hardware-specific options:
 
@@ -31,13 +31,16 @@ kmap_format                = [
     [         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
 
 
-[plain_keys]
+[modifiers]
 
-blank_mapping     = [["BLANK_MAPPING","0"]] #for ignoring unused blocks in kmap file
 modifierkey_shift = [["0","MODIFIERKEY_SHIFT"]]
 modifierkey_ctrl  = [["0","MODIFIERKEY_CTRL"]]
 modifierkey_alt   = [["0","MODIFIERKEY_ALT"]]
 modifierkey_gui   = [["0","MODIFIERKEY_GUI"]]
+
+[plain_keys]
+
+blank_mapping     = [["BLANK_MAPPING","0"]] #for ignoring unused blocks in kmap file
 key_a             = [["KEY_A","0"]]
 key_b             = [["KEY_B","0"]]
 key_b_2           = [["KEY_B","0"]]

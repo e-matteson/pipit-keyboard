@@ -62,11 +62,11 @@ uint8_t Chord::getAnagramNum(){
   // get only the anagram-relevant bits
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(conf::anagram_mask_chord_bytes[mode], anagram_bytes);
+  andMask(conf::getAnagramMask(mode), anagram_bytes);
 
   // check which anagram modifier matches
   for (uint8_t i = 0; i < NUM_ANAGRAMS; i++) {
-    if (isEqual(conf::anagram_chord_bytes[mode][i],
+    if (isEqual(conf::getAnagram(mode, i),
                 anagram_bytes)){
       return i;
     }
@@ -82,7 +82,7 @@ void Chord::unsetAnagram(uint8_t num){
     DEBUG1_LN("WARNING: Failed to unset anagram modifiers");
     return;
   }
-  unsetMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
+  unsetMask(conf::getAnagram(mode, num), chord_bytes);
 }
 
 void Chord::setAnagram(uint8_t num){
@@ -90,7 +90,7 @@ void Chord::setAnagram(uint8_t num){
     DEBUG1_LN("WARNING: Failed to set anagram modifiers");
     return;
   }
-  setMask(conf::anagram_chord_bytes[mode][num], chord_bytes);
+  setMask(conf::getAnagram(mode, num), chord_bytes);
 }
 
 uint8_t Chord::cycleAnagramModifier(){
@@ -107,61 +107,67 @@ bool Chord::matches(const uint8_t* lookup_chord_bytes) const{
 }
 
 void Chord::blankCtrl(){
-  blankModifier(MODIFIERKEY_CTRL);
+  blankMod(MODIFIERKEY_CTRL, conf::getCtrl(mode));
 }
 
 void Chord::blankAlt(){
-  blankModifier(MODIFIERKEY_ALT);
+  blankMod(MODIFIERKEY_ALT, conf::getAlt(mode));
 }
 
 void Chord::blankShift(){
-  blankModifier(MODIFIERKEY_SHIFT);
+  blankMod(MODIFIERKEY_SHIFT, conf::getShift(mode));
 }
 
 void Chord::blankGUI(){
-  blankModifier(MODIFIERKEY_GUI);
+  blankMod(MODIFIERKEY_GUI, conf::getGUI(mode));
 }
 
-
-void Chord::blankModifier(uint32_t modifier){
-  uint8_t position;
-  switch(modifier){
-  case MODIFIERKEY_SHIFT:
-    position = conf::shift_position[mode];
-    break;
-  case MODIFIERKEY_GUI:
-    position = conf::gui_position[mode];
-    break;
-  case MODIFIERKEY_CTRL:
-    position = conf::ctrl_position[mode];
-    break;
-  case MODIFIERKEY_ALT:
-    position = conf::alt_position[mode];
-    break;
-  default:
-    DEBUG1("ERROR: blankModifier: unknown modifier: ");
-    DEBUG1_LN(modifier);
-    return;
-  }
-
-  //If the modifier at the specified switch position is pressed:
-  // Set the corresponding bit in mod_byte,
-  // and unset the corresponding bit in the chord array.
-  if(chord_bytes[position/8] & 1<<position%8){
-    mod_byte |= modifier&0xff;
-    chord_bytes[position/8] &= ~(1<<position%8);
+void Chord::blankMod(uint32_t mod_name, const uint8_t* mod_chord_bytes){
+  if (areMaskBitsSet(mod_chord_bytes, chord_bytes)) {
+    mod_byte |= mod_name&0xff; // store in mod_byte
+    unsetMask(mod_chord_bytes, chord_bytes); // remove from chord
   }
 }
+
+
+// void Chord::blankMod(uint32_t modifier){
+//   uint8_t position;
+//   switch(modifier){
+//   case MODIFIERKEY_SHIFT:
+//     position = conf::shift_position[mode];
+//     break;
+//   case MODIFIERKEY_GUI:
+//     position = conf::gui_position[mode];
+//     break;
+//   case MODIFIERKEY_CTRL:
+//     position = conf::ctrl_position[mode];
+//     break;
+//   case MODIFIERKEY_ALT:
+//     position = conf::alt_position[mode];
+//     break;
+//   default:
+//     DEBUG1("ERROR: blankMod: unknown modifier: ");
+//     DEBUG1_LN(modifier);
+//     return;
+//   }
+
+//   //If the modifier at the specified switch position is pressed:
+//   // Set the corresponding bit in mod_byte,
+//   // and unset the corresponding bit in the chord array.
+//   if(chord_bytes[position/8] & 1<<position%8){
+//     mod_byte |= modifier&0xff;
+//     chord_bytes[position/8] &= ~(1<<position%8);
+//   }
+// }
 
 void Chord::blankWordmods(){
-  blankWordmod(conf::wordmod_capital_chord_bytes[mode]);
-  blankWordmod(conf::wordmod_nospace_chord_bytes[mode]);
+  blankWordmod(conf::getCapital(mode));
+  blankWordmod(conf::getNospace(mode));
 }
 
 void Chord::blankWordmod(const uint8_t* wordmod_chord_bytes){
   // Store the bit(s) of wordmod that are set in the current chord.
   // TODO refactor to be more like anagram setting?
-
   uint8_t tmp[NUM_BYTES_IN_CHORD] = {0};
   memcpy(tmp, chord_bytes, NUM_BYTES_IN_CHORD);
   andMask(wordmod_chord_bytes, tmp);
@@ -176,11 +182,11 @@ void Chord::restoreWordmods(){
 }
 
 bool Chord::hasCapitalWordmod() const{
-  return areMaskBitsSet(conf::wordmod_capital_chord_bytes[mode], wordmod_storage);
+  return areMaskBitsSet(conf::getCapital(mode), wordmod_storage);
 }
 
 bool Chord::hasNospaceWordmod() const{
-  return areMaskBitsSet(conf::wordmod_nospace_chord_bytes[mode], wordmod_storage);
+  return areMaskBitsSet(conf::getNospace(mode), wordmod_storage);
 }
 
 /************* Chord int array operations ********/

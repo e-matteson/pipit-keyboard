@@ -226,8 +226,10 @@ void Switches::makeChordBytes(Chord* chord){
           // Let modifiers be immediately re-used in future chords.
           // TODO document this special case
           // TODO multi-switch mods? what if those switches are also used in macros? trigger this from pipit, after plain-key recognition?
-          switch_status[index] = isModifier(index, chord->getMode()) ?
-            Switches::HELD : Switches::ALREADY_SENT;
+          // TODO fix after conf refactoring
+          // switch_status[index] = isModifier(index, chord->getMode()) ?
+          //   Switches::HELD : Switches::ALREADY_SENT;
+          switch_status[index] = Switches::ALREADY_SENT;
         }
       }
       index++;
@@ -239,12 +241,12 @@ void Switches::makeChordBytes(Chord* chord){
   }
 }
 
-bool Switches::isModifier(uint8_t switch_index, conf::mode_enum mode){
-  return ((switch_index == conf::shift_position[mode]) ||
-          (switch_index == conf::alt_position[mode])  ||
-          (switch_index == conf::ctrl_position[mode])  ||
-          (switch_index == conf::gui_position[mode]));
-}
+// bool Switches::isModifier(uint8_t switch_index, conf::mode_enum mode){
+//   return ((switch_index == conf::shift_position[mode]) ||
+//           (switch_index == conf::alt_position[mode])  ||
+//           (switch_index == conf::ctrl_position[mode])  ||
+//           (switch_index == conf::gui_position[mode]));
+// }
 
 void Switches::printStatusArray(){
   //for debugging

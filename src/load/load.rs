@@ -20,6 +20,7 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
     load_anagram_list(&other, maps);
     load_macros(&toml, maps);
     load_plains(&toml, maps);
+    load_modifierkeys(&toml, maps);
     load_word_list(&other, maps);
     load_command_list(&other, maps);
 
@@ -53,6 +54,12 @@ fn load_macros(toml: &Value, maps: &mut Maps) {
 
 fn load_plains(toml: &Value, maps: &mut Maps) {
     maps.set_sequences(SeqType::Plain, load_sequence_map(&toml["plain_keys"]));
+}
+
+fn load_modifierkeys(toml: &Value, maps: &mut Maps) {
+    for (name, seq) in load_sequence_map(&toml["modifiers"]).iter() {
+        maps.add_modifierkey(name.to_owned(), seq.to_owned());
+    }
 }
 
 fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {

@@ -15,14 +15,15 @@ Pipit::Pipit(){
 }
 
 void Pipit::setup(){
+  Serial.println("setup");
   switches->setup();
   feedback->startRoutine(BOOT_ROUTINE);
   feedback->updateLED();
   comms->setup();
-  Serial.println(conf::foobar.a);
 }
 
 void Pipit::loop(){
+  Serial.println("loop");
   switches->update();
   sendIfReady();
   updateConnection();
@@ -97,7 +98,9 @@ void Pipit::processChord(Chord* chord){
   uint8_t data_length = 0;
 
   // If chord is a known command, do it and return.
-  if((data_length=lookup->command(chord, data))){
+  // if((data_length=lookup->command(chord, data))){
+  Serial.println("command");
+  if((data_length=lookup->get(conf::COMMAND, chord, data))){
     doCommand(data[0]);
     feedback->triggerCommand();
     return;
@@ -108,7 +111,8 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known macro, send it and return.
-  if((data_length=lookup->macro(chord, data))){
+  Serial.println("macro");
+  if((data_length=lookup->get(conf::MACRO, chord, data))){
     sender->sendMacro(data, data_length, chord);
     feedback->triggerMacro();
     return;
@@ -116,7 +120,7 @@ void Pipit::processChord(Chord* chord){
 
   // If chord is a known word, send it and return.
   chord->blankWordmods();
-  if((data_length=lookup->word(chord, data))){
+  if((data_length=lookup->get(conf::WORD, chord, data))){
     sender->sendWord(data, data_length, chord);
     // switches->reuseWordmods(chord)
     feedback->triggerWord();
@@ -132,7 +136,7 @@ void Pipit::processChord(Chord* chord){
   chord->blankAlt();
 
   // If chord is a known plain key, send it and return.
-  if((data_length=lookup->plain(chord, data))){
+  if((data_length=lookup->get(conf::PLAIN, chord, data))){
     sender->sendPlain(data, data_length, chord);
     // switches->reuseMods(chord)
     feedback->triggerPlain();
@@ -283,7 +287,7 @@ void Pipit::cycleLastWord(){
       feedback->triggerUnknown();
       return; // Fail
     }
-    if((data_length=lookup->word(&new_chord, data))){
+    if((data_length=lookup->get(conf::WORD, &new_chord, data))){
       // This anagram mod was found!
       deleteLastWord();
       sender->sendWord(data, data_length, &new_chord);
