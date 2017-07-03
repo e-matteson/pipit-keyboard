@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use std::clone::Clone;
-use itertools::Itertools; // TODO unused?
+use itertools::Itertools;
 
 use format::format::Format;
 use types::{CCode, ToC};
@@ -54,15 +54,15 @@ impl <T> CArray<T> where T: Display + Clone
         self
     }
 
-    pub fn format_contents(self) -> CCode {
-        // Use this if you only want the contents, like as the initializer for
-        //  a struct field
-        match self.contents {
-            Some(Contents::D1(ref v)) => make_c_array1(&v),
-            Some(Contents::D2(ref v)) => make_c_array2(&v),
-            None => panic!("CArray was not filled")
-        }
-    }
+    // pub fn format_contents(self) -> CCode {
+    //     // Use this if you only want the contents, like as the initializer for
+    //     //  a struct field
+    //     match self.contents {
+    //         Some(Contents::D1(ref v)) => make_c_array1(&v),
+    //         Some(Contents::D2(ref v)) => make_c_array2(&v),
+    //         None => panic!("CArray was not filled")
+    //     }
+    // }
 
     pub fn format(self) -> Format {
         let name = match self.name {

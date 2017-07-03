@@ -74,10 +74,12 @@ impl <'a> KmapBuilder<'a> {
         }
     }
 
-    pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, CCode>) -> Format {
+    pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, CCode>)
+                  -> Format
+    {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
-        // TODO skip words for kmap if never used?
+        // TODO skip words for kmap if never used? gcc seems to optimize them away...
         let names_by_len = self.make_length_map();
 
         let seq_arrays = self.make_seq_arrays(&names_by_len);
@@ -95,7 +97,8 @@ impl <'a> KmapBuilder<'a> {
                 sequences: seq_array_name.clone(),
                 use_compression: self.use_compression,
                 use_mods: self.use_mods,
-                use_offsets: true               // TODO make optional
+                // TODO make offsets optional to save space, when there's only 1 word kmap
+                use_offsets: true
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             f.append(&s.format(&struct_name));
@@ -111,7 +114,6 @@ impl <'a> KmapBuilder<'a> {
         let mut f = Format::new();
         let mut array_names: Vec<CCode> = Vec::new();
         for (kmap, length_entries) in chord_arrays.into_iter(){
-
             let length_ints: Vec<Vec<i64>> = length_entries.iter()
                 .map(|v| flatten_chord_entries(v))
                 .collect();
@@ -125,12 +127,6 @@ impl <'a> KmapBuilder<'a> {
             );
             array_names.push(array_name.clone());
         }
-
-        // f.append(&CArray::new(&format!("{}_chord_lookup", self.lookup_name))
-        //          .is_extern(true)
-        //          .c_type("uint8_t**")
-        //          .fill_1d(&array_names)
-        //          .format());
         f
     }
 
@@ -139,15 +135,12 @@ impl <'a> KmapBuilder<'a> {
             .map(|keypress|
                  keypress.to_bytes(self.use_compression, self.use_mods))
             .collect();
-
         self.format_length_arrays(byte_arrays,
                                   &self.make_seq_array_name(),
                                   false)
     }
 
-    fn make_seq_arrays(&self, names_by_len: &LenMap)
-                       -> Vec<Sequence>
-    {
+    fn make_seq_arrays(&self, names_by_len: &LenMap) -> Vec<Sequence> {
         let mut seq_arrays = Vec::new();
         for length in 0..max_len(names_by_len)+1 {
             let subarray =
@@ -179,7 +172,10 @@ impl <'a> KmapBuilder<'a> {
     }
 
 
-    fn make_chord_subarray(&self, names_by_len: &LenMap, length: usize, kmap: &KmapPath)
+    fn make_chord_subarray(&self,
+                           names_by_len: &LenMap,
+                           length: usize,
+                           kmap: &KmapPath)
                            -> Vec<ChordEntry>
     {
         let chords = &self.chord_maps[kmap];
@@ -193,7 +189,8 @@ impl <'a> KmapBuilder<'a> {
                 entries.push(
                     ChordEntry{
                         offset: (index - last_index),
-                        chord: chords.get(name).expect("failed to get chord").clone()
+                        chord: chords.get(name)
+                            .expect("failed to get chord").clone()
                     }
                 );
                 last_index = index;
@@ -223,7 +220,6 @@ impl <'a> KmapBuilder<'a> {
                      .format()
             );
         }
-
         subarray_names.push("NULL".to_c());
         f.append(&CArray::new()
                  .name(name)
@@ -243,20 +239,22 @@ impl <'a> KmapBuilder<'a> {
         names.sort();
         for name in names{
             let length = self.seq_map[name].len();
-            names_by_len.entry(length).or_insert(Vec::new()).push(name.to_owned());
+            names_by_len.entry(length)
+                .or_insert(Vec::new())
+                .push(name.to_owned());
         }
         self.reorder_length_map(names_by_len)
     }
 
     fn reorder_length_map(&self, names_by_len: LenMap) -> LenMap
     {
-        /// Alternately pick one name from each kmap, so no 2 successive chords for
-        /// a kmap will be too far apart.
+        /// Alternately pick one name from each kmap, so no 2 successive chords
+        /// for a kmap will be too far apart.
 
         // Find the first name that's used in the given kmap.
         let find_name =
             |names: &Vec<Name>, kmap: &KmapPath| names.iter()
-            .position(|name| self.chord_maps[kmap].contains_key(name));
+            .position(|name| self.chord_maps[kmap].contains_key(name)) ;
 
         let mut new_map: LenMap = BTreeMap::new();
         for (length, mut names) in names_by_len.into_iter() {

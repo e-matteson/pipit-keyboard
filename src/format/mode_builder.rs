@@ -28,14 +28,12 @@ impl <'a> ModeBuilder <'a> {
         let mut mod_array_name = CCode::new();
         f.append(&self.format_modifier_array(&mut mod_array_name));
 
-        // TODO why does the explicit casting seem to be necessary?!
-        //  And why don't KmapStructs need it too?!
         let m = ModeStruct {
             num_kmaps: self.infos.len() as u8, // TODO warn if too long?
-            kmaps: CCode(format!(" {}", kmap_array_name)),
-            mod_chords: CCode(format!(" {}", mod_array_name)),
-            anagram_chords: CCode(format!(" {}", anagram_array_name)),
-            anagram_mask: CCode(format!(" {}", anagram_mask_name)),
+            kmaps: CCode(format!("{}", kmap_array_name)),
+            mod_chords: CCode(format!("{}", mod_array_name)),
+            anagram_chords: CCode(format!("{}", anagram_array_name)),
+            anagram_mask: CCode(format!("{}", anagram_mask_name)),
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
         f.append(&m.format(&mode_struct_name));
@@ -63,7 +61,9 @@ impl <'a> ModeBuilder <'a> {
                     }
                 );
             }
-            let name = CCode(format!("{}_{}_kmap_array", self.mode_name, seq_type));
+            let name = CCode(format!("{}_{}_kmap_array",
+                                     self.mode_name,
+                                     seq_type));
             f.append(&CArray::new()
                      .name(&name)
                      .is_extern(false)
@@ -97,34 +97,26 @@ impl <'a> ModeBuilder <'a> {
     }
 
     fn format_anagram_array (&self, new_array_name: &mut CCode) -> Format {
-        // TODO all 1d arrays. abstraction.
-        let mut f = Format::new();
-        let mut subarray_names = Vec::new();
-        for (i,c) in self.anagram_chords.iter().enumerate() {
-            let name = CCode(format!("{}_anagram_chord{}", self.mode_name, i));
-            f.append(&CArray::new()
-                     .name(&name)
-                     .is_extern(false)
-                     .fill_1d(&c.to_ints())
-                     .format());
-            subarray_names.push(name);
-        }
-        *new_array_name = CCode(format!("{}_anagram_chords", self.mode_name));
-        f.append(&CArray::new()
-                 .name(new_array_name)
-                 .c_type(&"uint8_t*".to_c())
-                 .is_extern(false)
-                 .fill_1d(&subarray_names)
-                 .format());
-        f
+        self.format_chord_array_helper(new_array_name,
+                             &self.anagram_chords,
+                             &"anagram_chord".to_c())
     }
 
+
     fn format_modifier_array (&self, new_array_name: &mut CCode) -> Format {
-        // TODO abstract this and format_anagram_array
+        self.format_chord_array_helper(new_array_name,
+                                       &self.mod_chords,
+                                       &"mod_chord".to_c())
+    }
+
+    fn format_chord_array_helper (&self,
+                                  new_array_name: &mut CCode,
+                                  chords: &Vec<Chord>,
+                                  label: &CCode) -> Format {
         let mut f = Format::new();
         let mut subarray_names = Vec::new();
-        for (i,c) in self.mod_chords.iter().enumerate() {
-            let name = CCode(format!("{}_mod_chord{}", self.mode_name, i));
+        for (i,c) in chords.iter().enumerate() {
+            let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
             f.append(&CArray::new()
                      .name(&name)
                      .is_extern(false)
@@ -132,7 +124,7 @@ impl <'a> ModeBuilder <'a> {
                      .format());
             subarray_names.push(name);
         }
-        *new_array_name = CCode(format!("{}_mod_chords", self.mode_name));
+        *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));
         f.append(&CArray::new()
                  .name(new_array_name)
                  .c_type(&"uint8_t*".to_c())
