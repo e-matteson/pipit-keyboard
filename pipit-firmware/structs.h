@@ -10,7 +10,7 @@ struct KmapStruct{
   bool use_compression;
   bool use_mods;
   bool use_offsets;
-  uint8_t magic;
+  // uint8_t magic;
 };
 
 struct ModeStruct{

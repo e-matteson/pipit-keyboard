@@ -15,7 +15,6 @@ Pipit::Pipit(){
 }
 
 void Pipit::setup(){
-  Serial.println("setup");
   switches->setup();
   feedback->startRoutine(BOOT_ROUTINE);
   feedback->updateLED();
@@ -23,7 +22,6 @@ void Pipit::setup(){
 }
 
 void Pipit::loop(){
-  Serial.println("loop");
   switches->update();
   sendIfReady();
   updateConnection();
@@ -99,7 +97,6 @@ void Pipit::processChord(Chord* chord){
 
   // If chord is a known command, do it and return.
   // if((data_length=lookup->command(chord, data))){
-  Serial.println("command");
   if((data_length=lookup->get(conf::COMMAND, chord, data))){
     doCommand(data[0]);
     feedback->triggerCommand();
@@ -111,7 +108,6 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known macro, send it and return.
-  Serial.println("macro");
   if((data_length=lookup->get(conf::MACRO, chord, data))){
     sender->sendMacro(data, data_length, chord);
     feedback->triggerMacro();
