@@ -21,6 +21,9 @@ fn get_chord_length() -> usize {
 
 
 #[derive(Clone)]
+#[derive(PartialEq)]
+#[derive(Eq)]
+#[derive(Hash)]
 pub struct Chord {
     bits: Vec<bool>,
 }

@@ -1,4 +1,5 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::hash_map::Entry;
 use std::clone::Clone;
 
 use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
@@ -120,6 +121,35 @@ impl Maps {
         self.get_chord_in_mode(name, mode)
     }
 
+    pub fn check_for_conflicts(&self) {
+        for mode in self.chords.keys() {
+            let reversed = self.reverse_chord_map(mode);
+            print_conflict_stats(reversed, mode);
+        }
+    }
+
+    fn reverse_chord_map(&self, mode: &KmapPath) -> HashMap<Chord, Vec<Name>>{
+        let exclude_anagrams = false;
+        let mut reversed: HashMap<Chord, Vec<Name>> = HashMap::new();
+        for (name, chord) in self.chords[mode].iter(){
+            match reversed.entry(chord.clone()){
+                Entry::Occupied(entry) => {
+                    let list = entry.into_mut();
+                    if exclude_anagrams && list.iter().any(|x| is_simple_anagram(x, name)){
+                        continue;
+                    }
+                    list.push(name.to_owned());
+                }
+                Entry::Vacant(entry) => {
+                    let mut v = Vec::new();
+                    v.push(name.to_owned());
+                    entry.insert(v);
+                }
+            }
+        }
+        reversed
+    }
+
 
     pub fn get_wordmod_capital(&self, mode: &ModeName) -> Chord {
         self.get_wordmod_helper(&Name::from("wordmod_capital"), mode)
@@ -188,13 +218,6 @@ impl Maps {
         v
     }
 
-    // fn get_all_chords_for_mode(&self, mode: &str) -> &Vec<BTreeMap<Name, Chord>>{
-    //     self.chords.iter()
-    //         .filter(|(key,_)| self.modes[mode].contains_key(key))
-    //         .map(|(_,val)| val)
-    //         .collect()
-    // }
-
     pub fn add_mode(&mut self, mode: ModeName, kmaps: Vec<KmapInfo>) {
         assert!(!self.modes.contains_key(&mode));
         // Store the kmaps that are included in this mode
@@ -219,67 +242,26 @@ impl Maps {
                              kmap))
             .append(&mut new_chords);
     }
-
-    // pub fn check_for_duplicate_chords(&self) {
-    //     for kmap in self.chords.keys(){
-    //         let mut foo: Vec<_> = self.chords[kmap].iter()
-    //             .map(|(k, v)|
-    //                  (v.to_string(), k))
-    //             .collect();
-
-    //         foo.sort();
-    //         let mut last_chord = String::new();
-    //         let mut last_name = "";
-    //         for (chord, name) in foo {
-    //             let is_duplicate = chord == last_chord
-    //                 && !self.wordmods.contains(&name.to_string())
-    //                 && !self.wordmods.contains(&last_name.to_string());
-
-    //             if is_duplicate {
-    //                 println!("WARNING: duplicate chord: '{}', '{}'", last_name, name);
-    //             }
-    //             last_chord = chord;
-    //             last_name = name;
-    //         }
-    //     }
-    // }
-
-
-    // pub fn check_for_missing_seqs(&self) {
-    //     // TODO new self.sequences
-    //     // Print warnings if any chords were never assigned a key sequence.
-    //     for kmap in self.chords.keys(){
-    //         for name in self.chords[kmap].keys() {
-    //             if self.wordmods.contains(name) { continue }
-    //             if self.commands.contains_key(name) { continue }
-    //             if self.plains.contains_key(name) { continue }
-    //             if self.macros.contains_key(name) { continue }
-    //             if self.words.contains_key(name) { continue }
-    //             println!("WARNING: no key sequence: '{}'", name);
-    //         }
-    //     }
-    // }
-
-    // pub fn make_anagram_bit_masks(&self) -> Vec<Chord> {
-    //     // TODO Making this for all kmaps isn't very useful - used to be all modes.
-    //     //      Remove this entirely and OR in firmware?
-    //     let mut v: Vec<Chord> = Vec::new();
-    //     // TODO why get kmaps from options? why not self.chords.keys()?
-    //     for kmap in &self.options.get_kmaps() {
-    //         let mut all_bits = Chord::new();
-
-    //         for name in &self.anagrams {
-    //             if let Some(chord) = self.chords[kmap].get(name) {
-    //                 all_bits.intersect(chord);
-    //             }
-    //             // Else this kmap doesn't have this anagram mod, fine.
-    //             // TODO should we explicitly handle non-word kmaps differently?
-    //         }
-    //         v.push(all_bits);
-    //     }
-    //     v
-    // }
-
 }
 
+fn print_conflict_stats(reversed: HashMap<Chord, Vec<Name>>, mode: &KmapPath){
+    let mut conflicts = HashMap::new();
+    for (_, names) in reversed {
+        let len = names.len();
+        if len == 1 {
+            continue;
+        }
+        println!("WARNING: duplicate chords: {:?}", names);
+        *conflicts.entry(len).or_insert(0) += 1;
+    }
+    let total: i64 = conflicts.values().sum();
+    let mut conflict_vec: Vec<_> = conflicts.iter().collect();
+    conflict_vec.sort_by(|a, b| b.1.cmp(a.1));
+    println!("{}: {} conflicts: {:?}", mode, total, conflict_vec);
+}
 
+fn is_simple_anagram(word1: &Name, word2: &Name) -> bool {
+    let chars1: HashSet<_> = word1.0.chars().collect();
+    let chars2: HashSet<_> = word2.0.chars().collect();
+    chars1 == chars2
+}

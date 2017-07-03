@@ -16,11 +16,11 @@ fn get_settings_path() -> String {
     }
 }
 
-
 fn main() {
     let settings_path = get_settings_path();
     let maps = Maps::load(&settings_path);
 
+    maps.check_for_conflicts();
     // TODO automatically extract path parts
     let f = maps.format("auto_config");
     // println!("DRY RUN, NOT SAVING");
