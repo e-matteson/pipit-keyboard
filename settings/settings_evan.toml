@@ -2,9 +2,8 @@
 
 [modes]
 
-default_mode               = [{file="keymaps/swap_ei.kmap"},
-                              {file="keymaps/dvorak24_evan.kmap", words=true}]
-left_hand_mode             = [{file="keymaps/dvorak24_left.kmap", words=false}]
+default_mode               = [{file="keymaps/dvorak24_evan.kmap", words=true}]
+left_hand_mode             = [{file="keymaps/dvorak24_left.kmap"}]
 
 [options]
 
