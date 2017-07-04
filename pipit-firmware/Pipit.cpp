@@ -191,19 +191,19 @@ void Pipit::doCommand(uint8_t code){
     break;
 
   case conf::COMMAND_STICKY_CTRL:
-    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    sender->setStickymod(MODIFIERKEY_CTRL&0xff);
     break;
 
   case conf::COMMAND_STICKY_SHIFT:
-    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    sender->setStickymod(MODIFIERKEY_SHIFT&0xff);
     break;
 
   case conf::COMMAND_STICKY_ALT:
-    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    sender->setStickymod(MODIFIERKEY_ALT&0xff);
     break;
 
   case conf::COMMAND_STICKY_GUI:
-    sender->setStickymod(MODIFIERKEY_CTRL & 0xff);
+    sender->setStickymod(MODIFIERKEY_GUI&0xff);
     break;
 
   case conf::COMMAND_LED_BATTERY:

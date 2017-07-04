@@ -93,10 +93,15 @@ void Chord::restoreWordmods(){
 void Chord::blankMod(conf::mod_enum modifier){
   // Store the bit(s) of wordmod that are set in the current chord.
   const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
-  if(isChordMaskSet(mod_chord_bytes, chord_bytes)){
-    mods[modifier] = 1;
-    unsetMask(mod_chord_bytes, chord_bytes);
+  if(!isChordMaskSet(mod_chord_bytes, chord_bytes)){
+    return;
   }
+  if(countBitsSet(mod_chord_bytes) == 0) {
+    // Chord is all zeroes - that's how we represent a missing mod chord.
+    return;
+  }
+  mods[modifier] = 1;
+  unsetMask(mod_chord_bytes, chord_bytes);
 }
 
 void Chord::restoreMod(conf::mod_enum modifier){

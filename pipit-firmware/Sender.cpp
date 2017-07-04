@@ -90,7 +90,7 @@ void Sender::setLastSend(uint8_t key_code, uint8_t mod_byte){
 }
 
 void Sender::setStickymod(uint8_t mod_byte){
-  stickymod = mod_byte;
+  stickymod = stickymod | mod_byte;
 }
 
 void Sender::press(uint8_t key_code, uint8_t mod_byte){
