@@ -14,13 +14,13 @@ namespace conf {
   const uint8_t* getAnagramMask(mode_enum mode);
   const uint8_t* getAnagram(mode_enum mode, uint8_t num);
 
-  const uint8_t* getModifier(mode_enum mode, mod_enum modifier);
-  const uint8_t* getNospace(mode_enum mode);
-  const uint8_t* getCapital(mode_enum mode);
-  const uint8_t* getCtrl(mode_enum mode);
-  const uint8_t* getShift(mode_enum mode);
-  const uint8_t* getAlt(mode_enum mode);
-  const uint8_t* getGUI(mode_enum mode);
+  const uint8_t* getModChord(mode_enum mode, mod_enum modifier);
+  const uint8_t getModifierkeyByte(uint8_t index);
+  const mod_enum getModifierkeyEnum(uint8_t index);
+  const mod_enum getWordmodEnum(uint8_t index);
+  const uint8_t getModifierkeyIndex(mod_enum modifier);
+  const mod_enum getNospaceEnum();
+  const mod_enum getCapitalEnum();
 
 }
 

@@ -118,7 +118,7 @@ void Pipit::processChord(Chord* chord){
   chord->blankWordmods();
   if((data_length=lookup->get(conf::WORD, chord, data))){
     sender->sendWord(data, data_length, chord);
-    // switches->reuseWordmods(chord)
+    switches->reuseMods(chord);
     feedback->triggerWord();
     return;
   }
@@ -126,21 +126,19 @@ void Pipit::processChord(Chord* chord){
   chord->restoreWordmods();
 
   // Blank out all modifier switches.
-  chord->blankCtrl();
-  chord->blankGUI();
-  chord->blankShift();
-  chord->blankAlt();
+  chord->blankMods();
 
   // If chord is a known plain key, send it and return.
   if((data_length=lookup->get(conf::PLAIN, chord, data))){
     sender->sendPlain(data, data_length, chord);
-    // switches->reuseMods(chord)
+    switches->reuseMods(chord);
     feedback->triggerPlain();
     return;
   }
 
   if(sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
+    switches->reuseMods(chord);
     feedback->triggerPlain();
   }
   else{

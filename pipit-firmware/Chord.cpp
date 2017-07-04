@@ -14,18 +14,19 @@ void Chord::setChordArray(const uint8_t* new_chord_bytes){
   }
 }
 
-void Chord::setWordmod(const uint8_t* new_wordmod_storage){
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    wordmod_storage[i] = new_wordmod_storage[i];
-  }
-}
-
 bool Chord::isEmpty() const{
-  // Doesn't check the modbyte, just the current chord bytes.
+  // Doesn't check the mods, just the current chord bytes.
+  // This is important because sendIfEmpty should send mods.
+  // TODO abort after 1st set bit?
   return countBitsSet(chord_bytes) == 0;
 }
 
 uint8_t Chord::getModByte() const{
+  uint8_t mod_byte = 0;
+  for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
+    conf::mod_enum mod = conf::getModifierkeyEnum(i);
+    mod_byte |= hasMod(mod) ? conf::getModifierkeyByte(i) : 0;
+  }
   return mod_byte;
 }
 
@@ -33,32 +34,82 @@ conf::mode_enum Chord::getMode() const{
   return mode;
 }
 
+bool Chord::matches(const uint8_t* lookup_chord_bytes) const{
+  // Use this for checking whether a lookup table entry matches this chord.
+  return isEqual(chord_bytes, lookup_chord_bytes);
+}
+
 void Chord::copy(const Chord* chord){
   mode = chord->mode;
-  mod_byte = chord->mod_byte;
+  for(int i = 0; i < NUM_MODIFIERS; i++){
+    mods[i] = chord->mods[i];
+  }
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = chord->chord_bytes[i];
-    wordmod_storage[i] = chord->wordmod_storage[i];
   }
 }
 
 void Chord::clear(){
   mode = (conf::mode_enum) 0;
-  mod_byte = 0;
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
+  for(uint8_t i = 0; i < NUM_MODIFIERS; i++){
+    mods[i] = 0;
+  }
+  for(uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
-    wordmod_storage[i] = 0;
   }
 }
 
-void Chord::copyWordmod(const Chord* chord){
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    wordmod_storage[i] = chord->wordmod_storage[i];
+bool Chord::hasCapitalWordmod() const{
+  // TODO avoid using enums outside conf?
+  return hasMod(conf::getCapitalEnum());
+}
+
+bool Chord::hasNospaceWordmod() const{
+  return hasMod(conf::getNospaceEnum());
+}
+
+bool Chord::hasMod(conf::mod_enum mod) const{
+  return mods[mod];
+}
+
+void Chord::blankMods(){
+  for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
+    blankMod(conf::getModifierkeyEnum(i));
   }
 }
+
+void Chord::blankWordmods(){
+  for(uint8_t i = 0; i < NUM_WORDMODS; i++){
+    blankMod(conf::getWordmodEnum(i));
+  }
+}
+
+void Chord::restoreWordmods(){
+  for(uint8_t i = 0; i < NUM_WORDMODS; i++){
+    restoreMod(conf::getWordmodEnum(i));
+  }
+}
+
+void Chord::blankMod(conf::mod_enum modifier){
+  // Store the bit(s) of wordmod that are set in the current chord.
+  const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
+  if(isChordMaskSet(mod_chord_bytes, chord_bytes)){
+    mods[modifier] = 1;
+    unsetMask(mod_chord_bytes, chord_bytes);
+  }
+}
+
+void Chord::restoreMod(conf::mod_enum modifier){
+  if(mods[modifier]){
+    mods[modifier] = 0;
+    setMask(conf::getModChord(mode, modifier), chord_bytes);
+  }
+}
+
+
+/********** Anagram manipulation ***********/
 
 uint8_t Chord::getAnagramNum(){
-
   // get only the anagram-relevant bits
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
@@ -101,94 +152,6 @@ uint8_t Chord::cycleAnagramModifier(){
   return next_num;
 }
 
-bool Chord::matches(const uint8_t* lookup_chord_bytes) const{
-  // Use this for checking whether a lookup table entry matches this chord.
-  return isEqual(chord_bytes, lookup_chord_bytes);
-}
-
-void Chord::blankCtrl(){
-  blankMod(MODIFIERKEY_CTRL, conf::getCtrl(mode));
-}
-
-void Chord::blankAlt(){
-  blankMod(MODIFIERKEY_ALT, conf::getAlt(mode));
-}
-
-void Chord::blankShift(){
-  blankMod(MODIFIERKEY_SHIFT, conf::getShift(mode));
-}
-
-void Chord::blankGUI(){
-  blankMod(MODIFIERKEY_GUI, conf::getGUI(mode));
-}
-
-void Chord::blankMod(uint32_t mod_name, const uint8_t* mod_chord_bytes){
-  if (areMaskBitsSet(mod_chord_bytes, chord_bytes)) {
-    mod_byte |= mod_name&0xff; // store in mod_byte
-    unsetMask(mod_chord_bytes, chord_bytes); // remove from chord
-  }
-}
-
-
-// void Chord::blankMod(uint32_t modifier){
-//   uint8_t position;
-//   switch(modifier){
-//   case MODIFIERKEY_SHIFT:
-//     position = conf::shift_position[mode];
-//     break;
-//   case MODIFIERKEY_GUI:
-//     position = conf::gui_position[mode];
-//     break;
-//   case MODIFIERKEY_CTRL:
-//     position = conf::ctrl_position[mode];
-//     break;
-//   case MODIFIERKEY_ALT:
-//     position = conf::alt_position[mode];
-//     break;
-//   default:
-//     DEBUG1("ERROR: blankMod: unknown modifier: ");
-//     DEBUG1_LN(modifier);
-//     return;
-//   }
-
-//   //If the modifier at the specified switch position is pressed:
-//   // Set the corresponding bit in mod_byte,
-//   // and unset the corresponding bit in the chord array.
-//   if(chord_bytes[position/8] & 1<<position%8){
-//     mod_byte |= modifier&0xff;
-//     chord_bytes[position/8] &= ~(1<<position%8);
-//   }
-// }
-
-void Chord::blankWordmods(){
-  blankWordmod(conf::getCapital(mode));
-  blankWordmod(conf::getNospace(mode));
-}
-
-void Chord::blankWordmod(const uint8_t* wordmod_chord_bytes){
-  // Store the bit(s) of wordmod that are set in the current chord.
-  // TODO refactor to be more like anagram setting?
-  uint8_t tmp[NUM_BYTES_IN_CHORD] = {0};
-  memcpy(tmp, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(wordmod_chord_bytes, tmp);
-  setMask(tmp, wordmod_storage);
-
-  // Unset those bits.
-  unsetMask(wordmod_chord_bytes, chord_bytes);
-}
-
-void Chord::restoreWordmods(){
-  setMask(wordmod_storage, chord_bytes);
-}
-
-bool Chord::hasCapitalWordmod() const{
-  return areMaskBitsSet(conf::getCapital(mode), wordmod_storage);
-}
-
-bool Chord::hasNospaceWordmod() const{
-  return areMaskBitsSet(conf::getNospace(mode), wordmod_storage);
-}
-
 /************* Chord int array operations ********/
 
 void Chord::setMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
@@ -209,10 +172,14 @@ void Chord::andMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
   }
 }
 
-bool Chord::areMaskBitsSet(const uint8_t* mask, const uint8_t* _chord_bytes) const{
+bool Chord::isByteMaskSet(const uint8_t mask, const uint8_t byte) const{
+  return mask == (byte & mask);
+}
+
+bool Chord::isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) const{
   bool return_val = 1;
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
-    return_val &= (mask[byte] == (_chord_bytes[byte] & mask[byte]));
+  for (uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++){
+    return_val &= isByteMaskSet(mask[byte_num], _chord_bytes[byte_num]);
   }
   return return_val;
 }
@@ -236,25 +203,12 @@ bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
   return 1;
 }
 
+///// debug
 
-/******* Debugging *******/
-
-void Chord::printChord(){
-  //for debugging
-  // Serial.print("chord: ");
-  printBytes(chord_bytes);
-}
-
-void Chord::printWordmod(){
-  //for debugging
-  // Serial.print("wordmod: ");
-  printBytes(wordmod_storage);
-}
-
-void Chord::printBytes(const uint8_t* bytes) const{
-  for(uint8_t byte_num = 0; byte_num != NUM_BYTES_IN_CHORD; byte_num++){
-    Serial.print(bytes[byte_num]);
+void Chord::printMod(){
+  for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
+    Serial.print(mods[i]);
     Serial.print(" ");
   }
-  Serial.println("");
+  Serial.println();
 }

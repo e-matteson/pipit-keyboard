@@ -280,3 +280,9 @@ impl ToC for u8 {
         CCode(self.to_string())
     }
 }
+
+impl ToC for usize {
+    fn to_c(&self) -> CCode {
+        CCode(self.to_string())
+    }
+}

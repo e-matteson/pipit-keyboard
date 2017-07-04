@@ -208,6 +208,25 @@ void Switches::reuseHeldSwitches(){
   }
 }
 
+void Switches::reuseMods(Chord* chord){
+  // Note: this doesn't re-use anagram mods, because I'm lazy
+  for(uint8_t m = 0; m < NUM_MODIFIERS; m++){
+    if(!chord->hasMod((conf::mod_enum) m)){
+      continue;
+    }
+    const uint8_t* mod_chord = conf::getModChord(chord->getMode(), (conf::mod_enum) m);
+    uint8_t i = 0;
+    for(uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++){
+      for(uint8_t bit_num = 0; bit_num < 8; bit_num++){
+        if(1<<bit_num & mod_chord[byte_num]){
+          switch_status[i] = Switches::HELD;
+        }
+        i++;
+      }
+    }
+  }
+}
+
 void Switches::makeChordBytes(Chord* chord){
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.
@@ -215,9 +234,7 @@ void Switches::makeChordBytes(Chord* chord){
   uint8_t index = 0;
   uint8_t chord_bytes [NUM_BYTES_IN_CHORD] = {0};
   for(uint8_t byte_num = 0; byte_num != NUM_BYTES_IN_CHORD; byte_num++){
-    // For each byte:
     for(uint8_t bit_num = 0; bit_num != 8; bit_num++){
-      // For each bit/switch:
       if (switch_status[index] == Switches::PRESSED || switch_status[index] == Switches::HELD){
         // Switch is pressed! Set bit high.
         chord_bytes[byte_num] |= 1<<bit_num;

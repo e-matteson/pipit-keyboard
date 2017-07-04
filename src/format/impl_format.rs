@@ -115,32 +115,12 @@ impl Maps {
         f
     }
 
-    fn format_kmaps(&self,
-                    kmap_struct_names: &mut BTreeMap<SeqType,
-                                                     BTreeMap<KmapPath, CCode>>)
-                    -> Format
-    {
-        // Format all keymap structs, and return their names
-        let mut f = Format::new();
-        for seq_type in self.sequences.keys() {
-            let l = KmapBuilder::new(seq_type.clone(),
-                                     &self.sequences[seq_type],
-                                     &self.chords,
-                                     &self.kmap_ids);
-            let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
-            f.append(&l.format(&mut tmp));
-            kmap_struct_names.insert(seq_type.to_owned(), tmp);
-        }
-        f.append_newline();
-        f
-    }
-
     fn format_modes (&self) -> Format {
         let mut f = Format::new();
         f.append(&self.format_command_enum());
         f.append(&self.format_seq_type_enum());
         f.append(&self.format_mode_enum());
-        f.append(&self.format_modifier_enum());
+        f.append(&self.format_modifiers());
 
         let mut struct_names = BTreeMap::new();
         f.append(&self.format_kmaps(&mut struct_names));
@@ -170,6 +150,26 @@ impl Maps {
         f
     }
 
+    fn format_kmaps(&self,
+                    kmap_struct_names: &mut BTreeMap<SeqType,
+                                                     BTreeMap<KmapPath, CCode>>)
+                    -> Format
+    {
+        // Format all keymap structs, and return their names
+        let mut f = Format::new();
+        for seq_type in self.sequences.keys() {
+            let l = KmapBuilder::new(seq_type.clone(),
+                                     &self.sequences[seq_type],
+                                     &self.chords,
+                                     &self.kmap_ids);
+            let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
+            f.append(&l.format(&mut tmp));
+            kmap_struct_names.insert(seq_type.to_owned(), tmp);
+        }
+        f.append_newline();
+        f
+    }
+
     fn format_mode_enum (&self) -> Format {
         let modes_list: Vec<_> = self.modes.keys()
             .map(|x| x.to_c().to_uppercase())
@@ -180,14 +180,45 @@ impl Maps {
         }
     }
 
-    fn format_modifier_enum (&self) -> Format {
-        let mods_list: Vec<_> = self.get_mod_names().into_iter()
-            .map(|x| format!("{}_ENUM", x).to_c().to_uppercase())
-            .collect();
-        Format {
-            h: make_enum(&mods_list, &"mod_enum".to_c()),
-            c: CCode::new(),
+    fn format_modifiers (&self) -> Format {
+        let mut mod_indices = BTreeMap::new();
+
+        for name in self.get_mod_names().iter(){
+            mod_indices.insert(name.to_owned(),
+                               format!("{}_ENUM", name).to_c().to_uppercase());
         }
+        let mut f = Format {
+            h: make_enum(&mod_indices.values().map(|x| x.to_owned()).collect(),
+                         &"mod_enum".to_c()),
+            c: CCode::new(),
+        };
+        f.append(&format_define(&"NUM_MODIFIERS".to_c(),
+                                &mod_indices.len().to_c()));
+        f.append(&format_define(&"NUM_WORDMODS".to_c(),
+                                &self.wordmods.len().to_c()));
+        f.append(&format_define(&"NUM_MODIFIERKEYS".to_c(),
+                                &self.modifierkeys.len().to_c()));
+        f.append(&CArray::new()
+                 .name(&"wordmod_indices".to_c())
+                 .c_type(&"mod_enum".to_c())
+                 .fill_1d(&self.wordmods.iter()
+                          .map(|x| mod_indices[x].clone())
+                          .collect())
+                 .format());
+        f.append(&CArray::new()
+                 .name(&"modifierkey_indices".to_c())
+                 .c_type(&"mod_enum".to_c())
+                 .fill_1d(&self.modifierkeys.iter()
+                          .map(|x| mod_indices[x].to_owned())
+                          .collect())
+                 .format());
+        f.append(&CArray::new()
+                 .name(&"modifierkey_keys".to_c())
+                 .fill_1d(&self.modifierkeys.iter()
+                          .map(|x| format!("({})&0xff", self.get_mod_key(x)))
+                          .collect())
+                 .format());
+        f
     }
 
     fn format_command_enum (&self) -> Format {

@@ -3,7 +3,7 @@ use std::collections::hash_map::Entry;
 use std::clone::Clone;
 
 use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
-            KmapInfo, Name, ModeName};
+            KmapInfo, Name, ModeName, CCode, ToC};
 
 
 // TODO typealias kmap names
@@ -34,7 +34,7 @@ impl Maps {
     }
 
     pub fn add_command(&mut self, entry: &Name) {
-        if self.get_sequences(SeqType::Command).contains_key(entry){
+        if self.get_sequences(&SeqType::Command).contains_key(entry){
             panic!(format!("commands map already contains key: {}", entry));
         }
         // commands are a single byte code, not an actual key sequence.
@@ -61,17 +61,17 @@ impl Maps {
         self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord);
     }
 
-    pub fn add_modifierkey(&mut self, name: Name, seq: Sequence) {
+    pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
         self.modifierkeys.push(name.clone());
-        self.get_sequences_mut(SeqType::Plain).insert(name, seq);
+        self.get_sequences_mut(SeqType::Plain).insert(name, seq.clone());
     }
 
-    pub fn set_sequences(&mut self, seq_type: SeqType, val: BTreeMap<Name, Sequence>) {
+    pub fn set_sequences(&mut self, seq_type: &SeqType, val: BTreeMap<Name, Sequence>) {
         assert!(!self.sequences.contains_key(&seq_type));
-        self.sequences.insert(seq_type, val);
+        self.sequences.insert(seq_type.clone(), val);
     }
 
-    pub fn get_sequences(&self, seq_type: SeqType) -> &BTreeMap<Name, Sequence>{
+    pub fn get_sequences(&self, seq_type: &SeqType) -> &BTreeMap<Name, Sequence>{
         self.sequences.get(&seq_type)
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
@@ -81,6 +81,25 @@ impl Maps {
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
 
+    fn get_sequence(&self, name: &Name) -> &Sequence {
+        for seq_type in self.sequences.keys() {
+            match self.get_sequences(seq_type).get(name){
+                Some(s) => return s,
+                None => (),
+            }
+        }
+        panic!("No sequence found for name");
+    }
+
+    pub fn get_mod_key(&self, name: &Name) -> CCode {
+        let seq = self.get_sequence(name);
+        if seq.len() != 1 || seq.0[0].key != "0".to_c() {
+            panic!("bad modifierkey sequence");
+        }
+        seq.0[0].modifier.clone()
+    }
+
+    // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {
         for kmap_info in self.modes.get(mode).expect("unknown mode"){
             if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {

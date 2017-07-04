@@ -11,10 +11,6 @@ namespace conf {
     return getMode(mode)->num_kmaps;
   }
 
-  // ModeStruct getSeqType(mode_enum mode, conf::seq_type_enum seq_type){
-  //   return getMode(mode)[seq_type];
-  // }
-
   const KmapStruct* getKmap(mode_enum mode,
                       seq_type_enum seq_type,
                       uint8_t kmap_num){
@@ -30,31 +26,39 @@ namespace conf {
     return getMode(mode)->anagram_chords[num];
   }
 
-  const uint8_t* getModifier(mode_enum mode, mod_enum modifier) {
+  const uint8_t* getModChord(mode_enum mode, mod_enum modifier) {
     return getMode(mode)->mod_chords[modifier];
   }
 
-  const uint8_t* getNospace(mode_enum mode) {
-    return getModifier(mode, WORDMOD_NOSPACE_ENUM);
+  const uint8_t getModifierkeyByte(uint8_t index) {
+    // TODO be consistent about mod terminology
+    return modifierkey_keys[index];
   }
 
-  const uint8_t* getCapital(mode_enum mode) {
-    return getModifier(mode, WORDMOD_CAPITAL_ENUM);
+  const mod_enum getModifierkeyEnum(uint8_t index) {
+    return (mod_enum) modifierkey_indices[index];
   }
 
-  const uint8_t* getCtrl(mode_enum mode) {
-    return getModifier(mode, MODIFIERKEY_CTRL_ENUM);
+  const mod_enum getWordmodEnum(uint8_t index) {
+    return (mod_enum) wordmod_indices[index];
   }
 
-  const uint8_t* getShift(mode_enum mode) {
-    return getModifier(mode, MODIFIERKEY_SHIFT_ENUM);
+  const uint8_t getModifierkeyIndex(mod_enum modifier) {
+    for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
+      if(modifierkey_indices[i] == modifier) {
+        return i;
+      }
+    }
+    DEBUG1_LN("ERROR: modifierkey index not found!");
+    return 0; // might as well return something instead of panicking
   }
 
-  const uint8_t* getAlt(mode_enum mode) {
-    return getModifier(mode, MODIFIERKEY_ALT_ENUM);
+  const mod_enum getNospaceEnum() {
+    return WORDMOD_NOSPACE_ENUM;
   }
 
-  const uint8_t* getGUI(mode_enum mode) {
-    return getModifier(mode, MODIFIERKEY_GUI_ENUM);
+  const mod_enum getCapitalEnum() {
+    return WORDMOD_CAPITAL_ENUM;
   }
+
 }

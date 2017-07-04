@@ -49,16 +49,16 @@ fn load_chords(options: &Options, kmap_paths: Vec<KmapPath>, maps: &mut Maps) {
 }
 
 fn load_macros(toml: &Value, maps: &mut Maps) {
-    maps.set_sequences(SeqType::Macro, load_sequence_map(&toml["macros"]));
+    maps.set_sequences(&SeqType::Macro, load_sequence_map(&toml["macros"]));
 }
 
 fn load_plains(toml: &Value, maps: &mut Maps) {
-    maps.set_sequences(SeqType::Plain, load_sequence_map(&toml["plain_keys"]));
+    maps.set_sequences(&SeqType::Plain, load_sequence_map(&toml["plain_keys"]));
 }
 
 fn load_modifierkeys(toml: &Value, maps: &mut Maps) {
     for (name, seq) in load_sequence_map(&toml["modifiers"]).iter() {
-        maps.add_modifierkey(name.to_owned(), seq.to_owned());
+        maps.add_modifierkey(name.to_owned(), seq);
     }
 }
 
@@ -74,7 +74,7 @@ fn load_anagram_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 
 fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     let command_list = toml_to_vec(&other["commands"], toml_to_name);
-    maps.set_sequences(SeqType::Command, BTreeMap::new());
+    maps.set_sequences(&SeqType::Command, BTreeMap::new());
     for entry in command_list.iter() {
         maps.add_command(entry)
     }
@@ -84,7 +84,7 @@ fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     // TODO use separate word lists for different modes?
     let word_list = toml_to_vec1_map(&other["dictionary"]);
     // Initialize empty word sequence map before adding words to it
-    maps.set_sequences(SeqType::Word, BTreeMap::new());
+    maps.set_sequences(&SeqType::Word, BTreeMap::new());
     for mode in &maps.get_kmaps_with_words(){
         for entry in word_list.iter() {
             let (seq_spelling, chord_spelling, anagram) = parse_word_entry(entry);

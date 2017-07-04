@@ -35,6 +35,7 @@ public:
   bool readyToRelease();
   // bool inStandby();
 
+  void reuseMods(Chord* chord);
   Matrix* matrix;
 
 private:
