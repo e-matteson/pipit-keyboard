@@ -5,7 +5,7 @@ use itertools::Itertools;
 use format::format::Format;
 use types::{CCode, ToC};
 
-// TODO fix horrible formatting in structs
+// TODO fix horrible 2d array formatting
 
 enum Contents <T> where T: Display + Clone {
     D1(Vec<T>),

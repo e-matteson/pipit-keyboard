@@ -1,11 +1,13 @@
 // use std::collections::BTreeMap;
 
 use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name, CCode, ToC};
-
+#[derive(Debug)]
 pub struct Word {
     pub name: Name,
     pub seq: Sequence,
     pub chord: Chord,
+    pub base_chord: Chord,
+    pub anagram_num: u64
 }
 
 pub struct WordBuilder<'a> {
@@ -18,11 +20,14 @@ pub struct WordBuilder<'a> {
 
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Word {
-        // TODO look for WORDKEY_* before KEY_*
+        let base = self.make_base_chord();
         Word{
             name: self.make_name(),
             seq: self.make_sequence(),
-            chord: self.make_chord(),
+            chord: self.make_chord(&base),
+            base_chord: base,
+            anagram_num: self.anagram,
+
         }
     }
 
@@ -72,8 +77,13 @@ impl<'a> WordBuilder<'a> {
         }
     }
 
-    fn make_chord(&self) -> Chord
-    {
+    fn make_chord(&self, base: &Chord) -> Chord {
+        let mut chord = base.to_owned();
+        chord.intersect(&self.maps.get_anagram_chord(self.anagram, self.kmap));
+        chord
+    }
+
+    fn make_base_chord(&self) -> Chord {
         let ignored = vec!['<', '.']; //TODO make this static?
 
         let mut chord = Chord::new();
@@ -83,12 +93,6 @@ impl<'a> WordBuilder<'a> {
             }
             chord.intersect(&self.get_letter_chord(letter));
         }
-        let anagram_name = self.maps.anagrams.iter()
-            .nth(self.anagram as usize)
-            .expect("invalid anagram number");
-        let anagram_chord = self.maps.get_chord(anagram_name, self.kmap)
-            .expect("invalid anagram name");
-        chord.intersect(&anagram_chord);
         chord
     }
 

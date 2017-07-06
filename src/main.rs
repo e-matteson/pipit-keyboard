@@ -1,7 +1,7 @@
 
 extern crate pipit_config;
 
-use pipit_config::Maps;
+use pipit_config::{Maps, Checker};
 use std::env::args;
 
 const DEFAULT_SETTINGS_FILE: &str = "settings/settings.toml";
@@ -19,8 +19,9 @@ fn get_settings_path() -> String {
 fn main() {
     let settings_path = get_settings_path();
     let maps = Maps::load(&settings_path);
+    let mut checker = Checker::new(&maps);
+    checker.check();
 
-    maps.check_for_conflicts();
     // TODO automatically extract path parts
     let f = maps.format("auto_config");
     // println!("DRY RUN, NOT SAVING");

@@ -177,6 +177,7 @@ impl OpDef{
     // }
 
     #[allow(unused_variables)]
+    // TODO how to avoid unused variables?
     pub fn is_mode(&self) -> bool {
         match self.op_type {
             OpType::Mode{use_words} => true,
@@ -184,7 +185,7 @@ impl OpDef{
         }
     }
 
-    #[allow(unused_variables)]
+    // #[allow(unused_variables)]
     pub fn is_mode_with_words(&self) -> bool {
         match self.op_type {
             OpType::Mode{use_words} => use_words,

@@ -53,7 +53,7 @@ pub struct KmapInfo {
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct KmapPath ( pub String );
 
 impl fmt::Display for KmapPath {
@@ -64,7 +64,7 @@ impl fmt::Display for KmapPath {
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ModeName ( pub String );
 
 impl fmt::Display for ModeName {
@@ -75,7 +75,7 @@ impl fmt::Display for ModeName {
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Name ( pub String );
 
 impl Name {
@@ -89,6 +89,12 @@ impl Name {
 }
 
 impl fmt::Display for Name {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl fmt::Debug for Name{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }

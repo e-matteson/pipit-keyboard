@@ -103,13 +103,16 @@ impl Sequence {
 }
 
 
-
 impl Maps {
 
     pub fn format(&self, file_name_base: &str) -> Format {
         let mut f = Format::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
         f.append(&self.options.format());
+        f.append(&self.format_modifiers());
+        f.append(&self.format_command_enum());
+        f.append(&self.format_seq_type_enum());
+        f.append(&self.format_mode_enum());
         f.append(&self.format_modes());
         f.append(&format_outro());
         f
@@ -117,19 +120,14 @@ impl Maps {
 
     fn format_modes (&self) -> Format {
         let mut f = Format::new();
-        f.append(&self.format_command_enum());
-        f.append(&self.format_seq_type_enum());
-        f.append(&self.format_mode_enum());
-        f.append(&self.format_modifiers());
-
-        let mut struct_names = BTreeMap::new();
-        f.append(&self.format_kmaps(&mut struct_names));
+        let mut kmap_struct_names = BTreeMap::new();
+        f.append(&self.format_kmaps(&mut kmap_struct_names));
 
         let mut mode_struct_names = Vec::new();
         for (mode, kmap_infos) in self.modes.iter() {
             let m = ModeBuilder {
                 infos: &kmap_infos,
-                kmap_struct_names: &struct_names,
+                kmap_struct_names: &kmap_struct_names,
                 seq_types: self.get_seq_types(),
                 mode_name: &mode,
                 mod_chords: self.get_mod_chords(mode),

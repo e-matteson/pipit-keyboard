@@ -20,10 +20,7 @@ fn get_chord_length() -> usize {
 }
 
 
-#[derive(Clone)]
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(Hash)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Chord {
     bits: Vec<bool>,
 }
@@ -55,14 +52,18 @@ impl Chord {
         self.bits.len()
     }
 
-    pub fn get_single_switch_index(&self) -> Option<usize>{
-        // If chord contains exactly 1 pressed switch, return its index.
-        // Otherwise, return None.
-        if self.bits.iter().filter(|x| **x).count() > 1 {
-            return None;
-        }
-        self.bits.iter().position(|x| *x)
+    pub fn count_switches(&self) -> usize{
+        self.bits.iter().filter(|x| **x).count()
     }
+
+    // pub fn get_single_switch_index(&self) -> Option<usize>{
+    //     // If chord contains exactly 1 pressed switch, return its index.
+    //     // Otherwise, return None.
+    //     if self.bits.iter().filter(|x| **x).count() > 1 {
+    //         return None;
+    //     }
+    //     self.bits.iter().position(|x| *x)
+    // }
 
 
     pub fn intersect(&mut self, other: &Chord){

@@ -1,27 +1,27 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::collections::hash_map::Entry;
+use std::collections::{BTreeMap};
 use std::clone::Clone;
 
-use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
+use types::{Chord, Sequence, KeyPress, WordBuilder, Word, Options, SeqType, KmapPath,
             KmapInfo, Name, ModeName, CCode, ToC};
 
 
 // TODO typealias kmap names
 #[derive(Debug)]
 pub struct Maps {
-    pub chords:       BTreeMap<KmapPath, BTreeMap<Name, Chord>>, // full kmap name to chord map
+    pub chords:       BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
     pub sequences:    BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
     pub wordmods:     Vec<Name>,
     pub modifierkeys: Vec<Name>,
     pub anagrams:     Vec<Name>,
     pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
-    pub kmap_ids:     BTreeMap<KmapPath, String>, // kmap path to short kmap nickname
+    pub kmap_ids:     BTreeMap<KmapPath, String>,
     pub options:      Options,
+    pub anagram_records: BTreeMap<KmapPath, Vec<Word>>,
 }
 
 impl Maps {
     pub fn new() -> Maps {
-        Maps{
+        Maps {
             chords: BTreeMap::new(),
             sequences: BTreeMap::new(),
             wordmods: Vec::new(),
@@ -30,6 +30,7 @@ impl Maps {
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
             options: Options::new(),
+            anagram_records: BTreeMap::new(),
         }
     }
 
@@ -46,6 +47,7 @@ impl Maps {
             .insert(entry.to_owned(), fake_seq_with_command_code);
     }
 
+
     pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
                     anagram: u64, kmap: &KmapPath)
     {
@@ -57,8 +59,9 @@ impl Maps {
             kmap: kmap,
             maps: &self,
         }.finalize();
-        self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq);
-        self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord);
+        self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq.clone());
+        self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord.clone());
+        self.add_anagram_record(kmap, word);
     }
 
     pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
@@ -109,6 +112,7 @@ impl Maps {
         Chord::new()
     }
 
+
     pub fn get_anagrams(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
         for name in self.anagrams.iter() {
@@ -131,69 +135,6 @@ impl Maps {
         }
         chords
     }
-
-    fn get_wordmod_helper(&self, name: &Name, mode: &ModeName) -> Chord {
-        // TODO what should happen when there's no chord?
-        if !self.wordmods.contains(name){
-            panic!(format!("Required wordmod is missing from settings: {}", name));
-        }
-        self.get_chord_in_mode(name, mode)
-    }
-
-    pub fn check_for_conflicts(&self) {
-        for mode in self.chords.keys() {
-            let reversed = self.reverse_chord_map(mode);
-            print_conflict_stats(reversed, mode);
-        }
-    }
-
-    fn reverse_chord_map(&self, mode: &KmapPath) -> HashMap<Chord, Vec<Name>>{
-        let exclude_anagrams = false;
-        let mut reversed: HashMap<Chord, Vec<Name>> = HashMap::new();
-        for (name, chord) in self.chords[mode].iter(){
-            match reversed.entry(chord.clone()){
-                Entry::Occupied(entry) => {
-                    let list = entry.into_mut();
-                    if exclude_anagrams && list.iter().any(|x| is_simple_anagram(x, name)){
-                        continue;
-                    }
-                    list.push(name.to_owned());
-                }
-                Entry::Vacant(entry) => {
-                    let mut v = Vec::new();
-                    v.push(name.to_owned());
-                    entry.insert(v);
-                }
-            }
-        }
-        reversed
-    }
-
-
-    pub fn get_wordmod_capital(&self, mode: &ModeName) -> Chord {
-        self.get_wordmod_helper(&Name::from("wordmod_capital"), mode)
-    }
-
-    pub fn get_wordmod_nospace(&self, mode: &ModeName) -> Chord {
-        self.get_wordmod_helper(&Name::from("wordmod_nospace"), mode)
-    }
-
-    pub fn get_mod_ctrl(&self, mode: &ModeName) -> Chord {
-        self.get_chord_in_mode(&Name::from("modifierkey_ctrl"), mode)
-    }
-
-    pub fn get_mod_alt(&self, mode: &ModeName) -> Chord {
-        self.get_chord_in_mode(&Name::from("modifierkey_alt"), mode)
-    }
-
-    pub fn get_mod_shift(&self, mode: &ModeName) -> Chord {
-        self.get_chord_in_mode(&Name::from("modifierkey_shift"), mode)
-    }
-
-    pub fn get_mod_gui(&self, mode: &ModeName) -> Chord {
-        self.get_chord_in_mode(&Name::from("modifierkey_gui"), mode)
-    }
-
     pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
         match self.chords[kmap].get(chord_name) {
             Some(chord) => Some(chord.clone()),
@@ -209,6 +150,14 @@ impl Maps {
     pub fn get_chords_mut(&mut self, kmap: &KmapPath) -> &mut BTreeMap<Name, Chord>{
         self.chords.get_mut(kmap)
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
+    }
+
+    pub fn get_anagram_chord(&self, num: u64, kmap: &KmapPath) -> Chord {
+        let anagram_name = self.anagrams.iter()
+            .nth(num as usize)
+            .expect("invalid anagram number");
+        self.get_chord(anagram_name, kmap)
+            .expect("invalid anagram name")
     }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
@@ -228,6 +177,15 @@ impl Maps {
             }
         }
         out
+    }
+
+    pub fn get_kmaps_for_mode(&self, mode: &ModeName) -> Vec<KmapPath> {
+        let v: Vec<_> = self.modes.get(mode)
+            .expect("mode not found")
+            .iter()
+            .map(|x| x.path.to_owned())
+            .collect();
+        v
     }
 
     pub fn get_seq_types(&self) -> Vec<SeqType> {
@@ -261,26 +219,13 @@ impl Maps {
                              kmap))
             .append(&mut new_chords);
     }
-}
 
-fn print_conflict_stats(reversed: HashMap<Chord, Vec<Name>>, mode: &KmapPath){
-    let mut conflicts = HashMap::new();
-    for (_, names) in reversed {
-        let len = names.len();
-        if len == 1 {
-            continue;
-        }
-        println!("WARNING: duplicate chords: {:?}", names);
-        *conflicts.entry(len).or_insert(0) += 1;
+
+    pub fn add_anagram_record(&mut self, kmap: &KmapPath, word: Word) {
+        self.anagram_records
+            .entry(kmap.to_owned())
+            .or_insert(Vec::new())
+            .push(word)
     }
-    let total: i64 = conflicts.values().sum();
-    let mut conflict_vec: Vec<_> = conflicts.iter().collect();
-    conflict_vec.sort_by(|a, b| b.1.cmp(a.1));
-    println!("{}: {} conflicts: {:?}", mode, total, conflict_vec);
-}
 
-fn is_simple_anagram(word1: &Name, word2: &Name) -> bool {
-    let chars1: HashSet<_> = word1.0.chars().collect();
-    let chars2: HashSet<_> = word2.0.chars().collect();
-    chars1 == chars2
 }
