@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use types::{Chord, SwitchPos, Maps};
+use types::{Chord, SwitchPos};
 
 const DEFAULT_OUTPUT_DIRECTORY: &str = "pipit-firmware/";
 
@@ -8,24 +8,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
 
     vec![
-        // ("default_mode",
-        //  OpDefBuilder::new(OpType::Mode {use_words: true})
-        //  .required(OpReq::Required)
-        //  .internal(true)
-        //  .finalize()),
-
-        // ("left_hand_mode",
-        //  OpDefBuilder::new(OpType::Mode {use_words: false})
-        //  .required(OpReq::Required)
-        //  .internal(true)
-        //  .finalize()),
-
-        // ("krita_mode",
-        //  OpDefBuilder::new(OpType::Mode {use_words: false})
-        //  .required(OpReq::Required)
-        //  .internal(true)
-        //  .finalize()),
-
         ("row_pins",
          OpDefBuilder::new(OpType::Array1D) .finalize()),
 
@@ -55,11 +37,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .finalize()),
 
         ("num_columns",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
-
-        ("num_anagrams",
          OpDefBuilder::new(OpType::DefineInt)
          .required(OpReq::Auto)
          .finalize()),
@@ -136,26 +113,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          OpDefBuilder::new(OpType::DefineInt)
          .required(OpReq::Auto)
          .finalize()),
-
-        // ("shift_position",
-        //  OpDefBuilder::new(OpType::Array1D)
-        //  .required(OpReq::Auto)
-        //  .finalize()),
-
-        // ("ctrl_position",
-        //  OpDefBuilder::new(OpType::Array1D)
-        //  .required(OpReq::Auto)
-        //  .finalize()),
-
-        // ("alt_position",
-        //  OpDefBuilder::new(OpType::Array1D)
-        //  .required(OpReq::Auto)
-        //  .finalize()),
-
-        // ("gui_position",
-        //  OpDefBuilder::new(OpType::Array1D)
-        //  .required(OpReq::Auto)
-        //  .finalize()),
     ]
 }
 
@@ -388,7 +345,7 @@ impl Options {
     }
 
     pub fn verify_requirements(&self){
-        /// Verify that whether option dependencies are satisfied.
+        /// Verify that option dependencies are satisfied.
         for (name, op) in self.0.iter(){
             if let Some(_) = op.val{
                 // The option was provided in the settings file.
@@ -415,37 +372,8 @@ impl Options {
         }
     }
 
-    pub fn update_after_loading_chords(&mut self, maps: &Maps){
-        /// Automatically generate the options that depend on chords
-        // self.set_modifierkey_positions(maps);
-
-        self.set_val("num_anagrams",
-                     OpVal::Int(maps.anagrams.len() as i64));
-    }
-
-
-    // fn set_modifierkey_positions(&mut self, maps: &Maps) {
-    //     // TODO rewrite to look through all kmaps for a mode
-    //     let mods = vec![("modifierkey_shift", "shift_position"),
-    //                     ("modifierkey_ctrl",  "ctrl_position"),
-    //                     ("modifierkey_alt",   "alt_position"),
-    //                     ("modifierkey_gui",   "gui_position")];
-
-    //     // TODO swapped names?
-    //     for (op_name, mod_name) in mods {
-    //         let mut positions: Vec<i64> = Vec::new();
-    //         for mode in &self.get_modes() {
-    //             positions.push(maps.get_modifier_position(op_name, mode) as i64);
-    //         }
-    //         self.set_val(mod_name, OpVal::Vec(positions))
-    //     }
-    // }
-
-    pub fn update_after_loading_toml(&mut self) {
-        /// Automatically generate the options that depend only on other options,
-        ///  not outside information like layouts etc.
-
-        self.set_val("blank_mapping" , OpVal::Int(0));
+    pub fn set_auto(&mut self) {
+        /// Generate the OpReq::Auto options that depend only on other options
 
         let num_rows: i64 = self.get_val_len("row_pins") as i64;
         let num_columns: i64 = self.get_val_len("column_pins") as i64;
@@ -462,6 +390,7 @@ impl Options {
         self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
         self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
         self.set_val("num_rgb_led_pins" , OpVal::Int(num_rgb_led_pins));
+        self.set_val("blank_mapping" , OpVal::Int(0));
 
         Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int());
     }

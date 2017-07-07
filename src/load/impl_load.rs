@@ -7,30 +7,22 @@ use types::{Maps, Options, OpDef, OpType, OpVal};
 // Implement loading options
 
 impl Maps {
-
     pub fn load(path: &str) -> Maps {
-        // TODO load all layouts
+        /// Load stuff into both Options and Maps
         let mut maps = Maps::new();
-
-        // loads stuff into both options and maps
-        let mut options = load_settings(path, &mut maps);
-
-        options.update_after_loading_chords(&maps);
+        let options = load_settings(path, &mut maps);
         maps.options = options;
-
         maps
     }
-
 }
 
 
 impl Options {
-
     pub fn load(parsed_options: &Value) -> Options{
         let mut options = Options::new();
         options.from_toml(parsed_options);
         options.verify_requirements();
-        options.update_after_loading_toml();
+        options.set_auto();
         options
     }
 

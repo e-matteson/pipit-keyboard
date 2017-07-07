@@ -209,7 +209,9 @@ void Switches::reuseHeldSwitches(){
 }
 
 void Switches::reuseMods(Chord* chord){
+  // Let modifiers be immediately re-used in future chords.
   // Note: this doesn't re-use anagram mods, because I'm lazy
+  // TODO document this special case
   for(uint8_t m = 0; m < NUM_MODIFIERS; m++){
     if(!chord->hasMod((conf::mod_enum) m)){
       continue;
@@ -238,16 +240,10 @@ void Switches::makeChordBytes(Chord* chord){
       if (switch_status[index] == Switches::PRESSED || switch_status[index] == Switches::HELD){
         // Switch is pressed! Set bit high.
         chord_bytes[byte_num] |= 1<<bit_num;
-        // Modify the status array to record that the switches have been processed.
-        if(switch_status[index] == Switches::PRESSED){
-          // Let modifiers be immediately re-used in future chords.
-          // TODO document this special case
-          // TODO multi-switch mods? what if those switches are also used in macros? trigger this from pipit, after plain-key recognition?
-          // TODO fix after conf refactoring
-          // switch_status[index] = isModifier(index, chord->getMode()) ?
-          //   Switches::HELD : Switches::ALREADY_SENT;
-          switch_status[index] = Switches::ALREADY_SENT;
-        }
+      }
+      // Modify the status array to record that the switches have been processed.
+      if(switch_status[index] == Switches::PRESSED){
+        switch_status[index] = Switches::ALREADY_SENT;
       }
       index++;
       if(index == NUM_MATRIX_POSITIONS){
@@ -257,13 +253,6 @@ void Switches::makeChordBytes(Chord* chord){
     }
   }
 }
-
-// bool Switches::isModifier(uint8_t switch_index, conf::mode_enum mode){
-//   return ((switch_index == conf::shift_position[mode]) ||
-//           (switch_index == conf::alt_position[mode])  ||
-//           (switch_index == conf::ctrl_position[mode])  ||
-//           (switch_index == conf::gui_position[mode]));
-// }
 
 void Switches::printStatusArray(){
   //for debugging
@@ -305,8 +294,3 @@ void Switches::printMatrixChange(uint8_t index){
 bool Switches::isActive(){
   return is_any_switch_down;
 }
-
-
-// bool Switches::inStandby(){
-//   return matrix->inStandby();
-// }

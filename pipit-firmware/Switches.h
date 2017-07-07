@@ -28,12 +28,9 @@ public:
   void update();
   void makeChordBytes(Chord* chord);
   void printStatusArray();
-  // void attachPinInterrupts(voidFuncPtr isr);
-  // void detachPinInterrupts();
   bool isActive();
   bool readyToPress();
   bool readyToRelease();
-  // bool inStandby();
 
   void reuseMods(Chord* chord);
   Matrix* matrix;
@@ -47,7 +44,6 @@ private:
   void stopDebouncingRelease(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-  // bool isModifier(uint8_t switch_index, conf::mode_enum mode);
   bool isAnySwitchStillBouncing();
   int32_t maximum(int32_t x, int32_t y);
 
@@ -69,10 +65,5 @@ private:
   bool is_any_switch_down = 0;
 
 };
-
-
-/***** switch statuses *****/
-
-
 
 #endif
