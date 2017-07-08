@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
 use types::{SeqType, KmapPath, CCode, Chord, KmapInfo, ModeName, ToC};
-
 use format::{Format, CArray};
 
 

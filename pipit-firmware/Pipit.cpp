@@ -116,6 +116,7 @@ void Pipit::processChord(Chord* chord){
 
   // If chord is a known word, send it and return.
   chord->blankWordmods();
+  chord->blankAnagramMods();
   if((data_length=lookup->get(conf::WORD, chord, data))){
     sender->sendWord(data, data_length, chord);
     switches->reuseMods(chord);
@@ -123,6 +124,7 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
+  chord->restoreAnagramMods();
   chord->restoreWordmods();
 
   // Blank out all modifier switches.

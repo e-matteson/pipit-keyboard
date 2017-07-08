@@ -17,6 +17,7 @@ pub struct Maps {
     pub kmap_ids:     BTreeMap<KmapPath, String>,
     pub options:      Options,
     pub anagram_records: BTreeMap<KmapPath, Vec<Word>>,
+    pub max_anagram_num: u8,
 }
 
 impl Maps {
@@ -31,6 +32,7 @@ impl Maps {
             kmap_ids: BTreeMap::new(),
             options: Options::new(),
             anagram_records: BTreeMap::new(),
+            max_anagram_num: 0,
         }
     }
 
@@ -49,18 +51,21 @@ impl Maps {
 
 
     pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
-                    anagram: u64, kmap: &KmapPath)
+                    anagram: u8, kmap: &KmapPath)
     {
         // TODO build word in loader code instead?
         let word = WordBuilder {
             seq_spelling: seq_spelling,
             chord_spelling: chord_spelling,
-            anagram: anagram,
+            anagram_num: anagram,
             kmap: kmap,
             maps: &self,
         }.finalize();
         self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq.clone());
         self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord.clone());
+        if word.chord.anagram_num > self.max_anagram_num {
+            self.max_anagram_num = word.chord.anagram_num;
+        }
         self.add_anagram_record(kmap, word);
     }
 
@@ -125,6 +130,8 @@ impl Maps {
         let mut names = Vec::new();
         names.extend(self.modifierkeys.clone());
         names.extend(self.wordmods.clone());
+        names.extend(self.anagrams.clone());
+        names.sort();
         names
     }
 
@@ -136,6 +143,7 @@ impl Maps {
         chords
     }
     pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
+        // TODO be consistent about argument order
         match self.chords[kmap].get(chord_name) {
             Some(chord) => Some(chord.clone()),
             None => None,
@@ -152,13 +160,13 @@ impl Maps {
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
 
-    pub fn get_anagram_chord(&self, num: u64, kmap: &KmapPath) -> Chord {
-        let anagram_name = self.anagrams.iter()
-            .nth(num as usize)
-            .expect("invalid anagram number");
-        self.get_chord(anagram_name, kmap)
-            .expect("invalid anagram name")
-    }
+    // pub fn get_anagram_chord(&self, num: u8, kmap: &KmapPath) -> Chord {
+    //     let anagram_name = self.anagrams.iter()
+    //         .nth(num as usize)
+    //         .expect("invalid anagram number");
+    //     self.get_chord(anagram_name, kmap)
+    //         .expect("invalid anagram name")
+    // }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
         let v: Vec<_> = self.kmap_ids.keys()
@@ -228,4 +236,7 @@ impl Maps {
             .push(word)
     }
 
+    pub fn get_num_anagrams(&self) -> u8 {
+        self.max_anagram_num + 1
+    }
 }

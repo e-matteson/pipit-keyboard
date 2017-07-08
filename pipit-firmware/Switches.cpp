@@ -210,7 +210,6 @@ void Switches::reuseHeldSwitches(){
 
 void Switches::reuseMods(Chord* chord){
   // Let modifiers be immediately re-used in future chords.
-  // Note: this doesn't re-use anagram mods, because I'm lazy
   // TODO document this special case
   for(uint8_t m = 0; m < NUM_MODIFIERS; m++){
     if(!chord->hasMod((conf::mod_enum) m)){

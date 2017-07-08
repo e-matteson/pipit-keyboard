@@ -14,7 +14,7 @@ type LenMap   = BTreeMap<usize, Vec<Name>>;
 
 struct ChordEntry {
     chord: Chord,
-    offset: usize,
+    offset: u8,
 }
 
 impl ChordEntry {
@@ -25,21 +25,27 @@ impl ChordEntry {
         }
     }
 
-    pub fn to_ints(&self) -> Vec<i64> {
+    pub fn to_ints(&self) -> Vec<u8> {
         // let mut v = vec![self.offset as i64];
         let mut v = self.make_prefix_byte();
         v.extend(self.chord.to_ints());
         v
     }
 
-    pub fn make_prefix_byte(&self) -> Vec<i64> {
-        const MAX_OFFSET: usize = 15;         // 4 bits for offset (least significant)
+    pub fn make_prefix_byte(&self) -> Vec<u8> {
+        const MAX_OFFSET: u8 = 15;   // 4 bits for offset  (least significant)
+        const MAX_ANAGRAM: u8 = 15;  // 4 bits for anagram (most significant)
 
         if self.offset > MAX_OFFSET {
             panic!("offset is too large - too many layouts?");
         }
+        if self.chord.anagram_num > MAX_ANAGRAM {
+            panic!("anagram num is too large");
+        }
 
-        vec![self.offset as i64]
+        let msb = self.chord.anagram_num.checked_shl(4).unwrap();
+        let lsb = self.offset;
+        vec![msb + lsb]
     }
 }
 
@@ -114,7 +120,7 @@ impl <'a> KmapBuilder<'a> {
         let mut f = Format::new();
         let mut array_names: Vec<CCode> = Vec::new();
         for (kmap, length_entries) in chord_arrays.into_iter(){
-            let length_ints: Vec<Vec<i64>> = length_entries.iter()
+            let length_ints: Vec<Vec<u8>> = length_entries.iter()
                 .map(|v| flatten_chord_entries(v))
                 .collect();
 
@@ -188,7 +194,7 @@ impl <'a> KmapBuilder<'a> {
                 }
                 entries.push(
                     ChordEntry{
-                        offset: (index - last_index),
+                        offset: (index - last_index) as u8,
                         chord: chords.get(name)
                             .expect("failed to get chord").clone()
                     }
@@ -323,7 +329,7 @@ fn max_len(names_by_len: &LenMap) -> usize {
         .expect("failed to get max length")
 }
 
-fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<i64> {
+fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<u8> {
 
     let mut v = Vec::new();
     for entry in entries {

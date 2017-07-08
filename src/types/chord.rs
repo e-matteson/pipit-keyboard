@@ -23,6 +23,7 @@ fn get_chord_length() -> usize {
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Chord {
     bits: Vec<bool>,
+    pub anagram_num: u8,
 }
 
 impl Chord {
@@ -33,6 +34,7 @@ impl Chord {
     pub fn new() -> Chord {
         Chord {
             bits: vec![false; get_chord_length()],
+            anagram_num: 0
         }
     }
 
@@ -45,6 +47,7 @@ impl Chord {
         }
         Chord {
             bits: v,
+            anagram_num: 0
         }
     }
 
@@ -55,16 +58,6 @@ impl Chord {
     pub fn count_switches(&self) -> usize{
         self.bits.iter().filter(|x| **x).count()
     }
-
-    // pub fn get_single_switch_index(&self) -> Option<usize>{
-    //     // If chord contains exactly 1 pressed switch, return its index.
-    //     // Otherwise, return None.
-    //     if self.bits.iter().filter(|x| **x).count() > 1 {
-    //         return None;
-    //     }
-    //     self.bits.iter().position(|x| *x)
-    // }
-
 
     pub fn intersect(&mut self, other: &Chord){
         assert_eq!(self.len(), other.len());
@@ -87,14 +80,16 @@ impl Chord {
         tmp.join("")
     }
 
-    pub fn to_ints(&self) -> Vec<i64> {
-        let mut v: Vec<i64> = Vec::new();
+    pub fn to_ints(&self) -> Vec<u8> {
+        let mut v: Vec<u8> = Vec::new();
         for chunk in &self.bits.iter().cloned().chunks(8) {
             let byte: Vec<_> = chunk.collect();
             v.push(byte_to_int(&byte));
         }
         v
     }
+
+    // pub fn get_anagram(&self)
 }
 
 impl fmt::Debug for Chord{
@@ -103,13 +98,14 @@ impl fmt::Debug for Chord{
     }
 }
 
-fn byte_to_int(v: &Vec<bool>) -> i64 {
+fn byte_to_int(v: &Vec<bool>) -> u8 {
     assert_eq!(v.len(), 8);
-    let mut num: i64 = 0;
-    let tmp: Vec<_> = v.iter().map(|&b| if b {1} else {0}).collect();
-    let base: i64 = 2;
+    let mut num: u8 = 0;
+    let base: u8 = 2;
+
+    let bits: Vec<u8> = v.iter().map(|&b| if b {1} else {0}).collect();
     for b in 0..8{
-        num +=  base.pow(b) * tmp[b as usize]
+        num +=  base.pow(b) * bits[b as usize]
     }
     num
 }

@@ -6,28 +6,22 @@ pub struct Word {
     pub name: Name,
     pub seq: Sequence,
     pub chord: Chord,
-    pub base_chord: Chord,
-    pub anagram_num: u64
 }
 
 pub struct WordBuilder<'a> {
     pub seq_spelling: &'a str,
     pub chord_spelling: &'a str,
-    pub anagram: u64,
+    pub anagram_num: u8,
     pub kmap: &'a KmapPath,
     pub maps: &'a Maps,
 }
 
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Word {
-        let base = self.make_base_chord();
         Word{
             name: self.make_name(),
             seq: self.make_sequence(),
-            chord: self.make_chord(&base),
-            base_chord: base,
-            anagram_num: self.anagram,
-
+            chord: self.make_chord(),
         }
     }
 
@@ -38,8 +32,8 @@ impl<'a> WordBuilder<'a> {
         if self.chord_spelling != self.seq_spelling {
             name += &format!("_{}", self.chord_spelling);
         }
-        if self.anagram != 0 {
-            name += &format!("_{}", self.anagram);
+        if self.anagram_num != 0 {
+            name += &format!("_{}", self.anagram_num);
         }
         Name(name)
     }
@@ -77,13 +71,7 @@ impl<'a> WordBuilder<'a> {
         }
     }
 
-    fn make_chord(&self, base: &Chord) -> Chord {
-        let mut chord = base.to_owned();
-        chord.intersect(&self.maps.get_anagram_chord(self.anagram, self.kmap));
-        chord
-    }
-
-    fn make_base_chord(&self) -> Chord {
+    fn make_chord(&self) -> Chord {
         let ignored = vec!['<', '.']; //TODO make this static?
 
         let mut chord = Chord::new();
@@ -93,9 +81,9 @@ impl<'a> WordBuilder<'a> {
             }
             chord.intersect(&self.get_letter_chord(letter));
         }
+        chord.anagram_num = self.anagram_num;
         chord
     }
-
 
     fn get_letter_chord(&self, letter: char) -> Chord {
         // TODO return option<chord>, for if not found
@@ -114,5 +102,4 @@ impl<'a> WordBuilder<'a> {
             _ => panic!("illegal character in chord: {}", character),
         })
     }
-
 }

@@ -20,6 +20,7 @@ public:
 private:
   uint8_t lookupChord(const Chord* chord, uint8_t* data, const KmapStruct* kmap);
   uint8_t readOffset(const uint8_t* start_of_entry);
+  uint8_t readAnagramNum(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);
   bool isZero(const uint8_t* start_of_entry);
   uint8_t* nextChordEntry(uint8_t* start_of_entry);

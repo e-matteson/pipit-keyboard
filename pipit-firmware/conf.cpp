@@ -43,6 +43,10 @@ namespace conf {
     return (mod_enum) wordmod_indices[index];
   }
 
+  const mod_enum getAnagramModEnum(uint8_t index) {
+    return (mod_enum) anagram_mod_indices[index];
+  }
+
   const uint8_t getModifierkeyIndex(mod_enum modifier) {
     for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
       if(modifierkey_indices[i] == modifier) {
@@ -51,6 +55,29 @@ namespace conf {
     }
     DEBUG1_LN("ERROR: modifierkey index not found!");
     return 0; // might as well return something instead of panicking
+  }
+
+  const mod_type getModType(mod_enum modifier){
+    if (contains(modifierkey_indices, NUM_MODIFIERKEYS, modifier)){
+      return conf::PLAIN_MOD;
+    }
+    if (contains(wordmod_indices, NUM_WORDMODS, modifier)){
+      return conf::WORD_MOD;
+    }
+    if (contains(anagram_mod_indices, NUM_ANAGRAM_MODS, modifier)){
+      return conf::ANAGRAM_MOD;
+    }
+    DEBUG1_LN("ERROR: Unknown modifier type");
+    exit(1);
+  }
+
+  const bool contains(const mod_enum* mod_array, const uint8_t len, const mod_enum modifier){
+    for(uint8_t i = 0; i < len; i++){
+      if(mod_array[i] == modifier){
+        return true;
+      }
+    }
+    return false;
   }
 
   const mod_enum getNospaceEnum() {

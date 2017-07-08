@@ -7,7 +7,7 @@ use types::{Chord, Word, KmapPath, Name, ModeName, Maps};
 #[derive(Debug)]
 pub struct Checker <'a>{
     // TODO use more references, instead of duplicating lots of stuff
-    pub reverse_anagrams: HashMap<KmapPath, HashMap<Chord, HashMap<u64, Name>>>,
+    pub reverse_anagrams: HashMap<KmapPath, HashMap<Chord, HashMap<u8, Name>>>,
     pub reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, Vec<Name>>>,
     pub reverse_modes:    HashMap<ModeName, HashMap<Chord, Vec<Name>>>,
     maps: &'a Maps
@@ -47,7 +47,9 @@ impl <'a> Checker <'a> {
         }
     }
 
-    fn get_anagram_conflicts(&self, kmap: &KmapPath, allow_two_key: bool) -> Vec<Vec<&Name>> {
+    fn get_anagram_conflicts(&self, kmap: &KmapPath, allow_two_key: bool)
+                             -> Vec<Vec<&Name>>
+    {
         // TODO rename, not a conflict. Useless anagrams.
         let mut out = Vec::new();
         for chord in self.reverse_anagrams[kmap].keys() {
@@ -62,14 +64,14 @@ impl <'a> Checker <'a> {
 
     fn is_anagram_bad(&self, kmap: &KmapPath,
                       base_chord: &Chord,
-                      anagrams: &HashMap<u64, Name>,
+                      anagrams: &HashMap<u8, Name>,
                       allow_two_key: bool)
                       -> bool
     {
         let max = anagrams.keys().max()
             .expect("failed to get max anagram num")
             .to_owned();
-        if max+1 == (anagrams.len() as u64){
+        if max+1 == (anagrams.len() as u8){
             return false;
         }
         for num in 0..max {
@@ -77,7 +79,8 @@ impl <'a> Checker <'a> {
                 continue;
             }
             let mut new_chord = base_chord.to_owned();
-            new_chord.intersect(&self.maps.get_anagram_chord(num, kmap));
+            new_chord.anagram_num = num;
+            // new_chord.intersect(&self.maps.get_anagram_chord(num, kmap));
             if !self.contains_chord(&new_chord, kmap) {
                 if allow_two_key && base_chord.count_switches() == 2 {
                     // By convention, all words made of 2 switches, one on each
@@ -115,7 +118,7 @@ impl <'a> Checker <'a> {
                     .expect("reverse kmap not found")
                     .to_owned());
             for kmap in kmaps {
-                println!("{}", kmap);
+                // println!("{}", kmap);
                 for (chord, names) in self.reverse_kmaps[kmap].iter() {
                     for name in names.iter(){
                         add_to(new.get_mut(mode).unwrap(), chord, name);
@@ -145,16 +148,16 @@ impl <'a> Checker <'a> {
 
 fn insert_anagram(reverse_anagrams: &mut HashMap<KmapPath,
                                                  HashMap<Chord,
-                                                         HashMap<u64, Name>>>,
+                                                         HashMap<u8, Name>>>,
                   kmap: &KmapPath, word: &Word)
 {
     reverse_anagrams
         .entry(kmap.to_owned())
         .or_insert(HashMap::new())
-        .entry(word.base_chord.to_owned())
+        .entry(word.chord.to_owned())
         .or_insert(HashMap::new())
     // TODO check for conflicts?
-        .insert(word.anagram_num, word.name.clone());
+        .insert(word.chord.anagram_num, word.name.clone());
 }
 
 fn add_to(reversed: &mut HashMap<Chord, Vec<Name>>,

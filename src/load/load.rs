@@ -93,7 +93,7 @@ fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
     }
 }
 
-fn parse_word_entry(entry: &BTreeMap<String, Value>) -> (String, String, u64){
+fn parse_word_entry(entry: &BTreeMap<String, Value>) -> (String, String, u8){
     let seq_spelling = match entry.get("word") {
         Some(x) => match x {
             &Value::String(ref s) => s.clone(),
@@ -110,9 +110,9 @@ fn parse_word_entry(entry: &BTreeMap<String, Value>) -> (String, String, u64){
         _ => seq_spelling.clone(),
     };
 
-    let anagram: u64 = match entry.get("anagram") {
+    let anagram: u8 = match entry.get("anagram") {
         Some(a) => match a {
-            &Value::Integer(i) => i as u64,
+            &Value::Integer(i) => i as u8,
             _ => panic!("expected integer"),
         },
         _ => 0,

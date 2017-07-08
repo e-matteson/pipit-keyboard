@@ -194,8 +194,10 @@ impl Maps {
                                 &mod_indices.len().to_c()));
         f.append(&format_define(&"NUM_WORDMODS".to_c(),
                                 &self.wordmods.len().to_c()));
-        f.append(&format_define(&"NUM_ANAGRAMS".to_c(),
+        f.append(&format_define(&"NUM_ANAGRAM_MODS".to_c(),
                                 &self.anagrams.len().to_c()));
+        f.append(&format_define(&"NUM_ANAGRAMS".to_c(),
+                                &self.get_num_anagrams().to_c()));
         f.append(&format_define(&"NUM_MODIFIERKEYS".to_c(),
                                 &self.modifierkeys.len().to_c()));
         f.append(&CArray::new()
@@ -209,6 +211,13 @@ impl Maps {
                  .name(&"modifierkey_indices".to_c())
                  .c_type(&"mod_enum".to_c())
                  .fill_1d(&self.modifierkeys.iter()
+                          .map(|x| mod_indices[x].to_owned())
+                          .collect())
+                 .format());
+        f.append(&CArray::new()
+                 .name(&"anagram_mod_indices".to_c())
+                 .c_type(&"mod_enum".to_c())
+                 .fill_1d(&self.anagrams.iter()
                           .map(|x| mod_indices[x].to_owned())
                           .collect())
                  .format());
