@@ -36,6 +36,22 @@ impl Maps {
         }
     }
 
+    pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath) {
+        self.checker.insert(name.clone(), chord.clone(), kmap);
+        self.chords
+            .get_mut(kmap)
+            .expect(&format!("Failed to add chord because kmap is unknown: {}",
+                             kmap))
+            .insert(name, chord);
+
+    }
+
+    pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>) {
+        for (name, chord) in new_chords.into_iter() {
+            self.add_chord(name, chord, kmap);
+        }
+    }
+
     pub fn add_command(&mut self, entry: &Name) {
         if self.get_sequences(&SeqType::Command).contains_key(entry){
             panic!(format!("commands map already contains key: {}", entry));
@@ -74,6 +90,23 @@ impl Maps {
         self.get_sequences_mut(SeqType::Plain).insert(name, seq.clone());
     }
 
+    pub fn add_mode(&mut self, mode: ModeName, kmaps: Vec<KmapInfo>) {
+        assert!(!self.modes.contains_key(&mode));
+        // Store the kmaps that are included in this mode
+        for kmap_info in kmaps.iter() {
+            let kmap_path = &kmap_info.path;
+            if self.kmap_ids.contains_key(kmap_path){
+                continue;
+            }
+            // Initialize new chord map
+            self.chords.insert(kmap_path.clone(), BTreeMap::new());
+            // Generate nickname, for later formatting
+            let nickname = format!("kmap{}", self.kmap_ids.len());
+            self.kmap_ids.insert(kmap_path.clone(), nickname);
+        }
+        self.modes.insert(mode, kmaps);
+    }
+
     pub fn set_sequences(&mut self, seq_type: &SeqType, val: BTreeMap<Name, Sequence>) {
         assert!(!self.sequences.contains_key(&seq_type));
         self.sequences.insert(seq_type.clone(), val);
@@ -107,6 +140,26 @@ impl Maps {
         seq.0[0].modifier.clone()
     }
 
+    pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
+        // TODO be consistent about argument order
+        match self.chords[kmap].get(chord_name) {
+            Some(chord) => Some(chord.clone()),
+            None => None,
+        }
+    }
+
+    pub fn get_chords(&self, kmap: &KmapPath) -> &BTreeMap<Name, Chord>{
+        self.chords.get(kmap)
+            .expect(&format!("Failed to get chords for kmap: {}", kmap))
+    }
+
+    pub fn get_chords_mut(&mut self, kmap: &KmapPath) -> &mut BTreeMap<Name, Chord>{
+        self.chords.get_mut(kmap)
+            .expect(&format!("Failed to get chords for kmap: {}", kmap))
+    }
+
+
+
     // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {
         for kmap_info in self.modes.get(mode).expect("unknown mode"){
@@ -116,7 +169,6 @@ impl Maps {
         }
         Chord::new()
     }
-
 
     pub fn get_anagrams(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
@@ -142,31 +194,6 @@ impl Maps {
         }
         chords
     }
-    pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
-        // TODO be consistent about argument order
-        match self.chords[kmap].get(chord_name) {
-            Some(chord) => Some(chord.clone()),
-            None => None,
-        }
-    }
-
-    pub fn get_chords(&self, kmap: &KmapPath) -> &BTreeMap<Name, Chord>{
-        self.chords.get(kmap)
-            .expect(&format!("Failed to get chords for kmap: {}", kmap))
-    }
-
-    pub fn get_chords_mut(&mut self, kmap: &KmapPath) -> &mut BTreeMap<Name, Chord>{
-        self.chords.get_mut(kmap)
-            .expect(&format!("Failed to get chords for kmap: {}", kmap))
-    }
-
-    // pub fn get_anagram_chord(&self, num: u8, kmap: &KmapPath) -> Chord {
-    //     let anagram_name = self.anagrams.iter()
-    //         .nth(num as usize)
-    //         .expect("invalid anagram number");
-    //     self.get_chord(anagram_name, kmap)
-    //         .expect("invalid anagram name")
-    // }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
         let v: Vec<_> = self.kmap_ids.keys()
@@ -202,40 +229,6 @@ impl Maps {
             .collect();
         v
     }
-
-    pub fn add_mode(&mut self, mode: ModeName, kmaps: Vec<KmapInfo>) {
-        assert!(!self.modes.contains_key(&mode));
-        // Store the kmaps that are included in this mode
-        for kmap_info in kmaps.iter() {
-            let kmap_path = &kmap_info.path;
-            if self.kmap_ids.contains_key(kmap_path){
-                continue;
-            }
-            // Initialize new chord map
-            self.chords.insert(kmap_path.clone(), BTreeMap::new());
-            // Generate nickname, for later formatting
-            let nickname = format!("kmap{}", self.kmap_ids.len());
-            self.kmap_ids.insert(kmap_path.clone(), nickname);
-        }
-        self.modes.insert(mode, kmaps);
-    }
-
-    pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath) {
-        self.checker.insert(name.clone(), chord.clone(), kmap);
-        self.chords
-            .get_mut(kmap)
-            .expect(&format!("Failed to add chord because kmap is unknown: {}",
-                             kmap))
-            .insert(name, chord);
-
-    }
-
-    pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>) {
-        for (name, chord) in new_chords.into_iter() {
-            self.add_chord(name, chord, kmap);
-        }
-    }
-
 
     pub fn get_num_anagrams(&self) -> u8 {
         self.max_anagram_num + 1
