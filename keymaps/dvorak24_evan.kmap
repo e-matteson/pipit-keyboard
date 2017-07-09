@@ -26,11 +26,11 @@ wordmod_capital  wordmod_nospace
   .     .          .     .
   *.. ...          ... ..*
 
-anagram_0         anagram_1         anagram_2
-....   ....       ....   ....       ....   ....
-....   ....       ....   ....       ....   ....
-  .     .           .     .           .     .
-  ... ...           .*. ...           .*. .*.
+anagram_1         anagram_2
+....   ....       ....   ....
+....   ....       ....   ....
+  .     .           .     .
+  .*. ...           .*. .*.
 
 ##### single-switch letters #####
 
