@@ -114,10 +114,10 @@ pub struct KeyPress{
 }
 
 impl KeyPress{
-    pub fn new(key: usize, modifier: usize) -> KeyPress {
+    pub fn new(key: &str, modifier: &str) -> KeyPress {
         KeyPress{
-            key: CCode(format!("{}", key)),
-            modifier: CCode(format!("{}", modifier)),
+            key: KeyPress::sanitize(key),
+            modifier: KeyPress::sanitize(modifier),
         }
     }
     pub fn new_fake(code: &Name) -> KeyPress {
@@ -136,7 +136,36 @@ impl KeyPress{
     pub fn is_mod_blank(&self) -> bool {
         self.modifier == "0".to_c()
     }
+
+    fn contains_illegal_char(string: &str) -> bool {
+        // It's not quite worth using the regex crate for this...
+        let legal = vec!['_', '|', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+                         'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                         'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+                         '5', '6', '7', '8', '9' ];
+        for c in string.chars(){
+            if !legal.contains(&c) {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn sanitize(string: &str) -> CCode {
+        // TODO compare to an actual list of defined characters?
+        //  Could vary with underlying keyboard lib, though
+        if KeyPress::contains_illegal_char(string) {
+            panic!(format!("Keypress value is probably not valid: {}", string));
+        }
+        if string.is_empty() {
+            "0".to_c()
+        }
+        else {
+            string.to_c()
+        }
+    }
 }
+
 
 //////////////////////////////
 

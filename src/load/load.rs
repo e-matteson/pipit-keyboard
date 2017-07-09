@@ -9,7 +9,7 @@ use load::kmap_parser::KmapParser;
 
 
 pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
-    // Stores settings in both Maps and Options
+    // Store settings in both Maps and Options
     let toml = parse_toml(toml_path);
     let options = Options::load(&toml["options"]);
     let other = toml_to_map(&toml["other"]);
@@ -33,12 +33,6 @@ fn load_modes(toml: &Value, maps: &mut Maps) {
         maps.add_mode(ModeName(key.to_string()),
                       toml_to_vec(&val, toml_to_kmap_info));
     }
-
-
-    // Must be called before loading chords or sequences.
-    // for mode in options.get_modes(){
-    //     maps.add_mode(&mode, &options.get_kmaps(&mode));
-    // }
 }
 
 fn load_chords(options: &Options, kmap_paths: Vec<KmapPath>, maps: &mut Maps) {
@@ -81,9 +75,7 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 }
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    // TODO use separate word lists for different modes?
     let word_list = toml_to_vec1_map(&other["dictionary"]);
-    // Initialize empty word sequence map before adding words to it
     maps.set_sequences(&SeqType::Word, BTreeMap::new());
     for mode in &maps.get_kmaps_with_words(){
         for entry in word_list.iter() {
@@ -125,7 +117,12 @@ fn load_sequence_map(parsed_toml: &Value) -> BTreeMap<Name, Sequence>{
     let map = toml_to_map(parsed_toml);
     let mut new_map: BTreeMap<Name, Sequence> = BTreeMap::new();
     for (key,val) in map.iter(){
-        new_map.insert(Name(key.clone()), toml_to_sequence(&val));
+        let seq = match toml_dimension(val) {
+            1 => Sequence(vec![toml_to_keypress(&val)]),
+            2 => toml_to_sequence(&val),
+            _ => panic!(format!("Invalid key sequence for {}", key)),
+        };
+        new_map.insert(Name::from(key), seq);
     }
     new_map
 }

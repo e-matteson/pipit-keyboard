@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name, ToC};
+use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -88,6 +88,14 @@ pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)
     }
 }
 
+pub fn toml_dimension(toml_array: &Value) -> usize {
+    // Assumes dimension is uniform, and only checks 1st element of each array!
+    match toml_array {
+        &Value::Array(ref vector) => 1 + toml_dimension(&vector[0]),
+        _ => 0
+    }
+}
+
 fn toml_to_int(toml_value: &Value) -> i64 {
     match toml_value {
         &Value::Integer(i) => i,
@@ -117,10 +125,10 @@ fn toml_to_switchpos(toml_array: &Value) -> SwitchPos {
     SwitchPos {row: int_vec[0] as usize, col: int_vec[1] as usize}
 }
 
-fn toml_to_keypress(toml_array: &Value) -> KeyPress {
+pub fn toml_to_keypress(toml_array: &Value) -> KeyPress {
     let string_vec = toml_to_vec(toml_array, toml_to_string);
     if string_vec.len() != 2 {
-        panic!("Expected vector of length 2");
+        panic!("keypress vector must have length 2");
     }
-    KeyPress {key: string_vec[0].to_c(), modifier: string_vec[1].to_c()}
+    KeyPress::new(&string_vec[0], &string_vec[1])
 }

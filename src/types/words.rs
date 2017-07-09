@@ -38,7 +38,6 @@ impl<'a> WordBuilder<'a> {
         Name(name)
     }
 
-
     fn make_sequence(&self) -> Sequence {
         let mut seq = Sequence::new();
         for letter in self.seq_spelling.chars(){
