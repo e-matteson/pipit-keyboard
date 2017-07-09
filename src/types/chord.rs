@@ -75,7 +75,12 @@ impl Chord {
         self.bits = new.bits;
     }
 
-    pub fn to_string(&self) -> String {
+    // pub fn to_string(&self) -> String {
+    //     let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else {"0"}).collect();
+    //     tmp.join("")
+    // }
+
+    pub fn bits(&self) -> String {
         let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else {"0"}).collect();
         tmp.join("")
     }
@@ -94,7 +99,7 @@ impl Chord {
 
 impl fmt::Debug for Chord{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Chord {{ {} }}", self.to_string())
+        write!(f, "Chord {{ {} : {}}}", self.bits(), self.anagram_num)
     }
 }
 

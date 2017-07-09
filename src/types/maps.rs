@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap};
 use std::clone::Clone;
 
-use types::{Chord, Sequence, KeyPress, WordBuilder, Word, Options, SeqType, KmapPath,
-            KmapInfo, Name, ModeName, CCode, ToC};
+use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
+            KmapInfo, Name, ModeName, CCode, ToC, Checker};
 
 
 // TODO typealias kmap names
@@ -16,8 +16,8 @@ pub struct Maps {
     pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
     pub kmap_ids:     BTreeMap<KmapPath, String>,
     pub options:      Options,
-    pub anagram_records: BTreeMap<KmapPath, Vec<Word>>,
-    pub max_anagram_num: u8,
+    checker:          Checker,
+    max_anagram_num:  u8,
 }
 
 impl Maps {
@@ -31,7 +31,7 @@ impl Maps {
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
             options: Options::new(),
-            anagram_records: BTreeMap::new(),
+            checker: Checker::new(),
             max_anagram_num: 0,
         }
     }
@@ -62,12 +62,12 @@ impl Maps {
             maps: &self,
         }.finalize();
         self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq.clone());
-        self.get_chords_mut(&kmap).insert(word.name.clone(), word.chord.clone());
+        self.add_chord(word.name.clone(), word.chord.clone(), kmap);
         if word.chord.anagram_num > self.max_anagram_num {
             self.max_anagram_num = word.chord.anagram_num;
         }
-        self.add_anagram_record(kmap, word);
     }
+
 
     pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
         self.modifierkeys.push(name.clone());
@@ -220,23 +220,28 @@ impl Maps {
         self.modes.insert(mode, kmaps);
     }
 
-    pub fn add_chords(&mut self, kmap: &KmapPath, mut new_chords: BTreeMap<Name, Chord>) {
+    pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath) {
+        self.checker.insert(name.clone(), chord.clone(), kmap);
         self.chords
             .get_mut(kmap)
             .expect(&format!("Failed to add chord because kmap is unknown: {}",
                              kmap))
-            .append(&mut new_chords);
+            .insert(name, chord);
+
     }
 
-
-    pub fn add_anagram_record(&mut self, kmap: &KmapPath, word: Word) {
-        self.anagram_records
-            .entry(kmap.to_owned())
-            .or_insert(Vec::new())
-            .push(word)
+    pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>) {
+        for (name, chord) in new_chords.into_iter() {
+            self.add_chord(name, chord, kmap);
+        }
     }
+
 
     pub fn get_num_anagrams(&self) -> u8 {
         self.max_anagram_num + 1
+    }
+
+    pub fn check(&self) {
+        self.checker.check();
     }
 }

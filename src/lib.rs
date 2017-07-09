@@ -3,7 +3,7 @@ extern crate time;
 extern crate toml;
 extern crate itertools;
 
-pub use types::{Maps, Checker};
+pub use types::{Maps};
 
 #[macro_use]
 mod load;
