@@ -33,669 +33,668 @@ kmap_format                = [
 
 [modifiers]
 
-modifierkey_shift = [["0","MODIFIERKEY_SHIFT"]]
-modifierkey_ctrl  = [["0","MODIFIERKEY_CTRL"]]
-modifierkey_alt   = [["0","MODIFIERKEY_ALT"]]
-modifierkey_gui   = [["0","MODIFIERKEY_GUI"]]
+modifierkey_shift = ["", "MODIFIERKEY_SHIFT"]
+modifierkey_ctrl  = ["", "MODIFIERKEY_CTRL"]
+modifierkey_alt   = ["", "MODIFIERKEY_ALT"]
+modifierkey_gui   = ["", "MODIFIERKEY_GUI"]
 
 [plain_keys]
 
-blank_mapping     = [["BLANK_MAPPING","0"]] #for ignoring unused blocks in kmap file
-key_a             = [["KEY_A","0"]]
-key_b             = [["KEY_B","0"]]
-key_b_2           = [["KEY_B","0"]]
-key_c             = [["KEY_C","0"]]
-key_d             = [["KEY_D","0"]]
-key_e             = [["KEY_E","0"]]
-key_f             = [["KEY_F","0"]]
-key_g             = [["KEY_G","0"]]
-key_g_2           = [["KEY_G","0"]]
-key_h             = [["KEY_H","0"]]
-key_i             = [["KEY_I","0"]]
-key_j             = [["KEY_J","0"]]
-key_j_2           = [["KEY_J","0"]]
-key_k             = [["KEY_K","0"]]
-key_k_2           = [["KEY_K","0"]]
-key_l             = [["KEY_L","0"]]
-key_m             = [["KEY_M","0"]]
-key_n             = [["KEY_N","0"]]
-key_o             = [["KEY_O","0"]]
-key_p             = [["KEY_P","0"]]
-key_q             = [["KEY_Q","0"]]
-key_q_2           = [["KEY_Q","0"]]
-key_r             = [["KEY_R","0"]]
-key_s             = [["KEY_S","0"]]
-key_t             = [["KEY_T","0"]]
-key_u             = [["KEY_U","0"]]
-key_v             = [["KEY_V","0"]]
-key_v_2           = [["KEY_V","0"]]
-key_w             = [["KEY_W","0"]]
-key_w_2           = [["KEY_W","0"]]
-key_x             = [["KEY_X","0"]]
-key_x_2           = [["KEY_X","0"]]
-key_y             = [["KEY_Y","0"]]
-key_y_2           = [["KEY_Y","0"]]
-key_z             = [["KEY_Z","0"]]
-key_z_2           = [["KEY_Z","0"]]
-key_1             = [["KEY_1","0"]]
-key_2             = [["KEY_2","0"]]
-key_3             = [["KEY_3","0"]]
-key_4             = [["KEY_4","0"]]
-key_5             = [["KEY_5","0"]]
-key_6             = [["KEY_6","0"]]
-key_7             = [["KEY_7","0"]]
-key_8             = [["KEY_8","0"]]
-key_9             = [["KEY_9","0"]]
-key_0             = [["KEY_0","0"]]
-key_f1            = [["KEY_F1","0"]]
-key_f2            = [["KEY_F2","0"]]
-key_f3            = [["KEY_F3","0"]]
-key_f4            = [["KEY_F4","0"]]
-key_f5            = [["KEY_F5","0"]]
-key_f6            = [["KEY_F6","0"]]
-key_f7            = [["KEY_F7","0"]]
-key_f8            = [["KEY_F8","0"]]
-key_f9            = [["KEY_F9","0"]]
-key_f10           = [["KEY_F10","0"]]
-key_enter         = [["KEY_ENTER","0"]]
-key_backspace     = [["KEY_BACKSPACE","0"]]
-key_tab           = [["KEY_TAB","0"]]
-key_space         = [["KEY_SPACE","0"]]
-key_esc           = [["KEY_ESC","0"]]
-key_caps_lock     = [["KEY_CAPS_LOCK","0"]]
-key_home          = [["KEY_HOME","0"]]
-key_end           = [["KEY_END","0"]]
-key_page_up       = [["KEY_PAGE_UP","0"]]
-key_page_down     = [["KEY_PAGE_DOWN","0"]]
-key_right         = [["KEY_RIGHT","0"]]
-key_left          = [["KEY_LEFT","0"]]
-key_down          = [["KEY_DOWN","0"]]
-key_up            = [["KEY_UP","0"]]
-key_printscreen   = [["KEY_PRINTSCREEN","0"]]
-# "key_scroll_lock" : [("KEY_SCROLL_LOCK","0")],
-key_delete        = [["KEY_DELETE","0"]]
-key_ampersand     = [["KEY_7","MODIFIERKEY_SHIFT"]]
-key_asterisk      = [["KEY_8","MODIFIERKEY_SHIFT"]]
-key_at            = [["KEY_2","MODIFIERKEY_SHIFT"]]
-key_backslash     = [["KEY_BACKSLASH","0"]]
-key_bang          = [["KEY_1", "MODIFIERKEY_SHIFT"]]
-key_caret         = [["KEY_6","MODIFIERKEY_SHIFT"]]
-key_colon         = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"]]
-key_comma         = [["KEY_COMMA","0"]]
-key_dollar        = [["KEY_4","MODIFIERKEY_SHIFT"]]
-key_doublequote   = [["KEY_QUOTE","MODIFIERKEY_SHIFT"]]
-key_equal         = [["KEY_EQUAL","0"]]
-key_grave         = [["KEY_TILDE","0"]]
-key_hash          = [["KEY_3","MODIFIERKEY_SHIFT"]]
-key_left_angle    = [["KEY_COMMA","MODIFIERKEY_SHIFT"]]
-key_left_brace    = [["KEY_LEFT_BRACE","0"]]
-key_left_curly    = [["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"]]
-key_left_paren    = [["KEY_9","MODIFIERKEY_SHIFT"]]
-key_minus         = [["KEY_MINUS","0"]]
-key_percent       = [["KEY_5","MODIFIERKEY_SHIFT"]]
-key_period        = [["KEY_PERIOD","0"]]
-key_pipe          = [["KEY_BACKSLASH", "MODIFIERKEY_SHIFT"]]
-key_plus          = [["KEY_EQUAL","MODIFIERKEY_SHIFT"]]
-key_question      = [["KEY_SLASH","MODIFIERKEY_SHIFT"]]
-key_quote         = [["KEY_QUOTE","0"]]
-key_right_angle   = [["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
-key_right_brace   = [["KEY_RIGHT_BRACE","0"]]
-key_right_curly   = [["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"]]
-key_right_paren   = [["KEY_0","MODIFIERKEY_SHIFT"]]
-key_semicolon     = [["KEY_SEMICOLON","0"]]
-key_slash         = [["KEY_SLASH","0"]]
-key_tilde         = [["KEY_TILDE", "MODIFIERKEY_SHIFT"]]
-key_underscore    = [["KEY_MINUS", "MODIFIERKEY_SHIFT"]]
-
+blank_mapping     = ["BLANK_MAPPING", ""] #for ignoring unused blocks in kmap file
+key_a             = ["KEY_A", ""]
+key_b             = ["KEY_B", ""]
+key_b_2           = ["KEY_B", ""]
+key_c             = ["KEY_C", ""]
+key_d             = ["KEY_D", ""]
+key_e             = ["KEY_E", ""]
+key_f             = ["KEY_F", ""]
+key_g             = ["KEY_G", ""]
+key_g_2           = ["KEY_G", ""]
+key_h             = ["KEY_H", ""]
+key_i             = ["KEY_I", ""]
+key_j             = ["KEY_J", ""]
+key_j_2           = ["KEY_J", ""]
+key_k             = ["KEY_K", ""]
+key_k_2           = ["KEY_K", ""]
+key_l             = ["KEY_L", ""]
+key_m             = ["KEY_M", ""]
+key_n             = ["KEY_N", ""]
+key_o             = ["KEY_O", ""]
+key_p             = ["KEY_P", ""]
+key_q             = ["KEY_Q", ""]
+key_q_2           = ["KEY_Q", ""]
+key_r             = ["KEY_R", ""]
+key_s             = ["KEY_S", ""]
+key_t             = ["KEY_T", ""]
+key_u             = ["KEY_U", ""]
+key_v             = ["KEY_V", ""]
+key_v_2           = ["KEY_V", ""]
+key_w             = ["KEY_W", ""]
+key_w_2           = ["KEY_W", ""]
+key_x             = ["KEY_X", ""]
+key_x_2           = ["KEY_X", ""]
+key_y             = ["KEY_Y", ""]
+key_y_2           = ["KEY_Y", ""]
+key_z             = ["KEY_Z", ""]
+key_z_2           = ["KEY_Z", ""]
+key_1             = ["KEY_1", ""]
+key_2             = ["KEY_2", ""]
+key_3             = ["KEY_3", ""]
+key_4             = ["KEY_4", ""]
+key_5             = ["KEY_5", ""]
+key_6             = ["KEY_6", ""]
+key_7             = ["KEY_7", ""]
+key_8             = ["KEY_8", ""]
+key_9             = ["KEY_9", ""]
+key_0             = ["KEY_0", ""]
+key_f1            = ["KEY_F1", ""]
+key_f2            = ["KEY_F2", ""]
+key_f3            = ["KEY_F3", ""]
+key_f4            = ["KEY_F4", ""]
+key_f5            = ["KEY_F5", ""]
+key_f6            = ["KEY_F6", ""]
+key_f7            = ["KEY_F7", ""]
+key_f8            = ["KEY_F8", ""]
+key_f9            = ["KEY_F9", ""]
+key_f10           = ["KEY_F10", ""]
+key_enter         = ["KEY_ENTER", ""]
+key_backspace     = ["KEY_BACKSPACE", ""]
+key_tab           = ["KEY_TAB", ""]
+key_space         = ["KEY_SPACE", ""]
+key_esc           = ["KEY_ESC", ""]
+key_caps_lock     = ["KEY_CAPS_LOCK", ""]
+key_home          = ["KEY_HOME", ""]
+key_end           = ["KEY_END", ""]
+key_page_up       = ["KEY_PAGE_UP", ""]
+key_page_down     = ["KEY_PAGE_DOWN", ""]
+key_right         = ["KEY_RIGHT", ""]
+key_left          = ["KEY_LEFT", ""]
+key_down          = ["KEY_DOWN", ""]
+key_up            = ["KEY_UP", ""]
+key_printscreen   = ["KEY_PRINTSCREEN", ""]
+key_delete        = ["KEY_DELETE", ""]
+key_ampersand     = ["KEY_7", "MODIFIERKEY_SHIFT"]
+key_asterisk      = ["KEY_8", "MODIFIERKEY_SHIFT"]
+key_at            = ["KEY_2", "MODIFIERKEY_SHIFT"]
+key_backslash     = ["KEY_BACKSLASH", ""]
+key_bang          = ["KEY_1", "MODIFIERKEY_SHIFT"]
+key_caret         = ["KEY_6", "MODIFIERKEY_SHIFT"]
+key_colon         = ["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"]
+key_comma         = ["KEY_COMMA", ""]
+key_dollar        = ["KEY_4", "MODIFIERKEY_SHIFT"]
+key_doublequote   = ["KEY_QUOTE", "MODIFIERKEY_SHIFT"]
+key_equal         = ["KEY_EQUAL", ""]
+key_grave         = ["KEY_TILDE", ""]
+key_hash          = ["KEY_3", "MODIFIERKEY_SHIFT"]
+key_left_angle    = ["KEY_COMMA", "MODIFIERKEY_SHIFT"]
+key_left_brace    = ["KEY_LEFT_BRACE", ""]
+key_left_curly    = ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"]
+key_left_paren    = ["KEY_9", "MODIFIERKEY_SHIFT"]
+key_minus         = ["KEY_MINUS", ""]
+key_percent       = ["KEY_5", "MODIFIERKEY_SHIFT"]
+key_period        = ["KEY_PERIOD", ""]
+key_pipe          = ["KEY_BACKSLASH", "MODIFIERKEY_SHIFT"]
+key_plus          = ["KEY_EQUAL", "MODIFIERKEY_SHIFT"]
+key_question      = ["KEY_SLASH", "MODIFIERKEY_SHIFT"]
+key_quote         = ["KEY_QUOTE", ""]
+key_right_angle   = ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]
+key_right_brace   = ["KEY_RIGHT_BRACE", ""]
+key_right_curly   = ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"]
+key_right_paren   = ["KEY_0", "MODIFIERKEY_SHIFT"]
+key_semicolon     = ["KEY_SEMICOLON", ""]
+key_slash         = ["KEY_SLASH", ""]
+key_tilde         = ["KEY_TILDE", "MODIFIERKEY_SHIFT"]
+key_underscore    = ["KEY_MINUS", "MODIFIERKEY_SHIFT"]
+# "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]
 
-macro_save        = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"],
-                     ["KEY_W", "0"],
-                     ["KEY_ENTER", "0"]]
-macro_quit        = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"], ["KEY_Q", "0"],
-                     ["KEY_ENTER", "0"]]
-macro_ls          = [["KEY_L","0"],
-                     ["KEY_S", "0"],
-                     ["KEY_ENTER", "0"]]
-# macro_g_comma     = [["KEY_G","0"],
-#                      ["KEY_COMMA", "0"]]
-# macro_g_semicolon = [["KEY_G","0"],
-#                      ["KEY_SEMICOLON", "0"]]
-macro_f_comma     = [["KEY_F","0"],
-                     ["KEY_COMMA", "0"]]
-macro_cap_f_comma        = [["KEY_F","MODIFIERKEY_SHIFT"],
-                              ["KEY_COMMA", "0"]]
+macro_save        = [["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"],
+                     ["KEY_W", ""],
+                     ["KEY_ENTER", ""]]
+macro_quit        = [["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"], ["KEY_Q", ""],
+                     ["KEY_ENTER", ""]]
+macro_ls          = [["KEY_L", ""],
+                     ["KEY_S", ""],
+                     ["KEY_ENTER", ""]]
+# macro_g_comma     = [["KEY_G", ""],
+#                      ["KEY_COMMA", ""]]
+# macro_g_semicolon = [["KEY_G", ""],
+#                      ["KEY_SEMICOLON", ""]]
+macro_f_comma     = [["KEY_F", ""],
+                     ["KEY_COMMA", ""]]
+macro_cap_f_comma        = [["KEY_F", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", ""]]
 macro_mx                = [["KEY_X", "MODIFIERKEY_ALT"]]
 # macro_other_buffer1      = [["KEY_F3", "MODIFIERKEY_CTRL"]]
-macro_other_buffer1      = [["KEY_SPACE", "0"],
-                              ["KEY_TAB", "0"]]
-macro_other_buffer2      = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_2", "0"]]
-macro_other_buffer3      = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_3", "0"]]
-macro_other_buffer4      = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_4", "0"]]
-macro_next_buffer        = [["KEY_SPACE", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_N", "0"]]
-macro_prev_buffer        = [["KEY_SPACE", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_P", "0"]]
-macro_kill_buffer        = [["KEY_SPACE", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_D", "0"]]
-# macro_kill_compile          = [["KEY_SPACE", "0"],
-#                               ["KEY_C", "0"],
-#                               ["KEY_K", "0"]]
-macro_in_paren           = [["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT","0"]]
-macro_in_angle           = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_PERIOD","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT","0"]]
-macro_in_brace           = [["KEY_LEFT_BRACE","0"],
-                              ["KEY_RIGHT_BRACE","0"],
-                              ["KEY_LEFT","0"]]
-macro_in_curly           = [["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT","0"]]
-macro_out_paren          = [["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"]]
-macro_out_angle          = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_PERIOD","MODIFIERKEY_SHIFT"]]
-macro_out_brace          = [["KEY_LEFT_BRACE","0"],
-                              ["KEY_RIGHT_BRACE","0"]]
-macro_out_curly          = [["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"]]
-macro_in_quote           = [["KEY_QUOTE","0"],
-                              ["KEY_QUOTE","0"],
-                              ["KEY_LEFT","0"]]
-macro_in_doublequote     = [["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT","0"]]
-# macro_out_quote          = [["KEY_QUOTE","0"],
-#                                ["KEY_QUOTE","0"]],
-# macro_out_doublequote    = [["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-#                                ["KEY_QUOTE","MODIFIERKEY_SHIFT"]],
-macro_right_arrow        = [["KEY_MINUS", "0"],
-                              ["KEY_PERIOD","MODIFIERKEY_SHIFT"]]
-macro_left_arrow         = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_MINUS", "0"]]
-macro_this_arrow         = [["KEY_T", "0"],
-                              ["KEY_H", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_S", "0"],
-                              ["KEY_MINUS", "0"],
-                              ["KEY_PERIOD","MODIFIERKEY_SHIFT"]]
-macro_cerr               = [["KEY_C", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_SPACE", "0"],
-                              ["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE", "0"]]
-macro_cout               = [["KEY_C", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_U", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_SPACE", "0"],
-                              ["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE", "0"]]
-macro_endl               = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_D", "0"],
-                              ["KEY_L", "0"]]
-macro_arduino_print      = [["KEY_S","MODIFIERKEY_SHIFT"],
-                              ["KEY_E", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_SEMICOLON", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_arduino_println    = [["KEY_S","MODIFIERKEY_SHIFT"],
-                              ["KEY_E", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_SEMICOLON", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_gmail              = [["KEY_E", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_M", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_S", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_2","MODIFIERKEY_SHIFT"],
-                              ["KEY_G", "0"],
-                              ["KEY_M", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_C", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_M", "0"]]
-macro_bmail              = [["KEY_E", "0"],
-                              ["KEY_V", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_N", "0"],
+macro_other_buffer1      = [["KEY_SPACE", ""],
+                              ["KEY_TAB", ""]]
+macro_other_buffer2      = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_B", ""],
+                              ["KEY_2", ""]]
+macro_other_buffer3      = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_B", ""],
+                              ["KEY_3", ""]]
+macro_other_buffer4      = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_B", ""],
+                              ["KEY_4", ""]]
+macro_next_buffer        = [["KEY_SPACE", ""],
+                              ["KEY_B", ""],
+                              ["KEY_N", ""]]
+macro_prev_buffer        = [["KEY_SPACE", ""],
+                              ["KEY_B", ""],
+                              ["KEY_P", ""]]
+macro_kill_buffer        = [["KEY_SPACE", ""],
+                              ["KEY_B", ""],
+                              ["KEY_D", ""]]
+# macro_kill_compile          = [["KEY_SPACE", ""],
+#                               ["KEY_C", ""],
+#                               ["KEY_K", ""]]
+macro_in_paren           = [["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""]]
+macro_in_angle           = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_PERIOD", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""]]
+macro_in_brace           = [["KEY_LEFT_BRACE", ""],
+                              ["KEY_RIGHT_BRACE", ""],
+                              ["KEY_LEFT", ""]]
+macro_in_curly           = [["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""]]
+macro_out_paren          = [["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"]]
+macro_out_angle          = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
+macro_out_brace          = [["KEY_LEFT_BRACE", ""],
+                              ["KEY_RIGHT_BRACE", ""]]
+macro_out_curly          = [["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"]]
+macro_in_quote           = [["KEY_QUOTE", ""],
+                              ["KEY_QUOTE", ""],
+                              ["KEY_LEFT", ""]]
+macro_in_doublequote     = [["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""]]
+# macro_out_quote          = [["KEY_QUOTE", ""],
+#                                ["KEY_QUOTE", ""]],
+# macro_out_doublequote    = [["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+#                                ["KEY_QUOTE", "MODIFIERKEY_SHIFT"]],
+macro_right_arrow        = [["KEY_MINUS", ""],
+                              ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
+macro_left_arrow         = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_MINUS", ""]]
+macro_this_arrow         = [["KEY_T", ""],
+                              ["KEY_H", ""],
+                              ["KEY_I", ""],
+                              ["KEY_S", ""],
+                              ["KEY_MINUS", ""],
+                              ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
+macro_cerr               = [["KEY_C", ""],
+                              ["KEY_E", ""],
+                              ["KEY_R", ""],
+                              ["KEY_R", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SPACE", ""]]
+macro_cout               = [["KEY_C", ""],
+                              ["KEY_O", ""],
+                              ["KEY_U", ""],
+                              ["KEY_T", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SPACE", ""]]
+macro_endl               = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SPACE", ""],
+                              ["KEY_E", ""],
+                              ["KEY_N", ""],
+                              ["KEY_D", ""],
+                              ["KEY_L", ""]]
+macro_arduino_print      = [["KEY_S", "MODIFIERKEY_SHIFT"],
+                              ["KEY_E", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_A", ""],
+                              ["KEY_L", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_arduino_println    = [["KEY_S", "MODIFIERKEY_SHIFT"],
+                              ["KEY_E", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_A", ""],
+                              ["KEY_L", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_L", ""],
+                              ["KEY_N", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_gmail              = [["KEY_E", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_R", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_M", ""],
+                              ["KEY_A", ""],
+                              ["KEY_T", ""],
+                              ["KEY_T", ""],
+                              ["KEY_E", ""],
+                              ["KEY_S", ""],
+                              ["KEY_O", ""],
+                              ["KEY_N", ""],
+                              ["KEY_2", "MODIFIERKEY_SHIFT"],
+                              ["KEY_G", ""],
+                              ["KEY_M", ""],
+                              ["KEY_A", ""],
+                              ["KEY_I", ""],
+                              ["KEY_L", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_C", ""],
+                              ["KEY_O", ""],
+                              ["KEY_M", ""]]
+macro_bmail              = [["KEY_E", ""],
+                              ["KEY_V", ""],
+                              ["KEY_A", ""],
+                              ["KEY_N", ""],
                               ["KEY_MINUS", "MODIFIERKEY_SHIFT"],
-                              ["KEY_M", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_S", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_2","MODIFIERKEY_SHIFT"],
-                              ["KEY_B", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_W", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_PERIOD", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_D", "0"],
-                              ["KEY_U", "0"]]
-macro_compile            = [["KEY_SPACE", "0"],
-                              ["KEY_M", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_C", "0"]]
-macro_helm_mini          = [["KEY_SPACE", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_B", "0"]]
-macro_helm_mark          = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_M", "0"]]
-macro_helm_imenu         = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_I", "0"]]
-macro_find_file          = [["KEY_SPACE", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_F", "0"]]
-macro_proj_find_file     = [["KEY_SPACE", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_F", "0"]]
-macro_recentf            = [["KEY_SPACE", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_R", "0"]]
-macro_find_other_file    = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_F", "0"]]
+                              ["KEY_M", ""],
+                              ["KEY_A", ""],
+                              ["KEY_T", ""],
+                              ["KEY_T", ""],
+                              ["KEY_E", ""],
+                              ["KEY_S", ""],
+                              ["KEY_O", ""],
+                              ["KEY_N", ""],
+                              ["KEY_2", "MODIFIERKEY_SHIFT"],
+                              ["KEY_B", ""],
+                              ["KEY_R", ""],
+                              ["KEY_O", ""],
+                              ["KEY_W", ""],
+                              ["KEY_N", ""],
+                              ["KEY_PERIOD", ""],
+                              ["KEY_E", ""],
+                              ["KEY_D", ""],
+                              ["KEY_U", ""]]
+macro_compile            = [["KEY_SPACE", ""],
+                              ["KEY_M", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_C", ""]]
+macro_helm_mini          = [["KEY_SPACE", ""],
+                              ["KEY_B", ""],
+                              ["KEY_B", ""]]
+macro_helm_mark          = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_M", ""]]
+macro_helm_imenu         = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_I", ""]]
+macro_find_file          = [["KEY_SPACE", ""],
+                              ["KEY_F", ""],
+                              ["KEY_F", ""]]
+macro_proj_find_file     = [["KEY_SPACE", ""],
+                              ["KEY_P", ""],
+                              ["KEY_F", ""]]
+macro_recentf            = [["KEY_SPACE", ""],
+                              ["KEY_F", ""],
+                              ["KEY_R", ""]]
+macro_find_other_file    = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_F", ""]]
 macro_del_win            = [["KEY_X", "MODIFIERKEY_CTRL"],
-                              ["KEY_0", "0"]]
+                              ["KEY_0", ""]]
 macro_del_other_wins     = [["KEY_X", "MODIFIERKEY_CTRL"],
-                              ["KEY_1", "0"]]
-macro_other_win          = [["KEY_SPACE", "0"],
-                              ["KEY_W", "0"],
-                              ["KEY_W", "0"]]
-macro_org_cycle          = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_Y", "0"],
-                              ["KEY_T", "0"]]
-macro_org_cycle_shift    = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_Y", "0"],
-                              ["KEY_S", "0"]]
-macro_org_cycle_ctrl     = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_Y", "0"],
-                              ["KEY_C", "0"]]
-macro_yank_eol           = [["KEY_Y", "0"],
-                              ["KEY_4","MODIFIERKEY_SHIFT"]]
-# macro_yy                 = [["KEY_Y", "0"],
-#                               ["KEY_Y", "0"]]
-# macro_dd                 = [["KEY_D", "0"],
-#                               ["KEY_D", "0"]]
-# macro_cc                 = [["KEY_C", "0"],
-#                               ["KEY_C", "0"]]
-macro_gi                 = [["KEY_G", "0"],
-                              ["KEY_I", "0"]]
-macro_gx                 = [["KEY_G", "0"],
-                              ["KEY_X","0"]]
-macro_aspace             = [["KEY_A", "0"],
-                              ["KEY_SPACE","0"],
-                              ["KEY_ESC","0"]]
-macro_aspace_p           = [["KEY_A", "0"],
-                              ["KEY_SPACE","0"],
-                              ["KEY_ESC","0"],
-                              ["KEY_P","0"]]
+                              ["KEY_1", ""]]
+macro_other_win          = [["KEY_SPACE", ""],
+                              ["KEY_W", ""],
+                              ["KEY_W", ""]]
+macro_org_cycle          = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_Y", ""],
+                              ["KEY_T", ""]]
+macro_org_cycle_shift    = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_Y", ""],
+                              ["KEY_S", ""]]
+macro_org_cycle_ctrl     = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_Y", ""],
+                              ["KEY_C", ""]]
+macro_yank_eol           = [["KEY_Y", ""],
+                              ["KEY_4", "MODIFIERKEY_SHIFT"]]
+# macro_yy                 = [["KEY_Y", ""],
+#                               ["KEY_Y", ""]]
+# macro_dd                 = [["KEY_D", ""],
+#                               ["KEY_D", ""]]
+# macro_cc                 = [["KEY_C", ""],
+#                               ["KEY_C", ""]]
+macro_gi                 = [["KEY_G", ""],
+                              ["KEY_I", ""]]
+macro_gx                 = [["KEY_G", ""],
+                              ["KEY_X", ""]]
+macro_aspace             = [["KEY_A", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_ESC", ""]]
+macro_aspace_p           = [["KEY_A", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_ESC", ""],
+                              ["KEY_P", ""]]
 macro_cap_aspace         = [["KEY_A", "MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE","0"],
-                              ["KEY_ESC","0"]]
+                              ["KEY_SPACE", ""],
+                              ["KEY_ESC", ""]]
 macro_cap_aspace_p       = [["KEY_A", "MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE","0"],
-                              ["KEY_ESC","0"],
-                              ["KEY_P","0"]]
-macro_at_at              = [["KEY_2","MODIFIERKEY_SHIFT"],
-                              ["KEY_2","MODIFIERKEY_SHIFT"]]
-macro_kill_ring          = [["KEY_SPACE", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_Y", "0"]]
-macro_comment            = [["KEY_SPACE", "0"],
-                              ["KEY_C", "0"],
-                              ["KEY_L", "0"]]
-macro_agenda             = [["KEY_SPACE", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_T", "0"]]
-macro_calendar           = [["KEY_SPACE", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_C", "0"]]
-macro_magit_status       = [["KEY_SPACE", "0"],
-                              ["KEY_G", "0"],
-                              ["KEY_S", "0"]]
-macro_browser_tab_search = [["KEY_T", "0"],
-                              ["KEY_TAB", "0"]]
-macro_org_capture        = [["KEY_SPACE", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_C", "0"]]
-macro_dotspacemacs       = [["KEY_SPACE", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_D", "0"]]
-macro_reload_emacs       = [["KEY_SPACE", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_E", "0"],
+                              ["KEY_SPACE", ""],
+                              ["KEY_ESC", ""],
+                              ["KEY_P", ""]]
+macro_at_at              = [["KEY_2", "MODIFIERKEY_SHIFT"],
+                              ["KEY_2", "MODIFIERKEY_SHIFT"]]
+macro_kill_ring          = [["KEY_SPACE", ""],
+                              ["KEY_R", ""],
+                              ["KEY_Y", ""]]
+macro_comment            = [["KEY_SPACE", ""],
+                              ["KEY_C", ""],
+                              ["KEY_L", ""]]
+macro_agenda             = [["KEY_SPACE", ""],
+                              ["KEY_A", ""],
+                              ["KEY_O", ""],
+                              ["KEY_O", ""],
+                              ["KEY_T", ""]]
+macro_calendar           = [["KEY_SPACE", ""],
+                              ["KEY_A", ""],
+                              ["KEY_O", ""],
+                              ["KEY_O", ""],
+                              ["KEY_C", ""]]
+macro_magit_status       = [["KEY_SPACE", ""],
+                              ["KEY_G", ""],
+                              ["KEY_S", ""]]
+macro_browser_tab_search = [["KEY_T", ""],
+                              ["KEY_TAB", ""]]
+macro_org_capture        = [["KEY_SPACE", ""],
+                              ["KEY_A", ""],
+                              ["KEY_O", ""],
+                              ["KEY_C", ""]]
+macro_dotspacemacs       = [["KEY_SPACE", ""],
+                              ["KEY_F", ""],
+                              ["KEY_E", ""],
+                              ["KEY_D", ""]]
+macro_reload_emacs       = [["KEY_SPACE", ""],
+                              ["KEY_F", ""],
+                              ["KEY_E", ""],
                               ["KEY_R", "MODIFIERKEY_SHIFT"]]
-macro_open_planner       = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_P", "0"]]
-macro_open_timeline      = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_T", "0"]]
-macro_open_settings      = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_S", "0"]]
-macro_open_dvorak        = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_D", "0"]]
-macro_open_starred        = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_C", "0"]]
-macro_set_starred        = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_P", "0"],
-                              ["KEY_Q", "0"]]
+macro_open_planner       = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_P", ""]]
+macro_open_timeline      = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_T", ""]]
+macro_open_settings      = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_S", ""]]
+macro_open_dvorak        = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_D", ""]]
+macro_open_starred        = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_C", ""]]
+macro_set_starred        = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_P", ""],
+                              ["KEY_Q", ""]]
 macro_todo               = [["KEY_T", "MODIFIERKEY_SHIFT"],
                               ["KEY_O", "MODIFIERKEY_SHIFT"],
                               ["KEY_D", "MODIFIERKEY_SHIFT"],
                               ["KEY_O", "MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE", "0"]]
-# macro_comment_copy       = [["KEY_SPACE", "0"],
-#                               ["KEY_C", "0"],
-#                               ["KEY_Y", "0"]]
-macro_ins_heading        = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_Y", "0"],
-                              ["KEY_H", "0"]]
-macro_ins_notes          = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_Z", "0"],
-                              ["KEY_Y", "0"],
-                              ["KEY_N", "0"]]
-macro_self_dot           = [["KEY_S", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_PERIOD", "0"]]
-macro_if_c               = [["KEY_I", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER","0"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_else_c             = [["KEY_E", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_S", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER","0"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_for_c              = [["KEY_F", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER","0"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_while_c            = [["KEY_W", "0"],
-                              ["KEY_H", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_L", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER","0"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_arg_c              = [["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER","0"],
-                              ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_ifdef_guard        = [["KEY_3","MODIFIERKEY_SHIFT"],
-                              ["KEY_I", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_D", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_SPACE", "0"],
-                              ["KEY_H","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER", "0"],
-                              ["KEY_3","MODIFIERKEY_SHIFT"],
-                              ["KEY_D", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_SPACE", "0"],
-                              ["KEY_H","MODIFIERKEY_SHIFT"],
-                              ["KEY_ENTER", "0"],
-                              ["KEY_ENTER", "0"],
-                              ["KEY_3","MODIFIERKEY_SHIFT"],
-                              ["KEY_E", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_D", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_UP", "0"],
-                              ["KEY_UP", "0"],
-                              ["KEY_UP", "0"],
-                              ["KEY_END", "0"]]
-# macro_printf2             = [["KEY_P", "0"],
-#                               ["KEY_R", "0"],
-#                               ["KEY_I", "0"],
-#                               ["KEY_N", "0"],
-#                               ["KEY_T", "0"],
-#                               ["KEY_F", "0"],
-#                               ["KEY_9","MODIFIERKEY_SHIFT"],
-#                               ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-#                               ["KEY_BACKSLASH","0"],
-#                               ["KEY_N","0"],
-#                               ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-#                               ["KEY_COMMA","0"],
-#                               ["KEY_SPACE","0"],
-#                               ["KEY_0","MODIFIERKEY_SHIFT"],
-#                               ["KEY_SEMICOLON", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"],
-#                               ["KEY_LEFT", "0"]]
-macro_printf            = [["KEY_P", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_F", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_BACKSLASH","0"],
-                              ["KEY_N","0"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_SEMICOLON", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_print_py           = [["KEY_P", "0"],
-                              ["KEY_R", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT", "0"]]
-macro_docstr_py          = [["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"],
-                              ["KEY_LEFT", "0"]]
-macro_lifetime_rs        = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                              ["KEY_QUOTE", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_PERIOD","MODIFIERKEY_SHIFT"]]
+                              ["KEY_SPACE", ""]]
+# macro_comment_copy       = [["KEY_SPACE", ""],
+#                               ["KEY_C", ""],
+#                               ["KEY_Y", ""]]
+macro_ins_heading        = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_Y", ""],
+                              ["KEY_H", ""]]
+macro_ins_notes          = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_Z", ""],
+                              ["KEY_Y", ""],
+                              ["KEY_N", ""]]
+macro_self_dot           = [["KEY_S", ""],
+                              ["KEY_E", ""],
+                              ["KEY_L", ""],
+                              ["KEY_F", ""],
+                              ["KEY_PERIOD", ""]]
+macro_if_c               = [["KEY_I", ""],
+                              ["KEY_F", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_else_c             = [["KEY_E", ""],
+                              ["KEY_L", ""],
+                              ["KEY_S", ""],
+                              ["KEY_E", ""],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_for_c              = [["KEY_F", ""],
+                              ["KEY_O", ""],
+                              ["KEY_R", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_while_c            = [["KEY_W", ""],
+                              ["KEY_H", ""],
+                              ["KEY_I", ""],
+                              ["KEY_L", ""],
+                              ["KEY_E", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_arg_c              = [["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_ifdef_guard        = [["KEY_3", "MODIFIERKEY_SHIFT"],
+                              ["KEY_I", ""],
+                              ["KEY_F", ""],
+                              ["KEY_N", ""],
+                              ["KEY_D", ""],
+                              ["KEY_E", ""],
+                              ["KEY_F", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_H", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_3", "MODIFIERKEY_SHIFT"],
+                              ["KEY_D", ""],
+                              ["KEY_E", ""],
+                              ["KEY_F", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_E", ""],
+                              ["KEY_SPACE", ""],
+                              ["KEY_H", "MODIFIERKEY_SHIFT"],
+                              ["KEY_ENTER", ""],
+                              ["KEY_ENTER", ""],
+                              ["KEY_3", "MODIFIERKEY_SHIFT"],
+                              ["KEY_E", ""],
+                              ["KEY_N", ""],
+                              ["KEY_D", ""],
+                              ["KEY_I", ""],
+                              ["KEY_F", ""],
+                              ["KEY_UP", ""],
+                              ["KEY_UP", ""],
+                              ["KEY_UP", ""],
+                              ["KEY_END", ""]]
+# macro_printf2             = [["KEY_P", ""],
+#                               ["KEY_R", ""],
+#                               ["KEY_I", ""],
+#                               ["KEY_N", ""],
+#                               ["KEY_T", ""],
+#                               ["KEY_F", ""],
+#                               ["KEY_9", "MODIFIERKEY_SHIFT"],
+#                               ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+#                               ["KEY_BACKSLASH", ""],
+#                               ["KEY_N", ""],
+#                               ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+#                               ["KEY_COMMA", ""],
+#                               ["KEY_SPACE", ""],
+#                               ["KEY_0", "MODIFIERKEY_SHIFT"],
+#                               ["KEY_SEMICOLON", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""],
+#                               ["KEY_LEFT", ""]]
+macro_printf            = [["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_F", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_BACKSLASH", ""],
+                              ["KEY_N", ""],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_print_py           = [["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""]]
+macro_docstr_py          = [["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_lifetime_rs        = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", ""],
+                              ["KEY_A", ""],
+                              ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
 macro_bang_dollar        = [["KEY_1", "MODIFIERKEY_SHIFT"],
                               ["KEY_4", "MODIFIERKEY_SHIFT"],
-                              ["KEY_SPACE", "0"]]
+                              ["KEY_SPACE", ""]]
 macro_hash_bang          = [["KEY_3", "MODIFIERKEY_SHIFT"],
                               ["KEY_1", "MODIFIERKEY_SHIFT"],
-                              ["KEY_SLASH", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_N", "0"],
-                              ["KEY_SLASH", "0"],
-                              ["KEY_B", "0"],
-                              ["KEY_A", "0"],
-                              ["KEY_S", "0"],
-                              ["KEY_H", "0"]]
-macro_exit_py            = [["KEY_E", "0"],
-                              ["KEY_X", "0"],
-                              ["KEY_I", "0"],
-                              ["KEY_T", "0"],
-                              ["KEY_9","MODIFIERKEY_SHIFT"],
-                              ["KEY_3", "0"],
-                              ["KEY_0","MODIFIERKEY_SHIFT"]]
-macro_error_next         = [["KEY_SPACE", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_N", "0"]]
-macro_error_prev         = [["KEY_SPACE", "0"],
-                              ["KEY_E", "0"],
-                              ["KEY_P", "0"]]
+                              ["KEY_SLASH", ""],
+                              ["KEY_B", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_SLASH", ""],
+                              ["KEY_B", ""],
+                              ["KEY_A", ""],
+                              ["KEY_S", ""],
+                              ["KEY_H", ""]]
+macro_exit_py            = [["KEY_E", ""],
+                              ["KEY_X", ""],
+                              ["KEY_I", ""],
+                              ["KEY_T", ""],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_3", ""],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"]]
+macro_error_next         = [["KEY_SPACE", ""],
+                              ["KEY_E", ""],
+                              ["KEY_N", ""]]
+macro_error_prev         = [["KEY_SPACE", ""],
+                              ["KEY_E", ""],
+                              ["KEY_P", ""]]
 macro_increment          = [["KEY_A", "MODIFIERKEY_CTRL"]]
 macro_decrement          = [["KEY_X", "MODIFIERKEY_CTRL"],
-                              ["KEY_ESC", "0"]]
-macro_nohlsearch         = [["KEY_SLASH", "0"],
-                              ["KEY_ESC", "0"]]
-macro_prev_search         = [["KEY_SLASH", "0"],
-                               ["KEY_UP", "0"],
-                               ["KEY_UP", "0"],
-                               ["KEY_ENTER", "0"]]
-macro_space_m            = [["KEY_SPACE", "0"],
-                              ["KEY_M","0"]]
-# macro_next_ws            = [["KEY_Z","MODIFIERKEY_GUI"],
-#                               ["KEY_Z","MODIFIERKEY_GUI"]]
-macro_bibtex             = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_X", "0"]]
-macro_col_eighty         = [["KEY_8", "0"],
-                              ["KEY_0", "0"],
+                              ["KEY_ESC", ""]]
+macro_nohlsearch         = [["KEY_SLASH", ""],
+                              ["KEY_ESC", ""]]
+macro_prev_search         = [["KEY_SLASH", ""],
+                               ["KEY_UP", ""],
+                               ["KEY_UP", ""],
+                               ["KEY_ENTER", ""]]
+macro_space_m            = [["KEY_SPACE", ""],
+                              ["KEY_M", ""]]
+# macro_next_ws            = [["KEY_Z", "MODIFIERKEY_GUI"],
+#                               ["KEY_Z", "MODIFIERKEY_GUI"]]
+macro_bibtex             = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_X", ""]]
+macro_col_eighty         = [["KEY_8", ""],
+                              ["KEY_0", ""],
                               ["KEY_BACKSLASH", "MODIFIERKEY_SHIFT"]]
-macro_inbox              = [["KEY_SPACE", "0"],
-                              ["KEY_O", "0"],
-                              ["KEY_I", "0"]]
+macro_inbox              = [["KEY_SPACE", ""],
+                              ["KEY_O", ""],
+                              ["KEY_I", ""]]
 # macro_zotero_save        = [["KEY_Z", "MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"]]
 macro_zotero_save        = [["KEY_Z", "MODIFIERKEY_CTRL|MODIFIERKEY_SHIFT"]]
 macro_zotero_rename        = [["KEY_R", "MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"]]
@@ -705,129 +704,129 @@ macro_swap_master        =[["KEY_I", "MODIFIERKEY_GUI"],
                              ["KEY_BACKSPACE", "MODIFIERKEY_GUI"]]
 macro_swap_master2        =[["KEY_P", "MODIFIERKEY_GUI"],
                               ["KEY_BACKSPACE", "MODIFIERKEY_GUI"]]
-macro_describe_key     =[["KEY_SPACE", "0"],
-                            ["KEY_H", "0"],
-                            ["KEY_D", "0"],
-                            ["KEY_K", "0"]]
-macro_describe_var     =[["KEY_SPACE", "0"],
-                            ["KEY_H", "0"],
-                            ["KEY_D", "0"],
-                            ["KEY_V", "0"]]
-macro_describe_fun     =[["KEY_SPACE", "0"],
-                            ["KEY_H", "0"],
-                            ["KEY_D", "0"],
-                            ["KEY_F", "0"]]
-macro_backslash_n       =[["KEY_BACKSLASH", "0"],
-                            ["KEY_N", "0"]]
+macro_describe_key     =[["KEY_SPACE", ""],
+                            ["KEY_H", ""],
+                            ["KEY_D", ""],
+                            ["KEY_K", ""]]
+macro_describe_var     =[["KEY_SPACE", ""],
+                            ["KEY_H", ""],
+                            ["KEY_D", ""],
+                            ["KEY_V", ""]]
+macro_describe_fun     =[["KEY_SPACE", ""],
+                            ["KEY_H", ""],
+                            ["KEY_D", ""],
+                            ["KEY_F", ""]]
+macro_backslash_n       =[["KEY_BACKSLASH", ""],
+                            ["KEY_N", ""]]
 macro_blackhole         =[["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
                             ["KEY_MINUS", "MODIFIERKEY_SHIFT"]]
-macro_tex_item          =[["KEY_O", "0"],
-                            ["KEY_BACKSLASH", "0"],
-                            ["KEY_I", "0"],
-                            ["KEY_T", "0"],
-                            ["KEY_E", "0"],
-                            ["KEY_M", "0"],
-                            ["KEY_SPACE", "0"]]
-macro_in_equal         =[["KEY_EQUAL", "0"],
-                           ["KEY_EQUAL", "0"],
-                           ["KEY_LEFT", "0"]]
-macro_open_scratch     =[["KEY_SPACE", "0"],
-                           ["KEY_B", "0"],
-                           ["KEY_S", "0"]]
-macro_open_messages    =[["KEY_SPACE", "0"],
-                           ["KEY_O", "0"],
-                           ["KEY_P", "0"],
-                           ["KEY_M", "0"]]
-macro_eval             =[["KEY_SPACE", "0"],
-                           ["KEY_O", "0"],
-                           ["KEY_Z", "0"],
-                           ["KEY_E", "0"]]
-# macro_eval_region      =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_E", "0"],
-#                            ["KEY_R", "0"]]
-macro_org_store_link   =[["KEY_SPACE", "0"],
-                           ["KEY_A", "0"],
-                           ["KEY_O", "0"],
-                           ["KEY_L", "0"]]
-macro_org_insert_link  =[["KEY_SPACE", "0"],
-                           ["KEY_M", "0"],
-                           ["KEY_I", "0"],
-                           ["KEY_L", "0"]]
-# macro_eval_scad        =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_E", "0"],
-#                            ["KEY_S", "0"]]
-# macro_eval_count       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_E", "0"],
-#                            ["KEY_T", "0"]]
-# macro_eval_nth         =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_E", "0"],
-#                            ["KEY_N", "0"]]
-# macro_lisp_slurpf       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_S", "0"]]
-# macro_lisp_slurpb       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
+macro_tex_item          =[["KEY_O", ""],
+                            ["KEY_BACKSLASH", ""],
+                            ["KEY_I", ""],
+                            ["KEY_T", ""],
+                            ["KEY_E", ""],
+                            ["KEY_M", ""],
+                            ["KEY_SPACE", ""]]
+macro_in_equal         =[["KEY_EQUAL", ""],
+                           ["KEY_EQUAL", ""],
+                           ["KEY_LEFT", ""]]
+macro_open_scratch     =[["KEY_SPACE", ""],
+                           ["KEY_B", ""],
+                           ["KEY_S", ""]]
+macro_open_messages    =[["KEY_SPACE", ""],
+                           ["KEY_O", ""],
+                           ["KEY_P", ""],
+                           ["KEY_M", ""]]
+macro_eval             =[["KEY_SPACE", ""],
+                           ["KEY_O", ""],
+                           ["KEY_Z", ""],
+                           ["KEY_E", ""]]
+# macro_eval_region      =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_E", ""],
+#                            ["KEY_R", ""]]
+macro_org_store_link   =[["KEY_SPACE", ""],
+                           ["KEY_A", ""],
+                           ["KEY_O", ""],
+                           ["KEY_L", ""]]
+macro_org_insert_link  =[["KEY_SPACE", ""],
+                           ["KEY_M", ""],
+                           ["KEY_I", ""],
+                           ["KEY_L", ""]]
+# macro_eval_scad        =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_E", ""],
+#                            ["KEY_S", ""]]
+# macro_eval_count       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_E", ""],
+#                            ["KEY_T", ""]]
+# macro_eval_nth         =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_E", ""],
+#                            ["KEY_N", ""]]
+# macro_lisp_slurpf       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_S", ""]]
+# macro_lisp_slurpb       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
 #                            ["KEY_S", "MODIFIERKEY_SHIFT"]]
-# macro_lisp_barff       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_B", "0"]]
-# macro_lisp_barfb       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
+# macro_lisp_barff       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_B", ""]]
+# macro_lisp_barfb       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
 #                            ["KEY_B", "MODIFIERKEY_SHIFT"]]
-# macro_lisp_wrap1       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_W", "0"],
+# macro_lisp_wrap1       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_W", ""],
 #                            ["KEY_9", "MODIFIERKEY_SHIFT"]]
-# macro_lisp_wrap2       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_W", "0"],
-#                            ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"]]
-# macro_lisp_wrap3       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_W", "0"],
-#                            ["KEY_LEFT_BRACE","0"]]
-# macro_lisp_splice     =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_L", "0"]]
-# macro_lisp_splicef    =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_K", "0"]]
-# macro_lisp_spliceb    =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
+# macro_lisp_wrap2       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_W", ""],
+#                            ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"]]
+# macro_lisp_wrap3       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_W", ""],
+#                            ["KEY_LEFT_BRACE", ""]]
+# macro_lisp_splice     =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_L", ""]]
+# macro_lisp_splicef    =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_K", ""]]
+# macro_lisp_spliceb    =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
 #                            ["KEY_K", "MODIFIERKEY_SHIFT"]]
-# macro_lisp_split      =[["KEY_SPACE", "0"],
-#                           ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
-#                            ["KEY_P", "0"]]
-# macro_lisp_join       =[["KEY_SPACE", "0"],
-#                          ["KEY_M", "0"],
-#                           ["KEY_O", "0"],
-#                           ["KEY_J", "0"]]
-# macro_lisp_eos       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
+# macro_lisp_split      =[["KEY_SPACE", ""],
+#                           ["KEY_M", ""],
+#                            ["KEY_O", ""],
+#                            ["KEY_P", ""]]
+# macro_lisp_join       =[["KEY_SPACE", ""],
+#                          ["KEY_M", ""],
+#                           ["KEY_O", ""],
+#                           ["KEY_J", ""]]
+# macro_lisp_eos       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
 #                            ["KEY_6", "MODIFIERKEY_SHIFT"]]
-# macro_lisp_bos       =[["KEY_SPACE", "0"],
-#                            ["KEY_M", "0"],
-#                            ["KEY_O", "0"],
+# macro_lisp_bos       =[["KEY_SPACE", ""],
+#                            ["KEY_M", ""],
+#                            ["KEY_O", ""],
 #                            ["KEY_4", "MODIFIERKEY_SHIFT"]]
 
 
