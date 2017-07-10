@@ -146,7 +146,7 @@ fn make_firmware_order(ops: &Options) -> Vec<(SwitchPos)> {
 
 
 fn load_lines(path: &KmapPath) -> Vec<String> {
-    let file = File::open(path.0.clone()).expect("failed to open words file");
+    let file = File::open(path.0.clone()).expect("failed to open kmap file");
     let buf = BufReader::new(file);
     let mut lines: Vec<String> =
         buf.lines()
