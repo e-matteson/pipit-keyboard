@@ -220,19 +220,14 @@ key_home       key_end        key_page_up   key_page_down
   .     .       .     .         *     .       *     *
   ... .*.       ... .*.         ... .*.  	    ... ...
 
-key_delete    key_printscreen
-..**	 ....   ....   ..**
-..**   ....		....   ..**
-  .     .       .     .
-  ... ...  	    ... ...
-
-# key_caps_lock
-# **..  ....
-# **..   ....
-#   .     .
-#   ... ...
+key_delete    key_printscreen  key_caps_lock
+..**	 ....   ....   ..**      ....   **..
+..**   ....		....   ..**      ....   **..
+  .     .       .     .          .     .
+  ... ...  	    ... ...          ... ...
 
 ###### commands ######
+
 command_delete_word  command_pause   command_led_rainbow
 ....   ....          ****   ****     ****   ..*.
 ....   ***.          ....   ....     ....   ....
@@ -256,6 +251,7 @@ command_left_hand_mode
 ....   ....
   .     .
   ... ...
+
 
 ## text macros ##
 
@@ -383,22 +379,16 @@ macro_kill_ring        macro_comment      macro_comment_copy     macro_nohlsearc
   ... .*.                ... .*.            ... .*.                ... .*.
 
 macro_compile          macro_error_prev       macro_error_next
-.***   ....            ...*   ....            ....   ....
-....   ....            ..*.   ....            ..*.   ..*.
+....   ....            ...*   ....            ....   ....
+....   ..*.            ..*.   ....            ..*.   ..*.
   .     .                .     .                .     .
-  ... ...                ... .*.                ... .*.
+  ... .*.                ... .*.                ... .*.
 
-macro_eval
-....   ....
-....   .*..
-  .     .
-  ... .*.
-
-# macro_eval            macro_eval_region
-# ....   ....           ....   ....
-# .**.   ....           .**.   *...
-#   .     .               .     .
-#   ... .*.               ... .*.
+# macro_eval_region   macro_eval
+# ....   ....         ....   ....
+# .**.   *...         ....   .*..
+#   .     .             .     .
+#   ... .*.             ... .*.
 
 # macro_eval_scad     macro_eval_count      macro_eval_nth
 # ....   ....         ....   ....           ....   ....
@@ -520,11 +510,17 @@ macro_decrement        macro_increment    macro_prev_search
   .     .                .     .            .     .
   ... .*.                ... .*.            ... .*.
 
-macro_at_at            macro_yank_eol
-..*.   ..*.            ....   .**.
-....   ....            ....   ....
-  .     .                .     .
-  ... .*.                ... .*.
+macro_at_at
+..*.   ..*.
+....   ....
+  .     .
+  ... .*.
+
+# macro_yank_eol
+# ....   .**.
+# ....   ....
+#   .     .
+#   ... .*.
 
 macro_col_eighty       macro_inbox      macro_helm_mark
 ....   ....            ....   ....      *...   ..*.
