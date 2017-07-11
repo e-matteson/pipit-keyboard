@@ -1,8 +1,19 @@
 ########### EXAMPLE SETTINGS FILE #############
-[modes]
 
-default_mode               = [{file="keymaps/dvorak24.kmap", words=true}]
-left_hand_mode             = [{file="keymaps/dvorak24_left.kmap"}]
+[[modes]]
+name = "default_mode"
+keymaps = [{file="keymaps/dvorak24_evan.kmap", words=true}]
+
+[[modes]]
+name = "left_hand_mode"
+keymaps = [{file="keymaps/dvorak24_left.kmap"}]
+gaming = false
+
+[[modes]]
+name = "gaming_mode"
+keymaps = [{file="keymaps/gaming_test.kmap"}]
+gaming = true
+
 
 [options]
 

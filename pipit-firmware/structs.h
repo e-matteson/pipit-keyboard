@@ -19,6 +19,7 @@ struct ModeStruct{
   const uint8_t** mod_chords;
   const uint8_t** anagram_chords;
   const uint8_t* anagram_mask;
+  const bool is_gaming;
 };
 
 

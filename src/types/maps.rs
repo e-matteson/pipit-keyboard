@@ -2,10 +2,10 @@ use std::collections::{BTreeMap};
 use std::clone::Clone;
 
 use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
-            KmapInfo, Name, ModeName, CCode, ToC, Checker};
+            Name, ModeInfo, ModeName, CCode, ToC, Checker};
 
 
-// TODO typealias kmap names
+// TODO typealias kmap names?
 #[derive(Debug)]
 pub struct Maps {
     pub chords:       BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
@@ -13,7 +13,8 @@ pub struct Maps {
     pub wordmods:     Vec<Name>,
     pub modifierkeys: Vec<Name>,
     pub anagrams:     Vec<Name>,
-    pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
+    // pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
+    pub modes:        BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids:     BTreeMap<KmapPath, String>,
     pub options:      Options,
     checker:          Checker,
@@ -90,10 +91,12 @@ impl Maps {
         self.get_sequences_mut(SeqType::Plain).insert(name, seq.clone());
     }
 
-    pub fn add_mode(&mut self, mode: ModeName, kmaps: Vec<KmapInfo>) {
-        assert!(!self.modes.contains_key(&mode));
+    pub fn add_mode(&mut self,
+                    name: ModeName,
+                    info: ModeInfo) {
+        assert!(!self.modes.contains_key(&name));
         // Store the kmaps that are included in this mode
-        for kmap_info in kmaps.iter() {
+        for kmap_info in info.keymaps.iter() {
             let kmap_path = &kmap_info.path;
             if self.kmap_ids.contains_key(kmap_path){
                 continue;
@@ -104,7 +107,7 @@ impl Maps {
             let nickname = format!("kmap{}", self.kmap_ids.len());
             self.kmap_ids.insert(kmap_path.clone(), nickname);
         }
-        self.modes.insert(mode, kmaps);
+        self.modes.insert(name, info);
     }
 
     pub fn set_sequences(&mut self, seq_type: &SeqType, val: BTreeMap<Name, Sequence>) {
@@ -162,7 +165,7 @@ impl Maps {
 
     // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {
-        for kmap_info in self.modes.get(mode).expect("unknown mode"){
+        for kmap_info in self.modes.get(mode).expect("unknown mode").keymaps.iter() {
             if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {
                 return chord;
             }
@@ -204,8 +207,8 @@ impl Maps {
 
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
         let mut out = Vec::new();
-        for mode in self.modes.values() {
-            for kmap_info in mode.iter() {
+        for mode_info in self.modes.values() {
+            for kmap_info in mode_info.keymaps.iter() {
                 if kmap_info.use_words {
                     out.push(kmap_info.path.clone());
                 }
@@ -217,7 +220,7 @@ impl Maps {
     pub fn get_kmaps_for_mode(&self, mode: &ModeName) -> Vec<KmapPath> {
         let v: Vec<_> = self.modes.get(mode)
             .expect("mode not found")
-            .iter()
+            .keymaps.iter()
             .map(|x| x.path.to_owned())
             .collect();
         v
@@ -235,6 +238,7 @@ impl Maps {
     }
 
     pub fn check(&self) {
+        // TODO check for missing sequences
         self.checker.check();
     }
 }

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use toml::Value;
 
-use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name};
+use types::{Sequence, KeyPress, SwitchPos, KmapInfo, KmapPath, Name, ModeInfo};
 
 
 pub fn toml_to_map(toml_table: &Value) -> BTreeMap<String, Value>{
@@ -131,4 +131,16 @@ pub fn toml_to_keypress(toml_array: &Value) -> KeyPress {
         panic!("keypress vector must have length 2");
     }
     KeyPress::new(&string_vec[0], &string_vec[1])
+}
+
+pub fn toml_to_mode(toml_map: &Value) -> ModeInfo {
+    let kmap_array = toml_map.get("keymaps").expect("Mode is missing keymaps");
+    let is_gaming = match toml_map.get("gaming") {
+        Some(b) => toml_to_bool(b),
+        None    => false, // default value if "gaming" not specified
+    };
+    ModeInfo {
+        keymaps: toml_to_vec(kmap_array, toml_to_kmap_info),
+        is_gaming: is_gaming,
+    }
 }

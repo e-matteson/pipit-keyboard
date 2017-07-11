@@ -58,7 +58,6 @@ pub struct KmapBuilder<'a> {
     kmap_ids: &'a BTreeMap<KmapPath, String>,
     use_compression: bool,
     use_mods: bool,
-    // use_offsets: bool,
 }
 
 
@@ -103,8 +102,6 @@ impl <'a> KmapBuilder<'a> {
                 sequences: seq_array_name.clone(),
                 use_compression: self.use_compression,
                 use_mods: self.use_mods,
-                // TODO make offsets optional to save space, when there's only 1 word kmap
-                use_offsets: true
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             f.append(&s.format(&struct_name));
@@ -363,8 +360,7 @@ c_struct!(
         chords: CCode,
         sequences: CCode,
         use_compression: bool,
-        use_mods: bool,
-        use_offsets: bool
+        use_mods: bool
     }
 );
 

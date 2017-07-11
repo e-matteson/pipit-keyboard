@@ -124,9 +124,9 @@ impl Maps {
         f.append(&self.format_kmaps(&mut kmap_struct_names));
 
         let mut mode_struct_names = Vec::new();
-        for (mode, kmap_infos) in self.modes.iter() {
+        for (mode, info) in self.modes.iter() {
             let m = ModeBuilder {
-                infos: &kmap_infos,
+                info: &info,
                 kmap_struct_names: &kmap_struct_names,
                 seq_types: self.get_seq_types(),
                 mode_name: &mode,

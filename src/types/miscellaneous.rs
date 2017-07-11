@@ -53,6 +53,14 @@ pub struct KmapInfo {
 
 //////////////////////////////
 
+#[derive(Clone, Debug)]
+pub struct ModeInfo {
+    pub keymaps: Vec<KmapInfo>,
+    pub is_gaming: bool,
+}
+
+//////////////////////////////
+
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct KmapPath ( pub String );
 

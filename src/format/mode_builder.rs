@@ -1,11 +1,11 @@
 use std::collections::BTreeMap;
 
-use types::{SeqType, KmapPath, CCode, Chord, KmapInfo, ModeName, ToC};
+use types::{SeqType, KmapPath, CCode, Chord, ModeName, ModeInfo, ToC};
 use format::{Format, CArray};
 
 
 pub struct  ModeBuilder <'a> {
-    pub infos: &'a Vec<KmapInfo>,
+    pub info: &'a ModeInfo,
     pub kmap_struct_names: &'a BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>,
     pub seq_types: Vec<SeqType>,
     pub mode_name: &'a ModeName,
@@ -28,11 +28,12 @@ impl <'a> ModeBuilder <'a> {
         f.append(&self.format_modifier_array(&mut mod_array_name));
 
         let m = ModeStruct {
-            num_kmaps: self.infos.len() as u8, // TODO warn if too long?
+            num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long?
             kmaps: CCode(format!("{}", kmap_array_name)),
             mod_chords: CCode(format!("{}", mod_array_name)),
             anagram_chords: CCode(format!("{}", anagram_array_name)),
             anagram_mask: CCode(format!("{}", anagram_mask_name)),
+            is_gaming: self.info.is_gaming,
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
         f.append(&m.format(&mode_struct_name));
@@ -48,14 +49,14 @@ impl <'a> ModeBuilder <'a> {
             let struct_names = self.kmap_struct_names.get(seq_type)
                 .expect("struct name not found");
 
-            for info in self.infos {
+            for kmap_info in self.info.keymaps.iter() {
                 v.push(
-                    if *seq_type == SeqType::Word && !info.use_words {
+                    if *seq_type == SeqType::Word && !kmap_info.use_words {
                         "NULL".to_c()
                     } else {
                         CCode(
                             format!("&{}",
-                                    struct_names.get(&info.path)
+                                    struct_names.get(&kmap_info.path)
                                     .expect("kmap struct name not found")))
                     }
                 );
@@ -140,6 +141,7 @@ c_struct!(
         kmaps: CCode,
         mod_chords: CCode,
         anagram_chords: CCode,
-        anagram_mask: CCode
+        anagram_mask: CCode,
+        is_gaming: bool
     }
 );

@@ -1,10 +1,19 @@
 ###### EVAN'S PERSONAL SETTINGS ######
 
-[modes]
+[[modes]]
+name = "default_mode"
+keymaps = [{file="keymaps/dvorak24_evan.kmap", words=true}]
 
-default_mode               = [{file="keymaps/dvorak24_evan.kmap", words=true}]
-# test_mode                  = [{file="keymaps/dvorak24_evan.kmap", words=true}]
-left_hand_mode             = [{file="keymaps/dvorak24_left.kmap"}]
+[[modes]]
+name = "left_hand_mode"
+keymaps = [{file="keymaps/dvorak24_left.kmap"}]
+gaming = false
+
+[[modes]]
+name = "gaming_mode"
+keymaps = [{file="keymaps/gaming_test.kmap"}]
+gaming = true
+
 
 [options]
 
@@ -40,43 +49,32 @@ modifierkey_gui   = ["", "MODIFIERKEY_GUI"]
 
 [plain_keys]
 
-blank_mapping     = ["BLANK_MAPPING", ""] #for ignoring unused blocks in kmap file
 key_a             = ["KEY_A", ""]
 key_b             = ["KEY_B", ""]
-key_b_2           = ["KEY_B", ""]
 key_c             = ["KEY_C", ""]
 key_d             = ["KEY_D", ""]
 key_e             = ["KEY_E", ""]
 key_f             = ["KEY_F", ""]
 key_g             = ["KEY_G", ""]
-key_g_2           = ["KEY_G", ""]
 key_h             = ["KEY_H", ""]
 key_i             = ["KEY_I", ""]
 key_j             = ["KEY_J", ""]
-key_j_2           = ["KEY_J", ""]
 key_k             = ["KEY_K", ""]
-key_k_2           = ["KEY_K", ""]
 key_l             = ["KEY_L", ""]
 key_m             = ["KEY_M", ""]
 key_n             = ["KEY_N", ""]
 key_o             = ["KEY_O", ""]
 key_p             = ["KEY_P", ""]
 key_q             = ["KEY_Q", ""]
-key_q_2           = ["KEY_Q", ""]
 key_r             = ["KEY_R", ""]
 key_s             = ["KEY_S", ""]
 key_t             = ["KEY_T", ""]
 key_u             = ["KEY_U", ""]
 key_v             = ["KEY_V", ""]
-key_v_2           = ["KEY_V", ""]
 key_w             = ["KEY_W", ""]
-key_w_2           = ["KEY_W", ""]
 key_x             = ["KEY_X", ""]
-key_x_2           = ["KEY_X", ""]
 key_y             = ["KEY_Y", ""]
-key_y_2           = ["KEY_Y", ""]
 key_z             = ["KEY_Z", ""]
-key_z_2           = ["KEY_Z", ""]
 key_1             = ["KEY_1", ""]
 key_2             = ["KEY_2", ""]
 key_3             = ["KEY_3", ""]
@@ -145,6 +143,7 @@ key_semicolon     = ["KEY_SEMICOLON", ""]
 key_slash         = ["KEY_SLASH", ""]
 key_tilde         = ["KEY_TILDE", "MODIFIERKEY_SHIFT"]
 key_underscore    = ["KEY_MINUS", "MODIFIERKEY_SHIFT"]
+blank_mapping     = ["BLANK_MAPPING", ""] #for ignoring unused blocks in kmap files
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]
@@ -157,16 +156,11 @@ macro_quit        = [["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"], ["KEY_Q", ""],
 macro_ls          = [["KEY_L", ""],
                      ["KEY_S", ""],
                      ["KEY_ENTER", ""]]
-# macro_g_comma     = [["KEY_G", ""],
-#                      ["KEY_COMMA", ""]]
-# macro_g_semicolon = [["KEY_G", ""],
-#                      ["KEY_SEMICOLON", ""]]
 macro_f_comma     = [["KEY_F", ""],
                      ["KEY_COMMA", ""]]
 macro_cap_f_comma        = [["KEY_F", "MODIFIERKEY_SHIFT"],
                               ["KEY_COMMA", ""]]
 macro_mx                = [["KEY_X", "MODIFIERKEY_ALT"]]
-# macro_other_buffer1      = [["KEY_F3", "MODIFIERKEY_CTRL"]]
 macro_other_buffer1      = [["KEY_SPACE", ""],
                               ["KEY_TAB", ""]]
 macro_other_buffer2      = [["KEY_SPACE", ""],
@@ -193,9 +187,6 @@ macro_prev_buffer        = [["KEY_SPACE", ""],
 macro_kill_buffer        = [["KEY_SPACE", ""],
                               ["KEY_B", ""],
                               ["KEY_D", ""]]
-# macro_kill_compile          = [["KEY_SPACE", ""],
-#                               ["KEY_C", ""],
-#                               ["KEY_K", ""]]
 macro_in_paren           = [["KEY_9", "MODIFIERKEY_SHIFT"],
                               ["KEY_0", "MODIFIERKEY_SHIFT"],
                               ["KEY_LEFT", ""]]
@@ -259,7 +250,7 @@ macro_endl               = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
                               ["KEY_N", ""],
                               ["KEY_D", ""],
                               ["KEY_L", ""]]
-macro_arduino_print      = [["KEY_S", "MODIFIERKEY_SHIFT"],
+macro_print_ino          = [["KEY_S", "MODIFIERKEY_SHIFT"],
                               ["KEY_E", ""],
                               ["KEY_R", ""],
                               ["KEY_I", ""],
@@ -276,7 +267,7 @@ macro_arduino_print      = [["KEY_S", "MODIFIERKEY_SHIFT"],
                               ["KEY_SEMICOLON", ""],
                               ["KEY_LEFT", ""],
                               ["KEY_LEFT", ""]]
-macro_arduino_println    = [["KEY_S", "MODIFIERKEY_SHIFT"],
+macro_println_ino       = [["KEY_S", "MODIFIERKEY_SHIFT"],
                               ["KEY_E", ""],
                               ["KEY_R", ""],
                               ["KEY_I", ""],
@@ -640,6 +631,44 @@ macro_lifetime_rs        = [["KEY_COMMA", "MODIFIERKEY_SHIFT"],
                               ["KEY_QUOTE", ""],
                               ["KEY_A", ""],
                               ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]]
+macro_print_rs           = [["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_L", ""],
+                              ["KEY_N", ""],
+                              ["KEY_1", "MODIFIERKEY_SHIFT"],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", ""],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
+macro_print_debug_rs     = [["KEY_P", ""],
+                              ["KEY_R", ""],
+                              ["KEY_I", ""],
+                              ["KEY_N", ""],
+                              ["KEY_T", ""],
+                              ["KEY_L", ""],
+                              ["KEY_N", ""],
+                              ["KEY_1", "MODIFIERKEY_SHIFT"],
+                              ["KEY_9", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SLASH", "MODIFIERKEY_SHIFT"],
+                              ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_QUOTE", "MODIFIERKEY_SHIFT"],
+                              ["KEY_COMMA", ""],
+                              ["KEY_0", "MODIFIERKEY_SHIFT"],
+                              ["KEY_SEMICOLON", ""],
+                              ["KEY_LEFT", ""],
+                              ["KEY_LEFT", ""]]
 macro_bang_dollar        = [["KEY_1", "MODIFIERKEY_SHIFT"],
                               ["KEY_4", "MODIFIERKEY_SHIFT"],
                               ["KEY_SPACE", ""]]
@@ -1374,7 +1403,7 @@ dictionary = [
     {word="buf", anagram=3},
     {word="buff", anagram=2},
     {word="buffer", anagram=1},
-    {word="bug"},
+    {word="bug", anagram=1},
     {word="build"},
     {word="built"},
     {word="bulk"},
@@ -3251,7 +3280,7 @@ dictionary = [
     {word="lord"},
     {word="lose"},
     {word="loser"},
-    {word="loss"},
+    {word="loss", anagram=1},
     {word="lost"},
     {word="lot"},
     {word="lottery", anagram=1},
@@ -3260,6 +3289,7 @@ dictionary = [
     {word="lounge"},
     {word="love"},
     {word="low"},
+    {word="'ll"},
     {word="ls"},
     {word="luck"},
     {word="luggage", anagram=2},
@@ -4081,7 +4111,7 @@ dictionary = [
     {word="public"},
     {word="publish"},
     {word="pudendal"},
-    {word="puff", anagram=1},
+    {word="puff", anagram=4},
     {word="pull"},
     {word="pulse"},
     {word="pump"},
@@ -4618,7 +4648,7 @@ dictionary = [
     {word="soldier"},
     {word="sole", anagram=2},
     {word="solid"},
-    {word="solo", anagram=1},
+    {word="solo", anagram=2},
     {word="solu"},
     {word="solution"},
     {word="solve"},

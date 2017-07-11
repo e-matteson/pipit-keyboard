@@ -28,10 +28,14 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
 }
 
 fn load_modes(toml: &Value, maps: &mut Maps) {
-    let map = toml_to_map(&toml["modes"]);
-    for (key,val) in map.iter(){
-        maps.add_mode(ModeName(key.to_string()),
-                      toml_to_vec(&val, toml_to_kmap_info));
+    let modes = toml_to_vec(toml.get("modes").expect("Modes are missing"),
+                            |x| x.clone());
+    for mode_table in modes.iter(){
+        let name = mode_table.get("name").expect("Mode name is missing");
+        maps.add_mode(
+            ModeName(toml_to_string(name)),
+            toml_to_mode(mode_table)
+        );
     }
 }
 

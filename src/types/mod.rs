@@ -1,5 +1,5 @@
 pub use self::miscellaneous::{SwitchPos, SeqType, KmapPath, KmapInfo, ModeName,
-                              Name, CCode, ToC, Sequence, KeyPress};
+                              ModeInfo, Name, CCode, ToC, Sequence, KeyPress};
 pub use self::chord::Chord;
 pub use self::words::{Word, WordBuilder};
 pub use self::options::{Options, OpDef, OpType, OpVal};

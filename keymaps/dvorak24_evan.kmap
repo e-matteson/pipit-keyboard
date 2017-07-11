@@ -297,11 +297,11 @@ macro_hash_bang   macro_exit_py     macro_self_dot    macro_docstr_py
   .     .           .     .           .     .           .     .
   ... .*.           ... .*.           ... .*.           ... .*.
 
-macro_printf    macro_print_py
-...*   .*..      ...*   .**.
-....   ....      ....   ....
-  .     .          .     .
-  ... .*.          ... .*.
+macro_printf    macro_print_py      macro_print_rs    macro_print_debug_rs
+...*   .*..      ...*   .**.         ...*   ..*.       ...*   *.*.
+....   ....      ....   ....         ....   ....       ....   ....
+  .     .          .     .             .     .           .     .
+  ... .*.          ... .*.             ... .*.           ... .*.
 
 macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
 ....   .*..       ....   .*..       .*..   .*..        .*..   *...
@@ -321,7 +321,7 @@ macro_cout        macro_endl        macro_cerr          macro_this_arrow
   .     .           .     .           .     .             .     .
   ... .*.           ... .*.           ... .*.             ... .*.
 
-macro_arduino_print   macro_arduino_println
+macro_print_ino   macro_println_ino
 ...*   ....           ...*   ...*
 ....   ...*           ....   ...*
   .     .               .     .
