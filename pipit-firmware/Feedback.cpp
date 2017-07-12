@@ -43,14 +43,14 @@ void Feedback::triggerUnknown(){
 
 
 void Feedback::triggerAudioFeedback(char feedback_code){
-#ifndef ENABLE_AUDIO_FEEDBACK
+#ifndef ENABLE_AUDIO_TYPING_FEEDBACK
   return;
 #endif
   Serial.print(feedback_code);
 }
 
 void Feedback::triggerLEDFeedback(led_routine_enum routine){
-#ifndef ENABLE_COLOR_FEEDBACK
+#ifndef ENABLE_LED_TYPING_FEEDBACK
   return;
 #endif
   startRoutine(routine);
@@ -58,13 +58,13 @@ void Feedback::triggerLEDFeedback(led_routine_enum routine){
 
 
 /************** pretty colors: rgb led *************/
+
 void Feedback::updateLED(){
   // State machine for handling LED routines
   // TODO consider replacing NO_ROUTINE with disabled led_timer
 #ifndef ENABLE_RGB_LED
   return;
 #endif
-
 
   if(led_timer->isRunning()){
     // Timer hasn't run out, we don't need to do anything yet.
@@ -110,7 +110,7 @@ void Feedback::updateLED(){
         break;
       default:
         // Battery not present, or bad level
-        endRoutine();
+        setLEDColor(WHITE);
         break;
       }
       break;

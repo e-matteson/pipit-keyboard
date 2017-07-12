@@ -1,8 +1,5 @@
 #include "Pipit.h"
 
-#define CONNECTION_CHECK_DELAY_SHORT 3000
-#define CONNECTION_CHECK_DELAY_LONG 6000
-
 
 void Pipit::doCommand(uint8_t code){
   // First check if we should un-pause, because that's the only command
@@ -100,12 +97,13 @@ Pipit::Pipit(){
   feedback = new Feedback();
 
   loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
-  connection_timer = new Timer(CONNECTION_CHECK_DELAY_LONG, 1, Timer::MILLISECONDS);
+  connection_timer = new Timer(connection_check_delay_long, 1, Timer::MILLISECONDS);
 }
 
 void Pipit::setup(){
   switches->setup();
-  feedback->startRoutine(BOOT_ROUTINE);
+  feedback->startRoutine(BATTERY_ROUTINE);
+  // feedback->startRoutine(BOOT_ROUTINE);
   feedback->updateLED();
   comms->setup();
 }
@@ -145,7 +143,7 @@ void Pipit::updateConnection(){
   if(comms->isConnected()){
     DEBUG1_LN("connected");
     num_disconnect_readings = 0;
-    connection_timer->start(CONNECTION_CHECK_DELAY_LONG);
+    connection_timer->start(connection_check_delay_long);
     return;
   }
 
@@ -154,7 +152,7 @@ void Pipit::updateConnection(){
     DEBUG1_LN("not connected");
     feedback->startRoutine(BLE_NO_CONNECTION_ROUTINE);
   }
-  connection_timer->start(CONNECTION_CHECK_DELAY_SHORT);
+  connection_timer->start(connection_check_delay_short);
 }
 
 void Pipit::sendIfReady(){
