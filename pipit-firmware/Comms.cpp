@@ -46,23 +46,30 @@ void Comms::setupBluetooth(){
 #endif
 }
 
-void Comms::press(uint8_t key_code, uint8_t mod_byte){
+void Comms::press(const SixKeys* keys){
 #if defined(TEENSY_LC)
 
-  Keyboard.set_key1(key_code);
-  Keyboard.set_key2(0);
-  Keyboard.set_key3(0);
-  Keyboard.set_key4(0);
-  Keyboard.set_key5(0);
-  Keyboard.set_key6(0);
-  Keyboard.set_modifier(mod_byte);
+  Keyboard.set_key1(keys->get(0));
+  Keyboard.set_key2(keys->get(1));
+  Keyboard.set_key3(keys->get(2));
+  Keyboard.set_key4(keys->get(3));
+  Keyboard.set_key5(keys->get(4));
+  Keyboard.set_key6(keys->get(5));
+  Keyboard.set_modifier(keys->getMod());
   Keyboard.send_now();
 
 #elif defined(FEATHER_M0_BLE)
 
-  static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-00-00-00-00-00";
+  static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-%02x-%02x-%02x-%02x-%02x";
   char cmd[45] = {0};
-  sprintf(cmd, cmd_template, mod_byte, key_code);
+  sprintf(cmd, cmd_template,
+          keys->getMod(),
+          keys->get(0),
+          keys->get(1),
+          keys->get(2),
+          keys->get(3),
+          keys->get(4),
+          keys->get(5));
   bluetooth->println(cmd);
 
 #endif
@@ -77,7 +84,7 @@ bool Comms::isConnected(){
 #elif defined(FEATHER_M0_BLE)
 
   // "debounce" the connection status, it often reports brief disconnects
-  DEBUG1_LN("checking connection...");
+  // DEBUG1_LN("checking connection...");
   return bluetooth->isConnected();
 #endif
 }

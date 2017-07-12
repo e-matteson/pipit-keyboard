@@ -8,7 +8,7 @@ Sender::Sender(Comms* comms){
 
 /************* Keypress sending ************/
 
-bool Sender::sendIfEmpty(Chord* chord){
+bool Sender::sendIfEmpty(const Chord* chord){
   // If chord is all zeros, send 0 (with any modifiers) and return 0.
   // Else return 1.
   if (!chord->isEmpty()){
@@ -18,93 +18,110 @@ bool Sender::sendIfEmpty(Chord* chord){
   return 1;
 }
 
-void Sender::sendPlain(const uint8_t* data, uint8_t data_length, Chord* chord){
+void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord){
   history->startEntry(chord, 0);
-  for(uint8_t i = 0; i<data_length-1; i+=2){
+  Key key;
+  for(uint8_t i = 0; i<data_length; i++){
     // Get the key, followed by the modifier.
-    sendKey(data[i], chord->getModByte() | data[i+1]);
+    key.copy(data+i);
+    key.addMod(chord->getModByte());
+    sendKey(&key);
   }
   history->endEntry();
 }
 
-void Sender::sendMacro(const uint8_t* data, uint8_t data_length, Chord* chord){
+void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord){
   history->startEntry(chord, 0);
-  for(uint8_t i = 0; i<data_length-1; i+=2){
+  Key key;
+  for(uint8_t i = 0; i<data_length; i++){
     //  get the key, followed by the modifier.
-    sendKey(data[i], chord->getModByte() | data[i+1]);
+    key.copy(data+i);
+    sendKey(&key);
     delay(comms->proportionalDelay(data_length));
   }
-  sendKey(0,0);
+  sendRelease();
   history->endEntry();
 }
 
-void Sender::sendWord(const uint8_t* data, uint8_t data_length, Chord* chord){
+void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
   history->startEntry(chord, 1);
-  // This is the first letter, so send shift if CAPITALIZATION_MODIFIER pressed.
   bool capitalMod = chord->hasCapitalWordmod();
   bool nospaceMod = chord->hasNospaceWordmod();
-  sendKey(data[0],
-          (capitalMod) ? MODIFIERKEY_SHIFT : 0);
+  Key key;
+
+  // This is the first letter, so capitalize it if necessary
+  key.copy(data+0);
+  if(capitalMod){
+    key.addMod(MODIFIERKEY_SHIFT);
+  }
+  sendKey(&key);
 
   for(uint8_t i = 1; i<data_length; i++){
     // This is not the first letter, so send the letter without any modifiers.
     delay(comms->proportionalDelay(data_length));
-    sendKey(data[i], 0);
+    sendKey(data+i);
   }
 
   // Append space to end of word, unless the no-space modifier is pressed.
-  if(!(nospaceMod)){
-    sendKey(KEY_SPACE&0xff, 0);
+  if(!nospaceMod){
+    key.set(KEY_SPACE&0xff, 0);
+    sendKey(&key);
   }
-  sendKey(0,0);
+  sendRelease();
   history->endEntry();
 }
 
+void Sender::sendRelease(){
+  sendKey(0,0);
+}
+
 void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
+  Key key;
+  key.set(key_code, mod_byte);
+  sendKey(&key);
+}
 
-  DEBUG1("sending key: ");
-  DEBUG1(key_code);
-  DEBUG1(", mod: ");
-  DEBUG1_LN(mod_byte | stickymod);
+void Sender::sendKey(const Key* key){
+  SixKeys keys;
+  keys.add(key);
+  sendKeys(&keys);
+}
 
-  if(stickymod && key_code){
-    this->press(key_code, mod_byte | stickymod);
+void Sender::sendKeys(SixKeys* keys){
+  if(stickymod && !keys->isEmpty()){
+    keys->addMod(stickymod);
     stickymod = 0; // reset stickymod after 1 use
   }
-
-  else{
-    this->press(key_code, mod_byte);
-  }
-
-  history->save(key_code, mod_byte);
+  this->press(keys);
+  history->save(keys);
 }
 
-bool Sender::isSameAsLastSend(uint8_t key_code, uint8_t mod_byte){
-  return ((last_sent_keycode == key_code)
-          && (last_sent_mod_byte == mod_byte));
+bool Sender::isSameAsLastSend(const SixKeys* keys){
+  return last_keys.isEqual(keys);
 }
 
-void Sender::setLastSend(uint8_t key_code, uint8_t mod_byte){
-  last_sent_keycode = key_code;
-  last_sent_mod_byte = mod_byte;
+void Sender::setLastSend(const SixKeys* keys){
+  last_keys.copy(keys);
 }
 
 void Sender::setStickymod(uint8_t mod_byte){
   stickymod = stickymod | mod_byte;
 }
 
-void Sender::press(uint8_t key_code, uint8_t mod_byte){
+void Sender::press(const SixKeys* keys){
   // If this is a repeated press, send a release first to separate them.
-  if(isSameAsLastSend(key_code, mod_byte)){
-    if(!(key_code || mod_byte)){
+  if(isSameAsLastSend(keys)){
+    if(keys->isEmpty()){
       return; //repeated release, don't send anything
     }
-    this->press(0, 0); //repeated press, send release first
+    SixKeys empty;
+    this->press(&empty); //repeated press, send release first
   }
-  setLastSend(key_code, mod_byte);
+  setLastSend(keys);
+  keys->printDebug();
 
   // Actually send the keypress, over USB or bluetooth:
-  this->comms->press(key_code, mod_byte);
+  this->comms->press(keys);
 }
 
 

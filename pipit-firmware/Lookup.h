@@ -6,6 +6,7 @@
 #include "auto_config.h"
 #include "conf.h"
 #include "Chord.h"
+#include "Key.h"
 
 // Max # of bytes of data in a word/macro lookup array entry.
 #define MAX_LOOKUP_DATA_LENGTH 256
@@ -15,10 +16,12 @@ class Lookup{
 public:
   Lookup();
 
-  uint8_t get(conf::seq_type_enum type, const Chord* chord, uint8_t* data);
+  uint8_t get(conf::seq_type_enum type, const Chord* chord, Key* keys);
 
 private:
-  uint8_t lookupChord(const Chord* chord, uint8_t* data, const KmapStruct* kmap);
+
+  uint8_t getKeys(const Chord* chord, const KmapStruct* kmap, Key* keys);
+  uint8_t lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t* data);
   uint8_t readOffset(const uint8_t* start_of_entry);
   uint8_t readAnagramNum(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);

@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include "auto_config.h"
 #include "structs.h"
+#include "Chord.h"
+#include "Key.h"
 
 // Verify that the user settings match the board we're compiling for
 
@@ -45,6 +47,7 @@ private:
   void shutdownIfSquished();
 
   void processChord(Chord* new_chord);
+  void processGamingChords(Chord gaming_chords[], uint8_t num_chords);
 
   void doCommand(uint8_t code);
 
@@ -60,6 +63,9 @@ private:
 
 
   conf::mode_enum mode = conf::mode_enum::DEFAULT_MODE;
+
+
+  // Chord* gaming_chords[NUM_MATRIX_POSITIONS] = {0};
 
   bool is_paused = 0;
 

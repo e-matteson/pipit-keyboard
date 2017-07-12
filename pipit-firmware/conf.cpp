@@ -71,7 +71,9 @@ namespace conf {
     exit(1);
   }
 
-  const bool contains(const mod_enum* mod_array, const uint8_t len, const mod_enum modifier){
+  const bool contains(const mod_enum* mod_array,
+                      const uint8_t len,
+                      const mod_enum modifier){
     for(uint8_t i = 0; i < len; i++){
       if(mod_array[i] == modifier){
         return true;

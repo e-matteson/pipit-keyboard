@@ -13,7 +13,7 @@ public:
   void clear();
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
-
+  void setMode(conf::mode_enum _mode);
   void blankMods();
   void blankAnagramMods();
   void restoreAnagramMods();
@@ -31,6 +31,7 @@ public:
   bool hasCapitalWordmod() const;
   bool hasNospaceWordmod() const;
 
+  void printDebug() const;
 
 private:
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;

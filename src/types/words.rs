@@ -1,4 +1,3 @@
-// use std::collections::BTreeMap;
 
 use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name, CCode, ToC};
 #[derive(Debug)]

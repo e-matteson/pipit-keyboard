@@ -3,14 +3,14 @@
 Lookup::Lookup(){
 }
 
-uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, uint8_t* data){
+uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys){
   conf::mode_enum mode = chord->getMode();
   for (uint8_t i = 0; i < conf::getNumKmaps(mode); i++){
     const KmapStruct* kmap = conf::getKmap(mode, type, i);
     if (kmap == NULL || kmap->sequences == NULL || kmap->chords == NULL) {
      continue;
     }
-    uint8_t length = lookupChord(chord, data, kmap);
+    uint8_t length = getKeys(chord, kmap, keys);
     if (length > 0) {
       return length; // Success!
     }
@@ -18,7 +18,30 @@ uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, uint8_t* data)
   return 0; // Fail!
 }
 
-uint8_t Lookup::lookupChord(const Chord* chord, uint8_t* data, const KmapStruct* kmap){
+uint8_t Lookup::getKeys(const Chord* chord, const KmapStruct* kmap, Key* keys){
+  // TODO arg order
+  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
+  uint8_t data_length = lookupChord(chord, kmap, data);
+  if(data_length == 0){
+    return 0;
+  }
+  uint8_t byte_index = 0;
+  uint8_t key_index = 0;
+  while(byte_index < data_length){
+    if(kmap->use_mods){
+      keys[key_index].set(data[byte_index], data[byte_index+1]);
+      byte_index += 2;
+    }
+    else{
+      keys[key_index].set(data[byte_index], 0);
+      byte_index++;
+    }
+    key_index++;
+  }
+  return key_index;
+}
+
+uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t* data){
   // If chord is found in lookup, store data and return its length.
   // Otherwise, return 0.
   uint8_t length_index = 0;

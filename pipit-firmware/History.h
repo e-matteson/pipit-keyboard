@@ -6,6 +6,7 @@
 #include "keycodes.h"
 #include "Chord.h"
 #include "Entry.h"
+#include "SixKeys.h"
 
 // The number of recent words/sends that can be deleted
 
@@ -28,7 +29,7 @@ class History{
 
 public:
   History();
-  void save(uint8_t key_code, uint8_t mod_byte);
+  void save(SixKeys* keys);
   void startEntry(const Chord* new_chord, bool is_anagrammable);
   void endEntry();
 
@@ -45,6 +46,8 @@ public:
 
 
 private:
+
+  void saveKeyCode(uint8_t key_code, uint8_t mod_byte);
   bool isCursorAtLimit(Direction direction);
   Entry* getEntryAt(uint8_t cursor_word);
   uint16_t getLengthAtCursor();

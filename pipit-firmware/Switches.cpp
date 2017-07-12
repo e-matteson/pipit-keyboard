@@ -44,10 +44,20 @@ bool Switches::isAnySwitchStillBouncing(){
   return 0;
 }
 
-bool Switches::readyToPress(){
+bool Switches::readyToPress(bool is_gaming){
+  if(is_gaming){
+    // If gaming, ignore chord timers and everything else.
+    // Just check if anything changed since we last checked.
+    if(!chord_timer->isDisabled() || !release_timer->isDisabled()){
+      chord_timer->disable();
+      release_timer->disable();
+      return 1; // Changed! Ready.
+    }
+    return 0; // No change.
+  }
+
   if(!chord_timer->peekDone()){
-    // Not ready
-    return 0;
+    return 0; // Not ready
   }
   if(isAnySwitchStillBouncing()){
     // Let's give this bouncy switch a little more time to settle before sending.
@@ -58,12 +68,14 @@ bool Switches::readyToPress(){
   return 1;
 }
 
-bool Switches::readyToRelease(){
+bool Switches::readyToRelease(bool is_gaming){
+  if(is_gaming){
+    return false; // Gaming mode only uses readyToPress()
+  }
   return release_timer->isDone();
 }
 
 void Switches::updateSwitchStatuses(){
-
   is_any_switch_down = 0;
   for(uint8_t i=0; i!=NUM_MATRIX_POSITIONS; i++){
 
@@ -147,10 +159,6 @@ bool Switches::debouncePress(uint8_t switch_index){
   return is_debounce_done;
 }
 
-int32_t Switches::maximum(int32_t x, int32_t y){
-  return x > y ? x : y;
-}
-
 bool Switches::debounceRelease(uint8_t switch_index){
   // Maybe it's a new release, debounce it first.
   // Count down from DEBOUNCE_DELAY to 0.
@@ -228,10 +236,10 @@ void Switches::reuseMods(Chord* chord){
   }
 }
 
-void Switches::makeChordBytes(Chord* chord){
+void Switches::fillChord(Chord* chord){
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.
-  // Also, update switch_status values from PRESSED -> ALREADY_SENT or HELD.
+  // Also, update switch_status values from PRESSED -> ALREADY_SENT.
   uint8_t index = 0;
   uint8_t chord_bytes [NUM_BYTES_IN_CHORD] = {0};
   for(uint8_t byte_num = 0; byte_num != NUM_BYTES_IN_CHORD; byte_num++){
@@ -248,6 +256,27 @@ void Switches::makeChordBytes(Chord* chord){
       if(index == NUM_MATRIX_POSITIONS){
         chord->setChordArray(chord_bytes);
         return;
+      }
+    }
+  }
+}
+
+uint8_t Switches::fillGamingChords(Chord* chords){
+  uint8_t switch_index = 0;
+  uint8_t num_chords = 0;
+  for(uint8_t byte_num = 0; byte_num != NUM_BYTES_IN_CHORD; byte_num++){
+    for(uint8_t bit_num = 0; bit_num != 8; bit_num++){
+      if (switch_status[switch_index] != Switches::NOT_PRESSED){
+        // Switch is pressed! Set bit high.
+        uint8_t chord_bytes [NUM_BYTES_IN_CHORD] = {0};
+        chord_bytes[byte_num] |= 1<<bit_num;
+        chords[num_chords].setChordArray(chord_bytes);
+        num_chords++;
+      }
+      // Don't bother to modify the status array.
+      switch_index++;
+      if(switch_index == NUM_MATRIX_POSITIONS){
+        return num_chords;
       }
     }
   }
@@ -290,6 +319,3 @@ void Switches::printMatrixChange(uint8_t index){
   }
 }
 
-bool Switches::isActive(){
-  return is_any_switch_down;
-}

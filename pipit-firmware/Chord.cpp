@@ -13,6 +13,10 @@ void Chord::setChordArray(const uint8_t* new_chord_bytes){
   }
 }
 
+void Chord::setMode(conf::mode_enum _mode){
+  mode = _mode;
+}
+
 bool Chord::isEmpty() const{
   // Doesn't check the mods, just the current chord bytes.
   // This is important because sendIfEmpty should send mods.
@@ -265,5 +269,13 @@ void Chord::printChord(const uint8_t* c) const{
     Serial.print(c[i]);
     Serial.print(", ");
   }
+  Serial.println();
+}
+
+void Chord::printDebug() const{
+  Serial.print("chord: ");
+  printChord(chord_bytes);
+  Serial.print("mod: ");
+  printMod();
   Serial.println();
 }

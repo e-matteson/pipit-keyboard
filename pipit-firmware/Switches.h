@@ -26,13 +26,13 @@ public:
   Switches();
   void setup();
   void update();
-  void makeChordBytes(Chord* chord);
-  void printStatusArray();
-  bool isActive();
-  bool readyToPress();
-  bool readyToRelease();
-
+  void fillChord(Chord* chord);
+  uint8_t fillGamingChords(Chord* chords);
+  bool readyToPress(bool is_gaming);
+  bool readyToRelease(bool is_gaming);
   void reuseMods(Chord* chord);
+  void printStatusArray();
+
   Matrix* matrix;
 
 private:
@@ -45,7 +45,6 @@ private:
   void resetInactivityTimers();
   void reuseHeldSwitches();
   bool isAnySwitchStillBouncing();
-  int32_t maximum(int32_t x, int32_t y);
 
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);

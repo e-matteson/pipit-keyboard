@@ -158,7 +158,7 @@ fn print_conflicts <T: Display>(conflicts: &Vec<&AnagramSet>, label: &T) {
     if conflicts.is_empty() {
         return;
     }
-    println!("Conflicting chords or useless anagrams in {}:", label);
+    println!("\nConflicting chords or useless anagrams in {}:", label);
     for conflict in conflicts {
         println!("  {}", conflict);
     }

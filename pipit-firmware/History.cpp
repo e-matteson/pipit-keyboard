@@ -100,7 +100,13 @@ void History::backspace(){
 }
 
 
-void History::save(uint8_t key_code, uint8_t mod_byte){
+void History::save(SixKeys* keys){
+  for(uint8_t i = 0; i < keys->numKeys(); i++){
+    saveKeyCode(keys->get(i), keys->getMod());
+  }
+}
+
+void History::saveKeyCode(uint8_t key_code, uint8_t mod_byte){
   // Update the stack when key_code and mod_byte are sent.
   if(key_code == (KEY_BACKSPACE&0xff)){
     backspace();
