@@ -104,10 +104,9 @@ void Chord::blankAnagramMods(){
 }
 
 void Chord::restoreAnagramMods(){
-  if(anagram_num == 0){
-    return;
+  if(doesAnagramHaveMod(anagram_num)){
+    restoreMod(conf::getAnagramModEnum(anagram_num-1));
   }
-  restoreMod(conf::getAnagramModEnum(anagram_num-1));
   anagram_num = 0;
 }
 
@@ -191,14 +190,23 @@ uint8_t Chord::getAnagramNum(){
   return anagram_num;
 }
 
-uint8_t Chord::cycleAnagramModifier(){
-  if(anagram_num != 0){
-    // Clear old mod flag
-    mods[conf::getAnagramModEnum(anagram_num-1)] = 0;
+bool Chord::doesAnagramHaveMod(uint8_t anagram_num){
+  return (anagram_num >= 1) && (anagram_num <= NUM_ANAGRAM_MODS);
+}
+
+void Chord::setAnagramModBit(uint8_t anagram_num, bool value){
+  if(!doesAnagramHaveMod(anagram_num)){
+    return;
   }
+  mods[conf::getAnagramModEnum(anagram_num-1)] = value;
+}
+
+uint8_t Chord::cycleAnagramModifier(){
+  // Unset old mod flag
+  setAnagramModBit(anagram_num, 0);
   anagram_num = (anagram_num + 1) % NUM_ANAGRAMS;
   // Set new mod flag
-  mods[conf::getAnagramModEnum(anagram_num-1)] = 1;
+  setAnagramModBit(anagram_num, 1);
   return anagram_num;
 }
 

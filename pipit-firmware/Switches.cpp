@@ -55,7 +55,7 @@ bool Switches::readyToPress(bool is_gaming){
     }
     return 0; // No change.
   }
-
+  // Otherwise, regular chording mode:
   if(!chord_timer->peekDone()){
     return 0; // Not ready
   }
@@ -273,7 +273,10 @@ uint8_t Switches::fillGamingChords(Chord* chords){
         chords[num_chords].setChordArray(chord_bytes);
         num_chords++;
       }
-      // Don't bother to modify the status array.
+      // Modify the status array to record that the switches have been processed.
+      if(switch_status[switch_index] == Switches::PRESSED){
+        switch_status[switch_index] = Switches::ALREADY_SENT;
+      }
       switch_index++;
       if(switch_index == NUM_MATRIX_POSITIONS){
         return num_chords;

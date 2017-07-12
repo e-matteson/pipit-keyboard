@@ -39,6 +39,8 @@ private:
   bool blankMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
+  void setAnagramModBit(uint8_t anagram_num, bool value);
+  bool doesAnagramHaveMod(uint8_t anagram_num);
   bool isAnagramMaskBlank();
   bool isExactAnagramPressed(const uint8_t* mod_chord,
                              const uint8_t* _chord);
