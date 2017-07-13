@@ -16,13 +16,16 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
 
         ("rgb_led_pins",
          OpDefBuilder::new(OpType::Array1D)
-         .required(OpReq::Dependent
-                   {key: "enable_rgb_led".to_owned(),
-                    val: Some(OpVal::Bool(true))})
+         .required(OpReq::Optional)
          .finalize()),
 
         ("num_rgb_led_pins",
          OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
+         .finalize()),
+
+        ("enable_rgb_led",
+         OpDefBuilder::new(OpType::IfdefKey)
          .required(OpReq::Auto)
          .finalize()),
 
@@ -62,30 +65,21 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
 
         ("battery_level_pin",
          OpDefBuilder::new(OpType::Uint8)
-         .required(OpReq::Dependent
-                   {key: "has_battery".to_string(),
-                    val: Some(OpVal::Bool(true))})
+         .required(OpReq::Optional)
          .finalize()),
 
         ("has_battery",
          OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
+         .required(OpReq::Auto)
          .finalize()),
 
-        // ("enable_audio_feedback",
+        // ("enable_audio_typing_feedback",
         //  OpDefBuilder::new(OpType::IfdefKey)
         //  .default(OpVal::Bool(false))
         //  .required(OpReq::Optional)
         //  .finalize()),
 
-        ("enable_color_feedback",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
-         .finalize()),
-
-        ("enable_rgb_led",
+        ("enable_led_typing_feedback",
          OpDefBuilder::new(OpType::IfdefKey)
          .default(OpVal::Bool(false))
          .required(OpReq::Optional)
@@ -154,6 +148,13 @@ impl OpDef{
         match self.val{
             Some(ref val) => val,
             _ => panic!(format!("value is None")),
+        }
+    }
+
+    pub fn is_set(&self) -> bool {
+        match self.val{
+            Some(_) => true,
+            None    => false
         }
     }
 
@@ -379,25 +380,31 @@ impl Options {
         let num_columns: i64 = self.get_val_len("column_pins") as i64;
         let num_matrix_positions: i64 = num_rows * num_columns as i64;
         let num_bytes_in_chord: i64 = round_up_to_num_bytes(num_matrix_positions);
+        let has_battery = self.get("battery_level_pin").is_set();
 
         let mut num_rgb_led_pins: i64 = 0;
-        if self.get_val("enable_rgb_led").unwrap_bool() {
+        let mut enable_rgb_led = false;
+        if self.get("rgb_led_pins").is_set() {
             num_rgb_led_pins = self.get_val_len("rgb_led_pins") as i64;
+            enable_rgb_led = true;
         }
+
 
         self.set_val("num_rows" , OpVal::Int(num_rows));
         self.set_val("num_columns" , OpVal::Int(num_columns));
         self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
         self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
-        self.set_val("num_rgb_led_pins" , OpVal::Int(num_rgb_led_pins));
-        self.set_val("blank_mapping" , OpVal::Int(0));
+        self.set_val("num_rgb_led_pins", OpVal::Int(num_rgb_led_pins));
+        self.set_val("enable_rgb_led", OpVal::Bool(enable_rgb_led));
+        self.set_val("has_battery", OpVal::Bool(has_battery));
+        self.set_val("blank_mapping", OpVal::Int(0));
 
         Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int());
     }
 
-    pub fn get_non_internal(&self) -> BTreeMap<String, OpDef> {
+    pub fn get_formattable_options(&self) -> BTreeMap<String, OpDef> {
         let map: BTreeMap<_,_> = self.0.clone().into_iter()
-            .filter(|&(_, ref val)| !val.is_internal())
+            .filter(|&(_, ref val)| !val.is_internal() && val.is_set())
             .collect();
         map
     }

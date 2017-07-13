@@ -28,7 +28,7 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
 }
 
 fn load_modes(toml: &Value, maps: &mut Maps) {
-    let modes = toml_to_vec(toml.get("modes").expect("Modes are missing"),
+    let modes = toml_to_vec(toml.get("mode").expect("Modes are missing"),
                             |x| x.clone());
     for mode_table in modes.iter(){
         let name = mode_table.get("name").expect("Mode name is missing");

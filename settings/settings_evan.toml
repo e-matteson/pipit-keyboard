@@ -1,16 +1,18 @@
 ###### EVAN'S PERSONAL SETTINGS ######
 
-[[modes]]
+[[mode]]
 
 name = "default_mode"
 keymaps = [{file="keymaps/dvorak24_evan.kmap", words=true}]
 
-[[modes]]
+
+[[mode]]
 
 name = "left_hand_mode"
 keymaps = [{file="keymaps/dvorak24_left.kmap"}]
 
-[[modes]]
+
+[[mode]]
 
 name = "gaming_mode"
 keymaps = [{file="keymaps/gaming_test.kmap"}]
@@ -24,14 +26,10 @@ held_delay                 = 200
 debounce_delay             = 5
 debug_messages             = 0
 
-##### hardware-specific options:
-
 board_name                 = "FEATHER_M0_BLE"
-has_battery                = true
-battery_level_pin          = 9
-enable_rgb_led             = true
-enable_color_feedback      = true
 rgb_led_pins               = [10, 11, 12]
+enable_led_typing_feedback = true
+battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 

@@ -23,7 +23,7 @@ impl KeyPress {
 impl Options {
     pub fn format(&self) -> Format {
         let mut f = Format::new();
-        for (name, op) in self.get_non_internal() {
+        for (name, op) in self.get_formattable_options() {
             f.append(&op.format(&name.to_c()));
         }
         f.append_newline();
@@ -48,13 +48,10 @@ impl OpDef {
                               &CCode::new())
             }
             OpType::IfdefKey => {
-                let blank = "".to_c();
-                let x = if self.get_val().unwrap_bool() {
-                    name
-                } else {
-                    &blank
-                };
-                format_define(x, &blank)
+                match self.get_val().unwrap_bool() {
+                    true => format_define(name, &"".to_c()),
+                    false => Format::new(),
+                }
             }
             OpType::Uint8 => {
                 format_uint8(&name, self.get_val().unwrap_int())
