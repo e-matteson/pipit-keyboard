@@ -72,9 +72,9 @@ impl<'a> WordBuilder<'a> {
         s.to_owned()
     }
 
-    fn get_mod_name_for_seq(&self, character: char) -> Option<String> {
+    fn get_mod_name_for_seq(&self, character: char) -> Option<Vec<String>> {
         if character.is_uppercase() {
-            Some("MODIFIERKEY_SHIFT".to_owned())
+            Some(vec!["MODIFIERKEY_SHIFT".to_owned()])
         } else {
             None
         }

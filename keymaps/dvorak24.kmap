@@ -5,7 +5,6 @@
 
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
-
 ##### modifier keys #####
 
 mod_shift        key_backspace     mod_ctrl
@@ -254,7 +253,13 @@ command_left_word   command_right_word    command_left_limit   command_right_lim
   ... .*.             ... .*.               ... .*.             ... .*.
 
 
-## text macros ##
+## macros ##
+
+macro_save_as     macro_vim_save   macro_vim_quit
+....   ....       ....   ....      ....   ....
+....   ...*       ....   *...      ****   *...
+  .     .           .     .          .     .
+  ... .*.           ... .*.          ... .*.
 
 macro_in_paren   macro_in_curly     macro_in_brace   macro_in_angle
 ....   *...      ....   .*..        ....   ..*.      ....   ...*
@@ -268,8 +273,8 @@ macro_in_quote   macro_in_doublequote
   .     .          .     .
   ... .*.          ... .*.
 
-macro_email      macro_if_c     macro_vim_save   macro_vim_quit
-*...   ...*      .*..   .*..    ....   ....      ....   ....
-*..*   ....      ...*   ....    ....   *...      ****   *...
-  .     .          .     .        .     .          .     .
-  ... .*.          ... .*.        ... .*.          ... .*.
+macro_email      macro_if_c
+*...   ....      .*..   .*..
+....   ....      ...*   ....
+  .     .          .     .
+  ... .*.          ... .*.

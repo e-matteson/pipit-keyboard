@@ -5,20 +5,19 @@
 
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
-
 ##### modifier keys #####
 
-mod_shift            key_backspace     mod_ctrl
-....   ....	       	 ....   ....   	   ....   ....
-....   ....		       ....   ....   	   ....   ....
-  .     .              .     .           .     .
-  *.. ...              .*. ...     	     ..* ...
+mod_shift        key_backspace     mod_ctrl
+....   ....	     ....   ....   	   ....   ....
+....   ....		   ....   ....   	   ....   ....
+  .     .          .     .           .     .
+  *.. ...          .*. ...     	     ..* ...
 
-mod_gui               key_space        mod_alt
-....   ....   	      ....   ....	     ....   .... 
-....   ....   	      ....   ....	     ....   ....
-  .     .               .     .          .     .
-  ... *..     	        ... .*.  	       ... ..*
+mod_gui          key_space         mod_alt
+....   ....   	 ....   ....	     ....   ....
+....   ....   	 ....   ....	     ....   ....
+  .     .          .     .          .     .
+  ... *..     	   ... .*.  	       ... ..*
 
 mod_capital      mod_nospace
 ....   ....      ....   ....
@@ -228,6 +227,12 @@ key_delete    key_printscreen  key_caps_lock
 
 ###### commands ######
 
+command_left_hand_mode  command_gaming_mode
+****   ....             ....   ****
+....   ....             ....   ....
+  .     .                 .     .
+  ... ...                 ... ...
+
 command_delete_word  command_pause   command_led_rainbow
 ....   ....          ****   ****     ****   ..*.
 ....   ***.          ....   ....     ....   ....
@@ -245,12 +250,6 @@ command_left_word   command_right_word    command_left_limit   command_right_lim
 ..*.   *...         ...*   *...           .**.   *...         ..**   *...
   .     .             .     .               .     .             .     .
   ... .*.             ... .*.               ... .*.             ... .*.
-
-command_left_hand_mode  command_gaming_mode
-****   ....             ....   ****
-....   ....             ....   ....
-  .     .                 .     .
-  ... ...                 ... ...
 
 
 ## text macros ##

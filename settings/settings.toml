@@ -149,21 +149,7 @@ blank_mapping     = {key="BLANK_MAPPING"} #for ignoring unused blocks in kmap fi
 
 [macros]
 
-macro_email           = [{key="KEY_M"},
-                         {key="KEY_E"},
-                         {key="KEY_2",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_E"},
-                         {key="KEY_X"},
-                         {key="KEY_A"},
-                         {key="KEY_M"},
-                         {key="KEY_P"},
-                         {key="KEY_L"},
-                         {key="KEY_E"},
-                         {key="KEY_PERIOD"},
-                         {key="KEY_C"},
-                         {key="KEY_O"},
-                         {key="KEY_M"}]
-macro_save            = [{key="KEY_S", mod="MODIFIERKEY_CTRL"}]
+macro_save_as         = [{key="KEY_S", mod=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
 macro_alt_tab         = [{key="KEY_TAB", mod="MODIFIERKEY_ALT"}]
 macro_vim_save        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_W"},
@@ -200,6 +186,20 @@ macro_if_c            = [{key="KEY_I"},
                          {key="KEY_END"},
                          {key="KEY_LEFT"},
                          {key="KEY_LEFT"}]
+macro_email           = [{key="KEY_M"},
+                         {key="KEY_E"},
+                         {key="KEY_2",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_E"},
+                         {key="KEY_X"},
+                         {key="KEY_A"},
+                         {key="KEY_M"},
+                         {key="KEY_P"},
+                         {key="KEY_L"},
+                         {key="KEY_E"},
+                         {key="KEY_PERIOD"},
+                         {key="KEY_C"},
+                         {key="KEY_O"},
+                         {key="KEY_M"}]
 
 
 [other]

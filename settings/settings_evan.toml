@@ -149,6 +149,7 @@ blank_mapping     = {key="BLANK_MAPPING"} #for ignoring unused blocks in kmap fi
 
 [macros]
 
+macro_save_as       = [{key="KEY_S", mod=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
 macro_save          = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_W"},
                        {key="KEY_ENTER"}]

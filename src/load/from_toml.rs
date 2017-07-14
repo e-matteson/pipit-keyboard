@@ -108,6 +108,7 @@ impl FromToml for Sequence {
 
 impl FromToml for KeyPress {
     fn from_toml(toml_table: &Value) -> KeyPress {
+        // mod can be either a single string, or a list of strings
         let map =
             match toml_table {
                 &Value::Table(ref t) => t,
@@ -117,11 +118,16 @@ impl FromToml for KeyPress {
             Some(v) => Some(String::from_toml(v)),
             None => None,
         };
-        let modifier = match map.get("mod") {
-            Some(v) => Some(String::from_toml(v)),
+        let modifiers: Option<Vec<String>> = match map.get("mod") {
+            Some(v) => Some(
+                match v {
+                    &Value::Array(_) => Vec::from_toml(v),
+                    _ => vec![String::from_toml(v)],
+                }
+            ),
             None => None,
         };
-        KeyPress::new(key, modifier)
+        KeyPress::new(key, modifiers)
     }
 }
 
