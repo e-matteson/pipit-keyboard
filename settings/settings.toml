@@ -1,16 +1,18 @@
 ########### EXAMPLE SETTINGS FILE #############
 
-[[modes]]
+[[mode]]
 
 name = "default_mode"
-keymaps = [{file="keymaps/dvorak24_evan.kmap", words=true}]
+keymaps = [{file="keymaps/dvorak24.kmap", words=true}]
 
-[[modes]]
+
+[[mode]]
 
 name = "left_hand_mode"
 keymaps = [{file="keymaps/dvorak24_left.kmap"}]
 
-[[modes]]
+
+[[mode]]
 
 name = "gaming_mode"
 keymaps = [{file="keymaps/gaming_test.kmap"}]
@@ -24,15 +26,10 @@ held_delay                 = 200
 debounce_delay             = 5
 debug_messages             = 0
 
-
-##### hardware-specific options:
-
 board_name                 = "FEATHER_M0_BLE"
-has_battery                = true
-battery_level_pin          = 9
-enable_rgb_led             = true
-enable_color_feedback      = true
 rgb_led_pins               = [10, 11, 12]
+enable_led_typing_feedback = true
+battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 
@@ -43,186 +40,178 @@ kmap_format                = [
     [         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
 
 
-[modifiers]
+[plain_modifiers]
 
-modifierkey_shift = ["", "MODIFIERKEY_SHIFT"]
-modifierkey_ctrl  = ["", "MODIFIERKEY_CTRL"]
-modifierkey_alt   = ["", "MODIFIERKEY_ALT"]
-modifierkey_gui   = ["", "MODIFIERKEY_GUI"]
+mod_shift         = {mod="MODIFIERKEY_SHIFT"}
+mod_ctrl          = {mod="MODIFIERKEY_CTRL"}
+mod_alt           = {mod="MODIFIERKEY_ALT"}
+mod_gui           = {mod="MODIFIERKEY_GUI"}
+
 
 [plain_keys]
 
-blank_mapping     = ["BLANK_MAPPING", ""] #for ignoring unused blocks in kmap file
-key_a             = ["KEY_A", ""]
-key_b             = ["KEY_B", ""]
-key_b_2           = ["KEY_B", ""]
-key_c             = ["KEY_C", ""]
-key_d             = ["KEY_D", ""]
-key_e             = ["KEY_E", ""]
-key_f             = ["KEY_F", ""]
-key_g             = ["KEY_G", ""]
-key_g_2           = ["KEY_G", ""]
-key_h             = ["KEY_H", ""]
-key_i             = ["KEY_I", ""]
-key_j             = ["KEY_J", ""]
-key_j_2           = ["KEY_J", ""]
-key_k             = ["KEY_K", ""]
-key_k_2           = ["KEY_K", ""]
-key_l             = ["KEY_L", ""]
-key_m             = ["KEY_M", ""]
-key_n             = ["KEY_N", ""]
-key_o             = ["KEY_O", ""]
-key_p             = ["KEY_P", ""]
-key_q             = ["KEY_Q", ""]
-key_q_2           = ["KEY_Q", ""]
-key_r             = ["KEY_R", ""]
-key_s             = ["KEY_S", ""]
-key_t             = ["KEY_T", ""]
-key_u             = ["KEY_U", ""]
-key_v             = ["KEY_V", ""]
-key_v_2           = ["KEY_V", ""]
-key_w             = ["KEY_W", ""]
-key_w_2           = ["KEY_W", ""]
-key_x             = ["KEY_X", ""]
-key_x_2           = ["KEY_X", ""]
-key_y             = ["KEY_Y", ""]
-key_y_2           = ["KEY_Y", ""]
-key_z             = ["KEY_Z", ""]
-key_z_2           = ["KEY_Z", ""]
-key_1             = ["KEY_1", ""]
-key_2             = ["KEY_2", ""]
-key_3             = ["KEY_3", ""]
-key_4             = ["KEY_4", ""]
-key_5             = ["KEY_5", ""]
-key_6             = ["KEY_6", ""]
-key_7             = ["KEY_7", ""]
-key_8             = ["KEY_8", ""]
-key_9             = ["KEY_9", ""]
-key_0             = ["KEY_0", ""]
-key_f1            = ["KEY_F1", ""]
-key_f2            = ["KEY_F2", ""]
-key_f3            = ["KEY_F3", ""]
-key_f4            = ["KEY_F4", ""]
-key_f5            = ["KEY_F5", ""]
-key_f6            = ["KEY_F6", ""]
-key_f7            = ["KEY_F7", ""]
-key_f8            = ["KEY_F8", ""]
-key_f9            = ["KEY_F9", ""]
-key_f10           = ["KEY_F10", ""]
-key_enter         = ["KEY_ENTER", ""]
-key_backspace     = ["KEY_BACKSPACE", ""]
-key_tab           = ["KEY_TAB", ""]
-key_space         = ["KEY_SPACE", ""]
-key_esc           = ["KEY_ESC", ""]
-key_caps_lock     = ["KEY_CAPS_LOCK", ""]
-key_home          = ["KEY_HOME", ""]
-key_end           = ["KEY_END", ""]
-key_page_up       = ["KEY_PAGE_UP", ""]
-key_page_down     = ["KEY_PAGE_DOWN", ""]
-key_right         = ["KEY_RIGHT", ""]
-key_left          = ["KEY_LEFT", ""]
-key_down          = ["KEY_DOWN", ""]
-key_up            = ["KEY_UP", ""]
-key_printscreen   = ["KEY_PRINTSCREEN", ""]
-key_delete        = ["KEY_DELETE", ""]
-key_ampersand     = ["KEY_7", "MODIFIERKEY_SHIFT"]
-key_asterisk      = ["KEY_8", "MODIFIERKEY_SHIFT"]
-key_at            = ["KEY_2", "MODIFIERKEY_SHIFT"]
-key_backslash     = ["KEY_BACKSLASH", ""]
-key_bang          = ["KEY_1", "MODIFIERKEY_SHIFT"]
-key_caret         = ["KEY_6", "MODIFIERKEY_SHIFT"]
-key_colon         = ["KEY_SEMICOLON", "MODIFIERKEY_SHIFT"]
-key_comma         = ["KEY_COMMA", ""]
-key_dollar        = ["KEY_4", "MODIFIERKEY_SHIFT"]
-key_doublequote   = ["KEY_QUOTE", "MODIFIERKEY_SHIFT"]
-key_equal         = ["KEY_EQUAL", ""]
-key_grave         = ["KEY_TILDE", ""]
-key_hash          = ["KEY_3", "MODIFIERKEY_SHIFT"]
-key_left_angle    = ["KEY_COMMA", "MODIFIERKEY_SHIFT"]
-key_left_brace    = ["KEY_LEFT_BRACE", ""]
-key_left_curly    = ["KEY_LEFT_BRACE", "MODIFIERKEY_SHIFT"]
-key_left_paren    = ["KEY_9", "MODIFIERKEY_SHIFT"]
-key_minus         = ["KEY_MINUS", ""]
-key_percent       = ["KEY_5", "MODIFIERKEY_SHIFT"]
-key_period        = ["KEY_PERIOD", ""]
-key_pipe          = ["KEY_BACKSLASH", "MODIFIERKEY_SHIFT"]
-key_plus          = ["KEY_EQUAL", "MODIFIERKEY_SHIFT"]
-key_question      = ["KEY_SLASH", "MODIFIERKEY_SHIFT"]
-key_quote         = ["KEY_QUOTE", ""]
-key_right_angle   = ["KEY_PERIOD", "MODIFIERKEY_SHIFT"]
-key_right_brace   = ["KEY_RIGHT_BRACE", ""]
-key_right_curly   = ["KEY_RIGHT_BRACE", "MODIFIERKEY_SHIFT"]
-key_right_paren   = ["KEY_0", "MODIFIERKEY_SHIFT"]
-key_semicolon     = ["KEY_SEMICOLON", ""]
-key_slash         = ["KEY_SLASH", ""]
-key_tilde         = ["KEY_TILDE", "MODIFIERKEY_SHIFT"]
-key_underscore    = ["KEY_MINUS", "MODIFIERKEY_SHIFT"]
+key_a             = {key="KEY_A"}
+key_b             = {key="KEY_B"}
+key_c             = {key="KEY_C"}
+key_d             = {key="KEY_D"}
+key_e             = {key="KEY_E"}
+key_f             = {key="KEY_F"}
+key_g             = {key="KEY_G"}
+key_h             = {key="KEY_H"}
+key_i             = {key="KEY_I"}
+key_j             = {key="KEY_J"}
+key_k             = {key="KEY_K"}
+key_l             = {key="KEY_L"}
+key_m             = {key="KEY_M"}
+key_n             = {key="KEY_N"}
+key_o             = {key="KEY_O"}
+key_p             = {key="KEY_P"}
+key_q             = {key="KEY_Q"}
+key_r             = {key="KEY_R"}
+key_s             = {key="KEY_S"}
+key_t             = {key="KEY_T"}
+key_u             = {key="KEY_U"}
+key_v             = {key="KEY_V"}
+key_w             = {key="KEY_W"}
+key_x             = {key="KEY_X"}
+key_y             = {key="KEY_Y"}
+key_z             = {key="KEY_Z"}
+key_1             = {key="KEY_1"}
+key_2             = {key="KEY_2"}
+key_3             = {key="KEY_3"}
+key_4             = {key="KEY_4"}
+key_5             = {key="KEY_5"}
+key_6             = {key="KEY_6"}
+key_7             = {key="KEY_7"}
+key_8             = {key="KEY_8"}
+key_9             = {key="KEY_9"}
+key_0             = {key="KEY_0"}
+key_f1            = {key="KEY_F1"}
+key_f2            = {key="KEY_F2"}
+key_f3            = {key="KEY_F3"}
+key_f4            = {key="KEY_F4"}
+key_f5            = {key="KEY_F5"}
+key_f6            = {key="KEY_F6"}
+key_f7            = {key="KEY_F7"}
+key_f8            = {key="KEY_F8"}
+key_f9            = {key="KEY_F9"}
+key_f10           = {key="KEY_F10"}
+key_enter         = {key="KEY_ENTER"}
+key_backspace     = {key="KEY_BACKSPACE"}
+key_tab           = {key="KEY_TAB"}
+key_space         = {key="KEY_SPACE"}
+key_esc           = {key="KEY_ESC"}
+key_caps_lock     = {key="KEY_CAPS_LOCK"}
+key_home          = {key="KEY_HOME"}
+key_end           = {key="KEY_END"}
+key_page_up       = {key="KEY_PAGE_UP"}
+key_page_down     = {key="KEY_PAGE_DOWN"}
+key_right         = {key="KEY_RIGHT"}
+key_left          = {key="KEY_LEFT"}
+key_down          = {key="KEY_DOWN"}
+key_up            = {key="KEY_UP"}
+key_printscreen   = {key="KEY_PRINTSCREEN"}
+key_delete        = {key="KEY_DELETE"}
+key_ampersand     = {key="KEY_7", mod="MODIFIERKEY_SHIFT"}
+key_asterisk      = {key="KEY_8", mod="MODIFIERKEY_SHIFT"}
+key_at            = {key="KEY_2", mod="MODIFIERKEY_SHIFT"}
+key_backslash     = {key="KEY_BACKSLASH"}
+key_bang          = {key="KEY_1", mod="MODIFIERKEY_SHIFT"}
+key_caret         = {key="KEY_6", mod="MODIFIERKEY_SHIFT"}
+key_colon         = {key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"}
+key_comma         = {key="KEY_COMMA"}
+key_dollar        = {key="KEY_4", mod="MODIFIERKEY_SHIFT"}
+key_doublequote   = {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"}
+key_equal         = {key="KEY_EQUAL"}
+key_grave         = {key="KEY_TILDE"}
+key_hash          = {key="KEY_3", mod="MODIFIERKEY_SHIFT"}
+key_left_angle    = {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"}
+key_left_brace    = {key="KEY_LEFT_BRACE"}
+key_left_curly    = {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"}
+key_left_paren    = {key="KEY_9", mod="MODIFIERKEY_SHIFT"}
+key_minus         = {key="KEY_MINUS"}
+key_percent       = {key="KEY_5", mod="MODIFIERKEY_SHIFT"}
+key_period        = {key="KEY_PERIOD"}
+key_pipe          = {key="KEY_BACKSLASH", mod="MODIFIERKEY_SHIFT"}
+key_plus          = {key="KEY_EQUAL", mod="MODIFIERKEY_SHIFT"}
+key_question      = {key="KEY_SLASH", mod="MODIFIERKEY_SHIFT"}
+key_quote         = {key="KEY_QUOTE"}
+key_right_angle   = {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}
+key_right_brace   = {key="KEY_RIGHT_BRACE"}
+key_right_curly   = {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"}
+key_right_paren   = {key="KEY_0", mod="MODIFIERKEY_SHIFT"}
+key_semicolon     = {key="KEY_SEMICOLON"}
+key_slash         = {key="KEY_SLASH"}
+key_tilde         = {key="KEY_TILDE", mod="MODIFIERKEY_SHIFT"}
+key_underscore    = {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}
+blank_mapping     = {key="BLANK_MAPPING"} #for ignoring unused blocks in kmap files
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]
 
-macro_email           = [["KEY_M", ""],
-                         ["KEY_E", ""],
-                         ["KEY_2","MODIFIERKEY_SHIFT"],
-                         ["KEY_E", ""],
-                         ["KEY_X", ""],
-                         ["KEY_A", ""],
-                         ["KEY_M", ""],
-                         ["KEY_P", ""],
-                         ["KEY_L", ""],
-                         ["KEY_E", ""],
-                         ["KEY_PERIOD", ""],
-                         ["KEY_C", ""],
-                         ["KEY_O", ""],
-                         ["KEY_M", ""]]
-macro_save            = [["KEY_S", "MODIFIERKEY_CTRL"]]
-macro_alt_tab         = [["KEY_TAB", "MODIFIERKEY_ALT"]]
-macro_vim_save        = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"],
-                         ["KEY_W", ""],
-                         ["KEY_ENTER", ""]]
-macro_vim_quit        = [["KEY_SEMICOLON","MODIFIERKEY_SHIFT"],
-                         ["KEY_Q", ""],
-                         ["KEY_ENTER", ""]]
-macro_in_quote        = [["KEY_QUOTE",""],
-                         ["KEY_QUOTE",""],
-                         ["KEY_LEFT",""]]
-macro_in_doublequote  = [["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                         ["KEY_QUOTE","MODIFIERKEY_SHIFT"],
-                         ["KEY_LEFT",""]]
-macro_in_paren        = [["KEY_9","MODIFIERKEY_SHIFT"],
-                         ["KEY_0","MODIFIERKEY_SHIFT"],
-                         ["KEY_LEFT",""]]
-macro_in_brace        = [["KEY_LEFT_BRACE",""],
-                         ["KEY_RIGHT_BRACE",""],
-                         ["KEY_LEFT",""]]
-macro_in_curly        = [["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                         ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                         ["KEY_LEFT",""]]
-macro_in_angle        = [["KEY_COMMA","MODIFIERKEY_SHIFT"],
-                         ["KEY_PERIOD","MODIFIERKEY_SHIFT"],
-                         ["KEY_LEFT",""]]
-macro_if_c            = [["KEY_I", ""],
-                         ["KEY_F", ""],
-                         ["KEY_9","MODIFIERKEY_SHIFT"],
-                         ["KEY_0","MODIFIERKEY_SHIFT"],
-                         ["KEY_LEFT_BRACE","MODIFIERKEY_SHIFT"],
-                         ["KEY_ENTER",""],
-                         ["KEY_RIGHT_BRACE","MODIFIERKEY_SHIFT"],
-                         ["KEY_UP", ""],
-                         ["KEY_END", ""],
-                         ["KEY_LEFT", ""],
-                         ["KEY_LEFT", ""]]
+macro_email           = [{key="KEY_M"},
+                         {key="KEY_E"},
+                         {key="KEY_2",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_E"},
+                         {key="KEY_X"},
+                         {key="KEY_A"},
+                         {key="KEY_M"},
+                         {key="KEY_P"},
+                         {key="KEY_L"},
+                         {key="KEY_E"},
+                         {key="KEY_PERIOD"},
+                         {key="KEY_C"},
+                         {key="KEY_O"},
+                         {key="KEY_M"}]
+macro_save            = [{key="KEY_S", mod="MODIFIERKEY_CTRL"}]
+macro_alt_tab         = [{key="KEY_TAB", mod="MODIFIERKEY_ALT"}]
+macro_vim_save        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_W"},
+                         {key="KEY_ENTER"}]
+macro_vim_quit        = [{key="KEY_SEMICOLON",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_Q"},
+                         {key="KEY_ENTER"}]
+macro_in_quote        = [{key="KEY_QUOTE"},
+                         {key="KEY_QUOTE"},
+                         {key="KEY_LEFT"}]
+macro_in_doublequote  = [{key="KEY_QUOTE",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_QUOTE",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_LEFT"}]
+macro_in_paren        = [{key="KEY_9",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_0",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_LEFT"}]
+macro_in_brace        = [{key="KEY_LEFT_BRACE"},
+                         {key="KEY_RIGHT_BRACE"},
+                         {key="KEY_LEFT"}]
+macro_in_curly        = [{key="KEY_LEFT_BRACE",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_RIGHT_BRACE",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_LEFT"}]
+macro_in_angle        = [{key="KEY_COMMA",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_PERIOD",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_LEFT"}]
+macro_if_c            = [{key="KEY_I"},
+                         {key="KEY_F"},
+                         {key="KEY_9",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_0",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_ENTER"},
+                         {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_UP"},
+                         {key="KEY_END"},
+                         {key="KEY_LEFT"},
+                         {key="KEY_LEFT"}]
+
 
 [other]
 
 word_modifiers = [
-    "wordmod_capital",
-    "wordmod_nospace"
+    "mod_capital",
+    "mod_nospace"
 ]
 
 anagram_modifiers = [
-    "anagram_1",
-    "anagram_2"
+    "mod_anagram_1",
+    "mod_anagram_2"
 ]
 
 commands = [
@@ -242,6 +231,7 @@ commands = [
     "command_led_rainbow",
     "command_left_hand_mode",
     "command_default_mode",
+    "command_gaming_mode",
 ]
 
 dictionary = [
@@ -663,6 +653,7 @@ dictionary = [
     {word="bingo"},
     {word="bio"},
     {word="biology"},
+    {word="biomarker", chord="biom"},
     {word="biomedical"},
     {word="bios"},
     {word="bird"},
@@ -762,7 +753,7 @@ dictionary = [
     {word="buf", anagram=3},
     {word="buff", anagram=2},
     {word="buffer", anagram=1},
-    {word="bug"},
+    {word="bug", anagram=1},
     {word="build"},
     {word="built"},
     {word="bulk"},
@@ -776,7 +767,7 @@ dictionary = [
     {word="bureau", anagram=2},
     {word="burn"},
     {word="burst"},
-    {word="bus"},
+    {word="bus", anagram=1},
     {word="bush", anagram=1},
     {word="business"},
     {word="busy"},
@@ -959,6 +950,7 @@ dictionary = [
     {word="cis"},
     {word="citation", anagram=2},
     {word="cite"},
+    {word="citep"},
     {word="citizen"},
     {word="city", anagram=2},
     {word="civil"},
@@ -1026,6 +1018,7 @@ dictionary = [
     {word="commercial"},
     {word="commit"},
     {word="common"},
+    {word="communicate", chord="comu"},
     {word="communicate"},
     {word="community"},
     {word="comp"},
@@ -1075,6 +1068,7 @@ dictionary = [
     {word="congratulate"},
     {word="congress"},
     {word="connect", anagram=1},
+    {word="connectivity", chord="con", anagram=1},
     {word="conscious"},
     {word="consecutive"},
     {word="consent"},
@@ -1439,7 +1433,7 @@ dictionary = [
     {word="dorsal"},
     {word="dosage"},
     {word="dose", anagram=1},
-    {word="dot"},
+    {word="dot", anagram=1},
     {word="double"},
     {word="doubt"},
     {word="doug", anagram=3},
@@ -1538,6 +1532,7 @@ dictionary = [
     {word="else"},
     {word="emacs"},
     {word="email"},
+    {word="ematteso"},
     {word="em", anagram=1},
     {word="embassy"},
     {word="embed"},
@@ -2087,7 +2082,7 @@ dictionary = [
     {word="half"},
     {word="hall"},
     {word="halloween"},
-    {word="halo"},
+    {word="halo", anagram=1},
     {word="halt"},
     {word="ham"},
     {word="hammer"},
@@ -2284,6 +2279,9 @@ dictionary = [
     {word="import"},
     {word="important"},
     {word="improve"},
+    {word="impulsive", anagram=1},
+    {word="impulsivity"},
+    {word="impulsivity", chord="impt"},
     {word="imum", anagram=2},
     {word="in", anagram=1},
     {word="inch"},
@@ -2302,7 +2300,7 @@ dictionary = [
     {word="industry"},
     {word="iness"},
     {word="<iness", anagram=1},
-    {word="inf"},
+    {word="inf", anagram=1},
     {word="infant"},
     {word="infect", anagram=1},
     {word="infinite", anagram=1},
@@ -2366,6 +2364,7 @@ dictionary = [
     {word="ious"},
     {word="<ious", anagram=1},
     {word="ip", anagram=2},
+    {word="iris"},
     {word="iron"},
     {word="is", anagram=1},
     {word="ish", anagram=1},
@@ -2631,7 +2630,7 @@ dictionary = [
     {word="lord"},
     {word="lose"},
     {word="loser"},
-    {word="loss"},
+    {word="loss", anagram=1},
     {word="lost"},
     {word="lot"},
     {word="lottery", anagram=1},
@@ -2640,6 +2639,7 @@ dictionary = [
     {word="lounge"},
     {word="love"},
     {word="low"},
+    {word="'ll"},
     {word="ls"},
     {word="luck"},
     {word="luggage", anagram=2},
@@ -2724,6 +2724,7 @@ dictionary = [
     {word="matrix"},
     {word="Matt", anagram=1},
     {word="matter"},
+    {word="Matteson"},
     {word="Matthew"},
     {word="mattress", anagram=2},
     {word="mature", anagram=1},
@@ -3460,7 +3461,7 @@ dictionary = [
     {word="public"},
     {word="publish"},
     {word="pudendal"},
-    {word="puff", anagram=1},
+    {word="puff", anagram=4},
     {word="pull"},
     {word="pulse"},
     {word="pump"},
@@ -3572,6 +3573,8 @@ dictionary = [
     {word="ref", anagram=1},
     {word="refer", anagram=2},
     {word="reference"},
+    {word="reflect"},
+    {word="reflection impulsivity", chord="refl"},
     {word="refrigerate"},
     {word="refugee", anagram=2},
     {word="refurbish"},
@@ -3933,7 +3936,7 @@ dictionary = [
     {word="sion"},
     {word="<sion", anagram=1},
     {word="sip", anagram=3},
-    {word="sir"},
+    {word="sir", anagram=1},
     {word="sister", anagram=1},
     {word="sit", anagram=2},
     {word="site"},
@@ -3995,7 +3998,7 @@ dictionary = [
     {word="soldier"},
     {word="sole", anagram=2},
     {word="solid"},
-    {word="solo", anagram=1},
+    {word="solo", anagram=2},
     {word="solu"},
     {word="solution"},
     {word="solve"},
@@ -4169,8 +4172,8 @@ dictionary = [
     {word="stupid"},
     {word="style"},
     {word="stylus"},
-    {word="sub", anagram=1},
-    {word="sublime", anagram=1},
+    {word="sub"},
+    {word="sublime", anagram=2},
     {word="submit"},
     {word="subscribe"},
     {word="subsequent"},
@@ -4358,6 +4361,8 @@ dictionary = [
     {word="thought", anagram=1},
     {word="thread"},
     {word="three", anagram=2},
+    {word="thresh"},
+    {word="threshold"},
     {word="through"},
     {word="throw"},
     {word="thumb"},

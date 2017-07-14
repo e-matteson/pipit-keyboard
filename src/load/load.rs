@@ -16,13 +16,13 @@ pub fn load_settings(toml_path: &str, maps: &mut Maps) -> Options {
 
     load_modes(&toml, maps);
     load_chords(&options, maps.get_kmap_paths(), maps);
-    load_wordmod_list(&other, maps);
-    load_anagram_list(&other, maps);
-    load_macros(&toml, maps);
     load_plains(&toml, maps);
-    load_modifierkeys(&toml, maps);
+    load_macros(&toml, maps);
+    load_plain_mods(&toml, maps);
+    load_word_mods(&other, maps);
+    load_anagram_mods(&other, maps);
     load_word_list(&other, maps);
-    load_command_list(&other, maps);
+    load_commands(&other, maps);
 
     options
 }
@@ -47,31 +47,37 @@ fn load_chords(options: &Options, kmap_paths: Vec<KmapPath>, maps: &mut Maps) {
 }
 
 fn load_macros(toml: &Value, maps: &mut Maps) {
-    maps.set_sequences(&SeqType::Macro, load_sequence_map(&toml["macros"]));
+    let table = toml.get("macros").expect("Missing table: macros");
+    maps.set_sequences(&SeqType::Macro, load_sequence_map(&table));
 }
 
 fn load_plains(toml: &Value, maps: &mut Maps) {
-    maps.set_sequences(&SeqType::Plain, load_sequence_map(&toml["plain_keys"]));
+    let table = toml.get("plain_keys").expect("Missing table: plain_keys");
+    maps.set_sequences(&SeqType::Plain, load_sequence_map(&table));
 }
 
-fn load_modifierkeys(toml: &Value, maps: &mut Maps) {
-    for (name, seq) in load_sequence_map(&toml["modifiers"]).iter() {
+fn load_plain_mods(toml: &Value, maps: &mut Maps) {
+    let table = toml.get("plain_modifiers").expect("Missing table: plain_modifiers");
+    for (name, seq) in load_sequence_map(&table).iter() {
         maps.add_modifierkey(name.to_owned(), seq);
     }
 }
 
-fn load_wordmod_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let wordmod_list = toml_to_vec(&other["word_modifiers"], toml_to_name);
+fn load_word_mods(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    let array = other.get("word_modifiers").expect("Missing array: word_modifiers");
+    let wordmod_list = toml_to_vec(&array, toml_to_name);
     maps.wordmods = wordmod_list;
 }
 
-fn load_anagram_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let anagram_list = toml_to_vec(&other["anagram_modifiers"], toml_to_name);
+fn load_anagram_mods(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    let array = other.get("anagram_modifiers").expect("Missing array: anagram_modifiers");
+    let anagram_list = toml_to_vec(&array, toml_to_name);
     maps.anagrams = anagram_list;
 }
 
-fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let command_list = toml_to_vec(&other["commands"], toml_to_name);
+fn load_commands(other: &BTreeMap<String, Value>, maps: &mut Maps) {
+    let array = other.get("commands").expect("Missing array: commands");
+    let command_list = toml_to_vec(&array, toml_to_name);
     maps.set_sequences(&SeqType::Command, BTreeMap::new());
     for entry in command_list.iter() {
         maps.add_command(entry)
@@ -79,7 +85,8 @@ fn load_command_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
 }
 
 fn load_word_list(other: &BTreeMap<String, Value>, maps: &mut Maps) {
-    let word_list = toml_to_vec1_map(&other["dictionary"]);
+    let array = other.get("dictionary").expect("Missing array: dictionary");
+    let word_list = toml_to_vec1_map(&array);
     maps.set_sequences(&SeqType::Word, BTreeMap::new());
     for mode in &maps.get_kmaps_with_words(){
         for entry in word_list.iter() {
@@ -121,9 +128,11 @@ fn load_sequence_map(parsed_toml: &Value) -> BTreeMap<Name, Sequence>{
     let map = toml_to_map(parsed_toml);
     let mut new_map: BTreeMap<Name, Sequence> = BTreeMap::new();
     for (key,val) in map.iter(){
-        let seq = match toml_dimension(val) {
-            1 => Sequence(vec![toml_to_keypress(&val)]),
-            2 => toml_to_sequence(&val),
+        let seq = match val {
+            &Value::Table(_) => Sequence(vec![toml_to_keypress(&val)]),
+            &Value::Array(_) => toml_to_sequence(&val),
+            // 1 => ,
+            // 2 => toml_to_sequence(&val),
             _ => panic!(format!("Invalid key sequence for {}", key)),
         };
         new_map.insert(Name::from(key), seq);

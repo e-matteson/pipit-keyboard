@@ -45,8 +45,8 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
 
 void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
   history->startEntry(chord, 1);
-  bool capitalMod = chord->hasCapitalWordmod();
-  bool nospaceMod = chord->hasNospaceWordmod();
+  bool capitalMod = chord->hasModCapital();
+  bool nospaceMod = chord->hasModNospace();
   Key key;
 
   // This is the first letter, so capitalize it if necessary

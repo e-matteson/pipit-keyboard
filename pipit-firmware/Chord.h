@@ -14,11 +14,11 @@ public:
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
   void setMode(conf::mode_enum _mode);
-  void blankMods();
-  void blankAnagramMods();
+  void extractPlainMods();
+  void extractWordMods();
+  void extractAnagramMods();
+  void restoreWordMods();
   void restoreAnagramMods();
-  void blankWordmods();
-  void restoreWordmods();
   uint8_t getAnagramNum();
   uint8_t cycleAnagramModifier();
 
@@ -28,15 +28,15 @@ public:
   conf::mode_enum getMode() const;
 
   bool hasMod(conf::mod_enum mod) const;
-  bool hasCapitalWordmod() const;
-  bool hasNospaceWordmod() const;
+  bool hasModCapital() const;
+  bool hasModNospace() const;
 
   void printDebug() const;
 
 private:
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
-  bool blankMod(conf::mod_enum modifier);
+  bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
   void setAnagramModBit(uint8_t anagram_num, bool value);

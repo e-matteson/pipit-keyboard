@@ -189,13 +189,13 @@ impl Maps {
         };
         f.append(&format_define(&"NUM_MODIFIERS".to_c(),
                                 &mod_indices.len().to_c()));
-        f.append(&format_define(&"NUM_WORDMODS".to_c(),
+        f.append(&format_define(&"NUM_WORD_MODS".to_c(),
                                 &self.wordmods.len().to_c()));
         f.append(&format_define(&"NUM_ANAGRAM_MODS".to_c(),
                                 &self.anagrams.len().to_c()));
         f.append(&format_define(&"NUM_ANAGRAMS".to_c(),
                                 &self.get_num_anagrams().to_c()));
-        f.append(&format_define(&"NUM_MODIFIERKEYS".to_c(),
+        f.append(&format_define(&"NUM_PLAIN_MODS".to_c(),
                                 &self.modifierkeys.len().to_c()));
         f.append(&CArray::new()
                  .name(&"wordmod_indices".to_c())

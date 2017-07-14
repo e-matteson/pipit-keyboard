@@ -89,9 +89,9 @@ void Feedback::updateLED(){
   case BATTERY_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer->start(3000);
+      led_timer->start(2000);
       led_subroutine++;
-      Serial.println(battery->getLevel());
+      // Serial.println(battery->getLevel());
       switch(battery->getLevel()){
       case 0:
         setLEDColor(RED);

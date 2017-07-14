@@ -8,25 +8,25 @@
 
 ##### modifier keys #####
 
-modifierkey_shift    key_backspace     modifierkey_ctrl
+mod_shift            key_backspace     mod_ctrl
 ....   ....	       	 ....   ....   	   ....   ....
 ....   ....		       ....   ....   	   ....   ....
   .     .              .     .           .     .
   *.. ...              .*. ...     	     ..* ...
 
-modifierkey_gui       key_space        modifierkey_alt
+mod_gui               key_space        mod_alt
 ....   ....   	      ....   ....	     ....   .... 
 ....   ....   	      ....   ....	     ....   ....
   .     .               .     .          .     .
   ... *..     	        ... .*.  	       ... ..*
 
-wordmod_capital  wordmod_nospace
+mod_capital      mod_nospace
 ....   ....      ....   ....
 ....   ....      ....   ....
   .     .          .     .
   *.. ...          ... ..*
 
-anagram_1         anagram_2
+mod_anagram_1     mod_anagram_2
 ....   ....       ....   ....
 ....   ....       ....   ....
   .     .           .     .
@@ -383,48 +383,6 @@ macro_compile          macro_error_prev       macro_error_next
 ....   ..*.            ..*.   ....            ..*.   ..*.
   .     .                .     .                .     .
   ... .*.                ... .*.                ... .*.
-
-# macro_eval_region   macro_eval
-# ....   ....         ....   ....
-# .**.   *...         ....   .*..
-#   .     .             .     .
-#   ... .*.             ... .*.
-
-# macro_eval_scad     macro_eval_count      macro_eval_nth
-# ....   ....         ....   ....           ....   ....
-# .**.   ...*         .**.   .*..           .**.   ..*.
-#   .     .             .     .               .     .
-#   ... .*.             ... .*.               ... .*.
-
-# macro_lisp_slurpf    macro_lisp_slurpb    macro_lisp_barff    macro_lisp_barfb
-# .*..   ...*         .*..   ...*          *...   ...*         *...   ...*
-# ....   ....         ....   ....          ....   ....         ....   ....
-#   .     .             .     .              .     .             .     .
-#   ... .*.             *.. .*.              ... .*.             *.. .*.
-
-# macro_lisp_wrap1    macro_lisp_splice    macro_lisp_splicef    macro_lisp_spliceb
-# ...*   ...*          ...*   ...*          ..*.   ...*         ..*.   ...*
-# ....   ....          ....   ....          ....   ....         ....   ....
-#   .     .              .     .              .     .             .     .
-#   ... .*.              *.. .*.              ... .*.             *.. .*.
-
-# macro_lisp_split    macro_lisp_join       macro_lisp_eos      macro_lisp_bos
-# ....   ...*         ....   ...*           ....   ...*         ....   ...*
-# .*.*   ....         ..**   ....           ...*   ....         ..*.   ....
-#   .     .             .     .               .     .             .     .
-#   ... .*.             ... .*.               ... .*.             ... .*.
-
-# macro_lisp_wrap2    macro_lisp_wrap3
-# ....   .*.*         ....   ..**
-# ..*.   ....         ..*.   ....
-#   .     .             .     .
-#   ... .*.             ... .*.
-
-# macro_lisp_wrap4   macro_lisp_next    macro_lisp_prev
-# ....   *..*        ....   ...*         ....   ...*
-# ..*.   ....        ..*.   ....         ...*   ....
-#   .     .            .     .             .     .
-#   ... .*.            ... .*.             ... .*.
 
 macro_dotspacemacs
 .*..   *...

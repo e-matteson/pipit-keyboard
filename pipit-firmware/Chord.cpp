@@ -28,9 +28,9 @@ uint8_t Chord::getModByte() const{
   // Get the byte containing ctrl, shift, alt, and/or gui.
   // Used for HID keyboard protocol.
   uint8_t mod_byte = 0;
-  for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
-    conf::mod_enum mod = conf::getModifierkeyEnum(i);
-    mod_byte |= hasMod(mod) ? conf::getModifierkeyByte(i) : 0;
+  for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
+    conf::mod_enum mod = conf::getPlainModEnum(i);
+    mod_byte |= hasMod(mod) ? conf::getPlainModByte(i) : 0;
   }
   return mod_byte;
 }
@@ -66,12 +66,11 @@ void Chord::clear(){
   anagram_num = 0;
 }
 
-bool Chord::hasCapitalWordmod() const{
-  // TODO avoid using enums outside conf?
+bool Chord::hasModCapital() const{
   return hasMod(conf::getCapitalEnum());
 }
 
-bool Chord::hasNospaceWordmod() const{
+bool Chord::hasModNospace() const{
   return hasMod(conf::getNospaceEnum());
 }
 
@@ -79,20 +78,27 @@ bool Chord::hasMod(conf::mod_enum mod) const{
   return mods[mod];
 }
 
-void Chord::blankMods(){
-  for(uint8_t i = 0; i < NUM_MODIFIERKEYS; i++){
-    blankMod(conf::getModifierkeyEnum(i));
+void Chord::extractPlainMods(){
+  for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
+    extractMod(conf::getPlainModEnum(i));
   }
 }
 
-void Chord::blankAnagramMods(){
+void Chord::extractWordMods(){
+  for(uint8_t i = 0; i < NUM_WORD_MODS; i++){
+    extractMod(conf::getWordModEnum(i));
+  }
+}
+
+
+void Chord::extractAnagramMods(){
   // TODO how does blank anagram0 work? Other blank mods are ignored...
   // Switch to null?
   if(!isAnagramMaskBlank()){
     // At least one switch in an anagram is pressed, check to see if it's an
     //  actual mod chord.
     for(uint8_t i = 0; i < NUM_ANAGRAM_MODS; i++){
-      if(blankMod(conf::getAnagramModEnum(i))){
+      if(extractMod(conf::getAnagramModEnum(i))){
         // Found mod!
         anagram_num = i+1; // 0 is reserved for no mod
         return;
@@ -110,26 +116,20 @@ void Chord::restoreAnagramMods(){
   anagram_num = 0;
 }
 
-void Chord::blankWordmods(){
-  for(uint8_t i = 0; i < NUM_WORDMODS; i++){
-    blankMod(conf::getWordmodEnum(i));
+void Chord::restoreWordMods(){
+  for(uint8_t i = 0; i < NUM_WORD_MODS; i++){
+    restoreMod(conf::getWordModEnum(i));
   }
 }
 
-void Chord::restoreWordmods(){
-  for(uint8_t i = 0; i < NUM_WORDMODS; i++){
-    restoreMod(conf::getWordmodEnum(i));
-  }
-}
-
-bool Chord::blankMod(conf::mod_enum modifier){
+bool Chord::extractMod(conf::mod_enum modifier){
   // If mod is pressed in the chord:
   // - remove the mod bits from the chord
   // - set a flag saying it's present
   // - return true
   const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
   if(!any(mod_chord_bytes)){
-    // Mod is all zeroes - that's how we represent a missing mod chord.
+    // Mod is all zeroes - that's how we represent a missing mod chord. Ignore.
     return false;
   }
   bool isPressed = false;
@@ -179,7 +179,6 @@ bool Chord::isExactAnagramPressed(const uint8_t* mod_chord,
                                   const uint8_t* _chord)
 {
   // TODO inefficient! recomputes mask for every ana mod
-  // get only the anagram-relevant bits
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, _chord, NUM_BYTES_IN_CHORD);
   andMask(conf::getAnagramMask(mode), anagram_bytes);

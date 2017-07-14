@@ -31,11 +31,6 @@ bool Switches::isAnySwitchStillBouncing(){
   for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
     if(first_contact_timers[i]->isRunning()){
       uint32_t time = first_contact_timers[i]->elapsed();
-
-      // Serial.print(i);
-      // Serial.print(": ");
-      // Serial.println(time);
-
       if(time > DEBOUNCE_DELAY){
         return 1;
       }

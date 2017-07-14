@@ -88,14 +88,6 @@ pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Vec<T> where F: Fn(&Value)
     }
 }
 
-pub fn toml_dimension(toml_array: &Value) -> usize {
-    // Assumes dimension is uniform, and only checks 1st element of each array!
-    match toml_array {
-        &Value::Array(ref vector) => 1 + toml_dimension(&vector[0]),
-        _ => 0
-    }
-}
-
 fn toml_to_int(toml_value: &Value) -> i64 {
     match toml_value {
         &Value::Integer(i) => i,
@@ -125,12 +117,15 @@ fn toml_to_switchpos(toml_array: &Value) -> SwitchPos {
     SwitchPos {row: int_vec[0] as usize, col: int_vec[1] as usize}
 }
 
-pub fn toml_to_keypress(toml_array: &Value) -> KeyPress {
-    let string_vec = toml_to_vec(toml_array, toml_to_string);
-    if string_vec.len() != 2 {
-        panic!("keypress vector must have length 2");
-    }
-    KeyPress::new(&string_vec[0], &string_vec[1])
+pub fn toml_to_keypress(toml_table: &Value) -> KeyPress {
+    let key_press_map: BTreeMap<_,_> = match toml_table {
+        &Value::Table(ref t) =>
+            t.iter()
+            .map(|(k, v)| (k.to_owned(), toml_to_string(v)))
+            .collect(),
+        _ => panic!("Expected table value"),
+    };
+    KeyPress::new(key_press_map.get("key"), key_press_map.get("mod"))
 }
 
 pub fn toml_to_mode(toml_map: &Value) -> ModeInfo {

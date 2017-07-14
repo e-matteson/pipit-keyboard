@@ -122,7 +122,7 @@ pub struct KeyPress{
 }
 
 impl KeyPress{
-    pub fn new(key: &str, modifier: &str) -> KeyPress {
+    pub fn new(key: Option<&String>, modifier: Option<&String>) -> KeyPress {
         KeyPress{
             key: KeyPress::sanitize(key),
             modifier: KeyPress::sanitize(modifier),
@@ -159,17 +159,17 @@ impl KeyPress{
         false
     }
 
-    fn sanitize(string: &str) -> CCode {
-        // TODO compare to an actual list of defined characters?
+    fn sanitize(string: Option<&String>) -> CCode {
+        // TODO compare to an actual list of defined key codes?
         //  Could vary with underlying keyboard lib, though
-        if KeyPress::contains_illegal_char(string) {
-            panic!(format!("Keypress value is probably not valid: {}", string));
-        }
-        if string.is_empty() {
-            "0".to_c()
-        }
-        else {
-            string.to_c()
+        match string {
+            None =>
+                "0".to_c(),
+            Some(s) => {
+                if KeyPress::contains_illegal_char(s) {
+                    panic!(format!("Keypress value is probably not valid: {}", s));
+                }
+                s.to_c()            }
         }
     }
 }

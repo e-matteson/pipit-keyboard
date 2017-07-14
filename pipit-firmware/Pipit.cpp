@@ -111,7 +111,7 @@ void Pipit::setup(){
 void Pipit::loop(){
   switches->update();
   sendIfReady();
-  updateConnection();
+  // updateConnection();
   feedback->updateLED();
   shutdownIfSquished();
   delayMicroseconds(loop_timer->remaining());
@@ -196,7 +196,6 @@ void Pipit::processChord(Chord* chord){
   uint8_t data_length = 0;
 
   // If chord is a known command, do it and return.
-  // if((data_length=lookup->command(chord, data))){
   if((data_length=lookup->get(conf::COMMAND, chord, data))){
     doCommand(data[0].key_code);
     feedback->triggerCommand();
@@ -215,8 +214,8 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known word, send it and return.
-  chord->blankWordmods();
-  chord->blankAnagramMods();
+  chord->extractWordMods();
+  chord->extractAnagramMods();
   if((data_length=lookup->get(conf::WORD, chord, data))){
     sender->sendWord(data, data_length, chord);
     switches->reuseMods(chord);
@@ -225,10 +224,10 @@ void Pipit::processChord(Chord* chord){
   }
 
   chord->restoreAnagramMods();
-  chord->restoreWordmods();
+  chord->restoreWordMods();
 
-  // Blank out all modifier switches.
-  chord->blankMods();
+  // extract out all modifier switches.
+  chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
   if((data_length=lookup->get(conf::PLAIN, chord, data))){
@@ -282,7 +281,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
       continue;
     }
 
-    chord->blankMods();
+    chord->extractPlainMods();
     uint8_t mod_byte = chord->getModByte();
     if(mod_byte){
       keys.addMod(mod_byte);
