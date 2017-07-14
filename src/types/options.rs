@@ -201,21 +201,29 @@ pub enum OpReq {
 #[derive(PartialEq)]
 #[derive(Eq)]
 #[derive(Clone)]
+// TODO let Vecs hold any OpVal recursively?
 pub enum OpVal {
     Str (String),
     StrVec (Vec<String>),
-    Int (i64),
+    Int32 (i32),
+    Uint8 (u8),
     Bool (bool),
-    Vec (Vec<i64>),
-    Vec2 (Vec<Vec<i64>>),
+    Vec (Vec<u8>),
+    Vec2 (Vec<Vec<u8>>),
     VecKmap (Vec<Vec<SwitchPos>>),
 }
 
 impl OpVal{
-    pub fn unwrap_int(&self) -> i64{
+    pub fn unwrap_int32(&self) -> i32{
         match self{
-            &OpVal::Int(x) => x,
-            _ => panic!("Expected OpVal::Int"),
+            &OpVal::Int32(x) => x,
+            _ => panic!("Expected OpVal::Int32"),
+        }
+    }
+    pub fn unwrap_uint8(&self) -> u8{
+        match self{
+            &OpVal::Uint8(x) => x,
+            _ => panic!("Expected OpVal::Uint8"),
         }
     }
     pub fn unwrap_str(&self) -> &str{
@@ -236,13 +244,13 @@ impl OpVal{
             _ => panic!("Expected OpVal::Bool"),
         }
     }
-    pub fn unwrap_vec(&self) -> &Vec<i64>{
+    pub fn unwrap_vec(&self) -> &Vec<u8>{
         match self{
             &OpVal::Vec(ref x) => x,
             _ => panic!("Expected OpVal::Vec"),
         }
     }
-    pub fn unwrap_vec2(&self) -> &Vec<Vec<i64>>{
+    pub fn unwrap_vec2(&self) -> &Vec<Vec<u8>>{
         match self{
             &OpVal::Vec2(ref x) => x,
             _ => panic!("Expected OpVal::Vec2"),
@@ -342,7 +350,7 @@ impl Options {
 
     fn get_val_len(&self, name: &str) -> usize{
         // TODO implement for other vector-based variants?
-        self.get_val(name).unwrap_vec().len()
+        self.get_val(name).unwrap_vec().len() as usize
     }
 
     pub fn verify_requirements(&self){
@@ -376,30 +384,30 @@ impl Options {
     pub fn set_auto(&mut self) {
         /// Generate the OpReq::Auto options that depend only on other options
 
-        let num_rows: i64 = self.get_val_len("row_pins") as i64;
-        let num_columns: i64 = self.get_val_len("column_pins") as i64;
-        let num_matrix_positions: i64 = num_rows * num_columns as i64;
-        let num_bytes_in_chord: i64 = round_up_to_num_bytes(num_matrix_positions);
+        let num_rows = self.get_val_len("row_pins");
+        let num_columns = self.get_val_len("column_pins");
+        let num_matrix_positions = num_rows * num_columns;
+        let num_bytes_in_chord = round_up_to_num_bytes(num_matrix_positions);
         let has_battery = self.get("battery_level_pin").is_set();
 
-        let mut num_rgb_led_pins: i64 = 0;
+        let mut num_rgb_led_pins = 0;
         let mut enable_rgb_led = false;
         if self.get("rgb_led_pins").is_set() {
-            num_rgb_led_pins = self.get_val_len("rgb_led_pins") as i64;
+            num_rgb_led_pins = self.get_val_len("rgb_led_pins");
             enable_rgb_led = true;
         }
 
 
-        self.set_val("num_rows" , OpVal::Int(num_rows));
-        self.set_val("num_columns" , OpVal::Int(num_columns));
-        self.set_val("num_matrix_positions", OpVal::Int(num_matrix_positions));
-        self.set_val("num_bytes_in_chord", OpVal::Int(num_bytes_in_chord));
-        self.set_val("num_rgb_led_pins", OpVal::Int(num_rgb_led_pins));
+        self.set_val("num_rows" , OpVal::Int32(num_rows as i32));
+        self.set_val("num_columns" , OpVal::Int32(num_columns as i32));
+        self.set_val("num_matrix_positions", OpVal::Int32(num_matrix_positions as i32));
+        self.set_val("num_bytes_in_chord", OpVal::Int32(num_bytes_in_chord as i32));
+        self.set_val("num_rgb_led_pins", OpVal::Int32(num_rgb_led_pins as i32));
         self.set_val("enable_rgb_led", OpVal::Bool(enable_rgb_led));
         self.set_val("has_battery", OpVal::Bool(has_battery));
-        self.set_val("blank_mapping", OpVal::Int(0));
+        self.set_val("blank_mapping", OpVal::Int32(0));
 
-        Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int());
+        Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int32());
     }
 
     pub fn get_formattable_options(&self) -> BTreeMap<String, OpDef> {
@@ -411,6 +419,6 @@ impl Options {
 
 }
 
-fn round_up_to_num_bytes(num_bits: i64) -> i64{
-    (num_bits as f64 / 8.0).ceil() as i64
+fn round_up_to_num_bytes(num_bits: usize) -> usize{
+    (num_bits as f64 / 8.0).ceil() as usize
 }

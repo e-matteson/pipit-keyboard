@@ -8,7 +8,6 @@ use format::{Format, CArray, KmapBuilder, ModeBuilder, compress,
              make_compression_macros};
 
 
-
 impl KeyPress {
     pub fn as_bytes(&self, use_mods: bool) -> Vec<CCode> {
         let mut v: Vec<CCode> = Vec::new();
@@ -37,7 +36,7 @@ impl OpDef {
         match self.op_type {
             OpType::DefineInt => {
                 format_define(name,
-                              &self.get_val().unwrap_int().to_c())
+                              &self.get_val().unwrap_int32().to_c())
             }
             OpType::DefineString => {
                 format_define(name,
@@ -54,7 +53,7 @@ impl OpDef {
                 }
             }
             OpType::Uint8 => {
-                format_uint8(&name, self.get_val().unwrap_int())
+                format_uint8(&name, self.get_val().unwrap_uint8())
             }
             OpType::Array1D => {
                 CArray::new()
@@ -362,10 +361,7 @@ fn format_define(name: &CCode, value: &CCode) -> Format {
     }
 }
 
-fn format_uint8(name: &CCode, value: i64) -> Format {
-    if value > 255 || value < 0 {
-        panic!("8-bit value out of range 0-255");
-    }
+fn format_uint8(name: &CCode, value: u8) -> Format {
     Format {
         h: CCode(format!("extern const uint8_t {};\n",
                          name)),

@@ -1,5 +1,13 @@
 
-use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name, CCode, ToC};
+use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name};
+
+#[derive(Debug, Clone)]
+pub struct WordInfo {
+    pub seq_spelling: String,
+    pub chord_spelling: String,
+    pub anagram_num: u8,
+}
+
 #[derive(Debug)]
 pub struct Word {
     pub name: Name,
@@ -8,9 +16,7 @@ pub struct Word {
 }
 
 pub struct WordBuilder<'a> {
-    pub seq_spelling: &'a str,
-    pub chord_spelling: &'a str,
-    pub anagram_num: u8,
+    pub info: WordInfo,
     pub kmap: &'a KmapPath,
     pub maps: &'a Maps,
 }
@@ -27,29 +33,34 @@ impl<'a> WordBuilder<'a> {
     fn make_name(&self) -> Name {
         // Ensure that each word has a unique name.
 
-        let mut name = format!("word_{}", self.seq_spelling);
-        if self.chord_spelling != self.seq_spelling {
-            name += &format!("_{}", self.chord_spelling);
+        let mut name = format!("word_{}", self.info.seq_spelling);
+        if self.info.chord_spelling != self.info.seq_spelling {
+            name += &format!("_{}", self.info.chord_spelling);
         }
-        if self.anagram_num != 0 {
-            name += &format!("_{}", self.anagram_num);
+        if self.info.anagram_num != 0 {
+            name += &format!("_{}", self.info.anagram_num);
         }
         Name(name)
     }
 
     fn make_sequence(&self) -> Sequence {
         let mut seq = Sequence::new();
-        for letter in self.seq_spelling.chars(){
-            seq.push(KeyPress{key: self.get_key_name_for_seq(letter),
-                              modifier: self.get_mod_name_for_seq(letter)})
+        for letter in self.info.seq_spelling.chars(){
+            // TODO use new
+            seq.push(
+                KeyPress::new(
+                    Some(self.get_key_code_for_seq(letter)),
+                    self.get_mod_name_for_seq(letter)
+                )
+            );
         }
         seq
     }
 
 
-    fn get_key_name_for_seq(&self, character: char) -> CCode {
+    fn get_key_code_for_seq(&self, character: char) -> String {
         if character.is_alphanumeric() {
-            return format!("KEY_{}", character.to_uppercase()).to_c();
+            return format!("KEY_{}", character.to_uppercase()).to_string();
         }
         let s = match character {
             ' '  => "KEY_SPACE",
@@ -58,14 +69,14 @@ impl<'a> WordBuilder<'a> {
             '.'  => "KEY_PERIOD",
             _ => panic!("illegal character in sequence: {}", character),
         };
-        s.to_c()
+        s.to_owned()
     }
 
-    fn get_mod_name_for_seq(&self, character: char) -> CCode {
+    fn get_mod_name_for_seq(&self, character: char) -> Option<String> {
         if character.is_uppercase() {
-            "MODIFIERKEY_SHIFT".to_c()
+            Some("MODIFIERKEY_SHIFT".to_owned())
         } else {
-            "0".to_c()
+            None
         }
     }
 
@@ -73,13 +84,13 @@ impl<'a> WordBuilder<'a> {
         let ignored = vec!['<', '.']; //TODO make this static?
 
         let mut chord = Chord::new();
-        for letter in self.chord_spelling.chars(){
+        for letter in self.info.chord_spelling.chars(){
             if ignored.contains(&letter){
                 continue;
             }
             chord.intersect(&self.get_letter_chord(letter));
         }
-        chord.anagram_num = self.anagram_num;
+        chord.anagram_num = self.info.anagram_num;
         chord
     }
 

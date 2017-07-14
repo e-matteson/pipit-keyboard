@@ -13,7 +13,7 @@ pub struct SwitchPos {
 }
 
 impl SwitchPos{
-    pub fn new(row: i64, col: i64) -> SwitchPos {
+    pub fn new(row: u8, col: u8) -> SwitchPos {
         SwitchPos{
             row: row as usize,
             col: col as usize,
@@ -122,7 +122,7 @@ pub struct KeyPress{
 }
 
 impl KeyPress{
-    pub fn new(key: Option<&String>, modifier: Option<&String>) -> KeyPress {
+    pub fn new(key: Option<String>, modifier: Option<String>) -> KeyPress {
         KeyPress{
             key: KeyPress::sanitize(key),
             modifier: KeyPress::sanitize(modifier),
@@ -159,14 +159,14 @@ impl KeyPress{
         false
     }
 
-    fn sanitize(string: Option<&String>) -> CCode {
+    fn sanitize(string: Option<String>) -> CCode {
         // TODO compare to an actual list of defined key codes?
         //  Could vary with underlying keyboard lib, though
         match string {
             None =>
                 "0".to_c(),
             Some(s) => {
-                if KeyPress::contains_illegal_char(s) {
+                if KeyPress::contains_illegal_char(&s) {
                     panic!(format!("Keypress value is probably not valid: {}", s));
                 }
                 s.to_c()            }
@@ -312,7 +312,7 @@ impl ToC for bool {
     }
 }
 
-impl ToC for i64 {
+impl ToC for i32 {
     fn to_c(&self) -> CCode {
         CCode(self.to_string())
     }

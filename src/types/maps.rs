@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap};
 use std::clone::Clone;
 
-use types::{Chord, Sequence, KeyPress, WordBuilder, Options, SeqType, KmapPath,
+use types::{Chord, Sequence, KeyPress, WordBuilder, WordInfo, Options, SeqType, KmapPath,
             Name, ModeInfo, ModeName, CCode, ToC, Checker};
 
 
@@ -67,14 +67,10 @@ impl Maps {
     }
 
 
-    pub fn add_word(&mut self, seq_spelling: &str, chord_spelling: &str,
-                    anagram: u8, kmap: &KmapPath)
-    {
+    pub fn add_word(&mut self, info: WordInfo, kmap: &KmapPath) {
         // TODO build word in loader code instead?
         let word = WordBuilder {
-            seq_spelling: seq_spelling,
-            chord_spelling: chord_spelling,
-            anagram_num: anagram,
+            info: info,
             kmap: kmap,
             maps: &self,
         }.finalize();
@@ -84,7 +80,6 @@ impl Maps {
             self.max_anagram_num = word.chord.anagram_num;
         }
     }
-
 
     pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
         self.modifierkeys.push(name.clone());

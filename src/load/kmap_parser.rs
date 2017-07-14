@@ -118,7 +118,6 @@ fn make_permutation(ops: &Options) -> Vec<usize> {
                 .expect(&format!("Not found in firmware_order: {:?}", pos))
         )
     }
-    // println!("{:?}, {}", permutation, permutation.len());
     permutation
 }
 
@@ -132,7 +131,7 @@ fn make_kmap_order(ops: &Options) -> Vec<SwitchPos> {
 }
 
 fn make_firmware_order(ops: &Options) -> Vec<(SwitchPos)> {
-    // must match the algorithm used in the firmware"s scanMatrix()!
+    // must match the algorithm used in the firmware's scanMatrix()!
     let mut order: Vec<SwitchPos> = Vec::new();
     let row_pins = ops.get_val("row_pins").unwrap_vec();
     let column_pins = ops.get_val("column_pins").unwrap_vec();
