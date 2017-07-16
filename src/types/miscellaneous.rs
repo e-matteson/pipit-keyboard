@@ -20,6 +20,12 @@ impl SwitchPos{
     }
 }
 
+impl fmt::Display for SwitchPos {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{},{}]", self.row, self.col)
+    }
+}
+
 //////////////////////////////
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
@@ -85,6 +91,7 @@ impl fmt::Display for ModeName {
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Name ( pub String );
 
+// TODO: sanitize name?
 impl Name {
     pub fn from(s: &str) -> Name {
         Name(s.to_owned())

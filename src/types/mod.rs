@@ -7,7 +7,11 @@ pub use self::words::{Word, WordInfo, WordBuilder};
 pub use self::options::{Options, OpDef, OpType, OpVal};
 pub use self::maps::Maps;
 pub use self::checker::Checker;
+// pub use self::errors::*;
+// pub use self::other_error::*;
 
+
+pub mod errors;
 mod options;
 mod key_press;
 mod c_code;

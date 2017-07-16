@@ -48,8 +48,8 @@ impl AnagramSet {
         // keys. So we may not want to warn about them. (We don't
         // check which hands the switches are on, but close enough)
         return match chord {
+            Some(c) => c.count_switches() != 2,
             None => true,
-            Some(c) => c.count_switches() != 2
         }
     }
 

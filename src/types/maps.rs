@@ -3,6 +3,7 @@ use std::clone::Clone;
 
 use types::{Chord, Sequence, KeyPress, WordBuilder, WordInfo, Options, SeqType, KmapPath,
             Name, ModeInfo, ModeName, CCode, ToC, Checker};
+use types::errors::*;
 
 
 // TODO typealias kmap names?
@@ -67,18 +68,19 @@ impl Maps {
     }
 
 
-    pub fn add_word(&mut self, info: WordInfo, kmap: &KmapPath) {
+    pub fn add_word(&mut self, info: WordInfo, kmap: &KmapPath) -> Result<()>{
         // TODO build word in loader code instead?
         let word = WordBuilder {
             info: info,
             kmap: kmap,
             maps: &self,
-        }.finalize();
+        }.finalize()?;
         self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq.clone());
         self.add_chord(word.name.clone(), word.chord.clone(), kmap);
         if word.chord.anagram_num > self.max_anagram_num {
             self.max_anagram_num = word.chord.anagram_num;
         }
+        Ok(())
     }
 
     pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
@@ -122,9 +124,8 @@ impl Maps {
 
     fn get_sequence(&self, name: &Name) -> &Sequence {
         for seq_type in self.sequences.keys() {
-            match self.get_sequences(seq_type).get(name){
-                Some(s) => return s,
-                None => (),
+            if let Some(s) = self.get_sequences(seq_type).get(name){
+                 return s;
             }
         }
         panic!("No sequence found for name");
@@ -140,10 +141,9 @@ impl Maps {
 
     pub fn get_chord(&self, chord_name: &Name, kmap: &KmapPath) -> Option<Chord>{
         // TODO be consistent about argument order
-        match self.chords[kmap].get(chord_name) {
-            Some(chord) => Some(chord.clone()),
-            None => None,
-        }
+        self.chords[kmap]
+            .get(chord_name)
+            .and_then(|x| Some(x.clone()))
     }
 
     pub fn get_chords(&self, kmap: &KmapPath) -> &BTreeMap<Name, Chord>{
@@ -155,8 +155,6 @@ impl Maps {
         self.chords.get_mut(kmap)
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
-
-
 
     // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {

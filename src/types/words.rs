@@ -1,5 +1,6 @@
 
 use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name};
+use types::errors::*;
 
 #[derive(Debug, Clone)]
 pub struct WordInfo {
@@ -22,12 +23,21 @@ pub struct WordBuilder<'a> {
 }
 
 impl<'a> WordBuilder<'a> {
-    pub fn finalize(&self) -> Word {
-        Word{
-            name: self.make_name(),
-            seq: self.make_sequence(),
-            chord: self.make_chord(),
-        }
+    pub fn finalize(&self) -> Result<Word> {
+        Ok(
+            Word{
+                name: self.make_name(),
+                seq: self.make_sequence()
+                    .chain_err(||ErrorKind::BadValue(
+                        "word".into(),
+                        Some(self.info.seq_spelling.clone()))
+                    )?,
+                // TODO make general purpose failure enum?
+                chord: self.make_chord()
+                    .chain_err(||format!("failure to make chord for: '{}'",
+                                         self.info.seq_spelling))?,
+            }
+        )
     }
 
     fn make_name(&self) -> Name {
@@ -43,44 +53,48 @@ impl<'a> WordBuilder<'a> {
         Name(name)
     }
 
-    fn make_sequence(&self) -> Sequence {
+    fn make_sequence(&self) -> Result<Sequence> {
         let mut seq = Sequence::new();
         for letter in self.info.seq_spelling.chars(){
-            // TODO use new
             seq.push(
                 KeyPress::new(
-                    Some(self.get_key_code_for_seq(letter)),
+                    Some(self.get_key_code_for_seq(letter)?),
                     self.get_mod_name_for_seq(letter)
-                )
+                ) .unwrap()
             );
         }
-        seq
+        Ok(seq)
     }
 
 
-    fn get_key_code_for_seq(&self, character: char) -> String {
+    fn get_key_code_for_seq(&self, character: char) -> Result<String> {
         if character.is_alphanumeric() {
-            return format!("KEY_{}", character.to_uppercase()).to_string();
+            return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
         }
         let s = match character {
             ' '  => "KEY_SPACE",
             '<'  => "KEY_BACKSPACE",
             '\'' => "KEY_QUOTE",
             '.'  => "KEY_PERIOD",
-            _ => panic!("illegal character in sequence: {}", character),
-        };
-        s.to_owned()
-    }
+            _ => bail!(
+                ErrorKind::BadValue(
+                    "character".into(),
+                    Some(character.to_string())
+                )
+            ),
+    };
+    Ok(s.into())
+}
 
     fn get_mod_name_for_seq(&self, character: char) -> Option<Vec<String>> {
         if character.is_uppercase() {
-            Some(vec!["MODIFIERKEY_SHIFT".to_owned()])
+            Some(vec!["MODIFIERKEY_SHIFT".into()])
         } else {
             None
         }
     }
 
-    fn make_chord(&self) -> Chord {
+    fn make_chord(&self) -> Result<Chord> {
         let ignored = vec!['<', '.']; //TODO make this static?
 
         let mut chord = Chord::new();
@@ -88,27 +102,39 @@ impl<'a> WordBuilder<'a> {
             if ignored.contains(&letter){
                 continue;
             }
-            chord.intersect(&self.get_letter_chord(letter));
+            chord.intersect(&self.get_letter_chord(letter)?);
         }
         chord.anagram_num = self.info.anagram_num;
-        chord
+        Ok(chord)
     }
 
-    fn get_letter_chord(&self, letter: char) -> Chord {
+    fn get_letter_chord(&self, letter: char) -> Result<Chord> {
         // TODO return option<chord>, for if not found
-        let name = self.get_key_name_for_chord(letter);
-        self.maps.get_chord(&name, self.kmap)
-            .expect(&format!("no chord for key name: {}", name))
+        let name = self.get_key_name_for_chord(letter)?;
+        self.maps
+            .get_chord(&name, self.kmap)
+            .ok_or(
+                ErrorKind::MissingValue(
+                    "chord".into(),
+                    Some(name.to_string())
+                ).into()
+            )
     }
 
-    fn get_key_name_for_chord(&self, character: char) -> Name {
+    fn get_key_name_for_chord(&self, character: char) -> Result<Name> {
         if character.is_alphanumeric() {
-            return Name(format!("key_{}", character.to_lowercase()))
+            return Ok(Name(format!("key_{}", character.to_lowercase())))
         }
-        Name(match character{
-            ' '  => "key_space".to_owned(),
-            '\'' => "key_quote".to_owned(),
-            _ => panic!("illegal character in chord: {}", character),
-        })
+        let name = match character{
+            ' '  => "key_space".into(),
+            '\'' => "key_quote".into(),
+            _ => bail!(
+                ErrorKind::BadValue(
+                    "character".into(),
+                    Some(character.to_string())
+                )
+            )
+        };
+        Ok(Name(name))
     }
 }

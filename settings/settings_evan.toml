@@ -33,6 +33,7 @@ battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 
+# kmap_format                = [[[1,2], [1,2]]]
 kmap_format                = [
     [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
     [[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
@@ -46,6 +47,7 @@ mod_shift         = {mod="MODIFIERKEY_SHIFT"}
 mod_ctrl          = {mod="MODIFIERKEY_CTRL"}
 mod_alt           = {mod="MODIFIERKEY_ALT"}
 mod_gui           = {mod="MODIFIERKEY_GUI"}
+
 
 
 [plain_keys]
@@ -748,7 +750,7 @@ macro_org_insert_link=[{key="KEY_SPACE"},
 
 word_modifiers = [
     "mod_capital",
-    "mod_nospace"
+    "mod_nospace",
 ]
 
 anagram_modifiers = [

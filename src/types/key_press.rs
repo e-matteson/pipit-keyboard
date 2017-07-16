@@ -1,4 +1,5 @@
 use types::{Name, CCode, ToC};
+use types::errors::*;
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack. Rename?
 
@@ -12,11 +13,13 @@ pub struct KeyPress{
 }
 
 impl KeyPress{
-    pub fn new(key: Option<String>, modifiers: Option<Vec<String>>) -> KeyPress {
-        KeyPress{
-            key: make_key(key),
-            modifier: make_mod(modifiers),
-        }
+    pub fn new(key: Option<String>, modifiers: Option<Vec<String>>) -> Result<KeyPress> {
+        Ok(
+            KeyPress{
+                key: make_key(key)?,
+                modifier: make_mod(modifiers)?,
+            }
+        )
     }
 
     pub fn new_fake(code: &Name) -> KeyPress {
@@ -37,37 +40,38 @@ impl KeyPress{
     }
 }
 
-fn make_key(key: Option<String>) -> CCode {
-    sanitize(&or_default(key))
+fn make_key(key: Option<String>) -> Result<CCode> {
+    Ok(sanitize(&or_default(key))?)
 }
 
-fn make_mod(modifiers: Option<Vec<String>>) -> CCode {
-    match modifiers {
-        Some(v) => {
-            let mod_codes: Vec<_> = v.into_iter()
-                .map(|s| sanitize(&s))
-                .collect();
-            mod_codes.join("|").to_c()
+fn make_mod(modifiers: Option<Vec<String>>) -> Result<CCode> {
+    Ok(
+        match modifiers {
+            Some(v) => {
+                let mut mod_codes= Vec::new();
+                for m in v.into_iter(){
+                    mod_codes.push(sanitize(&m)?);
+                }
+                mod_codes.join("|").to_c()
+            }
+            None => or_default(None).to_c(),
         }
-        None => or_default(None).to_c(),
-    }
+    )
 }
 
 fn or_default(string: Option<String>) -> String {
-    match string {
-        None =>
-            "0".to_owned(),
-        Some(s) => s
-    }
+    string.unwrap_or("0".into())
 }
 
-fn sanitize(s: &str) -> CCode {
+fn sanitize(s: &str) -> Result<CCode> {
     // TODO compare to an actual list of defined key codes?
     //  Could vary with underlying keyboard lib, though
     if contains_illegal_char(&s) {
-        panic!(format!("Keypress value is probably not valid: {}", s));
+        bail!(ErrorKind::BadValue("KeyPress".into(), Some(s.to_owned())))
     }
-    s.to_c()
+    else {
+        Ok(s.to_c())
+    }
 }
 
 fn contains_illegal_char(string: &str) -> bool {

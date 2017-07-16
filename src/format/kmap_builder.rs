@@ -320,10 +320,8 @@ fn make_flat_sequence(seq_map: &SeqMap, names: &Vec<Name>)
 }
 
 
-
 fn max_len(names_by_len: &LenMap) -> usize {
-    *names_by_len.keys().max()
-        .expect("failed to get max length")
+    *names_by_len.keys().max().unwrap_or(&0)
 }
 
 fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<u8> {

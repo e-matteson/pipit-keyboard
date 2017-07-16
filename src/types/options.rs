@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use types::{Chord, SwitchPos};
+use types::errors::*;
 
 const DEFAULT_OUTPUT_DIRECTORY: &str = "pipit-firmware/";
 
@@ -127,16 +128,13 @@ impl OpDef{
     //     self.required == OpReq::Auto
     // }
 
-    #[allow(unused_variables)]
-    // TODO how to avoid unused variables?
     pub fn is_mode(&self) -> bool {
         match self.op_type {
-            OpType::Mode{use_words} => true,
+            OpType::Mode{..} => true,
             _ => false,
         }
     }
 
-    // #[allow(unused_variables)]
     pub fn is_mode_with_words(&self) -> bool {
         match self.op_type {
             OpType::Mode{use_words} => use_words,
@@ -145,17 +143,11 @@ impl OpDef{
     }
 
     pub fn get_val(&self) -> &OpVal{
-        match self.val{
-            Some(ref val) => val,
-            _ => panic!(format!("value is None")),
-        }
+        self.val.as_ref().expect(&format!("value is None"))
     }
 
     pub fn is_set(&self) -> bool {
-        match self.val{
-            Some(_) => true,
-            None    => false
-        }
+        self.val.is_some()
     }
 
     fn is_internal(&self) -> bool {
@@ -323,17 +315,17 @@ impl Options {
     }
 
     pub fn get(&self, key: &str) -> &OpDef {
-        match self.0.get(key) {
-            Some(opdef) => opdef,
-            None => panic!(format!("option not found: {}", key)),
-        }
+        self.0.get(key).expect(&format!("option not found: {}", key))
     }
 
-    pub fn get_mut(&mut self, key: &str) -> &mut OpDef {
-        match self.0.get_mut(key) {
-            Some(opdef) => opdef,
-            None => panic!(format!("option not found: {}", key)),
-        }
+    pub fn get_mut(&mut self, key: &str) -> Result<&mut OpDef> {
+        self.0
+            .get_mut(key)
+            .ok_or(ErrorKind::UnexpectedKey(key.into()).into())
+        // {
+        //     Some(opdef) => Ok(opdef),
+        //     None => Err(),
+        // }
     }
 
     fn set_val(&mut self, name: &str, val: OpVal){
@@ -353,7 +345,7 @@ impl Options {
         self.get_val(name).unwrap_vec().len() as usize
     }
 
-    pub fn verify_requirements(&self){
+    pub fn verify_requirements(&self) -> Result<()>{
         /// Verify that option dependencies are satisfied.
         for (name, op) in self.0.iter(){
             if let Some(_) = op.val{
@@ -366,22 +358,28 @@ impl Options {
                 &OpReq::Optional => continue,
                 &OpReq::Required => (),
                 &OpReq::Dependent{ref key, ref val} =>
+                // TODO clean this up?
                     match (val, &self.0[key].val){
                         (&Some(ref expected), &Some(ref actual)) =>
                             if expected != actual {
                                 continue
                             },
-                        (&None, &None)
-                            | (&Some(_), &None) =>
+                        (&None, &None) | (&Some(_), &None) =>
                             continue,
                         _ => (),
                     },
             }
-            panic!("Missing required option: {}", name)
+            bail!(
+                ErrorKind::MissingValue(
+                    "required option key".into(),
+                    Some(name.to_string())
+                )
+            );
         }
+        Ok(())
     }
 
-    pub fn set_auto(&mut self) {
+    pub fn set_auto(&mut self)  {
         /// Generate the OpReq::Auto options that depend only on other options
 
         let num_rows = self.get_val_len("row_pins");
@@ -408,6 +406,7 @@ impl Options {
         self.set_val("blank_mapping", OpVal::Int32(0));
 
         Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int32());
+        // Ok(())
     }
 
     pub fn get_formattable_options(&self) -> BTreeMap<String, OpDef> {

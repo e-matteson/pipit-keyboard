@@ -28,7 +28,7 @@ impl <'a> ModeBuilder <'a> {
         f.append(&self.format_modifier_array(&mut mod_array_name));
 
         let m = ModeStruct {
-            num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long?
+            num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long!
             kmaps: CCode(format!("{}", kmap_array_name)),
             mod_chords: CCode(format!("{}", mod_array_name)),
             anagram_chords: CCode(format!("{}", anagram_array_name)),
