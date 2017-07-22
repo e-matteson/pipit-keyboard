@@ -33,7 +33,6 @@ battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 
-# kmap_format                = [[[1,2], [1,2]]]
 kmap_format                = [
     [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
     [[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
@@ -146,7 +145,6 @@ key_semicolon     = {key="KEY_SEMICOLON"}
 key_slash         = {key="KEY_SLASH"}
 key_tilde         = {key="KEY_TILDE", mod="MODIFIERKEY_SHIFT"}
 key_underscore    = {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}
-blank_mapping     = {key="BLANK_MAPPING"} #for ignoring unused blocks in kmap files
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]
@@ -1515,7 +1513,7 @@ dictionary = [
     {word="climb"},
     {word="clinic"},
     {word="clip"},
-    {word="clock", chord="clk"},
+    {word="clock", anagram=1},
     {word="clone"},
     {word="close"},
     {word="cloth"},
@@ -1611,7 +1609,7 @@ dictionary = [
     {word="confusion"},
     {word="congratulate"},
     {word="congress"},
-    {word="connect", anagram=1},
+    {word="connect"},
     {word="connectivity", chord="con", anagram=1},
     {word="conscious"},
     {word="consecutive"},
@@ -1633,7 +1631,7 @@ dictionary = [
     {word="contact"},
     {word="contain"},
     {word="contaminate"},
-    {word="content"},
+    {word="content", anagram=1},
     {word="contest", anagram=1},
     {word="context"},
     {word="continent", anagram=2},
@@ -1650,7 +1648,7 @@ dictionary = [
     {word="convention", anagram=1},
     {word="converge"},
     {word="conversation"},
-    {word="conversation", chord="convo"},
+    {word="conversation", chord="conv"},
     {word="convert"},
     {word="convey"},
     {word="convict"},
@@ -1900,7 +1898,7 @@ dictionary = [
     {word="different"},
     {word="different", chord="dif"},
     {word="difficult"},
-    {word="difficult", chord="dif", anagram=2},
+    {word="difficult", chord="difl"},
     {word="diffuse"},
     {word="dig"},
     {word="digest"},
@@ -4254,7 +4252,7 @@ dictionary = [
     {word="route"},
     {word="routine"},
     {word="rover", anagram=2},
-    {word="row", chord="row"},
+    {word="row"},
     {word="royal", anagram=1},
     {word="rpm"},
     {word="rubber", anagram=2},

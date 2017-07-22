@@ -29,6 +29,10 @@ error_chain! {
         //     description("Missing key in settings")
         //         display("missing key: '{}'", s)
         // }
+        // Duplicate(_type: String, name: String) {
+        //     description("Duplicate mapping")
+        //         display("unexpected key: '{}'", s)
+        // }
         UnexpectedKey(s: String) {
             description("Unexpected key in settings")
                 display("unexpected key: '{}'", s)

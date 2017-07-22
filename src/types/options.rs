@@ -103,14 +103,8 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          OpDefBuilder::new(OpType::DefineInt)
          .required(OpReq::Auto)
          .finalize()),
-
-        ("blank_mapping",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
     ]
 }
-
 
 
 #[derive(Debug)]
@@ -403,7 +397,6 @@ impl Options {
         self.set_val("num_rgb_led_pins", OpVal::Int32(num_rgb_led_pins as i32));
         self.set_val("enable_rgb_led", OpVal::Bool(enable_rgb_led));
         self.set_val("has_battery", OpVal::Bool(has_battery));
-        self.set_val("blank_mapping", OpVal::Int32(0));
 
         Chord::set_num_bytes(self.get_val("num_bytes_in_chord").unwrap_int32());
         // Ok(())

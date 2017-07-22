@@ -38,33 +38,35 @@ impl Maps {
         }
     }
 
-    pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath) {
-        self.checker.insert(name.clone(), chord.clone(), kmap);
+    pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath)
+                     -> Result<()>
+    {
+        self.checker.insert_chord(name.clone(), chord.clone(), kmap)?;
         self.chords
             .get_mut(kmap)
             .expect(&format!("Failed to add chord because kmap is unknown: {}",
                              kmap))
             .insert(name, chord);
-
+        Ok(())
     }
 
-    pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>) {
+    pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>)
+                      -> Result<()>
+    {
         for (name, chord) in new_chords.into_iter() {
-            self.add_chord(name, chord, kmap);
+            self.add_chord(name, chord, kmap)?;
         }
+        Ok(())
     }
 
-    pub fn add_command(&mut self, entry: &Name) {
-        if self.get_sequences(&SeqType::Command).contains_key(entry){
-            panic!(format!("commands map already contains key: {}", entry));
-        }
-        // commands are a single byte code, not an actual key sequence.
-        // But we'll store it as a KeyPress for convenience.
+    pub fn add_command(&mut self, entry: &Name) -> Result<()> {
+        // Commands are a single byte code, not an actual key sequence.
+        // But we'll store each one as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
         fake_seq_with_command_code.push(KeyPress::new_fake(&entry.to_uppercase()));
-
-        self.get_sequences_mut(SeqType::Command)
-            .insert(entry.to_owned(), fake_seq_with_command_code);
+        self.add_sequence(SeqType::Command,
+                          entry.to_owned(),
+                          fake_seq_with_command_code)
     }
 
 
@@ -75,23 +77,23 @@ impl Maps {
             kmap: kmap,
             maps: &self,
         }.finalize()?;
-        self.get_sequences_mut(SeqType::Word).insert(word.name.clone(),  word.seq.clone());
-        self.add_chord(word.name.clone(), word.chord.clone(), kmap);
+        self.add_sequence(SeqType::Word, word.name.clone(), word.seq.clone())?;
+        self.add_chord(word.name.clone(), word.chord.clone(), kmap)?;
         if word.chord.anagram_num > self.max_anagram_num {
             self.max_anagram_num = word.chord.anagram_num;
         }
         Ok(())
     }
 
-    pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) {
+    pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) -> Result<()> {
         self.modifierkeys.push(name.clone());
-        self.get_sequences_mut(SeqType::Plain).insert(name, seq.clone());
+        self.add_sequence(SeqType::Plain, name, seq.clone())
     }
 
-    pub fn add_mode(&mut self,
-                    name: ModeName,
-                    info: ModeInfo) {
-        assert!(!self.modes.contains_key(&name));
+    pub fn add_mode(&mut self, name: ModeName, info: ModeInfo) -> Result<()> {
+        if self.modes.contains_key(&name) {
+            bail!("mode already exists: '{}'", &name);
+        }
         // Store the kmaps that are included in this mode
         for kmap_info in info.keymaps.iter() {
             let kmap_path = &kmap_info.path;
@@ -105,11 +107,34 @@ impl Maps {
             self.kmap_ids.insert(kmap_path.clone(), nickname);
         }
         self.modes.insert(name, info);
+        Ok(())
     }
 
-    pub fn set_sequences(&mut self, seq_type: &SeqType, val: BTreeMap<Name, Sequence>) {
+    pub fn add_sequence(&mut self, seq_type: SeqType, name: Name, seq: Sequence)
+                        -> Result<()>
+    {
+        // TODO check that name doesn't already exist
+        self.checker.insert_seq(name.clone())?;
+        self.sequences
+            .entry(seq_type)
+            .or_insert(BTreeMap::new())
+            .insert(name, seq);
+        Ok(())
+    }
+
+    pub fn set_sequences(&mut self,
+                         seq_type: &SeqType,
+                         val: BTreeMap<Name, Sequence>)
+        -> Result<()>
+    {
+        // Add an entire seq_type's worth of sequences all at once
         assert!(!self.sequences.contains_key(&seq_type));
+
+        for name in val.keys(){
+            self.checker.insert_seq(name.to_owned())?;
+        }
         self.sequences.insert(seq_type.clone(), val);
+        Ok(())
     }
 
     pub fn get_sequences(&self, seq_type: &SeqType) -> &BTreeMap<Name, Sequence>{
@@ -134,7 +159,7 @@ impl Maps {
     pub fn get_mod_key(&self, name: &Name) -> CCode {
         let seq = self.get_sequence(name);
         if seq.len() != 1 || seq.0[0].key != "0".to_c() {
-            panic!("bad modifierkey sequence");
+            panic!("bad modifier key sequence");
         }
         seq.0[0].modifier.clone()
     }

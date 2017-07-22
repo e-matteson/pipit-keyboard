@@ -1,7 +1,8 @@
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
 use types::{Chord, KmapPath, Name};
+use types::errors::*;
 
 #[derive(Debug)]
 pub struct AnagramSet (pub HashMap<u8, Vec<Name>>);
@@ -89,20 +90,22 @@ impl fmt::Display for AnagramSet {
     }
 }
 
-
+//////////////////////////////
 
 #[derive(Debug)]
 pub struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
-    pub reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
-    // pub reverse_modes:    HashMap<ModeName, HashMap<Chord, AnagramSet>>,
+    reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
+    all_seqs:         HashSet<Name>,
+    all_chords:       HashSet<Name>,
 }
 
-impl  Checker  {
+impl Checker  {
     pub fn new() -> Checker {
         Checker {
             reverse_kmaps: HashMap::new(),
-            // reverse_modes: HashMap::new(),
+            all_seqs: HashSet::new(),
+            all_chords: HashSet::new(),
         }
     }
 
@@ -140,7 +143,17 @@ impl  Checker  {
     //     self.reverse_modes = new;
     // }
 
-    pub fn insert(&mut self, name: Name, chord: Chord, kmap: &KmapPath) {
+    pub fn insert_seq(&mut self, name: Name) -> Result<()>{
+        if !self.all_seqs.insert(name.clone()){
+            bail!("duplicate sequence: '{}'", name);
+        }
+        Ok(())
+    }
+
+    pub fn insert_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath)
+                        -> Result<()>
+    {
+        // TODO take refs
         let mut base_chord = chord.clone();
         base_chord.anagram_num = 0;
 
@@ -150,6 +163,8 @@ impl  Checker  {
             .entry(base_chord)
             .or_insert(AnagramSet::new())
             .insert(chord.anagram_num, name.clone());
+        self.all_chords.insert(name);
+        Ok(())
     }
 }
 

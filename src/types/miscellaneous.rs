@@ -88,7 +88,7 @@ impl fmt::Display for ModeName {
 
 //////////////////////////////
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Name ( pub String );
 
 // TODO: sanitize name?

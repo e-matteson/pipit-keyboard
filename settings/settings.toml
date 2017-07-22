@@ -144,7 +144,6 @@ key_semicolon     = {key="KEY_SEMICOLON"}
 key_slash         = {key="KEY_SLASH"}
 key_tilde         = {key="KEY_TILDE", mod="MODIFIERKEY_SHIFT"}
 key_underscore    = {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}
-blank_mapping     = {key="BLANK_MAPPING"} #for ignoring unused blocks in kmap files
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]

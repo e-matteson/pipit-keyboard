@@ -12,7 +12,7 @@ use types::errors::*;
 
 const COMMENT_START: &str = "#";
 const UNPRESSED_CHAR: char = '.';
-
+const BLANK_MAPPING: &str = "blank_mapping";
 
 type Section<'a> = Vec<(usize, Vec<&'a str>)>;
 
@@ -52,7 +52,7 @@ impl KmapParser {
             let section: Vec<_> = chunk.collect();
             pairs.extend(self.parse_section(section)?);
         }
-        Ok(pairs.into_iter().collect())
+        to_chord_map(pairs)
     }
 
     fn parse_section(&mut self, section: Section) -> Result<Vec<(Name, Chord)>>{
@@ -166,4 +166,18 @@ fn split(line: &str) -> Vec<&str>{
 
 fn last(line_nums: &Vec<usize>) -> usize {
     *line_nums.last().unwrap()
+}
+
+fn to_chord_map(pairs: Vec<(Name, Chord)>) -> Result<BTreeMap<Name, Chord>> {
+    let blank_mapping = Name::from(BLANK_MAPPING);
+    let mut map = BTreeMap::new();
+    for (name, chord) in pairs.into_iter() {
+        if name == blank_mapping {
+            continue;
+        }
+        if map.insert(name.clone(), chord).is_some() {
+            bail!("duplicate chord: '{}'", name);
+        }
+    }
+    Ok(map)
 }
