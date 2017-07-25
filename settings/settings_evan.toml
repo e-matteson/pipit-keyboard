@@ -33,11 +33,12 @@ battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 
+
 kmap_format                = [
-    [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
-    [[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
-    [                [1,18],                     [1,6]                ],
-    [         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
+    [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]],
+    [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]],
+    [                  [1, 18],                      [1,  6]                ],
+    [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]]
 
 
 [plain_modifiers]
@@ -46,7 +47,6 @@ mod_shift         = {mod="MODIFIERKEY_SHIFT"}
 mod_ctrl          = {mod="MODIFIERKEY_CTRL"}
 mod_alt           = {mod="MODIFIERKEY_ALT"}
 mod_gui           = {mod="MODIFIERKEY_GUI"}
-
 
 
 [plain_keys]
@@ -357,8 +357,6 @@ macro_recentf       = [{key="KEY_SPACE"},
 macro_find_other_file=[{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_F"}]
-macro_del_win       = [{key="KEY_X", mod="MODIFIERKEY_CTRL"},
-                       {key="KEY_0"}]
 macro_del_other_wins= [{key="KEY_X", mod="MODIFIERKEY_CTRL"},
                        {key="KEY_1"}]
 macro_other_win     = [{key="KEY_SPACE"},
@@ -418,8 +416,6 @@ macro_calendar      = [{key="KEY_SPACE"},
 macro_magit_status  = [{key="KEY_SPACE"},
                        {key="KEY_G"},
                        {key="KEY_S"}]
-macro_browser_tab_search = [{key="KEY_T"},
-                            {key="KEY_TAB"}]
 macro_org_capture   = [{key="KEY_SPACE"},
                        {key="KEY_A"},
                        {key="KEY_O"},
@@ -428,10 +424,6 @@ macro_dotspacemacs  = [{key="KEY_SPACE"},
                        {key="KEY_F"},
                        {key="KEY_E"},
                        {key="KEY_D"}]
-macro_reload_emacs  = [{key="KEY_SPACE"},
-                       {key="KEY_F"},
-                       {key="KEY_E"},
-                       {key="KEY_R", mod="MODIFIERKEY_SHIFT"}]
 macro_open_planner  = [{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_P"},
@@ -603,6 +595,21 @@ macro_lifetime_rs   = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_QUOTE"},
                        {key="KEY_A"},
                        {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}]
+macro_new_rs        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_N"},
+                       {key="KEY_E"},
+                       {key="KEY_W"},
+                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"}]
+macro_btreemap      = [{key="KEY_B", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_T", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_R"},
+                       {key="KEY_E"},
+                       {key="KEY_E"},
+                       {key="KEY_M", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_A"},
+                       {key="KEY_P"}]
 macro_print_rs      = [{key="KEY_P"},
                        {key="KEY_R"},
                        {key="KEY_I"},
@@ -1088,7 +1095,7 @@ dictionary = [
     {word="avr", anagram=1},
     {word="award", anagram=6},
     {word="aware", anagram=5},
-    {word="away", anagram=8},
+    # {word="away", anagram=8},
     {word="awesome"},
     {word="awful"},
     {word="awk"},
@@ -1672,6 +1679,7 @@ dictionary = [
     {word="correct"},
     {word="correlate"},
     {word="correlation"},
+    {word="correspond"},
     {word="cortex"},
     {word="cortical"},
     {word="cosmetic"},
@@ -2335,6 +2343,7 @@ dictionary = [
     {word="flat"},
     {word="flate"},
     {word="flavor"},
+    {word="flea"},
     {word="flect"},
     {word="fleet", anagram=2},
     {word="flesh", anagram=1},
@@ -2987,6 +2996,7 @@ dictionary = [
     {word="json"},
     {word="judge"},
     {word="juice"},
+    {word="julia"},
     {word="July"},
     {word="jump"},
     {word="junction"},
@@ -3081,7 +3091,7 @@ dictionary = [
     {word="lbs", anagram=1},
     {word="lcd"},
     {word="lead", anagram=1},
-    {word="leaf"},
+    {word="leaf", anagram=1},
     {word="league", anagram=1},
     {word="leak"},
     {word="lean"},
@@ -3107,6 +3117,7 @@ dictionary = [
     {word="len"},
     {word="lend"},
     {word="length"},
+    {word="lens"},
     {word="less", anagram=1},
     {word="let"},
     {word="letter"},
@@ -4619,7 +4630,7 @@ dictionary = [
     {word="squeeze"},
     {word="squirt"},
     {word="src"},
-    {word="ssh"},
+    {word="ssh", anagram=1},
     {word="ssl", anagram=1},
     {word="sta", anagram=2},
     {word="stable"},
@@ -4947,6 +4958,7 @@ dictionary = [
     {word="tolerate"},
     {word="toll", anagram=2},
     {word="tomato", anagram=1},
+    {word="toml"},
     {word="tomorrow"},
     {word="ton", anagram=1},
     {word="tone", anagram=1},
@@ -5356,7 +5368,7 @@ dictionary = [
     {word="<y", anagram=1},
     {word="Yang", anagram=1},
     {word="yaourt"},
-    {word="yard", anagram=9},
+    # {word="yard", anagram=9},
     {word="yarn", anagram=1},
     {word="yeah"},
     {word="year"},

@@ -7,17 +7,91 @@ const DEFAULT_OUTPUT_DIRECTORY: &str = "pipit-firmware/";
 
 fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
     /// Define new options here!
+    // TODO give instructions, describe OpReq
 
     vec![
+        //////// Required options
+        ("chord_delay",
+         OpDefBuilder::new(OpType::DefineInt)
+         .finalize()),
+
+        ("held_delay",
+         OpDefBuilder::new(OpType::DefineInt)
+         .finalize()),
+
+        ("debounce_delay",
+         OpDefBuilder::new(OpType::DefineInt)
+         .finalize()),
+
+        ("board_name",
+         OpDefBuilder::new(OpType::IfdefValue)
+         .finalize()),
+
+        ("debug_messages",
+         OpDefBuilder::new(OpType::DefineInt)
+         .finalize()),
+
         ("row_pins",
-         OpDefBuilder::new(OpType::Array1D) .finalize()),
+         OpDefBuilder::new(OpType::Array1D).finalize()),
 
         ("column_pins",
          OpDefBuilder::new(OpType::Array1D).finalize()),
 
+        ("kmap_format",
+         OpDefBuilder::new(OpType::ArrayKmap)
+         .internal(true)
+         .finalize()),
+
+        //////// Optional options
+
         ("rgb_led_pins",
          OpDefBuilder::new(OpType::Array1D)
          .required(OpReq::Optional)
+         .finalize()),
+
+        ("battery_level_pin",
+         OpDefBuilder::new(OpType::Uint8)
+         .required(OpReq::Optional)
+         .finalize()),
+
+        ("output_directory",
+         OpDefBuilder::new(OpType::DefineString)
+         .required(OpReq::Optional)
+         .default(OpVal::Str(DEFAULT_OUTPUT_DIRECTORY.to_owned()))
+         .internal(true)
+         .finalize()),
+
+        ("enable_led_typing_feedback",
+         OpDefBuilder::new(OpType::IfdefKey)
+         .default(OpVal::Bool(false))
+         .required(OpReq::Optional)
+         .finalize()),
+
+        //////// Automatically generated options
+
+        ("num_rows",
+         OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
+         .finalize()),
+
+        ("num_columns",
+         OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
+         .finalize()),
+
+        ("has_battery",
+         OpDefBuilder::new(OpType::IfdefKey)
+         .required(OpReq::Auto)
+         .finalize()),
+
+        ("num_bytes_in_chord",
+         OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
+         .finalize()),
+
+        ("num_matrix_positions",
+         OpDefBuilder::new(OpType::DefineInt)
+         .required(OpReq::Auto)
          .finalize()),
 
         ("num_rgb_led_pins",
@@ -30,79 +104,6 @@ fn  get_option_definitions<'a>() -> Vec<(&'a str, OpDef)> {
          .required(OpReq::Auto)
          .finalize()),
 
-        ("kmap_format",
-         OpDefBuilder::new(OpType::ArrayKmap)
-         .internal(true)
-         .finalize()),
-
-        ("num_rows",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
-
-        ("num_columns",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
-
-        ("chord_delay",
-         OpDefBuilder::new(OpType::DefineInt)
-         .finalize()),
-
-        ("output_directory",
-         OpDefBuilder::new(OpType::DefineString)
-         .required(OpReq::Optional)
-         .default(OpVal::Str(DEFAULT_OUTPUT_DIRECTORY.to_owned()))
-         .internal(true)
-         .finalize()),
-
-        ("held_delay",
-         OpDefBuilder::new(OpType::DefineInt)
-         .finalize()),
-
-        ("debounce_delay",
-         OpDefBuilder::new(OpType::DefineInt)
-         .finalize()),
-
-        ("battery_level_pin",
-         OpDefBuilder::new(OpType::Uint8)
-         .required(OpReq::Optional)
-         .finalize()),
-
-        ("has_battery",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .required(OpReq::Auto)
-         .finalize()),
-
-        // ("enable_audio_typing_feedback",
-        //  OpDefBuilder::new(OpType::IfdefKey)
-        //  .default(OpVal::Bool(false))
-        //  .required(OpReq::Optional)
-        //  .finalize()),
-
-        ("enable_led_typing_feedback",
-         OpDefBuilder::new(OpType::IfdefKey)
-         .default(OpVal::Bool(false))
-         .required(OpReq::Optional)
-         .finalize()),
-
-        ("board_name",
-         OpDefBuilder::new(OpType::IfdefValue)
-         .finalize()),
-
-        ("debug_messages",
-         OpDefBuilder::new(OpType::DefineInt)
-         .finalize()),
-
-        ("num_bytes_in_chord",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
-
-        ("num_matrix_positions",
-         OpDefBuilder::new(OpType::DefineInt)
-         .required(OpReq::Auto)
-         .finalize()),
     ]
 }
 
@@ -344,6 +345,10 @@ impl Options {
         for (name, op) in self.0.iter(){
             if let Some(_) = op.val{
                 // The option was provided in the settings file.
+                if op.required == OpReq::Auto {
+                    bail!("auto-generated option should not be provided: '{}'",
+                          name);
+                }
                 continue
             }
 

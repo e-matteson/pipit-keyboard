@@ -1,46 +1,104 @@
 ########### EXAMPLE SETTINGS FILE #############
 
-[[mode]]
+[options]
 
+# How quickly all the switches in a chord must be pressed for them to be
+# recognized as a single chord. Increase it if you often fail to press whole
+# chords at once. Decrease it if you often type too quickly and accidentally
+# combine separate presses into a single chord.
+#
+# Required. In milliseconds.
+chord_delay                = 50
+
+
+# How long a switch must be held down before it will be reused in future chords.
+#
+# Required. In milliseconds.
+held_delay                 = 200
+
+
+# How long a switch must stay down (or up) to be considered a real press (or
+# release), and not an accidental bounce.
+#
+# Required. In milliseconds.
+debounce_delay             = 5
+
+
+# How much debugging info to send over the serial connection. Messages can be
+# viewed in the Arduino serial monitor.
+#
+# Required. 0 (none), 1 (some), 2 (all).
+debug_messages             = 0
+
+
+# The name of the microcontroller board being used.
+#
+# Required. TEENSY_LC or FEATHER_M0_BLE.
+board_name                 = "FEATHER_M0_BLE"
+
+
+# The microcontroller pins connected to the red, green, and blue channels of an
+# RGB LED, if one is present.
+#
+# Optional. Default: LED disabled.
+rgb_led_pins               = [10, 11, 12]
+
+
+# If true, flash the LED when a unrecognized chord is typed.
+#
+# Optional. Default: false.
+enable_led_typing_feedback = true
+
+
+# The microcontroller pin used to sense battery voltage, if a battery is present.
+#
+# Optional. Default: battery feedback disabled.
+battery_level_pin          = 9
+
+
+# The microcontroller pins connected to each row in the switch matrix.
+#
+# Required.
+row_pins                   = [1, 0, 19]
+
+
+# The microcontroller pins connected to each column in the switch matrix.
+#
+# Required.
+column_pins                = [15,16,17,18, 20,21,5,6]
+
+
+# The format of the chord blocks in the =.kmap= files. Each
+# pair of numbers represents the row and column pins of one switch. The
+# number of switches on each line must match the number of dots on each line of
+# the kmap blocks.
+#
+# Required.
+kmap_format                = [
+    [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]],
+    [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]],
+    [                  [1, 18],                      [1,  6]                ],
+    [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]]
+
+
+# TODO document modes
+[[mode]]
 name = "default_mode"
 keymaps = [{file="keymaps/dvorak24.kmap", words=true}]
 
-
 [[mode]]
-
 name = "left_hand_mode"
 keymaps = [{file="keymaps/dvorak24_left.kmap"}]
 
-
 [[mode]]
-
 name = "gaming_mode"
 keymaps = [{file="keymaps/gaming_test.kmap"}]
 gaming = true
 
 
-[options]
-
-chord_delay                = 50
-held_delay                 = 200
-debounce_delay             = 5
-debug_messages             = 0
-
-board_name                 = "FEATHER_M0_BLE"
-rgb_led_pins               = [10, 11, 12]
-enable_led_typing_feedback = true
-battery_level_pin          = 9
-row_pins                   = [1, 0, 19]
-column_pins                = [15,16,17,18, 20,21,5,6]
-
-kmap_format                = [
-    [[19,18],[19,17],[19,16],[19,15],    [19,20],[19,21],[19,5],[19,6]],
-    [[0,18], [0,17], [0,16], [0,15],     [0,20], [0,21], [0,5], [0,6] ],
-    [                [1,18],                     [1,6]                ],
-    [         [1,17],[1,16],[1,15],       [1,20],[1,21],[1,5]         ]]
-
-
 [plain_modifiers]
+
+# You shouldn't need to edit these.
 
 mod_shift         = {mod="MODIFIERKEY_SHIFT"}
 mod_ctrl          = {mod="MODIFIERKEY_CTRL"}
@@ -49,6 +107,8 @@ mod_gui           = {mod="MODIFIERKEY_GUI"}
 
 
 [plain_keys]
+
+# You shouldn't need to edit these.
 
 key_a             = {key="KEY_A"}
 key_b             = {key="KEY_B"}
@@ -144,40 +204,42 @@ key_semicolon     = {key="KEY_SEMICOLON"}
 key_slash         = {key="KEY_SLASH"}
 key_tilde         = {key="KEY_TILDE", mod="MODIFIERKEY_SHIFT"}
 key_underscore    = {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}
-# "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
+
 
 [macros]
+
+# Add new macro key sequences here!
 
 macro_save_as         = [{key="KEY_S", mod=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
 macro_alt_tab         = [{key="KEY_TAB", mod="MODIFIERKEY_ALT"}]
 macro_vim_save        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_W"},
                          {key="KEY_ENTER"}]
-macro_vim_quit        = [{key="KEY_SEMICOLON",mod="MODIFIERKEY_SHIFT"},
+macro_vim_quit        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_Q"},
                          {key="KEY_ENTER"}]
 macro_in_quote        = [{key="KEY_QUOTE"},
                          {key="KEY_QUOTE"},
                          {key="KEY_LEFT"}]
-macro_in_doublequote  = [{key="KEY_QUOTE",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_QUOTE",mod="MODIFIERKEY_SHIFT"},
+macro_in_doublequote  = [{key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_LEFT"}]
-macro_in_paren        = [{key="KEY_9",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_0",mod="MODIFIERKEY_SHIFT"},
+macro_in_paren        = [{key="KEY_9", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_LEFT"}]
 macro_in_brace        = [{key="KEY_LEFT_BRACE"},
                          {key="KEY_RIGHT_BRACE"},
                          {key="KEY_LEFT"}]
-macro_in_curly        = [{key="KEY_LEFT_BRACE",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_RIGHT_BRACE",mod="MODIFIERKEY_SHIFT"},
+macro_in_curly        = [{key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_LEFT"}]
-macro_in_angle        = [{key="KEY_COMMA",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_PERIOD",mod="MODIFIERKEY_SHIFT"},
+macro_in_angle        = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_LEFT"}]
 macro_if_c            = [{key="KEY_I"},
                          {key="KEY_F"},
-                         {key="KEY_9",mod="MODIFIERKEY_SHIFT"},
-                         {key="KEY_0",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_ENTER"},
                          {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
@@ -187,7 +249,7 @@ macro_if_c            = [{key="KEY_I"},
                          {key="KEY_LEFT"}]
 macro_email           = [{key="KEY_M"},
                          {key="KEY_E"},
-                         {key="KEY_2",mod="MODIFIERKEY_SHIFT"},
+                         {key="KEY_2", mod="MODIFIERKEY_SHIFT"},
                          {key="KEY_E"},
                          {key="KEY_X"},
                          {key="KEY_A"},
@@ -203,16 +265,20 @@ macro_email           = [{key="KEY_M"},
 
 [other]
 
+# You shouldn't need to edit these.
 word_modifiers = [
     "mod_capital",
     "mod_nospace"
 ]
 
+
+# Add up to 7 anagram mods here!
 anagram_modifiers = [
     "mod_anagram_1",
     "mod_anagram_2"
 ]
 
+# Add new commands here, and in pipit-firmware/pipit.cpp
 commands = [
     "command_delete_word",
     "command_left_word",
@@ -232,6 +298,8 @@ commands = [
     "command_default_mode",
     "command_gaming_mode",
 ]
+
+# Add new words here!
 
 dictionary = [
     {word="a", anagram=1},
