@@ -41,7 +41,7 @@ impl Maps {
     pub fn add_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath)
                      -> Result<()>
     {
-        self.checker.insert_chord(name.clone(), chord.clone(), kmap)?;
+        self.checker.insert_chord(&name, &chord, kmap)?;
         self.chords
             .get_mut(kmap)
             .expect(&format!("Failed to add chord because kmap is unknown: {}",
@@ -114,7 +114,7 @@ impl Maps {
                         -> Result<()>
     {
         // TODO check that name doesn't already exist
-        self.checker.insert_seq(name.clone())?;
+        self.checker.insert_seq(&name)?;
         self.sequences
             .entry(seq_type)
             .or_insert(BTreeMap::new())
@@ -131,7 +131,7 @@ impl Maps {
         assert!(!self.sequences.contains_key(&seq_type));
 
         for name in val.keys(){
-            self.checker.insert_seq(name.to_owned())?;
+            self.checker.insert_seq(name)?;
         }
         self.sequences.insert(seq_type.clone(), val);
         Ok(())
@@ -176,7 +176,9 @@ impl Maps {
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
 
-    pub fn get_chords_mut(&mut self, kmap: &KmapPath) -> &mut BTreeMap<Name, Chord>{
+    pub fn get_chords_mut(&mut self, kmap: &KmapPath)
+                          -> &mut BTreeMap<Name, Chord>
+    {
         self.chords.get_mut(kmap)
             .expect(&format!("Failed to get chords for kmap: {}", kmap))
     }
@@ -257,6 +259,7 @@ impl Maps {
 
     pub fn check(&self) {
         // TODO check for missing sequences
-        self.checker.check();
+        self.checker.check_unused();
+        self.checker.check_chords();
     }
 }

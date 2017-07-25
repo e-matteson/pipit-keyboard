@@ -104,6 +104,7 @@ impl<'a> WordBuilder<'a> {
             }
             chord.intersect(&self.get_letter_chord(letter)?);
         }
+        check_valid_anagram(self.info.anagram_num)?;
         chord.anagram_num = self.info.anagram_num;
         Ok(chord)
     }
@@ -137,4 +138,16 @@ impl<'a> WordBuilder<'a> {
         };
         Ok(Name(name))
     }
+}
+
+fn check_valid_anagram(anagram_num: u8) -> Result<()> {
+    // TODO move max out somewere?
+    // TODO how to keep this matched with make_prefix_byte()?
+    const MAX_ANAGRAM: u8 = 7;
+    if anagram_num > MAX_ANAGRAM {
+        bail!("anagram number too large (max is {}): {}",
+              MAX_ANAGRAM,
+              anagram_num);
+    }
+    Ok(())
 }

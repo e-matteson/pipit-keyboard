@@ -176,7 +176,7 @@ fn to_chord_map(pairs: Vec<(Name, Chord)>) -> Result<BTreeMap<Name, Chord>> {
             continue;
         }
         if map.insert(name.clone(), chord).is_some() {
-            bail!("duplicate chord: '{}'", name);
+            bail!("duplicate chords for: '{}'", name);
         }
     }
     Ok(map)

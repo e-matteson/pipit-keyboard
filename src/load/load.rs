@@ -154,7 +154,6 @@ fn parse_toml(toml_path: &str) -> Result<Value> {
 
 fn get_section<'a>(toml: &'a Value, section_name: &str) -> Result<&'a Value> {
     // By section I mean a table that's used as 1 section of the settings
-    // TODO include name in error
     toml.get(section_name)
         .ok_or(
             ErrorKind::MissingValue(

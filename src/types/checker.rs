@@ -4,6 +4,112 @@ use std::fmt::{self, Display};
 use types::{Chord, KmapPath, Name};
 use types::errors::*;
 
+// The Checker warns about sub-optimal configuration. Any config issues that would
+// break the firmware should be caught in the loading (or formatting) code
+// instead.
+
+#[derive(Debug)]
+pub struct Checker {
+    // TODO use more references, instead of duplicating lots of stuff
+    reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
+    all_seqs:         HashSet<Name>,
+    all_chords:       HashSet<Name>,
+}
+
+impl Checker  {
+    pub fn new() -> Checker {
+        Checker {
+            reverse_kmaps: HashMap::new(),
+            all_seqs: HashSet::new(),
+            all_chords: HashSet::new(),
+        }
+    }
+
+    pub fn check_chords(&self) {
+        // TODO take args for types of checks
+        // TODO option to check for mode conflicts instead
+        for (kmap, reversed) in self.reverse_kmaps.iter() {
+            let v: Vec<_> = reversed.iter()
+                .filter(|&(chord, set)| set.is_invalid(Some(chord)))
+                .map(|(_, set)| set)
+                .collect();
+            print_conflicts(&v, kmap);
+        }
+    }
+
+    pub fn check_unused(&self) {
+        println!("Unused chords:");
+        for name in self.all_chords.difference(&self.all_seqs) {
+            println!("  {}", name);
+        }
+        println!("\nUnused sequences:");
+        for name in self.all_seqs.difference(&self.all_chords) {
+            println!("  {}", name);
+        }
+    }
+
+    // fn make_reverse_modes(&mut self) {
+    //     let mut new = HashMap::new();
+    //     for mode in self.maps.modes.keys() {
+    //         let kmaps_vec = self.maps.get_kmaps_for_mode(mode);
+    //         let mut kmaps = kmaps_vec.iter();
+    //         new.insert(
+    //             mode.to_owned(),
+    //             self.reverse_kmaps.get(kmaps.next().expect("no kmaps"))
+    //                 .expect("reverse kmap not found")
+    //                 .to_owned());
+    //         for kmap in kmaps {
+    //             // println!("{}", kmap);
+    //             for (chord, names) in self.reverse_kmaps[kmap].iter() {
+    //                 for name in names.iter(){
+    //                     add_to(new.get_mut(mode).unwrap(), chord, name);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     self.reverse_modes = new;
+    // }
+
+    pub fn insert_seq(&mut self, name: &Name) -> Result<()>{
+        if !self.all_seqs.insert(name.to_owned()){
+            bail!("duplicate sequences for: '{}'", name);
+        }
+        Ok(())
+    }
+
+    pub fn insert_chord(&mut self, name: &Name, chord: &Chord, kmap: &KmapPath)
+                        -> Result<()>
+    {
+        // TODO take refs
+        let mut base_chord = chord.to_owned();
+        base_chord.anagram_num = 0;
+
+        self.reverse_kmaps
+            .entry(kmap.to_owned())
+            .or_insert(HashMap::new())
+            .entry(base_chord)
+            .or_insert(AnagramSet::new())
+            .insert(chord.anagram_num, name.clone());
+        self.all_chords.insert(name.clone());
+        Ok(())
+    }
+}
+
+
+fn print_conflicts <T: Display>(conflicts: &Vec<&AnagramSet>, label: &T) {
+    if conflicts.is_empty() {
+        return;
+    }
+    println!("\nConflicting chords (in parens) or useless anagrams (\"?\") in {}:", label);
+    for conflict in conflicts {
+        println!("  {}", conflict);
+    }
+    println!("");
+}
+
+
+//////////////////////////////
+
 #[derive(Debug)]
 pub struct AnagramSet (pub HashMap<u8, Vec<Name>>);
 
@@ -88,96 +194,6 @@ impl fmt::Display for AnagramSet {
         let s = format!("[{}]", strings.join(", "));
         fmt::Display::fmt(&s, f)
     }
-}
-
-//////////////////////////////
-
-#[derive(Debug)]
-pub struct Checker {
-    // TODO use more references, instead of duplicating lots of stuff
-    reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
-    all_seqs:         HashSet<Name>,
-    all_chords:       HashSet<Name>,
-}
-
-impl Checker  {
-    pub fn new() -> Checker {
-        Checker {
-            reverse_kmaps: HashMap::new(),
-            all_seqs: HashSet::new(),
-            all_chords: HashSet::new(),
-        }
-    }
-
-    pub fn check(&self) {
-        // TODO take args for types of checks
-        // TODO option to check for mode conflicts instead
-        for (kmap, reversed) in self.reverse_kmaps.iter() {
-            let v: Vec<_> = reversed.iter()
-                .filter(|&(chord, set)| set.is_invalid(Some(chord)))
-                .map(|(_, set)| set)
-                .collect();
-            print_conflicts(&v, kmap);
-        }
-    }
-
-    // fn make_reverse_modes(&mut self) {
-    //     let mut new = HashMap::new();
-    //     for mode in self.maps.modes.keys() {
-    //         let kmaps_vec = self.maps.get_kmaps_for_mode(mode);
-    //         let mut kmaps = kmaps_vec.iter();
-    //         new.insert(
-    //             mode.to_owned(),
-    //             self.reverse_kmaps.get(kmaps.next().expect("no kmaps"))
-    //                 .expect("reverse kmap not found")
-    //                 .to_owned());
-    //         for kmap in kmaps {
-    //             // println!("{}", kmap);
-    //             for (chord, names) in self.reverse_kmaps[kmap].iter() {
-    //                 for name in names.iter(){
-    //                     add_to(new.get_mut(mode).unwrap(), chord, name);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     self.reverse_modes = new;
-    // }
-
-    pub fn insert_seq(&mut self, name: Name) -> Result<()>{
-        if !self.all_seqs.insert(name.clone()){
-            bail!("duplicate sequence: '{}'", name);
-        }
-        Ok(())
-    }
-
-    pub fn insert_chord(&mut self, name: Name, chord: Chord, kmap: &KmapPath)
-                        -> Result<()>
-    {
-        // TODO take refs
-        let mut base_chord = chord.clone();
-        base_chord.anagram_num = 0;
-
-        self.reverse_kmaps
-            .entry(kmap.to_owned())
-            .or_insert(HashMap::new())
-            .entry(base_chord)
-            .or_insert(AnagramSet::new())
-            .insert(chord.anagram_num, name.clone());
-        self.all_chords.insert(name);
-        Ok(())
-    }
-}
-
-
-fn print_conflicts <T: Display>(conflicts: &Vec<&AnagramSet>, label: &T) {
-    if conflicts.is_empty() {
-        return;
-    }
-    println!("\nConflicting chords or useless anagrams in {}:", label);
-    for conflict in conflicts {
-        println!("  {}", conflict);
-    }
-    println!("");
 }
 
 
