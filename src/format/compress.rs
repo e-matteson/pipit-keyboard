@@ -52,16 +52,14 @@ fn compress_chunk(mut data: Vec<KeyPress>) -> Vec<CCode> {
 }
 
 fn format_mask(i: usize, s1: &CCode, s2: &CCode) -> CCode {
-    CCode(
-        match i{
-            // 0 => format!("(({}&0x3F)<<2)|(({}&0x30)>>4)", s1, s2),
-            // 1 => format!("({}&0x0F)<<4|(({}&0x3C)>>2)", s1, s2),
-            // 2 => format!("({}&0x03)<<6|({}&0x3F)", s1, s2),
-            0 => format!("BY0({},{})", s1, s2),
-            1 => format!("BY1({},{})", s1, s2),
-            2 => format!("BY2({},{})", s1, s2),
-            _ => panic!("format_mask: bad index"),
-        }
+    let macro_name = match i {
+        0 => "BY0",
+        1 => "BY1",
+        2 => "BY2",
+        _ => panic!("format_mask: bad index"),
+    };
+    CCode (
+        format!("{}({},{})", macro_name, s1, s2)
     )
 }
 

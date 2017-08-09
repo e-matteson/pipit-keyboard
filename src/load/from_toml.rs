@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 use std::marker::Sized;
-use std::fmt::Debug;
 
 
 use toml::Value;
@@ -11,9 +10,7 @@ use types::{Options, OpDef, OpType, OpVal, Sequence, KeyPress, SwitchPos,
 use types::errors::*;
 use types;
 
-pub fn debug<T: Debug>(x: T) -> String {
-    format!("{:?}", x)
-}
+
 
 
 pub trait FromToml {
@@ -24,14 +21,16 @@ pub trait FromToml {
 impl FromToml for Options {
     fn from_toml(toml_value: &Value) -> Result<Options> {
         let mut options = Options::new();
-        let map = toml_to_map(&toml_value)?;
+        let map = toml_to_map(toml_value)?;
         for key in map.keys(){
             let op_def: &mut OpDef = options.get_mut(key)?;
-            let val = match map.get(key){
-                Some(x) => x,
-                None => bail!(ErrorKind::MissingValue("key".into(),
-                                                      Some(key.to_owned()))),
-            };
+            let val = map.get(key)
+                .ok_or(
+                    ErrorKind::MissingValue(
+                        "key".into(),
+                        Some(key.to_owned())
+                    )
+                )?;
             let op_val = op_def.value_from_toml(val)
                 .chain_err(|| format!("bad value for key: '{}'", key))?;
             op_def.val = Some(op_val);
@@ -45,13 +44,20 @@ impl OpDef {
         let op_val = match self.op_type {
             OpType::DefineString | OpType::IfdefValue =>
                 OpVal::Str(String::from_toml(val)?),
-            OpType::DefineInt => OpVal::Int32(i32::from_toml(val)?),
-            OpType::Uint8 => OpVal::Uint8(u8::from_toml(val)?),
-            OpType::IfdefKey => OpVal::Bool(bool::from_toml(val)?),
-            OpType::Mode {..} => OpVal::StrVec(Vec::from_toml(&val)?),
-            OpType::Array1D => OpVal::Vec(Vec::from_toml(&val)?),
-            OpType::Array2D => OpVal::Vec2(Vec::from_toml(&val)?),
-            OpType::ArrayKmap => OpVal::VecKmap(Vec::from_toml(&val)?),
+            OpType::DefineInt =>
+                OpVal::Int32(i32::from_toml(val)?),
+            OpType::Uint8 =>
+                OpVal::Uint8(u8::from_toml(val)?),
+            OpType::IfdefKey =>
+                OpVal::Bool(bool::from_toml(val)?),
+            OpType::Mode {..} =>
+                OpVal::StrVec(Vec::from_toml(val)?),
+            OpType::Array1D =>
+                OpVal::Vec(Vec::from_toml(val)?),
+            OpType::Array2D =>
+                OpVal::Vec2(Vec::from_toml(val)?),
+            OpType::ArrayKmap =>
+                OpVal::VecKmap(Vec::from_toml(val)?),
         };
         Ok(op_val)
     }
@@ -62,8 +68,8 @@ impl FromToml for BTreeMap<Name, Sequence> {
         // use table directly?
         let map = toml_to_map(toml_table)?;
         let mut new_map = BTreeMap::new();
-        for (key,val) in map.iter(){
-            let seq = Sequence::from_toml(&val)
+        for (key,val) in &map{
+            let seq = Sequence::from_toml(val)
                 .chain_err(|| format!("invalid Sequence for: '{}'", key))?;
             new_map.insert(Name::from(key), seq);
         }
@@ -74,25 +80,25 @@ impl FromToml for BTreeMap<Name, Sequence> {
 
 impl FromToml for Vec<Name> {
     fn from_toml(toml_array: &Value) -> Result<Vec<Name>>{
-        Ok(toml_to_vec(&toml_array, Name::from_toml)?)
+        Ok(toml_to_vec(toml_array, Name::from_toml)?)
     }
 }
 
 impl FromToml for Vec<String> {
     fn from_toml(toml_array: &Value) -> Result<Vec<String>>{
-        Ok(toml_to_vec(&toml_array, String::from_toml)?)
+        Ok(toml_to_vec(toml_array, String::from_toml)?)
     }
 }
 
 impl FromToml for Vec<u8> {
     fn from_toml(toml_array: &Value) -> Result<Vec<u8>>{
-        Ok(toml_to_vec(&toml_array, u8::from_toml)?)
+        Ok(toml_to_vec(toml_array, u8::from_toml)?)
     }
 }
 
 impl FromToml for Vec<Vec<u8>> {
     fn from_toml(toml_array: &Value) -> Result<Vec<Vec<u8>>>{
-        Ok(toml_to_vec(&toml_array, Vec::from_toml)?)
+        Ok(toml_to_vec(toml_array, Vec::from_toml)?)
     }
 }
 
@@ -102,7 +108,7 @@ impl FromToml for WordInfo {
 
         let seq_spelling = String::from_toml(
             entry.get("word")
-                .ok_or(ErrorKind::MissingValue("word name".into(), None))?
+                .ok_or_else(|| ErrorKind::MissingValue("word name".into(), None))?
         )?;
 
         WordInfo::helper(entry, seq_spelling.clone())
@@ -128,7 +134,7 @@ impl WordInfo {
                 u8::from_toml
             ).chain_err(|| ErrorKind::BadValue("chord".into(), None))?;
 
-        check_keys(&entry, vec!["word".into(), "chord".into(), "anagram".into()])?;
+        check_keys(&entry, &["word".into(), "chord".into(), "anagram".into()])?;
 
         Ok(
             WordInfo{
@@ -140,7 +146,7 @@ impl WordInfo {
     }
 }
 
-fn check_keys(entry: &BTreeMap<String, Value>, expected_keys: Vec<String>)
+fn check_keys(entry: &BTreeMap<String, Value>, expected_keys: &[String])
               -> Result<()>
 {
     for key in entry.keys(){
@@ -155,10 +161,13 @@ fn check_keys(entry: &BTreeMap<String, Value>, expected_keys: Vec<String>)
 impl FromToml for Sequence {
     fn from_toml(toml_value: &Value) -> Result<Sequence>{
         let key_vec =
-            match toml_value {
-                &Value::Table(_) => vec![KeyPress::from_toml(&toml_value)?],
-                &Value::Array(_) => toml_to_vec(toml_value, KeyPress::from_toml)?,
-                _ => panic!(format!("Invalid key sequence")),
+            match *toml_value {
+                Value::Table(_) =>
+                    vec![KeyPress::from_toml(toml_value)?],
+                Value::Array(_) =>
+                    toml_to_vec(toml_value, KeyPress::from_toml)?,
+                _ =>
+                    panic!("Invalid key sequence"),
             };
         Ok(Sequence(key_vec))
     }
@@ -176,21 +185,27 @@ impl FromToml for KeyPress {
            bail!(ErrorKind::BadValue("KeyPress".into(), None))
         }
 
-        check_keys(&map, vec!["key".into(), "mod".into()])
+        check_keys(&map, &["key".into(), "mod".into()])
             .chain_err(|| ErrorKind::BadValue("KeyPress".into(), None))?;
 
         let key = match map.get("key") {
-            Some(v) => Some(String::from_toml(v)?),
-            None => None,
+            Some(v) =>
+                Some(String::from_toml(v)?),
+            None =>
+                None,
         };
+
+        // TODO refactor without matches?
         let modifiers: Option<Vec<String>> = match map.get("mod") {
-            Some(v) => Some(
-                match v {
-                    &Value::Array(_) => Vec::from_toml(v)?,
-                    _ => vec![String::from_toml(v)?],
-                }
-            ),
-            None => None,
+            Some(v) =>
+                Some(
+                    match *v {
+                        Value::Array(_) => Vec::from_toml(v)?,
+                        _ => vec![String::from_toml(v)?],
+                    }
+                ),
+            None =>
+                None,
         };
         Ok(KeyPress::new(key, modifiers)?)
     }
@@ -198,13 +213,14 @@ impl FromToml for KeyPress {
 
 impl FromToml for KmapInfo {
     fn from_toml(toml_value: &Value) -> Result<KmapInfo >{
-        // let map = toml_to_map(toml_value);
         Ok(
             KmapInfo {
-                path: KmapPath::from_toml(get_key(&toml_value, "file")?)?,
+                path: KmapPath::from_toml(get_key(toml_value, "file")?)?,
                 use_words: match toml_value.get("words") {
-                    Some(x) => bool::from_toml(x)?,
-                    None => false,
+                    Some(x) =>
+                        bool::from_toml(x)?,
+                    None =>
+                        false,
                 }
             }
         )
@@ -236,7 +252,7 @@ impl FromToml for SwitchPos {
             bail!(
                 ErrorKind::BadValue(
                     "switch position".into(),
-                    Some(debug(int_vec))
+                    Some(format!("{:?}", int_vec))
                 )
             );
         }
@@ -246,7 +262,9 @@ impl FromToml for SwitchPos {
 
 impl FromToml for ModeInfo {
     fn from_toml(toml_map: &Value) -> Result<ModeInfo >{
-        let kmap_array = get_key(&toml_map, "keymaps")?;
+        let kmap_array = get_key(toml_map, "keymaps")?;
+        // let is_gaming = toml_map.get("gaming")
+        //     .map_or(false, |b| bool::from_toml(b));
         let is_gaming = match toml_map.get("gaming") {
             Some(b) => bool::from_toml(b)?,
             None    => false, // default value if "gaming" not specified
@@ -263,7 +281,7 @@ impl FromToml for ModeInfo {
 impl FromToml for Vec<Vec<SwitchPos>> {
     fn from_toml(toml_array: &Value) -> Result<Vec<Vec<SwitchPos>>>{
         Ok(
-            toml_to_vec(&toml_array,
+            toml_to_vec(toml_array,
                     |d1| Ok(toml_to_vec(d1, |d2| Ok(SwitchPos::from_toml(d2)?))?)
             )?
         )
@@ -272,57 +290,70 @@ impl FromToml for Vec<Vec<SwitchPos>> {
 
 impl FromToml for bool {
     fn from_toml(toml_value: &Value) -> Result<bool >{
-        match toml_value {
-            &Value::Boolean(b) => Ok(b),
-            _ => Err(ErrorKind::BadValue("bool".into(), None).into()),
+        // TODO refactor without match?
+        match *toml_value {
+            Value::Boolean(b) =>
+                Ok(b),
+            _ =>
+                Err(ErrorKind::BadValue("bool".into(), None).into()),
         }
     }
 }
 
 impl FromToml for String {
     fn from_toml(toml_value: &Value) -> Result<String >{
-        match toml_value {
-            &Value::String(ref s) => Ok(s.clone()),
-            _ => Err(ErrorKind::BadValue("String".into(), None).into()),
+        match *toml_value {
+            Value::String(ref s) =>
+                Ok(s.clone()),
+            _ =>
+                Err(ErrorKind::BadValue("String".into(), None).into()),
         }
     }
 }
 
 impl FromToml for u8 {
     fn from_toml(toml_value: &Value) -> Result<u8 >{
-        match toml_value {
-            &Value::Integer(i) if (i >= 0 && i <= 255) =>
+        match *toml_value {
+            Value::Integer(i) if (i >= 0 && i <= 255) =>
                 Ok(i as u8),
-            _ => Err(ErrorKind::BadValue("u8 integer".into(), None).into()),
+            _ =>
+                Err(ErrorKind::BadValue("u8 integer".into(), None).into()),
         }
     }
 }
 
 impl FromToml for i32 {
     fn from_toml(toml_value: &Value) -> Result<i32 >{
-        match toml_value {
+        match *toml_value {
             // TODO check if integers are in i32 range
-            &Value::Integer(i) => Ok(i as i32),
-            _ => Err(ErrorKind::BadValue("i32 integer".into(), None).into()),
+            Value::Integer(i) =>
+                Ok(i as i32),
+            _ =>
+                Err(ErrorKind::BadValue("i32 integer".into(), None).into()),
         }
     }
 }
 
 pub fn toml_to_map(toml_table: &Value) -> Result<BTreeMap<String, Value>>{
-    match toml_table {
-        &Value::Table(ref m) => {
+    // TODO refactor
+    match *toml_table {
+        Value::Table(ref m) => {
             Ok(m.clone())
         },
-        _ => Err(ErrorKind::BadValue("toml table".into(), None).into()),
+        _ =>
+            Err(ErrorKind::BadValue("toml table".into(), None).into()),
     }
 }
 
 pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Result<Vec<T>>
     where F: Fn(&Value)->Result<T>
 {
-    let v = match toml_array {
-        &Value::Array(ref v) => v,
-        _ => bail!(ErrorKind::BadValue("array".into(), None)),
+    // TODO refactor
+    let v = match *toml_array {
+        Value::Array(ref v) =>
+            v,
+        _ =>
+            bail!(ErrorKind::BadValue("array".into(), None)),
     };
     // TODO any way to combine map and ?
     let mut new_vec = Vec::new();
@@ -337,7 +368,7 @@ pub fn toml_to_vec<T, F>(toml_array: &Value, f: F) -> Result<Vec<T>>
 pub fn get_key<'a>(toml_table: &'a Value, key: &str) -> Result<&'a Value> {
     // TODO include name in error
     // TODO check if it's a table
-    toml_table.get(key).ok_or(
-        ErrorKind::MissingValue("key".into(), Some(key.into())).into()
+    toml_table.get(key).ok_or_else(
+        || ErrorKind::MissingValue("key".into(), Some(key.into())).into()
     )
 }

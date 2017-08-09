@@ -5,13 +5,13 @@ use std::fs::OpenOptions;
 use types::CCode;
 
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Format {
     pub h: CCode,   // for header file
     pub c: CCode,   // for cpp file
 }
 
-// TODO rename to a noun
+// TODO rename to a noun!
 impl Format {
 
     pub fn new() -> Format {

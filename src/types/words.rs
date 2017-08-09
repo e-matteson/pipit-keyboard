@@ -114,8 +114,8 @@ impl<'a> WordBuilder<'a> {
         let name = self.get_key_name_for_chord(letter)?;
         self.maps
             .get_chord(&name, self.kmap)
-            .ok_or(
-                ErrorKind::MissingValue(
+            .ok_or_else(
+                || ErrorKind::MissingValue(
                     "chord".into(),
                     Some(name.to_string())
                 ).into()

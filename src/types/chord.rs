@@ -20,7 +20,7 @@ fn get_chord_length() -> usize {
 }
 
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Chord {
     bits: Vec<bool>,
     pub anagram_num: u8,
@@ -66,7 +66,7 @@ impl Chord {
         }
     }
 
-    pub fn permute(&mut self, order: &Vec<usize>) {
+    pub fn permute(&mut self, order: &[usize]) {
         assert_eq!(self.len(), order.len());
         let mut new = Chord::new();
         for i in 0..self.len(){
@@ -103,7 +103,7 @@ impl fmt::Debug for Chord{
     }
 }
 
-fn byte_to_int(v: &Vec<bool>) -> u8 {
+fn byte_to_int(v: &[bool]) -> u8 {
     assert_eq!(v.len(), 8);
     let mut num: u8 = 0;
     let base: u8 = 2;

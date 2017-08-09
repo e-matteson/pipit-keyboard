@@ -38,11 +38,11 @@ pub enum SeqType {
 
 impl fmt::Display for SeqType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self {
-            &SeqType::Plain => "plain",
-            &SeqType::Macro => "macro",
-            &SeqType::Command => "command",
-            &SeqType::Word => "word",
+        let s = match *self {
+            SeqType::Plain => "plain",
+            SeqType::Macro => "macro",
+            SeqType::Command => "command",
+            SeqType::Word => "word",
         };
         fmt::Display::fmt(s, f)
     }
@@ -117,7 +117,7 @@ impl fmt::Debug for Name{
 
 //////////////////////////////
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 #[derive(Clone)]
 pub struct Sequence (
     pub Vec<KeyPress>

@@ -41,9 +41,9 @@ error_chain! {
             description("Missing value")
                 display("missing {}{}",
                         expected_type,
-                        match for_thing {
-                            &None => String::new(),
-                            &Some(ref s) => format!(" for: '{}'", s),
+                        match *for_thing {
+                            Some(ref s) => format!(" for: '{}'", s),
+                            None => String::new(),
                         }
                 )
         }
@@ -52,9 +52,9 @@ error_chain! {
             description("Bad value in settings")
                 display("invalid {}{}",
                         expected_type,
-                        match value {
-                            &None => String::new(),
-                            &Some(ref s) => format!(": '{}'", s),
+                        match *value {
+                            None => String::new(),
+                            Some(ref s) => format!(": '{}'", s),
                         }
                 )
         }

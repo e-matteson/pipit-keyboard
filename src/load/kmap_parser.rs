@@ -10,7 +10,7 @@ use types::{Chord, SwitchPos, Options, KmapPath, Name};
 use types::errors::*;
 
 
-const COMMENT_START: &str = "#";
+const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';
 const BLANK_MAPPING: &str = "blank_mapping";
 
@@ -42,7 +42,8 @@ impl KmapParser {
             .enumerate()                     // track line numbers
             .map(|(i, l)| (i, l.trim()))     // trim whitespace
             .filter(|&(_, l)|                // remove comments and empty lines
-                    !l.is_empty() && !l.starts_with(COMMENT_START))
+                    !l.is_empty()
+                    && !l.starts_with(COMMENT_START))
             .map(|(i, l)|                    // split on whitespace
                  (i, split(l)))
             .chunks(self.lines_in_block);    // chunk into sections
@@ -74,12 +75,18 @@ impl KmapParser {
             bail!(ErrorKind::KmapSyntax(last(&line_nums)));
         }
 
-        let names: Vec<Name> = lines[0].iter().cloned().map(|s| Name(s.into())).collect();
-        let body: Vec<_> = lines[1..].iter().map(|l| l.join("")).collect();
+        let names: Vec<_> = lines[0].iter()
+            .cloned()
+            .map(|s| Name(s.into()))
+            .collect();
+        let body: Vec<_> = lines[1..].iter()
+            .map(|l| l.join(""))
+            .collect();
+
         let num_blocks = names.len();
 
         // accumulate one string for each block
-        let mut strings: Vec<String> = vec![String::new() ; num_blocks];
+        let mut strings = vec![String::new() ; num_blocks];
 
         // store index into each line
         let mut indices: Vec<usize> = vec![0 ; body.len()];
@@ -89,9 +96,9 @@ impl KmapParser {
             if body[l].len() != num_items * num_blocks {
                 bail!(ErrorKind::KmapSyntax(line_nums[l]));
             }
-            for b in 0..num_blocks {
+            for s in strings.iter_mut().take(num_blocks) {
                 let end = indices[l]+num_items;
-                strings[b] += &body[l][indices[l]..end];
+                *s += &body[l][indices[l]..end];
                 indices[l] = end;
             }
         }
@@ -114,7 +121,7 @@ fn make_permutation(ops: &Options) -> Result<Vec<usize>> {
     for kmap_pos in kmap_order {
         let firmware_pos = firmware_order.iter()
             .position(|p| *p == kmap_pos)
-            .ok_or(ErrorKind::KmapPins(kmap_pos.to_string()))?;
+            .ok_or_else(|| ErrorKind::KmapPins(kmap_pos.to_string()))?;
         permutation.push(
             firmware_pos
         )
@@ -164,14 +171,14 @@ fn split(line: &str) -> Vec<&str>{
     words
 }
 
-fn last(line_nums: &Vec<usize>) -> usize {
+fn last(line_nums: &[usize]) -> usize {
     *line_nums.last().unwrap()
 }
 
 fn to_chord_map(pairs: Vec<(Name, Chord)>) -> Result<BTreeMap<Name, Chord>> {
     let blank_mapping = Name::from(BLANK_MAPPING);
     let mut map = BTreeMap::new();
-    for (name, chord) in pairs.into_iter() {
+    for (name, chord) in pairs {
         if name == blank_mapping {
             continue;
         }

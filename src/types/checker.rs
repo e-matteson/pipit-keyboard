@@ -28,7 +28,7 @@ impl Checker  {
     pub fn check_chords(&self) {
         // TODO take args for types of checks
         // TODO option to check for mode conflicts instead
-        for (kmap, reversed) in self.reverse_kmaps.iter() {
+        for (kmap, reversed) in &self.reverse_kmaps {
             let v: Vec<_> = reversed.iter()
                 .filter(|&(chord, set)| set.is_invalid(Some(chord)))
                 .map(|(_, set)| set)
@@ -86,9 +86,9 @@ impl Checker  {
 
         self.reverse_kmaps
             .entry(kmap.to_owned())
-            .or_insert(HashMap::new())
+            .or_insert_with(HashMap::new)
             .entry(base_chord)
-            .or_insert(AnagramSet::new())
+            .or_insert_with(AnagramSet::new)
             .insert(chord.anagram_num, name.clone());
         self.all_chords.insert(name.clone());
         Ok(())
@@ -96,7 +96,7 @@ impl Checker  {
 }
 
 
-fn print_conflicts <T: Display>(conflicts: &Vec<&AnagramSet>, label: &T) {
+fn print_conflicts <T: Display>(conflicts: &[&AnagramSet], label: &T) {
     if conflicts.is_empty() {
         return;
     }
@@ -120,7 +120,7 @@ impl AnagramSet {
 
     pub fn insert(&mut self, anagram_num: u8, name: Name) {
         self.0.entry(anagram_num)
-            .or_insert(Vec::new())
+            .or_insert_with(Vec::new)
             .push(name);
     }
 
@@ -133,7 +133,7 @@ impl AnagramSet {
                 return true;
             }
         }
-        return false;
+        false
     }
 
     pub fn has_chord_conflict(&self) -> bool {
@@ -142,22 +142,23 @@ impl AnagramSet {
                 return true;
             }
         }
-        return false;
+        false
     }
 
     pub fn is_anagram_missing(&self, anagram_num: u8, chord: Option<&Chord>) -> bool {
         if self.0.contains_key(&anagram_num) {
             return false;
         }
-        // By convention, all words made of 2 switches, one on each
-        // hand, use an anagram mod. It's because it's hard to
-        // remember which of those would conflict with 2-hand plain
-        // keys. So we may not want to warn about them. (We don't
-        // check which hands the switches are on, but close enough)
-        return match chord {
-            Some(c) => c.count_switches() != 2,
-            None => true,
-        }
+        /// By convention, all words made of 2 switches, one on each
+        /// hand, use an anagram mod. It's because it's hard to
+        /// remember which of those would conflict with 2-hand plain
+        /// keys. So we may not want to warn about them. (We don't
+        /// check which hands the switches are on, but close enough)
+        chord.map_or(true, |c| c.count_switches() != 2)
+        // match chord {
+        //     Some(c) => c.count_switches() != 2,
+        //     None => true,
+        // }
     }
 
     pub fn num_anagrams(&self) -> u8 {
@@ -172,7 +173,9 @@ impl AnagramSet {
             None =>
                 "?".to_string(),
             Some(v) => {
-                let strings: Vec<_> = v.iter().map(|x| x.to_string()).collect();
+                let strings: Vec<_> = v.iter()
+                    .map(|x| x.to_string())
+                    .collect();
                 if strings.len() == 1 {
                     strings[0].clone()
                 }

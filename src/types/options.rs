@@ -138,7 +138,9 @@ impl OpDef{
     }
 
     pub fn get_val(&self) -> &OpVal{
-        self.val.as_ref().expect(&format!("value is None"))
+        self.val
+            .as_ref()
+            .expect("value is None")
     }
 
     pub fn is_set(&self) -> bool {
@@ -202,50 +204,50 @@ pub enum OpVal {
 
 impl OpVal{
     pub fn unwrap_int32(&self) -> i32{
-        match self{
-            &OpVal::Int32(x) => x,
+        match *self{
+            OpVal::Int32(x) => x,
             _ => panic!("Expected OpVal::Int32"),
         }
     }
     pub fn unwrap_uint8(&self) -> u8{
-        match self{
-            &OpVal::Uint8(x) => x,
+        match *self{
+            OpVal::Uint8(x) => x,
             _ => panic!("Expected OpVal::Uint8"),
         }
     }
     pub fn unwrap_str(&self) -> &str{
-        match self{
-            &OpVal::Str(ref x) => x,
+        match *self{
+            OpVal::Str(ref x) => x,
             _ => panic!("Expected OpVal::Str"),
         }
     }
     pub fn unwrap_strvec(&self) -> &Vec<String>{
-        match self{
-            &OpVal::StrVec(ref x) => x,
+        match *self{
+            OpVal::StrVec(ref x) => x,
             _ => panic!("Expected OpVal::StrVec"),
         }
     }
     pub fn unwrap_bool(&self) -> bool{
-        match self{
-            &OpVal::Bool(x) => x,
+        match *self{
+            OpVal::Bool(x) => x,
             _ => panic!("Expected OpVal::Bool"),
         }
     }
     pub fn unwrap_vec(&self) -> &Vec<u8>{
-        match self{
-            &OpVal::Vec(ref x) => x,
+        match *self{
+            OpVal::Vec(ref x) => x,
             _ => panic!("Expected OpVal::Vec"),
         }
     }
     pub fn unwrap_vec2(&self) -> &Vec<Vec<u8>>{
-        match self{
-            &OpVal::Vec2(ref x) => x,
+        match *self{
+            OpVal::Vec2(ref x) => x,
             _ => panic!("Expected OpVal::Vec2"),
         }
     }
     pub fn unwrap_vec_kmap(&self) -> &Vec<Vec<SwitchPos>>{
-        match self{
-            &OpVal::VecKmap(ref x) => x,
+        match *self{
+            OpVal::VecKmap(ref x) => x,
             _ => panic!("Expected OpVal::VecKmap"),
         }
     }
@@ -296,7 +298,7 @@ impl OpDefBuilder {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Options (pub BTreeMap<String, OpDef>);
 
 impl Options {
@@ -316,7 +318,7 @@ impl Options {
     pub fn get_mut(&mut self, key: &str) -> Result<&mut OpDef> {
         self.0
             .get_mut(key)
-            .ok_or(ErrorKind::UnexpectedKey(key.into()).into())
+            .ok_or_else(|| ErrorKind::UnexpectedKey(key.into()).into())
         // {
         //     Some(opdef) => Ok(opdef),
         //     None => Err(),
@@ -342,28 +344,33 @@ impl Options {
 
     pub fn verify_requirements(&self) -> Result<()>{
         /// Verify that option dependencies are satisfied.
-        for (name, op) in self.0.iter(){
-            if let Some(_) = op.val{
+        for (name, op) in &self.0{
+            if op.val.is_some() {
                 // The option was provided in the settings file.
                 if op.required == OpReq::Auto {
-                    bail!("auto-generated option should not be provided: '{}'",
-                          name);
+                    bail!(
+                        "auto-generated option should not be provided: '{}'",
+                        name
+                    );
                 }
                 continue
             }
 
-            match &op.required {
-                &OpReq::Auto => continue,
-                &OpReq::Optional => continue,
-                &OpReq::Required => (),
-                &OpReq::Dependent{ref key, ref val} =>
+            match op.required {
+                OpReq::Auto
+                    | OpReq::Optional =>
+                    continue,
+                OpReq::Required =>
+                    (),
+                OpReq::Dependent{ref key, ref val} =>
                 // TODO clean this up?
                     match (val, &self.0[key].val){
                         (&Some(ref expected), &Some(ref actual)) =>
                             if expected != actual {
                                 continue
                             },
-                        (&None, &None) | (&Some(_), &None) =>
+                        (&None, &None)
+                            | (&Some(_), &None) =>
                             continue,
                         _ => (),
                     },
@@ -387,12 +394,20 @@ impl Options {
         let num_bytes_in_chord = round_up_to_num_bytes(num_matrix_positions);
         let has_battery = self.get("battery_level_pin").is_set();
 
-        let mut num_rgb_led_pins = 0;
-        let mut enable_rgb_led = false;
-        if self.get("rgb_led_pins").is_set() {
-            num_rgb_led_pins = self.get_val_len("rgb_led_pins");
-            enable_rgb_led = true;
-        }
+        // let mut num_rgb_led_pins = 0;
+        // let mut enable_rgb_led = false;
+        // if self.get("rgb_led_pins").is_set() {
+        //     num_rgb_led_pins = self.get_val_len("rgb_led_pins");
+        //     enable_rgb_led = true;
+        // }
+
+        let enable_rgb_led = self.get("rgb_led_pins").is_set();
+        let num_rgb_led_pins =
+            if self.get("rgb_led_pins").is_set() {
+                self.get_val_len("rgb_led_pins")
+            } else {
+                0
+            };
 
 
         self.set_val("num_rows" , OpVal::Int32(num_rows as i32));

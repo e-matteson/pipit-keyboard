@@ -54,23 +54,23 @@ impl Maps {
         maps.load_plain_mods(&toml)
             .chain_err(|| "failure to load plain modifiers")?;
 
-        maps.load_word_mods(&other)
+        maps.load_word_mods(other)
             .chain_err(|| "failure to load word modifiers")?;
 
-        maps.load_anagram_mods(&other)
+        maps.load_anagram_mods(other)
             .chain_err(|| "failure to load anagram modifiers")?;
 
-        maps.load_word_list(&other) // TODO rename word_list?
+        maps.load_word_list(other) // TODO rename word_list?
             .chain_err(|| "failure to load dictionary")?;
 
-        maps.load_commands(&other)
+        maps.load_commands(other)
             .chain_err(|| "failure to load commands")?;
         Ok(maps)
     }
 
     fn load_modes(&mut self, toml: &Value) -> Result<()>{
         let modes = toml_to_vec(get_section(toml, "mode")?, |x| Ok(x.clone()))?;
-        for mode_table in modes.iter(){
+        for mode_table in &modes{
             let name = get_key(mode_table, "name")?;
 
             self.add_mode(
@@ -93,40 +93,40 @@ impl Maps {
 
     fn load_macros(&mut self, toml: &Value) -> Result<()>{
         let table = get_section(toml, "macros")?;
-        self.set_sequences(&SeqType::Macro, BTreeMap::from_toml(&table)?)?;
+        self.set_sequences(SeqType::Macro, BTreeMap::from_toml(table)?)?;
         Ok(())
     }
 
     fn load_plains(&mut self, toml: &Value) -> Result<()>{
         let table = get_section(toml, "plain_keys")?;
-        self.set_sequences(&SeqType::Plain, BTreeMap::from_toml(&table)?)?;
+        self.set_sequences(SeqType::Plain, BTreeMap::from_toml(table)?)?;
         Ok(())
     }
 
     fn load_plain_mods(&mut self, toml: &Value) -> Result<()>{
         let table = get_section(toml, "plain_modifiers")?;
-        for (name, seq) in BTreeMap::from_toml(&table)?.iter() {
+        for (name, seq) in &BTreeMap::from_toml(table)? {
             self.add_modifierkey(name.to_owned(), seq)?;
         }
         Ok(())
     }
 
     fn load_word_mods(&mut self, other: &Value) -> Result<()>{
-        self.wordmods = Vec::from_toml(get_section(other, "word_modifiers")?)?;
+        self.word_mods = Vec::from_toml(get_section(other, "word_modifiers")?)?;
         Ok(())
     }
 
     fn load_anagram_mods(&mut self, other: &Value) -> Result<()>{
         let array = get_key(other, "anagram_modifiers")?;
-        self.anagrams = Vec::from_toml(&array)?;
+        self.anagram_mods = Vec::from_toml(array)?;
         Ok(())
     }
 
     fn load_commands(&mut self, other: &Value) -> Result<()>{
         // TODO use set sequences, and then process after?
         let array = get_section(other, "commands")?;
-        let command_list = Vec::from_toml(&array)?;
-        for name in command_list.iter() {
+        let command_list = Vec::from_toml(array)?;
+        for name in &command_list {
             self.add_command(name)?;
         }
         Ok(())
@@ -134,9 +134,9 @@ impl Maps {
 
     fn load_word_list(&mut self, other: &Value) -> Result<()>{
         let array = get_section(other, "dictionary")?;
-        let word_list = toml_to_vec(&array, WordInfo::from_toml)?;
+        let word_list = toml_to_vec(array, WordInfo::from_toml)?;
         for kmap in &self.get_kmaps_with_words(){
-            for info in word_list.iter() {
+            for info in &word_list {
                 self.add_word(info.to_owned(), kmap)?
             }
         }
@@ -155,8 +155,8 @@ fn parse_toml(toml_path: &str) -> Result<Value> {
 fn get_section<'a>(toml: &'a Value, section_name: &str) -> Result<&'a Value> {
     // By section I mean a table that's used as 1 section of the settings
     toml.get(section_name)
-        .ok_or(
-            ErrorKind::MissingValue(
+        .ok_or_else(
+            || ErrorKind::MissingValue(
                 "table".into(),
                 Some(section_name.into())
             ).into()

@@ -36,7 +36,7 @@ impl <'a> ModeBuilder <'a> {
             is_gaming: self.info.is_gaming,
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
-        f.append(&m.format(&mode_struct_name));
+        f.append(&m.format(mode_struct_name));
         f
     }
 
@@ -44,12 +44,12 @@ impl <'a> ModeBuilder <'a> {
     {
         let mut f = Format::new();
         let mut subarray_names = Vec::new();
-        for seq_type in self.seq_types.iter() {
+        for seq_type in &self.seq_types {
             let mut v = Vec::new();
             let struct_names = self.kmap_struct_names.get(seq_type)
                 .expect("struct name not found");
 
-            for kmap_info in self.info.keymaps.iter() {
+            for kmap_info in &self.info.keymaps {
                 v.push(
                     if *seq_type == SeqType::Word && !kmap_info.use_words {
                         "NULL".to_c()
@@ -66,7 +66,7 @@ impl <'a> ModeBuilder <'a> {
                                      seq_type));
             f.append(&CArray::new()
                      .name(&name)
-                     .is_extern(false)
+                     .c_extern(false)
                      .c_type(&"KmapStruct*".to_c())
                      .fill_1d(&v)
                      .format());
@@ -76,7 +76,7 @@ impl <'a> ModeBuilder <'a> {
         *kmap_array_name = CCode(format!("{}_kmap_arrays", self.mode_name));
         f.append(&CArray::new()
                  .name(kmap_array_name)
-                 .is_extern(false)
+                 .c_extern(false)
                  .c_type(&"KmapStruct**".to_c())
                  .fill_1d(&subarray_names)
                  .format());
@@ -85,13 +85,13 @@ impl <'a> ModeBuilder <'a> {
 
     fn format_anagram_mask (&self, array_name: &mut CCode) -> Format {
         let mut anagram_mask = Chord::new();
-        for c in self.anagram_chords.iter() {
+        for c in &self.anagram_chords {
             anagram_mask.intersect(c);
         }
         *array_name = CCode(format!("{}_anagram_mask", self.mode_name));
         CArray::new()
             .name(array_name)
-            .is_extern(false)
+            .c_extern(false)
             .fill_1d(&anagram_mask.to_ints())
             .format()
     }
@@ -111,7 +111,7 @@ impl <'a> ModeBuilder <'a> {
 
     fn format_chord_array_helper (&self,
                                   new_array_name: &mut CCode,
-                                  chords: &Vec<Chord>,
+                                  chords: &[Chord],
                                   label: &CCode) -> Format {
         let mut f = Format::new();
         let mut subarray_names = Vec::new();
@@ -119,7 +119,7 @@ impl <'a> ModeBuilder <'a> {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
             f.append(&CArray::new()
                      .name(&name)
-                     .is_extern(false)
+                     .c_extern(false)
                      .fill_1d(&c.to_ints())
                      .format());
             subarray_names.push(name);
@@ -128,7 +128,7 @@ impl <'a> ModeBuilder <'a> {
         f.append(&CArray::new()
                  .name(new_array_name)
                  .c_type(&"uint8_t*".to_c())
-                 .is_extern(false)
+                 .c_extern(false)
                  .fill_1d(&subarray_names)
                  .format());
         f

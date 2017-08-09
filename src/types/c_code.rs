@@ -6,7 +6,7 @@ use types::{Name, ModeName, SeqType};
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct CCode ( pub String );
 
 impl CCode {

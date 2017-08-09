@@ -11,9 +11,9 @@ use types::errors::*;
 pub struct Maps {
     pub chords:       BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
     pub sequences:    BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
-    pub wordmods:     Vec<Name>,
-    pub modifierkeys: Vec<Name>,
-    pub anagrams:     Vec<Name>,
+    pub word_mods:     Vec<Name>,
+    pub plain_mods: Vec<Name>,
+    pub anagram_mods:     Vec<Name>,
     // pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
     pub modes:        BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids:     BTreeMap<KmapPath, String>,
@@ -27,9 +27,9 @@ impl Maps {
         Maps {
             chords: BTreeMap::new(),
             sequences: BTreeMap::new(),
-            wordmods: Vec::new(),
-            modifierkeys: Vec::new(),
-            anagrams: Vec::new(),
+            word_mods: Vec::new(),
+            plain_mods: Vec::new(),
+            anagram_mods: Vec::new(),
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
             options: Options::new(),
@@ -53,7 +53,7 @@ impl Maps {
     pub fn add_chords(&mut self, kmap: &KmapPath, new_chords: BTreeMap<Name, Chord>)
                       -> Result<()>
     {
-        for (name, chord) in new_chords.into_iter() {
+        for (name, chord) in new_chords {
             self.add_chord(name, chord, kmap)?;
         }
         Ok(())
@@ -75,7 +75,7 @@ impl Maps {
         let word = WordBuilder {
             info: info,
             kmap: kmap,
-            maps: &self,
+            maps: self,
         }.finalize()?;
         self.add_sequence(SeqType::Word, word.name.clone(), word.seq.clone())?;
         self.add_chord(word.name.clone(), word.chord.clone(), kmap)?;
@@ -86,7 +86,7 @@ impl Maps {
     }
 
     pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) -> Result<()> {
-        self.modifierkeys.push(name.clone());
+        self.plain_mods.push(name.clone());
         self.add_sequence(SeqType::Plain, name, seq.clone())
     }
 
@@ -95,7 +95,7 @@ impl Maps {
             bail!("mode already exists: '{}'", &name);
         }
         // Store the kmaps that are included in this mode
-        for kmap_info in info.keymaps.iter() {
+        for kmap_info in &info.keymaps {
             let kmap_path = &kmap_info.path;
             if self.kmap_ids.contains_key(kmap_path){
                 continue;
@@ -117,13 +117,13 @@ impl Maps {
         self.checker.insert_seq(&name)?;
         self.sequences
             .entry(seq_type)
-            .or_insert(BTreeMap::new())
+            .or_insert_with(BTreeMap::new)
             .insert(name, seq);
         Ok(())
     }
 
     pub fn set_sequences(&mut self,
-                         seq_type: &SeqType,
+                         seq_type: SeqType,
                          val: BTreeMap<Name, Sequence>)
         -> Result<()>
     {
@@ -133,12 +133,12 @@ impl Maps {
         for name in val.keys(){
             self.checker.insert_seq(name)?;
         }
-        self.sequences.insert(seq_type.clone(), val);
+        self.sequences.insert(seq_type, val);
         Ok(())
     }
 
     pub fn get_sequences(&self, seq_type: &SeqType) -> &BTreeMap<Name, Sequence>{
-        self.sequences.get(&seq_type)
+        self.sequences.get(seq_type)
             .expect(&format!("Sequences has not been initialized for SeqType: {:?}", seq_type))
     }
 
@@ -185,7 +185,10 @@ impl Maps {
 
     // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(&self, chord_name: &Name, mode: &ModeName) -> Chord {
-        for kmap_info in self.modes.get(mode).expect("unknown mode").keymaps.iter() {
+        for kmap_info in &self.modes.get(mode)
+            .expect("unknown mode")
+            .keymaps
+        {
             if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {
                 return chord;
             }
@@ -195,17 +198,17 @@ impl Maps {
 
     pub fn get_anagrams(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
-        for name in self.anagrams.iter() {
-            out.push(self.get_chord_in_mode(&name, mode));
+        for name in &self.anagram_mods {
+            out.push(self.get_chord_in_mode(name, mode));
         }
         out
     }
 
     pub fn get_mod_names(&self) -> Vec<Name> {
         let mut names = Vec::new();
-        names.extend(self.modifierkeys.clone());
-        names.extend(self.wordmods.clone());
-        names.extend(self.anagrams.clone());
+        names.extend(self.plain_mods.clone());
+        names.extend(self.word_mods.clone());
+        names.extend(self.anagram_mods.clone());
         names.sort();
         names
     }
@@ -213,14 +216,14 @@ impl Maps {
     pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut chords = Vec::new();
         for name in self.get_mod_names() {
-            chords.push(self.get_chord_in_mode(&name, &mode));
+            chords.push(self.get_chord_in_mode(&name, mode));
         }
         chords
     }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
         let v: Vec<_> = self.kmap_ids.keys()
-            .map(|s| s.clone())
+            .cloned()
             .collect();
         v
     }
@@ -228,7 +231,7 @@ impl Maps {
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
         let mut out = Vec::new();
         for mode_info in self.modes.values() {
-            for kmap_info in mode_info.keymaps.iter() {
+            for kmap_info in &mode_info.keymaps {
                 if kmap_info.use_words {
                     out.push(kmap_info.path.clone());
                 }

@@ -3,6 +3,11 @@ name = "pipit-config"
 version = "0.1.0"
 authors = ["em <e.r.matteson@gmail.com>"]
 
+[[bin]]
+name = "main"
+path = "src/main.rs"
+doc = false
+
 [dependencies]
 time = "0.1.36"
 toml = "0.3"

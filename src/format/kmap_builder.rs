@@ -116,12 +116,12 @@ impl <'a> KmapBuilder<'a> {
         // TODO be consistent about "array" / "subarray" terminology
         let mut f = Format::new();
         let mut array_names: Vec<CCode> = Vec::new();
-        for (kmap, length_entries) in chord_arrays.into_iter(){
+        for (kmap, length_entries) in chord_arrays{
             let length_ints: Vec<Vec<u8>> = length_entries.iter()
                 .map(|v| flatten_chord_entries(v))
                 .collect();
 
-            let array_name = self.make_chord_array_name(&kmap);
+            let array_name = self.make_chord_array_name(kmap);
             f.append(
                 &self.format_length_arrays(
                     length_ints,
@@ -133,7 +133,7 @@ impl <'a> KmapBuilder<'a> {
         f
     }
 
-    fn format_seq_arrays(&self, seq_arrays: &Vec<Sequence>) -> Format {
+    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> Format {
         let byte_arrays: Vec<_> = seq_arrays.iter()
             .map(|keypress|
                  keypress.to_bytes(self.use_compression, self.use_mods))
@@ -147,11 +147,15 @@ impl <'a> KmapBuilder<'a> {
         let mut seq_arrays = Vec::new();
         for length in 0..max_len(names_by_len)+1 {
             let subarray =
-                match names_by_len.get(&length) {
-                    Some(names) =>
-                        make_flat_sequence(self.seq_map, names),
-                    None => Sequence::new(),
-                };
+                // match names_by_len.get(&length) {
+                //     Some(names) =>
+                //         make_flat_sequence(self.seq_map, names),
+                //     None => Sequence::new(),
+                // };
+                names_by_len.get(&length).map_or_else(
+                    Sequence::new,
+                    |names| make_flat_sequence(self.seq_map, names)
+                );
             seq_arrays.push(subarray);
         }
         seq_arrays
@@ -166,7 +170,7 @@ impl <'a> KmapBuilder<'a> {
 
             for length in 0..max_len(names_by_len)+1 {
                 kmap_array.push(
-                    self.make_chord_subarray(&names_by_len, length, kmap)
+                    self.make_chord_subarray(names_by_len, length, kmap)
                 );
             }
             chord_arrays.insert(kmap.to_owned(), kmap_array);
@@ -218,7 +222,7 @@ impl <'a> KmapBuilder<'a> {
         for i in 0..subarray_names.len() {
             f.append(&CArray::new()
                      .name(&subarray_names[i])
-                     .is_extern(false)
+                     .c_extern(false)
                      .fill_1d(&arrays[i])
                      .format()
             );
@@ -226,7 +230,7 @@ impl <'a> KmapBuilder<'a> {
         subarray_names.push("NULL".to_c());
         f.append(&CArray::new()
                  .name(name)
-                 .is_extern(is_extern)
+                 .c_extern(is_extern)
                  .c_type(&"uint8_t*".to_c())
                  .fill_1d(&subarray_names)
                  .format());
@@ -243,7 +247,7 @@ impl <'a> KmapBuilder<'a> {
         for name in names{
             let length = self.seq_map[name].len();
             names_by_len.entry(length)
-                .or_insert(Vec::new())
+                .or_insert_with(Vec::new)
                 .push(name.to_owned());
         }
         self.reorder_length_map(names_by_len)
@@ -260,7 +264,7 @@ impl <'a> KmapBuilder<'a> {
             .position(|name| self.chord_maps[kmap].contains_key(name)) ;
 
         let mut new_map: LenMap = BTreeMap::new();
-        for (length, mut names) in names_by_len.into_iter() {
+        for (length, mut names) in names_by_len {
             let mut v: Vec<Name> = Vec::new();
             let mut remaining_kmaps: Vec<_> = self.chord_maps.keys().collect();
             while !names.is_empty() {   // For each entry/sequence:
@@ -271,7 +275,7 @@ impl <'a> KmapBuilder<'a> {
                     break;
                 }
                 for kmap in remaining_kmaps.clone() {
-                    match find_name(&names, &kmap) {
+                    match find_name(&names, kmap) {
                         Some(position) => {
                             // Move the entry to the new map
                             v.push(names[position].clone());
@@ -309,7 +313,7 @@ impl <'a> KmapBuilder<'a> {
     }
 }
 
-fn make_flat_sequence(seq_map: &SeqMap, names: &Vec<Name>)
+fn make_flat_sequence(seq_map: &SeqMap, names: &[Name])
                       -> Sequence
 {
     let mut flat_seq = Sequence::new();
@@ -324,7 +328,7 @@ fn max_len(names_by_len: &LenMap) -> usize {
     *names_by_len.keys().max().unwrap_or(&0)
 }
 
-fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<u8> {
+fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<u8> {
 
     let mut v = Vec::new();
     for entry in entries {
@@ -336,19 +340,23 @@ fn flatten_chord_entries(entries: &Vec<ChordEntry>) -> Vec<u8> {
 
 fn get_compression_config(seq_type: SeqType) -> bool {
     match seq_type {
-        SeqType::Plain => false,
-        SeqType::Macro => false,
-        SeqType::Command => false,
-        SeqType::Word => true,
+        SeqType::Plain
+            | SeqType::Macro
+            | SeqType::Command =>
+            false,
+        SeqType::Word =>
+            true,
     }
 }
 
 fn get_mods_config(seq_type: SeqType) -> bool {
     match seq_type {
-        SeqType::Plain => true,
-        SeqType::Macro => true,
-        SeqType::Command => false,
-        SeqType::Word => false,
+        SeqType::Plain
+            | SeqType::Macro =>
+            true,
+        SeqType::Command
+            | SeqType::Word =>
+            false,
     }
 }
 

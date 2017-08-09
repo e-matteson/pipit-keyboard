@@ -49,7 +49,7 @@ fn make_mod(modifiers: Option<Vec<String>>) -> Result<CCode> {
         match modifiers {
             Some(v) => {
                 let mut mod_codes= Vec::new();
-                for m in v.into_iter(){
+                for m in v {
                     mod_codes.push(sanitize(&m)?);
                 }
                 mod_codes.join("|").to_c()
@@ -60,13 +60,13 @@ fn make_mod(modifiers: Option<Vec<String>>) -> Result<CCode> {
 }
 
 fn or_default(string: Option<String>) -> String {
-    string.unwrap_or("0".into())
+    string.unwrap_or_else(|| "0".into())
 }
 
 fn sanitize(s: &str) -> Result<CCode> {
     // TODO compare to an actual list of defined key codes?
     //  Could vary with underlying keyboard lib, though
-    if contains_illegal_char(&s) {
+    if contains_illegal_char(s) {
         bail!(ErrorKind::BadValue("KeyPress".into(), Some(s.to_owned())))
     }
     else {
