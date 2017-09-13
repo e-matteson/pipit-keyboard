@@ -297,16 +297,16 @@ macro_hash_bang   macro_exit_py     macro_self_dot    macro_docstr_py
   ... .*.           ... .*.           ... .*.           ... .*.
 
 macro_printf    macro_print_py      macro_print_rs    macro_print_debug_rs
-...*   .*..      ...*   .**.         ...*   ..*.       ...*   *.*.
-....   ....      ....   ....         ....   ....       ....   ....
-  .     .          .     .             .     .           .     .
-  ... .*.          ... .*.             ... .*.           ... .*.
+...*   .*..      ...*   .**.        ...*   ..*.       ...*   *.*.
+....   ....      ....   ....        ....   ....       ....   ....
+  .     .          .     .            .     .           .     .
+  ... .*.          ... .*.            ... .*.           ... .*.
 
-macro_lifetime_rs macro_btreemap
-....   ...*       *.**   ....
-***.   ....       *...   ....
-  .     .           .     .
-  ... .*.           ... ...
+macro_lifetime_rs macro_btreemap    macro_new_rs
+....   ...*       *.**   ....       ....   **..
+***.   ....       *...   ....       ..*.   ..*.
+  .     .           .     .           .     .
+  ... .*.           ... .*.           ... .*.
 
 macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
 ....   .*..       ....   .*..       .*..   .*..        .*..   *...
