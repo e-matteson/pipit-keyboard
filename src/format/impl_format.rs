@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use types::{Sequence, KeyPress, Maps, SeqType, KmapPath, CCode, Name, ToC,
             Options, OpDef, OpType};
-use format::{Format, CArray, KmapBuilder, ModeBuilder, compress,
+use format::{CFiles, CArray, KmapBuilder, ModeBuilder, compress,
              make_compression_macros};
 
 
@@ -20,8 +20,8 @@ impl KeyPress {
 }
 
 impl Options {
-    pub fn format(&self) -> Format {
-        let mut f = Format::new();
+    pub fn format(&self) -> CFiles {
+        let mut f = CFiles::new();
         for (name, op) in self.get_formattable_options() {
             f.append(&op.format(&name.to_c()));
         }
@@ -32,7 +32,7 @@ impl Options {
 
 
 impl OpDef {
-    pub fn format(&self, name: &CCode) -> Format {
+    pub fn format(&self, name: &CCode) -> CFiles {
         match self.op_type {
             OpType::DefineInt => {
                 format_define(
@@ -57,7 +57,7 @@ impl OpDef {
                     format_define(name, &"".to_c())
                 }
                 else {
-                    Format::new()
+                    CFiles::new()
                 }
             }
             OpType::Uint8 => {
@@ -109,8 +109,8 @@ impl Sequence {
 
 impl Maps {
 
-    pub fn format(&self, file_name_base: &str) -> Format {
-        let mut f = Format::new();
+    pub fn format(&self, file_name_base: &str) -> CFiles {
+        let mut f = CFiles::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
         f.append(&self.options.format());
         f.append(&self.format_modifiers());
@@ -122,8 +122,8 @@ impl Maps {
         f
     }
 
-    fn format_modes (&self) -> Format {
-        let mut f = Format::new();
+    fn format_modes (&self) -> CFiles {
+        let mut f = CFiles::new();
         let mut kmap_struct_names = BTreeMap::new();
         f.append(&self.format_kmaps(&mut kmap_struct_names));
 
@@ -155,10 +155,10 @@ impl Maps {
     fn format_kmaps(&self,
                     kmap_struct_names: &mut BTreeMap<SeqType,
                                                      BTreeMap<KmapPath, CCode>>)
-                    -> Format
+                    -> CFiles
     {
         // Format all keymap structs, and return their names
-        let mut f = Format::new();
+        let mut f = CFiles::new();
         for seq_type in self.sequences.keys() {
             let l = KmapBuilder::new(*seq_type,
                                      &self.sequences[seq_type],
@@ -172,11 +172,11 @@ impl Maps {
         f
     }
 
-    fn format_mode_enum (&self) -> Format {
+    fn format_mode_enum (&self) -> CFiles {
         let modes_list: Vec<_> = self.modes.keys()
             .map(|x| x.to_c().to_uppercase())
             .collect();
-        Format {
+        CFiles {
             h: make_enum(modes_list, &"mode_enum".to_c()),
             c: CCode::new(),
         }
@@ -200,24 +200,20 @@ impl Maps {
                        all_mod_indices: &BTreeMap<Name, CCode>)
                        -> Vec<CCode>
     {
-        // let indices: Vec<_> = mod_names.iter()
-        //     .map(|x| all_mod_indices[x].clone())
-        //     .collect();
-        // indices
         mod_names.iter()
             .map(|x| all_mod_indices[x].clone())
             .collect()
     }
 
-    fn format_modifiers (&self) -> Format {
+    fn format_modifiers (&self) -> CFiles {
         let all_index_variants = self.make_mod_index_variants();
 
         let index_variants: Vec<_> = all_index_variants.values()
             .cloned()
             .collect();
-        let mut f = Format {
-            h: make_enum(index_variants,
-                         &"mod_enum".to_c()),
+
+        let mut f = CFiles {
+            h: make_enum(index_variants, &"mod_enum".to_c()),
             c: CCode::new(),
         };
 
@@ -231,8 +227,7 @@ impl Maps {
             &"NUM_ANAGRAM_MODS".to_c(), &self.anagram_mods.len().to_c()
         ));
         f.append(&format_define(
-            &"NUM_ANAGRAMS".to_c(),
-            &self.get_num_anagrams().to_c()
+            &"NUM_ANAGRAMS".to_c(), &self.get_num_anagrams().to_c()
         ));
         f.append(&format_define(
             &"NUM_PLAIN_MODS".to_c(),
@@ -241,14 +236,14 @@ impl Maps {
 
         f.append(
             &CArray::new()
-                .name(&"wordmod_indices".to_c())
+                .name(&"word_mod_indices".to_c())
                 .c_type(&"mod_enum".to_c())
                 .fill_1d(&self.get_variants(&self.word_mods, &all_index_variants))
                 .format());
 
         f.append(
             &CArray::new()
-                .name(&"modifierkey_indices".to_c())
+                .name(&"plain_mod_indices".to_c())
                 .c_type(&"mod_enum".to_c())
                 .fill_1d(&self.get_variants(&self.plain_mods, &all_index_variants))
                 .format());
@@ -266,27 +261,28 @@ impl Maps {
 
         f.append(
             &CArray::new()
-                .name(&"modifierkey_keys".to_c())
+                .name(&"plain_mod_keys".to_c())
                 .fill_1d(&plain_mod_codes)
                 .format());
         f
     }
 
-    fn format_command_enum (&self) -> Format {
+    fn format_command_enum (&self) -> CFiles {
         let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
-            .map(|x| x.to_c().to_uppercase())
+            .map(|x|
+                 x.to_c().to_uppercase())
             .collect();
-        Format {
+        CFiles {
             h: make_enum(command_list, &"command_enum".to_c()),
             c: CCode::new(),
         }
     }
 
-    fn format_seq_type_enum (&self) -> Format {
+    fn format_seq_type_enum (&self) -> CFiles {
         let v: Vec<_> = self.get_seq_types().into_iter()
             .map(|s| s.to_c().to_uppercase())
             .collect();
-        Format {
+        CFiles {
             h: make_enum(v, &"seq_type_enum".to_c()),
             c: CCode::new(),
         }
@@ -294,7 +290,7 @@ impl Maps {
 }
 
 
-pub fn format_intro(h_file_name: &str) -> Format{
+pub fn format_intro(h_file_name: &str) -> CFiles{
     let mut f = format_autogen_message();
 
     let guard_name = make_guard_name(h_file_name);
@@ -313,9 +309,9 @@ pub fn format_intro(h_file_name: &str) -> Format{
     f
 }
 
-pub fn format_outro() -> Format {
+pub fn format_outro() -> CFiles {
     let end_namespace = "\n} // end namespace\n";
-    let mut f = Format::new();
+    let mut f = CFiles::new();
 
     f.h += make_debug_macros();
     f.h += end_namespace;
@@ -325,7 +321,7 @@ pub fn format_outro() -> Format {
     f
 }
 
-fn format_autogen_message( ) -> Format {
+fn format_autogen_message( ) -> CFiles {
     const AUTHOR: &str = "pipit-config";
 
     let mut s = format!("/**\n * Automatically generated by {} on:  {}\n",
@@ -333,7 +329,7 @@ fn format_autogen_message( ) -> Format {
                         now().strftime("%c").unwrap()
     );
     s += " * Do not make changes here, they will be overwritten.\n */\n\n";
-    Format{
+    CFiles{
         h: s.to_c(),
         c: s.to_c(),
     }
@@ -396,10 +392,10 @@ fn make_enum(variants: Vec<CCode>, name: &CCode) -> CCode {
     CCode(format!("enum {}{{\n{}}};\n\n", name, contents))
 }
 
-fn format_define(name: &CCode, value: &CCode) -> Format {
+fn format_define(name: &CCode, value: &CCode) -> CFiles {
     // Name will be written in all-caps.
 
-    Format {
+    CFiles {
         h: CCode(format!("#define {} {}\n",
                          name.to_uppercase(),
                          value)),
@@ -407,8 +403,8 @@ fn format_define(name: &CCode, value: &CCode) -> Format {
     }
 }
 
-fn format_uint8(name: &CCode, value: u8) -> Format {
-    Format {
+fn format_uint8(name: &CCode, value: u8) -> CFiles {
+    CFiles {
         h: CCode(format!("extern const uint8_t {};\n",
                          name)),
 

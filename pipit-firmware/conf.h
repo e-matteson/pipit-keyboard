@@ -23,7 +23,6 @@ namespace conf {
 
   const uint8_t* getModChord(mode_enum mode, mod_enum modifier);
   const uint8_t getPlainModByte(uint8_t index);
-  // const uint8_t getModifierkeyIndex(mod_enum modifier);
   const mod_enum getPlainModEnum(uint8_t index);
   const mod_enum getWordModEnum(uint8_t index);
   const mod_enum getAnagramModEnum(uint8_t index);

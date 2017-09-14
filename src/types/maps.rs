@@ -85,7 +85,7 @@ impl Maps {
         Ok(())
     }
 
-    pub fn add_modifierkey(&mut self, name: Name, seq: &Sequence) -> Result<()> {
+    pub fn add_plain_mod(&mut self, name: Name, seq: &Sequence) -> Result<()> {
         self.plain_mods.push(name.clone());
         self.add_sequence(SeqType::Plain, name, seq.clone())
     }

@@ -6,22 +6,22 @@ use types::CCode;
 
 
 #[derive(Debug, Default)]
-pub struct Format {
+pub struct CFiles {
     pub h: CCode,   // for header file
     pub c: CCode,   // for cpp file
 }
 
 // TODO rename to a noun!
-impl Format {
+impl CFiles {
 
-    pub fn new() -> Format {
-        Format {
+    pub fn new() -> CFiles {
+        CFiles {
             h: CCode::new(),
             c: CCode::new(),
         }
     }
 
-    pub fn append(&mut self, other: &Format) {
+    pub fn append(&mut self, other: &CFiles) {
         self.h += &other.h;
         self.c += &other.c;
     }

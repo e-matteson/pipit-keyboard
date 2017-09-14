@@ -11,11 +11,11 @@ macro_rules! c_struct {
             // TODO inline for efficiency?
             // TODO optionally extern?
             // TODO whats up with semicolons? diff between kmap and mode?
-            fn format(&self, name: &CCode) -> Format {
+            fn format(&self, name: &CCode) -> CFiles {
                 let mut c = format!("const {} {} = {{\n", stringify!($struct_type), name);
                 $(c += &format!("  {}, // {}\n", self.$field.to_c(), stringify!($field));)*
                 c += "};\n";
-                Format {
+                CFiles {
                     h: CCode::new(),
                     c: CCode(c),
                 }

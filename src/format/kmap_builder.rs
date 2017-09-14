@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::collections::BTreeMap;
 
 use types::{Chord, Sequence, KmapPath, SeqType, Name, CCode, ToC};
-use format::{Format, CArray};
+use format::{CFiles, CArray};
 
 type SeqMap   = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
@@ -80,7 +80,7 @@ impl <'a> KmapBuilder<'a> {
     }
 
     pub fn format(&self, struct_names_out: &mut BTreeMap<KmapPath, CCode>)
-                  -> Format
+                  -> CFiles
     {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
@@ -90,7 +90,7 @@ impl <'a> KmapBuilder<'a> {
         let seq_arrays = self.make_seq_arrays(&names_by_len);
         let chord_arrays = self.make_chord_arrays(&names_by_len);
 
-        let mut f = Format::new();
+        let mut f = CFiles::new();
         f.append(&self.format_seq_arrays(&seq_arrays));
         f.append(&self.format_chord_arrays(&chord_arrays));
 
@@ -111,10 +111,10 @@ impl <'a> KmapBuilder<'a> {
     }
 
     fn format_chord_arrays(&self, chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>)
-                           -> Format
+                           -> CFiles
     {
         // TODO be consistent about "array" / "subarray" terminology
-        let mut f = Format::new();
+        let mut f = CFiles::new();
         let mut array_names: Vec<CCode> = Vec::new();
         for (kmap, length_entries) in chord_arrays{
             let length_ints: Vec<Vec<u8>> = length_entries.iter()
@@ -133,7 +133,7 @@ impl <'a> KmapBuilder<'a> {
         f
     }
 
-    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> Format {
+    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> CFiles {
         let byte_arrays: Vec<_> = seq_arrays.iter()
             .map(|keypress|
                  keypress.to_bytes(self.use_compression, self.use_mods))
@@ -212,13 +212,13 @@ impl <'a> KmapBuilder<'a> {
     fn format_length_arrays <T> (&self,
                                  arrays: Vec<Vec<T>>,
                                  name: &CCode,
-                                 is_extern: bool) -> Format
+                                 is_extern: bool) -> CFiles
         where T: Display + Clone
     {
         let mut subarray_names: Vec<_> = (0..arrays.len())
             .map(|x| CCode(format!("{}_{}", name, x)))
             .collect();
-        let mut f = Format::new();
+        let mut f = CFiles::new();
         for i in 0..subarray_names.len() {
             f.append(&CArray::new()
                      .name(&subarray_names[i])

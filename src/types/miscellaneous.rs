@@ -117,8 +117,7 @@ impl fmt::Debug for Name{
 
 //////////////////////////////
 
-#[derive(Debug, Default)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Sequence (
     pub Vec<KeyPress>
 );

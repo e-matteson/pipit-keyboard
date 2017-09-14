@@ -106,7 +106,7 @@ impl Maps {
     fn load_plain_mods(&mut self, toml: &Value) -> Result<()>{
         let table = get_section(toml, "plain_modifiers")?;
         for (name, seq) in &BTreeMap::from_toml(table)? {
-            self.add_modifierkey(name.to_owned(), seq)?;
+            self.add_plain_mod(name.to_owned(), seq)?;
         }
         Ok(())
     }

@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::clone::Clone;
 use itertools::Itertools;
 
-use format::format::Format;
+use format::c_files::CFiles;
 use types::{CCode, ToC};
 
 // TODO fix horrible 2d array formatting
@@ -54,7 +54,7 @@ impl <T> CArray<T> where T: Display + Clone
         self
     }
 
-    pub fn format(self) -> Format {
+    pub fn format(self) -> CFiles {
         let name = self.name
             .as_ref()
             .expect("CArray name must be provided")
@@ -70,12 +70,12 @@ impl <T> CArray<T> where T: Display + Clone
     }
 
 
-    fn format_c_array1 (&self, v: &[T], name: &CCode) -> Format
+    fn format_c_array1 (&self, v: &[T], name: &CCode) -> CFiles
         where T: Display + Clone
     {
         let contents = make_c_array1(v);
         if self.is_extern {
-            Format {
+            CFiles {
                 h: CCode(
                     format!(
                         "extern const {} {}[];\n",
@@ -91,7 +91,7 @@ impl <T> CArray<T> where T: Display + Clone
             }
         }
         else {
-            Format {
+            CFiles {
                 h: CCode::new(),
                 c: CCode(
                     format!(
@@ -104,14 +104,14 @@ impl <T> CArray<T> where T: Display + Clone
         }
     }
 
-    fn format_c_array2(&self, v: &[Vec<T>], name: &CCode) -> Format
+    fn format_c_array2(&self, v: &[Vec<T>], name: &CCode) -> CFiles
         where T: Display
     {
         let contents = make_c_array2(v);
         let len_2nd_dim = v[0].len();
 
         if self.is_extern {
-            Format {
+            CFiles {
                 h: CCode(
                     format!("extern const {} {}[][{}];\n",
                             self.c_type, name, len_2nd_dim
@@ -119,12 +119,11 @@ impl <T> CArray<T> where T: Display + Clone
                 c: CCode(
                     format!("extern const {} {}[][{}] = {};\n\n",
                             self.c_type, name, len_2nd_dim, contents
-                    )
-                ),
+                    )),
             }
         }
         else {
-            Format {
+            CFiles {
                 h: CCode::new(),
                 c: CCode(
                     format!(

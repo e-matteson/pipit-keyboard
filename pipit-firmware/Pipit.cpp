@@ -251,7 +251,7 @@ void Pipit::processChord(Chord* chord){
 }
 
 void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
-  // For gaming modes. Only commands, plain_keys, and modifierkeys are
+  // For gaming modes. Only commands, plain_keys, and plain_mods are
   //  supported. Lookup each individual switch, and if they're plain_keys, send
   //  them all together at the end. If any switch is a command, do the command
   //  immediately and ignore the rest of the switches.

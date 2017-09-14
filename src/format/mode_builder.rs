@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use types::{SeqType, KmapPath, CCode, Chord, ModeName, ModeInfo, ToC};
-use format::{Format, CArray};
+use format::{CFiles, CArray};
 
 
 pub struct  ModeBuilder <'a> {
@@ -14,7 +14,7 @@ pub struct  ModeBuilder <'a> {
 }
 
 impl <'a> ModeBuilder <'a> {
-    pub fn format (&self, mode_struct_name: &mut CCode ) -> Format {
+    pub fn format (&self, mode_struct_name: &mut CCode ) -> CFiles {
         let mut kmap_array_name = CCode::new();
         let mut f = self.format_kmap_array(&mut kmap_array_name);
 
@@ -40,9 +40,9 @@ impl <'a> ModeBuilder <'a> {
         f
     }
 
-    fn format_kmap_array (&self, kmap_array_name: &mut CCode) -> Format
+    fn format_kmap_array (&self, kmap_array_name: &mut CCode) -> CFiles
     {
-        let mut f = Format::new();
+        let mut f = CFiles::new();
         let mut subarray_names = Vec::new();
         for seq_type in &self.seq_types {
             let mut v = Vec::new();
@@ -83,7 +83,7 @@ impl <'a> ModeBuilder <'a> {
         f
     }
 
-    fn format_anagram_mask (&self, array_name: &mut CCode) -> Format {
+    fn format_anagram_mask (&self, array_name: &mut CCode) -> CFiles {
         let mut anagram_mask = Chord::new();
         for c in &self.anagram_chords {
             anagram_mask.intersect(c);
@@ -96,14 +96,14 @@ impl <'a> ModeBuilder <'a> {
             .format()
     }
 
-    fn format_anagram_array (&self, new_array_name: &mut CCode) -> Format {
+    fn format_anagram_array (&self, new_array_name: &mut CCode) -> CFiles {
         self.format_chord_array_helper(new_array_name,
                              &self.anagram_chords,
                              &"anagram_chord".to_c())
     }
 
 
-    fn format_modifier_array (&self, new_array_name: &mut CCode) -> Format {
+    fn format_modifier_array (&self, new_array_name: &mut CCode) -> CFiles {
         self.format_chord_array_helper(new_array_name,
                                        &self.mod_chords,
                                        &"mod_chord".to_c())
@@ -112,8 +112,8 @@ impl <'a> ModeBuilder <'a> {
     fn format_chord_array_helper (&self,
                                   new_array_name: &mut CCode,
                                   chords: &[Chord],
-                                  label: &CCode) -> Format {
-        let mut f = Format::new();
+                                  label: &CCode) -> CFiles {
+        let mut f = CFiles::new();
         let mut subarray_names = Vec::new();
         for (i,c) in chords.iter().enumerate() {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
