@@ -33,17 +33,23 @@ impl ChordEntry {
     }
 
     pub fn make_prefix_byte(&self) -> Vec<u8> {
-        const MAX_OFFSET: u8 = 15;   // 4 bits for offset  (least significant)
-        const MAX_ANAGRAM: u8 = 15;  // 4 bits for anagram (most significant)
+        // This format must match Lookup::readOffset() and Lookup::readAnagramNum()!
+        // Offset and anagram bits fit into 1 byte, so must add up to 8.
+        const NUM_OFFSET_BITS: u32 = 5;   // (least significant)
+        const NUM_ANAGRAM_BITS: u32 = 3;  // (most significant)
 
-        if self.offset > MAX_OFFSET {
+        let max_offset = 2u32.pow(NUM_OFFSET_BITS) as u8;
+        let max_anagram = 2u32.pow(NUM_ANAGRAM_BITS) as u8;
+
+        if self.offset > max_offset {
             panic!("offset is too large - too many layouts?");
         }
-        if self.chord.anagram_num > MAX_ANAGRAM {
+
+        if self.chord.anagram_num > max_anagram {
             panic!("anagram num is too large");
         }
 
-        let msb = self.chord.anagram_num.checked_shl(4).unwrap();
+        let msb = self.chord.anagram_num.checked_shl(NUM_OFFSET_BITS).unwrap();
         let lsb = self.offset;
         vec![msb + lsb]
     }

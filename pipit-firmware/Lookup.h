@@ -25,7 +25,7 @@ private:
   uint8_t readOffset(const uint8_t* start_of_entry);
   uint8_t readAnagramNum(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);
-  bool isZero(const uint8_t* start_of_entry);
+  bool isZeros(const uint8_t* start_of_entry);
   uint8_t* nextChordEntry(uint8_t* start_of_entry);
 
 
@@ -44,6 +44,8 @@ private:
   const uint8_t compressed_cycle_length = 3;
 
   // length of prefix that stores offset, and maybe other info someday
+  // This must match ChordEntry.make_prefix_byte() in the config code.
+  // TODO write in auto_config
   const uint8_t num_bytes_in_prefix = 1;
 };
 

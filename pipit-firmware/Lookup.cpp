@@ -48,7 +48,7 @@ uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t*
   while(kmap->chords[length_index] != NULL){ // for each length subarray
     uint8_t* entry = (uint8_t*) kmap->chords[length_index];
     uint32_t seq_num = 0;
-    while(!isZero(entry)){ // for each entry/chunk
+    while(!isZeros(entry)){ // for each entry/chunk
       seq_num += readOffset(entry);
       if(chord->matches(getChordAddress(entry), readAnagramNum(entry))){
         // Found match!
@@ -70,20 +70,24 @@ uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t*
 /**** Chord lookup utilities ****/
 
 uint8_t Lookup::readOffset(const uint8_t* start_of_entry) {
-  // Offset is in the 4 least significant bits of the first byte
-  return start_of_entry[0] & 0x0F;
+  // Offset is in the 5 least significant bits of the first byte.
+  // This must match ChordEntry.make_prefix_byte() in the config code.
+  // TODO write in auto_config
+  return start_of_entry[0] & 0x1F;
 }
 
 uint8_t Lookup::readAnagramNum(const uint8_t* start_of_entry) {
-  // Anagram num is in the 4 most significant bits of the first byte
-  return (start_of_entry[0] & 0xF0) >> 4;
+  // Anagram num is in the 3 most significant bits of the first byte.
+  // This must match ChordEntry.make_prefix_byte() in the config code.
+  // TODO write in auto_config
+  return (start_of_entry[0] & 0xE0) >> 5;
 }
 
 uint8_t* Lookup::getChordAddress(const uint8_t* start_of_entry) {
   return (uint8_t*) start_of_entry + num_bytes_in_prefix;
 }
 
-bool Lookup::isZero(const uint8_t* start_of_entry){
+bool Lookup::isZeros(const uint8_t* start_of_entry){
   // return true if the chord bytes of the entry at the address are all zero
   const uint8_t* chord_address = getChordAddress(start_of_entry);
   bool is_zero = 1;
@@ -134,16 +138,16 @@ uint32_t Lookup::decompressKey(const uint8_t* compressed, uint32_t key_index, ui
   // Assume we always start on the 1st byte that contains part of the key.
   switch(key_index % this->decompressed_cycle_length){
   case 0:
-    *key_out = compressed[0] >> 2;                                             //a
+    *key_out = compressed[0] >> 2;
     return 0;
   case 1:
-    *key_out = ((compressed[0]&0x03) << 4) |  ((compressed[1]&0xF0) >> 4);        //b
+    *key_out = ((compressed[0]&0x03) << 4) |  ((compressed[1]&0xF0) >> 4);
     return 1;
   case 2:
-    *key_out = ((compressed[0]&0x0F) << 2) |  ((compressed[1]&0xC0) >> 6);        //c
+    *key_out = ((compressed[0]&0x0F) << 2) |  ((compressed[1]&0xC0) >> 6);
     return 1;
   case 3:
-    *key_out = (compressed[0]&0x3F);                                           //d
+    *key_out = (compressed[0]&0x3F);
     return 1;
   default:
     DEBUG1("ERROR: bad decompression offset");

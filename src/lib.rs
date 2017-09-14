@@ -1,3 +1,4 @@
+#![allow(unused_doc_comment)]
 
 extern crate time;
 extern crate toml;
