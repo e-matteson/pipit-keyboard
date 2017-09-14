@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
 use itertools::Itertools;
 
-use types::{Chord, SwitchPos, Options, KmapPath, Name};
+use types::{Chord, KmapPath, Name, Options, SwitchPos};
 
 use types::errors::*;
 
@@ -26,19 +26,16 @@ impl KmapParser {
     pub fn new(ops: &Options) -> Result<KmapParser> {
         let format = ops.get_val("kmap_format").unwrap_vec_kmap();
         let items_per_line: Vec<_> = format.iter().map(|v| v.len()).collect();
-        Ok(
-            KmapParser {
-                items_per_line: items_per_line,
-                lines_in_block: 1+format.len(), // 1 extra for the top name line
-                permutation: make_permutation(ops)?,
-            }
-        )
+        Ok(KmapParser {
+            items_per_line: items_per_line,
+            lines_in_block: 1 + format.len(), // 1 extra for the top name line
+            permutation: make_permutation(ops)?,
+        })
     }
 
     pub fn parse(&mut self, path: &KmapPath) -> Result<BTreeMap<Name, Chord>> {
         let all_lines = load_lines(path)?;
-        let lines_iter =
-            &all_lines.iter()
+        let lines_iter = &all_lines.iter()
             .enumerate()                     // track line numbers
             .map(|(i, l)| (i, l.trim()))     // trim whitespace
             .filter(|&(_, l)|                // remove comments and empty lines
@@ -46,58 +43,59 @@ impl KmapParser {
                     && !l.starts_with(COMMENT_START))
             .map(|(i, l)|                    // split on whitespace
                  (i, split(l)))
-            .chunks(self.lines_in_block);    // chunk into sections
+            .chunks(self.lines_in_block); // chunk into sections
 
         let mut pairs: Vec<(Name, Chord)> = Vec::new();
-        for chunk in lines_iter{
+        for chunk in lines_iter {
             let section: Vec<_> = chunk.collect();
             pairs.extend(self.parse_section(section)?);
         }
         to_chord_map(pairs)
     }
 
-    fn parse_section(&mut self, section: Section) -> Result<Vec<(Name, Chord)>>{
+    fn parse_section(
+        &mut self,
+        section: Section,
+    ) -> Result<Vec<(Name, Chord)>> {
         let (names, blocks) = self.get_block_strings(section)?;
         let mut pairs: Vec<(Name, Chord)> = Vec::new();
-        for (block, name) in blocks.iter().zip(names.iter()){
-            let chord = self.to_firmware_order(block.chars()
-                                               .map(|c| c != UNPRESSED_CHAR)
-                                               .collect());
+        for (block, name) in blocks.iter().zip(names.iter()) {
+            let chord = self.to_firmware_order(
+                block.chars().map(|c| c != UNPRESSED_CHAR).collect(),
+            );
             pairs.push(((*name).clone(), chord));
         }
         Ok(pairs)
     }
 
-    fn get_block_strings(&mut self, section: Section) -> Result<(Vec<Name>, Vec<String>)> {
-
+    fn get_block_strings(
+        &mut self,
+        section: Section,
+    ) -> Result<(Vec<Name>, Vec<String>)> {
         let (line_nums, lines): (Vec<_>, Vec<_>) = section.into_iter().unzip();
         if lines.len() != self.lines_in_block {
             bail!(ErrorKind::KmapSyntax(last(&line_nums)));
         }
 
-        let names: Vec<_> = lines[0].iter()
-            .cloned()
-            .map(|s| Name(s.into()))
-            .collect();
-        let body: Vec<_> = lines[1..].iter()
-            .map(|l| l.join(""))
-            .collect();
+        let names: Vec<_> =
+            lines[0].iter().cloned().map(|s| Name(s.into())).collect();
+        let body: Vec<_> = lines[1..].iter().map(|l| l.join("")).collect();
 
         let num_blocks = names.len();
 
         // accumulate one string for each block
-        let mut strings = vec![String::new() ; num_blocks];
+        let mut strings = vec![String::new(); num_blocks];
 
         // store index into each line
-        let mut indices: Vec<usize> = vec![0 ; body.len()];
+        let mut indices: Vec<usize> = vec![0; body.len()];
 
-        for l in 0..body.len(){
+        for l in 0..body.len() {
             let num_items = self.items_per_line[l];
             if body[l].len() != num_items * num_blocks {
                 bail!(ErrorKind::KmapSyntax(line_nums[l]));
             }
             for s in strings.iter_mut().take(num_blocks) {
-                let end = indices[l]+num_items;
+                let end = indices[l] + num_items;
                 *s += &body[l][indices[l]..end];
                 indices[l] = end;
             }
@@ -119,12 +117,11 @@ fn make_permutation(ops: &Options) -> Result<Vec<usize>> {
     let firmware_order = make_firmware_order(ops);
     let mut permutation: Vec<usize> = Vec::new();
     for kmap_pos in kmap_order {
-        let firmware_pos = firmware_order.iter()
+        let firmware_pos = firmware_order
+            .iter()
             .position(|p| *p == kmap_pos)
             .ok_or_else(|| ErrorKind::KmapPins(kmap_pos.to_string()))?;
-        permutation.push(
-            firmware_pos
-        )
+        permutation.push(firmware_pos)
     }
     Ok(permutation)
 }
@@ -132,7 +129,7 @@ fn make_permutation(ops: &Options) -> Result<Vec<usize>> {
 fn make_kmap_order(ops: &Options) -> Vec<SwitchPos> {
     let format = ops.get_val("kmap_format").unwrap_vec_kmap();
     let mut order: Vec<SwitchPos> = Vec::new();
-    for line in format.iter(){
+    for line in format.iter() {
         order.extend_from_slice(line);
     }
     order
@@ -155,18 +152,15 @@ fn make_firmware_order(ops: &Options) -> Vec<(SwitchPos)> {
 fn load_lines(path: &KmapPath) -> Result<Vec<String>> {
     let file = File::open(path.0.clone())?;
     let buf = BufReader::new(file);
-    let mut lines: Vec<String> =
-        buf.lines()
-        .map(|w| w.unwrap())
-        .collect();
+    let mut lines: Vec<String> = buf.lines().map(|w| w.unwrap()).collect();
     lines.insert(0, "".into()); // to make 0-indexed line numbering work
-    if lines.is_empty(){
+    if lines.is_empty() {
         bail!("file is empty");
     }
     Ok(lines)
 }
 
-fn split(line: &str) -> Vec<&str>{
+fn split(line: &str) -> Vec<&str> {
     let words: Vec<_> = line.split_whitespace().collect();
     words
 }

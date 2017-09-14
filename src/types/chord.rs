@@ -14,9 +14,7 @@ fn set_chord_length(len: usize) {
 }
 
 fn get_chord_length() -> usize {
-    unsafe {
-        CHORD_LENGTH
-    }
+    unsafe { CHORD_LENGTH }
 }
 
 
@@ -28,13 +26,13 @@ pub struct Chord {
 
 impl Chord {
     pub fn set_num_bytes(x: i32) {
-        set_chord_length((x*8) as usize);
+        set_chord_length((x * 8) as usize);
     }
 
     pub fn new() -> Chord {
         Chord {
             bits: vec![false; get_chord_length()],
-            anagram_num: 0
+            anagram_num: 0,
         }
     }
 
@@ -47,7 +45,7 @@ impl Chord {
         }
         Chord {
             bits: v,
-            anagram_num: 0
+            anagram_num: 0,
         }
     }
 
@@ -55,13 +53,13 @@ impl Chord {
         self.bits.len()
     }
 
-    pub fn count_switches(&self) -> usize{
+    pub fn count_switches(&self) -> usize {
         self.bits.iter().filter(|x| **x).count()
     }
 
-    pub fn intersect(&mut self, other: &Chord){
+    pub fn intersect(&mut self, other: &Chord) {
         assert_eq!(self.len(), other.len());
-        for i in 0..self.len(){
+        for i in 0..self.len() {
             self.bits[i] |= other.bits[i];
         }
     }
@@ -69,19 +67,23 @@ impl Chord {
     pub fn permute(&mut self, order: &[usize]) {
         assert_eq!(self.len(), order.len());
         let mut new = Chord::new();
-        for i in 0..self.len(){
+        for i in 0..self.len() {
             new.bits[order[i]] = self.bits[i];
         }
         self.bits = new.bits;
     }
 
     // pub fn to_string(&self) -> String {
-    //     let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else {"0"}).collect();
+    // let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else
+    // {"0"}).collect();
     //     tmp.join("")
     // }
 
     pub fn bits(&self) -> String {
-        let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else {"0"}).collect();
+        let tmp: Vec<_> = self.bits
+            .iter()
+            .map(|&b| if b { "1" } else { "0" })
+            .collect();
         tmp.join("")
     }
 
@@ -97,7 +99,7 @@ impl Chord {
     // pub fn get_anagram(&self)
 }
 
-impl fmt::Debug for Chord{
+impl fmt::Debug for Chord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Chord {{ {} : {}}}", self.bits(), self.anagram_num)
     }
@@ -108,9 +110,9 @@ fn byte_to_int(v: &[bool]) -> u8 {
     let mut num: u8 = 0;
     let base: u8 = 2;
 
-    let bits: Vec<u8> = v.iter().map(|&b| if b {1} else {0}).collect();
-    for b in 0..8{
-        num +=  base.pow(b) * bits[b as usize]
+    let bits: Vec<u8> = v.iter().map(|&b| if b { 1 } else { 0 }).collect();
+    for b in 0..8 {
+        num += base.pow(b) * bits[b as usize]
     }
     num
 }

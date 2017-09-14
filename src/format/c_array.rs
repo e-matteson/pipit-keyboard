@@ -7,12 +7,17 @@ use types::{CCode, ToC};
 
 // TODO fix horrible 2d array formatting
 
-enum Contents <T> where T: Display + Clone {
+enum Contents<T>
+where
+    T: Display + Clone,
+{
     D1(Vec<T>),
     D2(Vec<Vec<T>>),
 }
 
-pub struct CArray <T> where T: Display + Clone
+pub struct CArray<T>
+where
+    T: Display + Clone,
 {
     name: Option<CCode>,
     is_extern: bool,
@@ -20,9 +25,11 @@ pub struct CArray <T> where T: Display + Clone
     contents: Option<Contents<T>>,
 }
 
-impl <T> CArray<T> where T: Display + Clone
+impl<T> CArray<T>
+where
+    T: Display + Clone,
 {
-    pub fn new() -> CArray<T>  {
+    pub fn new() -> CArray<T> {
         CArray {
             name: None,
             is_extern: true,
@@ -30,7 +37,7 @@ impl <T> CArray<T> where T: Display + Clone
             contents: None,
         }
     }
-    pub fn name(mut self, name: &CCode) -> CArray<T>  {
+    pub fn name(mut self, name: &CCode) -> CArray<T> {
         self.name = Some(name.to_owned());
         self
     }
@@ -61,75 +68,74 @@ impl <T> CArray<T> where T: Display + Clone
             .to_owned();
 
         match self.contents {
-            Some(Contents::D1(ref v)) =>
-                self.format_c_array1(v, &name),
-            Some(Contents::D2(ref v)) =>
-                self.format_c_array2(v, &name),
-            None => panic!("CArray was not filled")
+            Some(Contents::D1(ref v)) => self.format_c_array1(v, &name),
+            Some(Contents::D2(ref v)) => self.format_c_array2(v, &name),
+            None => panic!("CArray was not filled"),
         }
     }
 
 
-    fn format_c_array1 (&self, v: &[T], name: &CCode) -> CFiles
-        where T: Display + Clone
+    fn format_c_array1(&self, v: &[T], name: &CCode) -> CFiles
+    where
+        T: Display + Clone,
     {
         let contents = make_c_array1(v);
         if self.is_extern {
             CFiles {
-                h: CCode(
-                    format!(
-                        "extern const {} {}[];\n",
-                        self.c_type,
-                        name
-                    )),
-                c: CCode(
-                    format!("extern const {} {}[] = {};\n\n",
-                            self.c_type,
-                            name,
-                            contents
-                    )),
+                h: CCode(format!("extern const {} {}[];\n", self.c_type, name)),
+                c: CCode(format!(
+                    "extern const {} {}[] = {};\n\n",
+                    self.c_type,
+                    name,
+                    contents
+                )),
             }
-        }
-        else {
+        } else {
             CFiles {
                 h: CCode::new(),
-                c: CCode(
-                    format!(
-                        "const {} {}[] = {};\n\n",
-                        self.c_type,
-                        name,
-                        contents
-                    )),
+                c: CCode(format!(
+                    "const {} {}[] = {};\n\n",
+                    self.c_type,
+                    name,
+                    contents
+                )),
             }
         }
     }
 
     fn format_c_array2(&self, v: &[Vec<T>], name: &CCode) -> CFiles
-        where T: Display
+    where
+        T: Display,
     {
         let contents = make_c_array2(v);
         let len_2nd_dim = v[0].len();
 
         if self.is_extern {
             CFiles {
-                h: CCode(
-                    format!("extern const {} {}[][{}];\n",
-                            self.c_type, name, len_2nd_dim
-                    )),
-                c: CCode(
-                    format!("extern const {} {}[][{}] = {};\n\n",
-                            self.c_type, name, len_2nd_dim, contents
-                    )),
+                h: CCode(format!(
+                    "extern const {} {}[][{}];\n",
+                    self.c_type,
+                    name,
+                    len_2nd_dim
+                )),
+                c: CCode(format!(
+                    "extern const {} {}[][{}] = {};\n\n",
+                    self.c_type,
+                    name,
+                    len_2nd_dim,
+                    contents
+                )),
             }
-        }
-        else {
+        } else {
             CFiles {
                 h: CCode::new(),
-                c: CCode(
-                    format!(
-                        "const {} {}[][{}] = {};\n\n",
-                        self.c_type, name, len_2nd_dim, contents
-                    )),
+                c: CCode(format!(
+                    "const {} {}[][{}] = {};\n\n",
+                    self.c_type,
+                    name,
+                    len_2nd_dim,
+                    contents
+                )),
             }
         }
     }
@@ -140,21 +146,22 @@ impl <T> CArray<T> where T: Display + Clone
             panic!("CArray cannot be filled more than once");
         }
     }
-
 }
 
 // TODO refactor to recursively make arrays of arbitrary dimensions?
 // Or at least re-use more code, and improve formatting
 
 fn make_c_array1<T>(v: &[T]) -> CCode
-    where T: Display
+where
+    T: Display,
 {
     let lines = wrap_in_braces(&to_code_vec(v));
     CCode(lines.join("\n"))
 }
 
 fn make_c_array2<T>(v: &[Vec<T>]) -> CCode
-    where T: Display
+where
+    T: Display,
 {
     // TODO format better, don't put commas on separate line
     assert!(is_rectangular(v));
@@ -169,38 +176,32 @@ fn make_c_array2<T>(v: &[Vec<T>]) -> CCode
 
 
 fn wrap_in_braces(lines: &[CCode]) -> Vec<CCode> {
-    let mut new: Vec<_> = lines.iter()
-        .map(|s| CCode(format!(" {}", s)))
-        .collect();
+    let mut new: Vec<_> =
+        lines.iter().map(|s| CCode(format!(" {}", s))).collect();
     new.insert(0, "{".to_c());
     new.push("}".to_c());
     new
 }
 
 fn to_code_vec<T>(v: &[T]) -> Vec<CCode>
-    where T: Display
+where
+    T: Display,
 {
     let items_per_line = 4;
     let mut lines: Vec<String> = Vec::new();
-    let chunks = &v.iter()
-        .map(|x| x.to_string())
-        .chunks(items_per_line);
+    let chunks = &v.iter().map(|x| x.to_string()).chunks(items_per_line);
     for chunk in chunks {
         let tmp: Vec<_> = chunk.collect();
         lines.push(tmp.join(", ") + ", ");
     }
-    let code_lines: Vec<_> = lines.into_iter()
-        .map(CCode)
-        .collect();
+    let code_lines: Vec<_> = lines.into_iter().map(CCode).collect();
     code_lines
 }
 
 fn is_rectangular<T>(v: &[Vec<T>]) -> bool
-    where T: Display
+where
+    T: Display,
 {
     let len_2nd_dim = v[0].len();
-    v.iter()
-        .map(|v| v.len())
-        .all(|x| x == len_2nd_dim)
+    v.iter().map(|v| v.len()).all(|x| x == len_2nd_dim)
 }
-

@@ -1,4 +1,4 @@
-use self::from_toml::{FromToml, toml_to_vec, get_key};
+use self::from_toml::{get_key, toml_to_vec, FromToml};
 use self::kmap_parser::KmapParser;
 
 mod kmap_parser;

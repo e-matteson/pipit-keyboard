@@ -63,8 +63,14 @@ error_chain! {
         //         display("file is empty")
         // }
         KmapPins(s: String) {
-            description("Switch positions in kmap format don't match row or column pins")
-                display("invalid position in kmap_format: {}. Check row_pins and col_pins.", s)
+            description(
+                "Switch positions in kmap format don't match row or column pins"
+            )
+                display(
+                    "invalid position in kmap_format: {}. Check row_pins and \
+                     col_pins.",
+                    s
+                )
         }
         KmapSyntax(l: usize) {
             description("Syntax error in kmap file")

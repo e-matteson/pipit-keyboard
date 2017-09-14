@@ -2,10 +2,11 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{Sequence, KeyPress, Maps, SeqType, KmapPath, CCode, Name, ToC,
-            Options, OpDef, OpType};
-use format::{CFiles, CArray, KmapBuilder, ModeBuilder, compress,
-             make_compression_macros};
+use types::{CCode, KeyPress, KmapPath, Maps, Name, OpDef, OpType, Options,
+            SeqType, Sequence, ToC};
+
+use format::{compress, make_compression_macros, CArray, CFiles, KmapBuilder,
+             ModeBuilder};
 
 
 impl KeyPress {
@@ -35,59 +36,44 @@ impl OpDef {
     pub fn format(&self, name: &CCode) -> CFiles {
         match self.op_type {
             OpType::DefineInt => {
-                format_define(
-                    name,
-                    &self.get_val().unwrap_int32().to_c()
-                )
+                format_define(name, &self.get_val().unwrap_int32().to_c())
             }
             OpType::DefineString => {
-                format_define(
-                    name,
-                    &self.get_val().unwrap_str().to_c()
-                )
+                format_define(name, &self.get_val().unwrap_str().to_c())
             }
-            OpType::IfdefValue => {
-                format_define(
-                    &self.get_val().unwrap_str().to_c(),
-                    &CCode::new()
-                )
-            }
-            OpType::IfdefKey => {
-                if self.get_val().unwrap_bool() {
-                    format_define(name, &"".to_c())
-                }
-                else {
-                    CFiles::new()
-                }
-            }
-            OpType::Uint8 => {
-                format_uint8(name, self.get_val().unwrap_uint8())
-            }
-            OpType::Array1D => {
-                CArray::new()
-                    .name(name)
-                    .fill_1d(self.get_val().unwrap_vec())
-                    .format()
-            }
-            OpType::Array2D => {
-                CArray::new()
-                    .name(name)
-                    .fill_2d(self.get_val().unwrap_vec2())
-                    .format()
-            }
+            OpType::IfdefValue => format_define(
+                &self.get_val().unwrap_str().to_c(),
+                &CCode::new(),
+            ),
+            OpType::IfdefKey => if self.get_val().unwrap_bool() {
+                format_define(name, &"".to_c())
+            } else {
+                CFiles::new()
+            },
+            OpType::Uint8 => format_uint8(name, self.get_val().unwrap_uint8()),
+            OpType::Array1D => CArray::new()
+                .name(name)
+                .fill_1d(self.get_val().unwrap_vec())
+                .format(),
+            OpType::Array2D => CArray::new()
+                .name(name)
+                .fill_2d(self.get_val().unwrap_vec2())
+                .format(),
             _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
 }
 
 impl Sequence {
-
-    pub fn to_bytes(&self, use_compression: bool, use_mods: bool) -> Vec<CCode>{
+    pub fn to_bytes(
+        &self,
+        use_compression: bool,
+        use_mods: bool,
+    ) -> Vec<CCode> {
         // TODO different name for "bytes"?
-        if use_compression{
+        if use_compression {
             self.to_compressed_bytes(use_mods)
-        }
-        else {
+        } else {
             self.to_raw_bytes(use_mods)
         }
     }
@@ -103,12 +89,10 @@ impl Sequence {
     fn to_compressed_bytes(&self, use_mods: bool) -> Vec<CCode> {
         compress(self, use_mods)
     }
-
 }
 
 
 impl Maps {
-
     pub fn format(&self, file_name_base: &str) -> CFiles {
         let mut f = CFiles::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
@@ -122,7 +106,7 @@ impl Maps {
         f
     }
 
-    fn format_modes (&self) -> CFiles {
+    fn format_modes(&self) -> CFiles {
         let mut f = CFiles::new();
         let mut kmap_struct_names = BTreeMap::new();
         f.append(&self.format_kmaps(&mut kmap_struct_names));
@@ -143,27 +127,28 @@ impl Maps {
         }
         f.append_newline();
         f.append(&CArray::new()
-                 .name(&"mode_structs".to_c())
-                 .c_extern(true)
-                 .c_type(&"ModeStruct*".to_c())
-                 .fill_1d(&mode_struct_names)
-                 .format());
+            .name(&"mode_structs".to_c())
+            .c_extern(true)
+            .c_type(&"ModeStruct*".to_c())
+            .fill_1d(&mode_struct_names)
+            .format());
         f.append_newline();
         f
     }
 
-    fn format_kmaps(&self,
-                    kmap_struct_names: &mut BTreeMap<SeqType,
-                                                     BTreeMap<KmapPath, CCode>>)
-                    -> CFiles
-    {
+    fn format_kmaps(
+        &self,
+        kmap_struct_names: &mut BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>,
+    ) -> CFiles {
         // Format all keymap structs, and return their names
         let mut f = CFiles::new();
         for seq_type in self.sequences.keys() {
-            let l = KmapBuilder::new(*seq_type,
-                                     &self.sequences[seq_type],
-                                     &self.chords,
-                                     &self.kmap_ids);
+            let l = KmapBuilder::new(
+                *seq_type,
+                &self.sequences[seq_type],
+                &self.chords,
+                &self.kmap_ids,
+            );
             let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
             f.append(&l.format(&mut tmp));
             kmap_struct_names.insert(seq_type.to_owned(), tmp);
@@ -172,10 +157,9 @@ impl Maps {
         f
     }
 
-    fn format_mode_enum (&self) -> CFiles {
-        let modes_list: Vec<_> = self.modes.keys()
-            .map(|x| x.to_c().to_uppercase())
-            .collect();
+    fn format_mode_enum(&self) -> CFiles {
+        let modes_list: Vec<_> =
+            self.modes.keys().map(|x| x.to_c().to_uppercase()).collect();
         CFiles {
             h: make_enum(modes_list, &"mode_enum".to_c()),
             c: CCode::new(),
@@ -185,32 +169,31 @@ impl Maps {
     fn make_mod_index_variants(&self) -> BTreeMap<Name, CCode> {
         // TODO rename?
         let mut all_index_variants = BTreeMap::new();
-        for name in &self.get_mod_names(){
+        for name in &self.get_mod_names() {
             all_index_variants.insert(
                 name.to_owned(),
-                format!("{}_ENUM", name)
-                    .to_c()
-                    .to_uppercase());
+                format!("{}_ENUM", name).to_c().to_uppercase(),
+            );
         }
         all_index_variants
     }
 
-    fn get_variants(&self,
-                       mod_names: &[Name],
-                       all_mod_indices: &BTreeMap<Name, CCode>)
-                       -> Vec<CCode>
-    {
-        mod_names.iter()
+    fn get_variants(
+        &self,
+        mod_names: &[Name],
+        all_mod_indices: &BTreeMap<Name, CCode>,
+    ) -> Vec<CCode> {
+        mod_names
+            .iter()
             .map(|x| all_mod_indices[x].clone())
             .collect()
     }
 
-    fn format_modifiers (&self) -> CFiles {
+    fn format_modifiers(&self) -> CFiles {
         let all_index_variants = self.make_mod_index_variants();
 
-        let index_variants: Vec<_> = all_index_variants.values()
-            .cloned()
-            .collect();
+        let index_variants: Vec<_> =
+            all_index_variants.values().cloned().collect();
 
         let mut f = CFiles {
             h: make_enum(index_variants, &"mod_enum".to_c()),
@@ -218,59 +201,62 @@ impl Maps {
         };
 
         f.append(&format_define(
-            &"NUM_MODIFIERS".to_c(), &all_index_variants.len().to_c()
+            &"NUM_MODIFIERS".to_c(),
+            &all_index_variants.len().to_c(),
         ));
         f.append(&format_define(
-            &"NUM_WORD_MODS".to_c(), &self.word_mods.len().to_c()
+            &"NUM_WORD_MODS".to_c(),
+            &self.word_mods.len().to_c(),
         ));
         f.append(&format_define(
-            &"NUM_ANAGRAM_MODS".to_c(), &self.anagram_mods.len().to_c()
+            &"NUM_ANAGRAM_MODS".to_c(),
+            &self.anagram_mods.len().to_c(),
         ));
         f.append(&format_define(
-            &"NUM_ANAGRAMS".to_c(), &self.get_num_anagrams().to_c()
+            &"NUM_ANAGRAMS".to_c(),
+            &self.get_num_anagrams().to_c(),
         ));
         f.append(&format_define(
             &"NUM_PLAIN_MODS".to_c(),
-            &self.plain_mods.len().to_c()
+            &self.plain_mods.len().to_c(),
         ));
 
-        f.append(
-            &CArray::new()
-                .name(&"word_mod_indices".to_c())
-                .c_type(&"mod_enum".to_c())
-                .fill_1d(&self.get_variants(&self.word_mods, &all_index_variants))
-                .format());
+        f.append(&CArray::new()
+            .name(&"word_mod_indices".to_c())
+            .c_type(&"mod_enum".to_c())
+            .fill_1d(&self.get_variants(&self.word_mods, &all_index_variants))
+            .format());
 
-        f.append(
-            &CArray::new()
-                .name(&"plain_mod_indices".to_c())
-                .c_type(&"mod_enum".to_c())
-                .fill_1d(&self.get_variants(&self.plain_mods, &all_index_variants))
-                .format());
+        f.append(&CArray::new()
+            .name(&"plain_mod_indices".to_c())
+            .c_type(&"mod_enum".to_c())
+            .fill_1d(&self.get_variants(&self.plain_mods, &all_index_variants))
+            .format());
 
-        f.append(
-            &CArray::new()
-                 .name(&"anagram_mod_indices".to_c())
-                 .c_type(&"mod_enum".to_c())
-                 .fill_1d(&self.get_variants(&self.anagram_mods, &all_index_variants))
-                 .format());
+        f.append(&CArray::new()
+            .name(&"anagram_mod_indices".to_c())
+            .c_type(&"mod_enum".to_c())
+            .fill_1d(
+                &self.get_variants(&self.anagram_mods, &all_index_variants),
+            )
+            .format());
 
-        let plain_mod_codes: Vec<_> = self.plain_mods.iter()
+        let plain_mod_codes: Vec<_> = self.plain_mods
+            .iter()
             .map(|x| format!("({})&0xff", self.get_mod_key(x)))
             .collect();
 
-        f.append(
-            &CArray::new()
-                .name(&"plain_mod_keys".to_c())
-                .fill_1d(&plain_mod_codes)
-                .format());
+        f.append(&CArray::new()
+            .name(&"plain_mod_keys".to_c())
+            .fill_1d(&plain_mod_codes)
+            .format());
         f
     }
 
-    fn format_command_enum (&self) -> CFiles {
-        let command_list: Vec<_> = self.sequences[&SeqType::Command].keys()
-            .map(|x|
-                 x.to_c().to_uppercase())
+    fn format_command_enum(&self) -> CFiles {
+        let command_list: Vec<_> = self.sequences[&SeqType::Command]
+            .keys()
+            .map(|x| x.to_c().to_uppercase())
             .collect();
         CFiles {
             h: make_enum(command_list, &"command_enum".to_c()),
@@ -278,8 +264,9 @@ impl Maps {
         }
     }
 
-    fn format_seq_type_enum (&self) -> CFiles {
-        let v: Vec<_> = self.get_seq_types().into_iter()
+    fn format_seq_type_enum(&self) -> CFiles {
+        let v: Vec<_> = self.get_seq_types()
+            .into_iter()
             .map(|s| s.to_c().to_uppercase())
             .collect();
         CFiles {
@@ -290,7 +277,7 @@ impl Maps {
 }
 
 
-pub fn format_intro(h_file_name: &str) -> CFiles{
+pub fn format_intro(h_file_name: &str) -> CFiles {
     let mut f = format_autogen_message();
 
     let guard_name = make_guard_name(h_file_name);
@@ -321,15 +308,16 @@ pub fn format_outro() -> CFiles {
     f
 }
 
-fn format_autogen_message( ) -> CFiles {
+fn format_autogen_message() -> CFiles {
     const AUTHOR: &str = "pipit-config";
 
-    let mut s = format!("/**\n * Automatically generated by {} on:  {}\n",
-                        AUTHOR,
-                        now().strftime("%c").unwrap()
+    let mut s = format!(
+        "/**\n * Automatically generated by {} on:  {}\n",
+        AUTHOR,
+        now().strftime("%c").unwrap()
     );
     s += " * Do not make changes here, they will be overwritten.\n */\n\n";
-    CFiles{
+    CFiles {
         h: s.to_c(),
         c: s.to_c(),
     }
@@ -341,13 +329,14 @@ fn make_guard_name(h_file_name: &str) -> CCode {
     let p: String = Path::new(h_file_name)
         .file_name()
         .expect("failed to get file name")
-        .to_str().unwrap().to_string()
+        .to_str()
+        .unwrap()
+        .to_string()
         .to_uppercase()
         .chars()
-        .map(|c| if c.is_alphanumeric() {c} else {'_'})
+        .map(|c| if c.is_alphanumeric() { c } else { '_' })
         .collect();
-    let first = p.chars().nth(0)
-        .expect(&error_message);
+    let first = p.chars().nth(0).expect(&error_message);
     if !first.is_alphabetic() && first != '_' {
         panic!(error_message);
     }
@@ -385,9 +374,9 @@ fn make_enum(variants: Vec<CCode>, name: &CCode) -> CCode {
     let contents = variants
         .into_iter()
         .enumerate()
-        .fold(String::new(),
-              |acc, (index, field)|
-              format!("{}  {} = {},\n", acc, field, index));
+        .fold(String::new(), |acc, (index, field)| {
+            format!("{}  {} = {},\n", acc, field, index)
+        });
 
     CCode(format!("enum {}{{\n{}}};\n\n", name, contents))
 }
@@ -396,20 +385,15 @@ fn format_define(name: &CCode, value: &CCode) -> CFiles {
     // Name will be written in all-caps.
 
     CFiles {
-        h: CCode(format!("#define {} {}\n",
-                         name.to_uppercase(),
-                         value)),
+        h: CCode(format!("#define {} {}\n", name.to_uppercase(), value)),
         c: CCode::new(),
     }
 }
 
 fn format_uint8(name: &CCode, value: u8) -> CFiles {
     CFiles {
-        h: CCode(format!("extern const uint8_t {};\n",
-                         name)),
+        h: CCode(format!("extern const uint8_t {};\n", name)),
 
-        c: CCode(format!("extern const uint8_t {} = {};\n\n",
-                         name,
-                         value)),
+        c: CCode(format!("extern const uint8_t {} = {};\n\n", name, value)),
     }
 }

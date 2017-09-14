@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::io::{Write};
+use std::io::Write;
 use std::fs::OpenOptions;
 
 use types::CCode;
@@ -7,13 +7,12 @@ use types::CCode;
 
 #[derive(Debug, Default)]
 pub struct CFiles {
-    pub h: CCode,   // for header file
-    pub c: CCode,   // for cpp file
+    pub h: CCode, // for header file
+    pub c: CCode, // for cpp file
 }
 
 // TODO rename to a noun!
 impl CFiles {
-
     pub fn new() -> CFiles {
         CFiles {
             h: CCode::new(),
@@ -35,8 +34,6 @@ impl CFiles {
         write_to_file(&format!("{}.h", path_base), &self.h);
         write_to_file(&format!("{}.cpp", path_base), &self.c);
     }
-
-
 }
 
 fn write_to_file(full_path: &str, s: &CCode) {
@@ -47,7 +44,6 @@ fn write_to_file(full_path: &str, s: &CCode) {
         .open(path)
         .expect("failed to open output file");
     file.set_len(0).expect("failed to clear output file");
-    file.write_all(s.to_string().as_bytes()).expect("failed to write to output file");
+    file.write_all(s.to_string().as_bytes())
+        .expect("failed to write to output file");
 }
-
-

@@ -4,19 +4,19 @@ use std::fmt::{self, Display};
 use types::{Chord, KmapPath, Name};
 use types::errors::*;
 
-// The Checker warns about sub-optimal configuration. Any config issues that would
-// break the firmware should be caught in the loading (or formatting) code
+// The Checker warns about sub-optimal configuration. Any config issues that
+// would break the firmware should be caught in the loading (or formatting) code
 // instead.
 
 #[derive(Debug)]
 pub struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
-    reverse_kmaps:    HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
-    all_seqs:         HashSet<Name>,
-    all_chords:       HashSet<Name>,
+    reverse_kmaps: HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
+    all_seqs: HashSet<Name>,
+    all_chords: HashSet<Name>,
 }
 
-impl Checker  {
+impl Checker {
     pub fn new() -> Checker {
         Checker {
             reverse_kmaps: HashMap::new(),
@@ -29,7 +29,8 @@ impl Checker  {
         // TODO take args for types of checks
         // TODO option to check for mode conflicts instead
         for (kmap, reversed) in &self.reverse_kmaps {
-            let v: Vec<_> = reversed.iter()
+            let v: Vec<_> = reversed
+                .iter()
                 .filter(|&(chord, set)| set.is_invalid(Some(chord)))
                 .map(|(_, set)| set)
                 .collect();
@@ -70,16 +71,19 @@ impl Checker  {
     //     self.reverse_modes = new;
     // }
 
-    pub fn insert_seq(&mut self, name: &Name) -> Result<()>{
-        if !self.all_seqs.insert(name.to_owned()){
+    pub fn insert_seq(&mut self, name: &Name) -> Result<()> {
+        if !self.all_seqs.insert(name.to_owned()) {
             bail!("duplicate sequences for: '{}'", name);
         }
         Ok(())
     }
 
-    pub fn insert_chord(&mut self, name: &Name, chord: &Chord, kmap: &KmapPath)
-                        -> Result<()>
-    {
+    pub fn insert_chord(
+        &mut self,
+        name: &Name,
+        chord: &Chord,
+        kmap: &KmapPath,
+    ) -> Result<()> {
         // TODO take refs
         let mut base_chord = chord.to_owned();
         base_chord.anagram_num = 0;
@@ -96,11 +100,14 @@ impl Checker  {
 }
 
 
-fn print_conflicts <T: Display>(conflicts: &[&AnagramSet], label: &T) {
+fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
     if conflicts.is_empty() {
         return;
     }
-    println!("\nConflicting chords (in parens) or useless anagrams (\"?\") in {}:", label);
+    println!(
+        "\nConflicting chords (in parens) or useless anagrams (\"?\") in {}:",
+        label
+    );
     for conflict in conflicts {
         println!("  {}", conflict);
     }
@@ -111,7 +118,7 @@ fn print_conflicts <T: Display>(conflicts: &[&AnagramSet], label: &T) {
 //////////////////////////////
 
 #[derive(Debug)]
-pub struct AnagramSet (pub HashMap<u8, Vec<Name>>);
+pub struct AnagramSet(pub HashMap<u8, Vec<Name>>);
 
 impl AnagramSet {
     pub fn new() -> AnagramSet {
@@ -119,7 +126,8 @@ impl AnagramSet {
     }
 
     pub fn insert(&mut self, anagram_num: u8, name: Name) {
-        self.0.entry(anagram_num)
+        self.0
+            .entry(anagram_num)
             .or_insert_with(Vec::new)
             .push(name);
     }
@@ -145,7 +153,11 @@ impl AnagramSet {
         false
     }
 
-    pub fn is_anagram_missing(&self, anagram_num: u8, chord: Option<&Chord>) -> bool {
+    pub fn is_anagram_missing(
+        &self,
+        anagram_num: u8,
+        chord: Option<&Chord>,
+    ) -> bool {
         if self.0.contains_key(&anagram_num) {
             return false;
         }
@@ -162,27 +174,23 @@ impl AnagramSet {
     }
 
     pub fn num_anagrams(&self) -> u8 {
-        self.0.keys().max()
+        self.0
+            .keys()
+            .max()
             .expect("failed to get max anagram num")
-            .to_owned()
-            + 1
+            .to_owned() + 1
     }
 
     pub fn anagram_to_string(&self, anagram_num: u8) -> String {
         match self.0.get(&anagram_num) {
-            None =>
-                "?".to_string(),
+            None => "?".to_string(),
             Some(v) => {
-                let strings: Vec<_> = v.iter()
-                    .map(|x| x.to_string())
-                    .collect();
+                let strings: Vec<_> = v.iter().map(|x| x.to_string()).collect();
                 if strings.len() == 1 {
                     strings[0].clone()
-                }
-                else {
+                } else {
                     format!("({})", strings.join(", "))
                 }
-
             }
         }
     }
@@ -191,7 +199,7 @@ impl AnagramSet {
 impl fmt::Display for AnagramSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = Vec::new();
-        for i in 0..self.num_anagrams(){
+        for i in 0..self.num_anagrams() {
             strings.push(self.anagram_to_string(i));
         }
         let s = format!("[{}]", strings.join(", "));

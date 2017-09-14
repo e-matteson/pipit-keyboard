@@ -1,13 +1,13 @@
-use std::fmt::{self};
+use std::fmt;
 use std::borrow::Borrow;
-use std::ops::{AddAssign};
+use std::ops::AddAssign;
 
-use types::{Name, ModeName, SeqType};
+use types::{ModeName, Name, SeqType};
 
 //////////////////////////////
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
-pub struct CCode ( pub String );
+pub struct CCode(pub String);
 
 impl CCode {
     pub fn new() -> CCode {
@@ -36,29 +36,25 @@ impl fmt::Display for CCode {
 }
 
 impl AddAssign<CCode> for CCode {
-    fn add_assign(&mut self, rhs: CCode)
-    {
+    fn add_assign(&mut self, rhs: CCode) {
         self.0 += &rhs.0;
     }
 }
 
 impl<'a> AddAssign<&'a CCode> for CCode {
-    fn add_assign(&mut self, rhs: &'a CCode)
-    {
+    fn add_assign(&mut self, rhs: &'a CCode) {
         self.0 += &rhs.0;
     }
 }
 
 impl AddAssign<String> for CCode {
-    fn add_assign(&mut self, rhs: String)
-    {
+    fn add_assign(&mut self, rhs: String) {
         self.0 += &rhs;
     }
 }
 
 impl<'a> AddAssign<&'a str> for CCode {
-    fn add_assign(&mut self, rhs: &'a str)
-    {
+    fn add_assign(&mut self, rhs: &'a str) {
         self.0 += rhs;
     }
 }
@@ -105,7 +101,7 @@ impl ToC for SeqType {
 
 impl ToC for bool {
     fn to_c(&self) -> CCode {
-        let s = if *self {"1"} else {"0"};
+        let s = if *self { "1" } else { "0" };
         CCode(s.to_owned())
     }
 }

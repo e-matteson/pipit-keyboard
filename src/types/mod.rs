@@ -1,10 +1,10 @@
-pub use self::key_press::{KeyPress};
+pub use self::key_press::KeyPress;
 pub use self::c_code::{CCode, ToC};
-pub use self::miscellaneous::{SwitchPos, SeqType, KmapPath, KmapInfo, ModeName,
-                              ModeInfo, Name, Sequence};
+pub use self::miscellaneous::{KmapInfo, KmapPath, ModeInfo, ModeName, Name,
+                              SeqType, Sequence, SwitchPos};
 pub use self::chord::Chord;
-pub use self::words::{Word, WordInfo, WordBuilder};
-pub use self::options::{Options, OpDef, OpType, OpVal};
+pub use self::words::{Word, WordBuilder, WordInfo};
+pub use self::options::{OpDef, OpType, OpVal, Options};
 pub use self::maps::Maps;
 pub use self::checker::Checker;
 // pub use self::errors::*;

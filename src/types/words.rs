@@ -1,5 +1,5 @@
 
-use types::{Chord, Sequence, KeyPress, Maps, KmapPath, Name};
+use types::{Chord, KeyPress, KmapPath, Maps, Name, Sequence};
 use types::errors::*;
 
 #[derive(Debug, Clone)]
@@ -24,20 +24,22 @@ pub struct WordBuilder<'a> {
 
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Result<Word> {
-        Ok(
-            Word{
-                name: self.make_name(),
-                seq: self.make_sequence()
-                    .chain_err(||ErrorKind::BadValue(
-                        "word".into(),
-                        Some(self.info.seq_spelling.clone()))
-                    )?,
-                // TODO make general purpose failure enum?
-                chord: self.make_chord()
-                    .chain_err(||format!("failure to make chord for: '{}'",
-                                         self.info.seq_spelling))?,
-            }
-        )
+        Ok(Word {
+            name: self.make_name(),
+            seq: self.make_sequence().chain_err(|| {
+                ErrorKind::BadValue(
+                    "word".into(),
+                    Some(self.info.seq_spelling.clone()),
+                )
+            })?,
+            // TODO make general purpose failure enum?
+            chord: self.make_chord().chain_err(|| {
+                format!(
+                    "failure to make chord for: '{}'",
+                    self.info.seq_spelling
+                )
+            })?,
+        })
     }
 
     fn make_name(&self) -> Name {
@@ -55,12 +57,12 @@ impl<'a> WordBuilder<'a> {
 
     fn make_sequence(&self) -> Result<Sequence> {
         let mut seq = Sequence::new();
-        for letter in self.info.seq_spelling.chars(){
+        for letter in self.info.seq_spelling.chars() {
             seq.push(
                 KeyPress::new(
                     Some(self.get_key_code_for_seq(letter)?),
-                    self.get_mod_name_for_seq(letter)
-                ) .unwrap()
+                    self.get_mod_name_for_seq(letter),
+                ).unwrap(),
             );
         }
         Ok(seq)
@@ -72,19 +74,17 @@ impl<'a> WordBuilder<'a> {
             return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
         }
         let s = match character {
-            ' '  => "KEY_SPACE",
-            '<'  => "KEY_BACKSPACE",
+            ' ' => "KEY_SPACE",
+            '<' => "KEY_BACKSPACE",
             '\'' => "KEY_QUOTE",
-            '.'  => "KEY_PERIOD",
-            _ => bail!(
-                ErrorKind::BadValue(
-                    "character".into(),
-                    Some(character.to_string())
-                )
-            ),
-    };
-    Ok(s.into())
-}
+            '.' => "KEY_PERIOD",
+            _ => bail!(ErrorKind::BadValue(
+                "character".into(),
+                Some(character.to_string())
+            )),
+        };
+        Ok(s.into())
+    }
 
     fn get_mod_name_for_seq(&self, character: char) -> Option<Vec<String>> {
         if character.is_uppercase() {
@@ -95,11 +95,11 @@ impl<'a> WordBuilder<'a> {
     }
 
     fn make_chord(&self) -> Result<Chord> {
-        let ignored = vec!['<', '.']; //TODO make this static?
+        let ignored = vec!['<', '.']; // TODO make this static?
 
         let mut chord = Chord::new();
-        for letter in self.info.chord_spelling.chars(){
-            if ignored.contains(&letter){
+        for letter in self.info.chord_spelling.chars() {
+            if ignored.contains(&letter) {
                 continue;
             }
             chord.intersect(&self.get_letter_chord(letter)?);
@@ -112,29 +112,23 @@ impl<'a> WordBuilder<'a> {
     fn get_letter_chord(&self, letter: char) -> Result<Chord> {
         // TODO return option<chord>, for if not found
         let name = self.get_key_name_for_chord(letter)?;
-        self.maps
-            .get_chord(&name, self.kmap)
-            .ok_or_else(
-                || ErrorKind::MissingValue(
-                    "chord".into(),
-                    Some(name.to_string())
-                ).into()
-            )
+        self.maps.get_chord(&name, self.kmap).ok_or_else(|| {
+            ErrorKind::MissingValue("chord".into(), Some(name.to_string()))
+                .into()
+        })
     }
 
     fn get_key_name_for_chord(&self, character: char) -> Result<Name> {
         if character.is_alphanumeric() {
-            return Ok(Name(format!("key_{}", character.to_lowercase())))
+            return Ok(Name(format!("key_{}", character.to_lowercase())));
         }
-        let name = match character{
-            ' '  => "key_space".into(),
+        let name = match character {
+            ' ' => "key_space".into(),
             '\'' => "key_quote".into(),
-            _ => bail!(
-                ErrorKind::BadValue(
-                    "character".into(),
-                    Some(character.to_string())
-                )
-            )
+            _ => bail!(ErrorKind::BadValue(
+                "character".into(),
+                Some(character.to_string())
+            )),
         };
         Ok(Name(name))
     }
@@ -145,9 +139,11 @@ fn check_valid_anagram(anagram_num: u8) -> Result<()> {
     // TODO how to keep this matched with make_prefix_byte()?
     const MAX_ANAGRAM: u8 = 7;
     if anagram_num > MAX_ANAGRAM {
-        bail!("anagram number too large (max is {}): {}",
-              MAX_ANAGRAM,
-              anagram_num);
+        bail!(
+            "anagram number too large (max is {}): {}",
+            MAX_ANAGRAM,
+            anagram_num
+        );
     }
     Ok(())
 }

@@ -1,9 +1,9 @@
 use itertools::Itertools;
 
-use types::{Sequence, KeyPress, CCode};
+use types::{CCode, KeyPress, Sequence};
 
 // Constants used for compression
-const NUM_BYTES: usize =  3;
+const NUM_BYTES: usize = 3;
 const NUM_KEYS: usize = 4;
 
 
@@ -43,7 +43,7 @@ fn compress_chunk(mut data: Vec<KeyPress>) -> Vec<CCode> {
     let mut bytes: Vec<CCode> = Vec::new();
     for i in 0..NUM_BYTES {
         let s1 = &data[i].key;
-        let s2 = &data[i+1].key;
+        let s2 = &data[i + 1].key;
         let m = format_mask(i, s1, s2);
         // we don't use the modifiers, just the keys
         bytes.push(m);
@@ -58,16 +58,13 @@ fn format_mask(i: usize, s1: &CCode, s2: &CCode) -> CCode {
         2 => "BY2",
         _ => panic!("format_mask: bad index"),
     };
-    CCode (
-        format!("{}({},{})", macro_name, s1, s2)
-    )
+    CCode(format!("{}({},{})", macro_name, s1, s2))
 }
 
 fn pad(v: &mut Vec<KeyPress>, length: usize) {
     assert!(v.len() <= length);
     let num_to_pad = length.saturating_sub(v.len());
     for _ in 0..num_to_pad {
-        v.push( KeyPress::new_blank());
+        v.push(KeyPress::new_blank());
     }
 }
-

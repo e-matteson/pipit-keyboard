@@ -1,7 +1,6 @@
-
 extern crate pipit_config;
 
-use pipit_config::{Maps};
+use pipit_config::Maps;
 use pipit_config::errors::*;
 
 use std::env::args;
@@ -18,7 +17,7 @@ fn get_settings_path() -> Result<String> {
     }
 }
 
-fn run() -> Result<()>{
+fn run() -> Result<()> {
     let settings_path = get_settings_path()?;
     let maps = Maps::load(&settings_path)?;
     maps.check();
@@ -30,7 +29,7 @@ fn run() -> Result<()>{
 }
 
 fn main() {
-  if let Err(ref e) = run() {
+    if let Err(ref e) = run() {
         use std::io::Write;
         let stderr = &mut ::std::io::stderr();
         let errmsg = "Error writing to stderr";
@@ -50,4 +49,3 @@ fn main() {
         ::std::process::exit(1);
     }
 }
-

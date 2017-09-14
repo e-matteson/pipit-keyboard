@@ -3,33 +3,33 @@ use std::io::prelude::*;
 use std::fs::File;
 use toml::Value;
 
-use load::{KmapParser, FromToml, toml_to_vec, get_key};
-use types::{Maps, SeqType, Options, ModeName, ModeInfo, WordInfo};
+use load::{get_key, toml_to_vec, FromToml, KmapParser};
+use types::{Maps, ModeInfo, ModeName, Options, SeqType, WordInfo};
 use types::errors::*;
 
 
 impl Options {
-    pub fn load(parsed_options: &Value) -> Result<Options>{
+    pub fn load(parsed_options: &Value) -> Result<Options> {
         let mut options = Options::from_toml(parsed_options)?;
         options.verify_requirements()?;
         options.set_auto();
-            // .chain_err("failure to auto-generate options")
+        // .chain_err("failure to auto-generate options")
         Ok(options)
     }
 }
 
 impl Maps {
     pub fn load(toml_path: &str) -> Result<Maps> {
-        Ok(Maps::load_helper(toml_path)
-            .chain_err(|| format!("failure to load from settings: {}",
-                                  toml_path))?)
+        Ok(Maps::load_helper(toml_path).chain_err(
+            || format!("failure to load from settings: {}", toml_path),
+        )?)
     }
 
     fn load_helper(toml_path: &str) -> Result<Maps> {
         /// Load stuff into both Options and Maps
         // TODO don't clone things so much?
-        let toml = parse_toml(toml_path)
-            .chain_err(|| "failure to parse toml format")?;
+        let toml =
+            parse_toml(toml_path).chain_err(|| "failure to parse toml format")?;
 
         let other = get_section(&toml, "other")?;
 
@@ -38,8 +38,7 @@ impl Maps {
 
         let mut maps = Maps::new();
 
-        maps.load_modes(&toml)
-            .chain_err(|| "failure to load modes")?;
+        maps.load_modes(&toml).chain_err(|| "failure to load modes")?;
 
         maps.load_chords(&options)
             .chain_err(|| "failure to load chords")?;
@@ -68,42 +67,43 @@ impl Maps {
         Ok(maps)
     }
 
-    fn load_modes(&mut self, toml: &Value) -> Result<()>{
+    fn load_modes(&mut self, toml: &Value) -> Result<()> {
         let modes = toml_to_vec(get_section(toml, "mode")?, |x| Ok(x.clone()))?;
-        for mode_table in &modes{
+        for mode_table in &modes {
             let name = get_key(mode_table, "name")?;
 
             self.add_mode(
                 ModeName::from_toml(name)?,
-                ModeInfo::from_toml(mode_table)?
+                ModeInfo::from_toml(mode_table)?,
             )?;
         }
         Ok(())
     }
 
-    fn load_chords(&mut self, options: &Options) -> Result<()>{
+    fn load_chords(&mut self, options: &Options) -> Result<()> {
         let mut kmap_parser = KmapParser::new(options)?;
         for kmap in self.get_kmap_paths() {
-            let chords = kmap_parser.parse(&kmap)
-                .chain_err(||format!("failure to load kmap: '{}'", kmap))?;
+            let chords = kmap_parser
+                .parse(&kmap)
+                .chain_err(|| format!("failure to load kmap: '{}'", kmap))?;
             self.add_chords(&kmap, chords)?;
         }
         Ok(())
     }
 
-    fn load_macros(&mut self, toml: &Value) -> Result<()>{
+    fn load_macros(&mut self, toml: &Value) -> Result<()> {
         let table = get_section(toml, "macros")?;
         self.set_sequences(SeqType::Macro, BTreeMap::from_toml(table)?)?;
         Ok(())
     }
 
-    fn load_plains(&mut self, toml: &Value) -> Result<()>{
+    fn load_plains(&mut self, toml: &Value) -> Result<()> {
         let table = get_section(toml, "plain_keys")?;
         self.set_sequences(SeqType::Plain, BTreeMap::from_toml(table)?)?;
         Ok(())
     }
 
-    fn load_plain_mods(&mut self, toml: &Value) -> Result<()>{
+    fn load_plain_mods(&mut self, toml: &Value) -> Result<()> {
         let table = get_section(toml, "plain_modifiers")?;
         for (name, seq) in &BTreeMap::from_toml(table)? {
             self.add_plain_mod(name.to_owned(), seq)?;
@@ -111,18 +111,18 @@ impl Maps {
         Ok(())
     }
 
-    fn load_word_mods(&mut self, other: &Value) -> Result<()>{
+    fn load_word_mods(&mut self, other: &Value) -> Result<()> {
         self.word_mods = Vec::from_toml(get_section(other, "word_modifiers")?)?;
         Ok(())
     }
 
-    fn load_anagram_mods(&mut self, other: &Value) -> Result<()>{
+    fn load_anagram_mods(&mut self, other: &Value) -> Result<()> {
         let array = get_key(other, "anagram_modifiers")?;
         self.anagram_mods = Vec::from_toml(array)?;
         Ok(())
     }
 
-    fn load_commands(&mut self, other: &Value) -> Result<()>{
+    fn load_commands(&mut self, other: &Value) -> Result<()> {
         // TODO use set sequences, and then process after?
         let array = get_section(other, "commands")?;
         let command_list = Vec::from_toml(array)?;
@@ -132,10 +132,10 @@ impl Maps {
         Ok(())
     }
 
-    fn load_word_list(&mut self, other: &Value) -> Result<()>{
+    fn load_word_list(&mut self, other: &Value) -> Result<()> {
         let array = get_section(other, "dictionary")?;
         let word_list = toml_to_vec(array, WordInfo::from_toml)?;
-        for kmap in &self.get_kmaps_with_words(){
+        for kmap in &self.get_kmaps_with_words() {
             for info in &word_list {
                 self.add_word(info.to_owned(), kmap)?
             }
@@ -154,11 +154,8 @@ fn parse_toml(toml_path: &str) -> Result<Value> {
 
 fn get_section<'a>(toml: &'a Value, section_name: &str) -> Result<&'a Value> {
     // By section I mean a table that's used as 1 section of the settings
-    toml.get(section_name)
-        .ok_or_else(
-            || ErrorKind::MissingValue(
-                "table".into(),
-                Some(section_name.into())
-            ).into()
-        )
+    toml.get(section_name).ok_or_else(|| {
+        ErrorKind::MissingValue("table".into(), Some(section_name.into()))
+            .into()
+    })
 }

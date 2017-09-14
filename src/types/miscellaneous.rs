@@ -1,9 +1,9 @@
 // A bunch of small, miscellaneous types
 
-use std::fmt::{self};
+use std::fmt;
 use std::slice::Iter;
 
-use types::{KeyPress};
+use types::KeyPress;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SwitchPos {
@@ -11,9 +11,9 @@ pub struct SwitchPos {
     pub col: usize,
 }
 
-impl SwitchPos{
+impl SwitchPos {
     pub fn new(row: u8, col: u8) -> SwitchPos {
-        SwitchPos{
+        SwitchPos {
             row: row as usize,
             col: col as usize,
         }
@@ -67,7 +67,7 @@ pub struct ModeInfo {
 //////////////////////////////
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct KmapPath ( pub String );
+pub struct KmapPath(pub String);
 
 impl fmt::Display for KmapPath {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -78,7 +78,7 @@ impl fmt::Display for KmapPath {
 //////////////////////////////
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ModeName ( pub String );
+pub struct ModeName(pub String);
 
 impl fmt::Display for ModeName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -89,7 +89,7 @@ impl fmt::Display for ModeName {
 //////////////////////////////
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct Name ( pub String );
+pub struct Name(pub String);
 
 // TODO: sanitize name?
 impl Name {
@@ -108,7 +108,7 @@ impl fmt::Display for Name {
     }
 }
 
-impl fmt::Debug for Name{
+impl fmt::Debug for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
@@ -118,24 +118,22 @@ impl fmt::Debug for Name{
 //////////////////////////////
 
 #[derive(Debug, Clone)]
-pub struct Sequence (
-    pub Vec<KeyPress>
-);
+pub struct Sequence(pub Vec<KeyPress>);
 
 impl Sequence {
     pub fn new() -> Sequence {
         Sequence(Vec::new())
     }
 
-    pub fn extend (&mut self, other: Sequence) {
+    pub fn extend(&mut self, other: Sequence) {
         self.0.extend(other.0)
     }
 
-    pub fn push (&mut self, keypress: KeyPress) {
+    pub fn push(&mut self, keypress: KeyPress) {
         self.0.push(keypress)
     }
 
-    pub fn len (&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 
@@ -143,5 +141,3 @@ impl Sequence {
         self.0.iter()
     }
 }
-
-
