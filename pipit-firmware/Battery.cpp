@@ -26,13 +26,13 @@ uint16_t Battery::readingToLevel(uint16_t reading){
   if (voltage > 4.36) {
     return 4;  // plugged in, battery disconnected
   }
-  if (voltage > 4) {
+  if (voltage > 3.9) {
     return 3;  // fully charged
   }
-  if (voltage > 3.9) {
+  if (voltage > 3.8) {
     return 2;
   }
-  if (voltage > 3.8) {
+  if (voltage > 3.7) {
     return 1;
   }
   return 0; // nearly dead
