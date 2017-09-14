@@ -71,6 +71,13 @@ impl Checker {
     //     self.reverse_modes = new;
     // }
 
+    // pub fn insert_seqs(&mut self, names: &[Name]) -> Result<()> {
+    //     for name in names {
+    //         self.insert_seq(name)?;
+    //     }
+    //     Ok(())
+    // }
+
     pub fn insert_seq(&mut self, name: &Name) -> Result<()> {
         if !self.all_seqs.insert(name.to_owned()) {
             bail!("duplicate sequences for: '{}'", name);

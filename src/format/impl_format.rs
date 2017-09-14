@@ -119,7 +119,7 @@ impl Maps {
                 seq_types: self.get_seq_types(),
                 mode_name: mode,
                 mod_chords: self.get_mod_chords(mode),
-                anagram_chords: self.get_anagrams(mode),
+                anagram_chords: self.get_anagram_chords(mode),
             };
             let mut tmp = CCode::new();
             f.append(&m.format(&mut tmp));

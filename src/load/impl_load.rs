@@ -42,6 +42,7 @@ impl Maps {
 
         maps.load_chords(&options)
             .chain_err(|| "failure to load chords")?;
+
         maps.options = options;
 
         maps.load_plains(&toml)
@@ -83,10 +84,10 @@ impl Maps {
     fn load_chords(&mut self, options: &Options) -> Result<()> {
         let mut kmap_parser = KmapParser::new(options)?;
         for kmap in self.get_kmap_paths() {
-            let chords = kmap_parser
+            let named_chords = kmap_parser
                 .parse(&kmap)
                 .chain_err(|| format!("failure to load kmap: '{}'", kmap))?;
-            self.add_chords(&kmap, chords)?;
+            self.add_chords(&kmap, named_chords)?;
         }
         Ok(())
     }
@@ -112,14 +113,15 @@ impl Maps {
     }
 
     fn load_word_mods(&mut self, other: &Value) -> Result<()> {
-        self.word_mods = Vec::from_toml(get_section(other, "word_modifiers")?)?;
-        Ok(())
+        self.set_word_mods(
+            Vec::from_toml(get_section(other, "word_modifiers")?)?
+        )
     }
 
     fn load_anagram_mods(&mut self, other: &Value) -> Result<()> {
-        let array = get_key(other, "anagram_modifiers")?;
-        self.anagram_mods = Vec::from_toml(array)?;
-        Ok(())
+        self.set_anagram_mods(
+            Vec::from_toml(get_key(other, "anagram_modifiers")?)?
+        )
     }
 
     fn load_commands(&mut self, other: &Value) -> Result<()> {

@@ -58,9 +58,9 @@ impl Maps {
     pub fn add_chords(
         &mut self,
         kmap: &KmapPath,
-        new_chords: BTreeMap<Name, Chord>,
+        named_chords: BTreeMap<Name, Chord>,
     ) -> Result<()> {
-        for (name, chord) in new_chords {
+        for (name, chord) in named_chords {
             self.add_chord(name, chord, kmap)?;
         }
         Ok(())
@@ -70,8 +70,10 @@ impl Maps {
         // Commands are a single byte code, not an actual key sequence.
         // But we'll store each one as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
+
         fake_seq_with_command_code
             .push(KeyPress::new_fake(&entry.to_uppercase()));
+
         self.add_sequence(
             SeqType::Command,
             entry.to_owned(),
@@ -98,6 +100,30 @@ impl Maps {
     pub fn add_plain_mod(&mut self, name: Name, seq: &Sequence) -> Result<()> {
         self.plain_mods.push(name.clone());
         self.add_sequence(SeqType::Plain, name, seq.clone())
+    }
+
+
+    pub fn set_word_mods(&mut self, names: Vec<Name>) -> Result<()> {
+        // Add all the word_mods at once
+        assert!(self.word_mods.is_empty());
+
+        for name in &names {
+            self.checker.insert_seq(name)?;
+        }
+        self.word_mods = names;
+        Ok(())
+    }
+
+    pub fn set_anagram_mods(&mut self, names: Vec<Name>) -> Result<()> {
+        // Add all the anagram_mods at once
+        // TODO share code with set_word_mods()?
+        assert!(self.anagram_mods.is_empty());
+
+        for name in &names {
+            self.checker.insert_seq(name)?;
+        }
+        self.anagram_mods = names;
+        Ok(())
     }
 
     pub fn add_mode(&mut self, name: ModeName, info: ModeInfo) -> Result<()> {
@@ -198,21 +224,6 @@ impl Maps {
             .and_then(|x| Some(x.clone()))
     }
 
-    pub fn get_chords(&self, kmap: &KmapPath) -> &BTreeMap<Name, Chord> {
-        self.chords
-            .get(kmap)
-            .expect(&format!("Failed to get chords for kmap: {}", kmap))
-    }
-
-    pub fn get_chords_mut(
-        &mut self,
-        kmap: &KmapPath,
-    ) -> &mut BTreeMap<Name, Chord> {
-        self.chords
-            .get_mut(kmap)
-            .expect(&format!("Failed to get chords for kmap: {}", kmap))
-    }
-
     // TODO handle missing mods better - here or firmware?
     pub fn get_chord_in_mode(
         &self,
@@ -227,7 +238,7 @@ impl Maps {
         Chord::new()
     }
 
-    pub fn get_anagrams(&self, mode: &ModeName) -> Vec<Chord> {
+    pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
         for name in &self.anagram_mods {
             out.push(self.get_chord_in_mode(name, mode));
@@ -245,6 +256,7 @@ impl Maps {
     }
 
     pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
+        // Order must match get_mod_names()!
         let mut chords = Vec::new();
         for name in self.get_mod_names() {
             chords.push(self.get_chord_in_mode(&name, mode));
@@ -281,7 +293,7 @@ impl Maps {
     }
 
     pub fn get_seq_types(&self) -> Vec<SeqType> {
-        let v: Vec<_> = self.sequences.keys().map(|s| s.to_owned()).collect();
+        let v: Vec<_> = self.sequences.keys().cloned().collect();
         v
     }
 
