@@ -78,6 +78,15 @@ bool Chord::hasMod(conf::mod_enum mod) const{
   return mods[mod];
 }
 
+bool Chord::toggleMod(conf::mod_enum mod){
+  mods[mod] ^= 1;
+  return mods[mod];
+}
+
+bool Chord::toggleCapital(){
+  return toggleMod(conf::getCapitalEnum());
+}
+
 void Chord::extractPlainMods(){
   for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
     extractMod(conf::getPlainModEnum(i));
@@ -102,7 +111,7 @@ void Chord::extractAnagramMods(){
         // Found mod!
         anagram_num = i+1; // 0 is reserved for no mod
         return;
-      };
+      }
     }
   }
   // No valid anagram mod pressed
@@ -193,19 +202,20 @@ bool Chord::doesAnagramHaveMod(uint8_t anagram_num){
   return (anagram_num >= 1) && (anagram_num <= NUM_ANAGRAM_MODS);
 }
 
-void Chord::setAnagramModBit(uint8_t anagram_num, bool value){
+void Chord::setAnagramModFlag(uint8_t anagram_num, bool value){
   if(!doesAnagramHaveMod(anagram_num)){
     return;
   }
   mods[conf::getAnagramModEnum(anagram_num-1)] = value;
 }
 
+
 uint8_t Chord::cycleAnagramModifier(){
   // Unset old mod flag
-  setAnagramModBit(anagram_num, 0);
+  setAnagramModFlag(anagram_num, 0);
   anagram_num = (anagram_num + 1) % NUM_ANAGRAMS;
   // Set new mod flag
-  setAnagramModBit(anagram_num, 1);
+  setAnagramModFlag(anagram_num, 1);
   return anagram_num;
 }
 

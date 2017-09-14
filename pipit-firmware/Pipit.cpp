@@ -51,7 +51,11 @@ void Pipit::doCommand(uint8_t code){
     break;
 
   case conf::COMMAND_CYCLE_WORD:
-    cycleLastWord();
+    cycleLastWordAnagram();
+    break;
+
+  case conf::COMMAND_CYCLE_CAPITAL:
+    cycleLastWordCapital();
     break;
 
   case conf::COMMAND_STICKY_CTRL:
@@ -317,7 +321,31 @@ void Pipit::deleteLastWord(){
   }
 }
 
-void Pipit::cycleLastWord(){
+void Pipit::cycleLastWordCapital(){
+  Entry* entry = sender->history->getEntryAtCursor();
+  if(!entry->isAnagrammable()){
+    feedback->triggerUnknown();
+    return;
+  }
+  Chord new_chord;
+  new_chord.copy(entry->getChord());
+  new_chord.toggleCapital();
+
+  // We need to lookup the chord again, even though only the capitalization is
+  // changing, because the history doesn't store the characters in a word.
+  Key data[MAX_LOOKUP_DATA_LENGTH];
+  uint8_t data_length = 0;
+  if((data_length=lookup->get(conf::WORD, &new_chord, data))){
+    deleteLastWord();
+    sender->sendWord(data, data_length, &new_chord);
+    feedback->triggerWord();
+    return; // Success
+  }
+  // The lookup should never fail...
+  feedback->triggerUnknown();
+}
+
+void Pipit::cycleLastWordAnagram(){
   Entry* entry = sender->history->getEntryAtCursor();
   if(!entry->isAnagrammable()){
     feedback->triggerUnknown();

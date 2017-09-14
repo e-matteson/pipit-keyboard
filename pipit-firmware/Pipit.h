@@ -51,7 +51,8 @@ private:
 
   void doCommand(uint8_t code);
 
-  void cycleLastWord();
+  void cycleLastWordAnagram();
+  void cycleLastWordCapital();
   void deleteLastWord();
   void move(Motion motion, Direction direction);
 

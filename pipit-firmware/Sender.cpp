@@ -19,6 +19,8 @@ bool Sender::sendIfEmpty(const Chord* chord){
 }
 
 void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord){
+  // TODO should we make plain entries anagrammable? For capitalization cycling?
+  //  But shift and capital might be on different keys anyway...
   history->startEntry(chord, 0);
   Key key;
   for(uint8_t i = 0; i<data_length; i++){

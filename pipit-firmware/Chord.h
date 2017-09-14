@@ -14,6 +14,7 @@ public:
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
   void setMode(conf::mode_enum _mode);
+  bool toggleCapital();
   void extractPlainMods();
   void extractWordMods();
   void extractAnagramMods();
@@ -36,10 +37,11 @@ public:
 private:
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
+  bool toggleMod(conf::mod_enum modifier);
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
-  void setAnagramModBit(uint8_t anagram_num, bool value);
+  void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool doesAnagramHaveMod(uint8_t anagram_num);
   bool isAnagramMaskBlank();
   bool isExactAnagramPressed(const uint8_t* mod_chord,
