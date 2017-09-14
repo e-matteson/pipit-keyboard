@@ -770,6 +770,7 @@ commands = [
     "command_right_word",
     "command_right_limit",
     "command_cycle_word",
+    "command_cycle_capital",
     "command_pause",
     "command_sticky_ctrl",
     "command_sticky_alt",
