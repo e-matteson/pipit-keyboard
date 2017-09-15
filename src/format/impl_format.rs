@@ -5,16 +5,36 @@ use std::collections::BTreeMap;
 use types::{CCode, KeyPress, KmapPath, Maps, Name, OpDef, OpType, Options,
             SeqType, Sequence, ToC};
 
+// use types::errors::*;
+
 use format::{compress, make_compression_macros, CArray, CFiles, KmapBuilder,
              ModeBuilder};
 
 
 impl KeyPress {
+    fn truncate(contents: &CCode) -> CCode {
+        CCode(format!("({})&0xff", contents))
+    }
+
+    pub fn format_key(&self) -> CCode {
+        match self.key {
+            Some(ref code) => KeyPress::truncate(code),
+            None => KeyPress::empty_code(),
+        }
+    }
+
+    pub fn format_mods(&self) -> CCode {
+        match self.modifiers {
+            Some(ref codes) => KeyPress::truncate(&CCode::join(codes, "|")),
+            None => KeyPress::empty_code(),
+        }
+    }
+
     pub fn as_bytes(&self, use_mods: bool) -> Vec<CCode> {
         let mut v: Vec<CCode> = Vec::new();
-        v.push(CCode(format!("{}&0xff", self.key)));
+        v.push(self.format_key());
         if use_mods {
-            v.push(CCode(format!("({})&0xff", self.modifier)));
+            v.push(self.format_mods());
         }
         v
     }
@@ -243,7 +263,7 @@ impl Maps {
 
         let plain_mod_codes: Vec<_> = self.plain_mods
             .iter()
-            .map(|x| format!("({})&0xff", self.get_mod_key(x)))
+            .map(|x| self.get_single_keypress(x).format_mods())
             .collect();
 
         f.append(&CArray::new()

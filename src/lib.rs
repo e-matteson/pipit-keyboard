@@ -5,12 +5,15 @@ extern crate time;
 extern crate toml;
 
 #[macro_use]
+extern crate serde_derive;
+
+#[macro_use]
 extern crate error_chain;
 
 pub use types::Maps;
 pub use types::errors;
 
 #[macro_use]
-mod load;
+pub mod load;
 mod format;
 mod types;

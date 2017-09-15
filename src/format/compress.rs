@@ -42,8 +42,8 @@ fn compress_chunk(mut data: Vec<KeyPress>) -> Vec<CCode> {
 
     let mut bytes: Vec<CCode> = Vec::new();
     for i in 0..NUM_BYTES {
-        let s1 = &data[i].key;
-        let s2 = &data[i + 1].key;
+        let s1 = &data[i].format_key();
+        let s2 = &data[i + 1].format_key();
         let m = format_mask(i, s1, s2);
         // we don't use the modifiers, just the keys
         bytes.push(m);

@@ -4,61 +4,73 @@ use types::errors::*;
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
 // Rename?
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
 pub struct KeyPress {
-    pub key: CCode,
-    pub modifier: CCode,
+    pub key: Option<CCode>,
+    pub modifiers: Option<Vec<CCode>>,
 }
 
+
 impl KeyPress {
+    pub fn empty_code() -> CCode {
+        "0".to_c()
+    }
+
     pub fn new(
         key: Option<String>,
         modifiers: Option<Vec<String>>,
     ) -> Result<KeyPress> {
         Ok(KeyPress {
             key: make_key(key)?,
-            modifier: make_mod(modifiers)?,
+            modifiers: make_mod(modifiers)?,
         })
     }
 
     pub fn new_fake(code: &Name) -> KeyPress {
         // We also use KeyPresses to store command codes
         KeyPress {
-            key: code.to_c(),
-            modifier: "0".to_c(),
+            key: Some(code.to_c()),
+            modifiers: None,
         }
     }
+
     pub fn new_blank() -> KeyPress {
         KeyPress {
-            key: "0".to_c(),
-            modifier: "0".to_c(),
+            key: None,
+            modifiers: None,
         }
     }
+
     pub fn is_mod_blank(&self) -> bool {
-        self.modifier == "0".to_c()
+        self.modifiers.is_none()
     }
 }
 
-fn make_key(key: Option<String>) -> Result<CCode> {
-    Ok(sanitize(&or_default(key))?)
+fn make_key(key: Option<String>) -> Result<Option<CCode>> {
+    // TODO map
+    Ok(match key {
+            Some(s) => Some(sanitize(&s)?),
+            None => None,
+    })
 }
 
-fn make_mod(modifiers: Option<Vec<String>>) -> Result<CCode> {
+fn make_mod(modifiers: Option<Vec<String>>) -> Result<Option<Vec<CCode>>> {
+    // TODO map
     Ok(match modifiers {
         Some(v) => {
             let mut mod_codes = Vec::new();
             for m in v {
                 mod_codes.push(sanitize(&m)?);
             }
-            mod_codes.join("|").to_c()
+            Some(mod_codes)
         }
-        None => or_default(None).to_c(),
+        None => None,
     })
 }
 
-fn or_default(string: Option<String>) -> String {
-    string.unwrap_or_else(|| "0".into())
-}
+// fn or_default(string: Option<String>) -> String {
+//     string.unwrap_or_else(|| "0".into())
+// }
 
 fn sanitize(s: &str) -> Result<CCode> {
     // TODO compare to an actual list of defined key codes?

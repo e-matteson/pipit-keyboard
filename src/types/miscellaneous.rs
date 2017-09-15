@@ -50,23 +50,31 @@ impl fmt::Display for SeqType {
 
 //////////////////////////////
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct KmapInfo {
-    pub path: KmapPath,
+    pub file: KmapPath,
+
+    #[serde(default = "return_false")]
     pub use_words: bool,
 }
 
-//////////////////////////////
-
-#[derive(Clone, Debug)]
-pub struct ModeInfo {
-    pub keymaps: Vec<KmapInfo>,
-    pub is_gaming: bool,
+fn return_false() -> bool {
+    false
 }
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, Deserialize)]
+pub struct ModeInfo {
+    pub keymaps: Vec<KmapInfo>,
+
+    #[serde(default = "return_false")]
+    pub gaming: bool,
+}
+
+//////////////////////////////
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
 pub struct KmapPath(pub String);
 
 impl fmt::Display for KmapPath {
@@ -117,7 +125,7 @@ impl fmt::Debug for Name {
 
 //////////////////////////////
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Sequence(pub Vec<KeyPress>);
 
 impl Sequence {

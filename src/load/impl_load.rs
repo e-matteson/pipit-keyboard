@@ -2,8 +2,11 @@ use std::collections::BTreeMap;
 use std::io::prelude::*;
 use std::fs::File;
 use toml::Value;
+// use toml;
 
-use load::{get_key, toml_to_vec, FromToml, KmapParser};
+use load::{get_key, toml_to_vec, FromToml, KmapParser,
+           // Settings
+};
 use types::{Maps, ModeInfo, ModeName, Options, SeqType, WordInfo};
 use types::errors::*;
 
@@ -20,6 +23,10 @@ impl Options {
 
 impl Maps {
     pub fn load(toml_path: &str) -> Result<Maps> {
+
+        // let settings: Settings = toml::from_str(&read_file(toml_path)?)?;
+        // println!("{:?}", settings);
+
         Ok(Maps::load_helper(toml_path).chain_err(
             || format!("failure to load from settings: {}", toml_path),
         )?)
@@ -30,6 +37,7 @@ impl Maps {
         // TODO don't clone things so much?
         let toml =
             parse_toml(toml_path).chain_err(|| "failure to parse toml format")?;
+
 
         let other = get_section(&toml, "other")?;
 
@@ -146,10 +154,15 @@ impl Maps {
     }
 }
 
-fn parse_toml(toml_path: &str) -> Result<Value> {
-    let mut f: File = File::open(toml_path)?;
+fn read_file(path: &str) -> Result<String> {
+    let mut f: File = File::open(path)?;
     let mut buffer = String::new();
     f.read_to_string(&mut buffer)?;
+    Ok(buffer)
+}
+
+fn parse_toml(toml_path: &str) -> Result<Value> {
+    let buffer = read_file(toml_path)?;
     let toml = buffer.parse::<Value>()?;
     Ok(toml)
 }

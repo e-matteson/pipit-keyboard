@@ -6,7 +6,7 @@ use types::{ModeName, Name, SeqType};
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize)]
 pub struct CCode(pub String);
 
 impl CCode {
@@ -18,7 +18,7 @@ impl CCode {
         CCode(self.0.to_uppercase())
     }
 
-    pub fn join(v: Vec<CCode>, separator: &str) -> CCode {
+    pub fn join(v: &[CCode], separator: &str) -> CCode {
         CCode(v.join(separator))
     }
 }

@@ -33,7 +33,7 @@ impl<'a> ModeBuilder<'a> {
             mod_chords: CCode(format!("{}", mod_array_name)),
             anagram_chords: CCode(format!("{}", anagram_array_name)),
             anagram_mask: CCode(format!("{}", anagram_mask_name)),
-            is_gaming: self.info.is_gaming,
+            is_gaming: self.info.gaming,
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
         f.append(&m.format(mode_struct_name));
@@ -56,7 +56,7 @@ impl<'a> ModeBuilder<'a> {
                     CCode(format!(
                         "&{}",
                         struct_names
-                            .get(&kmap_info.path)
+                            .get(&kmap_info.file)
                             .expect("kmap struct name not found")
                     ))
                 });

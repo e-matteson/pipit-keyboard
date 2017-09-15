@@ -156,7 +156,7 @@ where
     T: Display,
 {
     let lines = wrap_in_braces(&to_code_vec(v));
-    CCode(lines.join("\n"))
+    CCode::join(&lines, "\n")
 }
 
 fn make_c_array2<T>(v: &[Vec<T>]) -> CCode
@@ -171,7 +171,7 @@ where
         rows.extend(wrap_in_braces(&to_code_vec(row)));
         rows.push(",".to_c());
     }
-    CCode::join(wrap_in_braces(&rows), "\n")
+    CCode::join(&wrap_in_braces(&rows), "\n")
 }
 
 

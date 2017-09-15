@@ -192,7 +192,7 @@ impl FromToml for KeyPress {
 impl FromToml for KmapInfo {
     fn from_toml(toml_value: &Value) -> Result<KmapInfo> {
         Ok(KmapInfo {
-            path: KmapPath::from_toml(get_key(toml_value, "file")?)?,
+            file: KmapPath::from_toml(get_key(toml_value, "file")?)?,
             use_words: match toml_value.get("words") {
                 Some(x) => bool::from_toml(x)?,
                 None => false,
@@ -238,15 +238,15 @@ impl FromToml for SwitchPos {
 impl FromToml for ModeInfo {
     fn from_toml(toml_map: &Value) -> Result<ModeInfo> {
         let kmap_array = get_key(toml_map, "keymaps")?;
-        // let is_gaming = toml_map.get("gaming")
+        // let gaming = toml_map.get("gaming")
         //     .map_or(false, |b| bool::from_toml(b));
-        let is_gaming = match toml_map.get("gaming") {
+        let gaming = match toml_map.get("gaming") {
             Some(b) => bool::from_toml(b)?,
             None => false, // default value if "gaming" not specified
         };
         let m = ModeInfo {
             keymaps: toml_to_vec(kmap_array, KmapInfo::from_toml)?,
-            is_gaming: is_gaming,
+            gaming: gaming,
         };
         Ok(m)
     }

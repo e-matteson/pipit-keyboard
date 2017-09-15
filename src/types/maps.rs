@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
 
-use types::{CCode, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, Options, SeqType, Sequence, ToC, WordBuilder, WordInfo};
+use types::{Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
+            Name, Options, SeqType, Sequence, WordBuilder, WordInfo};
 use types::errors::*;
 
 
@@ -98,6 +98,7 @@ impl Maps {
     }
 
     pub fn add_plain_mod(&mut self, name: Name, seq: &Sequence) -> Result<()> {
+        // TODO check if sequence is valid! length 1, no key
         self.plain_mods.push(name.clone());
         self.add_sequence(SeqType::Plain, name, seq.clone())
     }
@@ -132,7 +133,7 @@ impl Maps {
         }
         // Store the kmaps that are included in this mode
         for kmap_info in &info.keymaps {
-            let kmap_path = &kmap_info.path;
+            let kmap_path = &kmap_info.file;
             if self.kmap_ids.contains_key(kmap_path) {
                 continue;
             }
@@ -205,13 +206,22 @@ impl Maps {
         panic!("No sequence found for name");
     }
 
-    pub fn get_mod_key(&self, name: &Name) -> CCode {
+    pub fn get_single_keypress(&self, name: &Name) -> KeyPress {
         let seq = self.get_sequence(name);
-        if seq.len() != 1 || seq.0[0].key != "0".to_c() {
-            panic!("bad modifier key sequence");
+        if seq.len() != 1 {
+            panic!("Expected sequence of length 1");
         }
-        seq.0[0].modifier.clone()
+        seq.0[0].clone()
     }
+
+    // pub fn get_mod_key(&self, name: &Name) -> KeyPress {
+    //     if seq.len() != 1 || seq.0[0].key.is_some() {
+    //         panic!("bad modifier key sequence");
+    //     }
+    //     seq.0[0].modifier.clone()
+    // }
+
+    // pub
 
     pub fn get_chord(
         &self,
@@ -231,7 +241,7 @@ impl Maps {
         mode: &ModeName,
     ) -> Chord {
         for kmap_info in &self.modes.get(mode).expect("unknown mode").keymaps {
-            if let Some(chord) = self.get_chord(chord_name, &kmap_info.path) {
+            if let Some(chord) = self.get_chord(chord_name, &kmap_info.file) {
                 return chord;
             }
         }
@@ -274,7 +284,7 @@ impl Maps {
         for mode_info in self.modes.values() {
             for kmap_info in &mode_info.keymaps {
                 if kmap_info.use_words {
-                    out.push(kmap_info.path.clone());
+                    out.push(kmap_info.file.clone());
                 }
             }
         }
@@ -287,7 +297,7 @@ impl Maps {
             .expect("mode not found")
             .keymaps
             .iter()
-            .map(|x| x.path.to_owned())
+            .map(|x| x.file.to_owned())
             .collect();
         v
     }
