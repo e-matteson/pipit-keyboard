@@ -14,6 +14,6 @@ pub use types::Maps;
 pub use types::errors;
 
 #[macro_use]
-pub mod load;
+mod load;
 mod format;
 mod types;
