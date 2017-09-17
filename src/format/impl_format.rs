@@ -2,7 +2,7 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{CCode, COption, KeyPress, KmapPath, Maps, Name, SeqType, Sequence,
+use types::{CCode, COption, KeyPress, KmapPath, AllData, Name, SeqType, Sequence,
             ToC};
 
 // use types::errors::*;
@@ -91,7 +91,7 @@ impl Sequence {
 }
 
 
-impl Maps {
+impl AllData {
     pub fn format(&self, file_name_base: &str) -> CFiles {
         let mut f = CFiles::new();
         f += format_intro(&format!("{}.h", file_name_base));

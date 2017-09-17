@@ -8,7 +8,7 @@ use types::errors::*;
 
 // TODO typealias kmap names?
 #[derive(Debug)]
-pub struct Maps {
+pub struct AllData {
     pub chords: BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
     pub sequences: BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
     pub word_mods: Vec<Name>,
@@ -21,9 +21,9 @@ pub struct Maps {
     max_anagram_num: u8,
 }
 
-impl Maps {
-    pub fn new() -> Maps {
-        Maps {
+impl AllData {
+    pub fn new() -> AllData {
+        AllData {
             chords: BTreeMap::new(),
             sequences: BTreeMap::new(),
             word_mods: Vec::new(),
@@ -82,7 +82,7 @@ impl Maps {
         let word = WordBuilder {
             info: info,
             kmap: kmap,
-            maps: self,
+            all_data: self,
         }.finalize()?;
         self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
         self.add_chord(&word.name, &word.chord, kmap)?;

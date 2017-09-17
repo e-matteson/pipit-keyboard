@@ -10,7 +10,7 @@ extern crate serde_derive;
 #[macro_use]
 extern crate error_chain;
 
-pub use types::Maps;
+pub use types::AllData;
 pub use types::errors;
 
 #[macro_use]

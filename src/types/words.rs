@@ -1,5 +1,5 @@
 
-use types::{Chord, KeyPress, KmapPath, Maps, Name, Sequence};
+use types::{Chord, KeyPress, KmapPath, AllData, Name, Sequence};
 use types::errors::*;
 
 #[derive(Debug, Clone)]
@@ -19,7 +19,7 @@ pub struct Word {
 pub struct WordBuilder<'a> {
     pub info: WordInfo,
     pub kmap: &'a KmapPath,
-    pub maps: &'a Maps,
+    pub all_data: &'a AllData,
 }
 
 impl<'a> WordBuilder<'a> {
@@ -111,7 +111,7 @@ impl<'a> WordBuilder<'a> {
     fn get_letter_chord(&self, letter: char) -> Result<Chord> {
         // TODO return option<chord>, for if not found
         let name = self.get_key_name_for_chord(letter)?;
-        self.maps.get_chord(&name, self.kmap).ok_or_else(|| {
+        self.all_data.get_chord(&name, self.kmap).ok_or_else(|| {
             ErrorKind::MissingValue("chord".into(), Some(name.to_string()))
                 .into()
         })

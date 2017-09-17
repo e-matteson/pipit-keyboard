@@ -49,35 +49,6 @@ impl Checker {
         }
     }
 
-    // fn make_reverse_modes(&mut self) {
-    //     let mut new = HashMap::new();
-    //     for mode in self.maps.modes.keys() {
-    //         let kmaps_vec = self.maps.get_kmaps_for_mode(mode);
-    //         let mut kmaps = kmaps_vec.iter();
-    //         new.insert(
-    //             mode.to_owned(),
-    //             self.reverse_kmaps.get(kmaps.next().expect("no kmaps"))
-    //                 .expect("reverse kmap not found")
-    //                 .to_owned());
-    //         for kmap in kmaps {
-    //             // println!("{}", kmap);
-    //             for (chord, names) in self.reverse_kmaps[kmap].iter() {
-    //                 for name in names.iter(){
-    //                     add_to(new.get_mut(mode).unwrap(), chord, name);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     self.reverse_modes = new;
-    // }
-
-    // pub fn insert_seqs(&mut self, names: &[Name]) -> Result<()> {
-    //     for name in names {
-    //         self.insert_seq(name)?;
-    //     }
-    //     Ok(())
-    // }
-
     pub fn insert_seq(&mut self, name: &Name) -> Result<()> {
         if !self.all_seqs.insert(name.to_owned()) {
             // println!("{:?}", self.all_seqs);

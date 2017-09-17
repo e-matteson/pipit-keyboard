@@ -3,54 +3,54 @@ use std::fs::File;
 use toml;
 
 use load::{KmapParser, OptionsConfig, Settings};
-use types::{Maps, SeqType};
+use types::{AllData, SeqType};
 use types::errors::*;
 
 
-impl Maps {
-    pub fn load(toml_path: &str) -> Result<Maps> {
-        Ok(Maps::load_helper(toml_path).chain_err(|| {
+impl AllData {
+    pub fn load(toml_path: &str) -> Result<AllData> {
+        Ok(AllData::load_helper(toml_path).chain_err(|| {
             format!("failure to load from settings file: {}", toml_path)
         })?)
     }
 
-    fn load_helper(toml_path: &str) -> Result<Maps> {
-        /// Load stuff into Maps
+    fn load_helper(toml_path: &str) -> Result<AllData> {
+        /// Load stuff into AllData
         let settings: Settings = toml::from_str(&read_file(toml_path)?)?;
 
-        let mut maps = Maps::new();
+        let mut all_data = AllData::new();
 
-        maps.load_modes(&settings)
+        all_data.load_modes(&settings)
             .chain_err(|| "failure to load modes")?;
 
-        maps.load_options(&settings.options)
+        all_data.load_options(&settings.options)
             .chain_err(|| "failure to load options")?;
 
-        maps.load_chords(&settings.options)
+        all_data.load_chords(&settings.options)
             .chain_err(|| "failure to load chords")?;
 
-        maps.load_plains(&settings)
+        all_data.load_plains(&settings)
             .chain_err(|| "failure to load plain keys")?;
 
-        maps.load_macros(&settings)
+        all_data.load_macros(&settings)
             .chain_err(|| "failure to load macros")?;
 
-        maps.load_plain_mods(&settings)
+        all_data.load_plain_mods(&settings)
             .chain_err(|| "failure to load plain modifiers")?;
 
-        maps.load_word_mods(&settings)
+        all_data.load_word_mods(&settings)
             .chain_err(|| "failure to load word modifiers")?;
 
-        maps.load_anagram_mods(&settings)
+        all_data.load_anagram_mods(&settings)
             .chain_err(|| "failure to load anagram modifiers")?;
 
         // TODO rename word_list?
-        maps.load_word_list(&settings)
+        all_data.load_word_list(&settings)
             .chain_err(|| "failure to load dictionary")?;
 
-        maps.load_commands(&settings)
+        all_data.load_commands(&settings)
             .chain_err(|| "failure to load commands")?;
-        Ok(maps)
+        Ok(all_data)
     }
 
     fn load_modes(&mut self, settings: &Settings) -> Result<()> {

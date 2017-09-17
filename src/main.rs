@@ -1,6 +1,6 @@
 extern crate pipit_config;
 
-use pipit_config::Maps;
+use pipit_config::AllData;
 use pipit_config::errors::*;
 
 use std::env::args;
@@ -19,10 +19,10 @@ fn get_settings_path() -> Result<String> {
 
 fn run() -> Result<()> {
     let settings_path = get_settings_path()?;
-    let maps = Maps::load(&settings_path)?;
-    maps.check();
+    let all_data = AllData::load(&settings_path)?;
+    all_data.check();
     // TODO automatically extract path parts
-    let f = maps.format("auto_config");
+    let f = all_data.format("auto_config");
     // println!("DRY RUN, NOT SAVING");
     f.save("pipit-firmware/auto_config");
     Ok(())
