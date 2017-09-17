@@ -36,10 +36,10 @@ kmap_format                = [
 
 [plain_modifiers]
 
-mod_shift         = {mod="MODIFIERKEY_SHIFT"}
-mod_ctrl          = {mod="MODIFIERKEY_CTRL"}
-mod_alt           = {mod="MODIFIERKEY_ALT"}
-mod_gui           = {mod="MODIFIERKEY_GUI"}
+mod_shift         = {mods=["MODIFIERKEY_SHIFT"]}
+mod_ctrl          = {mods=["MODIFIERKEY_CTRL"]}
+mod_alt           = {mods=["MODIFIERKEY_ALT"]}
+mod_gui           = {mods=["MODIFIERKEY_GUI"]}
 
 
 [plain_keys]
@@ -106,47 +106,47 @@ key_down          = {key="KEY_DOWN"}
 key_up            = {key="KEY_UP"}
 key_printscreen   = {key="KEY_PRINTSCREEN"}
 key_delete        = {key="KEY_DELETE"}
-key_ampersand     = {key="KEY_7", mod="MODIFIERKEY_SHIFT"}
-key_asterisk      = {key="KEY_8", mod="MODIFIERKEY_SHIFT"}
-key_at            = {key="KEY_2", mod="MODIFIERKEY_SHIFT"}
+key_ampersand     = {key="KEY_7", mods=["MODIFIERKEY_SHIFT"]}
+key_asterisk      = {key="KEY_8", mods=["MODIFIERKEY_SHIFT"]}
+key_at            = {key="KEY_2", mods=["MODIFIERKEY_SHIFT"]}
 key_backslash     = {key="KEY_BACKSLASH"}
-key_bang          = {key="KEY_1", mod="MODIFIERKEY_SHIFT"}
-key_caret         = {key="KEY_6", mod="MODIFIERKEY_SHIFT"}
-key_colon         = {key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"}
+key_bang          = {key="KEY_1", mods=["MODIFIERKEY_SHIFT"]}
+key_caret         = {key="KEY_6", mods=["MODIFIERKEY_SHIFT"]}
+key_colon         = {key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]}
 key_comma         = {key="KEY_COMMA"}
-key_dollar        = {key="KEY_4", mod="MODIFIERKEY_SHIFT"}
-key_doublequote   = {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"}
+key_dollar        = {key="KEY_4", mods=["MODIFIERKEY_SHIFT"]}
+key_doublequote   = {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]}
 key_equal         = {key="KEY_EQUAL"}
 key_grave         = {key="KEY_TILDE"}
-key_hash          = {key="KEY_3", mod="MODIFIERKEY_SHIFT"}
-key_left_angle    = {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"}
+key_hash          = {key="KEY_3", mods=["MODIFIERKEY_SHIFT"]}
+key_left_angle    = {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]}
 key_left_brace    = {key="KEY_LEFT_BRACE"}
-key_left_curly    = {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"}
-key_left_paren    = {key="KEY_9", mod="MODIFIERKEY_SHIFT"}
+key_left_curly    = {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]}
+key_left_paren    = {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]}
 key_minus         = {key="KEY_MINUS"}
-key_percent       = {key="KEY_5", mod="MODIFIERKEY_SHIFT"}
+key_percent       = {key="KEY_5", mods=["MODIFIERKEY_SHIFT"]}
 key_period        = {key="KEY_PERIOD"}
-key_pipe          = {key="KEY_BACKSLASH", mod="MODIFIERKEY_SHIFT"}
-key_plus          = {key="KEY_EQUAL", mod="MODIFIERKEY_SHIFT"}
-key_question      = {key="KEY_SLASH", mod="MODIFIERKEY_SHIFT"}
+key_pipe          = {key="KEY_BACKSLASH", mods=["MODIFIERKEY_SHIFT"]}
+key_plus          = {key="KEY_EQUAL", mods=["MODIFIERKEY_SHIFT"]}
+key_question      = {key="KEY_SLASH", mods=["MODIFIERKEY_SHIFT"]}
 key_quote         = {key="KEY_QUOTE"}
-key_right_angle   = {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}
+key_right_angle   = {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]}
 key_right_brace   = {key="KEY_RIGHT_BRACE"}
-key_right_curly   = {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"}
-key_right_paren   = {key="KEY_0", mod="MODIFIERKEY_SHIFT"}
+key_right_curly   = {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]}
+key_right_paren   = {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]}
 key_semicolon     = {key="KEY_SEMICOLON"}
 key_slash         = {key="KEY_SLASH"}
-key_tilde         = {key="KEY_TILDE", mod="MODIFIERKEY_SHIFT"}
-key_underscore    = {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}
+key_tilde         = {key="KEY_TILDE", mods=["MODIFIERKEY_SHIFT"]}
+key_underscore    = {key="KEY_MINUS", mods=["MODIFIERKEY_SHIFT"]}
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 [macros]
 
-macro_save_as       = [{key="KEY_S", mod=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
-macro_save          = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+macro_save_as       = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
+macro_save          = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_W"},
                        {key="KEY_ENTER"}]
-macro_quit          = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+macro_quit          = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_Q"},
                        {key="KEY_ENTER"}]
 macro_ls            = [{key="KEY_L"},
@@ -154,9 +154,9 @@ macro_ls            = [{key="KEY_L"},
                        {key="KEY_ENTER"}]
 macro_f_comma       = [{key="KEY_F"},
                        {key="KEY_COMMA"}]
-macro_cap_f_comma   = [{key="KEY_F", mod="MODIFIERKEY_SHIFT"},
+macro_cap_f_comma   = [{key="KEY_F", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_COMMA"}]
-macro_mx            = [{key="KEY_X", mod="MODIFIERKEY_ALT"}]
+macro_mx            = [{key="KEY_X", mods=["MODIFIERKEY_ALT"]}]
 macro_other_buffer1 = [{key="KEY_SPACE"},
                        {key="KEY_TAB"}]
 macro_other_buffer2 = [{key="KEY_SPACE"},
@@ -183,66 +183,66 @@ macro_prev_buffer   = [{key="KEY_SPACE"},
 macro_kill_buffer   = [{key="KEY_SPACE"},
                        {key="KEY_B"},
                        {key="KEY_D"}]
-macro_in_paren      = [{key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+macro_in_paren      = [{key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"}]
-macro_in_angle      = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"},
+macro_in_angle      = [{key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"}]
 macro_in_brace      = [{key="KEY_LEFT_BRACE"},
                        {key="KEY_RIGHT_BRACE"},
                        {key="KEY_LEFT"}]
-macro_in_curly      = [{key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+macro_in_curly      = [{key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"}]
-macro_out_paren     = [{key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"}]
-macro_out_angle     = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}]
+macro_out_paren     = [{key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]}]
+macro_out_angle     = [{key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]}]
 macro_out_brace     = [{key="KEY_LEFT_BRACE"},
                        {key="KEY_RIGHT_BRACE"}]
-macro_out_curly     = [{key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"}]
+macro_out_curly     = [{key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]}]
 macro_in_quote      = [{key="KEY_QUOTE"},
                        {key="KEY_QUOTE"},
                        {key="KEY_LEFT"}]
-macro_in_doublequote= [{key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+macro_in_doublequote= [{key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"}]
 macro_right_arrow   = [{key="KEY_MINUS"},
-                       {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}]
-macro_left_arrow    = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]}]
+macro_left_arrow    = [{key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_MINUS"}]
 macro_this_arrow    = [{key="KEY_T"},
                        {key="KEY_H"},
                        {key="KEY_I"},
                        {key="KEY_S"},
                        {key="KEY_MINUS"},
-                       {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}]
+                       {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]}]
 macro_cerr          = [{key="KEY_C"},
                        {key="KEY_E"},
                        {key="KEY_R"},
                        {key="KEY_R"},
                        {key="KEY_SPACE"},
-                       {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"}]
 macro_cout          = [{key="KEY_C"},
                        {key="KEY_O"},
                        {key="KEY_U"},
                        {key="KEY_T"},
                        {key="KEY_SPACE"},
-                       {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"}]
-macro_endl          = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+macro_endl          = [{key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"},
                        {key="KEY_E"},
                        {key="KEY_N"},
                        {key="KEY_D"},
                        {key="KEY_L"}]
-macro_print_ino     = [{key="KEY_S", mod="MODIFIERKEY_SHIFT"},
+macro_print_ino     = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_E"},
                        {key="KEY_R"},
                        {key="KEY_I"},
@@ -254,12 +254,12 @@ macro_print_ino     = [{key="KEY_S", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_I"},
                        {key="KEY_N"},
                        {key="KEY_T"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SEMICOLON"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
-macro_println_ino   = [{key="KEY_S", mod="MODIFIERKEY_SHIFT"},
+macro_println_ino   = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_E"},
                        {key="KEY_R"},
                        {key="KEY_I"},
@@ -273,8 +273,8 @@ macro_println_ino   = [{key="KEY_S", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_T"},
                        {key="KEY_L"},
                        {key="KEY_N"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SEMICOLON"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
@@ -290,7 +290,7 @@ macro_gmail         = [{key="KEY_E"},
                        {key="KEY_S"},
                        {key="KEY_O"},
                        {key="KEY_N"},
-                       {key="KEY_2", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_2", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_G"},
                        {key="KEY_M"},
                        {key="KEY_A"},
@@ -304,7 +304,7 @@ macro_bmail         = [{key="KEY_E"},
                        {key="KEY_V"},
                        {key="KEY_A"},
                        {key="KEY_N"},
-                       {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_MINUS", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_M"},
                        {key="KEY_A"},
                        {key="KEY_T"},
@@ -313,7 +313,7 @@ macro_bmail         = [{key="KEY_E"},
                        {key="KEY_S"},
                        {key="KEY_O"},
                        {key="KEY_N"},
-                       {key="KEY_2", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_2", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_B"},
                        {key="KEY_R"},
                        {key="KEY_O"},
@@ -350,7 +350,7 @@ macro_recentf       = [{key="KEY_SPACE"},
 macro_find_other_file=[{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_F"}]
-macro_del_other_wins= [{key="KEY_X", mod="MODIFIERKEY_CTRL"},
+macro_del_other_wins= [{key="KEY_X", mods=["MODIFIERKEY_CTRL"]},
                        {key="KEY_1"}]
 macro_other_win     = [{key="KEY_SPACE"},
                        {key="KEY_W"},
@@ -381,15 +381,15 @@ macro_aspace_p      = [{key="KEY_A"},
                        {key="KEY_SPACE"},
                        {key="KEY_ESC"},
                        {key="KEY_P"}]
-macro_cap_aspace    = [{key="KEY_A", mod="MODIFIERKEY_SHIFT"},
+macro_cap_aspace    = [{key="KEY_A", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"},
                        {key="KEY_ESC"}]
-macro_cap_aspace_p  = [{key="KEY_A", mod="MODIFIERKEY_SHIFT"},
+macro_cap_aspace_p  = [{key="KEY_A", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"},
                        {key="KEY_ESC"},
                        {key="KEY_P"}]
-macro_at_at         = [{key="KEY_2", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_2", mod="MODIFIERKEY_SHIFT"}]
+macro_at_at         = [{key="KEY_2", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_2", mods=["MODIFIERKEY_SHIFT"]}]
 macro_kill_ring     = [{key="KEY_SPACE"},
                        {key="KEY_R"},
                        {key="KEY_Y"}]
@@ -441,10 +441,10 @@ macro_set_starred   = [{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_P"},
                        {key="KEY_Q"}]
-macro_todo          = [{key="KEY_T", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_O", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_D", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_O", mod="MODIFIERKEY_SHIFT"},
+macro_todo          = [{key="KEY_T", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_O", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_D", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_O", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"}]
 macro_ins_heading   = [{key="KEY_SPACE"},
                        {key="KEY_O"},
@@ -463,11 +463,11 @@ macro_self_dot      = [{key="KEY_S"},
                        {key="KEY_PERIOD"}]
 macro_if_c          = [{key="KEY_I"},
                        {key="KEY_F"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"},
@@ -476,9 +476,9 @@ macro_else_c        = [{key="KEY_E"},
                        {key="KEY_L"},
                        {key="KEY_S"},
                        {key="KEY_E"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"},
@@ -486,11 +486,11 @@ macro_else_c        = [{key="KEY_E"},
 macro_for_c         = [{key="KEY_F"},
                        {key="KEY_O"},
                        {key="KEY_R"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"},
@@ -500,25 +500,25 @@ macro_while_c       = [{key="KEY_W"},
                        {key="KEY_I"},
                        {key="KEY_L"},
                        {key="KEY_E"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
-macro_arg_c         = [{key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
+macro_arg_c         = [{key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
-macro_ifdef_guard   = [{key="KEY_3", mod="MODIFIERKEY_SHIFT"},
+macro_ifdef_guard   = [{key="KEY_3", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_I"},
                        {key="KEY_F"},
                        {key="KEY_N"},
@@ -526,9 +526,9 @@ macro_ifdef_guard   = [{key="KEY_3", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_E"},
                        {key="KEY_F"},
                        {key="KEY_SPACE"},
-                       {key="KEY_H", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_H", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
-                       {key="KEY_3", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_3", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_D"},
                        {key="KEY_E"},
                        {key="KEY_F"},
@@ -536,10 +536,10 @@ macro_ifdef_guard   = [{key="KEY_3", mod="MODIFIERKEY_SHIFT"},
                        {key="KEY_N"},
                        {key="KEY_E"},
                        {key="KEY_SPACE"},
-                       {key="KEY_H", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_H", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_ENTER"},
                        {key="KEY_ENTER"},
-                       {key="KEY_3", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_3", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_E"},
                        {key="KEY_N"},
                        {key="KEY_D"},
@@ -555,12 +555,12 @@ macro_printf        = [{key="KEY_P"},
                        {key="KEY_N"},
                        {key="KEY_T"},
                        {key="KEY_F"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_BACKSLASH"},
                        {key="KEY_N"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SEMICOLON"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"},
@@ -572,35 +572,35 @@ macro_print_py      = [{key="KEY_P"},
                        {key="KEY_I"},
                        {key="KEY_N"},
                        {key="KEY_T"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"}]
-macro_docstr_py     = [{key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+macro_docstr_py     = [{key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
-macro_lifetime_rs   = [{key="KEY_COMMA", mod="MODIFIERKEY_SHIFT"},
+macro_lifetime_rs   = [{key="KEY_COMMA", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_QUOTE"},
                        {key="KEY_A"},
-                       {key="KEY_PERIOD", mod="MODIFIERKEY_SHIFT"}]
-macro_new_rs        = [{key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_PERIOD", mods=["MODIFIERKEY_SHIFT"]}]
+macro_new_rs        = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_N"},
                        {key="KEY_E"},
                        {key="KEY_W"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"}]
-macro_btreemap      = [{key="KEY_B", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_T", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]}]
+macro_btreemap      = [{key="KEY_B", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_T", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_R"},
                        {key="KEY_E"},
                        {key="KEY_E"},
-                       {key="KEY_M", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_M", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_A"},
                        {key="KEY_P"}]
 macro_print_rs      = [{key="KEY_P"},
@@ -610,14 +610,14 @@ macro_print_rs      = [{key="KEY_P"},
                        {key="KEY_T"},
                        {key="KEY_L"},
                        {key="KEY_N"},
-                       {key="KEY_1", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_1", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_COMMA"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SEMICOLON"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
@@ -628,24 +628,24 @@ macro_print_debug_rs= [{key="KEY_P"},
                        {key="KEY_T"},
                        {key="KEY_L"},
                        {key="KEY_N"},
-                       {key="KEY_1", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_LEFT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_SEMICOLON", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_SLASH", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_RIGHT_BRACE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_1", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_LEFT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_SLASH", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_RIGHT_BRACE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_COMMA"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SEMICOLON"},
                        {key="KEY_LEFT"},
                        {key="KEY_LEFT"}]
-macro_bang_dollar   = [{key="KEY_1", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_4", mod="MODIFIERKEY_SHIFT"},
+macro_bang_dollar   = [{key="KEY_1", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_4", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"}]
-macro_hash_bang     = [{key="KEY_3", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_1", mod="MODIFIERKEY_SHIFT"},
+macro_hash_bang     = [{key="KEY_3", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_1", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SLASH"},
                        {key="KEY_B"},
                        {key="KEY_I"},
@@ -659,17 +659,17 @@ macro_exit_py       = [{key="KEY_E"},
                        {key="KEY_X"},
                        {key="KEY_I"},
                        {key="KEY_T"},
-                       {key="KEY_9", mod="MODIFIERKEY_SHIFT"},
+                       {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_3"},
-                       {key="KEY_0", mod="MODIFIERKEY_SHIFT"}]
+                       {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]}]
 macro_error_next    = [{key="KEY_SPACE"},
                        {key="KEY_E"},
                        {key="KEY_N"}]
 macro_error_prev    = [{key="KEY_SPACE"},
                        {key="KEY_E"},
                        {key="KEY_P"}]
-macro_increment     = [{key="KEY_A", mod="MODIFIERKEY_CTRL"}]
-macro_decrement     = [{key="KEY_X", mod="MODIFIERKEY_CTRL"},
+macro_increment     = [{key="KEY_A", mods=["MODIFIERKEY_CTRL"]}]
+macro_decrement     = [{key="KEY_X", mods=["MODIFIERKEY_CTRL"]},
                        {key="KEY_ESC"}]
 macro_nohlsearch    = [{key="KEY_SLASH"},
                        {key="KEY_ESC"}]
@@ -684,19 +684,17 @@ macro_bibtex        = [{key="KEY_SPACE"},
                        {key="KEY_X"}]
 macro_col_eighty    = [{key="KEY_8"},
                        {key="KEY_0"},
-                       {key="KEY_BACKSLASH", mod="MODIFIERKEY_SHIFT"}]
+                       {key="KEY_BACKSLASH", mods=["MODIFIERKEY_SHIFT"]}]
 macro_inbox         = [{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_I"}]
-# macro_zotero_save   = [{key="KEY_Z", mod="MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"}]
-macro_zotero_save   = [{key="KEY_Z", mod="MODIFIERKEY_CTRL|MODIFIERKEY_SHIFT"}]
-macro_zotero_rename = [{key="KEY_R", mod="MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"}]
-macro_zotero_attach = [{key="KEY_A", mod="MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"}]
-macro_zotero_metadata=[{key="KEY_D", mod="MODIFIERKEY_CTRL|MODIFIERKEY_ALT|MODIFIERKEY_SHIFT"}]
-macro_swap_master    =[{key="KEY_I", mod="MODIFIERKEY_GUI"},
-                       {key="KEY_BACKSPACE", mod="MODIFIERKEY_GUI"}]
-macro_swap_master2   =[{key="KEY_P", mod="MODIFIERKEY_GUI"},
-                       {key="KEY_BACKSPACE", mod="MODIFIERKEY_GUI"}]
+# macro_zotero_save   = [{key="KEY_Z", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
+macro_zotero_save   = [{key="KEY_Z", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}]
+macro_zotero_rename = [{key="KEY_R", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
+macro_zotero_attach = [{key="KEY_A", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
+macro_zotero_metadata=[{key="KEY_D", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
+macro_swap_master    =[{key="KEY_I", mods=["MODIFIERKEY_GUI"]}, {key="KEY_BACKSPACE", mods=["MODIFIERKEY_GUI"]}]
+macro_swap_master2   =[{key="KEY_P", mods=["MODIFIERKEY_GUI"]}, {key="KEY_BACKSPACE", mods=["MODIFIERKEY_GUI"]}]
 macro_describe_key  = [{key="KEY_SPACE"},
                        {key="KEY_H"},
                        {key="KEY_D"},
@@ -711,8 +709,8 @@ macro_describe_fun  = [{key="KEY_SPACE"},
                        {key="KEY_F"}]
 macro_backslash_n   = [{key="KEY_BACKSLASH"},
                        {key="KEY_N"}]
-macro_blackhole     = [{key="KEY_QUOTE", mod="MODIFIERKEY_SHIFT"},
-                       {key="KEY_MINUS", mod="MODIFIERKEY_SHIFT"}]
+macro_blackhole     = [{key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_MINUS", mods=["MODIFIERKEY_SHIFT"]}]
 macro_tex_item      = [{key="KEY_O"},
                        {key="KEY_BACKSLASH"},
                        {key="KEY_I"},
