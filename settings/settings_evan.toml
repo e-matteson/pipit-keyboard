@@ -1,20 +1,13 @@
 ###### EVAN'S PERSONAL SETTINGS ######
 
-[[mode]]
-
-name = "default_mode"
-keymaps = [{file="keymaps/dvorak24_evan.kmap", words=true}]
+[modes.default_mode]
+keymaps = [{file="keymaps/dvorak24_evan.kmap", use_words=true}]
 
 
-[[mode]]
-
-name = "left_hand_mode"
+[modes.left_hand_mode]
 keymaps = [{file="keymaps/dvorak24_left.kmap"}]
 
-
-[[mode]]
-
-name = "gaming_mode"
+[modes.gaming_mode]
 keymaps = [{file="keymaps/gaming_test.kmap"}]
 gaming = true
 
@@ -1300,10 +1293,10 @@ dictionary = [
     {word="buck"},
     {word="buddy"},
     {word="budget"},
-    {word="buf", anagram=3},
-    {word="buff", anagram=2},
+    {word="buf", anagram=2},
+    {word="buff", anagram=1},
     {word="buffer", anagram=1},
-    {word="bug", anagram=1},
+    {word="bug"},
     {word="build"},
     {word="built"},
     {word="bulk"},
@@ -4022,7 +4015,7 @@ dictionary = [
     {word="public"},
     {word="publish"},
     {word="pudendal"},
-    {word="puff", anagram=4},
+    {word="puff", anagram=3},
     {word="pull"},
     {word="pulse"},
     {word="pump"},
