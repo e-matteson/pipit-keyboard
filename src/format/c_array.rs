@@ -22,7 +22,8 @@ where
     T: Display + Clone,
 {
     pub fn new<U>(name: U, contents: &Vec<T>) -> CArray<T>
-        where U: ToC
+    where
+        U: ToC,
     {
         CArray {
             name: name.to_c(),
@@ -37,7 +38,8 @@ where
         self
     }
     pub fn c_type<U>(mut self, c_type: U) -> CArray<T>
-        where U: ToC
+    where
+        U: ToC,
     {
         self.c_type = c_type.to_c();
         self
@@ -47,11 +49,9 @@ where
         let values = make_c_array(&self.contents);
         if self.is_extern {
             CFiles {
-                h: CCode(format!(
-                    "extern const {} {}[];\n",
-                    self.c_type,
-                    self.name
-                )),
+                h: CCode(
+                    format!("extern const {} {}[];\n", self.c_type, self.name),
+                ),
                 c: CCode(format!(
                     "extern const {} {}[] = {};\n\n",
                     self.c_type,
@@ -71,8 +71,6 @@ where
             }
         }
     }
-
-
 }
 
 // TODO refactor to recursively make arrays of arbitrary dimensions?

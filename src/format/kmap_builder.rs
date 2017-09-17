@@ -132,7 +132,7 @@ impl<'a> KmapBuilder<'a> {
                 .collect();
 
             let array_name = self.make_chord_array_name(kmap);
-            f += self.format_length_arrays(length_ints, &array_name, false) ;
+            f += self.format_length_arrays(length_ints, &array_name, false);
             array_names.push(array_name.clone());
         }
         f

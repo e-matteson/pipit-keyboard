@@ -63,21 +63,18 @@ impl<'a> ModeBuilder<'a> {
             }
             let name =
                 CCode(format!("{}_{}_kmap_array", self.mode_name, seq_type));
-            f +=
-                CArray::new(&name, &v)
-                    .c_extern(false)
-                    .c_type("KmapStruct*")
-                    .format()
-            ;
+            f += CArray::new(&name, &v)
+                .c_extern(false)
+                .c_type("KmapStruct*")
+                .format();
             subarray_names.push(name.clone());
         }
 
         *kmap_array_name = CCode(format!("{}_kmap_arrays", self.mode_name));
-        f +=
-            CArray::new(kmap_array_name, &subarray_names)
-                .c_extern(false)
-                .c_type("KmapStruct**")
-                .format();
+        f += CArray::new(kmap_array_name, &subarray_names)
+            .c_extern(false)
+            .c_type("KmapStruct**")
+            .format();
         f
     }
 
@@ -119,9 +116,7 @@ impl<'a> ModeBuilder<'a> {
         let mut subarray_names = Vec::new();
         for (i, c) in chords.iter().enumerate() {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
-            f += CArray::new(&name, &c.to_ints())
-                .c_extern(false)
-                .format();
+            f += CArray::new(&name, &c.to_ints()).c_extern(false).format();
             subarray_names.push(name);
         }
         *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));

@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
 
-use types::{Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName, Name,
-            COption, SeqType, Sequence, WordBuilder, WordInfo};
+use types::{COption, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
+            Name, SeqType, Sequence, WordBuilder, WordInfo};
 use types::errors::*;
 
 

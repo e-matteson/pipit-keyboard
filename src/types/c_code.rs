@@ -64,16 +64,18 @@ pub trait ToC {
     fn to_c(self) -> CCode;
 }
 
-impl <'a, T> ToC for &'a T
-    where T: ToC + Clone
+impl<'a, T> ToC for &'a T
+where
+    T: ToC + Clone,
 {
     fn to_c(self) -> CCode {
         self.to_owned().to_c()
     }
 }
 
-impl <'a, T> ToC for &'a mut T
-    where T: ToC + Clone
+impl<'a, T> ToC for &'a mut T
+where
+    T: ToC + Clone,
 {
     fn to_c(self) -> CCode {
         self.to_owned().to_c()
@@ -86,7 +88,7 @@ impl ToC for String {
     }
 }
 
-impl <'a> ToC for &'a str {
+impl<'a> ToC for &'a str {
     fn to_c(self) -> CCode {
         CCode(self.to_owned())
     }

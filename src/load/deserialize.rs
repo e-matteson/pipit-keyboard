@@ -1,8 +1,8 @@
 
 use std::collections::BTreeMap;
 
-use types::{Chord, KeyPress, KmapFormat, ModeInfo, ModeName, Name, COption,
-            Sequence, ToC, WordInfo, CCode};
+use types::{CCode, COption, Chord, KeyPress, KmapFormat, ModeInfo, ModeName,
+            Name, Sequence, ToC, WordInfo};
 
 fn default_output_dir() -> String {
     "pipit-firmware/".into()
@@ -34,11 +34,9 @@ pub struct OptionsConfig {
     pub rgb_led_pins: Option<Vec<u8>>,
     pub battery_level_pin: Option<u8>,
 
-    #[serde(default = "default_output_dir")]
-    pub output_directory: String,
+    #[serde(default = "default_output_dir")] pub output_directory: String,
 
-    #[serde(default = "return_false")]
-    pub enable_led_typing_feedback: bool,
+    #[serde(default = "return_false")] pub enable_led_typing_feedback: bool,
 }
 
 #[derive(Deserialize, Debug)]

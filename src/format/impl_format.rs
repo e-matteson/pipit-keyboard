@@ -2,7 +2,7 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{CCode, KeyPress, KmapPath, Maps, Name, COption, SeqType, Sequence,
+use types::{CCode, COption, KeyPress, KmapPath, Maps, Name, SeqType, Sequence,
             ToC};
 
 // use types::errors::*;
@@ -44,7 +44,9 @@ impl KeyPress {
 impl COption {
     pub fn format(&self) -> CFiles {
         match *self {
-            COption::DefineInt(ref name, val) => format_define(name, &val.to_c()),
+            COption::DefineInt(ref name, val) => {
+                format_define(name, &val.to_c())
+            }
             COption::DefineString(ref name, ref val) => {
                 format_define(name, &val.to_c())
             }
@@ -225,34 +227,30 @@ impl Maps {
             &self.plain_mods.len().to_c(),
         );
 
-        f +=
-            CArray::new(
-                "word_mod_indices",
-                &self.get_variants(&self.word_mods, &all_index_variants)
-            )
-                .c_type("mod_enum")
-                .format()
-        ;
-
-        f += CArray::new("plain_mod_indices", &self.get_variants(&self.plain_mods, &all_index_variants))
-            .c_type("mod_enum")
+        f += CArray::new(
+            "word_mod_indices",
+            &self.get_variants(&self.word_mods, &all_index_variants),
+        ).c_type("mod_enum")
             .format();
 
-        f +=
-            CArray::new(
-                "anagram_mod_indices",
-                &self.get_variants(&self.anagram_mods, &all_index_variants)
-            )
-                .c_type("mod_enum")
-                .format();
+        f += CArray::new(
+            "plain_mod_indices",
+            &self.get_variants(&self.plain_mods, &all_index_variants),
+        ).c_type("mod_enum")
+            .format();
+
+        f += CArray::new(
+            "anagram_mod_indices",
+            &self.get_variants(&self.anagram_mods, &all_index_variants),
+        ).c_type("mod_enum")
+            .format();
 
         let plain_mod_codes: Vec<_> = self.plain_mods
             .iter()
             .map(|x| self.get_single_keypress(x).format_mods())
             .collect();
 
-        f += CArray::new("plain_mod_keys", &plain_mod_codes)
-            .format();
+        f += CArray::new("plain_mod_keys", &plain_mod_codes).format();
         f
     }
 
@@ -372,7 +370,8 @@ fn make_debug_macros() -> CCode {
 
 
 fn make_enum<T>(variants: Vec<CCode>, name: T) -> CCode
-    where T: ToC
+where
+    T: ToC,
 {
     // TODO move somewhere?
     // TODO only assign first to 0
