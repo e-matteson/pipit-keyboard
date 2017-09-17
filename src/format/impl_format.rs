@@ -92,21 +92,21 @@ impl Sequence {
 impl Maps {
     pub fn format(&self, file_name_base: &str) -> CFiles {
         let mut f = CFiles::new();
-        f.append(&format_intro(&format!("{}.h", file_name_base)));
-        f.append(&self.format_options());
-        f.append(&self.format_modifiers());
-        f.append(&self.format_command_enum());
-        f.append(&self.format_seq_type_enum());
-        f.append(&self.format_mode_enum());
-        f.append(&self.format_modes());
-        f.append(&format_outro());
+        f += format_intro(&format!("{}.h", file_name_base));
+        f += self.format_options();
+        f += self.format_modifiers();
+        f += self.format_command_enum();
+        f += self.format_seq_type_enum();
+        f += self.format_mode_enum();
+        f += self.format_modes();
+        f += format_outro();
         f
     }
 
     fn format_modes(&self) -> CFiles {
         let mut f = CFiles::new();
         let mut kmap_struct_names = BTreeMap::new();
-        f.append(&self.format_kmaps(&mut kmap_struct_names));
+        f += self.format_kmaps(&mut kmap_struct_names);
 
         let mut mode_struct_names = Vec::new();
         for (mode, info) in &self.modes {
@@ -119,14 +119,14 @@ impl Maps {
                 anagram_chords: self.get_anagram_chords(mode),
             };
             let mut tmp = CCode::new();
-            f.append(&m.format(&mut tmp));
+            f += m.format(&mut tmp);
             mode_struct_names.push(CCode(format!("&{}", tmp)));
         }
         f.append_newline();
-        f.append(&CArray::new("mode_structs", &mode_struct_names)
+        f += CArray::new("mode_structs", &mode_struct_names)
             .c_extern(true)
             .c_type("ModeStruct*")
-            .format());
+            .format();
         f.append_newline();
         f
     }
@@ -145,7 +145,7 @@ impl Maps {
                 &self.kmap_ids,
             );
             let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
-            f.append(&l.format(&mut tmp));
+            f += l.format(&mut tmp);
             kmap_struct_names.insert(seq_type.to_owned(), tmp);
         }
         f.append_newline();
@@ -155,7 +155,7 @@ impl Maps {
     fn format_options(&self) -> CFiles {
         let mut f = CFiles::new();
         for op in &self.options {
-            f.append(&op.format());
+            f += op.format();
         }
         f.append_newline();
         f
@@ -204,55 +204,55 @@ impl Maps {
             c: CCode::new(),
         };
 
-        f.append(&format_define(
+        f += format_define(
             &"NUM_MODIFIERS".to_c(),
             &all_index_variants.len().to_c(),
-        ));
-        f.append(&format_define(
+        );
+        f += format_define(
             &"NUM_WORD_MODS".to_c(),
             &self.word_mods.len().to_c(),
-        ));
-        f.append(&format_define(
+        );
+        f += format_define(
             &"NUM_ANAGRAM_MODS".to_c(),
             &self.anagram_mods.len().to_c(),
-        ));
-        f.append(&format_define(
+        );
+        f += format_define(
             &"NUM_ANAGRAMS".to_c(),
             &self.get_num_anagrams().to_c(),
-        ));
-        f.append(&format_define(
+        );
+        f += format_define(
             &"NUM_PLAIN_MODS".to_c(),
             &self.plain_mods.len().to_c(),
-        ));
+        );
 
-        f.append(
-            &CArray::new(
+        f +=
+            CArray::new(
                 "word_mod_indices",
                 &self.get_variants(&self.word_mods, &all_index_variants)
             )
                 .c_type("mod_enum")
                 .format()
-        );
+        ;
 
-        f.append(&CArray::new("plain_mod_indices", &self.get_variants(&self.plain_mods, &all_index_variants))
+        f += CArray::new("plain_mod_indices", &self.get_variants(&self.plain_mods, &all_index_variants))
             .c_type("mod_enum")
-            .format());
+            .format();
 
-        f.append(
-            &CArray::new(
+        f +=
+            CArray::new(
                 "anagram_mod_indices",
                 &self.get_variants(&self.anagram_mods, &all_index_variants)
             )
                 .c_type("mod_enum")
-                .format());
+                .format();
 
         let plain_mod_codes: Vec<_> = self.plain_mods
             .iter()
             .map(|x| self.get_single_keypress(x).format_mods())
             .collect();
 
-    f.append(&CArray::new("plain_mod_keys", &plain_mod_codes)
-            .format());
+        f += CArray::new("plain_mod_keys", &plain_mod_codes)
+            .format();
         f
     }
 

@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::io::Write;
 use std::fs::OpenOptions;
+use std::ops::AddAssign;
 
 use types::CCode;
 
@@ -35,6 +36,20 @@ impl CFiles {
         write_to_file(&format!("{}.cpp", path_base), &self.c);
     }
 }
+
+impl AddAssign<CFiles> for CFiles {
+    fn add_assign(&mut self, rhs: CFiles) {
+        self.append(&rhs)
+    }
+}
+
+impl<'a> AddAssign<&'a CFiles> for CFiles {
+    fn add_assign(&mut self, rhs: &'a CFiles) {
+        self.append(rhs)
+    }
+}
+
+
 
 fn write_to_file(full_path: &str, s: &CCode) {
     let path = Path::new(full_path);

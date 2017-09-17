@@ -19,13 +19,13 @@ impl<'a> ModeBuilder<'a> {
         let mut f = self.format_kmap_array(&mut kmap_array_name);
 
         let mut anagram_array_name = CCode::new();
-        f.append(&self.format_anagram_array(&mut anagram_array_name));
+        f += self.format_anagram_array(&mut anagram_array_name);
 
         let mut anagram_mask_name = CCode::new();
-        f.append(&self.format_anagram_mask(&mut anagram_mask_name));
+        f += self.format_anagram_mask(&mut anagram_mask_name);
 
         let mut mod_array_name = CCode::new();
-        f.append(&self.format_modifier_array(&mut mod_array_name));
+        f += self.format_modifier_array(&mut mod_array_name);
 
         let m = ModeStruct {
             num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long!
@@ -36,7 +36,7 @@ impl<'a> ModeBuilder<'a> {
             is_gaming: self.info.gaming,
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
-        f.append(&m.format(mode_struct_name));
+        f += m.format(mode_struct_name);
         f
     }
 
@@ -63,21 +63,21 @@ impl<'a> ModeBuilder<'a> {
             }
             let name =
                 CCode(format!("{}_{}_kmap_array", self.mode_name, seq_type));
-            f.append(
-                &CArray::new(&name, &v)
+            f +=
+                CArray::new(&name, &v)
                     .c_extern(false)
                     .c_type("KmapStruct*")
                     .format()
-            );
+            ;
             subarray_names.push(name.clone());
         }
 
         *kmap_array_name = CCode(format!("{}_kmap_arrays", self.mode_name));
-        f.append(
-            &CArray::new(kmap_array_name, &subarray_names)
+        f +=
+            CArray::new(kmap_array_name, &subarray_names)
                 .c_extern(false)
                 .c_type("KmapStruct**")
-                .format());
+                .format();
         f
     }
 
@@ -119,16 +119,16 @@ impl<'a> ModeBuilder<'a> {
         let mut subarray_names = Vec::new();
         for (i, c) in chords.iter().enumerate() {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
-            f.append(&CArray::new(&name, &c.to_ints())
+            f += CArray::new(&name, &c.to_ints())
                 .c_extern(false)
-                .format());
+                .format();
             subarray_names.push(name);
         }
         *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));
-        f.append(&CArray::new(new_array_name, &subarray_names)
+        f += CArray::new(new_array_name, &subarray_names)
             .c_type(&"uint8_t*".to_c())
             .c_extern(false)
-            .format());
+            .format();
         f
     }
 }

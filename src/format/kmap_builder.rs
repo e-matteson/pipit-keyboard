@@ -99,8 +99,8 @@ impl<'a> KmapBuilder<'a> {
         let chord_arrays = self.make_chord_arrays(&names_by_len);
 
         let mut f = CFiles::new();
-        f.append(&self.format_seq_arrays(&seq_arrays));
-        f.append(&self.format_chord_arrays(&chord_arrays));
+        f += self.format_seq_arrays(&seq_arrays);
+        f += self.format_chord_arrays(&chord_arrays);
 
         let seq_array_name = self.make_seq_array_name();
         for kmap in chord_arrays.keys() {
@@ -112,7 +112,7 @@ impl<'a> KmapBuilder<'a> {
                 use_mods: self.use_mods,
             };
             let struct_name = self.make_lookup_struct_name(kmap);
-            f.append(&s.format(&struct_name));
+            f += s.format(&struct_name);
             struct_names_out.insert(kmap.clone(), struct_name);
         }
         f
@@ -132,9 +132,7 @@ impl<'a> KmapBuilder<'a> {
                 .collect();
 
             let array_name = self.make_chord_array_name(kmap);
-            f.append(
-                &self.format_length_arrays(length_ints, &array_name, false),
-            );
+            f += self.format_length_arrays(length_ints, &array_name, false) ;
             array_names.push(array_name.clone());
         }
         f
@@ -234,19 +232,15 @@ impl<'a> KmapBuilder<'a> {
             .collect();
         let mut f = CFiles::new();
         for i in 0..subarray_names.len() {
-            f.append(
-                &CArray::new(&subarray_names[i], &arrays[i])
-                    .c_extern(false)
-                    .format()
-            );
+            f += CArray::new(&subarray_names[i], &arrays[i])
+                .c_extern(false)
+                .format();
         }
         subarray_names.push("NULL".to_c());
-        f.append(
-            &CArray::new(name, &subarray_names)
-                .c_extern(is_extern)
-                .c_type(&"uint8_t*".to_c())
-                .format()
-        );
+        f += CArray::new(name, &subarray_names)
+            .c_extern(is_extern)
+            .c_type(&"uint8_t*".to_c())
+            .format();
         f
     }
 
