@@ -8,7 +8,7 @@ use types::errors::*;
 #[serde(deny_unknown_fields)]
 pub struct KeyPress {
     pub key: Option<CCode>,
-    pub modifiers: Option<Vec<CCode>>,
+    pub mods: Option<Vec<CCode>>,
 }
 
 
@@ -23,7 +23,7 @@ impl KeyPress {
     ) -> Result<KeyPress> {
         Ok(KeyPress {
             key: make_key(key)?,
-            modifiers: make_mod(modifiers)?,
+            mods: make_mod(modifiers)?,
         })
     }
 
@@ -31,19 +31,19 @@ impl KeyPress {
         // We also use KeyPresses to store command codes
         KeyPress {
             key: Some(code.to_c()),
-            modifiers: None,
+            mods: None,
         }
     }
 
     pub fn new_blank() -> KeyPress {
         KeyPress {
             key: None,
-            modifiers: None,
+            mods: None,
         }
     }
 
     pub fn is_mod_blank(&self) -> bool {
-        self.modifiers.is_none()
+        self.mods.is_none()
     }
 }
 

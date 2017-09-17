@@ -2,7 +2,7 @@
 use std::collections::BTreeMap;
 
 use types::{Chord, KeyPress, KmapFormat, ModeInfo, ModeName, Name, COption,
-            Sequence, ToC, WordInfo};
+            Sequence, ToC, WordInfo, CCode};
 
 fn default_output_dir() -> String {
     "pipit-firmware/".into()
@@ -74,7 +74,7 @@ impl OptionsConfig {
             COption::DefineInt("HELD_DELAY".to_c(), self.held_delay),
             COption::DefineInt("DEBOUNCE_DELAY".to_c(), self.debounce_delay),
             COption::DefineInt("DEBUG_MESSAGES".to_c(), self.debug_messages),
-            COption::Ifdef(self.board_name, true),
+            COption::Ifdef(self.board_name.clone(), true),
             COption::Array1D("row_pins".to_c(), self.row_pins.clone()),
             COption::Array1D("column_pins".to_c(), self.column_pins.clone()),
             COption::Ifdef(

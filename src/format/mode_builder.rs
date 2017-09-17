@@ -63,22 +63,21 @@ impl<'a> ModeBuilder<'a> {
             }
             let name =
                 CCode(format!("{}_{}_kmap_array", self.mode_name, seq_type));
-            f.append(&CArray::new()
-                .name(&name)
-                .c_extern(false)
-                .c_type(&"KmapStruct*".to_c())
-                .fill_1d(&v)
-                .format());
-            subarray_names.push(name);
+            f.append(
+                &CArray::new(&name, &v)
+                    .c_extern(false)
+                    .c_type("KmapStruct*")
+                    .format()
+            );
+            subarray_names.push(name.clone());
         }
 
         *kmap_array_name = CCode(format!("{}_kmap_arrays", self.mode_name));
-        f.append(&CArray::new()
-            .name(kmap_array_name)
-            .c_extern(false)
-            .c_type(&"KmapStruct**".to_c())
-            .fill_1d(&subarray_names)
-            .format());
+        f.append(
+            &CArray::new(kmap_array_name, &subarray_names)
+                .c_extern(false)
+                .c_type("KmapStruct**")
+                .format());
         f
     }
 
@@ -88,10 +87,8 @@ impl<'a> ModeBuilder<'a> {
             anagram_mask.intersect(c);
         }
         *array_name = CCode(format!("{}_anagram_mask", self.mode_name));
-        CArray::new()
-            .name(array_name)
+        CArray::new(array_name, &anagram_mask.to_ints())
             .c_extern(false)
-            .fill_1d(&anagram_mask.to_ints())
             .format()
     }
 
@@ -122,19 +119,15 @@ impl<'a> ModeBuilder<'a> {
         let mut subarray_names = Vec::new();
         for (i, c) in chords.iter().enumerate() {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
-            f.append(&CArray::new()
-                .name(&name)
+            f.append(&CArray::new(&name, &c.to_ints())
                 .c_extern(false)
-                .fill_1d(&c.to_ints())
                 .format());
             subarray_names.push(name);
         }
         *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));
-        f.append(&CArray::new()
-            .name(new_array_name)
+        f.append(&CArray::new(new_array_name, &subarray_names)
             .c_type(&"uint8_t*".to_c())
             .c_extern(false)
-            .fill_1d(&subarray_names)
             .format());
         f
     }

@@ -24,7 +24,7 @@ impl KeyPress {
     }
 
     pub fn format_mods(&self) -> CCode {
-        match self.modifiers {
+        match self.mods {
             Some(ref codes) => KeyPress::truncate(&CCode::join(codes, "|")),
             None => KeyPress::empty_code(),
         }
@@ -55,13 +55,8 @@ impl COption {
             },
             COption::Uint8(ref name, val) => format_uint8(name, val),
             COption::Array1D(ref name, ref val) => {
-                CArray::new().name(name).fill_1d(val).format()
+                CArray::new(name, val).format()
             }
-            // COption::Array2D(ref name, ref val) => CArray::new()
-            //     .name(name)
-            //     .fill_2d(val)
-            //     .format(),
-            // _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
 }
@@ -128,11 +123,9 @@ impl Maps {
             mode_struct_names.push(CCode(format!("&{}", tmp)));
         }
         f.append_newline();
-        f.append(&CArray::new()
-            .name(&"mode_structs".to_c())
+        f.append(&CArray::new("mode_structs", &mode_struct_names)
             .c_extern(true)
-            .c_type(&"ModeStruct*".to_c())
-            .fill_1d(&mode_struct_names)
+            .c_type("ModeStruct*")
             .format());
         f.append_newline();
         f
@@ -172,7 +165,7 @@ impl Maps {
         let modes_list: Vec<_> =
             self.modes.keys().map(|x| x.to_c().to_uppercase()).collect();
         CFiles {
-            h: make_enum(modes_list, &"mode_enum".to_c()),
+            h: make_enum(modes_list, "mode_enum"),
             c: CCode::new(),
         }
     }
@@ -207,7 +200,7 @@ impl Maps {
             all_index_variants.values().cloned().collect();
 
         let mut f = CFiles {
-            h: make_enum(index_variants, &"mod_enum".to_c()),
+            h: make_enum(index_variants, "mod_enum"),
             c: CCode::new(),
         };
 
@@ -232,34 +225,33 @@ impl Maps {
             &self.plain_mods.len().to_c(),
         ));
 
-        f.append(&CArray::new()
-            .name(&"word_mod_indices".to_c())
-            .c_type(&"mod_enum".to_c())
-            .fill_1d(&self.get_variants(&self.word_mods, &all_index_variants))
-            .format());
-
-        f.append(&CArray::new()
-            .name(&"plain_mod_indices".to_c())
-            .c_type(&"mod_enum".to_c())
-            .fill_1d(&self.get_variants(&self.plain_mods, &all_index_variants))
-            .format());
-
-        f.append(&CArray::new()
-            .name(&"anagram_mod_indices".to_c())
-            .c_type(&"mod_enum".to_c())
-            .fill_1d(
-                &self.get_variants(&self.anagram_mods, &all_index_variants),
+        f.append(
+            &CArray::new(
+                "word_mod_indices",
+                &self.get_variants(&self.word_mods, &all_index_variants)
             )
+                .c_type("mod_enum")
+                .format()
+        );
+
+        f.append(&CArray::new("plain_mod_indices", &self.get_variants(&self.plain_mods, &all_index_variants))
+            .c_type("mod_enum")
             .format());
+
+        f.append(
+            &CArray::new(
+                "anagram_mod_indices",
+                &self.get_variants(&self.anagram_mods, &all_index_variants)
+            )
+                .c_type("mod_enum")
+                .format());
 
         let plain_mod_codes: Vec<_> = self.plain_mods
             .iter()
             .map(|x| self.get_single_keypress(x).format_mods())
             .collect();
 
-        f.append(&CArray::new()
-            .name(&"plain_mod_keys".to_c())
-            .fill_1d(&plain_mod_codes)
+    f.append(&CArray::new("plain_mod_keys", &plain_mod_codes)
             .format());
         f
     }
@@ -267,10 +259,10 @@ impl Maps {
     fn format_command_enum(&self) -> CFiles {
         let command_list: Vec<_> = self.sequences[&SeqType::Command]
             .keys()
-            .map(|x| x.to_c().to_uppercase())
+            .map(|x: &Name| x.to_owned().to_c().to_uppercase())
             .collect();
         CFiles {
-            h: make_enum(command_list, &"command_enum".to_c()),
+            h: make_enum(command_list, "command_enum"),
             c: CCode::new(),
         }
     }
@@ -281,7 +273,7 @@ impl Maps {
             .map(|s| s.to_c().to_uppercase())
             .collect();
         CFiles {
-            h: make_enum(v, &"seq_type_enum".to_c()),
+            h: make_enum(v, "seq_type_enum"),
             c: CCode::new(),
         }
     }
@@ -329,8 +321,8 @@ fn format_autogen_message() -> CFiles {
     );
     s += " * Do not make changes here, they will be overwritten.\n */\n\n";
     CFiles {
-        h: s.to_c(),
-        c: s.to_c(),
+        h: (&s).to_c(),
+        c: (&s).to_c(),
     }
 }
 
@@ -379,7 +371,9 @@ fn make_debug_macros() -> CCode {
 }
 
 
-fn make_enum(variants: Vec<CCode>, name: &CCode) -> CCode {
+fn make_enum<T>(variants: Vec<CCode>, name: T) -> CCode
+    where T: ToC
+{
     // TODO move somewhere?
     // TODO only assign first to 0
     let contents = variants
@@ -389,7 +383,7 @@ fn make_enum(variants: Vec<CCode>, name: &CCode) -> CCode {
             format!("{}  {} = {},\n", acc, field, index)
         });
 
-    CCode(format!("enum {}{{\n{}}};\n\n", name, contents))
+    CCode(format!("enum {}{{\n{}}};\n\n", name.to_c(), contents))
 }
 
 fn format_define(name: &CCode, value: &CCode) -> CFiles {

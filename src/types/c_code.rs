@@ -61,66 +61,82 @@ impl<'a> AddAssign<&'a str> for CCode {
 }
 
 pub trait ToC {
-    fn to_c(&self) -> CCode;
+    fn to_c(self) -> CCode;
+}
+
+impl <'a, T> ToC for &'a T
+    where T: ToC + Clone
+{
+    fn to_c(self) -> CCode {
+        self.to_owned().to_c()
+    }
+}
+
+impl <'a, T> ToC for &'a mut T
+    where T: ToC + Clone
+{
+    fn to_c(self) -> CCode {
+        self.to_owned().to_c()
+    }
 }
 
 impl ToC for String {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.clone())
     }
 }
 
-impl ToC for str {
-    fn to_c(&self) -> CCode {
+impl <'a> ToC for &'a str {
+    fn to_c(self) -> CCode {
         CCode(self.to_owned())
     }
 }
 
 impl ToC for CCode {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         self.clone()
     }
 }
 
 impl ToC for Name {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.0.to_owned())
     }
 }
 
 impl ToC for ModeName {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.0.to_owned())
     }
 }
 
 impl ToC for SeqType {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.to_string())
     }
 }
 
 impl ToC for bool {
-    fn to_c(&self) -> CCode {
-        let s = if *self { "1" } else { "0" };
+    fn to_c(self) -> CCode {
+        let s = if self { "1" } else { "0" };
         CCode(s.to_owned())
     }
 }
 
 impl ToC for i32 {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.to_string())
     }
 }
 
 impl ToC for u8 {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.to_string())
     }
 }
 
 impl ToC for usize {
-    fn to_c(&self) -> CCode {
+    fn to_c(self) -> CCode {
         CCode(self.to_string())
     }
 }

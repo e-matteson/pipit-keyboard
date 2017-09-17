@@ -234,19 +234,19 @@ impl<'a> KmapBuilder<'a> {
             .collect();
         let mut f = CFiles::new();
         for i in 0..subarray_names.len() {
-            f.append(&CArray::new()
-                .name(&subarray_names[i])
-                .c_extern(false)
-                .fill_1d(&arrays[i])
-                .format());
+            f.append(
+                &CArray::new(&subarray_names[i], &arrays[i])
+                    .c_extern(false)
+                    .format()
+            );
         }
         subarray_names.push("NULL".to_c());
-        f.append(&CArray::new()
-            .name(name)
-            .c_extern(is_extern)
-            .c_type(&"uint8_t*".to_c())
-            .fill_1d(&subarray_names)
-            .format());
+        f.append(
+            &CArray::new(name, &subarray_names)
+                .c_extern(is_extern)
+                .c_type(&"uint8_t*".to_c())
+                .format()
+        );
         f
     }
 

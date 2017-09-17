@@ -1,4 +1,4 @@
-use self::decode::{OptionsConfig, Settings};
+use self::deserialize::{OptionsConfig, Settings};
 use self::kmap_parser::KmapParser;
 
 mod kmap_parser;

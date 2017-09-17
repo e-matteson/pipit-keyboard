@@ -19,7 +19,7 @@ macro_rules! c_struct {
                 );
                 $(c += &format!(
                     "  {}, // {}\n",
-                    self.$field.to_c(),
+                    (&self.$field).to_c(),
                     stringify!($field));
                 )*
                 c += "};\n";
