@@ -5,6 +5,7 @@ use types::errors::*;
 // Rename?
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct KeyPress {
     pub key: Option<CCode>,
     pub modifiers: Option<Vec<CCode>>,
@@ -49,8 +50,8 @@ impl KeyPress {
 fn make_key(key: Option<String>) -> Result<Option<CCode>> {
     // TODO map
     Ok(match key {
-            Some(s) => Some(sanitize(&s)?),
-            None => None,
+        Some(s) => Some(sanitize(&s)?),
+        None => None,
     })
 }
 

@@ -4,21 +4,22 @@ use std::fmt;
 use std::slice::Iter;
 // use std::collections::BTreeMap;
 
-use types::{KeyPress, CCode};
+use types::{CCode, KeyPress};
 
 #[derive(Debug, Clone)]
-pub enum OpNew {
-    DefineInt ( CCode, usize ),
-    DefineString ( CCode, CCode ),
-    Ifdef (CCode, bool),
-    Uint8 (CCode, u8),
-    Array1D (CCode, Vec<u8>),
+pub enum COption {
+    DefineInt(CCode, usize),
+    DefineString(CCode, CCode),
+    Ifdef(CCode, bool),
+    Uint8(CCode, u8),
+    Array1D(CCode, Vec<u8>),
     // Array2D (Vec<Vec<u8>>),
     // Mode { use_words: bool },
 }
 
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct SwitchPos {
     pub row: u8,
     pub col: u8,
@@ -44,7 +45,8 @@ impl fmt::Display for SwitchPos {
 //////////////////////////////
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
-pub struct KmapFormat (pub Vec<Vec<SwitchPos>>);
+#[serde(deny_unknown_fields)]
+pub struct KmapFormat(pub Vec<Vec<SwitchPos>>);
 
 //////////////////////////////
 
@@ -71,11 +73,11 @@ impl fmt::Display for SeqType {
 //////////////////////////////
 
 #[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct KmapInfo {
     pub file: KmapPath,
 
-    #[serde(default = "return_false")]
-    pub use_words: bool,
+    #[serde(default = "return_false")] pub use_words: bool,
 }
 
 fn return_false() -> bool {
@@ -85,16 +87,17 @@ fn return_false() -> bool {
 //////////////////////////////
 
 #[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ModeInfo {
     pub keymaps: Vec<KmapInfo>,
 
-    #[serde(default = "return_false")]
-    pub gaming: bool,
+    #[serde(default = "return_false")] pub gaming: bool,
 }
 
 //////////////////////////////
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct KmapPath(pub String);
 
 impl fmt::Display for KmapPath {
@@ -106,6 +109,7 @@ impl fmt::Display for KmapPath {
 //////////////////////////////
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 pub struct ModeName(pub String);
 
@@ -115,7 +119,7 @@ impl fmt::Display for ModeName {
     }
 }
 
-impl <'a> From<&'a str> for ModeName {
+impl<'a> From<&'a str> for ModeName {
     fn from(s: &str) -> ModeName {
         ModeName(s.to_owned())
     }
@@ -131,6 +135,7 @@ impl From<String> for ModeName {
 //////////////////////////////
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 pub struct Name(pub String);
 
@@ -148,7 +153,7 @@ impl From<String> for Name {
     }
 }
 
-impl <'a> From<&'a str> for Name {
+impl<'a> From<&'a str> for Name {
     fn from(s: &str) -> Name {
         Name(s.to_owned())
     }
@@ -170,7 +175,7 @@ impl fmt::Debug for Name {
 //////////////////////////////
 
 #[derive(Debug, Clone, Deserialize)]
-// #[serde(from = "KeyPress")]
+#[serde(deny_unknown_fields)]
 pub struct Sequence(pub Vec<KeyPress>);
 
 impl Sequence {

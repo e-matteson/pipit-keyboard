@@ -2,7 +2,8 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{CCode, KeyPress, KmapPath, Maps, Name, SeqType, Sequence, ToC, OpNew};
+use types::{CCode, KeyPress, KmapPath, Maps, Name, COption, SeqType, Sequence,
+            ToC};
 
 // use types::errors::*;
 
@@ -40,22 +41,23 @@ impl KeyPress {
 }
 
 
-impl OpNew {
+impl COption {
     pub fn format(&self) -> CFiles {
         match *self {
-            OpNew::DefineInt(ref name, val) => format_define(name, &val.to_c()),
-            OpNew::DefineString(ref name, ref val) => format_define(name, &val.to_c()),
-            OpNew::Ifdef(ref name, val) => if val {
+            COption::DefineInt(ref name, val) => format_define(name, &val.to_c()),
+            COption::DefineString(ref name, ref val) => {
+                format_define(name, &val.to_c())
+            }
+            COption::Ifdef(ref name, val) => if val {
                 format_define(name, &CCode::new())
             } else {
                 CFiles::new()
             },
-            OpNew::Uint8(ref name, val) => format_uint8(name, val),
-            OpNew::Array1D(ref name, ref val) => CArray::new()
-                .name(name)
-                .fill_1d(val)
-                .format(),
-            // OpNew::Array2D(ref name, ref val) => CArray::new()
+            COption::Uint8(ref name, val) => format_uint8(name, val),
+            COption::Array1D(ref name, ref val) => {
+                CArray::new().name(name).fill_1d(val).format()
+            }
+            // COption::Array2D(ref name, ref val) => CArray::new()
             //     .name(name)
             //     .fill_2d(val)
             //     .format(),
@@ -159,7 +161,7 @@ impl Maps {
 
     fn format_options(&self) -> CFiles {
         let mut f = CFiles::new();
-        for op in &self.new_options {
+        for op in &self.options {
             f.append(&op.format());
         }
         f.append_newline();

@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
 
-use types::{Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, SeqType, Sequence, WordBuilder, WordInfo, OpNew};
+use types::{Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName, Name,
+            COption, SeqType, Sequence, WordBuilder, WordInfo};
 use types::errors::*;
 
 
@@ -16,7 +16,7 @@ pub struct Maps {
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids: BTreeMap<KmapPath, String>,
-    pub new_options: Vec<OpNew>,
+    pub options: Vec<COption>,
     checker: Checker,
     max_anagram_num: u8,
 }
@@ -31,7 +31,7 @@ impl Maps {
             anagram_mods: Vec::new(),
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
-            new_options: Vec::new(),
+            options: Vec::new(),
             checker: Checker::new(),
             max_anagram_num: 0,
         }
@@ -59,7 +59,6 @@ impl Maps {
         kmap: &KmapPath,
         named_chords: BTreeMap<Name, Chord>,
     ) -> Result<()> {
-
         for (name, chord) in &named_chords {
             self.add_chord(name, chord, kmap)?;
         }
@@ -74,11 +73,7 @@ impl Maps {
         fake_seq_with_command_code
             .push(KeyPress::new_fake(&entry.to_uppercase()));
 
-        self.add_sequence(
-            SeqType::Command,
-            entry,
-            &fake_seq_with_command_code,
-        )
+        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code)
     }
 
 
@@ -98,7 +93,8 @@ impl Maps {
     }
 
     pub fn add_plain_mod<T>(&mut self, name: &Name, seq: &T) -> Result<()>
-        where T: Into<Sequence> + Clone
+    where
+        T: Into<Sequence> + Clone,
     {
         // TODO check if sequence is valid! length 1, no key
         self.plain_mods.push(name.to_owned());
@@ -145,7 +141,8 @@ impl Maps {
         name: &Name,
         seq: &T,
     ) -> Result<()>
-        where T: Into<Sequence> + Clone
+    where
+        T: Into<Sequence> + Clone,
     {
         // TODO check that name doesn't already exist
         self.checker.insert_seq(name)?;
@@ -161,7 +158,8 @@ impl Maps {
         seq_type: SeqType,
         seqs: &BTreeMap<Name, T>,
     ) -> Result<()>
-        where T: Into<Sequence> + Clone
+    where
+        T: Into<Sequence> + Clone,
     {
         for (name, seq) in seqs {
             self.add_sequence(seq_type, name, seq)?;

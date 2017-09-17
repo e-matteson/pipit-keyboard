@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
 use itertools::Itertools;
 
-use types::{Chord, KmapPath, Name, SwitchPos, KmapFormat};
+use types::{Chord, KmapFormat, KmapPath, Name, SwitchPos};
 
 use types::errors::*;
 
@@ -23,9 +23,11 @@ pub struct KmapParser {
 }
 
 impl KmapParser {
-    pub fn new(format: &KmapFormat, row_pins: &Vec<u8>, col_pins: &Vec<u8>)
-               -> Result<KmapParser>
-    {
+    pub fn new(
+        format: &KmapFormat,
+        row_pins: &Vec<u8>,
+        col_pins: &Vec<u8>,
+    ) -> Result<KmapParser> {
         // let format = ops.get_val("kmap_format").unwrap_vec_kmap();
         let items_per_line: Vec<_> = format.0.iter().map(|v| v.len()).collect();
         Ok(KmapParser {
@@ -114,9 +116,11 @@ impl KmapParser {
     }
 }
 
-fn make_permutation(format: &KmapFormat, row_pins: &Vec<u8>, col_pins: &Vec<u8>)
-                    -> Result<Vec<usize>>
-{
+fn make_permutation(
+    format: &KmapFormat,
+    row_pins: &Vec<u8>,
+    col_pins: &Vec<u8>,
+) -> Result<Vec<usize>> {
     let kmap_order = make_kmap_order(format);
     let firmware_order = make_firmware_order(row_pins, col_pins);
     let mut permutation: Vec<usize> = Vec::new();
@@ -138,7 +142,10 @@ fn make_kmap_order(format: &KmapFormat) -> Vec<SwitchPos> {
     order
 }
 
-fn make_firmware_order(row_pins: &Vec<u8>, col_pins: &Vec<u8>) -> Vec<(SwitchPos)> {
+fn make_firmware_order(
+    row_pins: &Vec<u8>,
+    col_pins: &Vec<u8>,
+) -> Vec<(SwitchPos)> {
     // must match the algorithm used in the firmware's scanMatrix()!
     let mut order: Vec<SwitchPos> = Vec::new();
     for c in col_pins {

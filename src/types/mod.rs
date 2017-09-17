@@ -1,7 +1,8 @@
 pub use self::key_press::KeyPress;
 pub use self::c_code::{CCode, ToC};
-pub use self::miscellaneous::{KmapInfo, KmapPath, KmapFormat, ModeInfo, ModeName,
-                              Name, SeqType, Sequence, SwitchPos, OpNew};
+pub use self::miscellaneous::{KmapFormat, KmapInfo, KmapPath, ModeInfo,
+                              ModeName, Name, COption, SeqType, Sequence,
+                              SwitchPos};
 pub use self::chord::Chord;
 pub use self::words::{Word, WordBuilder, WordInfo};
 pub use self::maps::Maps;

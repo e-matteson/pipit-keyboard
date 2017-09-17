@@ -1,30 +1,27 @@
-// use std::collections::BTreeMap;
 use std::io::prelude::*;
 use std::fs::File;
 use toml;
 
-#[allow(unused_imports)]
-use load::{KmapParser, Settings, OptionsConfig};
+use load::{KmapParser, OptionsConfig, Settings};
 use types::{Maps, SeqType};
 use types::errors::*;
 
 
 impl Maps {
     pub fn load(toml_path: &str) -> Result<Maps> {
-        Ok(Maps::load_helper(toml_path).chain_err(
-            || format!("failure to load from settings: {}", toml_path),
-        )?)
+        Ok(Maps::load_helper(toml_path).chain_err(|| {
+            format!("failure to load from settings file: {}", toml_path)
+        })?)
     }
 
     fn load_helper(toml_path: &str) -> Result<Maps> {
         /// Load stuff into Maps
-
         let settings: Settings = toml::from_str(&read_file(toml_path)?)?;
-
 
         let mut maps = Maps::new();
 
-        maps.load_modes(&settings).chain_err(|| "failure to load modes")?;
+        maps.load_modes(&settings)
+            .chain_err(|| "failure to load modes")?;
 
         maps.load_options(&settings.options)
             .chain_err(|| "failure to load options")?;
@@ -47,7 +44,8 @@ impl Maps {
         maps.load_anagram_mods(&settings)
             .chain_err(|| "failure to load anagram modifiers")?;
 
-        maps.load_word_list(&settings) // TODO rename word_list?
+        // TODO rename word_list?
+        maps.load_word_list(&settings)
             .chain_err(|| "failure to load dictionary")?;
 
         maps.load_commands(&settings)
@@ -79,8 +77,7 @@ impl Maps {
     }
 
     fn load_options(&mut self, options: &OptionsConfig) -> Result<()> {
-        let ops = options.to_vec();
-        self.new_options = ops;
+        self.options = options.to_vec();
         Ok(())
     }
 

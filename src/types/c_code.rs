@@ -7,6 +7,7 @@ use types::{ModeName, Name, SeqType};
 //////////////////////////////
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
 
 impl CCode {
