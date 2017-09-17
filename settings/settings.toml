@@ -82,16 +82,13 @@ kmap_format                = [
 
 
 # TODO document modes
-[[mode]]
-name = "default_mode"
+[modes.default_mode]
 keymaps = [{file="keymaps/dvorak24.kmap", words=true}]
 
-[[mode]]
-name = "left_hand_mode"
+[modes.left_hand_mode]
 keymaps = [{file="keymaps/dvorak24_left.kmap"}]
 
-[[mode]]
-name = "gaming_mode"
+[modes.gaming_mode]
 keymaps = [{file="keymaps/gaming_test.kmap"}]
 gaming = true
 

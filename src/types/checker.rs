@@ -80,6 +80,7 @@ impl Checker {
 
     pub fn insert_seq(&mut self, name: &Name) -> Result<()> {
         if !self.all_seqs.insert(name.to_owned()) {
+            // println!("{:?}", self.all_seqs);
             bail!("duplicate sequences for: '{}'", name);
         }
         Ok(())

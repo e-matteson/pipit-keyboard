@@ -25,8 +25,8 @@ pub struct Chord {
 }
 
 impl Chord {
-    pub fn set_num_bytes(x: i32) {
-        set_chord_length((x * 8) as usize);
+    pub fn set_num_bytes(x: usize) {
+        set_chord_length(x * 8);
     }
 
     pub fn new() -> Chord {

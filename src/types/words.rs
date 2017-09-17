@@ -68,7 +68,6 @@ impl<'a> WordBuilder<'a> {
         Ok(seq)
     }
 
-
     fn get_key_code_for_seq(&self, character: char) -> Result<String> {
         if character.is_alphanumeric() {
             return Ok(format!("KEY_{}", character.to_uppercase()).to_string());

@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 
 use types::{Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, Options, SeqType, Sequence, WordBuilder, WordInfo};
+            Name, SeqType, Sequence, WordBuilder, WordInfo, OpNew};
 use types::errors::*;
 
 
@@ -14,10 +14,9 @@ pub struct Maps {
     pub word_mods: Vec<Name>,
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
-    // pub modes:        BTreeMap<ModeName, Vec<KmapInfo>>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids: BTreeMap<KmapPath, String>,
-    pub options: Options,
+    pub new_options: Vec<OpNew>,
     checker: Checker,
     max_anagram_num: u8,
 }
@@ -32,7 +31,7 @@ impl Maps {
             anagram_mods: Vec::new(),
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
-            options: Options::new(),
+            new_options: Vec::new(),
             checker: Checker::new(),
             max_anagram_num: 0,
         }
@@ -40,18 +39,18 @@ impl Maps {
 
     pub fn add_chord(
         &mut self,
-        name: Name,
-        chord: Chord,
+        name: &Name,
+        chord: &Chord,
         kmap: &KmapPath,
     ) -> Result<()> {
-        self.checker.insert_chord(&name, &chord, kmap)?;
+        self.checker.insert_chord(name, chord, kmap)?;
         self.chords
             .get_mut(kmap)
             .expect(&format!(
                 "Failed to add chord because kmap is unknown: {}",
                 kmap
             ))
-            .insert(name, chord);
+            .insert(name.to_owned(), chord.to_owned());
         Ok(())
     }
 
@@ -60,7 +59,8 @@ impl Maps {
         kmap: &KmapPath,
         named_chords: BTreeMap<Name, Chord>,
     ) -> Result<()> {
-        for (name, chord) in named_chords {
+
+        for (name, chord) in &named_chords {
             self.add_chord(name, chord, kmap)?;
         }
         Ok(())
@@ -76,8 +76,8 @@ impl Maps {
 
         self.add_sequence(
             SeqType::Command,
-            entry.to_owned(),
-            fake_seq_with_command_code,
+            entry,
+            &fake_seq_with_command_code,
         )
     }
 
@@ -89,47 +89,39 @@ impl Maps {
             kmap: kmap,
             maps: self,
         }.finalize()?;
-        self.add_sequence(SeqType::Word, word.name.clone(), word.seq.clone())?;
-        self.add_chord(word.name.clone(), word.chord.clone(), kmap)?;
+        self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
+        self.add_chord(&word.name, &word.chord, kmap)?;
         if word.chord.anagram_num > self.max_anagram_num {
             self.max_anagram_num = word.chord.anagram_num;
         }
         Ok(())
     }
 
-    pub fn add_plain_mod(&mut self, name: Name, seq: &Sequence) -> Result<()> {
+    pub fn add_plain_mod<T>(&mut self, name: &Name, seq: &T) -> Result<()>
+        where T: Into<Sequence> + Clone
+    {
         // TODO check if sequence is valid! length 1, no key
-        self.plain_mods.push(name.clone());
-        self.add_sequence(SeqType::Plain, name, seq.clone())
+        self.plain_mods.push(name.to_owned());
+        self.add_sequence(SeqType::Plain, name, seq)
     }
 
 
-    pub fn set_word_mods(&mut self, names: Vec<Name>) -> Result<()> {
+    pub fn add_word_mod(&mut self, name: &Name) -> Result<()> {
         // Add all the word_mods at once
-        assert!(self.word_mods.is_empty());
-
-        for name in &names {
-            self.checker.insert_seq(name)?;
-        }
-        self.word_mods = names;
-        Ok(())
+        self.word_mods.push(name.to_owned());
+        self.checker.insert_seq(name)
     }
 
-    pub fn set_anagram_mods(&mut self, names: Vec<Name>) -> Result<()> {
+    pub fn add_anagram_mod(&mut self, name: &Name) -> Result<()> {
         // Add all the anagram_mods at once
         // TODO share code with set_word_mods()?
-        assert!(self.anagram_mods.is_empty());
-
-        for name in &names {
-            self.checker.insert_seq(name)?;
-        }
-        self.anagram_mods = names;
-        Ok(())
+        self.anagram_mods.push(name.to_owned());
+        self.checker.insert_seq(name)
     }
 
-    pub fn add_mode(&mut self, name: ModeName, info: ModeInfo) -> Result<()> {
-        if self.modes.contains_key(&name) {
-            bail!("mode already exists: '{}'", &name);
+    pub fn add_mode(&mut self, name: &ModeName, info: &ModeInfo) -> Result<()> {
+        if self.modes.contains_key(name) {
+            bail!("mode already exists: '{}'", name);
         }
         // Store the kmaps that are included in this mode
         for kmap_info in &info.keymaps {
@@ -143,37 +135,37 @@ impl Maps {
             let nickname = format!("kmap{}", self.kmap_ids.len());
             self.kmap_ids.insert(kmap_path.clone(), nickname);
         }
-        self.modes.insert(name, info);
+        self.modes.insert(name.to_owned(), info.to_owned());
         Ok(())
     }
 
-    pub fn add_sequence(
+    pub fn add_sequence<T>(
         &mut self,
         seq_type: SeqType,
-        name: Name,
-        seq: Sequence,
-    ) -> Result<()> {
+        name: &Name,
+        seq: &T,
+    ) -> Result<()>
+        where T: Into<Sequence> + Clone
+    {
         // TODO check that name doesn't already exist
-        self.checker.insert_seq(&name)?;
+        self.checker.insert_seq(name)?;
         self.sequences
             .entry(seq_type)
             .or_insert_with(BTreeMap::new)
-            .insert(name, seq);
+            .insert(name.to_owned(), seq.to_owned().into());
         Ok(())
     }
 
-    pub fn set_sequences(
+    pub fn add_sequences<T>(
         &mut self,
         seq_type: SeqType,
-        val: BTreeMap<Name, Sequence>,
-    ) -> Result<()> {
-        // Add an entire seq_type's worth of sequences all at once
-        assert!(!self.sequences.contains_key(&seq_type));
-
-        for name in val.keys() {
-            self.checker.insert_seq(name)?;
+        seqs: &BTreeMap<Name, T>,
+    ) -> Result<()>
+        where T: Into<Sequence> + Clone
+    {
+        for (name, seq) in seqs {
+            self.add_sequence(seq_type, name, seq)?;
         }
-        self.sequences.insert(seq_type, val);
         Ok(())
     }
 

@@ -2,8 +2,7 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{CCode, KeyPress, KmapPath, Maps, Name, OpDef, OpType, Options,
-            SeqType, Sequence, ToC};
+use types::{CCode, KeyPress, KmapPath, Maps, Name, SeqType, Sequence, ToC, OpNew};
 
 // use types::errors::*;
 
@@ -40,46 +39,27 @@ impl KeyPress {
     }
 }
 
-impl Options {
+
+impl OpNew {
     pub fn format(&self) -> CFiles {
-        let mut f = CFiles::new();
-        for (name, op) in self.get_formattable_options() {
-            f.append(&op.format(&name.to_c()));
-        }
-        f.append_newline();
-        f
-    }
-}
-
-
-impl OpDef {
-    pub fn format(&self, name: &CCode) -> CFiles {
-        match self.op_type {
-            OpType::DefineInt => {
-                format_define(name, &self.get_val().unwrap_int32().to_c())
-            }
-            OpType::DefineString => {
-                format_define(name, &self.get_val().unwrap_str().to_c())
-            }
-            OpType::IfdefValue => format_define(
-                &self.get_val().unwrap_str().to_c(),
-                &CCode::new(),
-            ),
-            OpType::IfdefKey => if self.get_val().unwrap_bool() {
-                format_define(name, &"".to_c())
+        match *self {
+            OpNew::DefineInt(ref name, val) => format_define(name, &val.to_c()),
+            OpNew::DefineString(ref name, ref val) => format_define(name, &val.to_c()),
+            OpNew::Ifdef(ref name, val) => if val {
+                format_define(name, &CCode::new())
             } else {
                 CFiles::new()
             },
-            OpType::Uint8 => format_uint8(name, self.get_val().unwrap_uint8()),
-            OpType::Array1D => CArray::new()
+            OpNew::Uint8(ref name, val) => format_uint8(name, val),
+            OpNew::Array1D(ref name, ref val) => CArray::new()
                 .name(name)
-                .fill_1d(self.get_val().unwrap_vec())
+                .fill_1d(val)
                 .format(),
-            OpType::Array2D => CArray::new()
-                .name(name)
-                .fill_2d(self.get_val().unwrap_vec2())
-                .format(),
-            _ => panic!(format!("option cannot be formatted: {}", name)),
+            // OpNew::Array2D(ref name, ref val) => CArray::new()
+            //     .name(name)
+            //     .fill_2d(val)
+            //     .format(),
+            // _ => panic!(format!("option cannot be formatted: {}", name)),
         }
     }
 }
@@ -116,7 +96,7 @@ impl Maps {
     pub fn format(&self, file_name_base: &str) -> CFiles {
         let mut f = CFiles::new();
         f.append(&format_intro(&format!("{}.h", file_name_base)));
-        f.append(&self.options.format());
+        f.append(&self.format_options());
         f.append(&self.format_modifiers());
         f.append(&self.format_command_enum());
         f.append(&self.format_seq_type_enum());
@@ -172,6 +152,15 @@ impl Maps {
             let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
             f.append(&l.format(&mut tmp));
             kmap_struct_names.insert(seq_type.to_owned(), tmp);
+        }
+        f.append_newline();
+        f
+    }
+
+    fn format_options(&self) -> CFiles {
+        let mut f = CFiles::new();
+        for op in &self.new_options {
+            f.append(&op.format());
         }
         f.append_newline();
         f
