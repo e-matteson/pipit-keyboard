@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use types::{CCode};
 use types::errors::*;
+use std::path::{PathBuf};
 
 // require Deserialize?
 
@@ -62,6 +63,13 @@ impl <T> Validate for Option<T>
 //         Ok(())
 //     }
 // }
+
+impl Validate for PathBuf{
+    fn validate(&self) -> Result<()> {
+        // Always valid.
+        Ok(())
+    }
+}
 
 impl Validate for bool{
     fn validate(&self) -> Result<()> {

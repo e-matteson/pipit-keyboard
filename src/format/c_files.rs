@@ -1,7 +1,7 @@
-use std::path::Path;
 use std::io::Write;
 use std::fs::OpenOptions;
 use std::ops::AddAssign;
+use std::path::PathBuf;
 
 use types::CCode;
 use types::errors::*;
@@ -32,9 +32,18 @@ impl CFiles {
         self.c += "\n";
     }
 
-    pub fn save(&self, directory: &str, name_base: &str) -> Result<()> {
-        write_to_file(&format!("{}/{}.h", directory, name_base), &self.h)?;
-        write_to_file(&format!("{}/{}.cpp", directory, name_base), &self.c)?;
+    pub fn save(&self, directory: &PathBuf, name_base: &str) -> Result<()> {
+        let mut base = directory.to_owned();
+        base.push(name_base);
+
+        let mut h_path = base.clone();
+        h_path.set_extension("h");
+
+        let mut cpp_path = base;
+        cpp_path.set_extension("cpp");
+
+        write_to_file(h_path, &self.h)?;
+        write_to_file(cpp_path, &self.c)?;
         Ok(())
     }
 }
@@ -52,13 +61,12 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
 }
 
 
-
-fn write_to_file(full_path: &str, s: &CCode) -> Result<()> {
-    let path = Path::new(full_path);
+fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
+    // let path = Path::new(full_path);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
-        .open(path)
+        .open(full_path)
         .chain_err(|| "failure to open output file")?;
     file.set_len(0).chain_err(|| "failure to clear output file")?;
     file.write_all(s.to_string().as_bytes())

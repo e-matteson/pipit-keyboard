@@ -98,7 +98,7 @@ impl AllData {
             // TODO as_ref?
             let dir = self.output_directory.as_ref()
                 .ok_or_else(|| "output directory option not set")?;
-            f.save(&dir, file_name_base)
+            f.save(dir, file_name_base)
         })()
             .chain_err(|| "failure to save configuration")
     }

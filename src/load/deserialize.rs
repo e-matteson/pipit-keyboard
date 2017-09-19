@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::path::{PathBuf};
 
 // #[macro_use]
 use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName,
@@ -6,8 +7,8 @@ use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName,
 
 use types::errors::*;
 
-fn default_output_dir() -> String {
-    "pipit-firmware/".into()
+fn default_output_dir() -> PathBuf {
+    PathBuf::from("pipit-firmware")
 }
 
 validated_struct!{
@@ -40,7 +41,7 @@ validated_struct!{
 
         #[serde(default = "default_output_dir")]
         // TODO validate strings!
-        pub output_directory: String,
+        pub output_directory: PathBuf,
 
         #[serde(default = "return_false")]
         pub enable_led_typing_feedback: bool,
@@ -151,7 +152,7 @@ impl OptionsConfig {
         round_up_to_num_bytes(self.num_matrix_positions())
     }
 
-    pub fn output_directory(&self) -> String {
+    pub fn output_directory(&self) -> PathBuf {
         self.output_directory.clone()
     }
 

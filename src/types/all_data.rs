@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
+use std::path::{PathBuf};
 
 use types::{COption, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
             Name, SeqType, Sequence, WordBuilder, WordInfo, AnagramNum};
@@ -16,7 +17,7 @@ pub struct AllData {
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<COption>,
-    pub output_directory: Option<String>,
+    pub output_directory: Option<PathBuf>,
     checker: Checker,
     max_anagram_num: AnagramNum,
 }
