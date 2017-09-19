@@ -4,6 +4,7 @@ use std::fs::OpenOptions;
 use std::ops::AddAssign;
 
 use types::CCode;
+use types::errors::*;
 
 
 #[derive(Debug, Default)]
@@ -31,9 +32,10 @@ impl CFiles {
         self.c += "\n";
     }
 
-    pub fn save(&self, path_base: &str) {
-        write_to_file(&format!("{}.h", path_base), &self.h);
-        write_to_file(&format!("{}.cpp", path_base), &self.c);
+    pub fn save(&self, directory: &str, name_base: &str) -> Result<()> {
+        write_to_file(&format!("{}/{}.h", directory, name_base), &self.h)?;
+        write_to_file(&format!("{}/{}.cpp", directory, name_base), &self.c)?;
+        Ok(())
     }
 }
 
@@ -51,14 +53,15 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
 
 
 
-fn write_to_file(full_path: &str, s: &CCode) {
+fn write_to_file(full_path: &str, s: &CCode) -> Result<()> {
     let path = Path::new(full_path);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .open(path)
-        .expect("failed to open output file");
-    file.set_len(0).expect("failed to clear output file");
+        .chain_err(|| "failure to open output file")?;
+    file.set_len(0).chain_err(|| "failure to clear output file")?;
     file.write_all(s.to_string().as_bytes())
-        .expect("failed to write to output file");
+        .chain_err(|| "failure to write to output file")?;
+    Ok(())
 }

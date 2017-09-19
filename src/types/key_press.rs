@@ -93,10 +93,6 @@ fn make_mod(modifiers: Option<Vec<String>>) -> Result<Option<Vec<CCode>>> {
     })
 }
 
-// fn or_default(string: Option<String>) -> String {
-//     string.unwrap_or_else(|| "0".into())
-// }
-
 fn sanitize(s: &str) -> Result<CCode> {
     // TODO compare to an actual list of defined key codes?
     //  Could vary with underlying keyboard lib, though
@@ -108,7 +104,7 @@ fn sanitize(s: &str) -> Result<CCode> {
 }
 
 fn contains_illegal_char(string: &str) -> bool {
-    // It's not quite worth using the regex crate for this...
+    // TODO use regex, for this and c_identifiers, c_macros, etc
     let legal = vec![
         '_',
         '|',

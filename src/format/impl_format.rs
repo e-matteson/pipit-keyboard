@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use types::{CCode, COption, KeyPress, KmapPath, AllData, Name, SeqType, Sequence,
             ToC};
 
-// use types::errors::*;
+use types::errors::*;
 
 use format::{compress, make_compression_macros, CArray, CFiles, KmapBuilder,
              ModeBuilder};
@@ -92,23 +92,34 @@ impl Sequence {
 
 
 impl AllData {
-    pub fn format(&self, file_name_base: &str) -> CFiles {
+    pub fn save_as(&self, file_name_base: &str) -> Result<()>{
+        (|| {
+            let f = self.format(file_name_base)?;
+            // TODO as_ref?
+            let dir = self.output_directory.as_ref()
+                .ok_or_else(|| "output directory option not set")?;
+            f.save(&dir, file_name_base)
+        })()
+            .chain_err(|| "failure to save configuration")
+    }
+
+    pub fn format(&self, file_name_base: &str) -> Result<CFiles> {
         let mut f = CFiles::new();
-        f += format_intro(&format!("{}.h", file_name_base));
+        f += format_intro(&format!("{}.h", file_name_base))?;
         f += self.format_options();
-        f += self.format_modifiers();
+        f += self.format_modifiers()?;
         f += self.format_command_enum();
         f += self.format_seq_type_enum();
         f += self.format_mode_enum();
-        f += self.format_modes();
+        f += self.format_modes()?;
         f += format_outro();
-        f
+        Ok(f)
     }
 
-    fn format_modes(&self) -> CFiles {
+    fn format_modes(&self) -> Result<CFiles> {
         let mut f = CFiles::new();
         let mut kmap_struct_names = BTreeMap::new();
-        f += self.format_kmaps(&mut kmap_struct_names);
+        f += self.format_kmaps(&mut kmap_struct_names)?;
 
         let mut mode_struct_names = Vec::new();
         for (mode, info) in &self.modes {
@@ -121,7 +132,7 @@ impl AllData {
                 anagram_chords: self.get_anagram_chords(mode),
             };
             let mut tmp = CCode::new();
-            f += m.format(&mut tmp);
+            f += m.format(&mut tmp)?;
             mode_struct_names.push(CCode(format!("&{}", tmp)));
         }
         f.append_newline();
@@ -130,13 +141,13 @@ impl AllData {
             .c_type("ModeStruct*")
             .format();
         f.append_newline();
-        f
+        Ok(f)
     }
 
     fn format_kmaps(
         &self,
         kmap_struct_names: &mut BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>,
-    ) -> CFiles {
+    ) -> Result<CFiles> {
         // Format all keymap structs, and return their names
         let mut f = CFiles::new();
         for seq_type in self.sequences.keys() {
@@ -147,11 +158,11 @@ impl AllData {
                 &self.kmap_ids,
             );
             let mut tmp: BTreeMap<KmapPath, CCode> = BTreeMap::new();
-            f += l.format(&mut tmp);
+            f += l.format(&mut tmp)?;
             kmap_struct_names.insert(seq_type.to_owned(), tmp);
         }
         f.append_newline();
-        f
+        Ok(f)
     }
 
     fn format_options(&self) -> CFiles {
@@ -195,7 +206,7 @@ impl AllData {
             .collect()
     }
 
-    fn format_modifiers(&self) -> CFiles {
+    fn format_modifiers(&self) -> Result<CFiles> {
         let all_index_variants = self.make_mod_index_variants();
 
         let index_variants: Vec<_> =
@@ -245,13 +256,16 @@ impl AllData {
         ).c_type("mod_enum")
             .format();
 
-        let plain_mod_codes: Vec<_> = self.plain_mods
-            .iter()
-            .map(|x| self.get_single_keypress(x).format_mods())
-            .collect();
+        f += CArray::new("plain_mod_keys", &self.get_plain_mod_codes()?)
+            .format();
+        Ok(f)
+    }
 
-        f += CArray::new("plain_mod_keys", &plain_mod_codes).format();
-        f
+    fn get_plain_mod_codes(&self) -> Result<Vec<CCode>> {
+         self.plain_mods
+            .iter()
+            .map(|name| Ok(self.get_single_keypress(name)?.format_mods()))
+            .collect()
     }
 
     fn format_command_enum(&self) -> CFiles {
@@ -278,10 +292,10 @@ impl AllData {
 }
 
 
-pub fn format_intro(h_file_name: &str) -> CFiles {
+pub fn format_intro(h_file_name: &str) -> Result<CFiles> {
     let mut f = format_autogen_message();
 
-    let guard_name = make_guard_name(h_file_name);
+    let guard_name = make_guard_name(h_file_name)?;
     let start_namespace = "namespace conf{\n\n";
 
     f.h += format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
@@ -294,7 +308,7 @@ pub fn format_intro(h_file_name: &str) -> CFiles {
 
     f.c += format!("#include \"{}\"\n\n", h_file_name);
     f.c += start_namespace;
-    f
+    Ok(f)
 }
 
 pub fn format_outro() -> CFiles {
@@ -324,12 +338,12 @@ fn format_autogen_message() -> CFiles {
     }
 }
 
-fn make_guard_name(h_file_name: &str) -> CCode {
+fn make_guard_name(h_file_name: &str) -> Result<CCode> {
     // TODO remove unsafe characters, like the python version
     let error_message = format!("invalid header file name: {}", h_file_name);
     let p: String = Path::new(h_file_name)
         .file_name()
-        .expect("failed to get file name")
+        .ok_or_else(|| "failure to get file name")?
         .to_str()
         .unwrap()
         .to_string()
@@ -337,11 +351,12 @@ fn make_guard_name(h_file_name: &str) -> CCode {
         .chars()
         .map(|c| if c.is_alphanumeric() { c } else { '_' })
         .collect();
-    let first = p.chars().nth(0).expect(&error_message);
+    let first = p.chars().nth(0).ok_or_else(|| error_message.clone())?;
+
     if !first.is_alphabetic() && first != '_' {
-        panic!(error_message);
+        bail!(error_message);
     }
-    CCode(p + "_")
+    Ok(CCode(p + "_"))
 }
 
 fn make_debug_macros() -> CCode {
@@ -387,7 +402,6 @@ where
 
 fn format_define(name: &CCode, value: &CCode) -> CFiles {
     // Name will be written in all-caps.
-
     CFiles {
         h: CCode(format!("#define {} {}\n", name.to_uppercase(), value)),
         c: CCode::new(),

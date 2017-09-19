@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 
-use types::{CCode, Chord, KmapPath, ModeInfo, ModeName, SeqType, ToC};
 use format::{CArray, CFiles};
+use types::{CCode, Chord, KmapPath, ModeInfo, ModeName, SeqType, ToC};
+use types::errors::*;
 
 
 pub struct ModeBuilder<'a> {
@@ -14,9 +15,9 @@ pub struct ModeBuilder<'a> {
 }
 
 impl<'a> ModeBuilder<'a> {
-    pub fn format(&self, mode_struct_name: &mut CCode) -> CFiles {
+    pub fn format(&self, mode_struct_name: &mut CCode) -> Result<CFiles> {
         let mut kmap_array_name = CCode::new();
-        let mut f = self.format_kmap_array(&mut kmap_array_name);
+        let mut f = self.format_kmap_array(&mut kmap_array_name)?;
 
         let mut anagram_array_name = CCode::new();
         f += self.format_anagram_array(&mut anagram_array_name);
@@ -37,17 +38,17 @@ impl<'a> ModeBuilder<'a> {
         };
         *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
         f += m.format(mode_struct_name);
-        f
+        Ok(f)
     }
 
-    fn format_kmap_array(&self, kmap_array_name: &mut CCode) -> CFiles {
+    fn format_kmap_array(&self, kmap_array_name: &mut CCode) -> Result<CFiles> {
         let mut f = CFiles::new();
         let mut subarray_names = Vec::new();
         for seq_type in &self.seq_types {
             let mut v = Vec::new();
             let struct_names = self.kmap_struct_names
                 .get(seq_type)
-                .expect("struct name not found");
+                .ok_or("struct name not found")?;
 
             for kmap_info in &self.info.keymaps {
                 v.push(if *seq_type == SeqType::Word && !kmap_info.use_words {
@@ -57,7 +58,7 @@ impl<'a> ModeBuilder<'a> {
                         "&{}",
                         struct_names
                             .get(&kmap_info.file)
-                            .expect("kmap struct name not found")
+                            .ok_or("kmap struct name not found")?
                     ))
                 });
             }
@@ -75,7 +76,7 @@ impl<'a> ModeBuilder<'a> {
             .c_extern(false)
             .c_type("KmapStruct**")
             .format();
-        f
+        Ok(f)
     }
 
     fn format_anagram_mask(&self, array_name: &mut CCode) -> CFiles {

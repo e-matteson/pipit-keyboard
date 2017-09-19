@@ -16,6 +16,7 @@ pub struct AllData {
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<COption>,
+    pub output_directory: Option<String>,
     checker: Checker,
     max_anagram_num: AnagramNum,
 }
@@ -31,6 +32,7 @@ impl AllData {
             modes: BTreeMap::new(),
             kmap_ids: BTreeMap::new(),
             options: Vec::new(),
+            output_directory: None,
             checker: Checker::new(),
             max_anagram_num: AnagramNum(0),
         }
@@ -42,15 +44,14 @@ impl AllData {
         chord: &Chord,
         kmap: &KmapPath,
     ) -> Result<()> {
-        self.checker.insert_chord(name, chord, kmap)?;
-        self.chords
-            .get_mut(kmap)
-            .expect(&format!(
-                "Failed to add chord because kmap is unknown: {}",
-                kmap
-            ))
-            .insert(name.to_owned(), chord.to_owned());
-        Ok(())
+        (|| -> Result<()> {
+            self.checker.insert_chord(name, chord, kmap)?;
+            self.chords
+                .get_mut(kmap)
+                .ok_or_else(|| format!("unknown kmap: {}", kmap))?
+                .insert(name.to_owned(), chord.to_owned());
+            Ok(())
+        })().chain_err(|| "failure to add chord")
     }
 
     pub fn add_chords(
@@ -169,38 +170,45 @@ impl AllData {
     pub fn get_sequences(
         &self,
         seq_type: &SeqType,
-    ) -> &BTreeMap<Name, Sequence> {
-        self.sequences.get(seq_type).expect(&format!(
-            "Sequences has not been initialized for SeqType: {:?}",
-            seq_type
-        ))
+    ) -> Result<&BTreeMap<Name, Sequence>> {
+        self.sequences.get(seq_type)
+            .ok_or_else(
+                || format!(
+                    "Sequence type was not initialized: {:?}",
+                    seq_type
+                ).into()
+            )
     }
 
     pub fn get_sequences_mut(
         &mut self,
         seq_type: SeqType,
-    ) -> &mut BTreeMap<Name, Sequence> {
-        self.sequences.get_mut(&seq_type).expect(&format!(
-            "Sequences has not been initialized for SeqType: {:?}",
-            seq_type
-        ))
+    ) -> Result<&mut BTreeMap<Name, Sequence>> {
+        self.sequences.get_mut(&seq_type)
+            .ok_or_else(
+                || format!(
+                    "Sequence type was not initialized: {:?}",
+                    seq_type
+                ).into()
+            )
     }
 
-    fn get_sequence(&self, name: &Name) -> &Sequence {
+    fn get_sequence(&self, name: &Name) -> Result<&Sequence> {
         for seq_type in self.sequences.keys() {
-            if let Some(s) = self.get_sequences(seq_type).get(name) {
-                return s;
+            if let Some(s) = self.get_sequences(seq_type)?.get(name) {
+                return Ok(s);
             }
         }
-        panic!("No sequence found for name");
+        bail!("No sequence found for name");
     }
 
-    pub fn get_single_keypress(&self, name: &Name) -> KeyPress {
-        let seq = self.get_sequence(name);
+    pub fn get_single_keypress(&self, name: &Name) -> Result<KeyPress> {
+        let seq = self.get_sequence(name)?;
+        // TODO iter?
         if seq.len() != 1 {
             panic!("Expected sequence of length 1");
         }
-        seq.0[0].clone()
+        Ok(seq.0[0].clone())
     }
 
     // pub fn get_mod_key(&self, name: &Name) -> KeyPress {

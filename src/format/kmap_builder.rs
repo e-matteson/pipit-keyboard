@@ -1,8 +1,9 @@
 use std::fmt::Display;
 use std::collections::BTreeMap;
 
-use types::{CCode, Chord, KmapPath, Name, SeqType, Sequence, ToC};
 use format::{CArray, CFiles};
+use types::{CCode, Chord, KmapPath, Name, SeqType, Sequence, ToC};
+use types::errors::*;
 
 type SeqMap = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
@@ -88,7 +89,7 @@ impl<'a> KmapBuilder<'a> {
     pub fn format(
         &self,
         struct_names_out: &mut BTreeMap<KmapPath, CCode>,
-    ) -> CFiles {
+    ) -> Result<CFiles> {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
         // TODO skip words for kmap if never used? gcc seems to optimize them
@@ -96,15 +97,15 @@ impl<'a> KmapBuilder<'a> {
         let names_by_len = self.make_length_map();
 
         let seq_arrays = self.make_seq_arrays(&names_by_len);
-        let chord_arrays = self.make_chord_arrays(&names_by_len);
+        let chord_arrays = self.make_chord_arrays(&names_by_len)?;
 
         let mut f = CFiles::new();
         f += self.format_seq_arrays(&seq_arrays);
-        f += self.format_chord_arrays(&chord_arrays);
+        f += self.format_chord_arrays(&chord_arrays)?;
 
         let seq_array_name = self.make_seq_array_name();
         for kmap in chord_arrays.keys() {
-            let chord_array_name = self.make_chord_array_name(kmap);
+            let chord_array_name = self.make_chord_array_name(kmap)?;
             let s = KmapStruct {
                 chords: chord_array_name.clone(),
                 sequences: seq_array_name.clone(),
@@ -115,13 +116,13 @@ impl<'a> KmapBuilder<'a> {
             f += s.format(&struct_name);
             struct_names_out.insert(kmap.clone(), struct_name);
         }
-        f
+        Ok(f)
     }
 
     fn format_chord_arrays(
         &self,
         chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>,
-    ) -> CFiles {
+    ) -> Result<CFiles> {
         // TODO be consistent about "array" / "subarray" terminology
         let mut f = CFiles::new();
         let mut array_names: Vec<CCode> = Vec::new();
@@ -131,11 +132,11 @@ impl<'a> KmapBuilder<'a> {
                 .map(|v| flatten_chord_entries(v))
                 .collect();
 
-            let array_name = self.make_chord_array_name(kmap);
+            let array_name = self.make_chord_array_name(kmap)?;
             f += self.format_length_arrays(length_ints, &array_name, false);
             array_names.push(array_name.clone());
         }
-        f
+        Ok(f)
     }
 
     fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> CFiles {
@@ -173,18 +174,18 @@ impl<'a> KmapBuilder<'a> {
     fn make_chord_arrays(
         &self,
         names_by_len: &LenMap,
-    ) -> BTreeMap<KmapPath, Vec<Vec<ChordEntry>>> {
+    ) -> Result<BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>> {
         let mut chord_arrays = BTreeMap::new();
         for kmap in self.chord_maps.keys() {
             let mut kmap_array = Vec::new();
 
             for length in 0..max_len(names_by_len) + 1 {
                 kmap_array
-                    .push(self.make_chord_subarray(names_by_len, length, kmap));
+                    .push(self.make_chord_subarray(names_by_len, length, kmap)?);
             }
             chord_arrays.insert(kmap.to_owned(), kmap_array);
         }
-        chord_arrays
+        Ok(chord_arrays)
     }
 
 
@@ -193,7 +194,7 @@ impl<'a> KmapBuilder<'a> {
         names_by_len: &LenMap,
         length: usize,
         kmap: &KmapPath,
-    ) -> Vec<ChordEntry> {
+    ) -> Result<Vec<ChordEntry>> {
         let chords = &self.chord_maps[kmap];
         let mut entries = Vec::new();
         if let Some(names) = names_by_len.get(&length) {
@@ -206,7 +207,7 @@ impl<'a> KmapBuilder<'a> {
                     offset: (index - last_index) as u8,
                     chord: chords
                         .get(name)
-                        .expect("failed to get chord")
+                        .ok_or("failed to get chord")?
                         .clone(),
                 });
                 last_index = index;
@@ -214,7 +215,7 @@ impl<'a> KmapBuilder<'a> {
         }
         // blank entry marks the end of the array
         entries.push(ChordEntry::new());
-        entries
+        Ok(entries)
     }
 
 
@@ -308,12 +309,12 @@ impl<'a> KmapBuilder<'a> {
         new_map
     }
 
-    fn make_chord_array_name(&self, kmap: &KmapPath) -> CCode {
-        CCode(format!(
+    fn make_chord_array_name(&self, kmap: &KmapPath) -> Result<CCode> {
+        Ok(CCode(format!(
             "{}_{}_chord_lookup",
             self.seq_type.to_string(),
-            self.kmap_ids.get(kmap).expect("kmap name not found")
-        ))
+            self.kmap_ids.get(kmap).ok_or("kmap name not found")?
+        )))
     }
 
     fn make_seq_array_name(&self) -> CCode {

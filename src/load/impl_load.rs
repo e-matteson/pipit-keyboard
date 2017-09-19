@@ -3,7 +3,7 @@ use std::fs::File;
 use toml;
 
 use load::{KmapParser, OptionsConfig, Settings};
-use types::{AllData, SeqType, Validate};
+use types::{AllData, SeqType, Validate, Chord};
 use types::errors::*;
 
 
@@ -20,6 +20,10 @@ impl AllData {
         settings.validate()?;
 
         let mut all_data = AllData::new();
+
+        all_data.output_directory = Some(settings.options.output_directory());
+        Chord::set_num_bytes(settings.options.num_bytes_in_chord());
+
 
         all_data.load_modes(&settings)
             .chain_err(|| "failure to load modes")?;
@@ -51,6 +55,7 @@ impl AllData {
 
         all_data.load_commands(&settings)
             .chain_err(|| "failure to load commands")?;
+
         Ok(all_data)
     }
 

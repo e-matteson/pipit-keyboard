@@ -22,9 +22,7 @@ fn run() -> Result<()> {
     let all_data = AllData::load(&settings_path)?;
     all_data.check();
     // TODO automatically extract path parts
-    let f = all_data.format("auto_config");
-    // println!("DRY RUN, NOT SAVING");
-    f.save("pipit-firmware/auto_config");
+    all_data.save_as("auto_config")?;
     Ok(())
 }
 

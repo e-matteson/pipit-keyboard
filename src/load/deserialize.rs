@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 // #[macro_use]
-use types::{CCode, COption, Chord, KeyPress, KmapFormat, ModeInfo, ModeName,
+use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName,
             Name, Sequence, ToC, WordInfo, Validate, Pin, AnagramNum};
 
 use types::errors::*;
@@ -135,13 +135,30 @@ impl OptionsConfig {
         ops
     }
 
+    fn num_rows(&self) -> usize {
+        self.row_pins.len()
+    }
+
+    fn num_columns(&self) -> usize {
+        self.column_pins.len()
+    }
+
+    fn num_matrix_positions(&self) -> usize {
+        self.num_rows() * self.num_columns()
+    }
+
+    pub fn num_bytes_in_chord(&self) -> usize {
+        round_up_to_num_bytes(self.num_matrix_positions())
+    }
+
+    pub fn output_directory(&self) -> String {
+        self.output_directory.clone()
+    }
+
     pub fn get_auto(&self) -> Vec<COption> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
-        let num_rows = self.row_pins.len();
-        let num_columns = self.column_pins.len();
-        let num_matrix_positions = num_rows * num_columns;
-        let num_bytes_in_chord = round_up_to_num_bytes(num_matrix_positions);
+
         let has_battery = self.battery_level_pin.is_some();
 
         let enable_rgb_led = self.rgb_led_pins.is_some();
@@ -149,16 +166,16 @@ impl OptionsConfig {
             self.rgb_led_pins.as_ref().map_or(0, |v| v.len());
 
         // TODO don't magically set Chord's static var here!
-        Chord::set_num_bytes(num_bytes_in_chord);
+        // Chord::set_num_bytes(num_bytes_in_chord);
 
         vec![
-            COption::DefineInt("NUM_ROWS".to_c(), num_rows),
-            COption::DefineInt("NUM_COLUMNS".to_c(), num_columns),
+            COption::DefineInt("NUM_ROWS".to_c(), self.num_rows()),
+            COption::DefineInt("NUM_COLUMNS".to_c(), self.num_columns()),
             COption::DefineInt(
                 "NUM_MATRIX_POSITIONS".to_c(),
-                num_matrix_positions,
+                self.num_matrix_positions(),
             ),
-            COption::DefineInt("NUM_BYTES_IN_CHORD".to_c(), num_bytes_in_chord),
+            COption::DefineInt("NUM_BYTES_IN_CHORD".to_c(), self.num_bytes_in_chord()),
             COption::DefineInt("NUM_RGB_LED_PINS".to_c(), num_rgb_led_pins),
             COption::Ifdef("ENABLE_RGB_LED".to_c(), enable_rgb_led),
             COption::Ifdef("HAS_BATTERY".to_c(), has_battery),
