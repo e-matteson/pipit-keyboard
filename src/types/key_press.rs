@@ -1,4 +1,4 @@
-use types::{CCode, Name, ToC};
+use types::{CCode, Name, ToC, Validate};
 use types::errors::*;
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
@@ -46,6 +46,30 @@ impl KeyPress {
         self.mods.is_none()
     }
 }
+
+impl Validate for KeyPress {
+    fn validate(&self) -> Result<()> {
+        // TODO check against actual list of character defines?
+        let assert_legal = |s: &CCode| -> Result<()> {
+            if contains_illegal_char(&s.0) {
+                bail!("illegal character in keypress")
+            }
+            Ok(())
+        };
+
+        if let Some(ref s) = self.key {
+            assert_legal(s)?
+        }
+        if let Some(ref v) = self.mods {
+            for s in v.iter() {
+                assert_legal(s)?
+            }
+        }
+        Ok(())
+    }
+}
+
+
 
 fn make_key(key: Option<String>) -> Result<Option<CCode>> {
     // TODO map

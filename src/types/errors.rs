@@ -47,7 +47,10 @@ error_chain! {
                         }
                 )
         }
-
+        OutOfRange(name: String, min: usize, max: usize) {
+            description("Input out of range")
+                display("Out of range: {}, ({}, {})", name, min, max)
+        }
         BadValue(expected_type: String, value: Option<String>) {
             description("Bad value in settings")
                 display("invalid {}{}",

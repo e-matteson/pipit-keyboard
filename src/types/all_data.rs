@@ -2,11 +2,10 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 
 use types::{COption, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, SeqType, Sequence, WordBuilder, WordInfo};
+            Name, SeqType, Sequence, WordBuilder, WordInfo, AnagramNum};
 use types::errors::*;
 
 
-// TODO typealias kmap names?
 #[derive(Debug)]
 pub struct AllData {
     pub chords: BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
@@ -18,7 +17,7 @@ pub struct AllData {
     pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<COption>,
     checker: Checker,
-    max_anagram_num: u8,
+    max_anagram_num: AnagramNum,
 }
 
 impl AllData {
@@ -33,7 +32,7 @@ impl AllData {
             kmap_ids: BTreeMap::new(),
             options: Vec::new(),
             checker: Checker::new(),
-            max_anagram_num: 0,
+            max_anagram_num: AnagramNum(0),
         }
     }
 
@@ -298,7 +297,7 @@ impl AllData {
     }
 
     pub fn get_num_anagrams(&self) -> u8 {
-        self.max_anagram_num + 1
+        self.max_anagram_num.0 + 1
     }
 
     pub fn check(&self) {

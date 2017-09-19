@@ -1,60 +1,99 @@
-
 use std::collections::BTreeMap;
 
+// #[macro_use]
 use types::{CCode, COption, Chord, KeyPress, KmapFormat, ModeInfo, ModeName,
-            Name, Sequence, ToC, WordInfo};
+            Name, Sequence, ToC, WordInfo, Validate, Pin, AnagramNum};
+
+use types::errors::*;
 
 fn default_output_dir() -> String {
     "pipit-firmware/".into()
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-pub struct Settings {
-    pub modes: BTreeMap<ModeName, ModeInfo>,
-    pub options: OptionsConfig,
-    pub plain_modifiers: BTreeMap<Name, KeyPress>,
-    pub plain_keys: BTreeMap<Name, KeyPress>,
-    pub macros: BTreeMap<Name, Sequence>,
-    pub other: OtherConfig,
+validated_struct!{
+    #[derive(Deserialize, Debug)]
+    #[serde(deny_unknown_fields)]
+    pub struct Settings {
+        pub options: OptionsConfig,
+        pub modes: BTreeMap<ModeName, ModeInfo>,
+        pub plain_modifiers: BTreeMap<Name, KeyPress>,
+        pub plain_keys: BTreeMap<Name, KeyPress>,
+        pub macros: BTreeMap<Name, Sequence>,
+        pub other: OtherConfig,
+    }
+}
+validated_struct!{
+    #[derive(Deserialize, Debug)]
+    #[serde(deny_unknown_fields)]
+    pub struct OptionsConfig {
+        pub chord_delay: Delay,
+        pub held_delay: Delay,
+        pub debounce_delay: Delay,
+        pub debug_messages: Verbosity, //TODO enum
+        pub board_name: BoardName, //TODO enum
+        pub row_pins: Vec<Pin>,
+        pub column_pins: Vec<Pin>,
+        pub kmap_format: KmapFormat,
+
+        pub rgb_led_pins: Option<Vec<Pin>>,
+        pub battery_level_pin: Option<Pin>,
+
+        #[serde(default = "default_output_dir")]
+        // TODO validate strings!
+        pub output_directory: String,
+
+        #[serde(default = "return_false")]
+        pub enable_led_typing_feedback: bool,
+    }
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-pub struct OptionsConfig {
-    pub chord_delay: usize,
-    pub held_delay: usize,
-    pub debounce_delay: usize,
-    pub debug_messages: usize,
-    pub board_name: CCode,
-    pub row_pins: Vec<u8>,
-    pub column_pins: Vec<u8>,
-    pub kmap_format: KmapFormat,
 
-    pub rgb_led_pins: Option<Vec<u8>>,
-    pub battery_level_pin: Option<u8>,
 
-    #[serde(default = "default_output_dir")] pub output_directory: String,
+validated_struct!(
+    #[derive(Deserialize, Debug, Clone)]
+    #[serde(deny_unknown_fields)]
+    pub struct OtherConfig {
+        pub word_modifiers: Vec<Name>,
+        pub anagram_modifiers: Vec<Name>,
+        pub commands: Vec<Name>,
+        pub dictionary: Vec<WordConfig>,
+    }
+);
 
-    #[serde(default = "return_false")] pub enable_led_typing_feedback: bool,
+validated_struct!{
+    #[derive(Deserialize, Debug, Clone)]
+    #[serde(deny_unknown_fields)]
+    pub struct WordConfig {
+        // TODO validate strings!
+        pub word: String,
+        pub anagram: Option<AnagramNum>,
+        pub chord: Option<String>,
+    }
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-pub struct OtherConfig {
-    pub word_modifiers: Vec<Name>,
-    pub anagram_modifiers: Vec<Name>,
-    pub commands: Vec<Name>,
-    pub dictionary: Vec<WordConfig>,
+always_valid_enum!{
+    #[derive(Deserialize, Debug, Clone, Copy)]
+    pub enum Verbosity {
+        None,
+        Some,
+        All,
+    }
 }
 
-#[derive(Deserialize, Debug, Clone)]
-#[serde(deny_unknown_fields)]
-pub struct WordConfig {
-    pub word: String,
-    pub anagram: Option<u8>,
-    pub chord: Option<String>,
+always_valid_enum!{
+    #[derive(Deserialize, Debug, Clone, Copy)]
+    #[allow(non_camel_case_types)]
+    pub enum BoardName {
+        FEATHER_M0_BLE,
+        TEENSY_LC,
+    }
 }
+
+
+#[derive(Deserialize, Debug, Clone, Copy)]
+#[serde(deny_unknown_fields)]
+pub struct Delay (u16);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,14 +106,15 @@ impl OptionsConfig {
 
     fn get_literal_ops(&self) -> Vec<COption> {
         // TODO use macro to avoid writing out field names as strings?
+
         let mut ops = vec![
-            COption::DefineInt("CHORD_DELAY".to_c(), self.chord_delay),
-            COption::DefineInt("HELD_DELAY".to_c(), self.held_delay),
-            COption::DefineInt("DEBOUNCE_DELAY".to_c(), self.debounce_delay),
-            COption::DefineInt("DEBUG_MESSAGES".to_c(), self.debug_messages),
-            COption::Ifdef(self.board_name.clone(), true),
-            COption::Array1D("row_pins".to_c(), self.row_pins.clone()),
-            COption::Array1D("column_pins".to_c(), self.column_pins.clone()),
+            COption::DefineInt("CHORD_DELAY".to_c(), self.chord_delay.into()),
+            COption::DefineInt("HELD_DELAY".to_c(), self.held_delay.into()),
+            COption::DefineInt("DEBOUNCE_DELAY".to_c(), self.debounce_delay.into()),
+            COption::DefineInt("DEBUG_MESSAGES".to_c(), self.debug_messages.into()),
+            COption::Ifdef(self.board_name.to_c(), true),
+            COption::Array1D("row_pins".to_c(), Pin::to_usize(&self.row_pins)),
+            COption::Array1D("column_pins".to_c(), Pin::to_usize(&self.column_pins)),
             COption::Ifdef(
                 "ENABLE_LED_TYPING_FEEDBACK".to_c(),
                 self.enable_led_typing_feedback,
@@ -83,13 +123,13 @@ impl OptionsConfig {
 
         if self.rgb_led_pins.is_some() {
             let v = self.rgb_led_pins.clone();
-            ops.push(COption::Array1D("rgb_led_pins".to_c(), v.unwrap()))
+            ops.push(COption::Array1D("rgb_led_pins".to_c(), Pin::to_usize(&v.unwrap())))
         }
 
         if self.battery_level_pin.is_some() {
             ops.push(COption::Uint8(
                 "battery_level_pin".to_c(),
-                self.battery_level_pin.unwrap(),
+                self.battery_level_pin.unwrap().into(),
             ))
         }
         ops
@@ -131,8 +171,40 @@ impl From<WordConfig> for WordInfo {
         WordInfo {
             chord_spelling: conf.chord.unwrap_or(conf.word.clone()),
             seq_spelling: conf.word,
-            anagram_num: conf.anagram.unwrap_or(0),
+            anagram_num: conf.anagram.unwrap_or(AnagramNum(0)),
         }
+    }
+}
+
+impl ToC for BoardName {
+    fn to_c(self) -> CCode {
+        match self {
+            BoardName::FEATHER_M0_BLE => "FEATHER_M0_BLE".to_c(),
+            BoardName::TEENSY_LC => "TEENSY_LC".to_c(),
+        }
+    }
+}
+
+
+impl From<Verbosity> for usize {
+    fn from(verbosity: Verbosity) -> usize {
+        match verbosity {
+            Verbosity::None => 0,
+            Verbosity::Some => 1,
+            Verbosity::All => 2,
+        }
+    }
+}
+
+impl Validate for Delay {
+    fn validate(&self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl From<Delay> for usize {
+    fn from(delay: Delay) -> usize {
+        delay.0 as usize
     }
 }
 

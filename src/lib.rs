@@ -14,6 +14,7 @@ pub use types::AllData;
 pub use types::errors;
 
 #[macro_use]
+mod types;
+#[macro_use]
 mod load;
 mod format;
-mod types;

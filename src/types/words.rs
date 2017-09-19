@@ -1,12 +1,12 @@
 
-use types::{Chord, KeyPress, KmapPath, AllData, Name, Sequence};
+use types::{Chord, KeyPress, KmapPath, AllData, Name, Sequence, Validate};
 use types::errors::*;
 
 #[derive(Debug, Clone)]
 pub struct WordInfo {
     pub seq_spelling: String,
     pub chord_spelling: String,
-    pub anagram_num: u8,
+    pub anagram_num: AnagramNum,
 }
 
 #[derive(Debug)]
@@ -14,6 +14,38 @@ pub struct Word {
     pub name: Name,
     pub seq: Sequence,
     pub chord: Chord,
+}
+
+#[derive(Deserialize, Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[serde(deny_unknown_fields)]
+pub struct AnagramNum (pub u8);
+
+impl Default for AnagramNum {
+    fn default() -> AnagramNum {
+        AnagramNum( 0 )
+    }
+}
+
+impl Validate for AnagramNum {
+    fn validate(&self) -> Result<()> {
+        // TODO move max out somewere?
+        // TODO how to keep this matched with make_prefix_byte()?
+        const MAX_ANAGRAM: u8 = 7;
+        if self.0 > MAX_ANAGRAM {
+            bail!(
+                "anagram number too large (max is {}): {}",
+                MAX_ANAGRAM,
+                self.0
+            );
+        }
+        Ok(())
+    }
+}
+
+impl From<AnagramNum> for usize {
+    fn from(num: AnagramNum) -> usize {
+        num.0 as usize
+    }
 }
 
 pub struct WordBuilder<'a> {
@@ -49,8 +81,8 @@ impl<'a> WordBuilder<'a> {
         if self.info.chord_spelling != self.info.seq_spelling {
             name += &format!("_{}", self.info.chord_spelling);
         }
-        if self.info.anagram_num != 0 {
-            name += &format!("_{}", self.info.anagram_num);
+        if self.info.anagram_num.0 != 0 {
+            name += &format!("_{}", self.info.anagram_num.0);
         }
         Name(name)
     }
@@ -103,7 +135,7 @@ impl<'a> WordBuilder<'a> {
             }
             chord.intersect(&self.get_letter_chord(letter)?);
         }
-        check_valid_anagram(self.info.anagram_num)?;
+        self.info.anagram_num.validate()?;
         chord.anagram_num = self.info.anagram_num;
         Ok(chord)
     }
@@ -133,16 +165,3 @@ impl<'a> WordBuilder<'a> {
     }
 }
 
-fn check_valid_anagram(anagram_num: u8) -> Result<()> {
-    // TODO move max out somewere?
-    // TODO how to keep this matched with make_prefix_byte()?
-    const MAX_ANAGRAM: u8 = 7;
-    if anagram_num > MAX_ANAGRAM {
-        bail!(
-            "anagram number too large (max is {}): {}",
-            MAX_ANAGRAM,
-            anagram_num
-        );
-    }
-    Ok(())
-}

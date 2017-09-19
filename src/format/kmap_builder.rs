@@ -46,11 +46,11 @@ impl ChordEntry {
             panic!("offset is too large - too many layouts?");
         }
 
-        if self.chord.anagram_num > max_anagram {
+        if self.chord.anagram_num.0 > max_anagram {
             panic!("anagram num is too large");
         }
 
-        let msb = self.chord.anagram_num.checked_shl(NUM_OFFSET_BITS).unwrap();
+        let msb = self.chord.anagram_num.0.checked_shl(NUM_OFFSET_BITS).unwrap();
         let lsb = self.offset;
         vec![msb + lsb]
     }

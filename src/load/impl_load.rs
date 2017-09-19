@@ -3,7 +3,7 @@ use std::fs::File;
 use toml;
 
 use load::{KmapParser, OptionsConfig, Settings};
-use types::{AllData, SeqType};
+use types::{AllData, SeqType, Validate};
 use types::errors::*;
 
 
@@ -17,6 +17,7 @@ impl AllData {
     fn load_helper(toml_path: &str) -> Result<AllData> {
         /// Load stuff into AllData
         let settings: Settings = toml::from_str(&read_file(toml_path)?)?;
+        settings.validate()?;
 
         let mut all_data = AllData::new();
 

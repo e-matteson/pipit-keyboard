@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use std::fmt;
 
+use types::{AnagramNum};
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
@@ -21,7 +22,7 @@ fn get_chord_length() -> usize {
 #[derive(Clone, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Chord {
     bits: Vec<bool>,
-    pub anagram_num: u8,
+    pub anagram_num: AnagramNum,
 }
 
 impl Chord {
@@ -32,7 +33,7 @@ impl Chord {
     pub fn new() -> Chord {
         Chord {
             bits: vec![false; get_chord_length()],
-            anagram_num: 0,
+            anagram_num: AnagramNum(0),
         }
     }
 
@@ -45,7 +46,7 @@ impl Chord {
         }
         Chord {
             bits: v,
-            anagram_num: 0,
+            anagram_num: AnagramNum(0),
         }
     }
 
@@ -101,7 +102,7 @@ impl Chord {
 
 impl fmt::Debug for Chord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Chord {{ {} : {}}}", self.bits(), self.anagram_num)
+        write!(f, "Chord {{ {} : {}}}", self.bits(), self.anagram_num.0)
     }
 }
 

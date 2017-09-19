@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{Chord, KmapPath, Name};
+use types::{Chord, KmapPath, Name, AnagramNum};
 use types::errors::*;
 
 // The Checker warns about sub-optimal configuration. Any config issues that
@@ -65,7 +65,7 @@ impl Checker {
     ) -> Result<()> {
         // TODO take refs
         let mut base_chord = chord.to_owned();
-        base_chord.anagram_num = 0;
+        base_chord.anagram_num = AnagramNum(0);
 
         self.reverse_kmaps
             .entry(kmap.to_owned())
@@ -97,14 +97,14 @@ fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
 //////////////////////////////
 
 #[derive(Debug)]
-pub struct AnagramSet(pub HashMap<u8, Vec<Name>>);
+pub struct AnagramSet(pub HashMap<AnagramNum, Vec<Name>>);
 
 impl AnagramSet {
     pub fn new() -> AnagramSet {
         AnagramSet(HashMap::new())
     }
 
-    pub fn insert(&mut self, anagram_num: u8, name: Name) {
+    pub fn insert(&mut self, anagram_num: AnagramNum, name: Name) {
         self.0
             .entry(anagram_num)
             .or_insert_with(Vec::new)
@@ -116,7 +116,7 @@ impl AnagramSet {
             return true;
         }
         for num in 0..self.num_anagrams() {
-            if self.is_anagram_missing(num, chord) {
+            if self.is_anagram_missing(AnagramNum(num), chord) {
                 return true;
             }
         }
@@ -134,7 +134,7 @@ impl AnagramSet {
 
     pub fn is_anagram_missing(
         &self,
-        anagram_num: u8,
+        anagram_num: AnagramNum,
         chord: Option<&Chord>,
     ) -> bool {
         if self.0.contains_key(&anagram_num) {
@@ -153,14 +153,16 @@ impl AnagramSet {
     }
 
     pub fn num_anagrams(&self) -> u8 {
-        self.0
+        // TODO use actual max from elsewhere?
+        let max_num = self.0
             .keys()
             .max()
             .expect("failed to get max anagram num")
-            .to_owned() + 1
+            .to_owned();
+        max_num.0 + 1
     }
 
-    pub fn anagram_to_string(&self, anagram_num: u8) -> String {
+    pub fn anagram_to_string(&self, anagram_num: AnagramNum) -> String {
         match self.0.get(&anagram_num) {
             None => "?".to_string(),
             Some(v) => {
@@ -179,7 +181,8 @@ impl fmt::Display for AnagramSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = Vec::new();
         for i in 0..self.num_anagrams() {
-            strings.push(self.anagram_to_string(i));
+            // TODO get iterator over all AnagramNums?
+            strings.push(self.anagram_to_string(AnagramNum(i)));
         }
         let s = format!("[{}]", strings.join(", "));
         fmt::Display::fmt(&s, f)
