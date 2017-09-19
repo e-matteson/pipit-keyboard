@@ -1,9 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::{PathBuf};
 
-// #[macro_use]
 use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName,
-            Name, Sequence, ToC, WordInfo, Validate, Pin, AnagramNum};
+            Name, Sequence, ToC, WordConfig, Validate, Pin};
 
 use types::errors::*;
 
@@ -48,8 +47,6 @@ validated_struct!{
     }
 }
 
-
-
 validated_struct!(
     #[derive(Deserialize, Debug, Clone)]
     #[serde(deny_unknown_fields)]
@@ -61,23 +58,6 @@ validated_struct!(
     }
 );
 
-#[derive(Deserialize, Debug, Clone)]
-#[serde(deny_unknown_fields)]
-pub struct WordConfig {
-    // TODO validate strings!
-    pub word: String,
-    pub anagram: Option<AnagramNum>,
-    pub chord: Option<String>,
-}
-
-impl Validate for WordConfig {
-    fn validate(&self) -> Result<()> {
-        self.anagram.validate()
-        // TODO check for illegal characters?
-        // self.word
-        // self.chord
-    }
-}
 
 always_valid_enum!{
     #[derive(Deserialize, Debug, Clone, Copy)]
@@ -188,16 +168,6 @@ impl OptionsConfig {
             COption::Ifdef("ENABLE_RGB_LED".to_c(), enable_rgb_led),
             COption::Ifdef("HAS_BATTERY".to_c(), has_battery),
         ]
-    }
-}
-
-impl From<WordConfig> for WordInfo {
-    fn from(conf: WordConfig) -> Self {
-        WordInfo {
-            chord_spelling: conf.chord.unwrap_or(conf.word.clone()),
-            seq_spelling: conf.word,
-            anagram_num: conf.anagram.unwrap_or(AnagramNum(0)),
-        }
     }
 }
 

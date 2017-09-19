@@ -4,7 +4,7 @@ pub use self::miscellaneous::{COption, KmapFormat, KmapInfo, KmapPath,
                               ModeInfo, ModeName, Name, SeqType, Sequence,
                               SwitchPos, Pin};
 pub use self::chord::Chord;
-pub use self::words::{Word, WordBuilder, WordInfo, AnagramNum};
+pub use self::words::{Word, WordBuilder, WordConfig, AnagramNum};
 pub use self::all_data::AllData;
 pub use self::checker::Checker;
 

@@ -3,7 +3,7 @@ use std::clone::Clone;
 use std::path::{PathBuf};
 
 use types::{COption, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, SeqType, Sequence, WordBuilder, WordInfo, AnagramNum};
+            Name, SeqType, Sequence, WordBuilder, WordConfig, AnagramNum};
 use types::errors::*;
 
 
@@ -78,7 +78,7 @@ impl AllData {
     }
 
 
-    pub fn add_word(&mut self, info: WordInfo, kmap: &KmapPath) -> Result<()> {
+    pub fn add_word(&mut self, info: WordConfig, kmap: &KmapPath) -> Result<()> {
         // TODO build word in loader code instead?
         let word = WordBuilder {
             info: info,

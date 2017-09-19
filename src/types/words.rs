@@ -2,11 +2,39 @@
 use types::{Chord, KeyPress, KmapPath, AllData, Name, Sequence, Validate};
 use types::errors::*;
 
-#[derive(Debug, Clone)]
-pub struct WordInfo {
-    pub seq_spelling: String,
-    pub chord_spelling: String,
-    pub anagram_num: AnagramNum,
+#[derive(Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct WordConfig {
+    pub word: String,
+    pub anagram: Option<AnagramNum>,
+    pub chord: Option<String>,
+}
+
+impl Validate for WordConfig {
+    fn validate(&self) -> Result<()> {
+        self.anagram.validate()
+        // TODO check for illegal characters?
+        // self.word
+        // self.chord
+    }
+}
+
+impl WordConfig {
+    fn seq_spelling(&self) -> String {
+        self.word.clone()
+    }
+
+    fn chord_spelling(&self) -> String {
+        self.chord.clone().unwrap_or(self.word.clone())
+    }
+
+    fn anagram_num(&self) -> AnagramNum {
+        self.anagram.unwrap_or(AnagramNum(0))
+    }
+
+    fn has_alternate_chord(&self) -> bool {
+        self.chord.is_some()
+    }
 }
 
 #[derive(Debug)]
@@ -49,47 +77,43 @@ impl From<AnagramNum> for usize {
 }
 
 pub struct WordBuilder<'a> {
-    pub info: WordInfo,
+    pub info: WordConfig,
     pub kmap: &'a KmapPath,
     pub all_data: &'a AllData,
 }
 
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Result<Word> {
+        let seq_spelling = self.info.seq_spelling();
+        let error_message = |thing| format!(
+            "failure to make {} for: '{}'",
+            thing,
+            &seq_spelling
+        );
         Ok(Word {
             name: self.make_name(),
-            seq: self.make_sequence().chain_err(|| {
-                ErrorKind::BadValue(
-                    "word".into(),
-                    Some(self.info.seq_spelling.clone()),
-                )
-            })?,
-            // TODO make general purpose failure enum?
-            chord: self.make_chord().chain_err(|| {
-                format!(
-                    "failure to make chord for: '{}'",
-                    self.info.seq_spelling
-                )
-            })?,
+            chord: self.make_chord().chain_err(|| error_message("chord"))?,
+            seq: self.make_sequence().chain_err(|| error_message("sequence"))?,
         })
     }
 
     fn make_name(&self) -> Name {
         // Ensure that each word has a unique name.
 
-        let mut name = format!("word_{}", self.info.seq_spelling);
-        if self.info.chord_spelling != self.info.seq_spelling {
-            name += &format!("_{}", self.info.chord_spelling);
+        let mut name = format!("word_{}", self.info.seq_spelling());
+        if self.info.has_alternate_chord() {
+            name += &format!("_{}", self.info.chord_spelling());
         }
-        if self.info.anagram_num.0 != 0 {
-            name += &format!("_{}", self.info.anagram_num.0);
+        let num = self.info.anagram_num();
+        if num != AnagramNum(0) {
+            name += &format!("_{}", num.0);
         }
         Name(name)
     }
 
     fn make_sequence(&self) -> Result<Sequence> {
         let mut seq = Sequence::new();
-        for letter in self.info.seq_spelling.chars() {
+        for letter in self.info.seq_spelling().chars() {
             seq.push(
                 KeyPress::new(
                     Some(self.get_key_code_for_seq(letter)?),
@@ -129,14 +153,18 @@ impl<'a> WordBuilder<'a> {
         let ignored = vec!['<', '.']; // TODO make this static?
 
         let mut chord = Chord::new();
-        for letter in self.info.chord_spelling.chars() {
+
+        let num = self.info.anagram_num();
+        num.validate()?;
+        chord.anagram_num = num;
+
+        for letter in self.info.chord_spelling().chars() {
             if ignored.contains(&letter) {
                 continue;
             }
             chord.intersect(&self.get_letter_chord(letter)?);
         }
-        self.info.anagram_num.validate()?;
-        chord.anagram_num = self.info.anagram_num;
+
         Ok(chord)
     }
 

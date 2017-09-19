@@ -127,7 +127,7 @@ impl AllData {
     fn load_word_list(&mut self, settings: &Settings) -> Result<()> {
         for kmap in &self.get_kmaps_with_words() {
             for info in &settings.other.dictionary {
-                self.add_word(info.to_owned().into(), kmap)?
+                self.add_word(info.to_owned(), kmap)?
             }
         }
         Ok(())
