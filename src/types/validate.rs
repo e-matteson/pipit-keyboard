@@ -49,21 +49,6 @@ impl <T> Validate for Option<T>
     }
 }
 
-// // TODO don't implement for primitive types! shouldn't always pass!
-// impl Validate for u8{
-//     fn validate(&self) -> Result<()> {
-//         // Primitive types are always valid.
-//         Ok(())
-//     }
-// }
-
-// impl Validate for usize{
-//     fn validate(&self) -> Result<()> {
-//         // Primitive types are always valid.
-//         Ok(())
-//     }
-// }
-
 impl Validate for PathBuf{
     fn validate(&self) -> Result<()> {
         // Always valid.
@@ -78,16 +63,16 @@ impl Validate for bool{
     }
 }
 
-impl Validate for String {
-    fn validate(&self) -> Result<()> {
-        // Primitive types are always valid.
-        Ok(())
-    }
-}
+// impl Validate for String {
+//     fn validate(&self) -> Result<()> {
+//         // Primitive types are always valid.
+//         Ok(())
+//     }
+// }
 
 impl Validate for CCode {
     fn validate(&self) -> Result<()> {
-        // Primitive types are always valid.
+        // TODO sanitize?
         Ok(())
     }
 }

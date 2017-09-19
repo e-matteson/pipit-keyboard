@@ -61,14 +61,21 @@ validated_struct!(
     }
 );
 
-validated_struct!{
-    #[derive(Deserialize, Debug, Clone)]
-    #[serde(deny_unknown_fields)]
-    pub struct WordConfig {
-        // TODO validate strings!
-        pub word: String,
-        pub anagram: Option<AnagramNum>,
-        pub chord: Option<String>,
+#[derive(Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct WordConfig {
+    // TODO validate strings!
+    pub word: String,
+    pub anagram: Option<AnagramNum>,
+    pub chord: Option<String>,
+}
+
+impl Validate for WordConfig {
+    fn validate(&self) -> Result<()> {
+        self.anagram.validate()
+        // TODO check for illegal characters?
+        // self.word
+        // self.chord
     }
 }
 
