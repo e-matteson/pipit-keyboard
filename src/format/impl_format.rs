@@ -2,8 +2,8 @@ use time::*;
 use std::path::Path;
 use std::collections::BTreeMap;
 
-use types::{CCode, COption, KeyPress, KmapPath, AllData, Name, SeqType, Sequence,
-            ToC};
+use types::{AllData, CCode, COption, KeyPress, KmapPath, Name, SeqType,
+            Sequence, ToC};
 
 use types::errors::*;
 
@@ -92,11 +92,12 @@ impl Sequence {
 
 
 impl AllData {
-    pub fn save_as(&self, file_name_base: &str) -> Result<()>{
+    pub fn save_as(&self, file_name_base: &str) -> Result<()> {
         (|| {
             let f = self.format(file_name_base)?;
             // TODO as_ref?
-            let dir = self.output_directory.as_ref()
+            let dir = self.output_directory
+                .as_ref()
                 .ok_or_else(|| "output directory option not set")?;
             f.save(dir, file_name_base)
         })()
@@ -262,7 +263,7 @@ impl AllData {
     }
 
     fn get_plain_mod_codes(&self) -> Result<Vec<CCode>> {
-         self.plain_mods
+        self.plain_mods
             .iter()
             .map(|name| Ok(self.get_single_keypress(name)?.format_mods()))
             .collect()

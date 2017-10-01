@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{Chord, KmapPath, Name, AnagramNum};
+use types::{AnagramNum, Chord, KmapPath, Name};
 use types::errors::*;
 
 // The Checker warns about sub-optimal configuration. Any config issues that

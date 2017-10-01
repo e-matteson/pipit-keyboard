@@ -1,5 +1,5 @@
 
-use types::{Chord, KeyPress, KmapPath, AllData, Name, Sequence, Validate};
+use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
 use types::errors::*;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -46,11 +46,11 @@ pub struct Word {
 
 #[derive(Deserialize, Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[serde(deny_unknown_fields)]
-pub struct AnagramNum (pub u8);
+pub struct AnagramNum(pub u8);
 
 impl Default for AnagramNum {
     fn default() -> AnagramNum {
-        AnagramNum( 0 )
+        AnagramNum(0)
     }
 }
 
@@ -85,11 +85,9 @@ pub struct WordBuilder<'a> {
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Result<Word> {
         let seq_spelling = self.info.seq_spelling();
-        let error_message = |thing| format!(
-            "failure to make {} for: '{}'",
-            thing,
-            &seq_spelling
-        );
+        let error_message = |thing| {
+            format!("failure to make {} for: '{}'", thing, &seq_spelling)
+        };
         Ok(Word {
             name: self.make_name(),
             chord: self.make_chord().chain_err(|| error_message("chord"))?,
@@ -192,4 +190,3 @@ impl<'a> WordBuilder<'a> {
         Ok(Name(name))
     }
 }
-

@@ -1,10 +1,10 @@
 pub use self::key_press::KeyPress;
 pub use self::c_code::{CCode, ToC};
 pub use self::miscellaneous::{COption, KmapFormat, KmapInfo, KmapPath,
-                              ModeInfo, ModeName, Name, SeqType, Sequence,
-                              SwitchPos, Pin};
+                              ModeInfo, ModeName, Name, Pin, SeqType,
+                              Sequence, SwitchPos};
 pub use self::chord::Chord;
-pub use self::words::{Word, WordBuilder, WordConfig, AnagramNum};
+pub use self::words::{AnagramNum, Word, WordBuilder, WordConfig};
 pub use self::all_data::AllData;
 pub use self::checker::Checker;
 
@@ -23,4 +23,3 @@ mod chord;
 mod words;
 mod all_data;
 mod checker;
-

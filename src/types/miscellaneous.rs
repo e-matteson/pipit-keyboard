@@ -20,13 +20,11 @@ pub enum COption {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Pin( pub u8 );
+pub struct Pin(pub u8);
 
 impl Pin {
     pub fn to_usize(pin_vec: &Vec<Pin>) -> Vec<usize> {
-        pin_vec.iter()
-            .map(|pin| usize::from(*pin))
-            .collect()
+        pin_vec.iter().map(|pin| usize::from(*pin)).collect()
     }
 }
 
@@ -140,8 +138,7 @@ impl fmt::Display for SeqType {
 pub struct KmapInfo {
     pub file: KmapPath,
 
-    #[serde(default = "return_false")]
-    pub use_words: bool,
+    #[serde(default = "return_false")] pub use_words: bool,
 }
 
 impl Validate for KmapInfo {

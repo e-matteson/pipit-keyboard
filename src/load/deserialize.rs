@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
-use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName,
-            Name, Sequence, ToC, WordConfig, Validate, Pin};
+use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName, Name,
+            Pin, Sequence, ToC, Validate, WordConfig};
 
 use types::errors::*;
 
@@ -80,7 +80,7 @@ always_valid_enum!{
 
 #[derive(Deserialize, Debug, Clone, Copy)]
 #[serde(deny_unknown_fields)]
-pub struct Delay (u16);
+pub struct Delay(u16);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,11 +98,20 @@ impl OptionsConfig {
         let mut ops = vec![
             COption::DefineInt("CHORD_DELAY".to_c(), self.chord_delay.into()),
             COption::DefineInt("HELD_DELAY".to_c(), self.held_delay.into()),
-            COption::DefineInt("DEBOUNCE_DELAY".to_c(), self.debounce_delay.into()),
-            COption::DefineInt("DEBUG_MESSAGES".to_c(), self.debug_messages.into()),
+            COption::DefineInt(
+                "DEBOUNCE_DELAY".to_c(),
+                self.debounce_delay.into(),
+            ),
+            COption::DefineInt(
+                "DEBUG_MESSAGES".to_c(),
+                self.debug_messages.into(),
+            ),
             COption::Ifdef(self.board_name.to_c(), true),
             COption::Array1D("row_pins".to_c(), Pin::to_usize(&self.row_pins)),
-            COption::Array1D("column_pins".to_c(), Pin::to_usize(&self.column_pins)),
+            COption::Array1D(
+                "column_pins".to_c(),
+                Pin::to_usize(&self.column_pins),
+            ),
             COption::Ifdef(
                 "ENABLE_LED_TYPING_FEEDBACK".to_c(),
                 self.enable_led_typing_feedback,
@@ -111,7 +120,10 @@ impl OptionsConfig {
 
         if self.rgb_led_pins.is_some() {
             let v = self.rgb_led_pins.clone();
-            ops.push(COption::Array1D("rgb_led_pins".to_c(), Pin::to_usize(&v.unwrap())))
+            ops.push(COption::Array1D(
+                "rgb_led_pins".to_c(),
+                Pin::to_usize(&v.unwrap()),
+            ))
         }
 
         if self.battery_level_pin.is_some() {
@@ -146,7 +158,6 @@ impl OptionsConfig {
     pub fn get_auto(&self) -> Vec<COption> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
-
         let has_battery = self.battery_level_pin.is_some();
 
         let enable_rgb_led = self.rgb_led_pins.is_some();
@@ -163,7 +174,10 @@ impl OptionsConfig {
                 "NUM_MATRIX_POSITIONS".to_c(),
                 self.num_matrix_positions(),
             ),
-            COption::DefineInt("NUM_BYTES_IN_CHORD".to_c(), self.num_bytes_in_chord()),
+            COption::DefineInt(
+                "NUM_BYTES_IN_CHORD".to_c(),
+                self.num_bytes_in_chord(),
+            ),
             COption::DefineInt("NUM_RGB_LED_PINS".to_c(), num_rgb_led_pins),
             COption::Ifdef("ENABLE_RGB_LED".to_c(), enable_rgb_led),
             COption::Ifdef("HAS_BATTERY".to_c(), has_battery),

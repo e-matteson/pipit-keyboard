@@ -3,7 +3,7 @@ use std::fs::File;
 use toml;
 
 use load::{KmapParser, OptionsConfig, Settings};
-use types::{AllData, SeqType, Validate, Chord};
+use types::{AllData, Chord, SeqType, Validate};
 use types::errors::*;
 
 
@@ -25,35 +25,45 @@ impl AllData {
         Chord::set_num_bytes(settings.options.num_bytes_in_chord());
 
 
-        all_data.load_modes(&settings)
+        all_data
+            .load_modes(&settings)
             .chain_err(|| "failure to load modes")?;
 
-        all_data.load_options(&settings.options)
+        all_data
+            .load_options(&settings.options)
             .chain_err(|| "failure to load options")?;
 
-        all_data.load_chords(&settings.options)
+        all_data
+            .load_chords(&settings.options)
             .chain_err(|| "failure to load chords")?;
 
-        all_data.load_plains(&settings)
+        all_data
+            .load_plains(&settings)
             .chain_err(|| "failure to load plain keys")?;
 
-        all_data.load_macros(&settings)
+        all_data
+            .load_macros(&settings)
             .chain_err(|| "failure to load macros")?;
 
-        all_data.load_plain_mods(&settings)
+        all_data
+            .load_plain_mods(&settings)
             .chain_err(|| "failure to load plain modifiers")?;
 
-        all_data.load_word_mods(&settings)
+        all_data
+            .load_word_mods(&settings)
             .chain_err(|| "failure to load word modifiers")?;
 
-        all_data.load_anagram_mods(&settings)
+        all_data
+            .load_anagram_mods(&settings)
             .chain_err(|| "failure to load anagram modifiers")?;
 
         // TODO rename word_list?
-        all_data.load_word_list(&settings)
+        all_data
+            .load_word_list(&settings)
             .chain_err(|| "failure to load dictionary")?;
 
-        all_data.load_commands(&settings)
+        all_data
+            .load_commands(&settings)
             .chain_err(|| "failure to load commands")?;
 
         Ok(all_data)

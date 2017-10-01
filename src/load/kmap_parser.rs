@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
 use itertools::Itertools;
 
-use types::{Chord, KmapFormat, KmapPath, Name, SwitchPos, Pin};
+use types::{Chord, KmapFormat, KmapPath, Name, Pin, SwitchPos};
 
 use types::errors::*;
 

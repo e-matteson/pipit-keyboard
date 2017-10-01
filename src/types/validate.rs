@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
-use types::{CCode};
+use types::CCode;
 use types::errors::*;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 // require Deserialize?
 
@@ -9,13 +9,12 @@ pub trait Validate {
     fn validate(&self) -> Result<()>;
 }
 
-impl <K,V> Validate for BTreeMap<K,V>
-    where
+impl<K, V> Validate for BTreeMap<K, V>
+where
     K: Validate,
-    V: Validate
+    V: Validate,
 {
-    fn validate(&self) -> Result<()>
-    {
+    fn validate(&self) -> Result<()> {
         for (key, val) in self {
             key.validate()?;
             val.validate()?;
@@ -24,9 +23,9 @@ impl <K,V> Validate for BTreeMap<K,V>
     }
 }
 
-impl <T> Validate for Vec<T>
-    where
-    T: Validate
+impl<T> Validate for Vec<T>
+where
+    T: Validate,
 {
     fn validate(&self) -> Result<()> {
         for x in self {
@@ -36,9 +35,9 @@ impl <T> Validate for Vec<T>
     }
 }
 
-impl <T> Validate for Option<T>
-    where
-    T: Validate
+impl<T> Validate for Option<T>
+where
+    T: Validate,
 {
     fn validate(&self) -> Result<()> {
         // A None value is always valid.
@@ -49,14 +48,14 @@ impl <T> Validate for Option<T>
     }
 }
 
-impl Validate for PathBuf{
+impl Validate for PathBuf {
     fn validate(&self) -> Result<()> {
         // Always valid.
         Ok(())
     }
 }
 
-impl Validate for bool{
+impl Validate for bool {
     fn validate(&self) -> Result<()> {
         // Primitive types are always valid.
         Ok(())
@@ -101,7 +100,8 @@ macro_rules! validated_struct {
             impl Validate for $struct_type {
                 fn validate(&self) -> Result<()> {
                     $(
-                        &self.$field.validate().chain_err(|| stringify!($field))?;
+                        &self.$field.validate()
+                            .chain_err(|| stringify!($field))?;
                     )*
                         Ok(())
                 }
@@ -134,5 +134,3 @@ macro_rules! always_valid_enum {
             }
         };
 }
-
-

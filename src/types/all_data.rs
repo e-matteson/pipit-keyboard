@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 use std::clone::Clone;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
-use types::{COption, Checker, Chord, KeyPress, KmapPath, ModeInfo, ModeName,
-            Name, SeqType, Sequence, WordBuilder, WordConfig, AnagramNum};
+use types::{AnagramNum, COption, Checker, Chord, KeyPress, KmapPath, ModeInfo,
+            ModeName, Name, SeqType, Sequence, WordBuilder, WordConfig};
 use types::errors::*;
 
 
@@ -52,7 +52,8 @@ impl AllData {
                 .ok_or_else(|| format!("unknown kmap: {}", kmap))?
                 .insert(name.to_owned(), chord.to_owned());
             Ok(())
-        })().chain_err(|| "failure to add chord")
+        })()
+            .chain_err(|| "failure to add chord")
     }
 
     pub fn add_chords(
@@ -78,7 +79,11 @@ impl AllData {
     }
 
 
-    pub fn add_word(&mut self, info: WordConfig, kmap: &KmapPath) -> Result<()> {
+    pub fn add_word(
+        &mut self,
+        info: WordConfig,
+        kmap: &KmapPath,
+    ) -> Result<()> {
         // TODO build word in loader code instead?
         let word = WordBuilder {
             info: info,
@@ -172,26 +177,18 @@ impl AllData {
         &self,
         seq_type: &SeqType,
     ) -> Result<&BTreeMap<Name, Sequence>> {
-        self.sequences.get(seq_type)
-            .ok_or_else(
-                || format!(
-                    "Sequence type was not initialized: {:?}",
-                    seq_type
-                ).into()
-            )
+        self.sequences.get(seq_type).ok_or_else(|| {
+            format!("Sequence type was not initialized: {:?}", seq_type).into()
+        })
     }
 
     pub fn get_sequences_mut(
         &mut self,
         seq_type: SeqType,
     ) -> Result<&mut BTreeMap<Name, Sequence>> {
-        self.sequences.get_mut(&seq_type)
-            .ok_or_else(
-                || format!(
-                    "Sequence type was not initialized: {:?}",
-                    seq_type
-                ).into()
-            )
+        self.sequences.get_mut(&seq_type).ok_or_else(|| {
+            format!("Sequence type was not initialized: {:?}", seq_type).into()
+        })
     }
 
     fn get_sequence(&self, name: &Name) -> Result<&Sequence> {

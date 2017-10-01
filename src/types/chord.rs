@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::fmt;
 
-use types::{AnagramNum};
+use types::AnagramNum;
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.

@@ -51,7 +51,11 @@ impl ChordEntry {
             panic!("anagram num is too large");
         }
 
-        let msb = self.chord.anagram_num.0.checked_shl(NUM_OFFSET_BITS).unwrap();
+        let msb = self.chord
+            .anagram_num
+            .0
+            .checked_shl(NUM_OFFSET_BITS)
+            .unwrap();
         let lsb = self.offset;
         vec![msb + lsb]
     }
@@ -180,8 +184,9 @@ impl<'a> KmapBuilder<'a> {
             let mut kmap_array = Vec::new();
 
             for length in 0..max_len(names_by_len) + 1 {
-                kmap_array
-                    .push(self.make_chord_subarray(names_by_len, length, kmap)?);
+                kmap_array.push(
+                    self.make_chord_subarray(names_by_len, length, kmap)?
+                );
             }
             chord_arrays.insert(kmap.to_owned(), kmap_array);
         }
