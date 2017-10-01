@@ -371,11 +371,11 @@ macro_other_buffer1    macro_other_buffer2    macro_other_buffer3 macro_other_bu
   .     .                .     .                 .     .             .     .
   ... .*.                ... .*.                 ... .*.             ... .*.
 
-macro_kill_ring        macro_comment      macro_comment_copy     macro_nohlsearch
-...*   ....            ....   .*.*        ....   .**.            ..**   **..
-....   ....            ....   ....        ....   ....            ....   ....
-  .     .                .     .            .     .                .     .
-  ... .*.                ... .*.            ... .*.                ... .*.
+macro_kill_ring        macro_comment         macro_nohlsearch
+...*   ....            ....   ....           ..**   **..
+....   ....            .*..   ....           ....   ....
+  .     .                .     .               .     .
+  ... .*.                ... .*.               ... .*.
 
 macro_compile          macro_error_prev       macro_error_next   macro_eval
 ....   ....            ...*   ....            ....   ....        ....   ....

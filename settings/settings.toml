@@ -27,8 +27,8 @@ debounce_delay             = 5
 # How much debugging info to send over the serial connection. Messages can be
 # viewed in the Arduino serial monitor.
 #
-# Required. 0 (none), 1 (some), 2 (all).
-debug_messages             = 0
+# Required. None, Some, or All).
+debug_messages             = "None"
 
 
 # The name of the microcontroller board being used.

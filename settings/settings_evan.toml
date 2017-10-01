@@ -1,5 +1,6 @@
 ###### EVAN'S PERSONAL SETTINGS ######
 
+
 [modes.default_mode]
 keymaps = [{file="keymaps/dvorak24_evan.kmap", use_words=true}]
 
@@ -17,7 +18,7 @@ gaming = true
 chord_delay                = 30
 held_delay                 = 200
 debounce_delay             = 5
-debug_messages             = 0
+debug_messages             = "None"
 
 board_name                 = "FEATHER_M0_BLE"
 rgb_led_pins               = [10, 11, 12]
@@ -25,6 +26,7 @@ enable_led_typing_feedback = true
 battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
+output_directory = "pipit-firmware"
 
 
 kmap_format                = [
@@ -394,8 +396,7 @@ macro_kill_ring     = [{key="KEY_SPACE"},
                        {key="KEY_R"},
                        {key="KEY_Y"}]
 macro_comment       = [{key="KEY_SPACE"},
-                       {key="KEY_C"},
-                       {key="KEY_L"}]
+                       {key="KEY_SEMICOLON"}]
 macro_agenda        = [{key="KEY_SPACE"},
                        {key="KEY_A"},
                        {key="KEY_O"},
@@ -972,6 +973,8 @@ dictionary = [
     {word="any"},
     {word="ap"},
     {word="apart", anagram=1},
+    {word="ape"},
+    {word="apex", anagram=1},
     {word="aperture"},
     {word="aphasia"},
     {word="API"},
@@ -1598,6 +1601,7 @@ dictionary = [
     {word="concrete", anagram=1},
     {word="condition"},
     {word="conduct"},
+    {word="cone", anagram=1},
     {word="conf"},
     {word="conference"},
     {word="confident"},
@@ -2551,6 +2555,7 @@ dictionary = [
     {word="gonna"},
     {word="good"},
     {word="google"},
+    {word="goose"},
     {word="gore", anagram=2},
     {word="gorgeous"},
     {word="gospel"},
@@ -3593,6 +3598,7 @@ dictionary = [
     {word="offer"},
     {word="office"},
     {word="official"},
+    {word="offset"},
     {word="often"},
     {word="oh", anagram=1},
     {word="oil"},
@@ -3677,7 +3683,7 @@ dictionary = [
     {word="pain"},
     {word="paint"},
     {word="pair"},
-    {word="palace", anagram=1},
+    {word="palace", anagram=2},
     {word="pal", anagram=1},
     {word="pale"},
     {word="pallidum"},
@@ -3823,6 +3829,7 @@ dictionary = [
     {word="pink"},
     {word="pioneer"},
     {word="pipe"},
+    {word="pipit", anagram=2},
     {word="pirate"},
     {word="piss", anagram=2},
     {word="pit", anagram=1},
@@ -3973,6 +3980,7 @@ dictionary = [
     {word="profession"},
     {word="professor"},
     {word="profile"},
+    {word="profit"},
     {word="prog", anagram=1},
     {word="program"},
     {word="programmer"},
@@ -4806,6 +4814,7 @@ dictionary = [
     {word="sys", anagram=1},
     {word="system"},
     {word="Syua"},
+    {word="'t"},
     {word="tab"},
     {word="table"},
     {word="tablet", anagram=1},
@@ -5076,6 +5085,7 @@ dictionary = [
     {word="tx"},
     {word="tyler", anagram=2},
     {word="type", anagram=1},
+    {word="typo"},
     {word="typical", anagram=1},
     {word="ual"},
     {word="u", anagram=1},
@@ -5249,6 +5259,7 @@ dictionary = [
     {word="ware", anagram=2},
     {word="warm"},
     {word="warn"},
+    {word="warp", anagram=1},
     {word="warranty"},
     {word="warrior", anagram=1},
     {word="was"},
@@ -5270,6 +5281,7 @@ dictionary = [
     {word="weather"},
     {word="web"},
     {word="wed", anagram=1},
+    {word="wedge"},
     {word="Wednes", anagram=1},
     {word="weed", anagram=2},
     {word="week"},
