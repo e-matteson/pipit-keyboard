@@ -23,10 +23,12 @@ debug_messages             = "None"
 board_name                 = "FEATHER_M0_BLE"
 rgb_led_pins               = [10, 11, 12]
 enable_led_typing_feedback = true
+enable_audio_typing_feedback = true
 battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
 output_directory = "pipit-firmware"
+
 
 
 kmap_format                = [
@@ -1104,6 +1106,7 @@ dictionary = [
     {word="bad"},
     {word="badge"},
     {word="bag"},
+    {word="bail"},
     {word="bake"},
     {word="balance"},
     {word="ball", anagram=2},
@@ -1508,6 +1511,7 @@ dictionary = [
     {word="clean"},
     {word="clear", anagram=2},
     {word="clerk"},
+    {word="clever"},
     {word="click"},
     {word="client"},
     {word="cliff", anagram=1},
