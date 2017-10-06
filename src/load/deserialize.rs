@@ -44,6 +44,9 @@ validated_struct!{
 
         #[serde(default = "return_false")]
         pub enable_led_typing_feedback: bool,
+
+        #[serde(default = "return_false")]
+        pub enable_audio_typing_feedback: bool,
     }
 }
 
@@ -115,6 +118,10 @@ impl OptionsConfig {
             COption::Ifdef(
                 "ENABLE_LED_TYPING_FEEDBACK".to_c(),
                 self.enable_led_typing_feedback,
+            ),
+            COption::Ifdef(
+                "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
+                self.enable_audio_typing_feedback,
             ),
         ];
 
