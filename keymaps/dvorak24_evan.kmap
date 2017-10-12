@@ -379,7 +379,7 @@ macro_kill_ring        macro_comment         macro_nohlsearch
 
 macro_compile          macro_error_prev       macro_error_next   macro_eval
 ....   ....            ...*   ....            ....   ....        ....   ....
-....   ..*.            ..*.   ....            ..*.   ..*.        ....   .*..
+....   **..            ..*.   ....            ..*.   ..*.        ....   .*..
   .     .                .     .                .     .            .     .
   ... .*.                ... .*.                ... .*.            ... .*.
 
@@ -388,12 +388,6 @@ macro_dotspacemacs
 ..*.   ....
   .     .
   ... .*.
-
-macro_describe_key     macro_describe_var  macro_describe_fun
-**..   *...            *.*.   *...         .*..   *...
-....   *...            ....   *...         ....   *...
-  .     .                .     .             .     .
-  ... .*.                ... .*.             ... .*.
 
 macro_magit_status
 .**.   ....
@@ -407,11 +401,11 @@ macro_magit_status
 #   .     .             .     .
 #   ... .*.             ... .*.
 
-macro_calendar         macro_agenda       macro_org_capture
-....   .*..            ....   ....        ....   .*..
-**..   ....            **..   .*..        .*..   ....
-  .     .                .     .            .     .
-  ... .*.                ... .*.            ... .*.
+macro_calendar         macro_org_capture
+....   .*..            ....   .*..
+**..   ....            .*..   ....
+  .     .                .     .
+  ... .*.                ... .*.
 
 macro_open_planner    macro_open_timeline  macro_open_settings  macro_open_dvorak
 ...*   ....           ...*   ....          ...*   ....          ...*   *...
@@ -479,17 +473,11 @@ macro_at_at
 #   .     .
 #   ... .*.
 
-macro_col_eighty       macro_inbox      macro_helm_mark
-....   ....            ....   ....      *...   ..*.
-...*   ..*.            .*.*   ....      ....   ....
-  .     .                .     .          .     .
-  ... .*.                ... .*.          ... .*.
-
-macro_space_m          macro_bibtex
-*...   ....            ....   .*.*
-....   ....            ..*.   .*..
-  .     .                .     .
-  ... .*.                ... .*.
+macro_col_eighty       macro_inbox 
+....   ....            ....   .... 
+...*   ..*.            .*.*   .... 
+  .     .                .     .   
+  ... .*.                ... .*.   
 
 # macro_dragon_xfer macro_dragon_toggle
 # ....   ..*.       ....   ..*.
@@ -498,12 +486,6 @@ macro_space_m          macro_bibtex
 #   ... .*.           ... .*.
 
 ## window manager macros ##
-
-macro_swap_master    macro_swap_master2
-....   ....          ...*   ....
-...*   ....          ....   ....
-  .     .              .     .
-  .*. *..              .*. *..
 
 # macro_speak_toggle macro_speak_slower macro_speak_faster
 # ....   ....        ....   *...        ....   .*..
@@ -538,17 +520,17 @@ macro_swap_master    macro_swap_master2
 
 ## web browser macros ##
 
-macro_zotero_save macro_zotero_rename    macro_zotero_attach
-*..*   ....       *..*   ..*.            *..*   ....
-....   ....       ....   ....            *...   ....
-  .     .           .     .                .     .
-  ... .*.           ... .*.                ... .*.
-
-macro_zotero_metadata
-*..*   *...
+macro_zotero_save
+*..*   ....
 ....   ....
   .     .
   ... .*.
+
+macro_next_tab  macro_prev_tab
+....   ....     ....   ....
+....   ...*     ....   ..*.
+  .     .         .     .
+  ... .*.         ... .*.
 
 # macro_     macro_     macro_    macro_    macro_
 # ....   ....      ....   ....        ....   ....       ....   ....

@@ -335,9 +335,6 @@ macro_compile       = [{key="KEY_SPACE"},
 macro_helm_mini     = [{key="KEY_SPACE"},
                        {key="KEY_B"},
                        {key="KEY_B"}]
-macro_helm_mark     = [{key="KEY_SPACE"},
-                       {key="KEY_O"},
-                       {key="KEY_M"}]
 macro_helm_imenu    = [{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_Z"},
@@ -399,11 +396,6 @@ macro_kill_ring     = [{key="KEY_SPACE"},
                        {key="KEY_Y"}]
 macro_comment       = [{key="KEY_SPACE"},
                        {key="KEY_SEMICOLON"}]
-macro_agenda        = [{key="KEY_SPACE"},
-                       {key="KEY_A"},
-                       {key="KEY_O"},
-                       {key="KEY_O"},
-                       {key="KEY_T"}]
 macro_calendar      = [{key="KEY_SPACE"},
                        {key="KEY_A"},
                        {key="KEY_O"},
@@ -680,11 +672,6 @@ macro_prev_search   = [{key="KEY_SLASH"},
                        {key="KEY_UP"},
                        {key="KEY_UP"},
                        {key="KEY_ENTER"}]
-macro_space_m       = [{key="KEY_SPACE"},
-                       {key="KEY_M"}]
-macro_bibtex        = [{key="KEY_SPACE"},
-                       {key="KEY_O"},
-                       {key="KEY_X"}]
 macro_col_eighty    = [{key="KEY_8"},
                        {key="KEY_0"},
                        {key="KEY_BACKSLASH", mods=["MODIFIERKEY_SHIFT"]}]
@@ -693,23 +680,8 @@ macro_inbox         = [{key="KEY_SPACE"},
                        {key="KEY_I"}]
 # macro_zotero_save   = [{key="KEY_Z", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
 macro_zotero_save   = [{key="KEY_Z", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}]
-macro_zotero_rename = [{key="KEY_R", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
-macro_zotero_attach = [{key="KEY_A", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
-macro_zotero_metadata=[{key="KEY_D", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT", "MODIFIERKEY_SHIFT"]}]
-macro_swap_master    =[{key="KEY_I", mods=["MODIFIERKEY_GUI"]}, {key="KEY_BACKSPACE", mods=["MODIFIERKEY_GUI"]}]
-macro_swap_master2   =[{key="KEY_P", mods=["MODIFIERKEY_GUI"]}, {key="KEY_BACKSPACE", mods=["MODIFIERKEY_GUI"]}]
-macro_describe_key  = [{key="KEY_SPACE"},
-                       {key="KEY_H"},
-                       {key="KEY_D"},
-                       {key="KEY_K"}]
-macro_describe_var  = [{key="KEY_SPACE"},
-                       {key="KEY_H"},
-                       {key="KEY_D"},
-                       {key="KEY_V"}]
-macro_describe_fun  = [{key="KEY_SPACE"},
-                       {key="KEY_H"},
-                       {key="KEY_D"},
-                       {key="KEY_F"}]
+macro_next_tab      = [{key="KEY_TAB", mods=["MODIFIERKEY_CTRL"]}]
+macro_prev_tab      = [{key="KEY_TAB", mods=["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}]
 macro_backslash_n   = [{key="KEY_BACKSLASH"},
                        {key="KEY_N"}]
 macro_blackhole     = [{key="KEY_QUOTE", mods=["MODIFIERKEY_SHIFT"]},
@@ -2559,7 +2531,7 @@ dictionary = [
     {word="gonna"},
     {word="good"},
     {word="google"},
-    {word="goose"},
+    {word="goose", anagram=1},
     {word="gore", anagram=2},
     {word="gorgeous"},
     {word="gospel"},
