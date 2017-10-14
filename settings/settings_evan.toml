@@ -23,7 +23,7 @@ debug_messages             = "None"
 board_name                 = "FEATHER_M0_BLE"
 rgb_led_pins               = [10, 11, 12]
 enable_led_typing_feedback = true
-enable_audio_typing_feedback = true
+# enable_audio_typing_feedback = true
 battery_level_pin          = 9
 row_pins                   = [1, 0, 19]
 column_pins                = [15,16,17,18, 20,21,5,6]
@@ -722,6 +722,7 @@ macro_org_insert_link=[{key="KEY_SPACE"},
 word_modifiers = [
     "mod_capital",
     "mod_nospace",
+    "mod_double",
 ]
 
 anagram_modifiers = [
@@ -731,6 +732,7 @@ anagram_modifiers = [
 
 commands = [
     "command_delete_word",
+    "command_shorten_last_word",
     "command_left_word",
     "command_left_limit",
     "command_right_word",
@@ -1037,6 +1039,7 @@ dictionary = [
     {word="attempt"},
     {word="attend"},
     {word="attention"},
+    {word="attire"},
     {word="attitude"},
     {word="attract", anagram=3},
     {word="attribute"},
