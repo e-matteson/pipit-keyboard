@@ -18,6 +18,7 @@ public:
   void sendMacro(const Key* data, uint8_t data_length, const Chord* chord);
   void sendWord(const Key* data, uint8_t data_length, const Chord* chord);
   // void sendGaming(const Key* data, uint8_t data_length, Chord* chord);
+  void sendBackspace();
 
   void sendKey(const Key* key);
   void sendKey(uint8_t key_code, uint8_t mod_byte);

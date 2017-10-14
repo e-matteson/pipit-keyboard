@@ -46,10 +46,20 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
 }
 
 void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
-  history->startEntry(chord, 1);
+  Key key;
   bool capitalMod = chord->hasModCapital();
   bool nospaceMod = chord->hasModNospace();
-  Key key;
+  bool doubleMod = chord->hasModDouble();
+
+  if(doubleMod) {
+    history->getLastLetterAtCursor(&key);
+  }
+
+  history->startEntry(chord, 1);
+
+  if(doubleMod) {
+    sendKey(&key);
+  }
 
   // This is the first letter, so capitalize it if necessary
   key.copy(data+0);
@@ -75,6 +85,10 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
 
 void Sender::sendRelease(){
   sendKey(0,0);
+}
+
+void Sender::sendBackspace(){
+  sendKey(KEY_BACKSPACE&0xff, 0);
 }
 
 void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){

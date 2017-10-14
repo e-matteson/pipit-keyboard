@@ -31,6 +31,7 @@ public:
   bool hasMod(conf::mod_enum mod) const;
   bool hasModCapital() const;
   bool hasModNospace() const;
+  bool hasModDouble() const;
 
   void printDebug() const;
 

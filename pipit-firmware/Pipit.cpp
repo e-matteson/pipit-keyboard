@@ -34,6 +34,12 @@ void Pipit::doCommand(uint8_t code){
     deleteLastWord();
     break;
 
+  case conf::COMMAND_SHORTEN_LAST_WORD:
+    move(WORD, LEFT);
+    sender->sendBackspace();
+    move(WORD, RIGHT);
+    break;
+
   case conf::COMMAND_LEFT_WORD:
     move(WORD, LEFT);
     break;
@@ -314,7 +320,7 @@ void Pipit::deleteLastWord(){
   move(WORD_EDGE, RIGHT);
   int16_t count = sender->history->calcDistance(WORD, LEFT);
   for(int16_t i = 0; i < count; i++){
-    sender->sendKey(KEY_BACKSPACE&0xff, 0);
+    sender->sendBackspace();
     // For some reason the backspaces get dropped more easily then word letters
     //  so add a longer delay between sends.
     delay(6*comms->proportionalDelay(count));

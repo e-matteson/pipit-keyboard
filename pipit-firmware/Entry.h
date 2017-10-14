@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "auto_config.h"
 #include "Chord.h"
+#include "Key.h"
 
 class Entry{
 public:
@@ -18,6 +19,8 @@ public:
   void setLength(uint8_t value);
   void increment();
   void decrement();
+  void setLastLetter(uint8_t key_code, uint8_t mod_byte);
+  void getLastLetter(Key* key);
 
   bool isClear();
   bool isAnagrammable();
@@ -27,6 +30,7 @@ private:
   Chord chord;
   // bool is_clear = 1;
   uint8_t length = 0;
+  Key last_key;
   bool is_anagrammable = 0;
 };
 

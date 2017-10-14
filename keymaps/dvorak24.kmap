@@ -19,11 +19,11 @@ mod_gui          key_space         mod_alt
   .     .          .     .          .     .
   ... *..     	   ... .*.  	       ... ..*
 
-mod_capital      mod_nospace
-....   ....      ....   ....
-....   ....      ....   ....
-  .     .          .     .
-  *.. ...          ... ..*
+mod_capital      mod_nospace       mod_double
+....   ....      ....   ....       ....   ....
+....   ....      ....   ....       ....   ....
+  .     .          .     .           .     .
+  *.. ...          ... ..*           ..* ...
 
 mod_anagram_1     mod_anagram_2
 ....   ....       ....   ....
@@ -233,6 +233,12 @@ command_delete_word    command_cycle_word   command_cycle_capital
 ....   ***.            .***   ....          .***   ....
   .     .                .     .              .     .
   ... ...                ... ...              *.. ...
+
+command_shorten_last_word
+....   ....
+....   ***.
+  .     .
+  ... .*.
 
 command_pause   command_led_rainbow  command_led_battery  command_led_colors
 ****   ****     ****   ..*.          ****   ....          ****   .*..

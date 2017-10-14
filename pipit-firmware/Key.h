@@ -13,6 +13,7 @@ public:
   void addMod(uint8_t new_mod_byte);
   void copy(const Key* other);
   void clear();
+  void print();
 
   uint8_t key_code = 0;
   uint8_t mod_byte = 0;

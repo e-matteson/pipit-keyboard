@@ -39,6 +39,7 @@ public:
   void backspace();
 
   Entry* getEntryAtCursor();
+  void getLastLetterAtCursor(Key* key);
 
   bool atEdge(Direction direction);
   void printStack();

@@ -265,7 +265,8 @@ macro_email           = [{key="KEY_M"},
 # You shouldn't need to edit these.
 word_modifiers = [
     "mod_capital",
-    "mod_nospace"
+    "mod_nospace",
+    "mod_double"
 ]
 
 
@@ -278,6 +279,7 @@ anagram_modifiers = [
 # Add new commands here, and in pipit-firmware/pipit.cpp
 commands = [
     "command_delete_word",
+    "command_shorten_last_word",
     "command_left_word",
     "command_left_limit",
     "command_right_word",

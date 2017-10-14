@@ -33,6 +33,7 @@ namespace conf {
                       const mod_enum modifier);
   const mod_enum getNospaceEnum();
   const mod_enum getCapitalEnum();
+  const mod_enum getDoubleEnum();
 
 }
 

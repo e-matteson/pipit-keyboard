@@ -74,6 +74,10 @@ bool Chord::hasModNospace() const{
   return hasMod(conf::getNospaceEnum());
 }
 
+bool Chord::hasModDouble() const{
+  return hasMod(conf::getDoubleEnum());
+}
+
 bool Chord::hasMod(conf::mod_enum mod) const{
   return mods[mod];
 }

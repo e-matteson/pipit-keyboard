@@ -23,3 +23,10 @@ void Key::copy(const Key* other){
 void Key::clear(){
   set(0,0);
 }
+
+void Key::print(){
+  Serial.print("key: ");
+  Serial.print(key_code);
+  Serial.print(", ");
+  Serial.println(mod_byte);
+}

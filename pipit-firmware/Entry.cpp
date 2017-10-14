@@ -24,6 +24,7 @@ void Entry::copy(const Entry* other){
   is_anagrammable = other->is_anagrammable;
   // is_clear = other->is_clear;
   chord.copy(&other->chord);
+  last_key = other->last_key;
 }
 
 void Entry::clear(){
@@ -54,6 +55,14 @@ void Entry::decrement(){
 
 void Entry::setLength(uint8_t value){
   length = value;
+}
+
+void Entry::setLastLetter(uint8_t key_code, uint8_t mod_byte) {
+  last_key.set(key_code, mod_byte);
+}
+
+void Entry::getLastLetter(Key* key){
+  key->copy(&last_key);
 }
 
 void Entry::setAnagrammable(bool value){

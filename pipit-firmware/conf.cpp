@@ -80,4 +80,8 @@ namespace conf {
     return MOD_CAPITAL_ENUM;
   }
 
+  const mod_enum getDoubleEnum() {
+    return MOD_DOUBLE_ENUM;
+  }
+
 }

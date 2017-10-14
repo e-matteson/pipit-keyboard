@@ -126,6 +126,7 @@ void History::saveKeyCode(uint8_t key_code, uint8_t mod_byte){
   }
   else if(key_code > 0){
     // If any other non-zero key is sent, increment the current length.
+    current.setLastLetter(key_code, mod_byte);
     current.increment();
   }
 }
@@ -243,6 +244,10 @@ Entry* History::getEntryAtCursor(){
   return getEntryAt(cursor.word);
 }
 
+void History::getLastLetterAtCursor(Key* key){
+  getEntryAt(cursor.word)->getLastLetter(key);
+}
+
 Entry* History::getEntryAt(uint8_t cursor_word){
   static const uint8_t max = HISTORY_SIZE+PADDING-1;
   if(cursor_word > max){
@@ -282,13 +287,20 @@ bool History::isCursorAtLimit(Direction direction){
 }
 
 void History::printStack(){
+  Key last_key;
   Serial.print("cursor: ");
   Serial.print(cursor.word);
   Serial.print(",");
   Serial.print(cursor.letter);
   Serial.print("\t hist: ");
   for(int i = 0; i < HISTORY_SIZE+PADDING; i++){
+    stack[i]->getLastLetter(&last_key);
+
     Serial.print(stack[i]->getLength());
+    Serial.print(" ");
+    Serial.print(last_key.key_code);
+    Serial.print(" ");
+    Serial.print(last_key.mod_byte);
     // Serial.print(":");
     // Serial.print(stack[i]->isAnagrammable());
     Serial.print(", ");
