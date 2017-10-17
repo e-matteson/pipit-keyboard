@@ -22,6 +22,7 @@ enum led_routine_enum{
   MACRO_FEEDBACK_ROUTINE,
   WORD_FEEDBACK_ROUTINE,
   UNKNOWN_FEEDBACK_ROUTINE,
+  NO_ANAGRAM_FEEDBACK_ROUTINE,
   COMMAND_FEEDBACK_ROUTINE,
   WARNING_ROUTINE,
   SHUTDOWN_ROUTINE,
@@ -60,6 +61,7 @@ public:
   void triggerWord();
   void triggerCommand();
   void triggerUnknown();
+  void triggerNoAnagram();
   void updateLED();
   void startRoutine(led_routine_enum routine);
   void endRoutine();

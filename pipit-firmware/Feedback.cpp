@@ -41,6 +41,10 @@ void Feedback::triggerUnknown(){
   triggerLEDFeedback(UNKNOWN_FEEDBACK_ROUTINE);
 }
 
+void Feedback::triggerNoAnagram(){
+  triggerLEDFeedback(NO_ANAGRAM_FEEDBACK_ROUTINE);
+}
+
 
 void Feedback::triggerAudioFeedback(char feedback_code){
 #ifndef ENABLE_AUDIO_TYPING_FEEDBACK
@@ -188,7 +192,7 @@ void Feedback::updateLED(){
   case WORD_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer->start( 500);
+      led_timer->start(500);
       setLEDColor(GREEN);
       led_subroutine++;
       break;
@@ -200,8 +204,20 @@ void Feedback::updateLED(){
   case UNKNOWN_FEEDBACK_ROUTINE:
     switch(led_subroutine){
     case 0:
-      led_timer->start( 100);
+      led_timer->start(100);
       setLEDColor(RED);
+      led_subroutine++;
+      break;
+    default:
+      endRoutine();
+    }
+    break;
+
+  case NO_ANAGRAM_FEEDBACK_ROUTINE:
+    switch(led_subroutine){
+    case 0:
+      led_timer->start(100);
+      setLEDColor(MAGENTA);
       led_subroutine++;
       break;
     default:

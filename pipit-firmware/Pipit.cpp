@@ -330,7 +330,7 @@ void Pipit::deleteLastWord(){
 void Pipit::cycleLastWordCapital(){
   Entry* entry = sender->history->getEntryAtCursor();
   if(!entry->isAnagrammable()){
-    feedback->triggerUnknown();
+    feedback->triggerNoAnagram();
     return;
   }
   Chord new_chord;
@@ -348,13 +348,13 @@ void Pipit::cycleLastWordCapital(){
     return; // Success
   }
   // The lookup should never fail...
-  feedback->triggerUnknown();
+  feedback->triggerNoAnagram();
 }
 
 void Pipit::cycleLastWordAnagram(){
   Entry* entry = sender->history->getEntryAtCursor();
   if(!entry->isAnagrammable()){
-    feedback->triggerUnknown();
+    feedback->triggerNoAnagram();
     return;
   }
   Chord new_chord;
@@ -368,7 +368,7 @@ void Pipit::cycleLastWordAnagram(){
     if(new_chord.getAnagramNum() == original_num){
       // We've tried all the anagram modifiers, stop.
       // (The for loop should stop us too, just in case)
-      feedback->triggerUnknown();
+      feedback->triggerNoAnagram();
       return; // Fail
     }
     if((data_length=lookup->get(conf::WORD, &new_chord, data))){
