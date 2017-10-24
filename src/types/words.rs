@@ -131,6 +131,7 @@ impl<'a> WordBuilder<'a> {
             '<' => "KEY_BACKSPACE",
             '\'' => "KEY_QUOTE",
             '.' => "KEY_PERIOD",
+            ',' => "KEY_COMMA",
             _ => bail!(ErrorKind::BadValue(
                 "character".into(),
                 Some(character.to_string())
@@ -148,7 +149,7 @@ impl<'a> WordBuilder<'a> {
     }
 
     fn make_chord(&self) -> Result<Chord> {
-        let ignored = vec!['<', '.']; // TODO make this static?
+        let ignored = vec!['<'];
 
         let mut chord = Chord::new();
 
@@ -181,6 +182,8 @@ impl<'a> WordBuilder<'a> {
         }
         let name = match character {
             ' ' => "key_space".into(),
+            '.' => "key_period".into(),
+            ',' => "key_comma".into(),
             '\'' => "key_quote".into(),
             _ => bail!(ErrorKind::BadValue(
                 "character".into(),
