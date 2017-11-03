@@ -83,6 +83,114 @@ key_y          key_x          key_j
   .     .        .     .        .     .
   ... ...        ... ...        ... ...
 
+# ###### alternate punctuation - double-switch plain-keys #######
+
+# key_esc         key_tab
+# ....   ....     ....   ....
+# ..*.   .*..     ...*   .*..
+#  .     .         .     .
+#   ... ...         ... ...
+
+# key_question    key_bang
+# ....   ....     ....   ....
+# ....   *..*     *..*   ....
+#   .     .         .     .
+#   ... ...         ... ...
+
+# # Fewer word collisions on this side, TODO update macros
+# key_left_paren   key_left_curly      key_left_brace    key_left_angle
+# ...*   ....		    ..*.   ....   	   .*..   ....	     *...   ....
+# ....   *...		    ....   *...   	   ....   *...	     ....   *...
+#   .     .           .     .            .     .           .     .
+#   ... ...  	        ... ...     	     ... ...  	       ... ...
+
+# key_right_paren   key_right_curly    key_right_brace   key_right_angle
+# ...*   ....		    ..*.   ....   	   .*..   ....	     *...   ....
+# ....   .*..		    ....   .*..   	   ....   .*..	     ....   .*..
+#   .     .           .     .            .     .           .     .
+#   ... ...  	        ... ...     	     ... ...  	       ... ...
+
+# ## pointer ##
+
+# key_backslash   key_slash
+# ..*.   ....     ....   .*..
+# ...*   ....     ....   *...
+#  .     .          .     .
+#   ... ...         ... ...
+
+# key_underscore  key_minus
+# .*..   ....     ....   ..*.
+# ...*   ....     ....   *...
+#  .     .          .     .
+#   ... ...         ... ...
+
+# key_plus        key_equal
+# *...   ....     ....   ...*
+# ...*   ....     ....   *...
+#  .     .          .     .
+#   ... ...         ... ...
+
+# ## middle ##
+
+# key_caret       key_dollar
+# ...*   ....     ....   *...
+# ..*.   ....     ....   .*..
+#  .     .         .     .
+#   ... ...         ... ...
+
+# key_asterisk    key_percent
+# .*..   ....     ....   ..*.
+# ..*.   ....     ....   .*..
+#  .     .         .     .
+#   ... ...         ... ...
+
+# key_            key_
+# *...   ....     ....   ...*
+# ..*.   ....     ....   .*..
+#  .     .         .     .
+#   ... ...         ... ...
+
+# ## ring ##
+
+# key_colon       key_semicolon
+# ...*   ....     ....   *...
+# .*..   ....     ....   ..*.
+#  .     .         .     .
+#   ... ...         ... ...
+
+# key_pipe            key_ampersand
+# ..*.   ....     ....   .*..
+# .*..   ....     ....   ..*.
+#  .     .         .     .
+#   ... ...         ... ...
+
+# key_            key_
+# *...   ....     ....   ...*
+# .*..   ....     ....   ..*.
+#  .     .         .     .
+#   ... ...         ... ...
+
+# ## pinky ##
+
+# key_quote       key_doublequote
+# ...*   ....     ....   *...
+# *...   ....     ....   ...*
+#  .     .          .     .
+#   ... ...         ... ...
+
+# key_at            key_hash
+# ..*.   ....     ....   .*..
+# *...   ....     ....   ...*
+#  .     .         .     .
+#   ... ...         ... ...
+
+
+# key_grave            key_tilde
+# .*..   ....     ....   ..*.
+# *...   ....     ....   ...*
+#  .     .         .     .
+#   ... ...         ... ...
+
 
 ###### other double-switch plain-keys #######
 
@@ -92,7 +200,7 @@ key_asterisk   key_slash       key_backslash
   .     .        .     .        .     .
   ... ...  	     ... ...  	     ... ...
 
-key_grave      key_at         key_hash
+key_grave      key_at          key_hash
 *...   ..*.		 ..*.   ..*.	   ...*   ..*.
 ....   ....		 ....   ....	   ....   ....
   .     .        .     .        .     .
@@ -110,7 +218,7 @@ blank_mapping  key_semicolon  key_esc         key_tab
   .     .        .     .        .     .         .     .
   ... ...  	     ... ...     	  ... ...  	      ... ...
 
-key_colon      key_caret       key_dollar
+key_colon       key_caret       key_dollar
 ....   ....   	....   ....	    ....   ....
 .*..   ..*.   	..*.   ..*.	    ...*   ..*.
   .     .        .     .         .     .
@@ -233,6 +341,12 @@ command_left_hand_mode  command_gaming_mode
   .     .                 .     .
   ... ...                 ... ...
 
+# command_builder_mode
+# .*..   ..*.
+# ....   ....
+#   .     .
+#   ... .*.
+
 command_delete_word  command_pause   command_led_rainbow
 ....   ....          ****   ****     ****   ..*.
 ....   ***.          ....   ....     ....   ....
@@ -308,11 +422,17 @@ macro_printf    macro_print_py      macro_print_rs    macro_print_debug_rs
   .     .          .     .            .     .           .     .
   ... .*.          ... .*.            ... .*.           ... .*.
 
-macro_lifetime_rs macro_btreemap    macro_new_rs
-....   ...*       *.**   ....       ....   **..
-***.   ....       *...   ....       ..*.   ..*.
-  .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.
+macro_lifetime_rs macro_btreemap    macro_new_rs      macro_ampermut_rs
+....   ...*       *.**   ....       ....   **..       *.*.   ....
+***.   ....       *...   ....       ..*.   ..*.       ....   .**.
+  .     .           .     .           .     .           .     .
+  ... .*.           ... .*.           ... .*.           ... ...
+
+macro_return_rs
+....   ...*
+*.*.   *...
+  .     .
+  ... .*.
 
 macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
 ....   .*..       ....   .*..       .*..   .*..        .*..   *...
@@ -321,8 +441,8 @@ macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
   ... .*.           ... .*.           ... .*.            ... .*.
 
 macro_arg_c       macro_while_c    macro_right_arrow    macro_left_arrow
-....   **..       ....   **..      ....   ...*          ....   ...*
-.**.   ....       ....   ....      *.*.   *...          **..   *...
+....   **..       ....   **.*      ....   ...*          ....   ...*
+.**.   ....       ..**   *...      *.*.   *...          **..   *...
   .     .           .     .          .     .              .     .
   ... .*.           ... .*.          ... ...              ... ...
 
