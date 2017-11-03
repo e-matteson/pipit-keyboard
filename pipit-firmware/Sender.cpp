@@ -57,7 +57,14 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
 
   history->startEntry(chord, 1);
 
+  // TODO doubleMod without nospace is kinda useless...
   if(doubleMod) {
+    sendKey(&key);
+  }
+
+  // Prepend space to the start of word, unless the no-space modifier is pressed.
+  if(!nospaceMod){
+    key.set(KEY_SPACE&0xff, 0);
     sendKey(&key);
   }
 
@@ -74,11 +81,6 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
     sendKey(data+i);
   }
 
-  // Append space to end of word, unless the no-space modifier is pressed.
-  if(!nospaceMod){
-    key.set(KEY_SPACE&0xff, 0);
-    sendKey(&key);
-  }
   sendRelease();
   history->endEntry();
 }
