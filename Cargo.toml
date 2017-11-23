@@ -9,9 +9,12 @@ path = "src/main.rs"
 doc = false
 
 [dependencies]
-time = "0.1.36"
-toml = "*"
-serde_derive = "*"
-serde = "*"
-itertools = "0.5.9"
-error-chain = "0.10.0"
+time = "0.1"
+toml = "0.4"
+serde_derive = "1.0"
+serde = "1.0"
+itertools = "0.5"
+error-chain = "0.10"
+cursive = "0.7"
+unicode-segmentation = "1.2"
+lazy_static = "0.2"

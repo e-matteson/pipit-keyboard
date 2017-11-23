@@ -205,6 +205,12 @@ impl Validate for ModeName {
     }
 }
 
+impl Default for ModeName {
+    fn default() -> Self {
+        ModeName("default_mode".into())
+    }
+}
+
 
 impl fmt::Display for ModeName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

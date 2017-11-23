@@ -3,6 +3,8 @@ extern crate pipit_config;
 use pipit_config::AllData;
 use pipit_config::errors::*;
 
+use pipit_config::tutor;
+
 use std::env::args;
 
 const DEFAULT_SETTINGS_FILE: &str = "settings/settings.toml";
@@ -18,11 +20,14 @@ fn get_settings_path() -> Result<String> {
 }
 
 fn run() -> Result<()> {
-    let settings_path = get_settings_path()?;
-    let all_data = AllData::load(&settings_path)?;
-    all_data.check();
-    // TODO automatically extract path parts
-    all_data.save_as("auto_config")?;
+    // let settings_path = get_settings_path()?;
+    // let all_data = AllData::load(&settings_path)?;
+    // all_data.check();
+    // // TODO automatically extract path parts
+    // all_data.save_as("auto_config")?;
+    eprintln!("tutor!");
+    tutor::run();
+    eprintln!("done!");
     Ok(())
 }
 

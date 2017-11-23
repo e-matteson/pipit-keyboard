@@ -1,121 +1,432 @@
+use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(all(feature = "winit", feature = "glium"))]
-use conrod::{self, widget, Colorable, Positionable, Widget};
-use conrod::backend::glium::glium::{self, Surface};
+use cursive::{Cursive, Printer};
+use cursive::align::HAlign;
+use cursive::traits::*;
+use cursive::views::{Dialog, SelectView, TextView};
+use cursive::vec::Vec2;
+use cursive::theme::ColorStyle;
+use cursive::event::{Callback, Event, EventResult, Key};
 
-pub fn main() {
-    const WIDTH: u32 = 400;
-    const HEIGHT: u32 = 200;
+use types::{AllData, Chord, ModeName, Name};
+use types::errors::*;
 
-    // Build the window.
-    let mut events_loop = glium::glutin::EventsLoop::new();
-    let window = glium::glutin::WindowBuilder::new()
-        .with_title("Hello Conrod!")
-        .with_dimensions(WIDTH, HEIGHT);
-    let context = glium::glutin::ContextBuilder::new()
-        .with_vsync(true)
-        .with_multisampling(4);
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
+struct LessonMenu;
+struct LessonWrapper;
 
-    // construct our `Ui`.
-    let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+enum LessonState {
+    Typing,
+    EndOfLine,
+}
 
-    // Generate the widget identifiers.
-    widget_ids!(struct Ids { text });
-    let ids = Ids::new(ui.widget_id_generator());
+struct Graphic {
+    positions: Vec<(usize, usize)>,
+    chord: Option<Chord>,
+    icon: String,
+}
 
-    // Add a `Font` to the `Ui`'s `font::Map` from file.
-    const FONT_PATH: &'static str = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/assets/fonts/NotoSans/NotoSans-Regular.ttf"
-    );
-    ui.fonts.insert_from_file(FONT_PATH).unwrap();
+struct Lesson {
+    lines: Vec<String>,
+    model: String,
+    typed: String,
+    width: usize,
+    point_marker: String,
+    point_offset: usize,
+    index: usize,
+    graphic: Graphic,
+    graphic_spacing: usize,
+}
 
-    // A type used for converting `conrod::render::Primitives` into
-    // `Command`s that can be used
-    // for drawing to the glium `Surface`.
-    let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
+////////////////////////////////////////////////////////////////////////////////
 
-    // The image map describing each of our widget->image mappings (in our
-    // case, none).
-    let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
+pub fn run() {
+    let mut siv = Cursive::new();
 
-    let mut events = Vec::new();
+    // TODO move theme file to an assets folder?
+    siv.load_theme_file("src/tutor/theme.toml")
+        .expect("failed to load theme");
+    LessonMenu::show(&mut siv);
+    siv.run();
+}
 
-    'render: loop {
-        events.clear();
+impl LessonMenu {
+    fn show(siv: &mut Cursive) {
+        let names = vec![
+            "home row letters",
+            "top row letters",
+            "double-switch letters",
+        ];
 
-        // Get all the new events since the last frame.
-        events_loop.poll_events(|event| { events.push(event); });
+        let mut select = SelectView::new().h_align(HAlign::Center);
 
-        // If there are no new events, wait for one.
-        if events.is_empty() {
-            events_loop.run_forever(|event| {
-                events.push(event);
-                glium::glutin::ControlFlow::Break
-            });
-        }
+        select.add_all_str(names);
 
-        // Process the events.
-        for event in events.drain(..) {
-            // Break from the loop upon `Escape` or closed window.
-            match event.clone() {
-                    glium::glutin::Event::WindowEvent { event, .. } => {
-                        match event {
-                            glium::glutin::WindowEvent::Closed |
-                            glium::glutin::WindowEvent::KeyboardInput {
-                                input: glium::glutin::KeyboardInput {
-                                    virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
-                                    ..
-                                },
-                                ..
-                            } => break 'render,
-                            _ => (),
-                        }
-                    }
-                    _ => (),
-                };
+        select.set_on_submit(|siv, name| {
+            LessonMenu::cleanup(siv);
+            LessonWrapper::show(siv, name)
+        });
 
-            // Use the `winit` backend feature to convert the winit event
-            // to a conrod input.
-            let input =
-                match conrod::backend::winit::convert_event(event, &display) {
-                    None => continue,
-                    Some(input) => input,
-                };
+        siv.add_layer(
+            Dialog::around(select.fixed_size((20, 10)))
+                .title("Please select a lesson"),
+        );
+    }
 
-            // Handle the input with the `Ui`.
-            ui.handle_event(input);
-
-            // Set the widgets.
-            let ui = &mut ui.set_widgets();
-
-            // "Hello World!" in the middle of the screen.
-            widget::Text::new("Hello World!")
-                .middle_of(ui.window)
-                .color(conrod::color::WHITE)
-                .font_size(32)
-                .set(ids.text, ui);
-        }
-
-        // Draw the `Ui` if it has changed.
-        if let Some(primitives) = ui.draw_if_changed() {
-            renderer.fill(&display, primitives, &image_map);
-            let mut target = display.draw();
-            target.clear_color(0.0, 0.0, 0.0, 1.0);
-            renderer.draw(&display, &mut target, &image_map).unwrap();
-            target.finish().unwrap();
-        }
+    fn cleanup(siv: &mut Cursive) {
+        siv.pop_layer();
     }
 }
 
-// #[cfg(not(all(feature = "winit", feature = "glium")))]
-// mod feature {
-//     pub fn main() {
-//         println!(
-//             "This example requires the `winit` and `glium` features. Try \
-//              running `cargo run --release --features=\"winit glium\" \
-//              --example <example_name>`"
-//         );
+impl LessonWrapper {
+    fn show(siv: &mut Cursive, _name: &str) {
+        let lines = vec![
+            "hello world and fox".into(),
+            "this is the second line".into(),
+            "and the last one!".into(),
+        ];
+        siv.add_layer(Lesson::new(lines).with_id("text"));
+    }
+
+    fn cleanup(siv: &mut Cursive) {
+        siv.pop_layer();
+    }
+
+    fn show_confirm_back(siv: &mut Cursive) {
+        siv.add_layer(
+            Dialog::around(TextView::new("Return to lesson menu?"))
+                .dismiss_button("Cancel")
+                .button("Yes", |siv| {
+                    siv.pop_layer();
+                    LessonWrapper::cleanup(siv);
+                    LessonMenu::show(siv);
+                }),
+        )
+    }
+
+    fn end_lesson_callback(siv: &mut Cursive) {
+        siv.add_layer(Dialog::around(TextView::new("Lesson complete")).button(
+            "back",
+            |siv| {
+                siv.pop_layer();
+                LessonWrapper::cleanup(siv);
+                LessonMenu::show(siv)
+            },
+        ));
+    }
+}
+
+impl Lesson {
+    fn new(lines: Vec<String>) -> Lesson {
+        let width = 31;
+        let point_offset = 15;
+
+        let mut lesson = Lesson {
+            lines: lines.into_iter().rev().collect(),
+            model: String::new(),
+            typed: String::new(),
+            width: width,
+            point_marker: "▼".into(),
+            point_offset: point_offset,
+            index: 0,
+            graphic: Graphic::new(),
+            graphic_spacing: 1,
+        };
+        lesson.next_line();
+        lesson
+    }
+
+
+    fn type_char(&mut self, character: char) {
+        self.typed.push(character);
+        self.index += 1;
+    }
+
+    fn backspace(&mut self) {
+        if self.index > 0 {
+            self.typed.pop();
+            self.index -= 1;
+        }
+    }
+
+    fn start(&self) -> usize {
+        self.index
+    }
+
+    fn end(&self) -> usize {
+        self.index + self.width
+    }
+
+    fn next_line(&mut self) {
+        let pad = " ".repeat(self.point_offset);
+        let model = pad.clone() + &self.lines.pop().expect("lesson was empty");
+        let mut typed = String::from(pad);
+        typed.reserve(model.len());
+
+        self.model = model;
+        self.typed = typed;
+        self.index = 0;
+    }
+
+    fn at_end_of_line(&self) -> bool {
+        self.typed.len() == self.model.len()
+    }
+
+    fn state(&self) -> LessonState {
+        if self.at_end_of_line() {
+            LessonState::EndOfLine
+        } else {
+            LessonState::Typing
+        }
+    }
+
+    fn graphic_padding(&self) -> Vec2 {
+        let x = offset(self.graphic.size().x, self.size().x);
+        let y = 3 + self.graphic_spacing;
+        Vec2::new(x, y)
+    }
+
+    fn text_padding(&self) -> Vec2 {
+        let x = offset(self.width, self.size().x);
+        Vec2::new(x, 0)
+    }
+
+    fn size(&self) -> Vec2 {
+        let graphic_size = self.graphic.size();
+        let x = self.width.max(graphic_size.x);
+        let y = 3 + self.graphic_spacing + graphic_size.y;
+        Vec2::new(x, y)
+    }
+
+    fn point(&self) -> usize {
+        self.index + self.point_offset
+    }
+
+    fn char_at_point(&self) -> char {
+        let mut chars = grapheme_slice(&self.model, self.start(), self.end())
+            .nth(self.point())
+            .expect("no character at point!")
+            .chars();
+        let first = chars.nth(0).expect("invalid character at point!");
+        // TODO check if there were any leftover bytes!
+        first
+    }
+
+    fn chord_at_point(&self) -> Result<Chord> {
+        let name = if self.at_end_of_line() {
+            Name("key_enter".into())
+        } else {
+            get_char_name(self.char_at_point())?
+        };
+
+        get_chord(name)
+    }
+}
+
+impl View for Lesson {
+    fn required_size(&mut self, _constraint: Vec2) -> Vec2 {
+        self.size()
+    }
+
+    fn draw(&self, printer: &Printer) {
+        let pad = self.text_padding().x;
+        printer.print((self.point_offset + pad, 0), &self.point_marker);
+
+        let model = grapheme_slice(&self.model, self.start(), self.end());
+        let mut typed = grapheme_slice(&self.typed, self.start(), self.end());
+        for (i, m_char) in model.enumerate() {
+            printer.print((i + pad, 1), m_char);
+            if let Some(t_char) = typed.next() {
+                printer.with_color(get_style(m_char, t_char), |printer| {
+                    printer.print((i + pad, 2), t_char)
+                });
+            }
+        }
+
+        self.graphic.draw(&printer.sub_printer(
+            self.graphic_padding(),
+            self.graphic.size(),
+            false,
+        ))
+    }
+
+    fn on_event(&mut self, event: Event) -> EventResult {
+        if let Event::Key(Key::Esc) = event {
+            return EventResult::Consumed(
+                Some(Callback::from_fn(LessonWrapper::show_confirm_back)),
+            );
+        }
+        match self.state() {
+            LessonState::Typing => match event {
+                Event::Key(Key::Backspace) => self.backspace(),
+                Event::Char(letter) => self.type_char(letter),
+                _ => return EventResult::Ignored,
+            },
+            LessonState::EndOfLine => match event {
+                Event::Key(Key::Backspace) => self.backspace(),
+                Event::CtrlChar('j') | Event::Key(Key::Enter) => {
+                    if self.lines.is_empty() {
+                        // Lesson is done
+                        return EventResult::Consumed(Some(Callback::from_fn(
+                            LessonWrapper::end_lesson_callback,
+                        )));
+                    }
+                    self.next_line()
+                }
+                _ => return EventResult::Ignored,
+            },
+        }
+        // TODO handle error better
+        self.graphic.chord =
+            Some(self.chord_at_point().expect("chord not found"));
+        EventResult::Consumed(None)
+    }
+}
+
+impl Graphic {
+    fn new() -> Graphic {
+        Graphic {
+            positions: get_switch_positions(),
+            icon: "▆▆".into(),
+            chord: None,
+        }
+    }
+
+    fn size(&self) -> Vec2 {
+        Vec2::new(45, 6)
+    }
+
+    fn draw_switches(&self, printer: &Printer) {
+        for pos in &self.positions {
+            printer.print(pos.to_owned(), &self.icon)
+        }
+    }
+
+    fn draw_frame(&self, printer: &Printer) {
+        printer.print((0, 0),
+                      "╭─────────────╮               ╭─────────────╮"
+        );
+        printer.print(
+            (0, 1),
+            "│             │               │             │",
+        );
+        printer.print(
+            (0, 2),
+            "│             │               │             │",
+        );
+        printer.print((0, 3),
+                      "╰─────╮       ╰──────╮ ╭──────╯       ╭─────╯"
+        );
+        printer.print(
+            (0, 4),
+            "      ╰───╮          │ │          ╭───╯",
+        );
+        printer.print((0, 5),
+                      "          ╰──────────╯ ╰──────────╯"
+        );
+    }
+}
+
+impl View for Graphic {
+    fn required_size(&mut self, _constraint: Vec2) -> Vec2 {
+        self.size()
+    }
+
+    fn draw(&self, printer: &Printer) {
+        self.draw_frame(printer);
+        self.draw_switches(printer);
+    }
+}
+
+fn get_switch_positions() -> Vec<(usize, usize)> {
+    let p = vec![
+        (2, 1),
+        (5, 1),
+        (8, 1),
+        (11, 1),
+        (32, 1),
+        (35, 1),
+        (38, 1),
+        (41, 1),
+        (2, 2),
+        (5, 2),
+        (8, 2),
+        (11, 2),
+        (32, 2),
+        (35, 2),
+        (38, 2),
+        (41, 2),
+        (8, 3),
+        (35, 3),
+        (12, 4),
+        (15, 4),
+        (18, 4),
+        (25, 4),
+        (28, 4),
+        (31, 4),
+    ];
+    p
+}
+
+fn grapheme_slice<'a>(
+    s: &'a str,
+    start: usize,
+    end: usize,
+) -> Box<Iterator<Item = &'a str> + 'a> {
+    Box::new(s.graphemes(true).skip(start).take(end))
+}
+
+
+fn offset(width1: usize, width2: usize) -> usize {
+    ((width2 - width1) as f32 / 2.).round() as usize
+}
+
+
+fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
+    if actual_char == expected_char {
+        ColorStyle::Primary
+    } else {
+        ColorStyle::Secondary
+    }
+}
+
+
+fn get_pipit_data() -> Result<&'static AllData> {
+    // TODO don't hardcode path - redesign!
+    lazy_static!{
+        static ref DATA: AllData = {
+            eprintln!("Loading pipit data from scratch");
+            let all_data = AllData::load("settings/settings_evan.toml").expect("failed to load pipit data");
+            // all_data.check();
+            all_data
+        };
+    }
+    Ok(&DATA)
+}
+
+// fn get_key_name(key: Key) -> Result<Name> {
+//     match key {
+//         Key::Backspace => Some("key_backspace"),
+//         Key::Enter => Some("key_enter"),
+//         _ => return None,
 //     }
 // }
+
+fn get_char_name(character: char) -> Result<Name> {
+    if character.is_alphanumeric() {
+        return Ok(Name(format!("key_{}", character.to_lowercase())));
+    }
+    let name = match character {
+        ' ' => "key_space".into(),
+        '.' => "key_period".into(),
+        ',' => "key_comma".into(),
+        '\'' => "key_quote".into(),
+        _ => bail!("tutor: unknown character"),
+    };
+    Ok(Name(name))
+}
+
+fn get_chord(chord_name: Name) -> Result<Chord> {
+    let mode_name = ModeName::default();
+    // TODO handle missing chords better?
+    Ok(get_pipit_data()?.get_visual_chord_in_mode(&chord_name, &mode_name))
+}

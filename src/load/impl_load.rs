@@ -89,6 +89,7 @@ impl AllData {
                 .chain_err(|| format!("failure to load kmap: '{}'", kmap))?;
             self.add_chords(&kmap, named_chords)?;
         }
+        self.chord_permutation = Some(kmap_parser.permutation_to_kmap);
         Ok(())
     }
 

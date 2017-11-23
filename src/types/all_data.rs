@@ -18,6 +18,7 @@ pub struct AllData {
     pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<COption>,
     pub output_directory: Option<PathBuf>,
+    pub chord_permutation: Option<Vec<usize>>,
     checker: Checker,
     max_anagram_num: AnagramNum,
 }
@@ -36,6 +37,7 @@ impl AllData {
             output_directory: None,
             checker: Checker::new(),
             max_anagram_num: AnagramNum(0),
+            chord_permutation: None,
         }
     }
 
@@ -241,6 +243,20 @@ impl AllData {
             }
         }
         Chord::new()
+    }
+
+    pub fn get_visual_chord_in_mode(
+        &self,
+        chord_name: &Name,
+        mode: &ModeName,
+    ) -> Chord {
+        let mut chord = self.get_chord_in_mode(chord_name, mode);
+        // TODO why is clone needed?!
+        let permutation = self.chord_permutation
+            .clone()
+            .expect("permutation was never set!");
+        chord.permute(&permutation);
+        chord
     }
 
     pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {

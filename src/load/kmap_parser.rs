@@ -19,7 +19,8 @@ type Section<'a> = Vec<(usize, Vec<&'a str>)>;
 pub struct KmapParser {
     items_per_line: Vec<usize>,
     lines_in_block: usize,
-    permutation: Vec<usize>,
+    permutation_to_firmware: Vec<usize>,
+    pub permutation_to_kmap: Vec<usize>,
 }
 
 impl KmapParser {
@@ -33,7 +34,16 @@ impl KmapParser {
         Ok(KmapParser {
             items_per_line: items_per_line,
             lines_in_block: 1 + format.0.len(), // 1 extra for the top name line
-            permutation: make_permutation(format, row_pins, col_pins)?,
+            permutation_to_firmware: permutation_to_firmware(
+                format,
+                row_pins,
+                col_pins,
+            )?,
+            permutation_to_kmap: permutation_to_kmap(
+                format,
+                row_pins,
+                col_pins,
+            )?,
         })
     }
 
@@ -111,27 +121,45 @@ impl KmapParser {
         // Convert a vector with switches given in kmap order to a vector in
         //  firmware order.
         let mut chord = Chord::from_vec(vector);
-        chord.permute(&self.permutation);
+        chord.permute(&self.permutation_to_firmware);
         chord
     }
 }
 
 fn make_permutation(
+    old_order: Vec<SwitchPos>,
+    new_order: Vec<SwitchPos>,
+) -> Result<Vec<usize>> {
+    let mut permutation: Vec<usize> = Vec::new();
+    for old_pos in old_order {
+        let new_pos = new_order
+            .iter()
+            .position(|p| *p == old_pos)
+            .ok_or_else(|| ErrorKind::KmapPins(old_pos.to_string()))?;
+        permutation.push(new_pos as usize)
+    }
+    Ok(permutation)
+}
+
+fn permutation_to_firmware(
     format: &KmapFormat,
     row_pins: &Vec<Pin>,
     col_pins: &Vec<Pin>,
 ) -> Result<Vec<usize>> {
     let kmap_order = make_kmap_order(format);
     let firmware_order = make_firmware_order(row_pins, col_pins);
-    let mut permutation: Vec<usize> = Vec::new();
-    for kmap_pos in kmap_order {
-        let firmware_pos = firmware_order
-            .iter()
-            .position(|p| *p == kmap_pos)
-            .ok_or_else(|| ErrorKind::KmapPins(kmap_pos.to_string()))?;
-        permutation.push(firmware_pos as usize)
-    }
-    Ok(permutation)
+    make_permutation(kmap_order, firmware_order)
+}
+
+
+fn permutation_to_kmap(
+    format: &KmapFormat,
+    row_pins: &Vec<Pin>,
+    col_pins: &Vec<Pin>,
+) -> Result<Vec<usize>> {
+    let kmap_order = make_kmap_order(format);
+    let firmware_order = make_firmware_order(row_pins, col_pins);
+    make_permutation(firmware_order, kmap_order)
 }
 
 fn make_kmap_order(format: &KmapFormat) -> Vec<SwitchPos> {
@@ -145,7 +173,7 @@ fn make_kmap_order(format: &KmapFormat) -> Vec<SwitchPos> {
 fn make_firmware_order(
     row_pins: &Vec<Pin>,
     col_pins: &Vec<Pin>,
-) -> Vec<(SwitchPos)> {
+) -> Vec<SwitchPos> {
     // must match the algorithm used in the firmware's scanMatrix()!
     let mut order: Vec<SwitchPos> = Vec::new();
     for c in col_pins {
