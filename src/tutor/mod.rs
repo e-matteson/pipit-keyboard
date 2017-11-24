@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::sync::Mutex;
 
 use serde_json;
 use unicode_segmentation::UnicodeSegmentation;
@@ -16,10 +17,22 @@ use cursive::event::{Callback, Event, EventResult, Key};
 use types::{Chord, ModeName, Name};
 use types::errors::*;
 
-struct LessonMenu;
-struct LessonWrapper;
 
 type TutorData = BTreeMap<ModeName, BTreeMap<Name, Chord>>;
+
+pub struct TutorApp;
+
+struct Lesson {
+    lines: Vec<String>,
+    expected: String,
+    actual: String,
+    width: usize,
+    point_marker: String,
+    point_offset: usize,
+    index: usize,
+    graphic: Graphic,
+    graphic_spacing: usize,
+}
 
 enum LessonState {
     Typing,
@@ -37,47 +50,54 @@ struct Switch {
     right_style: ColorStyle,
 }
 
-struct Lesson {
-    lines: Vec<String>,
-    expected: String,
-    actual: String,
-    width: usize,
-    point_marker: String,
-    point_offset: usize,
-    index: usize,
-    graphic: Graphic,
-    graphic_spacing: usize,
-}
-
 ////////////////////////////////////////////////////////////////////////////////
-
-pub fn run() {
-    let mut siv = Cursive::new();
-
-    // TODO move theme file to an assets folder?
-    siv.load_theme_file("src/tutor/theme.toml")
-        .expect("failed to load theme");
-    LessonMenu::show(&mut siv);
-    siv.run();
+lazy_static! {
+    static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
 }
 
-fn read_file(path: &str) -> Result<String> {
-    let file = File::open(path)
-        .chain_err(|| format!("failed to open file: {}", path))?;
-    let mut s = String::new();
-    BufReader::new(file).read_to_string(&mut s)?;
-    Ok(s)
+fn set_tutor_data(data: TutorData) {
+    *TUTOR_DATA.lock().unwrap() = Some(data);
 }
 
-pub fn load_tutor_data() -> Result<TutorData> {
-    let path = "tutor/tutor_data.json";
-    let json = read_file(path)?;
-    let data = serde_json::from_str(&json)?;
-    Ok(data)
+fn get_chord(chord_name: Name) -> Result<Chord> {
+    // TODO handle missing chords better?
+    let mode_name = ModeName::default();
+
+    if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
+        Ok(data.get(&mode_name)
+            .ok_or_else(|| "mode not found in tutor data".to_owned())?
+            .get(&chord_name)
+            .cloned()
+            .ok_or_else(|| "chord not found in mode".to_owned())?)
+    } else {
+        panic!("tutor data was not set")
+    }
 }
 
-impl LessonMenu {
-    fn show(siv: &mut Cursive) {
+
+// fn get_tutor_data() -> &'static TutorData {
+//     // let data = unsafe { TUTOR_DATA.lock().unwrap().clone() };
+//     // if data.is_empty() {
+//     //     panic!("tutor data was not set");
+//     // }
+//     &*TUTOR_DATA.lock().unwrap()
+// }
+
+
+impl TutorApp {
+    pub fn run(data: TutorData) {
+        set_tutor_data(data);
+
+        let mut siv = Cursive::new();
+
+        // TODO move theme file to an assets folder?
+        siv.load_theme_file("src/tutor/theme.toml")
+            .expect("failed to load theme");
+        TutorApp::show_menu(&mut siv);
+        siv.run();
+    }
+
+    fn show_menu(siv: &mut Cursive) {
         let names = vec![
             "home row letters",
             "top row letters",
@@ -87,10 +107,9 @@ impl LessonMenu {
         let mut select = SelectView::new().h_align(HAlign::Center);
 
         select.add_all_str(names);
-
         select.set_on_submit(|siv, name| {
-            LessonMenu::cleanup(siv);
-            LessonWrapper::show(siv, name)
+            TutorApp::cleanup_menu(siv);
+            TutorApp::show_lesson(siv, name)
         });
 
         siv.add_layer(
@@ -99,13 +118,11 @@ impl LessonMenu {
         );
     }
 
-    fn cleanup(siv: &mut Cursive) {
+    fn cleanup_menu(siv: &mut Cursive) {
         siv.pop_layer();
     }
-}
 
-impl LessonWrapper {
-    fn show(siv: &mut Cursive, _name: &str) {
+    fn show_lesson(siv: &mut Cursive, _name: &str) {
         let lines = vec![
             "hello world and fox".into(),
             "this is the second line".into(),
@@ -114,7 +131,7 @@ impl LessonWrapper {
         siv.add_layer(Lesson::new(lines).with_id("text"));
     }
 
-    fn cleanup(siv: &mut Cursive) {
+    fn cleanup_lesson(siv: &mut Cursive) {
         siv.pop_layer();
     }
 
@@ -124,8 +141,8 @@ impl LessonWrapper {
                 .dismiss_button("Cancel")
                 .button("Yes", |siv| {
                     siv.pop_layer();
-                    LessonWrapper::cleanup(siv);
-                    LessonMenu::show(siv);
+                    TutorApp::cleanup_lesson(siv);
+                    TutorApp::show_menu(siv);
                 }),
         )
     }
@@ -135,8 +152,8 @@ impl LessonWrapper {
             "back",
             |siv| {
                 siv.pop_layer();
-                LessonWrapper::cleanup(siv);
-                LessonMenu::show(siv)
+                TutorApp::cleanup_lesson(siv);
+                TutorApp::show_menu(siv)
             },
         ));
     }
@@ -239,7 +256,6 @@ impl Lesson {
     }
 
     fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
-        // eprintln!("{}",self.start(), self.end(), self.point());
         let mut chars = grapheme_slice(string, self.start(), self.end())
             .nth(offset)
             .ok_or_else(|| "no character offset".to_owned())?
@@ -285,7 +301,10 @@ impl View for Lesson {
 
     fn draw(&self, printer: &Printer) {
         let pad = self.text_padding().x;
-        printer.print((self.point_offset + pad, 0), &self.point_marker);
+
+        printer.with_color(ColorStyle::TitleSecondary, |printer| {
+            printer.print((self.point_offset + pad, 0), &self.point_marker);
+        });
 
         let expected = grapheme_slice(&self.expected, self.start(), self.end());
         let mut actual = grapheme_slice(&self.actual, self.start(), self.end());
@@ -308,7 +327,7 @@ impl View for Lesson {
     fn on_event(&mut self, event: Event) -> EventResult {
         if let Event::Key(Key::Esc) = event {
             return EventResult::Consumed(
-                Some(Callback::from_fn(LessonWrapper::show_confirm_back)),
+                Some(Callback::from_fn(TutorApp::show_confirm_back)),
             );
         }
         match self.state() {
@@ -322,9 +341,9 @@ impl View for Lesson {
                 Event::CtrlChar('j') | Event::Key(Key::Enter) => {
                     if self.lines.is_empty() {
                         // Lesson is done
-                        return EventResult::Consumed(Some(Callback::from_fn(
-                            LessonWrapper::end_lesson_callback,
-                        )));
+                        return EventResult::Consumed(Some(
+                            Callback::from_fn(TutorApp::end_lesson_callback),
+                        ));
                     }
                     self.next_line()
                 }
@@ -352,14 +371,11 @@ impl Graphic {
     fn draw_switches(&self, printer: &Printer) {
         // TODO don't clone?
         if let Some(bits) = self.chord.clone() {
-            eprintln!("DRAWSWITCHES: {:?}, {:?}", bits, self.alternate_chord);
-
             for ((&pos, &bit), &alt_bit) in self.positions
                 .iter()
                 .zip(bits.to_bools().iter())
                 .zip(self.alternate_chord.clone().to_bools().iter())
             {
-                eprintln!("{}, {}", bit, alt_bit);
                 Switch::new(bit, alt_bit).draw(pos, printer)
             }
         }
@@ -409,7 +425,6 @@ impl Switch {
     }
 
     fn draw(&self, pos: (usize, usize), printer: &Printer) {
-        eprintln!("draw switch");
         let (x, y) = pos;
         printer.with_color(self.left_style, |printer| {
             printer.print((x, y), &Switch::LEFT_ICON)
@@ -481,11 +496,9 @@ fn grapheme_slice<'a>(
     Box::new(s.graphemes(true).skip(start).take(end))
 }
 
-
 fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize
 }
-
 
 fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
     if actual_char == expected_char {
@@ -493,18 +506,6 @@ fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
     } else {
         ColorStyle::Secondary
     }
-}
-
-
-fn get_pipit_data() -> Result<&'static TutorData> {
-    // TODO don't hardcode path - redesign!
-    lazy_static!{
-        static ref DATA: TutorData = {
-            eprintln!("Loading pipit data from tutor file");
-            load_tutor_data().expect("failed to load tutor data")
-        };
-    }
-    Ok(&DATA)
 }
 
 // fn get_key_name(key: Key) -> Result<Name> {
@@ -529,17 +530,21 @@ fn get_char_name(character: char) -> Result<Name> {
     Ok(Name(name))
 }
 
-fn get_chord(chord_name: Name) -> Result<Chord> {
-    let mode_name = ModeName::default();
-    // TODO handle missing chords better?
-    let chord: Chord = get_pipit_data()?
-        .get(&mode_name)
-        .ok_or_else(|| "mode not found in tutor data".to_owned())?
-        .get(&chord_name)
-        .cloned()
-        .ok_or_else(|| "chord not found in mode".to_owned())?;
-    Ok(chord)
-}
 fn backspace_chord() -> Result<Chord> {
     get_chord(Name("key_backspace".into()))
+}
+
+fn read_file(path: &str) -> Result<String> {
+    let file = File::open(path)
+        .chain_err(|| format!("failed to open file: {}", path))?;
+    let mut s = String::new();
+    BufReader::new(file).read_to_string(&mut s)?;
+    Ok(s)
+}
+
+pub fn load_tutor_data() -> Result<TutorData> {
+    let path = "tutor/tutor_data.json";
+    let json = read_file(path)?;
+    let data = serde_json::from_str(&json)?;
+    Ok(data)
 }

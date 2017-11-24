@@ -3,7 +3,7 @@ extern crate pipit_config;
 use pipit_config::AllData;
 use pipit_config::errors::*;
 
-use pipit_config::tutor;
+use pipit_config::tutor::TutorApp;
 
 use std::env::args;
 
@@ -25,10 +25,7 @@ fn run() -> Result<()> {
     all_data.check();
     // TODO automatically extract path parts
     all_data.save_as("auto_config")?;
-    // all_data.save_tutor_data()?;
-    // eprintln!("tutor!");
-    // tutor::run();
-    // eprintln!("done!");
+    TutorApp::run(all_data.get_tutor_data()?);
     Ok(())
 }
 

@@ -220,8 +220,6 @@ impl AllData {
     //     seq.0[0].modifier.clone()
     // }
 
-    // pub
-
     pub fn get_chord(
         &self,
         chord_name: &Name,
@@ -329,5 +327,27 @@ impl AllData {
         // TODO check for missing sequences
         self.checker.check_unused();
         self.checker.check_chords();
+    }
+
+    pub fn get_tutor_data(
+        &self,
+    ) -> Result<BTreeMap<ModeName, BTreeMap<Name, Chord>>> {
+        // TODO think about borrowck
+        let mut chords = BTreeMap::new();
+        let names: Vec<_> = self.get_sequences(&SeqType::Plain)?
+            .keys()
+            .cloned()
+            .collect();
+        for mode in self.modes.keys() {
+            let mut mode_chords = BTreeMap::new();
+            // chords.insert(mode, BTreeMap::new());
+            for name in &names {
+                if let Some(chord) = self.get_visual_chord_in_mode(name, mode) {
+                    mode_chords.insert(name.to_owned(), chord);
+                }
+            }
+            chords.insert(mode.to_owned(), mode_chords);
+        }
+        Ok(chords)
     }
 }
