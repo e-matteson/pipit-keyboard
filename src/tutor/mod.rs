@@ -29,13 +29,18 @@ enum LessonState {
 struct Graphic {
     positions: Vec<(usize, usize)>,
     chord: Option<Chord>,
-    icon: String,
+    alternate_chord: Chord,
+}
+
+struct Switch {
+    left_style: ColorStyle,
+    right_style: ColorStyle,
 }
 
 struct Lesson {
     lines: Vec<String>,
-    model: String,
-    typed: String,
+    expected: String,
+    actual: String,
     width: usize,
     point_marker: String,
     point_offset: usize,
@@ -144,8 +149,8 @@ impl Lesson {
 
         let mut lesson = Lesson {
             lines: lines.into_iter().rev().collect(),
-            model: String::new(),
-            typed: String::new(),
+            expected: String::new(),
+            actual: String::new(),
             width: width,
             point_marker: "▼".into(),
             point_offset: point_offset,
@@ -160,13 +165,13 @@ impl Lesson {
 
 
     fn type_char(&mut self, character: char) {
-        self.typed.push(character);
+        self.actual.push(character);
         self.index += 1;
     }
 
     fn backspace(&mut self) {
         if self.index > 0 {
-            self.typed.pop();
+            self.actual.pop();
             self.index -= 1;
         }
     }
@@ -181,17 +186,18 @@ impl Lesson {
 
     fn next_line(&mut self) {
         let pad = " ".repeat(self.point_offset);
-        let model = pad.clone() + &self.lines.pop().expect("lesson was empty");
-        let mut typed = String::from(pad);
-        typed.reserve(model.len());
+        let expected =
+            pad.clone() + &self.lines.pop().expect("lesson was empty");
+        let mut actual = String::from(pad);
+        actual.reserve(expected.len());
 
-        self.model = model;
-        self.typed = typed;
+        self.expected = expected;
+        self.actual = actual;
         self.index = 0;
     }
 
     fn at_end_of_line(&self) -> bool {
-        self.typed.len() == self.model.len()
+        self.actual.len() == self.expected.len()
     }
 
     fn state(&self) -> LessonState {
@@ -220,26 +226,38 @@ impl Lesson {
         Vec2::new(x, y)
     }
 
-    fn char_at_point(&self) -> Result<char> {
+    fn was_last_char_wrong(&self) -> Result<bool> {
+        let offset = self.point_offset - 1;
+        Ok(
+            self.char_at_offset(&self.expected, offset)?
+                != self.char_at_offset(&self.actual, offset)?,
+        )
+    }
+
+    fn expected_char_at_point(&self) -> Result<char> {
+        self.char_at_offset(&self.expected, self.point_offset)
+    }
+
+    fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
         // eprintln!("{}",self.start(), self.end(), self.point());
-        let mut chars = grapheme_slice(&self.model, self.start(), self.end())
-            .nth(self.point_offset)
-            .ok_or_else(|| "no character at point!".to_owned())?
+        let mut chars = grapheme_slice(string, self.start(), self.end())
+            .nth(offset)
+            .ok_or_else(|| "no character offset".to_owned())?
             .chars();
         let first = chars
             .next()
-            .ok_or_else(|| "invalid character at point!".to_owned())?;
+            .ok_or_else(|| "invalid character at offset, no bytes".to_owned())?;
         if chars.count() > 0 {
-            bail!("invalid character at point, extra bytes");
+            bail!("invalid character at offset, extra bytes");
         }
         Ok(first)
     }
 
-    fn chord_at_point(&self) -> Result<Chord> {
+    fn expected_chord_at_point(&self) -> Result<Chord> {
         let name = if self.at_end_of_line() {
             Name("key_enter".into())
         } else {
-            get_char_name(self.char_at_point()?)?
+            get_char_name(self.expected_char_at_point()?)?
         };
 
         get_chord(name)
@@ -248,7 +266,15 @@ impl Lesson {
     fn update_chord(&mut self) {
         // TODO handle error better
         self.graphic.chord =
-            Some(self.chord_at_point().expect("chord not found"));
+            Some(self.expected_chord_at_point().expect("chord not found"));
+
+        self.graphic.alternate_chord = if self.was_last_char_wrong()
+            .expect("failed to check if char was wrong")
+        {
+            backspace_chord().expect("backspace chord not found")
+        } else {
+            Chord::new()
+        };
     }
 }
 
@@ -261,11 +287,11 @@ impl View for Lesson {
         let pad = self.text_padding().x;
         printer.print((self.point_offset + pad, 0), &self.point_marker);
 
-        let model = grapheme_slice(&self.model, self.start(), self.end());
-        let mut typed = grapheme_slice(&self.typed, self.start(), self.end());
-        for (i, m_char) in model.enumerate() {
+        let expected = grapheme_slice(&self.expected, self.start(), self.end());
+        let mut actual = grapheme_slice(&self.actual, self.start(), self.end());
+        for (i, m_char) in expected.enumerate() {
             printer.print((i + pad, 1), m_char);
-            if let Some(t_char) = typed.next() {
+            if let Some(t_char) = actual.next() {
                 printer.with_color(get_style(m_char, t_char), |printer| {
                     printer.print((i + pad, 2), t_char)
                 });
@@ -314,8 +340,8 @@ impl Graphic {
     fn new() -> Graphic {
         Graphic {
             positions: get_switch_positions(),
-            icon: "▆▆".into(),
             chord: None,
+            alternate_chord: Chord::default(),
         }
     }
 
@@ -326,18 +352,15 @@ impl Graphic {
     fn draw_switches(&self, printer: &Printer) {
         // TODO don't clone?
         if let Some(bits) = self.chord.clone() {
-            for (pos, &bit) in self.positions.iter().zip(bits.to_bools().iter())
-            {
-                let style = if bit {
-                    ColorStyle::Tertiary
-                } else {
-                    ColorStyle::TitleSecondary
-                };
+            eprintln!("DRAWSWITCHES: {:?}, {:?}", bits, self.alternate_chord);
 
-                printer
-                    .with_color(style, |printer| {
-                        printer.print(pos.to_owned(), &self.icon)
-                    });
+            for ((&pos, &bit), &alt_bit) in self.positions
+                .iter()
+                .zip(bits.to_bools().iter())
+                .zip(self.alternate_chord.clone().to_bools().iter())
+            {
+                eprintln!("{}, {}", bit, alt_bit);
+                Switch::new(bit, alt_bit).draw(pos, printer)
             }
         }
     }
@@ -365,6 +388,47 @@ impl Graphic {
                           "          ╰──────────╯ ╰──────────╯"
             )
         });
+    }
+}
+
+impl Switch {
+    const LEFT_ICON: &'static str = "▆";
+    const RIGHT_ICON: &'static str = "▆";
+
+    fn new(bit: bool, alt_bit: bool) -> Switch {
+        let (left, right) = match (bit, alt_bit) {
+            (false, false) => (Switch::blank(), Switch::blank()),
+            (true, false) => (Switch::next(), Switch::next()),
+            (false, true) => (Switch::wrong(), Switch::wrong()),
+            (true, true) => (Switch::next(), Switch::wrong()),
+        };
+        Switch {
+            left_style: left,
+            right_style: right,
+        }
+    }
+
+    fn draw(&self, pos: (usize, usize), printer: &Printer) {
+        eprintln!("draw switch");
+        let (x, y) = pos;
+        printer.with_color(self.left_style, |printer| {
+            printer.print((x, y), &Switch::LEFT_ICON)
+        });
+        printer.with_color(self.right_style, |printer| {
+            printer.print((x + 1, y), &Switch::RIGHT_ICON)
+        });
+    }
+
+    fn wrong() -> ColorStyle {
+        ColorStyle::Secondary
+    }
+
+    fn next() -> ColorStyle {
+        ColorStyle::Tertiary
+    }
+
+    fn blank() -> ColorStyle {
+        ColorStyle::TitleSecondary
     }
 }
 
@@ -475,4 +539,7 @@ fn get_chord(chord_name: Name) -> Result<Chord> {
         .cloned()
         .ok_or_else(|| "chord not found in mode".to_owned())?;
     Ok(chord)
+}
+fn backspace_chord() -> Result<Chord> {
+    get_chord(Name("key_backspace".into()))
 }

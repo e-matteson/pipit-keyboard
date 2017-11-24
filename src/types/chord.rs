@@ -15,7 +15,11 @@ fn set_chord_length(len: usize) {
 }
 
 fn get_chord_length() -> usize {
-    unsafe { CHORD_LENGTH }
+    let len = unsafe { CHORD_LENGTH };
+    if len == 0 {
+        panic!("chord length was not set");
+    }
+    len
 }
 
 
@@ -38,9 +42,6 @@ impl Chord {
     }
 
     pub fn from_vec(v: Vec<bool>) -> Chord {
-        if get_chord_length() == 0 {
-            panic!("chord length was not set");
-        }
         if v.len() != get_chord_length() {
             panic!("wrong chord length");
         }

@@ -20,15 +20,15 @@ fn get_settings_path() -> Result<String> {
 }
 
 fn run() -> Result<()> {
-    // let settings_path = get_settings_path()?;
-    // let all_data = AllData::load(&settings_path)?;
-    // all_data.check();
-    // // TODO automatically extract path parts
-    // all_data.save_as("auto_config")?;
+    let settings_path = get_settings_path()?;
+    let all_data = AllData::load(&settings_path)?;
+    all_data.check();
+    // TODO automatically extract path parts
+    all_data.save_as("auto_config")?;
     // all_data.save_tutor_data()?;
-    eprintln!("tutor!");
-    tutor::run();
-    eprintln!("done!");
+    // eprintln!("tutor!");
+    // tutor::run();
+    // eprintln!("done!");
     Ok(())
 }
 
