@@ -18,6 +18,7 @@ pub struct AllData {
     pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<COption>,
     pub output_directory: Option<PathBuf>,
+    pub tutor_directory: Option<PathBuf>,
     pub chord_permutation: Option<Vec<usize>>,
     checker: Checker,
     max_anagram_num: AnagramNum,
@@ -35,6 +36,7 @@ impl AllData {
             kmap_ids: BTreeMap::new(),
             options: Vec::new(),
             output_directory: None,
+            tutor_directory: None,
             checker: Checker::new(),
             max_anagram_num: AnagramNum(0),
             chord_permutation: None,
@@ -236,33 +238,33 @@ impl AllData {
         &self,
         chord_name: &Name,
         mode: &ModeName,
-    ) -> Chord {
+    ) -> Option<Chord> {
         for kmap_info in &self.modes.get(mode).expect("unknown mode").keymaps {
             if let Some(chord) = self.get_chord(chord_name, &kmap_info.file) {
-                return chord;
+                return Some(chord);
             }
         }
-        Chord::new()
+        None
+        // Chord::new()
     }
 
     pub fn get_visual_chord_in_mode(
         &self,
         chord_name: &Name,
         mode: &ModeName,
-    ) -> Chord {
-        let mut chord = self.get_chord_in_mode(chord_name, mode);
+    ) -> Option<Chord> {
+        let chord = self.get_chord_in_mode(chord_name, mode);
         // TODO why is clone needed?!
         let permutation = self.chord_permutation
             .clone()
             .expect("permutation was never set!");
-        chord.permute(&permutation);
-        chord
+        chord.map(|c: Chord| c.permute(&permutation))
     }
 
     pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
         for name in &self.anagram_mods {
-            out.push(self.get_chord_in_mode(name, mode));
+            out.push(self.get_chord_in_mode(name, mode).unwrap_or_default());
         }
         out
     }
@@ -280,7 +282,8 @@ impl AllData {
         // Order must match get_mod_names()!
         let mut chords = Vec::new();
         for name in self.get_mod_names() {
-            chords.push(self.get_chord_in_mode(&name, mode));
+            chords
+                .push(self.get_chord_in_mode(&name, mode).unwrap_or_default());
         }
         chords
     }

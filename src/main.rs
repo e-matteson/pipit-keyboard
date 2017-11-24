@@ -25,6 +25,7 @@ fn run() -> Result<()> {
     // all_data.check();
     // // TODO automatically extract path parts
     // all_data.save_as("auto_config")?;
+    // all_data.save_tutor_data()?;
     eprintln!("tutor!");
     tutor::run();
     eprintln!("done!");

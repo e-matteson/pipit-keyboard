@@ -19,7 +19,7 @@ fn get_chord_length() -> usize {
 }
 
 
-#[derive(Clone, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct Chord {
     bits: Vec<bool>,
     pub anagram_num: AnagramNum,
@@ -65,13 +65,14 @@ impl Chord {
         }
     }
 
-    pub fn permute(&mut self, order: &[usize]) {
+    pub fn permute(&self, order: &[usize]) -> Chord {
+        // TODO use different types for different permutations?
         assert_eq!(self.len(), order.len());
         let mut new = Chord::new();
         for i in 0..self.len() {
             new.bits[order[i]] = self.bits[i];
         }
-        self.bits = new.bits;
+        new
     }
 
     // pub fn to_string(&self) -> String {
@@ -88,6 +89,10 @@ impl Chord {
         tmp.join("")
     }
 
+    pub fn to_bools(&self) -> Vec<bool> {
+        self.bits.clone()
+    }
+
     pub fn to_ints(&self) -> Vec<u8> {
         let mut v: Vec<u8> = Vec::new();
         for chunk in &self.bits.iter().cloned().chunks(8) {
@@ -98,6 +103,12 @@ impl Chord {
     }
 
     // pub fn get_anagram(&self)
+}
+
+impl Default for Chord {
+    fn default() -> Chord {
+        Chord::new()
+    }
 }
 
 impl fmt::Debug for Chord {

@@ -22,6 +22,7 @@ impl AllData {
         let mut all_data = AllData::new();
 
         all_data.output_directory = Some(settings.options.output_directory());
+        all_data.tutor_directory = Some(settings.options.tutor_directory());
         Chord::set_num_bytes(settings.options.num_bytes_in_chord());
 
 

@@ -1,3 +1,8 @@
+use std::collections::BTreeMap;
+use std::fs::File;
+use std::io::{BufReader, Read};
+
+use serde_json;
 use unicode_segmentation::UnicodeSegmentation;
 
 use cursive::{Cursive, Printer};
@@ -8,11 +13,13 @@ use cursive::vec::Vec2;
 use cursive::theme::ColorStyle;
 use cursive::event::{Callback, Event, EventResult, Key};
 
-use types::{AllData, Chord, ModeName, Name};
+use types::{Chord, ModeName, Name};
 use types::errors::*;
 
 struct LessonMenu;
 struct LessonWrapper;
+
+type TutorData = BTreeMap<ModeName, BTreeMap<Name, Chord>>;
 
 enum LessonState {
     Typing,
@@ -47,6 +54,21 @@ pub fn run() {
         .expect("failed to load theme");
     LessonMenu::show(&mut siv);
     siv.run();
+}
+
+fn read_file(path: &str) -> Result<String> {
+    let file = File::open(path)
+        .chain_err(|| format!("failed to open file: {}", path))?;
+    let mut s = String::new();
+    BufReader::new(file).read_to_string(&mut s)?;
+    Ok(s)
+}
+
+pub fn load_tutor_data() -> Result<TutorData> {
+    let path = "tutor/tutor_data.json";
+    let json = read_file(path)?;
+    let data = serde_json::from_str(&json)?;
+    Ok(data)
 }
 
 impl LessonMenu {
@@ -132,6 +154,7 @@ impl Lesson {
             graphic_spacing: 1,
         };
         lesson.next_line();
+        lesson.update_chord();
         lesson
     }
 
@@ -197,28 +220,35 @@ impl Lesson {
         Vec2::new(x, y)
     }
 
-    fn point(&self) -> usize {
-        self.index + self.point_offset
-    }
-
-    fn char_at_point(&self) -> char {
+    fn char_at_point(&self) -> Result<char> {
+        // eprintln!("{}",self.start(), self.end(), self.point());
         let mut chars = grapheme_slice(&self.model, self.start(), self.end())
-            .nth(self.point())
-            .expect("no character at point!")
+            .nth(self.point_offset)
+            .ok_or_else(|| "no character at point!".to_owned())?
             .chars();
-        let first = chars.nth(0).expect("invalid character at point!");
-        // TODO check if there were any leftover bytes!
-        first
+        let first = chars
+            .next()
+            .ok_or_else(|| "invalid character at point!".to_owned())?;
+        if chars.count() > 0 {
+            bail!("invalid character at point, extra bytes");
+        }
+        Ok(first)
     }
 
     fn chord_at_point(&self) -> Result<Chord> {
         let name = if self.at_end_of_line() {
             Name("key_enter".into())
         } else {
-            get_char_name(self.char_at_point())?
+            get_char_name(self.char_at_point()?)?
         };
 
         get_chord(name)
+    }
+
+    fn update_chord(&mut self) {
+        // TODO handle error better
+        self.graphic.chord =
+            Some(self.chord_at_point().expect("chord not found"));
     }
 }
 
@@ -275,9 +305,7 @@ impl View for Lesson {
                 _ => return EventResult::Ignored,
             },
         }
-        // TODO handle error better
-        self.graphic.chord =
-            Some(self.chord_at_point().expect("chord not found"));
+        self.update_chord();
         EventResult::Consumed(None)
     }
 }
@@ -296,33 +324,47 @@ impl Graphic {
     }
 
     fn draw_switches(&self, printer: &Printer) {
-        for pos in &self.positions {
-            printer.print(pos.to_owned(), &self.icon)
+        // TODO don't clone?
+        if let Some(bits) = self.chord.clone() {
+            for (pos, &bit) in self.positions.iter().zip(bits.to_bools().iter())
+            {
+                let style = if bit {
+                    ColorStyle::Tertiary
+                } else {
+                    ColorStyle::TitleSecondary
+                };
+
+                printer
+                    .with_color(style, |printer| {
+                        printer.print(pos.to_owned(), &self.icon)
+                    });
+            }
         }
     }
 
     fn draw_frame(&self, printer: &Printer) {
-        printer.print((0, 0),
-                      "╭─────────────╮               ╭─────────────╮"
-        );
-        printer.print(
-            (0, 1),
-            "│             │               │             │",
-        );
-        printer.print(
-            (0, 2),
-            "│             │               │             │",
-        );
-        printer.print((0, 3),
-                      "╰─────╮       ╰──────╮ ╭──────╯       ╭─────╯"
-        );
-        printer.print(
-            (0, 4),
-            "      ╰───╮          │ │          ╭───╯",
-        );
-        printer.print((0, 5),
-                      "          ╰──────────╯ ╰──────────╯"
-        );
+        printer.with_color(ColorStyle::TitleSecondary, |printer| {
+            printer.print((0, 0),
+                          "╭─────────────╮               ╭─────────────╮"
+            );
+            printer.print(
+                (0, 1),
+                "│             │               │             │",
+            );
+            printer.print(
+                (0, 2),
+                "│             │               │             │",
+            );
+            printer.print((0, 3),
+                          "╰─────╮       ╰──────╮ ╭──────╯       ╭─────╯"
+            );
+            printer.print((0, 4),
+                          "      ╰───╮          │ │          ╭───╯",
+            );
+            printer.print((0, 5),
+                          "          ╰──────────╯ ╰──────────╯"
+            )
+        });
     }
 }
 
@@ -390,14 +432,12 @@ fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
 }
 
 
-fn get_pipit_data() -> Result<&'static AllData> {
+fn get_pipit_data() -> Result<&'static TutorData> {
     // TODO don't hardcode path - redesign!
     lazy_static!{
-        static ref DATA: AllData = {
-            eprintln!("Loading pipit data from scratch");
-            let all_data = AllData::load("settings/settings_evan.toml").expect("failed to load pipit data");
-            // all_data.check();
-            all_data
+        static ref DATA: TutorData = {
+            eprintln!("Loading pipit data from tutor file");
+            load_tutor_data().expect("failed to load tutor data")
         };
     }
     Ok(&DATA)
@@ -428,5 +468,11 @@ fn get_char_name(character: char) -> Result<Name> {
 fn get_chord(chord_name: Name) -> Result<Chord> {
     let mode_name = ModeName::default();
     // TODO handle missing chords better?
-    Ok(get_pipit_data()?.get_visual_chord_in_mode(&chord_name, &mode_name))
+    let chord: Chord = get_pipit_data()?
+        .get(&mode_name)
+        .ok_or_else(|| "mode not found in tutor data".to_owned())?
+        .get(&chord_name)
+        .cloned()
+        .ok_or_else(|| "chord not found in mode".to_owned())?;
+    Ok(chord)
 }

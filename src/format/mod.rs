@@ -8,6 +8,7 @@ use self::compress::*;
 mod c_struct;
 
 mod impl_format;
+mod tutor_format;
 mod c_files;
 mod c_array;
 mod compress;

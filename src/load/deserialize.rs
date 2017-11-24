@@ -10,6 +10,10 @@ fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
 }
 
+fn default_tutor_dir() -> PathBuf {
+    PathBuf::from("tutor")
+}
+
 validated_struct!{
     #[derive(Deserialize, Debug)]
     #[serde(deny_unknown_fields)]
@@ -41,6 +45,10 @@ validated_struct!{
         #[serde(default = "default_output_dir")]
         // TODO validate strings!
         pub output_directory: PathBuf,
+
+        #[serde(default = "default_tutor_dir")]
+        // TODO validate strings!
+        pub tutor_directory: PathBuf,
 
         #[serde(default = "return_false")]
         pub enable_led_typing_feedback: bool,
@@ -160,6 +168,10 @@ impl OptionsConfig {
 
     pub fn output_directory(&self) -> PathBuf {
         self.output_directory.clone()
+    }
+
+    pub fn tutor_directory(&self) -> PathBuf {
+        self.tutor_directory.clone()
     }
 
     pub fn get_auto(&self) -> Vec<COption> {

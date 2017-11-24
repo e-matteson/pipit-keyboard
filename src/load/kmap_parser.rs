@@ -120,9 +120,8 @@ impl KmapParser {
     fn to_firmware_order(&self, vector: Vec<bool>) -> Chord {
         // Convert a vector with switches given in kmap order to a vector in
         //  firmware order.
-        let mut chord = Chord::from_vec(vector);
-        chord.permute(&self.permutation_to_firmware);
-        chord
+        let chord = Chord::from_vec(vector);
+        chord.permute(&self.permutation_to_firmware)
     }
 }
 

@@ -61,14 +61,15 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
 }
 
 
-fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
+pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
     // let path = Path::new(full_path);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .open(full_path)
         .chain_err(|| "failure to open output file")?;
-    file.set_len(0).chain_err(|| "failure to clear output file")?;
+    file.set_len(0)
+        .chain_err(|| "failure to clear output file")?;
     file.write_all(s.to_string().as_bytes())
         .chain_err(|| "failure to write to output file")?;
     Ok(())

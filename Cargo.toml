@@ -11,8 +11,9 @@ doc = false
 [dependencies]
 time = "0.1"
 toml = "0.4"
-serde_derive = "1.0"
 serde = "1.0"
+serde_derive = "1.0"
+serde_json = "*"
 itertools = "0.5"
 error-chain = "0.10"
 cursive = "0.7"

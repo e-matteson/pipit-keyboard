@@ -193,7 +193,8 @@ impl fmt::Display for KmapPath {
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize,
+         Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 pub struct ModeName(pub String);
@@ -233,7 +234,7 @@ impl From<String> for ModeName {
 
 //////////////////////////////
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 // #[serde(finalize = "Name::sanitize")]

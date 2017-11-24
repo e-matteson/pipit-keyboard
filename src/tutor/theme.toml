@@ -1,32 +1,22 @@
 # Every field in a theme file is optional.
 
-# First come some various options
 shadow = false  # Don't draw shadows around stacked views
-# shadow = true
 borders = "simple"  # Alternatives are "none" and "outset"
 
-# Here we define the color palette.
 [colors]
     # If the value is an array, the first valid color will be used.
     # If the terminal doesn't support custom color,
     # non-base colors will be skipped.
     background = "black"
-    # shadow     = ["#000000", "black"]
     shadow     = "white"
-    # view       = "#505050"
     view       = "black"
 
-# Array and simple values have the same effect.
-    # primary   = ["#111111"]
     primary   = "white"
-    secondary = "red"
-    tertiary  = "yellow"
+    secondary = ["#d70000", "red"]
+    tertiary  = ["#005f87", "blue"]
 
-    # Hex values can use lower or uppercase.
-    # (base color MUST be lowercase)
-    title_primary   = "yellow"
-    title_secondary = "red"
+    title_primary   = ["#5f5f5f", "white"]
+    title_secondary = ["#303030", "white"]
 
-    # Lower precision values can use only 3 digits.
-    highlight          = "green"
-    highlight_inactive = "blue"
+    highlight          = ["#5f5faf", "blue"]
+    highlight_inactive = "yellow"

@@ -44,7 +44,8 @@ pub struct Word {
     pub chord: Chord,
 }
 
-#[derive(Deserialize, Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
+         PartialOrd, Hash)]
 #[serde(deny_unknown_fields)]
 pub struct AnagramNum(pub u8);
 
@@ -91,7 +92,8 @@ impl<'a> WordBuilder<'a> {
         Ok(Word {
             name: self.make_name(),
             chord: self.make_chord().chain_err(|| error_message("chord"))?,
-            seq: self.make_sequence().chain_err(|| error_message("sequence"))?,
+            seq: self.make_sequence()
+                .chain_err(|| error_message("sequence"))?,
         })
     }
 
