@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::{BufReader, Read};
+use std::fs::{self, File};
+use std::path::PathBuf;
+use std::io::{BufRead, BufReader, Read};
 use std::sync::Mutex;
 
 use serde_json;
@@ -42,7 +43,7 @@ enum LessonState {
 struct Graphic {
     positions: Vec<(usize, usize)>,
     chord: Option<Chord>,
-    alternate_chord: Chord,
+    alternate_chord: Option<Chord>,
 }
 
 struct Switch {
@@ -56,33 +57,56 @@ lazy_static! {
 }
 
 fn set_tutor_data(data: TutorData) {
-    *TUTOR_DATA.lock().unwrap() = Some(data);
+    let mut tutor_data = TUTOR_DATA.lock().unwrap();
+    match *tutor_data {
+        Some(_) => panic!("tutor data can only be set once"),
+        None => *tutor_data = Some(data),
+    }
 }
 
-fn get_chord(chord_name: Name) -> Result<Chord> {
+fn get_chord(chord_name: Name) -> Option<Chord> {
     // TODO handle missing chords better?
     let mode_name = ModeName::default();
 
     if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-        Ok(data.get(&mode_name)
-            .ok_or_else(|| "mode not found in tutor data".to_owned())?
+        data.get(&mode_name)?
+           // .ok_or_else(|| "mode not found in tutor data".to_owned())?
             .get(&chord_name)
             .cloned()
-            .ok_or_else(|| "chord not found in mode".to_owned())?)
+    // .ok_or_else(|| "chord not found in mode".to_owned())?)
     } else {
         panic!("tutor data was not set")
     }
 }
 
+fn get_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
+    load_lessons(lesson_dir)
+    // lazy_static!{
+    //     static ref LESSONS = load_lessons(lesson_dir).;
+    // }
+}
 
-// fn get_tutor_data() -> &'static TutorData {
-//     // let data = unsafe { TUTOR_DATA.lock().unwrap().clone() };
-//     // if data.is_empty() {
-//     //     panic!("tutor data was not set");
-//     // }
-//     &*TUTOR_DATA.lock().unwrap()
-// }
+fn load_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
+    let entries = fs::read_dir(lesson_dir)?;
+    let mut map = BTreeMap::new();
+    for entry in entries {
+        let path = entry?.path();
+        let name = lesson_path_to_name(&path);
+        map.insert(name, read_file_lines(&path)?);
+    }
+    Ok(map)
+}
 
+fn lesson_path_to_name(path: &PathBuf) -> String {
+    let s = path.file_stem()
+        .expect("invalid lesson file name")
+        .to_str()
+        .expect("lesson path is not valid unicode");
+    let mut sections = s.split("_");
+    let number = sections.next().expect("invalid lesson file name");
+    let words: Vec<_> = sections.collect();
+    format!("{}) {}", number, words.join(" "))
+}
 
 impl TutorApp {
     pub fn run(data: TutorData) {
@@ -98,23 +122,23 @@ impl TutorApp {
     }
 
     fn show_menu(siv: &mut Cursive) {
-        let names = vec![
-            "home row letters",
-            "top row letters",
-            "double-switch letters",
-        ];
+        let lessons =
+            get_lessons("tutor/lessons/").expect("failed to get lessons");
+        let names: Vec<String> = lessons.keys().cloned().collect();
 
-        let mut select = SelectView::new().h_align(HAlign::Center);
+        let mut select = SelectView::new().h_align(HAlign::Left);
 
         select.add_all_str(names);
-        select.set_on_submit(|siv, name| {
+        select.set_on_submit(move |siv, name| {
             TutorApp::cleanup_menu(siv);
-            TutorApp::show_lesson(siv, name)
+            let lines = lessons.get(name).cloned().expect("lesson not found");
+            TutorApp::show_lesson(siv, name, lines)
         });
 
         siv.add_layer(
-            Dialog::around(select.fixed_size((20, 10)))
-                .title("Please select a lesson"),
+            // Dialog::around(select.fixed_size((20, 10)))
+            // Dialog::around(select).title("Please select a lesson"),
+            Dialog::around(select).title("Lessons:"),
         );
     }
 
@@ -122,12 +146,7 @@ impl TutorApp {
         siv.pop_layer();
     }
 
-    fn show_lesson(siv: &mut Cursive, _name: &str) {
-        let lines = vec![
-            "hello world and fox".into(),
-            "this is the second line".into(),
-            "and the last one!".into(),
-        ];
+    fn show_lesson(siv: &mut Cursive, _name: &str, lines: Vec<String>) {
         siv.add_layer(Lesson::new(lines).with_id("text"));
     }
 
@@ -269,11 +288,14 @@ impl Lesson {
         Ok(first)
     }
 
-    fn expected_chord_at_point(&self) -> Result<Chord> {
+    fn expected_chord_at_point(&self) -> Option<Chord> {
         let name = if self.at_end_of_line() {
             Name("key_enter".into())
         } else {
-            get_char_name(self.expected_char_at_point()?)?
+            get_char_name(
+                self.expected_char_at_point()
+                    .expect("failed to get character at point"),
+            )?
         };
 
         get_chord(name)
@@ -281,15 +303,14 @@ impl Lesson {
 
     fn update_chord(&mut self) {
         // TODO handle error better
-        self.graphic.chord =
-            Some(self.expected_chord_at_point().expect("chord not found"));
+        self.graphic.chord = self.expected_chord_at_point();
 
         self.graphic.alternate_chord = if self.was_last_char_wrong()
             .expect("failed to check if char was wrong")
         {
-            backspace_chord().expect("backspace chord not found")
+            backspace_chord()
         } else {
-            Chord::new()
+            None
         };
     }
 }
@@ -360,7 +381,7 @@ impl Graphic {
         Graphic {
             positions: get_switch_positions(),
             chord: None,
-            alternate_chord: Chord::default(),
+            alternate_chord: None,
         }
     }
 
@@ -368,16 +389,35 @@ impl Graphic {
         Vec2::new(45, 6)
     }
 
+    fn draw_question_mark(&self, printer: &Printer) {
+        let center = printer.size.x / 2 as usize;
+        // printer.with_color(Switch::blank(), |printer| {
+        //     printer.print((center - 2, 0), "╭───╮");
+        //     printer.print((center - 2, 1), "│   │");
+        //     printer.print((center - 2, 2), "╰───╯");
+        // });
+        printer.with_color(Switch::next(), |printer| {
+            printer.print((center - 1, 1), "???");
+        });
+    }
+
     fn draw_switches(&self, printer: &Printer) {
         // TODO don't clone?
-        if let Some(bits) = self.chord.clone() {
-            for ((&pos, &bit), &alt_bit) in self.positions
-                .iter()
-                .zip(bits.to_bools().iter())
-                .zip(self.alternate_chord.clone().to_bools().iter())
-            {
-                Switch::new(bit, alt_bit).draw(pos, printer)
+        let bits = match self.chord {
+            Some(ref chord) => chord.to_bools(),
+            None => {
+                self.draw_question_mark(printer);
+                Chord::default().to_bools()
             }
+        };
+
+        let alt_bits =
+            self.alternate_chord.clone().unwrap_or_default().to_bools();
+
+        for ((&pos, &bit), &alt_bit) in
+            self.positions.iter().zip(bits.iter()).zip(alt_bits.iter())
+        {
+            Switch::new(bit, alt_bit).draw(pos, printer)
         }
     }
 
@@ -516,22 +556,33 @@ fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
 //     }
 // }
 
-fn get_char_name(character: char) -> Result<Name> {
+fn get_char_name(character: char) -> Option<Name> {
     if character.is_alphanumeric() {
-        return Ok(Name(format!("key_{}", character.to_lowercase())));
+        return Some(Name(format!("key_{}", character.to_lowercase())));
     }
     let name = match character {
         ' ' => "key_space".into(),
         '.' => "key_period".into(),
         ',' => "key_comma".into(),
         '\'' => "key_quote".into(),
-        _ => bail!("tutor: unknown character"),
+        _ => return None,
     };
-    Ok(Name(name))
+    Some(Name(name))
 }
 
-fn backspace_chord() -> Result<Chord> {
+fn backspace_chord() -> Option<Chord> {
     get_chord(Name("key_backspace".into()))
+}
+
+fn read_file_lines(path: &PathBuf) -> Result<Vec<String>> {
+    let file = File::open(path)
+        .chain_err(|| format!("failed to open file: {}", path.display()))?;
+    let buf = BufReader::new(file);
+    let lines: Vec<String> = buf.lines()
+        .map(|w| w.unwrap())
+        .filter(|s| !s.is_empty())
+        .collect();
+    Ok(lines)
 }
 
 fn read_file(path: &str) -> Result<String> {
