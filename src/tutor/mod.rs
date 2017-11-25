@@ -6,6 +6,7 @@ use std::sync::Mutex;
 
 use serde_json;
 use unicode_segmentation::UnicodeSegmentation;
+use natord;
 
 use cursive::{Cursive, Printer};
 use cursive::align::HAlign;
@@ -55,6 +56,7 @@ struct Switch {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
 lazy_static! {
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
 }
@@ -124,7 +126,8 @@ impl TutorApp {
     fn show_menu(siv: &mut Cursive) {
         let lessons =
             load_lessons("tutor/lessons/").expect("failed to get lessons");
-        let names: Vec<String> = lessons.keys().cloned().collect();
+        let mut names: Vec<String> = lessons.keys().cloned().collect();
+        names.sort_by(|a, b| natord::compare(a, b));
 
         let mut select = SelectView::new().h_align(HAlign::Left);
 
@@ -501,10 +504,10 @@ fn get_switch_positions() -> Vec<(usize, usize)> {
         (60, 7),
         (12, 7),
         (20, 8),
-        (26, 9),
-        (32, 10),
-        (40, 10),
-        (46, 9),
+        (26, 8),
+        (32, 9),
+        (40, 9),
+        (46, 8),
         (52, 8),
     ]
 }

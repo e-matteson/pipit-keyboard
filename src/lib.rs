@@ -2,9 +2,11 @@
 
 extern crate cursive;
 extern crate itertools;
+extern crate natord;
 extern crate time;
 extern crate toml;
 extern crate unicode_segmentation;
+
 
 #[macro_use]
 extern crate serde_derive;
