@@ -43,12 +43,15 @@ enum LessonState {
 struct Graphic {
     positions: Vec<(usize, usize)>,
     chord: Option<Chord>,
-    alternate_chord: Option<Chord>,
+    alt_chord: Option<Chord>,
+    label: String,
+    alt_label: String,
 }
 
 struct Switch {
     left_style: ColorStyle,
     right_style: ColorStyle,
+    label: String,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,26 +67,23 @@ fn set_tutor_data(data: TutorData) {
     }
 }
 
+fn char_to_chord(character: char) -> Option<Chord> {
+    let (name, is_uppercase) = get_char_name(character)?;
+    let mut chord = get_chord(name)?;
+    if is_uppercase {
+        chord.intersect(&get_chord(Name("mod_shift".into()))?)
+    }
+    Some(chord)
+}
+
 fn get_chord(chord_name: Name) -> Option<Chord> {
-    // TODO handle missing chords better?
     let mode_name = ModeName::default();
 
     if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-        data.get(&mode_name)?
-           // .ok_or_else(|| "mode not found in tutor data".to_owned())?
-            .get(&chord_name)
-            .cloned()
-    // .ok_or_else(|| "chord not found in mode".to_owned())?)
+        data.get(&mode_name)?.get(&chord_name).cloned()
     } else {
         panic!("tutor data was not set")
     }
-}
-
-fn get_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
-    load_lessons(lesson_dir)
-    // lazy_static!{
-    //     static ref LESSONS = load_lessons(lesson_dir).;
-    // }
 }
 
 fn load_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
@@ -123,7 +123,7 @@ impl TutorApp {
 
     fn show_menu(siv: &mut Cursive) {
         let lessons =
-            get_lessons("tutor/lessons/").expect("failed to get lessons");
+            load_lessons("tutor/lessons/").expect("failed to get lessons");
         let names: Vec<String> = lessons.keys().cloned().collect();
 
         let mut select = SelectView::new().h_align(HAlign::Left);
@@ -138,7 +138,7 @@ impl TutorApp {
         siv.add_layer(
             // Dialog::around(select.fixed_size((20, 10)))
             // Dialog::around(select).title("Please select a lesson"),
-            Dialog::around(select).title("Lessons:"),
+            Dialog::around(select).title("Lessons"),
         );
     }
 
@@ -180,8 +180,8 @@ impl TutorApp {
 
 impl Lesson {
     fn new(lines: Vec<String>) -> Lesson {
-        let width = 31;
-        let point_offset = 15;
+        let width = 79;
+        let point_offset = 39;
 
         let mut lesson = Lesson {
             lines: lines.into_iter().rev().collect(),
@@ -270,10 +270,6 @@ impl Lesson {
         )
     }
 
-    fn expected_char_at_point(&self) -> Result<char> {
-        self.char_at_offset(&self.expected, self.point_offset)
-    }
-
     fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
         let mut chars = grapheme_slice(string, self.start(), self.end())
             .nth(offset)
@@ -288,30 +284,29 @@ impl Lesson {
         Ok(first)
     }
 
-    fn expected_chord_at_point(&self) -> Option<Chord> {
-        let name = if self.at_end_of_line() {
-            Name("key_enter".into())
+    fn expected_char_at_point(&self) -> char {
+        if self.at_end_of_line() {
+            '\n'
         } else {
-            get_char_name(
-                self.expected_char_at_point()
-                    .expect("failed to get character at point"),
-            )?
-        };
-
-        get_chord(name)
+            self.char_at_offset(&self.expected, self.point_offset)
+                .expect("failed to get character at point")
+        }
     }
 
     fn update_chord(&mut self) {
-        // TODO handle error better
-        self.graphic.chord = self.expected_chord_at_point();
+        let character = self.expected_char_at_point();
+        self.graphic.chord = char_to_chord(character);
+        self.graphic.label = char_to_label(character);
 
-        self.graphic.alternate_chord = if self.was_last_char_wrong()
+        let (alt_chord, alt_label) = if self.was_last_char_wrong()
             .expect("failed to check if char was wrong")
         {
-            backspace_chord()
+            (backspace_chord(), "bak".into())
         } else {
-            None
+            (None, String::new())
         };
+        self.graphic.alt_chord = alt_chord;
+        self.graphic.alt_label = alt_label;
     }
 }
 
@@ -381,12 +376,14 @@ impl Graphic {
         Graphic {
             positions: get_switch_positions(),
             chord: None,
-            alternate_chord: None,
+            alt_chord: None,
+            label: String::new(),
+            alt_label: String::new(),
         }
     }
 
     fn size(&self) -> Vec2 {
-        Vec2::new(45, 6)
+        Vec2::new(80, 26)
     }
 
     fn draw_question_mark(&self, printer: &Printer) {
@@ -400,77 +397,48 @@ impl Graphic {
             printer.print((center - 1, 1), "???");
         });
     }
-
-    fn draw_switches(&self, printer: &Printer) {
-        // TODO don't clone?
-        let bits = match self.chord {
-            Some(ref chord) => chord.to_bools(),
-            None => {
-                self.draw_question_mark(printer);
-                Chord::default().to_bools()
-            }
-        };
-
-        let alt_bits =
-            self.alternate_chord.clone().unwrap_or_default().to_bools();
-
-        for ((&pos, &bit), &alt_bit) in
-            self.positions.iter().zip(bits.iter()).zip(alt_bits.iter())
-        {
-            Switch::new(bit, alt_bit).draw(pos, printer)
-        }
-    }
-
-    fn draw_frame(&self, printer: &Printer) {
-        printer.with_color(ColorStyle::TitleSecondary, |printer| {
-            printer.print((0, 0),
-                          "╭─────────────╮               ╭─────────────╮"
-            );
-            printer.print(
-                (0, 1),
-                "│             │               │             │",
-            );
-            printer.print(
-                (0, 2),
-                "│             │               │             │",
-            );
-            printer.print((0, 3),
-                          "╰─────╮       ╰──────╮ ╭──────╯       ╭─────╯"
-            );
-            printer.print((0, 4),
-                          "      ╰───╮          │ │          ╭───╯",
-            );
-            printer.print((0, 5),
-                          "          ╰──────────╯ ╰──────────╯"
-            )
-        });
-    }
 }
 
 impl Switch {
-    const LEFT_ICON: &'static str = "▆";
-    const RIGHT_ICON: &'static str = "▆";
-
-    fn new(bit: bool, alt_bit: bool) -> Switch {
-        let (left, right) = match (bit, alt_bit) {
-            (false, false) => (Switch::blank(), Switch::blank()),
-            (true, false) => (Switch::next(), Switch::next()),
-            (false, true) => (Switch::wrong(), Switch::wrong()),
-            (true, true) => (Switch::next(), Switch::wrong()),
+    fn new(bit: bool, alt_bit: bool, label: &str, alt_label: &str) -> Switch {
+        let (left, right, foo) = match (bit, alt_bit) {
+            (false, false) => (Switch::blank(), Switch::blank(), String::new()),
+            (true, false) => (Switch::next(), Switch::next(), label.into()),
+            (false, true) => {
+                (Switch::wrong(), Switch::wrong(), alt_label.into())
+            }
+            (true, true) => (Switch::next(), Switch::wrong(), label.into()),
         };
         Switch {
             left_style: left,
             right_style: right,
+            label: foo,
         }
+    }
+
+    fn center_pad(label: &str, width: usize) -> String {
+        let len = grapheme_slice(label, 0, label.len()).count();
+        let start = (width - len) / 2. as usize;
+        " ".repeat(start) + label + &" ".repeat(width - start)
     }
 
     fn draw(&self, pos: (usize, usize), printer: &Printer) {
         let (x, y) = pos;
+        let row1_left = "╭───";
+        let row2_left = format!("│{}", Switch::center_pad(&self.label, 3));
+        let row3_left = "╰";
+        let row1_right = "╮";
+        let row2_right = "│";
+        let row3_right = "───╯";
         printer.with_color(self.left_style, |printer| {
-            printer.print((x, y), &Switch::LEFT_ICON)
+            printer.print((x, y), row1_left);
+            printer.print((x, y + 1), &row2_left);
+            printer.print((x, y + 2), row3_left);
         });
         printer.with_color(self.right_style, |printer| {
-            printer.print((x + 1, y), &Switch::RIGHT_ICON)
+            printer.print((x + 4, y), row1_right);
+            printer.print((x + 4, y + 1), &row2_right);
+            printer.print((x + 1, y + 2), row3_right);
         });
     }
 
@@ -493,39 +461,52 @@ impl View for Graphic {
     }
 
     fn draw(&self, printer: &Printer) {
-        self.draw_frame(printer);
-        self.draw_switches(printer);
+        let bits = match self.chord {
+            Some(ref chord) => chord.to_bools(),
+            None => {
+                self.draw_question_mark(printer);
+                Chord::default().to_bools()
+            }
+        };
+
+        let alt_bits = self.alt_chord.clone().unwrap_or_default().to_bools();
+
+        for ((&pos, &bit), &alt_bit) in
+            self.positions.iter().zip(bits.iter()).zip(alt_bits.iter())
+        {
+            Switch::new(bit, alt_bit, &self.label, &self.alt_label)
+                .draw(pos, printer)
+        }
     }
 }
 
 fn get_switch_positions() -> Vec<(usize, usize)> {
-    let p = vec![
-        (2, 1),
-        (5, 1),
-        (8, 1),
-        (11, 1),
-        (32, 1),
-        (35, 1),
-        (38, 1),
-        (41, 1),
-        (2, 2),
-        (5, 2),
-        (8, 2),
-        (11, 2),
-        (32, 2),
-        (35, 2),
-        (38, 2),
-        (41, 2),
-        (8, 3),
-        (35, 3),
+    vec![
+        (0, 2),
+        (6, 1),
+        (12, 1),
+        (18, 1),
+        (54, 1),
+        (60, 1),
+        (66, 1),
+        (72, 2),
+        (0, 5),
+        (6, 4),
         (12, 4),
-        (15, 4),
         (18, 4),
-        (25, 4),
-        (28, 4),
-        (31, 4),
-    ];
-    p
+        (54, 4),
+        (60, 4),
+        (66, 4),
+        (72, 5),
+        (60, 7),
+        (12, 7),
+        (20, 8),
+        (26, 9),
+        (32, 10),
+        (40, 10),
+        (46, 9),
+        (52, 8),
+    ]
 }
 
 fn grapheme_slice<'a>(
@@ -548,26 +529,61 @@ fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
     }
 }
 
-// fn get_key_name(key: Key) -> Result<Name> {
-//     match key {
-//         Key::Backspace => Some("key_backspace"),
-//         Key::Enter => Some("key_enter"),
-//         _ => return None,
-//     }
-// }
+fn char_to_label(character: char) -> String {
+    match character {
+        '\n' => "ret".into(), // "⏎"
+        '\t' => "tab".into(),
+        ' ' => "spc".into(),
+        c => c.to_string(),
+    }
+}
 
-fn get_char_name(character: char) -> Option<Name> {
+fn get_char_name(character: char) -> Option<(Name, bool)> {
     if character.is_alphanumeric() {
-        return Some(Name(format!("key_{}", character.to_lowercase())));
+        return Some((
+            Name(format!("key_{}", character.to_lowercase())),
+            character.is_uppercase(),
+        ));
     }
     let name = match character {
-        ' ' => "key_space".into(),
-        '.' => "key_period".into(),
+        '&' => "key_ampersand".into(),
+        '*' => "key_asterisk".into(),
+        '@' => "key_at".into(),
+        '\\' => "key_backslash".into(),
+        '!' => "key_bang".into(),
+        '^' => "key_caret".into(),
+        ':' => "key_colon".into(),
         ',' => "key_comma".into(),
+        '$' => "key_dollar".into(),
+        '"' => "key_doublequote".into(),
+        '\n' => "key_enter".into(),
+        '=' => "key_equal".into(),
+        '`' => "key_grave".into(),
+        '#' => "key_hash".into(),
+        '<' => "key_left_angle".into(),
+        '[' => "key_left_brace".into(),
+        '{' => "key_left_curly".into(),
+        '(' => "key_left_paren".into(),
+        '-' => "key_minus".into(),
+        '%' => "key_percent".into(),
+        '.' => "key_period".into(),
+        '|' => "key_pipe".into(),
+        '+' => "key_plus".into(),
+        '?' => "key_question".into(),
         '\'' => "key_quote".into(),
+        '>' => "key_right_angle".into(),
+        ']' => "key_right_brace".into(),
+        '}' => "key_right_curly".into(),
+        ')' => "key_right_paren".into(),
+        ';' => "key_semicolon".into(),
+        '/' => "key_slash".into(),
+        ' ' => "key_space".into(),
+        '\t' => "key_tab".into(),
+        '~' => "key_tilde".into(),
+        '_' => "key_underscore".into(),
         _ => return None,
     };
-    Some(Name(name))
+    Some((Name(name), false))
 }
 
 fn backspace_chord() -> Option<Chord> {
