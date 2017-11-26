@@ -12,11 +12,9 @@ use cursive::vec::Vec2;
 use cursive::theme::ColorStyle;
 use cursive::event::{Callback, Event, EventResult, Key};
 
-use types::{Chord, Name};
 use types::errors::*;
 use tutor::graphic::Graphic;
-use tutor::utils::{char_to_chord, char_to_label, grapheme_slice,
-                   read_file_lines, TutorData};
+use tutor::utils::{grapheme_slice, read_file_lines, TutorData};
 
 pub struct TutorApp;
 
@@ -113,7 +111,7 @@ impl TutorApp {
 impl Lesson {
     fn new(lines: Vec<String>) -> Lesson {
         let width = 79;
-        let point_offset = 39;
+        let point_offset = 40;
 
         let mut lesson = Lesson {
             lines: lines.into_iter().rev().collect(),
@@ -142,14 +140,6 @@ impl Lesson {
             self.actual.pop();
             self.index -= 1;
         }
-    }
-
-    fn start(&self) -> usize {
-        self.index
-    }
-
-    fn end(&self) -> usize {
-        self.index + self.width
     }
 
     fn next_line(&mut self) {
@@ -229,24 +219,18 @@ impl Lesson {
     }
 
     fn update_chord(&mut self) {
-        let character = self.expected_char_at_point();
-        self.graphic.next_chord = char_to_chord(character);
-        self.graphic.next_label = Some(char_to_label(character));
+        let next_char = self.expected_char_at_point();
+        let last_wrong_char = self.last_wrong_char()
+            .expect("failed to check if char was wrong");
+        self.graphic.update(next_char, last_wrong_char);
+    }
 
-        if let Some(character) = self.last_wrong_char()
-            .expect("failed to check if char was wrong")
-        {
-            self.graphic.backspace_chord = backspace_chord();
-            self.graphic.backspace_label = Some("bak".into());
-            self.graphic.error_chord = char_to_chord(character);
-            self.graphic.error_label = Some(char_to_label(character));
-        } else {
-            self.graphic.backspace_chord = None;
-            self.graphic.backspace_label = None;
-            self.graphic.error_chord = None;
-            self.graphic.error_label = None;
-        }
-        self.graphic.update_switches();
+    fn start(&self) -> usize {
+        self.index
+    }
+
+    fn end(&self) -> usize {
+        self.index + self.width
     }
 }
 
@@ -344,8 +328,4 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
 
 fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize
-}
-
-fn backspace_chord() -> Option<Chord> {
-    TutorData::get_chord(Name("key_backspace".into()))
 }

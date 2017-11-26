@@ -1,22 +1,31 @@
-
-
 use cursive::Printer;
 use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::theme::{Color, ColorStyle};
 
-use types::Chord;
+use types::{Chord, Name};
 // use types::errors::*;
-use tutor::utils::grapheme_slice;
+
+use tutor::utils::{char_to_chord, char_to_label, grapheme_slice, TutorData};
 
 pub struct Graphic {
-    pub next_chord: Option<Chord>,
-    pub error_chord: Option<Chord>,
-    pub backspace_chord: Option<Chord>,
-    pub next_label: Option<String>,
-    pub error_label: Option<String>,
-    pub backspace_label: Option<String>,
+    pub next: Option<LabeledChord>,
+    pub error: Option<LabeledChord>,
+    pub backspace: Option<LabeledChord>,
     switches: Vec<Switch>,
+}
+
+#[derive(Clone)]
+pub struct LabeledChord {
+    pub chord: Option<Chord>,
+    pub label: String,
+}
+
+#[derive(Clone, Copy)]
+pub enum ChordType {
+    Next,
+    Error,
+    Backspace,
 }
 
 struct Switch {
@@ -35,18 +44,11 @@ impl Graphic {
             .map(|pos| Switch::new(pos))
             .collect();
         Graphic {
-            next_chord: None,
-            error_chord: None,
-            backspace_chord: None,
-            next_label: Some(String::new()),
-            error_label: Some(String::new()),
-            backspace_label: Some(String::new()),
+            next: None,
+            error: None,
+            backspace: None,
             switches: switches,
         }
-    }
-
-    pub fn size(&self) -> Vec2 {
-        Vec2::new(78, 12)
     }
 
     fn draw_question_mark(&self, printer: &Printer) {
@@ -56,34 +58,69 @@ impl Graphic {
         });
     }
 
+    pub fn size(&self) -> Vec2 {
+        Vec2::new(78, 12)
+    }
+
+    pub fn update(&mut self, next_char: char, last_wrong_char: Option<char>) {
+        self.next = Some(LabeledChord {
+            chord: char_to_chord(next_char),
+            label: char_to_label(next_char),
+        });
+
+        if let Some(wrong_char) = last_wrong_char {
+            self.backspace = Some(LabeledChord {
+                chord: backspace_chord(),
+                label: "bak".into(),
+            });
+            self.error = Some(LabeledChord {
+                chord: char_to_chord(wrong_char),
+                label: char_to_label(wrong_char),
+            });
+        } else {
+            self.backspace = None;
+            self.error = None;
+        }
+        self.update_switches();
+    }
+
+    pub fn update_switches(&mut self) {
+        self.clear_switches();
+        self.update_switches_with_type(ChordType::Next);
+        self.update_switches_with_type(ChordType::Backspace);
+        self.update_switches_with_type(ChordType::Error);
+    }
+
+    fn update_switches_with_type(&mut self, chord_type: ChordType) {
+        if let Some(ref chord) = self.get_chord(chord_type) {
+            let label = self.get_label(chord_type).clone();
+            for (&bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
+                if bit {
+                    switch.set(chord_type, label.clone());
+                }
+            }
+        }
+    }
+
     fn clear_switches(&mut self) {
         for switch in self.switches.iter_mut() {
             switch.clear()
         }
     }
 
-    pub fn update_switches(&mut self) {
-        self.clear_switches();
-        if let Some(ref bits) = self.next_chord {
-            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
-                if bit {
-                    switch.set_next(self.next_label.clone());
-                }
-            }
-        }
-        if let Some(ref bits) = self.error_chord {
-            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
-                if bit {
-                    switch.set_error(self.error_label.clone());
-                }
-            }
-        }
-        if let Some(ref bits) = self.backspace_chord {
-            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
-                if bit {
-                    switch.set_backspace(self.backspace_label.clone());
-                }
-            }
+    pub fn get_chord(&self, chord_type: ChordType) -> Option<Chord> {
+        self.get(chord_type)?.chord
+    }
+
+    pub fn get_label(&self, chord_type: ChordType) -> Option<String> {
+        Some(self.get(chord_type)?.label)
+    }
+
+    fn get(&self, chord_type: ChordType) -> Option<LabeledChord> {
+        match chord_type {
+            ChordType::Next => self.next.clone(),
+            ChordType::Error => self.error.clone(),
+            ChordType::Backspace => self.backspace.clone(),
         }
     }
 }
@@ -94,10 +131,9 @@ impl View for Graphic {
     }
 
     fn draw(&self, printer: &Printer) {
-        if self.next_chord.is_none() {
+        if self.get_chord(ChordType::Next).is_none() {
             self.draw_question_mark(printer);
         }
-
         for switch in &self.switches {
             switch.draw(printer);
         }
@@ -113,24 +149,23 @@ impl Switch {
             position: position,
         }
     }
-    // bit: bool, alt_bit: bool, label: &str, alt_label: &str
-    // let (left, right, foo) = match (bit, alt_bit) {
-    // (false, false) => (Switch::default_style(), Switch::default_style(),
-    // String::new()),
-    // (true, false) => (Switch::next_style(), Switch::next_style(),
-    // label.into()),
-    //     (false, true) => {
-    // (Switch::backspace_style(), Switch::backspace_style(),
-    // alt_label.into())
-    //     }
-    // (true, true) => (Switch::next_style(), Switch::backspace_style(),
-    // label.into()),
-    // };
-    // Switch {
-    //     left_style: left,
-    //     right_style: right,
-    //     label: foo,
-    // }
+
+    fn draw(&self, printer: &Printer) {
+        let (x, y) = self.position;
+        let row2_left = format!("│{}", Switch::center_pad(&self.label(), 3));
+        let (left, right) = self.styles();
+        printer.with_color(left, |printer| {
+            printer.print((x, y), "╭───");
+            printer.print((x, y + 1), &row2_left);
+            printer.print((x, y + 2), "╰");
+        });
+        printer.with_color(right, |printer| {
+            printer.print((x + 4, y), "╮");
+            printer.print((x + 4, y + 1), "│");
+            printer.print((x + 1, y + 2), "───╯");
+        });
+    }
+
 
     fn clear(&mut self) {
         self.next = None;
@@ -171,43 +206,18 @@ impl Switch {
         }
     }
 
-    fn set_next(&mut self, label: Option<String>) {
-        self.next = label;
-    }
-
-    fn set_error(&mut self, label: Option<String>) {
-        self.error = label;
-    }
-
-    fn set_backspace(&mut self, label: Option<String>) {
-        self.backspace = label;
+    pub fn set(&mut self, chord_type: ChordType, label: Option<String>) {
+        match chord_type {
+            ChordType::Next => self.next = label,
+            ChordType::Error => self.error = label,
+            ChordType::Backspace => self.backspace = label,
+        }
     }
 
     fn center_pad(label: &str, width: usize) -> String {
         let len = grapheme_slice(label, 0, label.len()).count();
         let start = (width - len) / 2. as usize;
         " ".repeat(start) + label + &" ".repeat(width - start)
-    }
-
-    fn draw(&self, printer: &Printer) {
-        let (x, y) = self.position;
-        let row1_left = "╭───";
-        let row2_left = format!("│{}", Switch::center_pad(&self.label(), 3));
-        let row3_left = "╰";
-        let row1_right = "╮";
-        let row2_right = "│";
-        let row3_right = "───╯";
-        let (left, right) = self.styles();
-        printer.with_color(left, |printer| {
-            printer.print((x, y), row1_left);
-            printer.print((x, y + 1), &row2_left);
-            printer.print((x, y + 2), row3_left);
-        });
-        printer.with_color(right, |printer| {
-            printer.print((x + 4, y), row1_right);
-            printer.print((x + 4, y + 1), &row2_right);
-            printer.print((x + 1, y + 2), row3_right);
-        });
     }
 
     fn next_style() -> ColorStyle {
@@ -259,4 +269,9 @@ fn get_switch_positions() -> Vec<(usize, usize)> {
         (46, 8),
         (52, 8),
     ]
+}
+
+
+fn backspace_chord() -> Option<Chord> {
+    TutorData::get_chord(Name("key_backspace".into()))
 }

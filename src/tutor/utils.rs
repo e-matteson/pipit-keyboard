@@ -108,7 +108,6 @@ fn get_char_name(character: char) -> Option<(Name, bool)> {
     Some((Name(name), false))
 }
 
-
 pub fn grapheme_slice<'a>(
     s: &'a str,
     start: usize,
@@ -116,8 +115,6 @@ pub fn grapheme_slice<'a>(
 ) -> Box<Iterator<Item = &'a str> + 'a> {
     Box::new(s.graphemes(true).skip(start).take(end))
 }
-
-
 
 pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>> {
     let file = File::open(path)
