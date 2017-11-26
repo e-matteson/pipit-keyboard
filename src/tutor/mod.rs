@@ -13,7 +13,7 @@ use cursive::align::HAlign;
 use cursive::traits::*;
 use cursive::views::{Dialog, SelectView, TextView};
 use cursive::vec::Vec2;
-use cursive::theme::ColorStyle;
+use cursive::theme::{Color, ColorStyle};
 use cursive::event::{Callback, Event, EventResult, Key};
 
 use types::{Chord, ModeName, Name};
@@ -42,17 +42,20 @@ enum LessonState {
 }
 
 struct Graphic {
-    positions: Vec<(usize, usize)>,
-    chord: Option<Chord>,
-    alt_chord: Option<Chord>,
-    label: String,
-    alt_label: String,
+    next_chord: Option<Chord>,
+    error_chord: Option<Chord>,
+    backspace_chord: Option<Chord>,
+    next_label: Option<String>,
+    error_label: Option<String>,
+    backspace_label: Option<String>,
+    switches: Vec<Switch>,
 }
 
 struct Switch {
-    left_style: ColorStyle,
-    right_style: ColorStyle,
-    label: String,
+    position: (usize, usize),
+    next: Option<String>,
+    error: Option<String>,
+    backspace: Option<String>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +143,6 @@ impl TutorApp {
 
         siv.add_layer(
             // Dialog::around(select.fixed_size((20, 10)))
-            // Dialog::around(select).title("Please select a lesson"),
             Dialog::around(select).title("Lessons"),
         );
     }
@@ -265,12 +267,15 @@ impl Lesson {
         Vec2::new(x, y)
     }
 
-    fn was_last_char_wrong(&self) -> Result<bool> {
+    fn last_wrong_char(&self) -> Result<Option<char>> {
         let offset = self.point_offset - 1;
-        Ok(
-            self.char_at_offset(&self.expected, offset)?
-                != self.char_at_offset(&self.actual, offset)?,
-        )
+        let actual = self.char_at_offset(&self.actual, offset)?;
+        let expected = self.char_at_offset(&self.expected, offset)?;
+        Ok(if actual != expected {
+            Some(actual)
+        } else {
+            None
+        })
     }
 
     fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
@@ -298,18 +303,23 @@ impl Lesson {
 
     fn update_chord(&mut self) {
         let character = self.expected_char_at_point();
-        self.graphic.chord = char_to_chord(character);
-        self.graphic.label = char_to_label(character);
+        self.graphic.next_chord = char_to_chord(character);
+        self.graphic.next_label = Some(char_to_label(character));
 
-        let (alt_chord, alt_label) = if self.was_last_char_wrong()
+        if let Some(character) = self.last_wrong_char()
             .expect("failed to check if char was wrong")
         {
-            (backspace_chord(), "bak".into())
+            self.graphic.backspace_chord = backspace_chord();
+            self.graphic.backspace_label = Some("bak".into());
+            self.graphic.error_chord = char_to_chord(character);
+            self.graphic.error_label = Some(char_to_label(character));
         } else {
-            (None, String::new())
-        };
-        self.graphic.alt_chord = alt_chord;
-        self.graphic.alt_label = alt_label;
+            self.graphic.backspace_chord = None;
+            self.graphic.backspace_label = None;
+            self.graphic.error_chord = None;
+            self.graphic.error_label = None;
+        }
+        self.graphic.update_switches();
     }
 }
 
@@ -376,85 +386,61 @@ impl View for Lesson {
 
 impl Graphic {
     fn new() -> Graphic {
+        let switches: Vec<_> = get_switch_positions()
+            .into_iter()
+            .map(|pos| Switch::new(pos))
+            .collect();
         Graphic {
-            positions: get_switch_positions(),
-            chord: None,
-            alt_chord: None,
-            label: String::new(),
-            alt_label: String::new(),
+            next_chord: None,
+            error_chord: None,
+            backspace_chord: None,
+            next_label: Some(String::new()),
+            error_label: Some(String::new()),
+            backspace_label: Some(String::new()),
+            switches: switches,
         }
     }
 
     fn size(&self) -> Vec2 {
-        Vec2::new(80, 26)
+        Vec2::new(78, 12)
     }
 
     fn draw_question_mark(&self, printer: &Printer) {
         let center = printer.size.x / 2 as usize;
-        // printer.with_color(Switch::blank(), |printer| {
-        //     printer.print((center - 2, 0), "╭───╮");
-        //     printer.print((center - 2, 1), "│   │");
-        //     printer.print((center - 2, 2), "╰───╯");
-        // });
-        printer.with_color(Switch::next(), |printer| {
+        printer.with_color(Switch::next_style(), |printer| {
             printer.print((center - 1, 1), "???");
         });
     }
-}
 
-impl Switch {
-    fn new(bit: bool, alt_bit: bool, label: &str, alt_label: &str) -> Switch {
-        let (left, right, foo) = match (bit, alt_bit) {
-            (false, false) => (Switch::blank(), Switch::blank(), String::new()),
-            (true, false) => (Switch::next(), Switch::next(), label.into()),
-            (false, true) => {
-                (Switch::wrong(), Switch::wrong(), alt_label.into())
-            }
-            (true, true) => (Switch::next(), Switch::wrong(), label.into()),
-        };
-        Switch {
-            left_style: left,
-            right_style: right,
-            label: foo,
+    fn clear_switches(&mut self) {
+        for switch in self.switches.iter_mut() {
+            switch.clear()
         }
     }
 
-    fn center_pad(label: &str, width: usize) -> String {
-        let len = grapheme_slice(label, 0, label.len()).count();
-        let start = (width - len) / 2. as usize;
-        " ".repeat(start) + label + &" ".repeat(width - start)
-    }
-
-    fn draw(&self, pos: (usize, usize), printer: &Printer) {
-        let (x, y) = pos;
-        let row1_left = "╭───";
-        let row2_left = format!("│{}", Switch::center_pad(&self.label, 3));
-        let row3_left = "╰";
-        let row1_right = "╮";
-        let row2_right = "│";
-        let row3_right = "───╯";
-        printer.with_color(self.left_style, |printer| {
-            printer.print((x, y), row1_left);
-            printer.print((x, y + 1), &row2_left);
-            printer.print((x, y + 2), row3_left);
-        });
-        printer.with_color(self.right_style, |printer| {
-            printer.print((x + 4, y), row1_right);
-            printer.print((x + 4, y + 1), &row2_right);
-            printer.print((x + 1, y + 2), row3_right);
-        });
-    }
-
-    fn wrong() -> ColorStyle {
-        ColorStyle::Secondary
-    }
-
-    fn next() -> ColorStyle {
-        ColorStyle::Tertiary
-    }
-
-    fn blank() -> ColorStyle {
-        ColorStyle::TitleSecondary
+    fn update_switches(&mut self) {
+        self.clear_switches();
+        if let Some(ref bits) = self.next_chord {
+            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
+                if bit {
+                    switch.set_next(self.next_label.clone());
+                }
+            }
+        }
+        if let Some(ref bits) = self.error_chord {
+            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
+                if bit {
+                    switch.set_error(self.error_label.clone());
+                }
+            }
+        }
+        if let Some(ref bits) = self.backspace_chord {
+            for (&bit, switch) in bits.iter().zip(self.switches.iter_mut()) {
+                if bit {
+                    switch.set_backspace(self.backspace_label.clone());
+                }
+            }
+        }
     }
 }
 
@@ -464,24 +450,144 @@ impl View for Graphic {
     }
 
     fn draw(&self, printer: &Printer) {
-        let bits = match self.chord {
-            Some(ref chord) => chord.to_bools(),
-            None => {
-                self.draw_question_mark(printer);
-                Chord::default().to_bools()
-            }
-        };
+        if self.next_chord.is_none() {
+            self.draw_question_mark(printer);
+        }
 
-        let alt_bits = self.alt_chord.clone().unwrap_or_default().to_bools();
-
-        for ((&pos, &bit), &alt_bit) in
-            self.positions.iter().zip(bits.iter()).zip(alt_bits.iter())
-        {
-            Switch::new(bit, alt_bit, &self.label, &self.alt_label)
-                .draw(pos, printer)
+        for switch in &self.switches {
+            switch.draw(printer);
         }
     }
 }
+
+impl Switch {
+    fn new(position: (usize, usize)) -> Switch {
+        Switch {
+            next: None,
+            error: None,
+            backspace: None,
+            position: position,
+        }
+    }
+    // bit: bool, alt_bit: bool, label: &str, alt_label: &str
+    // let (left, right, foo) = match (bit, alt_bit) {
+    // (false, false) => (Switch::default_style(), Switch::default_style(),
+    // String::new()),
+    // (true, false) => (Switch::next_style(), Switch::next_style(),
+    // label.into()),
+    //     (false, true) => {
+    // (Switch::backspace_style(), Switch::backspace_style(),
+    // alt_label.into())
+    //     }
+    // (true, true) => (Switch::next_style(), Switch::backspace_style(),
+    // label.into()),
+    // };
+    // Switch {
+    //     left_style: left,
+    //     right_style: right,
+    //     label: foo,
+    // }
+
+    fn clear(&mut self) {
+        self.next = None;
+        self.error = None;
+        self.backspace = None;
+    }
+
+    fn label<'a>(&'a self) -> &'a str {
+        if let Some(ref label) = self.next {
+            label
+        } else if let Some(ref label) = self.error {
+            label
+        } else if let Some(ref label) = self.backspace {
+            label
+        } else {
+            ""
+        }
+    }
+
+    fn styles(&self) -> (ColorStyle, ColorStyle) {
+        match (&self.next, &self.error, &self.backspace) {
+            (&Some(_), &None, &None) => {
+                (Switch::next_style(), Switch::next_style())
+            }
+            (&None, &Some(_), &None) => {
+                (Switch::error_style(), Switch::error_style())
+            }
+            (&None, &None, &Some(_)) => {
+                (Switch::backspace_style(), Switch::backspace_style())
+            }
+            (&Some(_), &Some(_), &None) => {
+                (Switch::next_style(), Switch::error_style())
+            }
+            (&Some(_), &None, &Some(_)) => {
+                (Switch::next_style(), Switch::backspace_style())
+            }
+            _ => (Switch::default_style(), Switch::default_style()),
+        }
+    }
+
+    fn set_next(&mut self, label: Option<String>) {
+        self.next = label;
+    }
+
+    fn set_error(&mut self, label: Option<String>) {
+        self.error = label;
+    }
+
+    fn set_backspace(&mut self, label: Option<String>) {
+        self.backspace = label;
+    }
+
+    fn center_pad(label: &str, width: usize) -> String {
+        let len = grapheme_slice(label, 0, label.len()).count();
+        let start = (width - len) / 2. as usize;
+        " ".repeat(start) + label + &" ".repeat(width - start)
+    }
+
+    fn draw(&self, printer: &Printer) {
+        let (x, y) = self.position;
+        let row1_left = "╭───";
+        let row2_left = format!("│{}", Switch::center_pad(&self.label(), 3));
+        let row3_left = "╰";
+        let row1_right = "╮";
+        let row2_right = "│";
+        let row3_right = "───╯";
+        let (left, right) = self.styles();
+        printer.with_color(left, |printer| {
+            printer.print((x, y), row1_left);
+            printer.print((x, y + 1), &row2_left);
+            printer.print((x, y + 2), row3_left);
+        });
+        printer.with_color(right, |printer| {
+            printer.print((x + 4, y), row1_right);
+            printer.print((x + 4, y + 1), &row2_right);
+            printer.print((x + 1, y + 2), row3_right);
+        });
+    }
+
+    fn next_style() -> ColorStyle {
+        ColorStyle::Tertiary
+    }
+
+    fn backspace_style() -> ColorStyle {
+        // TODO the background color is hardcoded, instead of inheriting from
+        // the theme!
+        ColorStyle::Custom {
+            front: Color::Rgb(100, 95, 0),
+            back: Color::Rgb(0, 0, 0),
+        }
+    }
+
+    fn error_style() -> ColorStyle {
+        ColorStyle::Secondary
+    }
+
+    fn default_style() -> ColorStyle {
+        ColorStyle::TitleSecondary
+    }
+}
+
 
 fn get_switch_positions() -> Vec<(usize, usize)> {
     vec![

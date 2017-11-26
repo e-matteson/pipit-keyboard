@@ -82,7 +82,7 @@ impl Chord {
     //     tmp.join("")
     // }
 
-    pub fn bits(&self) -> String {
+    pub fn bit_string(&self) -> String {
         let tmp: Vec<_> = self.bits
             .iter()
             .map(|&b| if b { "1" } else { "0" })
@@ -90,8 +90,8 @@ impl Chord {
         tmp.join("")
     }
 
-    pub fn to_bools(&self) -> Vec<bool> {
-        self.bits.clone()
+    pub fn iter(&self) -> ::std::slice::Iter<bool> {
+        self.bits.iter()
     }
 
     pub fn to_ints(&self) -> Vec<u8> {
@@ -114,7 +114,12 @@ impl Default for Chord {
 
 impl fmt::Debug for Chord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Chord {{ {} : {}}}", self.bits(), self.anagram_num.0)
+        write!(
+            f,
+            "Chord {{ {} : {}}}",
+            self.bit_string(),
+            self.anagram_num.0
+        )
     }
 }
 
