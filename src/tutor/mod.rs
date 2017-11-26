@@ -3,4 +3,5 @@ pub use self::utils::TutorData;
 
 pub mod tutor_app;
 mod graphic;
+mod copier;
 mod utils;

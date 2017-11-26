@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
+// use std::time::Instant;
 
 use natord;
 
@@ -9,33 +10,27 @@ use cursive::align::HAlign;
 use cursive::traits::*;
 use cursive::views::{Dialog, SelectView, TextView};
 use cursive::vec::Vec2;
-use cursive::theme::ColorStyle;
 use cursive::event::{Callback, Event, EventResult, Key};
 
 use types::errors::*;
 use tutor::graphic::Graphic;
-use tutor::utils::{grapheme_slice, read_file_lines, TutorData};
+use tutor::utils::{offset, read_file_lines, TutorData};
+use tutor::copier::Copier;
 
 pub struct TutorApp;
 
 struct Lesson {
     lines: Vec<String>,
-    expected: String,
-    actual: String,
-    width: usize,
-    point_marker: String,
-    point_offset: usize,
-    index: usize,
     graphic: Graphic,
     graphic_spacing: usize,
+    copier: Copier,
+    // start_time: Option<Instant>,
 }
 
 enum LessonState {
     Typing,
     EndOfLine,
 }
-
-
 
 impl TutorApp {
     pub fn run(data: TutorData) {
@@ -110,56 +105,35 @@ impl TutorApp {
 
 impl Lesson {
     fn new(lines: Vec<String>) -> Lesson {
-        let width = 79;
-        let point_offset = 40;
+        let copier = Copier::new(79);
 
         let mut lesson = Lesson {
             lines: lines.into_iter().rev().collect(),
-            expected: String::new(),
-            actual: String::new(),
-            width: width,
-            point_marker: "▼".into(),
-            point_offset: point_offset,
-            index: 0,
             graphic: Graphic::new(),
             graphic_spacing: 1,
+            copier: copier,
+            // start_time: None,
         };
         lesson.next_line();
         lesson.update_chord();
         lesson
     }
 
-
-    fn type_char(&mut self, character: char) {
-        self.actual.push(character);
-        self.index += 1;
-    }
-
-    fn backspace(&mut self) {
-        if self.index > 0 {
-            self.actual.pop();
-            self.index -= 1;
-        }
+    fn size(&self) -> Vec2 {
+        let graphic_size = self.graphic.size();
+        let copy_size = self.copier.size();
+        let x = graphic_size.x.max(copy_size.x);
+        let y = graphic_size.y + copy_size.y + self.graphic_spacing;
+        Vec2::new(x, y)
     }
 
     fn next_line(&mut self) {
-        let pad = " ".repeat(self.point_offset);
-        let expected =
-            pad.clone() + &self.lines.pop().expect("lesson was empty");
-        let mut actual = String::from(pad);
-        actual.reserve(expected.len());
-
-        self.expected = expected;
-        self.actual = actual;
-        self.index = 0;
-    }
-
-    fn at_end_of_line(&self) -> bool {
-        self.actual.len() == self.expected.len()
+        self.copier
+            .start_line(&self.lines.pop().expect("lesson was empty"))
     }
 
     fn state(&self) -> LessonState {
-        if self.at_end_of_line() {
+        if self.copier.at_end_of_line() {
             LessonState::EndOfLine
         } else {
             LessonState::Typing
@@ -168,69 +142,21 @@ impl Lesson {
 
     fn graphic_padding(&self) -> Vec2 {
         let x = offset(self.graphic.size().x, self.size().x);
-        let y = 3 + self.graphic_spacing;
+        let y = self.copier.size().y + self.graphic_spacing;
         Vec2::new(x, y)
     }
 
-    fn text_padding(&self) -> Vec2 {
-        let x = offset(self.width, self.size().x);
+    fn copy_padding(&self) -> Vec2 {
+        let x = offset(self.copier.size().x, self.size().x);
         Vec2::new(x, 0)
     }
 
-    fn size(&self) -> Vec2 {
-        let graphic_size = self.graphic.size();
-        let x = self.width.max(graphic_size.x);
-        let y = 3 + self.graphic_spacing + graphic_size.y;
-        Vec2::new(x, y)
-    }
-
-    fn last_wrong_char(&self) -> Result<Option<char>> {
-        let offset = self.point_offset - 1;
-        let actual = self.char_at_offset(&self.actual, offset)?;
-        let expected = self.char_at_offset(&self.expected, offset)?;
-        Ok(if actual != expected {
-            Some(actual)
-        } else {
-            None
-        })
-    }
-
-    fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
-        let mut chars = grapheme_slice(string, self.start(), self.end())
-            .nth(offset)
-            .ok_or_else(|| "no character offset".to_owned())?
-            .chars();
-        let first = chars
-            .next()
-            .ok_or_else(|| "invalid character at offset, no bytes".to_owned())?;
-        if chars.count() > 0 {
-            bail!("invalid character at offset, extra bytes");
-        }
-        Ok(first)
-    }
-
-    fn expected_char_at_point(&self) -> char {
-        if self.at_end_of_line() {
-            '\n'
-        } else {
-            self.char_at_offset(&self.expected, self.point_offset)
-                .expect("failed to get character at point")
-        }
-    }
-
     fn update_chord(&mut self) {
-        let next_char = self.expected_char_at_point();
-        let last_wrong_char = self.last_wrong_char()
+        let next_char = self.copier.expected_char_at_point();
+        let last_wrong_char = self.copier
+            .last_wrong_char()
             .expect("failed to check if char was wrong");
         self.graphic.update(next_char, last_wrong_char);
-    }
-
-    fn start(&self) -> usize {
-        self.index
-    }
-
-    fn end(&self) -> usize {
-        self.index + self.width
     }
 }
 
@@ -240,23 +166,11 @@ impl View for Lesson {
     }
 
     fn draw(&self, printer: &Printer) {
-        let pad = self.text_padding().x;
-
-        printer.with_color(ColorStyle::TitleSecondary, |printer| {
-            printer.print((self.point_offset + pad, 0), &self.point_marker);
-        });
-
-        let expected = grapheme_slice(&self.expected, self.start(), self.end());
-        let mut actual = grapheme_slice(&self.actual, self.start(), self.end());
-        for (i, m_char) in expected.enumerate() {
-            printer.print((i + pad, 1), m_char);
-            if let Some(t_char) = actual.next() {
-                printer.with_color(get_style(m_char, t_char), |printer| {
-                    printer.print((i + pad, 2), t_char)
-                });
-            }
-        }
-
+        self.copier.draw(&printer.sub_printer(
+            self.copy_padding(),
+            self.copier.size(),
+            false,
+        ));
         self.graphic.draw(&printer.sub_printer(
             self.graphic_padding(),
             self.graphic.size(),
@@ -272,12 +186,12 @@ impl View for Lesson {
         }
         match self.state() {
             LessonState::Typing => match event {
-                Event::Key(Key::Backspace) => self.backspace(),
-                Event::Char(letter) => self.type_char(letter),
+                Event::Key(Key::Backspace) => self.copier.type_backspace(),
+                Event::Char(letter) => self.copier.type_char(letter),
                 _ => return EventResult::Ignored,
             },
             LessonState::EndOfLine => match event {
-                Event::Key(Key::Backspace) => self.backspace(),
+                Event::Key(Key::Backspace) => self.copier.type_backspace(),
                 Event::CtrlChar('j') | Event::Key(Key::Enter) => {
                     if self.lines.is_empty() {
                         // Lesson is done
@@ -295,13 +209,6 @@ impl View for Lesson {
     }
 }
 
-fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
-    if actual_char == expected_char {
-        ColorStyle::Primary
-    } else {
-        ColorStyle::Secondary
-    }
-}
 
 fn load_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
     let entries = fs::read_dir(lesson_dir)?;
@@ -323,9 +230,4 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
     let number = sections.next().expect("invalid lesson file name");
     let words: Vec<_> = sections.collect();
     format!("{}) {}", number, words.join(" "))
-}
-
-
-fn offset(width1: usize, width2: usize) -> usize {
-    ((width2 - width1) as f32 / 2.).round() as usize
 }

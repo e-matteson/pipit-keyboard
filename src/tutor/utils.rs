@@ -134,3 +134,7 @@ pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>> {
 //     BufReader::new(file).read_to_string(&mut s)?;
 //     Ok(s)
 // }
+
+pub fn offset(width1: usize, width2: usize) -> usize {
+    ((width2 - width1) as f32 / 2.).round() as usize
+}
