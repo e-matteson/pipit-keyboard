@@ -25,7 +25,7 @@ fn run() -> Result<()> {
     all_data.check();
     // TODO automatically extract path parts
     all_data.save_as("auto_config")?;
-    TutorApp::run(TutorData::new(all_data.get_tutor_data()?));
+    // TutorApp::run(TutorData::new(all_data.get_tutor_data()?));
     Ok(())
 }
 

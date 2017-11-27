@@ -137,19 +137,21 @@ impl AnagramSet {
         anagram_num: AnagramNum,
         chord: Option<&Chord>,
     ) -> bool {
+        const ALLOW_MISSING_DOUBLE_SWITCHES: bool = false;
+
         if self.0.contains_key(&anagram_num) {
             return false;
         }
-        /// By convention, all words made of 2 switches, one on each
-        /// hand, use an anagram mod. It's because it's hard to
-        /// remember which of those would conflict with 2-hand plain
-        /// keys. So we may not want to warn about them. (We don't
-        /// check which hands the switches are on, but close enough)
-        chord.map_or(true, |c| c.count_switches() != 2)
-        // match chord {
-        //     Some(c) => c.count_switches() != 2,
-        //     None => true,
-        // }
+        // By convention, all words made of 2 switches on the same
+        // hand use an anagram mod. It's because it's hard to
+        // remember which of those would conflict with double-switch plain
+        // keys. So we may not want to warn about them. (We don't
+        // check which hands the switches are on, but close enough)
+        if ALLOW_MISSING_DOUBLE_SWITCHES {
+            chord.map_or(true, |c| c.count_switches() != 2)
+        } else {
+            true
+        }
     }
 
     pub fn num_anagrams(&self) -> u8 {
