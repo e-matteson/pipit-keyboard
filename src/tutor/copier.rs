@@ -89,9 +89,9 @@ impl Copier {
 
     pub fn net_words(&self) -> f64 {
         const CHARS_PER_WORD: f64 = 5.;
-        let all =
+        let total_chars =
             (self.actual.graphemes(true).count() - self.extra_spaces()) as f64;
-        let errors: f64 = self.actual
+        let wrong_chars: f64 = self.actual
             .graphemes(true)
             .zip(self.expected.graphemes(true))
             .map(|(actual, expected)| if actual == expected {
@@ -100,8 +100,8 @@ impl Copier {
                 1.
             })
             .sum();
-        // eprintln!("all: {}, errors: {}", all, errors);
-        (all / CHARS_PER_WORD) - errors
+        // ensure the corrected wpm won't be negative
+        f64::max(0., (total_chars / CHARS_PER_WORD) - wrong_chars)
     }
 
     pub fn last_wrong_char(&self) -> Result<Option<char>> {
