@@ -5,6 +5,8 @@ use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::theme::ColorStyle;
 
+use unicode_segmentation::UnicodeSegmentation;
+
 use types::errors::*;
 use tutor::utils::{grapheme_slice, offset};
 
@@ -44,7 +46,7 @@ impl Copier {
     }
 
     pub fn start_line(&mut self, line: &str) {
-        let pad = " ".repeat(self.point_offset);
+        let pad = " ".repeat(self.extra_spaces());
         let expected = pad.clone() + line;
         let mut actual = String::from(pad);
         actual.reserve(expected.len());
@@ -58,6 +60,10 @@ impl Copier {
         self.actual.len() == self.expected.len()
     }
 
+    fn extra_spaces(&self) -> usize {
+        self.point_offset
+    }
+
     fn text_padding(&self) -> Vec2 {
         let x = offset(self.num_chars, self.size().x);
         Vec2::new(x, 0)
@@ -65,6 +71,33 @@ impl Copier {
 
     pub fn size(&self) -> Vec2 {
         Vec2::new(self.num_chars, 3)
+    }
+
+    // pub fn actual_graphemes<'a>(&self) -> Box<Iterator<Item = &'a str> + 'a>
+    // {x
+    //     grapheme_slice(&self.actual, 0, self.actual.len())
+    // }
+
+    // pub fn expected_graphemes<'a>(&self) -> Box<Iterator<Item = &'a str> +
+    // 'a> {
+    //     grapheme_slice(&self.expected, 0, self.expected.len())
+    // }
+
+    pub fn net_words(&self) -> f64 {
+        const CHARS_PER_WORD: f64 = 5.;
+        let all =
+            (self.actual.graphemes(true).count() - self.extra_spaces()) as f64;
+        let errors: f64 = self.actual
+            .graphemes(true)
+            .zip(self.expected.graphemes(true))
+            .map(|(actual, expected)| if actual == expected {
+                0.
+            } else {
+                1.
+            })
+            .sum();
+        // eprintln!("all: {}, errors: {}", all, errors);
+        (all / CHARS_PER_WORD) - errors
     }
 
     pub fn last_wrong_char(&self) -> Result<Option<char>> {
