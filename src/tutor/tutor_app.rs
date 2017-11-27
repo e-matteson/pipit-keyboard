@@ -26,6 +26,7 @@ struct Lesson {
     copier: Copier,
     start_time: Option<Instant>,
     net_words: f64,
+    always_show_hint: bool,
 }
 
 enum LessonState {
@@ -116,6 +117,7 @@ impl Lesson {
             copier: copier,
             start_time: None,
             net_words: 0.,
+            always_show_hint: false,
         };
         lesson.next_line();
         lesson.update_chord();
@@ -155,7 +157,13 @@ impl Lesson {
     }
 
     fn update_chord(&mut self) {
-        let next_char = self.copier.expected_char_at_point();
+        let next_char =
+            if self.always_show_hint || self.copier.was_backspace_typed_last {
+                Some(self.copier.expected_char_at_point())
+            } else {
+                None
+            };
+
         let last_wrong_char = self.copier
             .last_wrong_char()
             .expect("failed to check if char was wrong");
@@ -163,7 +171,6 @@ impl Lesson {
     }
 
     fn start_if_not_started(&mut self) {
-        eprintln!("started?");
         if self.start_time.is_none() {
             eprintln!("start!");
             self.start_time = Some(Instant::now());

@@ -12,6 +12,7 @@ use tutor::utils::{grapheme_slice, offset};
 
 
 pub struct Copier {
+    pub was_backspace_typed_last: bool,
     expected: String,
     actual: String,
     num_chars: usize,
@@ -30,18 +31,21 @@ impl Copier {
             expected: String::new(),
             actual: String::new(),
             index: 0,
+            was_backspace_typed_last: false,
         }
     }
 
     pub fn type_char(&mut self, character: char) {
         self.actual.push(character);
         self.index += 1;
+        self.was_backspace_typed_last = false;
     }
 
     pub fn type_backspace(&mut self) {
         if self.index > 0 {
             self.actual.pop();
             self.index -= 1;
+            self.was_backspace_typed_last = true;
         }
     }
 

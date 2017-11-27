@@ -51,22 +51,30 @@ impl Graphic {
         }
     }
 
-    fn draw_question_mark(&self, printer: &Printer) {
-        let center = printer.size.x / 2 as usize;
-        printer.with_color(Switch::next_style(), |printer| {
-            printer.print((center - 1, 1), "???");
-        });
-    }
+    // fn draw_question_mark(&self, printer: &Printer) {
+    //     let center = printer.size.x / 2 as usize;
+    //     printer.with_color(Switch::next_style(), |printer| {
+    //         printer.print((center - 1, 1), "???");
+    //     });
+    // }
 
     pub fn size(&self) -> Vec2 {
         Vec2::new(78, 12)
     }
 
-    pub fn update(&mut self, next_char: char, last_wrong_char: Option<char>) {
-        self.next = Some(LabeledChord {
-            chord: char_to_chord(next_char),
-            label: char_to_label(next_char),
-        });
+    pub fn update(
+        &mut self,
+        next_char: Option<char>,
+        last_wrong_char: Option<char>,
+    ) {
+        // TODO use some map fn
+        self.next = match next_char {
+            Some(c) => Some(LabeledChord {
+                chord: char_to_chord(c),
+                label: char_to_label(c),
+            }),
+            None => None,
+        };
 
         if let Some(wrong_char) = last_wrong_char {
             self.backspace = Some(LabeledChord {
@@ -131,9 +139,10 @@ impl View for Graphic {
     }
 
     fn draw(&self, printer: &Printer) {
-        if self.get_chord(ChordType::Next).is_none() {
-            self.draw_question_mark(printer);
-        }
+        // if self.get_chord(ChordType::Next).is_none() {
+        // // This might just mean we're not showing hints right now
+        //     self.draw_question_mark(printer);
+        // }
         for switch in &self.switches {
             switch.draw(printer);
         }
