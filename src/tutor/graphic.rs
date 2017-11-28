@@ -64,19 +64,19 @@ impl Graphic {
 
     pub fn update(
         &mut self,
-        next_char: Option<char>,
-        last_wrong_char: Option<char>,
+        next_char: Option<String>,
+        last_wrong_char: Option<String>,
     ) {
         // TODO use some map fn
         self.next = match next_char {
-            Some(c) => Some(LabeledChord {
+            Some(ref c) => Some(LabeledChord {
                 chord: char_to_chord(c),
                 label: char_to_label(c),
             }),
             None => None,
         };
 
-        if let Some(wrong_char) = last_wrong_char {
+        if let Some(ref wrong_char) = last_wrong_char {
             self.backspace = Some(LabeledChord {
                 chord: backspace_chord(),
                 label: "bak".into(),

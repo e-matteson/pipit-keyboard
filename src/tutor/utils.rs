@@ -41,7 +41,7 @@ impl TutorData {
     }
 }
 
-pub fn char_to_chord(character: char) -> Option<Chord> {
+pub fn char_to_chord(character: &str) -> Option<Chord> {
     let (name, is_uppercase) = get_char_name(character)?;
     let mut chord = TutorData::get_chord(name)?;
     if is_uppercase {
@@ -51,58 +51,73 @@ pub fn char_to_chord(character: char) -> Option<Chord> {
 }
 
 
-pub fn char_to_label(character: char) -> String {
+pub fn char_to_label(character: &str) -> String {
     match character {
-        '\n' => "ret".into(), // "⏎"
-        '\t' => "tab".into(),
-        ' ' => "spc".into(),
+        "\n" => "ret".into(), // "⏎"
+        "\t" => "tab".into(),
+        " " => "spc".into(),
         c => c.to_string(),
     }
 }
 
-fn get_char_name(character: char) -> Option<(Name, bool)> {
-    if character.is_alphanumeric() {
-        return Some((
-            Name(format!("key_{}", character.to_lowercase())),
-            character.is_uppercase(),
-        ));
+fn to_ascii(character: &str) -> Option<char> {
+    let mut chars = character.chars();
+    let first_char = chars
+        .next()
+        .expect("string should contain exactly one grapheme, but is empty");
+    if chars.count() > 0 {
+        // this grapheme contained more than one byte, so it's not ascii.
+        None
+    } else {
+        Some(first_char)
+    }
+}
+
+fn get_char_name(character: &str) -> Option<(Name, bool)> {
+    if let Some(c) = to_ascii(character) {
+        if c.is_alphanumeric() {
+            return Some((
+                Name(format!("key_{}", c.to_lowercase())),
+                c.is_uppercase(),
+            ));
+        }
     }
     let name = match character {
-        '&' => "key_ampersand".into(),
-        '*' => "key_asterisk".into(),
-        '@' => "key_at".into(),
-        '\\' => "key_backslash".into(),
-        '!' => "key_bang".into(),
-        '^' => "key_caret".into(),
-        ':' => "key_colon".into(),
-        ',' => "key_comma".into(),
-        '$' => "key_dollar".into(),
-        '"' => "key_doublequote".into(),
-        '\n' => "key_enter".into(),
-        '=' => "key_equal".into(),
-        '`' => "key_grave".into(),
-        '#' => "key_hash".into(),
-        '<' => "key_left_angle".into(),
-        '[' => "key_left_brace".into(),
-        '{' => "key_left_curly".into(),
-        '(' => "key_left_paren".into(),
-        '-' => "key_minus".into(),
-        '%' => "key_percent".into(),
-        '.' => "key_period".into(),
-        '|' => "key_pipe".into(),
-        '+' => "key_plus".into(),
-        '?' => "key_question".into(),
-        '\'' => "key_quote".into(),
-        '>' => "key_right_angle".into(),
-        ']' => "key_right_brace".into(),
-        '}' => "key_right_curly".into(),
-        ')' => "key_right_paren".into(),
-        ';' => "key_semicolon".into(),
-        '/' => "key_slash".into(),
-        ' ' => "key_space".into(),
-        '\t' => "key_tab".into(),
-        '~' => "key_tilde".into(),
-        '_' => "key_underscore".into(),
+        "&" => "key_ampersand".into(),
+        "*" => "key_asterisk".into(),
+        "@" => "key_at".into(),
+        "\\" => "key_backslash".into(),
+        "!" => "key_bang".into(),
+        "^" => "key_caret".into(),
+        ":" => "key_colon".into(),
+        "," => "key_comma".into(),
+        "$" => "key_dollar".into(),
+        "\"" => "key_doublequote".into(),
+        "\n" => "key_enter".into(),
+        "=" => "key_equal".into(),
+        "`" => "key_grave".into(),
+        "#" => "key_hash".into(),
+        "<" => "key_left_angle".into(),
+        "[" => "key_left_brace".into(),
+        "{" => "key_left_curly".into(),
+        "(" => "key_left_paren".into(),
+        "-" => "key_minus".into(),
+        "%" => "key_percent".into(),
+        "." => "key_period".into(),
+        "|" => "key_pipe".into(),
+        "+" => "key_plus".into(),
+        "?" => "key_question".into(),
+        "'" => "key_quote".into(),
+        ">" => "key_right_angle".into(),
+        "]" => "key_right_brace".into(),
+        "}" => "key_right_curly".into(),
+        ")" => "key_right_paren".into(),
+        ";" => "key_semicolon".into(),
+        "/" => "key_slash".into(),
+        " " => "key_space".into(),
+        "\t" => "key_tab".into(),
+        "~" => "key_tilde".into(),
+        "_" => "key_underscore".into(),
         _ => return None,
     };
     Some((Name(name), false))

@@ -1,4 +1,5 @@
 #![allow(unused_doc_comment)]
+#![feature(entry_or_default)]
 
 extern crate cursive;
 extern crate itertools;

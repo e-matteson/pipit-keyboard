@@ -1,4 +1,4 @@
-// use std::time::Instant;
+use std::collections::HashMap;
 
 use cursive::Printer;
 use cursive::traits::*;
@@ -19,6 +19,31 @@ pub struct Copier {
     point_marker: String,
     point_offset: usize,
     index: usize,
+    keys: HashMap<String, LearnState>,
+}
+
+struct LearnState(i64);
+
+impl LearnState {
+    fn update(&mut self, was_correct: bool) {
+        if was_correct {
+            self.0 -= 1;
+        } else {
+            self.0 += 1;
+        }
+    }
+
+    fn needs_hint(&self) -> bool {
+        self.0 >= 0
+    }
+}
+
+impl Default for LearnState {
+    fn default() -> LearnState {
+        // Set the number of times you must type this character correctly
+        // before the hint goes away
+        LearnState(3)
+    }
 }
 
 impl Copier {
@@ -32,11 +57,26 @@ impl Copier {
             actual: String::new(),
             index: 0,
             was_backspace_typed_last: false,
+            keys: HashMap::new(),
+        }
+    }
+
+    pub fn next_hint(&mut self) -> Option<String> {
+        let next = self.expected_char_at_point();
+
+        let was_correct = self.was_last_char_correct();
+        let entry = self.keys.entry(next.clone()).or_default();
+        entry.update(was_correct);
+        if entry.needs_hint() || self.was_backspace_typed_last {
+            Some(next)
+        } else {
+            None
         }
     }
 
     pub fn type_char(&mut self, character: char) {
-        self.actual.push(character);
+        let s = character.to_string();
+        self.actual += &s;
         self.index += 1;
         self.was_backspace_typed_last = false;
     }
@@ -104,7 +144,13 @@ impl Copier {
         f64::max(0., (total_chars / CHARS_PER_WORD) - wrong_chars)
     }
 
-    pub fn last_wrong_char(&self) -> Result<Option<char>> {
+    fn was_last_char_correct(&self) -> bool {
+        self.last_wrong_char()
+            .expect("failed to check if char was wrong")
+            .is_none()
+    }
+
+    pub fn last_wrong_char(&self) -> Result<Option<String>> {
         let offset = self.point_offset - 1;
         let actual = self.char_at_offset(&self.actual, offset)?;
         let expected = self.char_at_offset(&self.expected, offset)?;
@@ -115,23 +161,29 @@ impl Copier {
         })
     }
 
-    fn char_at_offset(&self, string: &str, offset: usize) -> Result<char> {
-        let mut chars = grapheme_slice(string, self.start(), self.end())
+    fn char_at_offset(&self, string: &str, offset: usize) -> Result<String> {
+        grapheme_slice(string, self.start(), self.end())
             .nth(offset)
-            .ok_or_else(|| "no character offset".to_owned())?
-            .chars();
-        let first = chars
-            .next()
-            .ok_or_else(|| "invalid character at offset, no bytes".to_owned())?;
-        if chars.count() > 0 {
-            bail!("invalid character at offset, extra bytes");
-        }
-        Ok(first)
+            .ok_or_else(|| "no character offset".into())
+            .map(|s| s.to_owned())
+
+        // let mut chars = grapheme_slice(string, self.start(), self.end())
+        //     .nth(offset)
+        //     .ok_or_else(|| "no character offset".to_owned())?
+        //     .chars();
+        // let first = chars
+        //     .next()
+        // .ok_or_else(|| "invalid character at offset, no
+        // bytes".to_owned())?;
+        // // if chars.count() > 0 {
+        // //     bail!("invalid character at offset, extra bytes");
+        // // }
+        // Ok(first)
     }
 
-    pub fn expected_char_at_point(&self) -> char {
+    pub fn expected_char_at_point(&self) -> String {
         if self.at_end_of_line() {
-            '\n'
+            "\n".to_owned()
         } else {
             self.char_at_offset(&self.expected, self.point_offset)
                 .expect("failed to get character at point")
