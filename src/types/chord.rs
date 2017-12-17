@@ -55,6 +55,10 @@ impl Chord {
         self.bits.len()
     }
 
+    pub fn chord_length() -> usize {
+        get_chord_length()
+    }
+
     pub fn count_switches(&self) -> usize {
         self.bits.iter().filter(|x| **x).count()
     }
@@ -94,13 +98,17 @@ impl Chord {
         self.bits.iter()
     }
 
-    pub fn to_ints(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         let mut v: Vec<u8> = Vec::new();
         for chunk in &self.bits.iter().cloned().chunks(8) {
             let byte: Vec<_> = chunk.collect();
             v.push(byte_to_int(&byte));
         }
         v
+    }
+
+    pub fn to_usize_vec(&self) -> Vec<usize> {
+        self.iter().map(|&b| if b { 1 } else { 0 }).collect()
     }
 
     // pub fn get_anagram(&self)

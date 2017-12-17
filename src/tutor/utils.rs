@@ -21,31 +21,34 @@ impl TutorData {
     pub fn new(data: BTreeMap<ModeName, BTreeMap<Name, Chord>>) -> TutorData {
         TutorData(data)
     }
-
-    pub fn set(data: TutorData) {
-        let mut tutor_data = TUTOR_DATA.lock().unwrap();
-        match *tutor_data {
-            Some(_) => panic!("tutor data can only be set once"),
-            None => *tutor_data = Some(data),
-        }
-    }
-
-    pub fn get_chord(chord_name: Name) -> Option<Chord> {
+    pub fn get_chord(&self, chord_name: &Name) -> Option<Chord> {
+        // TODO don't assume default mode
         let mode_name = ModeName::default();
+        self.0.get(&mode_name)?.get(chord_name).cloned()
+    }
+}
 
-        if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-            data.0.get(&mode_name)?.get(&chord_name).cloned()
-        } else {
-            panic!("tutor data was not set")
-        }
+pub fn set_tutor_data(data: TutorData) {
+    let mut tutor_data = TUTOR_DATA.lock().unwrap();
+    match *tutor_data {
+        Some(_) => panic!("tutor data can only be set once"),
+        None => *tutor_data = Some(data),
+    }
+}
+
+pub fn get_tutor_data_chord(chord_name: Name) -> Option<Chord> {
+    if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
+        data.get_chord(&chord_name)
+    } else {
+        panic!("tutor data was not set")
     }
 }
 
 pub fn char_to_chord(character: &str) -> Option<Chord> {
     let (name, is_uppercase) = get_char_name(character)?;
-    let mut chord = TutorData::get_chord(name)?;
+    let mut chord = get_tutor_data_chord(name)?;
     if is_uppercase {
-        chord.intersect(&TutorData::get_chord(Name("mod_shift".into()))?)
+        chord.intersect(&get_tutor_data_chord(Name("mod_shift".into()))?)
     }
     Some(chord)
 }

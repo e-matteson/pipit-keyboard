@@ -14,7 +14,7 @@ use cursive::event::{Callback, Event, EventResult, Key};
 
 use types::errors::*;
 use tutor::graphic::Graphic;
-use tutor::utils::{offset, read_file_lines, TutorData};
+use tutor::utils::{offset, read_file_lines, set_tutor_data, TutorData};
 use tutor::copier::Copier;
 
 pub struct TutorApp;
@@ -35,7 +35,7 @@ enum LessonState {
 
 impl TutorApp {
     pub fn run(data: TutorData) {
-        TutorData::set(data);
+        set_tutor_data(data);
 
         let mut siv = Cursive::new();
 

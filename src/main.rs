@@ -4,6 +4,7 @@ use pipit_config::AllData;
 use pipit_config::errors::*;
 
 use pipit_config::tutor::{TutorApp, TutorData};
+use pipit_config::cheatsheet::CheatSheet;
 
 use std::env::args;
 
@@ -25,7 +26,9 @@ fn run() -> Result<()> {
     all_data.check();
     // TODO automatically extract path parts
     all_data.save_as("auto_config")?;
-    TutorApp::run(TutorData::new(all_data.get_tutor_data()?));
+    let tutor_data = TutorData::new(all_data.get_tutor_data()?);
+    CheatSheet::new(&tutor_data).save("out.svg");
+    // TutorApp::run(TutorData::new(tutor_data));
     Ok(())
 }
 

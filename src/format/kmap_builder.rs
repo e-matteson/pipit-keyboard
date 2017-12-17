@@ -26,10 +26,10 @@ impl ChordEntry {
         }
     }
 
-    pub fn to_ints(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         // let mut v = vec![self.offset as i64];
         let mut v = self.make_prefix_byte();
-        v.extend(self.chord.to_ints());
+        v.extend(self.chord.to_bytes());
         v
     }
 
@@ -184,9 +184,8 @@ impl<'a> KmapBuilder<'a> {
             let mut kmap_array = Vec::new();
 
             for length in 0..max_len(names_by_len) + 1 {
-                kmap_array.push(
-                    self.make_chord_subarray(names_by_len, length, kmap)?
-                );
+                kmap_array
+                    .push(self.make_chord_subarray(names_by_len, length, kmap)?);
             }
             chord_arrays.insert(kmap.to_owned(), kmap_array);
         }
@@ -351,7 +350,7 @@ fn max_len(names_by_len: &LenMap) -> usize {
 fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<u8> {
     let mut v = Vec::new();
     for entry in entries {
-        v.extend(entry.to_ints());
+        v.extend(entry.to_bytes());
     }
     v
 }

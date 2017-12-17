@@ -1,9 +1,11 @@
 #![allow(unused_doc_comment)]
 #![feature(entry_or_default)]
+#![feature(conservative_impl_trait)]
 
 extern crate cursive;
 extern crate itertools;
 extern crate natord;
+extern crate svg;
 extern crate time;
 extern crate toml;
 extern crate unicode_segmentation;
@@ -27,3 +29,4 @@ mod types;
 mod load;
 mod format;
 pub mod tutor;
+pub mod cheatsheet;

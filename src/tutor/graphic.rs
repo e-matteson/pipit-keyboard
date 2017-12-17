@@ -6,7 +6,8 @@ use cursive::theme::{Color, ColorStyle};
 use types::{Chord, Name};
 // use types::errors::*;
 
-use tutor::utils::{char_to_chord, char_to_label, grapheme_slice, TutorData};
+use tutor::utils::{char_to_chord, char_to_label, get_tutor_data_chord,
+                   grapheme_slice};
 
 pub struct Graphic {
     pub next: Option<LabeledChord>,
@@ -282,5 +283,5 @@ fn get_switch_positions() -> Vec<(usize, usize)> {
 
 
 fn backspace_chord() -> Option<Chord> {
-    TutorData::get_chord(Name("key_backspace".into()))
+    get_tutor_data_chord(Name("key_backspace".into()))
 }

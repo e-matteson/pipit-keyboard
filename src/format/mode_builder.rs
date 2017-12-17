@@ -85,7 +85,7 @@ impl<'a> ModeBuilder<'a> {
             anagram_mask.intersect(c);
         }
         *array_name = CCode(format!("{}_anagram_mask", self.mode_name));
-        CArray::new(array_name, &anagram_mask.to_ints())
+        CArray::new(array_name, &anagram_mask.to_bytes())
             .c_extern(false)
             .format()
     }
@@ -117,7 +117,7 @@ impl<'a> ModeBuilder<'a> {
         let mut subarray_names = Vec::new();
         for (i, c) in chords.iter().enumerate() {
             let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
-            f += CArray::new(&name, &c.to_ints()).c_extern(false).format();
+            f += CArray::new(&name, &c.to_bytes()).c_extern(false).format();
             subarray_names.push(name);
         }
         *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));
