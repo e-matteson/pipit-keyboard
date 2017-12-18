@@ -28,7 +28,7 @@ fn run() -> Result<()> {
     all_data.save_as("auto_config")?;
     let tutor_data = TutorData::new(all_data.get_tutor_data()?);
     CheatSheet::new(&tutor_data).save("out.svg");
-    // TutorApp::run(TutorData::new(tutor_data));
+    // TutorApp::run(tutor_data);
     Ok(())
 }
 

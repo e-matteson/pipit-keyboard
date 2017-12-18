@@ -3,7 +3,6 @@ use types::{Chord, Name};
 
 use std::ops::Add;
 use std::collections::HashMap;
-// use std::iter;
 
 use svg;
 use svg::Document;
@@ -11,6 +10,7 @@ use svg::{node, Node};
 use svg::node::Value;
 use svg::node::element::{Rectangle, Text};
 
+use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Clone, Debug)]
 pub struct CheatSheet {
@@ -56,13 +56,12 @@ struct MyRect {
 }
 
 #[derive(Clone, Debug)]
-struct MyText {
+struct Label {
     string: String,
     pos: P2,
     color: Color,
     size: f64,
     font: Font,
-    anchor: TextAnchor,
 }
 
 
@@ -257,22 +256,6 @@ impl Keyboard {
     }
 
     fn pick_display_style(chords: &[Chord]) -> DisplayStyle {
-        // // TODO clean up logic
-        // let mut all_nums = Chord::default().to_usize_vec();
-        // println!("{:?}", all_nums);
-        // // TODO consider anagram num
-        // for chord in chords {
-        //     println!("{}", chord.bit_string());
-        //     let nums = chord.to_usize_vec();
-        //     for index in 0..all_nums.len() {
-        //         all_nums[index] += nums[index];
-        //     }
-        // }
-        // println!("{:?}", all_nums);
-        // let all = all_nums.into_iter();
-        // let num_singles = all.clone().filter(|&x| x == 1).count();
-        // let num_chords = all.clone().filter(|&x| x > 1).count();
-
         // TODO clean up refs in iterators
         let chord_sizes: Vec<_> =
             chords.iter().map(|c| c.count_switches()).collect();
@@ -316,6 +299,7 @@ impl Keyboard {
             };
 
         let mut p = Vec::new();
+
         // top left row
         p.push(origin + (0., y_pinky)); // 0
         p.push(origin + (x_col, y_ring)); // 1
@@ -427,13 +411,13 @@ impl Switch {
 
         if let Some(ref content) = self.contents {
             doc.append(
-                MyText {
+                Label {
                     string: content.symbol.clone(),
-                    pos: self.center() + (0., self.font_size() / 4.),
+                    // pos: self.center() + (0., self.font_size() / 4.),
+                    pos: self.center(),
                     size: self.font_size(),
                     color: Color::Black,
                     font: Font::default(),
-                    anchor: TextAnchor::Middle,
                 }.finalize(),
             );
         }
@@ -475,20 +459,28 @@ impl Into<Value> for TextAnchor {
 // style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;
 // font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;
 // fill-opacity:1;stroke:none"
-impl MyText {
+impl Label {
     pub fn finalize(self) -> Text {
-        // let style = String::new();
+        let size = self.scaled_size();
         let text = Text::new()
             .set("x", self.pos.x)
             .set("y", self.pos.y)
-            .set("text-anchor", self.anchor)
+            .set("font-size", size)
             .set("font-style", self.font.style)
             .set("font-weight", self.font.weight)
             .set("font-family", self.font.family)
-            .set("font-size", self.size)
+            .set("dominant-baseline", "central") // center vertically
+            .set("text-anchor", TextAnchor::Middle) // center horizontally
             .set("fill", self.color)
             .add(node::Text::new(self.string));
         text
+    }
+
+    pub fn scaled_size(&self) -> f64 {
+        let len = self.string.graphemes(true).count() as i32; // lossy cast
+        println!("{}, {}", self.string, len);
+        let scale = if len > 1 { (0.9_f64).powi(len - 1) } else { 1. };
+        self.size * scale
     }
 }
 
@@ -638,6 +630,8 @@ impl V2 {
 }
 
 fn get_symbol(key: &Name) -> String {
+    // TODO add all symbols
+    // TODO share with tutor?
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, String>  = vec![
             ("key_a".into(), "a".into()),
@@ -681,12 +675,14 @@ fn get_symbol(key: &Name) -> String {
             ("key_right".into(), "→".into()),
             ("key_up".into(), "↑".into()),
             ("key_down".into(), "↓".into()),
-            ("key_backspace".into(), "⌫".into()),
-            ("key_space".into(), "␣".into()),
+            // ("key_backspace".into(), "⌫".into()),
+            ("key_backspace".into(), "bak".into()),
+            // ("key_space".into(), "␣".into()),
+            ("key_space".into(), "spc".into()),
             ("mod_shift".into(), "⇧".into()),
             ("mod_ctrl".into(), "ctrl".into()),
             ("mod_alt".into(), "alt".into()),
-            ("mod_gui".into(), "⌘❖".into()),
+            ("mod_gui".into(), "⌘/❖".into()),
         ].into_iter().collect();
     }
     SYMBOLS.get(key).expect("no symbol for key").to_owned()
