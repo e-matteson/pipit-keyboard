@@ -158,43 +158,45 @@ impl CheatSheet {
     pub fn new(data: &TutorData) -> CheatSheet {
         let mut keyboard = Keyboard::new(P2::new(10., 10.));
         keyboard.set_keys(
-            &[
-                "key_b".into(),
-                "key_w".into(),
-                "key_k".into(),
-                "key_j".into(),
-                "key_1".into(),
-                "key_0".into(),
-                // "key_5".into(),
-                // "key_4".into(),
-                "key_enter".into(),
-                // "key_page_down".into(),
-            ],
             // &[
-            //     "key_a".into(),
-            //     "key_c".into(),
-            //     "key_d".into(),
-            //     "key_e".into(),
-            //     "key_f".into(),
-            //     "key_h".into(),
-            //     "key_i".into(),
-            //     "key_l".into(),
-            //     "key_m".into(),
-            //     "key_n".into(),
-            //     "key_o".into(),
-            //     "key_p".into(),
-            //     "key_r".into(),
-            //     "key_s".into(),
-            //     "key_t".into(),
-            //     "key_u".into(),
-            //     "key_space".into(),
-            //     "key_backspace".into(),
-            //     "mod_shift".into(),
-            //     "mod_ctrl".into(),
-            //     "mod_gui".into(),
-            //     "mod_alt".into(),
+            //     "key_b".into(),
+            //     "key_w".into(),
+            //     "key_k".into(),
+            //     "key_j".into(),
+            //     "key_1".into(),
+            //     "key_0".into(),
+            //     // "key_5".into(),
+            //     // "key_4".into(),
+            //     "key_enter".into(),
             //     // "key_page_down".into(),
             // ],
+            &[
+                "key_a".into(),
+                "key_c".into(),
+                "key_d".into(),
+                "key_e".into(),
+                "key_f".into(),
+                "key_h".into(),
+                "key_i".into(),
+                "key_l".into(),
+                "key_m".into(),
+                "key_n".into(),
+                "key_o".into(),
+                "key_p".into(),
+                "key_r".into(),
+                "key_s".into(),
+                "key_t".into(),
+                "key_u".into(),
+                "key_space".into(),
+                "key_backspace".into(),
+                "key_up".into(),
+                "key_down".into(),
+                "mod_shift".into(),
+                "mod_ctrl".into(),
+                "mod_gui".into(),
+                "mod_alt".into(),
+                // "key_page_down".into(),
+            ],
             data,
         );
 
@@ -293,6 +295,8 @@ impl Keyboard {
     }
 
     fn positions(origin: P2) -> Vec<P2> {
+        // Order must match tutor's graphical switch order, since we're using
+        // the same chord lookup.
         let len = Switch::side_length();
         let y_pinky = len * 0.75;
         let y_ring = len * 0.25;
@@ -341,15 +345,18 @@ impl Keyboard {
             reflect(&mut p, i); // 12-15
         }
 
-        // left tower and thumb
+        // left and right towers
         offset(&mut p, 10, (0., y_tower)); // 16
-        offset(&mut p, 16, thumb_from_tower); // 17
-        offset(&mut p, 17, (x_thumb, y_thumb_medial)); // 18
-        offset(&mut p, 18, (x_thumb, y_thumb_radial)); // 19
+        reflect(&mut p, 16); // 17
 
-        // right tower and thumb
-        for i in (16..20).rev() {
-            reflect(&mut p, i); // 20-23
+        // left thumb
+        offset(&mut p, 16, thumb_from_tower); // 18
+        offset(&mut p, 18, (x_thumb, y_thumb_medial)); // 19
+        offset(&mut p, 19, (x_thumb, y_thumb_radial)); // 20
+
+        // right thumb
+        for i in (18..21).rev() {
+            reflect(&mut p, i); // 21-23
         }
         p
     }
