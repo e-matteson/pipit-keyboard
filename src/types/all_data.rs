@@ -329,18 +329,24 @@ impl AllData {
         self.checker.check_chords();
     }
 
+    fn get_names_for_seq(&self, seq_type: SeqType) -> Result<Vec<Name>> {
+        Ok(self.get_sequences(&seq_type)?.keys().cloned().collect())
+    }
+
     pub fn get_tutor_data(
         &self,
     ) -> Result<BTreeMap<ModeName, BTreeMap<Name, Chord>>> {
+        // TODO clean up, reorganize AllData to make this less bad?
         // TODO think about borrowck
         let mut chords = BTreeMap::new();
-        let names: Vec<_> = self.get_sequences(&SeqType::Plain)?
-            .keys()
-            .cloned()
-            .collect();
+        let mut names = self.get_names_for_seq(SeqType::Plain)?;
+        names.extend(self.get_names_for_seq(SeqType::Command)?);
+        names.extend(self.get_names_for_seq(SeqType::Macro)?);
+        names.extend(self.anagram_mods.clone());
+        names.extend(self.word_mods.clone());
+
         for mode in self.modes.keys() {
             let mut mode_chords = BTreeMap::new();
-            // chords.insert(mode, BTreeMap::new());
             for name in &names {
                 if let Some(chord) = self.get_visual_chord_in_mode(name, mode) {
                     mode_chords.insert(name.to_owned(), chord);

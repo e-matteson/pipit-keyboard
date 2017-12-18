@@ -1,13 +1,20 @@
 use std::collections::HashMap;
+use std::f64::consts::PI;
+use std::io::prelude::*;
+use std::fs::File;
 
 use svg;
 use svg::Document;
 use svg::Node;
+use svg::node::element::{ClipPath, Definitions, Group, Path};
+use svg::node::element::path::Data;
 
+use toml;
 
 use tutor::TutorData;
 use types::{Chord, Name};
-use cheatsheet::draw::{Color, Fill, Font, Label, MyRect, P2, V2};
+use types::errors::*;
+use cheatsheet::draw::{Color, Fill, Font, Label, MyCircle, MyRect, P2, V2};
 
 
 #[derive(Clone, Debug)]
@@ -15,13 +22,19 @@ pub struct CheatSheet {
     keyboards: Vec<Keyboard>,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct CheatSheetSpec {
+    keyboards: Vec<KeyboardSpec>,
+    // TODO add title?
+}
+
 #[derive(Clone, Debug)]
 struct Keyboard {
     switches: Vec<Switch>,
 }
 
-#[derive(Clone, Debug)]
-struct KeyboardSpec {
+#[derive(Clone, Debug, Deserialize)]
+pub struct KeyboardSpec {
     keys: Vec<Name>,
     // TODO add title?
 }
@@ -41,72 +54,63 @@ struct Content {
 #[derive(Clone, Debug)]
 struct Switch {
     pos: P2,
-    contents: Option<Content>,
+    contents: Vec<Content>,
 }
 
+#[derive(Clone, Debug)]
+struct Wedge {
+    tip_pos: P2,
+    radius: f64,
+    circle_divisions: usize,
+    division_num: usize,
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CheatSheet {
-    pub fn new(data: &TutorData) -> CheatSheet {
-        let mut keyboard = Keyboard::new(P2::new(10., 10.));
-        keyboard.set_keys(
-            // &[
-            //     "key_b".into(),
-            //     "key_w".into(),
-            //     "key_k".into(),
-            //     "key_j".into(),
-            //     "key_1".into(),
-            //     "key_0".into(),
-            //     // "key_5".into(),
-            //     // "key_4".into(),
-            //     "key_enter".into(),
-            //     // "key_page_down".into(),
-            // ],
-            &[
-                "key_a".into(),
-                "key_c".into(),
-                "key_d".into(),
-                "key_e".into(),
-                "key_f".into(),
-                "key_h".into(),
-                "key_i".into(),
-                "key_l".into(),
-                "key_m".into(),
-                "key_n".into(),
-                "key_o".into(),
-                "key_p".into(),
-                "key_r".into(),
-                "key_s".into(),
-                "key_t".into(),
-                "key_u".into(),
-                "key_space".into(),
-                "key_backspace".into(),
-                "key_up".into(),
-                "key_down".into(),
-                "mod_shift".into(),
-                "mod_ctrl".into(),
-                "mod_gui".into(),
-                "mod_alt".into(),
-                // "key_page_down".into(),
-            ],
-            data,
-        );
+    pub fn from_toml(path: &str, data: &TutorData) -> CheatSheet {
+        let spec: CheatSheetSpec = toml::from_str(
+            &read_file(path).expect("failed to read"),
+        ).expect("failed to parse");
+        CheatSheet::new(spec, data)
+    }
 
-        CheatSheet {
-            keyboards: vec![keyboard],
+    pub fn new(spec: CheatSheetSpec, data: &TutorData) -> CheatSheet {
+        // TODO make spacing even, make page breaks?
+        let mut col_1_pos = P2::new(10., 10.);
+        let mut col_2_pos = col_1_pos + V2::new(Keyboard::width(), 0.);
+        let height = V2::new(0., Keyboard::height());
+        let mut all = Vec::new();
+        for (i, kb_spec) in spec.keyboards.iter().enumerate() {
+            let mut pos = if i % 2 == 0 {
+                &mut col_1_pos
+            } else {
+                &mut col_2_pos
+            };
+            let mut keyboard = Keyboard::new(*pos);
+            keyboard.set_keys(&kb_spec.keys, data);
+            all.push(keyboard);
+            *pos = *pos + height;
         }
+        CheatSheet { keyboards: all }
     }
 
     pub fn save(&self, filename: &str) {
-        let page_width = 1000;
-        let page_height = 300;
+        // TODO add metadata
+        let page_width = Keyboard::width() * 2.;
+        let page_height = Keyboard::height() * 7.;
 
-        let mut document =
-            Document::new().set("viewBox", (0, 0, page_width, page_height));
+        let mut group = Group::new();
+
         for kb in &self.keyboards {
-            kb.add_to(&mut document);
+            kb.add_to(&mut group);
         }
-        svg::save(filename, &document).unwrap();
+
+        let mut doc =
+            Document::new().set("viewBox", (0, 0, page_width, page_height));
+
+        Switch::add_mask_definition(&mut doc);
+        doc.append(group);
+        svg::save(filename, &doc).unwrap();
     }
 }
 
@@ -121,19 +125,23 @@ impl Keyboard {
     }
 
     fn set_keys(&mut self, keys: &[Name], data: &TutorData) {
-        // TODO use actual Chords methods: len, iter
         assert_eq!(Chord::chord_length(), self.switches.len());
-
         let chords: Vec<_> = keys.iter()
             .map(|key| data.get_chord(key).expect("chord not found"))
             .collect();
 
         let symbols: Vec<_> = keys.iter().map(|key| get_symbol(key)).collect();
 
-        let style = Keyboard::pick_display_style(&chords);
-        let mut fills = style.fill_iter();
+        let mut single_fills = DisplayStyle::Single.fill_iter();
+        let mut multi_fills = DisplayStyle::Chords.fill_iter();
 
         for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
+            let mut fills = if chord.count_switches() > 1 {
+                &mut multi_fills
+            } else {
+                &mut single_fills
+            };
+
             let content = Content {
                 symbol: symbol.clone(),
                 fill: fills
@@ -142,32 +150,42 @@ impl Keyboard {
             };
             for (index, &bit) in chord.iter().enumerate() {
                 if bit {
-                    self.switches[index].set_content(content.clone());
+                    self.switches[index].add_content(content.clone());
                 }
             }
         }
     }
 
-    fn pick_display_style(chords: &[Chord]) -> DisplayStyle {
-        // TODO clean up refs in iterators
-        let chord_sizes: Vec<_> =
-            chords.iter().map(|c| c.count_switches()).collect();
-        let num_singles = chord_sizes.iter().filter(|&&x| x == 1).count();
-        let num_multis = chord_sizes.iter().filter(|&&x| x > 1).count();
-
-        // TODO better messages, return Result
-        println!("{}, {}", num_singles, num_multis);
-        match (num_singles, num_multis) {
-            (_, 0) => DisplayStyle::Single,
-            (0, _) => DisplayStyle::Chords,
-            _ => panic!("can't mix single switch and multi-switch chords"),
+    fn add_to(&self, group: &mut Group) {
+        for switch in &self.switches {
+            switch.add_to(group);
         }
     }
 
-    fn add_to(&self, doc: &mut Document) {
-        for switch in &self.switches {
-            switch.add_to(doc);
-        }
+    fn height() -> f64 {
+        // TODO this could fail if the switch alignment changes! Those 2
+        // switches won't always be highest and lowest.
+        let positions = Keyboard::positions(P2::origin());
+        let err_msg = "failed to calc keyboard height";
+        let highest = 2;
+        let lowest = 20;
+        let height = positions.get(lowest).expect(err_msg).y
+            - positions.get(highest).expect(err_msg).y
+            + Switch::side_length();
+        height * 1.1
+    }
+
+    fn width() -> f64 {
+        // TODO this could fail if the switch alignment changes! Those 2
+        // switches won't always be highest and lowest.
+        let positions = Keyboard::positions(P2::origin());
+        let err_msg = "failed to calc keyboard width";
+        let highest = 7;
+        let lowest = 0;
+        let width = positions.get(highest).expect(err_msg).x
+            - positions.get(lowest).expect(err_msg).x
+            + Switch::side_length();
+        width * 1.05
     }
 
     fn positions(origin: P2) -> Vec<P2> {
@@ -183,7 +201,7 @@ impl Keyboard {
         let x_thumb = x_col;
         let y_thumb_medial = len * 0.;
         let y_thumb_radial = len * 0.5;
-        let x_col_hand_gap = len * 4.;
+        let x_col_hand_gap = len * 3.;
 
         let offset =
             |positions: &mut Vec<P2>, index: usize, offset: (f64, f64)| {
@@ -254,6 +272,10 @@ impl DisplayStyle {
                 Fill::Shared5,
                 Fill::Shared6,
                 Fill::Shared7,
+                Fill::Shared8,
+                Fill::Shared9,
+                Fill::Shared10,
+                Fill::Shared11,
             ],
         };
         v.into_iter()
@@ -264,69 +286,222 @@ impl Switch {
     fn new(pos: P2) -> Switch {
         Switch {
             pos: pos,
-            contents: None,
+            contents: Vec::new(),
         }
     }
 
-    fn set_content(&mut self, symbol: Content) {
-        self.contents = Some(symbol);
+    fn add_content(&mut self, content: Content) {
+        self.contents.push(content);
     }
 
     fn side_length() -> f64 {
-        50.
+        // 50.
+        25.
     }
+    fn mask_name() -> String {
+        "SwitchMask".into()
+    }
+
     fn size() -> V2 {
         let len = Switch::side_length();
         V2::new(len, len)
     }
 
     fn font_size(&self) -> f64 {
-        30.
+        // 15.
+        Switch::side_length() * 3. / 5.
     }
 
-    fn center(&self) -> P2 {
-        let half = Self::side_length() / 2.;
-        P2::new(self.pos.x + half, self.pos.y + half)
+    // fn center(&self) -> P2 {
+    //     let half = Self::side_length() / 2.;
+    //     P2::new(self.pos.x + half, self.pos.y + half)
+    // }
+
+    // fn sole_content(&self) -> Option<Content> {
+    //     if self.contents.len() == 1 {
+    //         self.contents.get(0).cloned()
+    //     } else {
+    //         None
+    //     }
+    // }
+
+    fn outline(pos: P2) -> MyRect {
+        MyRect::new(P2::new(pos.x, pos.y), Switch::size())
+            .stroke(Color::Black, 1.)
+            .fillet(5.)
     }
 
-    fn fill(&self) -> Fill {
-        if let Some(ref contents) = self.contents {
-            contents.fill
-        } else {
-            Fill::Blank
-        }
+    fn add_mask_definition(doc: &mut Document) {
+        let mask = Switch::outline(P2::origin()).finalize();
+        let clip_path = ClipPath::new()
+            .set("id", Switch::mask_name())
+        // .set("clipPathUnits", "objectBoundingBox")
+            .add(mask);
+        let defs = Definitions::new().add(clip_path);
+        doc.append(defs);
     }
 
-    fn add_to(&self, doc: &mut Document) {
-        doc.append(
-            MyRect::new(self.pos, Switch::size())
-                .fill(self.fill())
-                .stroke(Color::Black, 3.)
-                .fillet(5.)
-                .finalize(),
-        );
+    fn radius(&self) -> f64 {
+        Switch::side_length() / 2. * 2_f64.sqrt()
+    }
 
-        if let Some(ref content) = self.contents {
-            doc.append(
+    fn relative_center(&self) -> P2 {
+        let half_len = Switch::side_length() / 2.;
+        P2::new(half_len, half_len)
+    }
+
+    fn pie(&self) -> Group {
+        let mut g = Group::new();
+        let num_wedges = self.contents.len();
+
+        if num_wedges == 1 {
+            let sole_content = &self.contents[0];
+            g.append(
+                MyCircle::new(self.relative_center(), self.radius())
+                    .fill(sole_content.fill)
+                    .finalize(),
+            );
+            g.append(
                 Label {
-                    string: content.symbol.clone(),
-                    // pos: self.center() + (0., self.font_size() / 4.),
-                    pos: self.center(),
+                    string: sole_content.symbol.clone(),
+                    pos: self.relative_center(),
                     size: self.font_size(),
                     color: Color::Black,
                     font: Font::default(),
                 }.finalize(),
-            );
+            )
+        } else {
+            for (i, content) in self.contents.iter().enumerate() {
+                g.append(
+                    Wedge {
+                        tip_pos: self.relative_center(),
+                        radius: self.radius(),
+                        circle_divisions: num_wedges,
+                        division_num: i,
+                    }.finalize(content.fill),
+                );
+            }
         }
+        g.set("clip-path", format!("url(#{})", Switch::mask_name()))
+            .set(
+                "transform",
+                format!("translate({},{})", self.pos.x, self.pos.y),
+            )
     }
+
+    fn add_to(&self, group: &mut Group) {
+        group.append(self.pie());
+        group.append(Switch::outline(self.pos).finalize());
+    }
+}
+
+impl Wedge {
+    fn arc_start(&self) -> P2 {
+        self.tip_pos
+            + polar_vec(self.radius, self.rotation_radians()).reflect_xy()
+    }
+
+    fn arc_end(&self) -> P2 {
+        self.tip_pos
+            + polar_vec(
+                self.radius,
+                self.rotation_radians() + self.width_radians(),
+            ).reflect_xy()
+    }
+
+    fn rotation_radians(&self) -> f64 {
+        self.width_radians() * (self.division_num as f64)
+    }
+
+    fn width_radians(&self) -> f64 {
+        PI * 2. / (self.circle_divisions as f64)
+    }
+
+    fn is_large_arc(&self) -> bool {
+        self.width_radians() > PI
+    }
+
+    fn finalize(&self, fill: Fill) -> Path {
+        Path::new()
+            .set("d", self.to_data())
+            .set("fill", fill.color())
+    }
+
+    fn to_data(&self) -> Data {
+        Data::new()
+            .move_to(self.tip_pos)
+            .line_to(self.arc_start())
+            .elliptical_arc_to(
+                ArcArgs {
+                    radius: P2::new(self.radius, self.radius),
+                    x_axis_rotation: 0.,
+                    large_arc_flag: self.is_large_arc(),
+                    sweep_flag: false,
+                    end: self.arc_end(),
+                }.finalize(),
+            )
+            .close()
+    }
+
+    // fn debug(&self) -> Group {
+    //     Group::new()
+    //         .add(mark(self.arc_start()))
+    //         .add(mark(self.arc_end()))
+    //         .add(mark(self.tip_pos))
+    // }
+}
+
+// fn mark(pos: P2) -> Circle {
+//     Circle::new()
+//         .set("cx", pos.x)
+//         .set("cy", pos.y)
+//         .set("fill", Color::Red)
+//         .set("r", 5)
+// }
+
+struct ArcArgs {
+    radius: P2,
+    x_axis_rotation: f64,
+    large_arc_flag: bool,
+    sweep_flag: bool,
+    end: P2,
+}
+
+impl ArcArgs {
+    fn finalize(&self) -> (f64, f64, f64, f64, f64, f64, f64) {
+        (
+            self.radius.x,
+            self.radius.y,
+            self.x_axis_rotation,
+            if self.large_arc_flag { 1. } else { 0. },
+            if self.sweep_flag { 1. } else { 0. },
+            self.end.x,
+            self.end.y,
+        )
+    }
+}
+
+fn polar_vec(radius: f64, radians: f64) -> V2 {
+    let x = radians.cos() * radius;
+    let y = radians.sin() * radius;
+    V2::new(x, y)
 }
 
 
 fn get_symbol(key: &Name) -> String {
-    // TODO add all symbols
     // TODO share with tutor?
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, String>  = vec![
+            // ("mod_shift".into(), "⇧".into()),
+            ("mod_shift".into(), "shift".into()),
+            ("mod_ctrl".into(), "ctrl".into()),
+            ("mod_alt".into(), "alt".into()),
+            ("mod_gui".into(), "⌘❖".into()),
+            ("mod_anagram_1".into(), "a1".into()),
+            ("mod_anagram_2".into(), "a2".into()),
+            ("mod_capital".into(), "cap".into()),
+            ("mod_nospace".into(), "NoSpc".into()),
+            ("mod_double".into(), "double".into()),
             ("key_a".into(), "a".into()),
             ("key_b".into(), "b".into()),
             ("key_c".into(), "c".into()),
@@ -363,7 +538,8 @@ fn get_symbol(key: &Name) -> String {
             ("key_7".into(), "7".into()),
             ("key_8".into(), "8".into()),
             ("key_9".into(), "9".into()),
-            ("key_enter".into(), "⏎".into()),
+            // ("key_enter".into(), "⏎".into()),
+            ("key_enter".into(), "enter".into()),
             ("key_left".into(), "←".into()),
             ("key_right".into(), "→".into()),
             ("key_up".into(), "↑".into()),
@@ -372,11 +548,75 @@ fn get_symbol(key: &Name) -> String {
             ("key_backspace".into(), "bak".into()),
             // ("key_space".into(), "␣".into()),
             ("key_space".into(), "spc".into()),
-            ("mod_shift".into(), "⇧".into()),
-            ("mod_ctrl".into(), "ctrl".into()),
-            ("mod_alt".into(), "alt".into()),
-            ("mod_gui".into(), "⌘❖".into()),
+            ("key_backslash".into(), "\\".into()),
+            ("key_right_paren".into(), ")".into()),
+            ("key_right_angle".into(), "&gt;".into()), // TODO scale as if len==1
+            ("key_right_curly".into(), "}".into()),
+            ("key_right_brace".into(), "]".into()),
+            ("key_left_paren".into(), "(".into()),
+            ("key_left_angle".into(), "&lt;".into()), // TODO scale as if len==1
+            ("key_left_curly".into(), "{".into()),
+            ("key_left_brace".into(), "[".into()),
+            ("key_f1".into(), "f1".into()),
+            ("key_f2".into(), "f2".into()),
+            ("key_f3".into(), "f3".into()),
+            ("key_f4".into(), "f4".into()),
+            ("key_f5".into(), "f5".into()),
+            ("key_f6".into(), "f6".into()),
+            ("key_f7".into(), "f7".into()),
+            ("key_f8".into(), "f8".into()),
+            ("key_f9".into(), "f9".into()),
+            ("key_tab".into(), "tab".into()),
+            ("key_esc".into(), "esc".into()),
+            ("key_caps_lock".into(), "caplock".into()),
+            ("key_home".into(), "home".into()),
+            ("key_end".into(), "end".into()),
+            ("key_page_up".into(), "PgUp".into()),
+            ("key_page_down".into(), "PgDn".into()),
+            ("key_printscreen".into(), "print".into()),
+            ("key_delete".into(), "del".into()),
+            ("key_ampersand".into(), "&amp;".into()),
+            ("key_asterisk".into(), "*".into()),
+            ("key_at".into(), "@".into()),
+            ("key_backslash".into(), "\\".into()),
+            ("key_bang".into(), "!".into()),
+            ("key_caret".into(), "^".into()),
+            ("key_colon".into(), ":".into()),
+            ("key_comma".into(), ",".into()),
+            ("key_dollar".into(), "$".into()),
+            ("key_doublequote".into(), "\"".into()),
+            ("key_equal".into(), "=".into()),
+            ("key_grave".into(), "`".into()),
+            ("key_hash".into(), "#".into()),
+            ("key_minus".into(), "-".into()),
+            ("key_percent".into(), "%".into()),
+            ("key_period".into(), ".".into()),
+            ("key_pipe".into(), "|".into()),
+            ("key_plus".into(), "+".into()),
+            ("key_question".into(), "?".into()),
+            ("key_quote".into(), "'".into()),
+            ("key_semicolon".into(), ";".into()),
+            ("key_slash".into(), "/".into()),
+            ("key_tilde".into(), "~".into()),
+            ("key_underscore".into(), "_".into()),
+            ("command_pause".into(), "pause".into()),
+            ("command_delete_word".into(), "DelWord".into()),
+            ("command_cycle_word".into(), "CycleWord".into()),
+            ("command_gaming_mode".into(), "GameMode".into()),
+            ("command_left_hand_mode".into(), "LeftHandMode".into()),
+            ("macro_in_paren".into(), "()".into()),
+            ("macro_in_curly".into(), "{}".into()),
+            ("macro_in_brace".into(), "[]".into()),
+            ("macro_in_angle".into(), "&lt;&gt;".into()),
+
         ].into_iter().collect();
     }
     SYMBOLS.get(key).expect("no symbol for key").to_owned()
+}
+
+fn read_file(path: &str) -> Result<String> {
+    let mut f: File = File::open(path)?;
+    let mut buffer = String::new();
+    f.read_to_string(&mut buffer)?;
+    Ok(buffer)
 }

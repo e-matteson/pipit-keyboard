@@ -27,7 +27,8 @@ fn run() -> Result<()> {
     // TODO automatically extract path parts
     all_data.save_as("auto_config")?;
     let tutor_data = TutorData::new(all_data.get_tutor_data()?);
-    CheatSheet::new(&tutor_data).save("out.svg");
+    CheatSheet::from_toml("settings/cheatsheet.toml", &tutor_data)
+        .save("out.svg");
     // TutorApp::run(tutor_data);
     Ok(())
 }

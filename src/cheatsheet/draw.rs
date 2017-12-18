@@ -1,10 +1,9 @@
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
-// use svg;
-// use svg::Document;
-use svg::node;
+use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Rectangle, Text};
+use svg::node::element::{Circle, Rectangle, Text};
+use svg::node::element::path::Parameters;
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -16,6 +15,15 @@ pub struct MyRect {
     fill: Option<Fill>,
     fillet: Option<V2>,
 }
+
+#[derive(Clone, Copy, Debug)]
+pub struct MyCircle {
+    pos: P2,
+    radius: f64,
+    fill: Option<Fill>,
+    stroke: Option<Stroke>,
+}
+
 
 #[derive(Clone, Debug)]
 pub struct Label {
@@ -139,7 +147,7 @@ impl MyRect {
         self
     }
 
-    pub fn fill(mut self, fill: Fill) -> Self {
+    pub fn _fill(mut self, fill: Fill) -> Self {
         self.fill = Some(fill);
         self
     }
@@ -158,26 +166,68 @@ impl MyRect {
             .set("height", self.size.y);
 
         if let Some(stroke) = self.stroke {
-            element = element
-                .set("stroke", stroke.color)
-                .set("stroke-width", stroke.width);
+            element.assign("stroke", stroke.color);
+            element.assign("stroke-width", stroke.width);
         }
 
         if let Some(fill) = self.fill {
-            element = element.set("fill", fill.color());
+            element.assign("fill", fill.color());
+        } else {
+            element.assign("fill", "none");
         }
 
         if let Some(fillet) = self.fillet {
-            element = element.set("rx", fillet.x).set("ry", fillet.y);
+            element.assign("rx", fillet.x);
+            element.assign("ry", fillet.y);
         }
         element
     }
 }
 
+impl MyCircle {
+    pub fn new(pos: P2, radius: f64) -> Self {
+        Self {
+            pos: pos,
+            radius: radius,
+            stroke: None,
+            fill: None,
+        }
+    }
 
-// style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;
-// font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;
-// fill-opacity:1;stroke:none"
+    pub fn _stroke(mut self, color: Color, width: f64) -> Self {
+        self.stroke = Some(Stroke {
+            color: color,
+            width: width,
+        });
+        self
+    }
+
+    pub fn fill(mut self, fill: Fill) -> Self {
+        self.fill = Some(fill);
+        self
+    }
+
+    pub fn finalize(self) -> Circle {
+        let mut element = Circle::new()
+            .set("cx", self.pos.x)
+            .set("cy", self.pos.y)
+            .set("r", self.radius);
+
+        if let Some(stroke) = self.stroke {
+            element.assign("stroke", stroke.color);
+            element.assign("stroke-width", stroke.width);
+        }
+
+        if let Some(fill) = self.fill {
+            element.assign("fill", fill.color());
+        } else {
+            element.assign("fill", "none");
+        }
+
+        element
+    }
+}
+
 impl Label {
     pub fn finalize(self) -> Text {
         let size = self.scaled_size();
@@ -197,40 +247,15 @@ impl Label {
 
     pub fn scaled_size(&self) -> f64 {
         let len = self.string.graphemes(true).count() as i32; // lossy cast
-        println!("{}, {}", self.string, len);
+                                                              // println!("{}, {}", self.string, len);
         let scale = if len > 1 { (0.9_f64).powi(len - 1) } else { 1. };
         self.size * scale
     }
 }
 
-
-// #[test]
-// fn test_complex_rect() {
-//     let rect = MyRect::new(P2::new(50., 25.), V2::new(100., 200.))
-//         .fill(Color::Red)
-//         .stroke(Color::Blue, 3.)
-//         .fillet(5.)
-//         .finalize();
-//     assert!(
-//         rect.to_string()
-//             == "<rect fill=\"red\" height=\"200\" rx=\"5\" ry=\"5\" \
-//                 stroke=\"blue\" stroke-width=\"3\" width=\"100\" x=\"50\" \
-//                 y=\"25\"/>"
-//     )
-// }
-
-// #[test]
-// fn test_simple_rect() {
-//     let rect = MyRect::new(P2::new(0., 0.), V2::new(30., 50.)).finalize();
-//     assert_eq!(
-//         rect.to_string(),
-//         "<rect height=\"50\" width=\"30\" x=\"0\" y=\"0\"/>"
-//     )
-// }
-
 impl Fill {
     // TODO add patterns to distinguish between same colors.
-    fn color(&self) -> Color {
+    pub fn color(&self) -> Color {
         match *self {
             Fill::Blank => Color::White,
             Fill::Single => Color::LightGrey,
@@ -308,11 +333,18 @@ impl P2 {
     pub fn new(x: f64, y: f64) -> P2 {
         P2 { x: x, y: y }
     }
+    pub fn origin() -> P2 {
+        P2::new(0., 0.)
+    }
 }
 
 impl V2 {
     pub fn new(x: f64, y: f64) -> V2 {
         V2 { x: x, y: y }
+    }
+
+    pub fn reflect_xy(&self) -> V2 {
+        V2::new(self.y, self.x)
     }
 }
 
@@ -320,5 +352,34 @@ impl Add<(f64, f64)> for P2 {
     type Output = P2;
     fn add(self, rhs: (f64, f64)) -> P2 {
         P2::new(self.x + rhs.0, self.y + rhs.1)
+    }
+}
+
+impl Add<V2> for P2 {
+    type Output = P2;
+    fn add(self, rhs: V2) -> P2 {
+        P2::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+impl Sub<V2> for P2 {
+    type Output = P2;
+    fn sub(self, rhs: V2) -> P2 {
+        P2::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Into<Parameters> for P2 {
+    fn into(self) -> Parameters {
+        (self.x, self.y).into()
+    }
+}
+impl Into<V2> for P2 {
+    fn into(self) -> V2 {
+        V2::new(self.x, self.y)
+    }
+}
+impl Into<P2> for V2 {
+    fn into(self) -> P2 {
+        P2::new(self.x, self.y)
     }
 }
