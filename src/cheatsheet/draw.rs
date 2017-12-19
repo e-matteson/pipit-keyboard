@@ -2,7 +2,7 @@ use std::ops::{Add, Sub};
 
 use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Circle, Rectangle, Text};
+use svg::node::element::{Circle, Definitions, Mask, Pattern, Rectangle, Text};
 use svg::node::element::path::Parameters;
 
 use unicode_segmentation::UnicodeSegmentation;
@@ -64,29 +64,19 @@ pub enum Color {
     DarkGrey,
 }
 
-// #[derive(Clone, Copy, Debug)]
-// pub enum Pattern {
-//     Solid,
-// }
+#[derive(Clone, Copy, Debug)]
+pub enum FillPattern {
+    Checkers,
+    VertStripes,
+    HorizStripes,
+    Dots,
+}
 
 #[derive(Clone, Copy, Debug)]
 #[allow(dead_code)]
-pub enum Fill {
-    Blank,
-    Single,
-    // TODO rename shared
-    Shared0,
-    Shared1,
-    Shared2,
-    Shared3,
-    Shared4,
-    Shared5,
-    Shared6,
-    Shared7,
-    Shared8,
-    Shared9,
-    Shared10,
-    Shared11,
+pub struct Fill {
+    pub color: Color,
+    pub pattern: Option<FillPattern>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -147,10 +137,10 @@ impl MyRect {
         self
     }
 
-    pub fn _fill(mut self, fill: Fill) -> Self {
-        self.fill = Some(fill);
-        self
-    }
+    // pub fn fill(mut self, fill: Fill) -> Self {
+    //     self.fill = Some(fill);
+    //     self
+    // }
 
     pub fn fillet(mut self, radius: f64) -> Self {
         assert!(radius >= 0.);
@@ -171,7 +161,8 @@ impl MyRect {
         }
 
         if let Some(fill) = self.fill {
-            element.assign("fill", fill.color());
+            // TODO put None option in fill enum
+            fill.assign_to(&mut element);
         } else {
             element.assign("fill", "none");
         }
@@ -219,7 +210,7 @@ impl MyCircle {
         }
 
         if let Some(fill) = self.fill {
-            element.assign("fill", fill.color());
+            fill.assign_to(&mut element);
         } else {
             element.assign("fill", "none");
         }
@@ -254,18 +245,184 @@ impl Label {
 }
 
 impl Fill {
-    // TODO add patterns to distinguish between same colors.
-    pub fn color(&self) -> Color {
-        match *self {
-            Fill::Blank => Color::White,
-            Fill::Single => Color::LightGrey,
-            Fill::Shared0 | Fill::Shared6 => Color::Red,
-            Fill::Shared1 | Fill::Shared7 => Color::Yellow,
-            Fill::Shared2 | Fill::Shared8 => Color::Green,
-            Fill::Shared3 | Fill::Shared9 => Color::Cyan,
-            Fill::Shared4 | Fill::Shared10 => Color::Blue,
-            Fill::Shared5 | Fill::Shared11 => Color::Magenta,
+    pub fn new_solid(color: Color) -> Fill {
+        Fill {
+            color: color,
+            pattern: None,
         }
+    }
+
+    pub fn assign_to<T>(&self, node: &mut T)
+    where
+        T: Node,
+    {
+        node.assign("fill", self.color);
+        if let Some(pattern) = self.pattern {
+            node.assign("mask", pattern.mask_url());
+        }
+    }
+}
+
+impl FillPattern {
+    fn mask_url(&self) -> String {
+        format!("url(#{})", self.mask_id())
+    }
+
+    fn pattern_url(&self) -> String {
+        format!("url(#{})", self.pattern_id())
+    }
+
+    fn pattern_id(&self) -> String {
+        format!("Pattern{}", self.id_base())
+    }
+
+    fn mask_id(&self) -> String {
+        format!("Mask{}", self.id_base())
+    }
+    fn id_base(&self) -> String {
+        match *self {
+            FillPattern::Checkers => "Checkers".into(),
+            FillPattern::VertStripes => "VertStripes".into(),
+            FillPattern::HorizStripes => "HorizStripes".into(),
+            FillPattern::Dots => "Dots".into(),
+        }
+    }
+
+    pub fn add_all_definitions(background: MyRect, defs: &mut Definitions) {
+        FillPattern::Checkers.add_definition(background, defs);
+        FillPattern::VertStripes.add_definition(background, defs);
+        FillPattern::HorizStripes.add_definition(background, defs);
+        FillPattern::Dots.add_definition(background, defs);
+    }
+
+    pub fn add_definition(&self, background: MyRect, defs: &mut Definitions) {
+        let pattern = match *self {
+            FillPattern::Checkers => FillPattern::checkers_pattern(),
+            FillPattern::VertStripes => FillPattern::vert_stripes_pattern(),
+            FillPattern::HorizStripes => FillPattern::horiz_stripes_pattern(),
+            FillPattern::Dots => FillPattern::dots_pattern(),
+        }.set("id", self.pattern_id());
+        let rect = background.finalize().set("fill", self.pattern_url());
+        let mask = Mask::new().set("id", self.mask_id()).add(rect);
+        defs.append(pattern);
+        defs.append(mask);
+    }
+
+    fn checkers_pattern() -> Pattern {
+        let size = 4.;
+        let rect1 = Rectangle::new()
+            .set("x", 0.)
+            .set("y", 0.)
+            .set("width", size)
+            .set("height", size)
+            .set("fill", "white");
+
+        let rect2 = Rectangle::new()
+            .set("x", size)
+            .set("y", size)
+            .set("width", size)
+            .set("height", size)
+            .set("fill", "white");
+
+        let rect3 = Rectangle::new()
+            .set("x", 0.)
+            .set("y", 0.)
+            .set("width", 2. * size)
+            .set("height", 2. * size)
+            .set("fill", "white")
+            .set("fill-opacity", "0.2");
+
+        let pattern = Pattern::new()
+            .set("x", 0)
+            .set("y", 0)
+            .set("width", size * 2.)
+            .set("height", size * 2.)
+            .set("patternUnits", "userSpaceOnUse")
+            .add(rect1)
+            .add(rect2)
+            .add(rect3);
+        pattern
+    }
+
+    fn vert_stripes_pattern() -> Pattern {
+        let size = 2.;
+        let rect1 = Rectangle::new()
+            .set("x", 0.)
+            .set("y", 0.)
+            .set("width", size)
+            .set("height", 2. * size)
+            .set("fill", "white")
+            .set("fill-opacity", 0.5);
+        let rect2 = Rectangle::new()
+            .set("x", size)
+            .set("y", 0.)
+            .set("width", size)
+            .set("height", 2. * size)
+            .set("fill", "white");
+
+        let pattern = Pattern::new()
+            .set("x", 0)
+            .set("y", 0)
+            .set("width", size * 2.)
+            .set("height", size * 2.)
+            .set("patternUnits", "userSpaceOnUse")
+            .add(rect1)
+            .add(rect2);
+        pattern
+    }
+
+    fn horiz_stripes_pattern() -> Pattern {
+        let size = 2.;
+        let rect1 = Rectangle::new()
+            .set("x", 0.)
+            .set("y", 0.)
+            .set("width", 2. * size)
+            .set("height", size)
+            .set("fill", "white")
+            .set("fill-opacity", 0.5);
+        let rect2 = Rectangle::new()
+            .set("x", 0.)
+            .set("y", size)
+            .set("width", 2. * size)
+            .set("height", size)
+            .set("fill", "white");
+
+        let pattern = Pattern::new()
+            .set("x", 0)
+            .set("y", 0)
+            .set("width", size * 2.)
+            .set("height", size * 2.)
+            .set("patternUnits", "userSpaceOnUse")
+            .add(rect1)
+            .add(rect2);
+        pattern
+    }
+
+    fn dots_pattern() -> Pattern {
+        let radius = 4.;
+        let side = 4. * radius;
+        let dot = Circle::new()
+            .set("cx", radius)
+            .set("cy", radius)
+            .set("r", radius)
+            .set("fill", "white");
+        // .set("fill-opacity", 0.9);
+        // let rect = Rectangle::new()
+        //     .set("x", 0.)
+        //     .set("y", size)
+        //     .set("width", 2. * size)
+        //     .set("height", size)
+        //     .set("fill", "white");
+
+        let pattern = Pattern::new()
+            .set("x", 0)
+            .set("y", 0)
+            .set("width", side)
+            .set("height", side)
+            .set("patternUnits", "userSpaceOnUse")
+            // .add(rect1)
+            .add(dot);
+        pattern
     }
 }
 

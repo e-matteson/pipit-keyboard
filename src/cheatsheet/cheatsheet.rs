@@ -14,7 +14,8 @@ use toml;
 use tutor::TutorData;
 use types::{Chord, Name};
 use types::errors::*;
-use cheatsheet::draw::{Color, Fill, Font, Label, MyCircle, MyRect, P2, V2};
+use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
+                       MyRect, P2, V2};
 
 
 #[derive(Clone, Debug)]
@@ -40,15 +41,30 @@ pub struct KeyboardSpec {
 }
 
 #[derive(Clone, Copy, Debug)]
-enum DisplayStyle {
-    Single, // none shared, all singles with no colors
-    Chords,
+#[allow(dead_code)]
+pub enum SwitchStyle {
+    Blank,
+    Single,
+    // TODO rename shared
+    Shared0,
+    Shared1,
+    Shared2,
+    Shared3,
+    Shared4,
+    Shared5,
+    Shared6,
+    Shared7,
+    Shared8,
+    Shared9,
+    Shared10,
+    Shared11,
 }
+
 
 #[derive(Clone, Debug)]
 struct Content {
     symbol: String,
-    fill: Fill,
+    style: SwitchStyle,
 }
 
 #[derive(Clone, Debug)]
@@ -105,10 +121,20 @@ impl CheatSheet {
             kb.add_to(&mut group);
         }
 
+        let mut defs = Definitions::new();
+        // let background = Rectangle::new()
+        //     .set("x", 0)
+        //     .set("y", 0)
+        //     .set("width", page_width)
+        //     .set("height", page_height);
+        let background =
+            MyRect::new(P2::origin(), V2::new(page_width, page_height));
+        FillPattern::add_all_definitions(background, &mut defs);
+        Switch::add_clip_definition(&mut defs);
+
         let mut doc =
             Document::new().set("viewBox", (0, 0, page_width, page_height));
-
-        Switch::add_mask_definition(&mut doc);
+        doc.append(defs);
         doc.append(group);
         svg::save(filename, &doc).unwrap();
     }
@@ -132,21 +158,20 @@ impl Keyboard {
 
         let symbols: Vec<_> = keys.iter().map(|key| get_symbol(key)).collect();
 
-        let mut single_fills = DisplayStyle::Single.fill_iter();
-        let mut multi_fills = DisplayStyle::Chords.fill_iter();
+        let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
         for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
-            let mut fills = if chord.count_switches() > 1 {
-                &mut multi_fills
+            let style = if chord.count_switches() > 1 {
+                chord_style_iter
+                    .next()
+                    .expect("ran out of unique switch fill styles")
             } else {
-                &mut single_fills
+                SwitchStyle::Single
             };
 
             let content = Content {
                 symbol: symbol.clone(),
-                fill: fills
-                    .next()
-                    .expect("ran out of unique switch fill styles"),
+                style: style,
             };
             for (index, &bit) in chord.iter().enumerate() {
                 if bit {
@@ -257,31 +282,6 @@ impl Keyboard {
     }
 }
 
-impl DisplayStyle {
-    fn fill_iter(&self) -> impl Iterator<Item = Fill> {
-        let v: Vec<_> = match *self {
-            DisplayStyle::Single => ::std::iter::repeat(Fill::Single)
-                .take(Chord::chord_length())
-                .collect(),
-            DisplayStyle::Chords => vec![
-                Fill::Shared0,
-                Fill::Shared1,
-                Fill::Shared2,
-                Fill::Shared3,
-                Fill::Shared4,
-                Fill::Shared5,
-                Fill::Shared6,
-                Fill::Shared7,
-                Fill::Shared8,
-                Fill::Shared9,
-                Fill::Shared10,
-                Fill::Shared11,
-            ],
-        };
-        v.into_iter()
-    }
-}
-
 impl Switch {
     fn new(pos: P2) -> Switch {
         Switch {
@@ -298,8 +298,8 @@ impl Switch {
         // 50.
         25.
     }
-    fn mask_name() -> String {
-        "SwitchMask".into()
+    fn clip_id() -> String {
+        "ClipSwitch".into()
     }
 
     fn size() -> V2 {
@@ -331,14 +331,13 @@ impl Switch {
             .fillet(5.)
     }
 
-    fn add_mask_definition(doc: &mut Document) {
-        let mask = Switch::outline(P2::origin()).finalize();
+    fn add_clip_definition(defs: &mut Definitions) {
+        let clip = Switch::outline(P2::origin()).finalize();
         let clip_path = ClipPath::new()
-            .set("id", Switch::mask_name())
+            .set("id", Switch::clip_id())
         // .set("clipPathUnits", "objectBoundingBox")
-            .add(mask);
-        let defs = Definitions::new().add(clip_path);
-        doc.append(defs);
+            .add(clip);
+        defs.append(clip_path);
     }
 
     fn radius(&self) -> f64 {
@@ -358,7 +357,7 @@ impl Switch {
             let sole_content = &self.contents[0];
             g.append(
                 MyCircle::new(self.relative_center(), self.radius())
-                    .fill(sole_content.fill)
+                    .fill(sole_content.style.fill())
                     .finalize(),
             );
             g.append(
@@ -378,11 +377,11 @@ impl Switch {
                         radius: self.radius(),
                         circle_divisions: num_wedges,
                         division_num: i,
-                    }.finalize(content.fill),
+                    }.finalize(content.style.fill()),
                 );
             }
         }
-        g.set("clip-path", format!("url(#{})", Switch::mask_name()))
+        g.set("clip-path", format!("url(#{})", Switch::clip_id()))
             .set(
                 "transform",
                 format!("translate({},{})", self.pos.x, self.pos.y),
@@ -422,9 +421,7 @@ impl Wedge {
     }
 
     fn finalize(&self, fill: Fill) -> Path {
-        Path::new()
-            .set("d", self.to_data())
-            .set("fill", fill.color())
+        Path::new().set("d", self.to_data()).set("fill", fill.color)
     }
 
     fn to_data(&self) -> Data {
@@ -480,6 +477,63 @@ impl ArcArgs {
         )
     }
 }
+
+impl SwitchStyle {
+    fn chord_style_iter() -> impl Iterator<Item = SwitchStyle> {
+        vec![
+            SwitchStyle::Shared0,
+            SwitchStyle::Shared1,
+            SwitchStyle::Shared2,
+            SwitchStyle::Shared3,
+            SwitchStyle::Shared4,
+            SwitchStyle::Shared5,
+            SwitchStyle::Shared6,
+            SwitchStyle::Shared7,
+            SwitchStyle::Shared8,
+            SwitchStyle::Shared9,
+            SwitchStyle::Shared10,
+            SwitchStyle::Shared11,
+        ].into_iter()
+    }
+
+    pub fn fill(&self) -> Fill {
+        match *self {
+            SwitchStyle::Blank => Fill::new_solid(Color::White),
+            SwitchStyle::Single => Fill::new_solid(Color::LightGrey),
+            SwitchStyle::Shared0 => Fill::new_solid(Color::Red),
+            SwitchStyle::Shared1 => Fill::new_solid(Color::Yellow),
+            SwitchStyle::Shared2 => Fill::new_solid(Color::Green),
+            SwitchStyle::Shared3 => Fill::new_solid(Color::Cyan),
+            SwitchStyle::Shared4 => Fill::new_solid(Color::Blue),
+            SwitchStyle::Shared5 => Fill::new_solid(Color::Magenta),
+            SwitchStyle::Shared6 => Fill {
+                color: Color::Red,
+                pattern: Some(FillPattern::Checkers),
+            },
+            SwitchStyle::Shared7 => Fill {
+                color: Color::Yellow,
+                pattern: Some(FillPattern::Checkers),
+            },
+            SwitchStyle::Shared8 => Fill {
+                color: Color::Green,
+                pattern: Some(FillPattern::Checkers),
+            },
+            SwitchStyle::Shared9 => Fill {
+                color: Color::Cyan,
+                pattern: Some(FillPattern::Checkers),
+            },
+            SwitchStyle::Shared10 => Fill {
+                color: Color::Blue,
+                pattern: Some(FillPattern::Checkers),
+            },
+            SwitchStyle::Shared11 => Fill {
+                color: Color::Magenta,
+                pattern: Some(FillPattern::Checkers),
+            },
+        }
+    }
+}
+
 
 fn polar_vec(radius: f64, radians: f64) -> V2 {
     let x = radians.cos() * radius;
