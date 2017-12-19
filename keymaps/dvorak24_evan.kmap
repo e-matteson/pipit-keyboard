@@ -492,16 +492,16 @@ macro_cout        macro_endl        macro_cerr          macro_this_arrow
   ... .*.           ... .*.           ... .*.             ... .*.
 
 macro_print_ino   macro_println_ino
-...*   ....           ...*   ...*
-....   ...*           ....   ...*
-  .     .               .     .
-  ... .*.               ... .*.
+...*   ....       ...*   ...*
+....   ...*       ....   ...*
+  .     .           .     .
+  ... .*.           ... .*.
 
-macro_tex_item
-*...   ....
-..**   .*..
-  .     .
-  ... .*.
+macro_tex_item    macro_tex_citep   macro_tex_itemize   macro_tex_enumerate
+....   ...*       ...*   .*.*       ....   ...*         ....   ...*
+.*..   ....       ....   ....       ...*   ....         ..*.   ....
+  .     .           .     .           .     .             .     .
+  ... .*.           ... .*.           ... .*.             ... .*.
 
 
 ## vim/spacemacs macros ##
