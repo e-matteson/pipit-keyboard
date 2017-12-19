@@ -137,10 +137,10 @@ impl MyRect {
         self
     }
 
-    // pub fn fill(mut self, fill: Fill) -> Self {
-    //     self.fill = Some(fill);
-    //     self
-    // }
+    pub fn fill(mut self, fill: Fill) -> Self {
+        self.fill = Some(fill);
+        self
+    }
 
     pub fn fillet(mut self, radius: f64) -> Self {
         assert!(radius >= 0.);
@@ -330,7 +330,7 @@ impl FillPattern {
             .set("width", 2. * size)
             .set("height", 2. * size)
             .set("fill", "white")
-            .set("fill-opacity", "0.2");
+            .set("fill-opacity", "0.3");
 
         let pattern = Pattern::new()
             .set("x", 0)
@@ -429,21 +429,19 @@ impl FillPattern {
 impl Into<Value> for Color {
     fn into(self) -> Value {
         match self {
-            Color::Red => "#fc9c93",
-            Color::Yellow => "#cdb36b",
-            Color::Green => "#7ac68f",
-            Color::Cyan => "#01c8d9",
-            Color::Blue => "#80b9fe",
-            Color::Magenta => "#e49fdb",
+            Color::Red => "#fa99b7",
+            Color::Yellow => "#eba676",
+            Color::Green => "#a7be74",
+            Color::Cyan => "#48c9b4",
+            Color::Blue => "#3ac3f5",
+            Color::Magenta => "#b9acf6",
             Color::Black => "#000000",
             Color::White => "#ffffff",
-            Color::LightGrey => "#b6b6b6",
-            Color::DarkGrey => "#3b3b3b",
+            Color::LightGrey => "#eeeeee",
+            Color::DarkGrey => "#b6b6b6",
         }.into()
     }
 }
-
-
 
 impl Default for Font {
     fn default() -> Font {

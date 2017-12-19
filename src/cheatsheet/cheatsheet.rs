@@ -349,48 +349,68 @@ impl Switch {
         P2::new(half_len, half_len)
     }
 
-    fn pie(&self) -> Group {
-        let mut g = Group::new();
-        let num_wedges = self.contents.len();
-
-        if num_wedges == 1 {
-            let sole_content = &self.contents[0];
-            g.append(
-                MyCircle::new(self.relative_center(), self.radius())
-                    .fill(sole_content.style.fill())
-                    .finalize(),
-            );
-            g.append(
-                Label {
-                    string: sole_content.symbol.clone(),
-                    pos: self.relative_center(),
-                    size: self.font_size(),
-                    color: Color::Black,
-                    font: Font::default(),
-                }.finalize(),
-            )
-        } else {
-            for (i, content) in self.contents.iter().enumerate() {
-                g.append(
-                    Wedge {
-                        tip_pos: self.relative_center(),
-                        radius: self.radius(),
-                        circle_divisions: num_wedges,
-                        division_num: i,
-                    }.finalize(content.style.fill()),
-                );
-            }
-        }
-        g.set("clip-path", format!("url(#{})", Switch::clip_id()))
-            .set(
-                "transform",
-                format!("translate({},{})", self.pos.x, self.pos.y),
-            )
+    fn add_blank_switch(group: &mut Group) {
+        let rect = Switch::outline(P2::origin())
+            .fill(SwitchStyle::Blank.fill())
+            .finalize();
+        // SwitchStyle::Blank.fill().assign_to(&mut rect);
+        group.append(rect);
     }
 
-    fn add_to(&self, group: &mut Group) {
-        group.append(self.pie());
-        group.append(Switch::outline(self.pos).finalize());
+    fn add_chord_pie(&self, num_wedges: usize, group: &mut Group) {
+        for (i, content) in self.contents.iter().enumerate() {
+            group.append(
+                Wedge {
+                    tip_pos: self.relative_center(),
+                    radius: self.radius(),
+                    circle_divisions: num_wedges,
+                    division_num: i,
+                }.finalize(content.style.fill()),
+            );
+        }
+        group.append(Switch::outline(P2::origin()).finalize());
+    }
+
+    fn add_single_circle(&self, group: &mut Group) {
+        let sole_content = &self.contents[0];
+        group.append(
+            MyCircle::new(self.relative_center(), self.radius())
+                .fill(sole_content.style.fill())
+                .finalize(),
+        );
+        group.append(
+            Label {
+                string: sole_content.symbol.clone(),
+                pos: self.relative_center(),
+                size: self.font_size(),
+                color: Color::Black,
+                font: Font::default(),
+            }.finalize(),
+        );
+        group.append(Switch::outline(P2::origin()).finalize());
+    }
+
+    fn clip_and_translate(&self, group: &mut Group) {
+        group.assign("clip-path", format!("url(#{})", Switch::clip_id()));
+        group.assign(
+            "transform",
+            format!("translate({},{})", self.pos.x, self.pos.y),
+        );
+    }
+
+    fn add_to(&self, outer_group: &mut Group) {
+        let mut inner_group = Group::new();
+        let num_wedges = self.contents.len();
+
+        if num_wedges == 0 {
+            Switch::add_blank_switch(&mut inner_group);
+        } else if num_wedges == 1 {
+            self.add_single_circle(&mut inner_group);
+        } else {
+            self.add_chord_pie(num_wedges, &mut inner_group);
+        }
+        self.clip_and_translate(&mut inner_group);
+        outer_group.append(inner_group);
     }
 }
 
@@ -421,7 +441,9 @@ impl Wedge {
     }
 
     fn finalize(&self, fill: Fill) -> Path {
-        Path::new().set("d", self.to_data()).set("fill", fill.color)
+        let mut path = Path::new().set("d", self.to_data());
+        fill.assign_to(&mut path);
+        path
     }
 
     fn to_data(&self) -> Data {
@@ -498,8 +520,8 @@ impl SwitchStyle {
 
     pub fn fill(&self) -> Fill {
         match *self {
-            SwitchStyle::Blank => Fill::new_solid(Color::White),
-            SwitchStyle::Single => Fill::new_solid(Color::LightGrey),
+            SwitchStyle::Blank => Fill::new_solid(Color::LightGrey),
+            SwitchStyle::Single => Fill::new_solid(Color::DarkGrey),
             SwitchStyle::Shared0 => Fill::new_solid(Color::Red),
             SwitchStyle::Shared1 => Fill::new_solid(Color::Yellow),
             SwitchStyle::Shared2 => Fill::new_solid(Color::Green),
