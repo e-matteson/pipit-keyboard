@@ -29,16 +29,16 @@ keys = [
 
 [[keyboards]]
 keys = [
-  "key_b",
-  "key_k",
   "key_w",
+  "key_b",
   "key_j",
-  "key_1",
-  "key_5",
+  "key_k",
   "key_0",
+  "key_1",
   "key_4",
-  "key_enter",
-  "key_page_down"
+  "key_5",
+  "key_page_down",
+  "key_enter"
 ]
 
 [[keyboards]]
@@ -154,7 +154,11 @@ keys = [
 
 [[keyboards]]
 keys = [
-  "command_left_hand_mode",
-  "command_gaming_mode",
+  # "command_left_hand_mode",
+  # "command_gaming_mode",
   "mod_anagram_2",
+  "command_left_word",
+  # "command_right_word",
+  # "command_right_limit",
+  "command_cycle_capital",
 ]

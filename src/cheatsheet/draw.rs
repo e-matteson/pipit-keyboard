@@ -1,11 +1,12 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Div, MulAssign, Sub};
 
 use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Circle, Definitions, Mask, Pattern, Rectangle, Text};
+use svg::node::element::{Circle, Definitions, Group, Mask, Pattern, Rectangle,
+                         Text};
 use svg::node::element::path::Parameters;
 
-use unicode_segmentation::UnicodeSegmentation;
+// use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Clone, Copy, Debug)]
 pub struct MyRect {
@@ -27,7 +28,7 @@ pub struct MyCircle {
 
 #[derive(Clone, Debug)]
 pub struct Label {
-    pub string: String,
+    pub lines: Vec<String>,
     pub pos: P2,
     pub color: Color,
     pub size: f64,
@@ -137,14 +138,41 @@ impl MyRect {
         self
     }
 
+    pub fn reset_stroke(mut self) -> Self {
+        self.stroke = None;
+        self
+    }
+
     pub fn fill(mut self, fill: Fill) -> Self {
         self.fill = Some(fill);
+        self
+    }
+
+    pub fn reset_fill(mut self) -> Self {
+        self.fill = None;
         self
     }
 
     pub fn fillet(mut self, radius: f64) -> Self {
         assert!(radius >= 0.);
         self.fillet = Some(V2::new(radius, radius));
+        self
+    }
+
+    pub fn reset_fillet(mut self) -> Self {
+        self.fillet = None;
+        self
+    }
+
+    pub fn center(&self) -> P2 {
+        self.pos + self.size / 2.
+    }
+
+    pub fn scale(mut self, factor: f64) -> Self {
+        // Scale the switch uniformly around its center
+        let center = self.center();
+        self.size *= factor;
+        self.pos = center - self.size / 2.;
         self
     }
 
@@ -220,27 +248,36 @@ impl MyCircle {
 }
 
 impl Label {
-    pub fn finalize(self) -> Text {
-        let size = self.scaled_size();
-        let text = Text::new()
-            .set("x", self.pos.x)
-            .set("y", self.pos.y)
-            .set("font-size", size)
-            .set("font-style", self.font.style)
-            .set("font-weight", self.font.weight)
-            .set("font-family", self.font.family)
-            .set("dominant-baseline", "central") // center vertically
-            .set("text-anchor", TextAnchor::Middle) // center horizontally
-            .set("fill", self.color)
-            .add(node::Text::new(self.string));
-        text
+    pub fn finalize(self) -> Group {
+        let mut g = Group::new();
+        let mut y = self.pos.y - self.total_height() / 2.;
+        let line_height = self.line_height();
+        for line in self.lines {
+            let text = Text::new()
+                .set("x", self.pos.x)
+                .set("y", y)
+                .set("font-size", self.size)
+                .set("font-style", self.font.style)
+                .set("font-weight", self.font.weight)
+                .set("font-family", self.font.family.clone())
+                .set("dominant-baseline", "central") // center vertically
+                .set("text-anchor", TextAnchor::Middle) // center horizontally
+                .set("fill", self.color)
+                .add(node::Text::new(line.to_owned()));
+
+            g.append(text);
+            y += line_height;
+        }
+        g
     }
 
-    pub fn scaled_size(&self) -> f64 {
-        let len = self.string.graphemes(true).count() as i32; // lossy cast
-                                                              // println!("{}, {}", self.string, len);
-        let scale = if len > 1 { (0.9_f64).powi(len - 1) } else { 1. };
-        self.size * scale
+    fn line_height(&self) -> f64 {
+        // self.size * 1.1
+        self.size
+    }
+
+    fn total_height(&self) -> f64 {
+        self.line_height() * ((self.lines.len() as f64) - 1.)
     }
 }
 
@@ -420,7 +457,7 @@ impl FillPattern {
             .set("width", side)
             .set("height", side)
             .set("patternUnits", "userSpaceOnUse")
-            // .add(rect1)
+        // .add(rect1)
             .add(dot);
         pattern
     }
@@ -447,7 +484,8 @@ impl Default for Font {
     fn default() -> Font {
         Font {
             family: "sans-serif".into(),
-            weight: FontWeight::Normal,
+            // weight: FontWeight::Normal,
+            weight: FontWeight::Bold,
             style: FontStyle::Normal,
         }
     }
@@ -516,6 +554,22 @@ impl Add<V2> for P2 {
         P2::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
+
+impl Div<f64> for V2 {
+    type Output = V2;
+    fn div(self, rhs: f64) -> V2 {
+        V2::new(self.x / rhs, self.y / rhs)
+    }
+}
+
+impl MulAssign<f64> for V2 {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.x *= rhs;
+        self.y *= rhs;
+        // P2::new(self.x / rhs, self.y / rhs)
+    }
+}
+
 impl Sub<V2> for P2 {
     type Output = P2;
     fn sub(self, rhs: V2) -> P2 {

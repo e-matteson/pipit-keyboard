@@ -63,8 +63,14 @@ pub enum SwitchStyle {
 
 #[derive(Clone, Debug)]
 struct Content {
-    symbol: String,
+    symbol: Symbol,
     style: SwitchStyle,
+}
+
+#[derive(Clone, Debug)]
+struct Symbol {
+    lines: Vec<String>,
+    scale: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -175,13 +181,21 @@ impl Keyboard {
             };
             for (index, &bit) in chord.iter().enumerate() {
                 if bit {
-                    self.switches[index].add_content(content.clone());
+                    self.switches[index].push_content(content.clone());
                 }
             }
         }
     }
 
     fn add_to(&self, group: &mut Group) {
+        let mut background_group = Group::new();
+        for switch in &self.switches {
+            switch.add_background_to(&mut background_group, Color::Black, 1.6);
+        }
+        for switch in &self.switches {
+            switch.add_background_to(&mut background_group, Color::White, 1.57);
+        }
+        group.append(background_group);
         for switch in &self.switches {
             switch.add_to(group);
         }
@@ -210,7 +224,7 @@ impl Keyboard {
         let width = positions.get(highest).expect(err_msg).x
             - positions.get(lowest).expect(err_msg).x
             + Switch::side_length();
-        width * 1.05
+        width * 1.1
     }
 
     fn positions(origin: P2) -> Vec<P2> {
@@ -219,14 +233,14 @@ impl Keyboard {
         let len = Switch::side_length();
         let y_pinky = len * 0.75;
         let y_ring = len * 0.25;
-        let x_col = len * 1.25;
-        let y_col = len * 1.2;
-        let y_tower = len * 1.3;
-        let thumb_from_tower = (len * 1.5, len * 0.5);
+        let x_col = len * 1.1;
+        let y_col = len * 1.1;
+        let y_tower = len * 1.2;
+        let thumb_from_tower = (len * 1.2, len * 0.5);
         let x_thumb = x_col;
         let y_thumb_medial = len * 0.;
         let y_thumb_radial = len * 0.5;
-        let x_col_hand_gap = len * 3.;
+        let x_col_hand_gap = len * 2.7;
 
         let offset =
             |positions: &mut Vec<P2>, index: usize, offset: (f64, f64)| {
@@ -290,7 +304,7 @@ impl Switch {
         }
     }
 
-    fn add_content(&mut self, content: Content) {
+    fn push_content(&mut self, content: Content) {
         self.contents.push(content);
     }
 
@@ -380,9 +394,9 @@ impl Switch {
         );
         group.append(
             Label {
-                string: sole_content.symbol.clone(),
+                lines: sole_content.symbol.lines.clone(),
                 pos: self.relative_center(),
-                size: self.font_size(),
+                size: self.font_size() * sole_content.symbol.scale,
                 color: Color::Black,
                 font: Font::default(),
             }.finalize(),
@@ -398,16 +412,24 @@ impl Switch {
         );
     }
 
+    fn add_background_to(&self, group: &mut Group, color: Color, scale: f64) {
+        let bg_fill = Fill::new_solid(color);
+        let bg = Switch::outline(self.pos)
+            .fill(bg_fill)
+            .reset_stroke()
+            .scale(scale)
+            .finalize();
+        group.append(bg);
+    }
+
     fn add_to(&self, outer_group: &mut Group) {
         let mut inner_group = Group::new();
         let num_wedges = self.contents.len();
 
-        if num_wedges == 0 {
-            Switch::add_blank_switch(&mut inner_group);
-        } else if num_wedges == 1 {
-            self.add_single_circle(&mut inner_group);
-        } else {
-            self.add_chord_pie(num_wedges, &mut inner_group);
+        match num_wedges {
+            0 => Switch::add_blank_switch(&mut inner_group),
+            1 => self.add_single_circle(&mut inner_group),
+            _ => self.add_chord_pie(num_wedges, &mut inner_group),
         }
         self.clip_and_translate(&mut inner_group);
         outer_group.append(inner_group);
@@ -563,127 +585,171 @@ fn polar_vec(radius: f64, radians: f64) -> V2 {
     V2::new(x, y)
 }
 
+// impl Into<Symbol> for &'static str {
+//     fn into(self) -> Symbol {
+//         Symbol {
+//             lines: vec![self.into()],
+//             scale: 1.,
+//         }
+//     }
+// }
 
-fn get_symbol(key: &Name) -> String {
+// impl Into<Symbol> for (&'static str, usize) {
+//     fn into(self) -> Symbol {
+//         // let a: u8 = self.into_iter();
+//         let lines: Vec<String> =
+//             self.into_iter().map(|s| s.to_string()).collect();
+//         Symbol {
+//             lines: lines,
+//             scale: 1.,
+//         }
+//     }
+// }
+
+impl Symbol {
+    // fn from(line: &str) -> Symbol {
+    //     Symbol::with_scale(line, 1.)
+    // }
+
+    fn from(line: &str, scale: f64) -> Symbol {
+        Symbol::from_lines(&[line], scale)
+    }
+
+    fn from_lines(lines: &[&str], scale: f64) -> Symbol {
+        Symbol {
+            lines: lines.into_iter().map(|s| s.to_string()).collect(),
+            scale: scale,
+        }
+    }
+}
+
+
+fn get_symbol(key: &Name) -> Symbol {
     // TODO share with tutor?
     lazy_static! {
-        static ref SYMBOLS: HashMap<Name, String>  = vec![
-            // ("mod_shift".into(), "⇧".into()),
-            ("mod_shift".into(), "shift".into()),
-            ("mod_ctrl".into(), "ctrl".into()),
-            ("mod_alt".into(), "alt".into()),
-            ("mod_gui".into(), "⌘❖".into()),
-            ("mod_anagram_1".into(), "a1".into()),
-            ("mod_anagram_2".into(), "a2".into()),
-            ("mod_capital".into(), "cap".into()),
-            ("mod_nospace".into(), "NoSpc".into()),
-            ("mod_double".into(), "double".into()),
-            ("key_a".into(), "a".into()),
-            ("key_b".into(), "b".into()),
-            ("key_c".into(), "c".into()),
-            ("key_d".into(), "d".into()),
-            ("key_e".into(), "e".into()),
-            ("key_f".into(), "f".into()),
-            ("key_g".into(), "g".into()),
-            ("key_h".into(), "h".into()),
-            ("key_i".into(), "i".into()),
-            ("key_j".into(), "j".into()),
-            ("key_k".into(), "k".into()),
-            ("key_l".into(), "l".into()),
-            ("key_m".into(), "m".into()),
-            ("key_n".into(), "n".into()),
-            ("key_o".into(), "o".into()),
-            ("key_p".into(), "p".into()),
-            ("key_q".into(), "q".into()),
-            ("key_r".into(), "r".into()),
-            ("key_s".into(), "s".into()),
-            ("key_t".into(), "t".into()),
-            ("key_u".into(), "u".into()),
-            ("key_v".into(), "v".into()),
-            ("key_w".into(), "w".into()),
-            ("key_x".into(), "x".into()),
-            ("key_y".into(), "y".into()),
-            ("key_z".into(), "z".into()),
-            ("key_0".into(), "0".into()),
-            ("key_1".into(), "1".into()),
-            ("key_2".into(), "2".into()),
-            ("key_3".into(), "3".into()),
-            ("key_4".into(), "4".into()),
-            ("key_5".into(), "5".into()),
-            ("key_6".into(), "6".into()),
-            ("key_7".into(), "7".into()),
-            ("key_8".into(), "8".into()),
-            ("key_9".into(), "9".into()),
-            // ("key_enter".into(), "⏎".into()),
-            ("key_enter".into(), "enter".into()),
-            ("key_left".into(), "←".into()),
-            ("key_right".into(), "→".into()),
-            ("key_up".into(), "↑".into()),
-            ("key_down".into(), "↓".into()),
-            // ("key_backspace".into(), "⌫".into()),
-            ("key_backspace".into(), "bak".into()),
-            // ("key_space".into(), "␣".into()),
-            ("key_space".into(), "spc".into()),
-            ("key_backslash".into(), "\\".into()),
-            ("key_right_paren".into(), ")".into()),
-            ("key_right_angle".into(), "&gt;".into()), // TODO scale as if len==1
-            ("key_right_curly".into(), "}".into()),
-            ("key_right_brace".into(), "]".into()),
-            ("key_left_paren".into(), "(".into()),
-            ("key_left_angle".into(), "&lt;".into()), // TODO scale as if len==1
-            ("key_left_curly".into(), "{".into()),
-            ("key_left_brace".into(), "[".into()),
-            ("key_f1".into(), "f1".into()),
-            ("key_f2".into(), "f2".into()),
-            ("key_f3".into(), "f3".into()),
-            ("key_f4".into(), "f4".into()),
-            ("key_f5".into(), "f5".into()),
-            ("key_f6".into(), "f6".into()),
-            ("key_f7".into(), "f7".into()),
-            ("key_f8".into(), "f8".into()),
-            ("key_f9".into(), "f9".into()),
-            ("key_tab".into(), "tab".into()),
-            ("key_esc".into(), "esc".into()),
-            ("key_caps_lock".into(), "caplock".into()),
-            ("key_home".into(), "home".into()),
-            ("key_end".into(), "end".into()),
-            ("key_page_up".into(), "PgUp".into()),
-            ("key_page_down".into(), "PgDn".into()),
-            ("key_printscreen".into(), "print".into()),
-            ("key_delete".into(), "del".into()),
-            ("key_ampersand".into(), "&amp;".into()),
-            ("key_asterisk".into(), "*".into()),
-            ("key_at".into(), "@".into()),
-            ("key_backslash".into(), "\\".into()),
-            ("key_bang".into(), "!".into()),
-            ("key_caret".into(), "^".into()),
-            ("key_colon".into(), ":".into()),
-            ("key_comma".into(), ",".into()),
-            ("key_dollar".into(), "$".into()),
-            ("key_doublequote".into(), "\"".into()),
-            ("key_equal".into(), "=".into()),
-            ("key_grave".into(), "`".into()),
-            ("key_hash".into(), "#".into()),
-            ("key_minus".into(), "-".into()),
-            ("key_percent".into(), "%".into()),
-            ("key_period".into(), ".".into()),
-            ("key_pipe".into(), "|".into()),
-            ("key_plus".into(), "+".into()),
-            ("key_question".into(), "?".into()),
-            ("key_quote".into(), "'".into()),
-            ("key_semicolon".into(), ";".into()),
-            ("key_slash".into(), "/".into()),
-            ("key_tilde".into(), "~".into()),
-            ("key_underscore".into(), "_".into()),
-            ("command_pause".into(), "pause".into()),
-            ("command_delete_word".into(), "DelWord".into()),
-            ("command_cycle_word".into(), "CycleWord".into()),
-            ("command_gaming_mode".into(), "GameMode".into()),
-            ("command_left_hand_mode".into(), "LeftHandMode".into()),
-            ("macro_in_paren".into(), "()".into()),
-            ("macro_in_curly".into(), "{}".into()),
-            ("macro_in_brace".into(), "[]".into()),
-            ("macro_in_angle".into(), "&lt;&gt;".into()),
+        static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
+            // ("mod_shift".into(), Symbol::from("shift", 0.9)),
+            ("mod_shift".into(), Symbol::from("⇧", 1.0)),
+            ("mod_ctrl".into(), Symbol::from("ctrl", 0.9)),
+            ("mod_alt".into(), Symbol::from("alt", 1.)),
+            ("mod_gui".into(), Symbol::from("⌘❖", 0.8)),
+            ("mod_anagram_1".into(), Symbol::from_lines(&["ana","gram","1"], 0.6)),
+            ("mod_anagram_2".into(), Symbol::from_lines(&["ana", "gram","2"], 0.6)),
+            ("mod_capital".into(), Symbol::from_lines(&["cap", "mod"], 0.7)),
+            ("mod_nospace".into(), Symbol::from_lines(&["no", "space","mod"], 0.5)),
+            ("mod_double".into(), Symbol::from_lines(&["double", "mod"], 0.5)),
+            ("key_a".into(), Symbol::from("a", 1.)),
+            ("key_b".into(), Symbol::from("b", 1.)),
+            ("key_c".into(), Symbol::from("c", 1.)),
+            ("key_d".into(), Symbol::from("d", 1.)),
+            ("key_e".into(), Symbol::from("e", 1.)),
+            ("key_f".into(), Symbol::from("f", 1.)),
+            ("key_g".into(), Symbol::from("g", 1.)),
+            ("key_h".into(), Symbol::from("h", 1.)),
+            ("key_i".into(), Symbol::from("i", 1.)),
+            ("key_j".into(), Symbol::from("j", 1.)),
+            ("key_k".into(), Symbol::from("k", 1.)),
+            ("key_l".into(), Symbol::from("l", 1.)),
+            ("key_m".into(), Symbol::from("m", 1.)),
+            ("key_n".into(), Symbol::from("n", 1.)),
+            ("key_o".into(), Symbol::from("o", 1.)),
+            ("key_p".into(), Symbol::from("p", 1.)),
+            ("key_q".into(), Symbol::from("q", 1.)),
+            ("key_r".into(), Symbol::from("r", 1.)),
+            ("key_s".into(), Symbol::from("s", 1.)),
+            ("key_t".into(), Symbol::from("t", 1.)),
+            ("key_u".into(), Symbol::from("u", 1.)),
+            ("key_v".into(), Symbol::from("v", 1.)),
+            ("key_w".into(), Symbol::from("w", 1.)),
+            ("key_x".into(), Symbol::from("x", 1.)),
+            ("key_y".into(), Symbol::from("y", 1.)),
+            ("key_z".into(), Symbol::from("z", 1.)),
+            ("key_0".into(), Symbol::from("0", 1.)),
+            ("key_1".into(), Symbol::from("1", 1.)),
+            ("key_2".into(), Symbol::from("2", 1.)),
+            ("key_3".into(), Symbol::from("3", 1.)),
+            ("key_4".into(), Symbol::from("4", 1.)),
+            ("key_5".into(), Symbol::from("5", 1.)),
+            ("key_6".into(), Symbol::from("6", 1.)),
+            ("key_7".into(), Symbol::from("7", 1.)),
+            ("key_8".into(), Symbol::from("8", 1.)),
+            ("key_9".into(), Symbol::from("9", 1.)),
+            // ("key_enter".into(), "".into()),
+            // ("key_enter".into(), Symbol::from("enter", 0.6)),
+            ("key_enter".into(), Symbol::from("⏎", 1.)),
+            ("key_left".into(), Symbol::from("←", 1.)),
+            ("key_right".into(), Symbol::from("→", 1.)),
+            ("key_up".into(), Symbol::from("↑", 1.)),
+            ("key_down".into(), Symbol::from("↓", 1.)),
+            // ("key_backspace".into(), Symbol::from_lines(&["back","space"], 0.5)),
+            ("key_backspace".into(), Symbol::from("⌫", 1.)),
+            // ("key_space".into(), Symbol::from("space", 0.6)),
+            ("key_space".into(), Symbol::from("␣", 1.)),
+            ("key_backslash".into(), Symbol::from("\\", 1.)),
+            ("key_right_paren".into(), Symbol::from(")", 1.)),
+            ("key_right_angle".into(), Symbol::from("&gt;", 1.)), // TODO scale as if len==1
+            ("key_right_curly".into(), Symbol::from("}", 1.)),
+            ("key_right_brace".into(), Symbol::from("]", 1.)),
+            ("key_left_paren".into(), Symbol::from("(", 1.)),
+            ("key_left_angle".into(), Symbol::from("&lt;", 1.)), // TODO scale as if len==1
+            ("key_left_curly".into(), Symbol::from("{", 1.)),
+            ("key_left_brace".into(), Symbol::from("[", 1.)),
+            ("key_f1".into(), Symbol::from("f1", 1.)),
+            ("key_f2".into(), Symbol::from("f2", 1.)),
+            ("key_f3".into(), Symbol::from("f3", 1.)),
+            ("key_f4".into(), Symbol::from("f4", 1.)),
+            ("key_f5".into(), Symbol::from("f5", 1.)),
+            ("key_f6".into(), Symbol::from("f6", 1.)),
+            ("key_f7".into(), Symbol::from("f7", 1.)),
+            ("key_f8".into(), Symbol::from("f8", 1.)),
+            ("key_f9".into(), Symbol::from("f9", 1.)),
+            ("key_tab".into(), Symbol::from("tab", 0.7)),
+            ("key_esc".into(), Symbol::from("esc", 0.7)),
+            ("key_caps_lock".into(), Symbol::from_lines(&["caps","lock"], 0.6)),
+            ("key_home".into(), Symbol::from("home", 0.5)),
+            ("key_end".into(), Symbol::from("end", 0.7)),
+            ("key_page_up".into(), Symbol::from_lines(&["pg", "up"], 0.9)),
+            ("key_page_down".into(), Symbol::from_lines(&["pg", "dn"], 0.9)),
+            ("key_printscreen".into(), Symbol::from_lines(&["print", "scrn"], 0.5)),
+            // ("key_delete".into(), Symbol::from("delete", 0.5)),
+            ("key_delete".into(), Symbol::from("⌦", 1.)),
+            ("key_ampersand".into(), Symbol::from("&amp;", 1.)),
+            ("key_asterisk".into(), Symbol::from("*", 1.)),
+            ("key_at".into(), Symbol::from("@", 1.)),
+            ("key_backslash".into(), Symbol::from("\\", 1.)),
+            ("key_bang".into(), Symbol::from("!", 1.)),
+            ("key_caret".into(), Symbol::from("^", 1.)),
+            ("key_colon".into(), Symbol::from(":", 1.)),
+            ("key_comma".into(), Symbol::from(",", 1.)),
+            ("key_dollar".into(), Symbol::from("$", 1.)),
+            ("key_doublequote".into(), Symbol::from("\"", 1.)),
+            ("key_equal".into(), Symbol::from("=", 1.)),
+            ("key_grave".into(), Symbol::from("`", 1.)),
+            ("key_hash".into(), Symbol::from("#", 1.)),
+            ("key_minus".into(), Symbol::from("-", 1.)),
+            ("key_percent".into(), Symbol::from("%", 1.)),
+            ("key_period".into(), Symbol::from(".", 1.)),
+            ("key_pipe".into(), Symbol::from("|", 1.)),
+            ("key_plus".into(), Symbol::from("+", 1.)),
+            ("key_question".into(), Symbol::from("?", 1.)),
+            ("key_quote".into(), Symbol::from("'", 1.)),
+            ("key_semicolon".into(), Symbol::from(";", 1.)),
+            ("key_slash".into(), Symbol::from("/", 1.)),
+            ("key_tilde".into(), Symbol::from("~", 1.)),
+            ("key_underscore".into(), Symbol::from("_", 1.)),
+            ("command_pause".into(), Symbol::from("pause", 0.5)),
+            ("command_delete_word".into(), Symbol::from_lines(&["delete", "word"], 0.5)),
+            ("command_cycle_word".into(), Symbol::from_lines(&["cycle", "word"], 0.6)),
+            ("command_cycle_capital".into(), Symbol::from_lines(&["cycle", "cap"], 0.6)),
+            ("command_left_word".into(), Symbol::from_lines(&["left", "word"], 0.5)),
+            ("command_right_word".into(), Symbol::from_lines(&["right", "word"], 0.5)),
+            ("command_right_limit".into(), Symbol::from_lines(&["right", "limit"], 0.5)),
+            ("command_gaming_mode".into(), Symbol::from_lines(&["game", "mode"], 0.5)),
+            ("command_left_hand_mode".into(), Symbol::from_lines(&["left","hand", "mode"], 0.5)),
+            ("macro_in_paren".into(), Symbol::from("()", 1.)),
+            ("macro_in_curly".into(), Symbol::from("{}", 1.)),
+            ("macro_in_brace".into(), Symbol::from("[]", 1.)),
+            ("macro_in_angle".into(), Symbol::from("&lt;&gt;", 1.)),
 
         ].into_iter().collect();
     }
