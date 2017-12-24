@@ -593,34 +593,34 @@ impl SwitchStyle {
         match *self {
             SwitchStyle::Blank => Fill::new_solid(Color::LightGrey),
             SwitchStyle::Single => Fill::new_solid(Color::DarkGrey),
-            SwitchStyle::Shared0 => Fill::new_solid(Color::Red),
-            SwitchStyle::Shared1 => Fill::new_solid(Color::Yellow),
-            SwitchStyle::Shared2 => Fill::new_solid(Color::Green),
-            SwitchStyle::Shared3 => Fill::new_solid(Color::Cyan),
-            SwitchStyle::Shared4 => Fill::new_solid(Color::Blue),
-            SwitchStyle::Shared5 => Fill::new_solid(Color::Magenta),
+            SwitchStyle::Shared0 => Fill::new_solid(Color::Cyan),
+            SwitchStyle::Shared1 => Fill::new_solid(Color::Magenta),
+            SwitchStyle::Shared2 => Fill::new_solid(Color::Yellow),
+            SwitchStyle::Shared3 => Fill::new_solid(Color::Blue),
+            SwitchStyle::Shared4 => Fill::new_solid(Color::Red),
+            SwitchStyle::Shared5 => Fill::new_solid(Color::Green),
             SwitchStyle::Shared6 => Fill {
-                color: Color::Red,
-                pattern: Some(FillPattern::Checkers),
+                color: Color::Cyan,
+                pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared7 => Fill {
-                color: Color::Yellow,
+                color: Color::Magenta,
                 pattern: Some(FillPattern::Checkers),
             },
             SwitchStyle::Shared8 => Fill {
-                color: Color::Green,
-                pattern: Some(FillPattern::Checkers),
+                color: Color::Yellow,
+                pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared9 => Fill {
-                color: Color::Cyan,
-                pattern: Some(FillPattern::Checkers),
-            },
-            SwitchStyle::Shared10 => Fill {
                 color: Color::Blue,
                 pattern: Some(FillPattern::Checkers),
             },
+            SwitchStyle::Shared10 => Fill {
+                color: Color::Red,
+                pattern: Some(FillPattern::DiagStripes),
+            },
             SwitchStyle::Shared11 => Fill {
-                color: Color::Magenta,
+                color: Color::Green,
                 pattern: Some(FillPattern::Checkers),
             },
         }

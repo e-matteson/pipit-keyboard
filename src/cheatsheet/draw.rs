@@ -2,8 +2,8 @@ use std::ops::{Add, Div, MulAssign, Sub};
 
 use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Circle, Definitions, Group, Mask, Pattern, Rectangle,
-                         Text};
+use svg::node::element::{Circle, Definitions, Group, Line, Mask, Pattern,
+                         Rectangle, Text};
 use svg::node::element::path::Parameters;
 
 // use unicode_segmentation::UnicodeSegmentation;
@@ -70,6 +70,7 @@ pub enum FillPattern {
     Checkers,
     VertStripes,
     HorizStripes,
+    DiagStripes,
     Dots,
 }
 
@@ -321,6 +322,7 @@ impl FillPattern {
             FillPattern::Checkers => "Checkers".into(),
             FillPattern::VertStripes => "VertStripes".into(),
             FillPattern::HorizStripes => "HorizStripes".into(),
+            FillPattern::DiagStripes => "DiagStripes".into(),
             FillPattern::Dots => "Dots".into(),
         }
     }
@@ -329,6 +331,7 @@ impl FillPattern {
         FillPattern::Checkers.add_definition(background, defs);
         FillPattern::VertStripes.add_definition(background, defs);
         FillPattern::HorizStripes.add_definition(background, defs);
+        FillPattern::DiagStripes.add_definition(background, defs);
         FillPattern::Dots.add_definition(background, defs);
     }
 
@@ -337,8 +340,10 @@ impl FillPattern {
             FillPattern::Checkers => FillPattern::checkers_pattern(),
             FillPattern::VertStripes => FillPattern::vert_stripes_pattern(),
             FillPattern::HorizStripes => FillPattern::horiz_stripes_pattern(),
+            FillPattern::DiagStripes => FillPattern::diag_stripes_pattern(),
             FillPattern::Dots => FillPattern::dots_pattern(),
         }.set("id", self.pattern_id());
+
         let rect = background.finalize().set("fill", self.pattern_url());
         let mask = Mask::new().set("id", self.mask_id()).add(rect);
         defs.append(pattern);
@@ -435,6 +440,36 @@ impl FillPattern {
         pattern
     }
 
+    fn diag_stripes_pattern() -> Pattern {
+        let size = 4.;
+        let line1 = Line::new()
+            .set("x1", 0)
+            .set("y1", 0)
+            .set("x2", 0)
+            .set("y2", size)
+            .set("stroke", "white")
+            .set("stroke-width", size);
+
+        let line2 = Line::new()
+            .set("x1", size / 2.)
+            .set("y1", 0)
+            .set("x2", size / 2.)
+            .set("y2", size)
+            .set("stroke", "white")
+            .set("stroke-opacity", 0.3)
+            .set("stroke-width", size);
+
+        Pattern::new()
+            .set("x", 0)
+            .set("y", 0)
+            .set("width", size)
+            .set("height", size)
+            .set("patternTransform", "rotate(45 0 0)")
+            .set("patternUnits", "userSpaceOnUse")
+            .add(line1)
+            .add(line2)
+    }
+
     fn dots_pattern() -> Pattern {
         let radius = 4.;
         let side = 4. * radius;
@@ -443,23 +478,14 @@ impl FillPattern {
             .set("cy", radius)
             .set("r", radius)
             .set("fill", "white");
-        // .set("fill-opacity", 0.9);
-        // let rect = Rectangle::new()
-        //     .set("x", 0.)
-        //     .set("y", size)
-        //     .set("width", 2. * size)
-        //     .set("height", size)
-        //     .set("fill", "white");
 
-        let pattern = Pattern::new()
+        Pattern::new()
             .set("x", 0)
             .set("y", 0)
             .set("width", side)
             .set("height", side)
             .set("patternUnits", "userSpaceOnUse")
-        // .add(rect1)
-            .add(dot);
-        pattern
+            .add(dot)
     }
 }
 
