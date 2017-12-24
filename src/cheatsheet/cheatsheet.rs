@@ -21,11 +21,15 @@ use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
 #[derive(Clone, Debug)]
 pub struct CheatSheet {
     keyboards: Vec<Keyboard>,
+    page_width: f64,
+    page_height: f64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CheatSheetSpec {
     keyboards: Vec<KeyboardSpec>,
+    page_width: f64,
+    page_height: f64,
     // TODO add title?
 }
 
@@ -98,29 +102,52 @@ impl CheatSheet {
 
     pub fn new(spec: CheatSheetSpec, data: &TutorData) -> CheatSheet {
         // TODO make spacing even, make page breaks?
-        let mut col_1_pos = P2::new(10., 10.);
-        let mut col_2_pos = col_1_pos + V2::new(Keyboard::width(), 0.);
-        let height = V2::new(0., Keyboard::height());
+        let num_cols = 2.;
+        let num_rows = (spec.keyboards.len() as f64 / num_cols).ceil();
+
+        let x_padding =
+            (spec.page_width - num_cols * Keyboard::width()) / (num_cols + 1.);
+        let y_padding = (spec.page_height - num_rows * Keyboard::height())
+            / (num_rows + 1.);
+
+        let mut col_positions: Vec<_> = (0..num_cols as usize)
+            .map(|c| {
+                let c = c as f64;
+                P2::new((c + 1.) * x_padding + c * Keyboard::width(), y_padding)
+                // P2::new((c + 1.) * x_padding + c * Keyboard::width(), 0.)
+            })
+            .collect();
+
+        println!("{:?}", col_positions);
+        println!(
+            "{}, {}, {}, {}",
+            x_padding,
+            spec.page_width,
+            num_cols,
+            Keyboard::width()
+        );
+
+        let height = V2::new(0., Keyboard::height() + y_padding);
+
         let mut all = Vec::new();
         for (i, kb_spec) in spec.keyboards.iter().enumerate() {
-            let mut pos = if i % 2 == 0 {
-                &mut col_1_pos
-            } else {
-                &mut col_2_pos
-            };
+            let mut pos = col_positions
+                .get_mut(i % (num_cols as usize))
+                .expect("bug in CheatSheet::new()");
             let mut keyboard = Keyboard::new(*pos);
             keyboard.set_keys(&kb_spec.keys, data);
             all.push(keyboard);
             *pos = *pos + height;
         }
-        CheatSheet { keyboards: all }
+        CheatSheet {
+            keyboards: all,
+            page_width: spec.page_width,
+            page_height: spec.page_height,
+        }
     }
 
     pub fn save(&self, filename: &str) {
         // TODO add metadata
-        let page_width = Keyboard::width() * 2.;
-        let page_height = Keyboard::height() * 7.;
-
         let mut group = Group::new();
 
         for kb in &self.keyboards {
@@ -133,13 +160,15 @@ impl CheatSheet {
         //     .set("y", 0)
         //     .set("width", page_width)
         //     .set("height", page_height);
-        let background =
-            MyRect::new(P2::origin(), V2::new(page_width, page_height));
+        let background = MyRect::new(
+            P2::origin(),
+            V2::new(self.page_width, self.page_height),
+        );
         FillPattern::add_all_definitions(background, &mut defs);
         Switch::add_clip_definition(&mut defs);
 
-        let mut doc =
-            Document::new().set("viewBox", (0, 0, page_width, page_height));
+        let mut doc = Document::new()
+            .set("viewBox", (0, 0, self.page_width, self.page_height));
         doc.append(defs);
         doc.append(group);
         svg::save(filename, &doc).unwrap();
@@ -188,17 +217,33 @@ impl Keyboard {
     }
 
     fn add_to(&self, group: &mut Group) {
-        let mut background_group = Group::new();
+        let mut frame_group = Group::new();
         for switch in &self.switches {
-            switch.add_background_to(&mut background_group, Color::Black, 1.6);
+            switch.add_frame_to(
+                &mut frame_group,
+                Color::Black,
+                Keyboard::outer_frame_scale(),
+            );
         }
         for switch in &self.switches {
-            switch.add_background_to(&mut background_group, Color::White, 1.57);
+            switch.add_frame_to(
+                &mut frame_group,
+                Color::White,
+                Keyboard::inner_frame_scale(),
+            );
         }
-        group.append(background_group);
+        group.append(frame_group);
         for switch in &self.switches {
             switch.add_to(group);
         }
+    }
+
+    fn outer_frame_scale() -> f64 {
+        1.6
+    }
+
+    fn inner_frame_scale() -> f64 {
+        1.57
     }
 
     fn height() -> f64 {
@@ -210,7 +255,7 @@ impl Keyboard {
         let lowest = 20;
         let height = positions.get(lowest).expect(err_msg).y
             - positions.get(highest).expect(err_msg).y
-            + Switch::side_length();
+            + Switch::side_length() * Keyboard::outer_frame_scale();
         height * 1.1
     }
 
@@ -242,6 +287,10 @@ impl Keyboard {
         let y_thumb_radial = len * 0.5;
         let x_col_hand_gap = len * 2.7;
 
+        let frame_width =
+            (Keyboard::outer_frame_scale() - 1.) * Switch::side_length() / 2.;
+        let frame = V2::new(frame_width, frame_width);
+
         let offset =
             |positions: &mut Vec<P2>, index: usize, offset: (f64, f64)| {
                 let new_pos = positions[index] + offset;
@@ -251,9 +300,9 @@ impl Keyboard {
         let mut p = Vec::new();
 
         // top left row
-        p.push(origin + (0., y_pinky)); // 0
-        p.push(origin + (x_col, y_ring)); // 1
-        p.push(origin + (x_col * 2., 0.)); // 2
+        p.push(origin + (0., y_pinky) + frame); // 0
+        p.push(origin + (x_col, y_ring) + frame); // 1
+        p.push(origin + (x_col * 2., 0.) + frame); // 2
         offset(&mut p, 2, (x_col, 0.)); // 3
 
         let reflect = |positions: &mut Vec<P2>, index: usize| {
@@ -412,14 +461,14 @@ impl Switch {
         );
     }
 
-    fn add_background_to(&self, group: &mut Group, color: Color, scale: f64) {
-        let bg_fill = Fill::new_solid(color);
-        let bg = Switch::outline(self.pos)
-            .fill(bg_fill)
+    fn add_frame_to(&self, group: &mut Group, color: Color, scale: f64) {
+        let frame_fill = Fill::new_solid(color);
+        let frame = Switch::outline(self.pos)
+            .fill(frame_fill)
             .reset_stroke()
             .scale(scale)
             .finalize();
-        group.append(bg);
+        group.append(frame);
     }
 
     fn add_to(&self, outer_group: &mut Group) {

@@ -485,7 +485,7 @@ impl Default for Font {
         Font {
             family: "sans-serif".into(),
             // weight: FontWeight::Normal,
-            weight: FontWeight::Bold,
+            weight: FontWeight::Bolder,
             style: FontStyle::Normal,
         }
     }
