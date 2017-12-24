@@ -1,13 +1,11 @@
 use std::collections::HashMap;
-use std::f64::consts::PI;
 use std::io::prelude::*;
 use std::fs::File;
 
 use svg;
 use svg::Document;
 use svg::Node;
-use svg::node::element::{ClipPath, Definitions, Group, Path};
-use svg::node::element::path::Data;
+use svg::node::element::{ClipPath, Definitions, Group};
 
 use toml;
 
@@ -15,7 +13,7 @@ use tutor::TutorData;
 use types::{Chord, Name};
 use types::errors::*;
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
-                       MyRect, P2, V2};
+                       MyRect, P2, V2, Wedge};
 
 
 #[derive(Clone, Debug)]
@@ -83,13 +81,6 @@ struct Switch {
     contents: Vec<Content>,
 }
 
-#[derive(Clone, Debug)]
-struct Wedge {
-    tip_pos: P2,
-    radius: f64,
-    circle_divisions: usize,
-    division_num: usize,
-}
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CheatSheet {
@@ -101,7 +92,7 @@ impl CheatSheet {
     }
 
     pub fn new(spec: CheatSheetSpec, data: &TutorData) -> CheatSheet {
-        // TODO make spacing even, make page breaks?
+        // TODO keyboards are not exactly centered
         let num_cols = 2.;
         let num_rows = (spec.keyboards.len() as f64 / num_cols).ceil();
 
@@ -114,7 +105,6 @@ impl CheatSheet {
             .map(|c| {
                 let c = c as f64;
                 P2::new((c + 1.) * x_padding + c * Keyboard::width(), y_padding)
-                // P2::new((c + 1.) * x_padding + c * Keyboard::width(), 0.)
             })
             .collect();
 
@@ -155,11 +145,6 @@ impl CheatSheet {
         }
 
         let mut defs = Definitions::new();
-        // let background = Rectangle::new()
-        //     .set("x", 0)
-        //     .set("y", 0)
-        //     .set("width", page_width)
-        //     .set("height", page_height);
         let background = MyRect::new(
             P2::origin(),
             V2::new(self.page_width, self.page_height),
@@ -358,7 +343,6 @@ impl Switch {
     }
 
     fn side_length() -> f64 {
-        // 50.
         25.
     }
     fn clip_id() -> String {
@@ -371,22 +355,8 @@ impl Switch {
     }
 
     fn font_size(&self) -> f64 {
-        // 15.
         Switch::side_length() * 3. / 5.
     }
-
-    // fn center(&self) -> P2 {
-    //     let half = Self::side_length() / 2.;
-    //     P2::new(self.pos.x + half, self.pos.y + half)
-    // }
-
-    // fn sole_content(&self) -> Option<Content> {
-    //     if self.contents.len() == 1 {
-    //         self.contents.get(0).cloned()
-    //     } else {
-    //         None
-    //     }
-    // }
 
     fn outline(pos: P2) -> MyRect {
         MyRect::new(P2::new(pos.x, pos.y), Switch::size())
@@ -396,16 +366,18 @@ impl Switch {
 
     fn add_clip_definition(defs: &mut Definitions) {
         let clip = Switch::outline(P2::origin()).finalize();
-        let clip_path = ClipPath::new()
-            .set("id", Switch::clip_id())
-        // .set("clipPathUnits", "objectBoundingBox")
-            .add(clip);
+        let clip_path = ClipPath::new().set("id", Switch::clip_id()).add(clip);
         defs.append(clip_path);
     }
 
     fn radius(&self) -> f64 {
         Switch::side_length() / 2. * 2_f64.sqrt()
     }
+
+    // fn center(&self) -> P2 {
+    //     let half = Self::side_length() / 2.;
+    //     P2::new(self.pos.x + half, self.pos.y + half)
+    // }
 
     fn relative_center(&self) -> P2 {
         let half_len = Switch::side_length() / 2.;
@@ -416,7 +388,6 @@ impl Switch {
         let rect = Switch::outline(P2::origin())
             .fill(SwitchStyle::Blank.fill())
             .finalize();
-        // SwitchStyle::Blank.fill().assign_to(&mut rect);
         group.append(rect);
     }
 
@@ -485,92 +456,6 @@ impl Switch {
     }
 }
 
-impl Wedge {
-    fn arc_start(&self) -> P2 {
-        self.tip_pos
-            + polar_vec(self.radius, self.rotation_radians()).reflect_xy()
-    }
-
-    fn arc_end(&self) -> P2 {
-        self.tip_pos
-            + polar_vec(
-                self.radius,
-                self.rotation_radians() + self.width_radians(),
-            ).reflect_xy()
-    }
-
-    fn rotation_radians(&self) -> f64 {
-        self.width_radians() * (self.division_num as f64)
-    }
-
-    fn width_radians(&self) -> f64 {
-        PI * 2. / (self.circle_divisions as f64)
-    }
-
-    fn is_large_arc(&self) -> bool {
-        self.width_radians() > PI
-    }
-
-    fn finalize(&self, fill: Fill) -> Path {
-        let mut path = Path::new().set("d", self.to_data());
-        fill.assign_to(&mut path);
-        path
-    }
-
-    fn to_data(&self) -> Data {
-        Data::new()
-            .move_to(self.tip_pos)
-            .line_to(self.arc_start())
-            .elliptical_arc_to(
-                ArcArgs {
-                    radius: P2::new(self.radius, self.radius),
-                    x_axis_rotation: 0.,
-                    large_arc_flag: self.is_large_arc(),
-                    sweep_flag: false,
-                    end: self.arc_end(),
-                }.finalize(),
-            )
-            .close()
-    }
-
-    // fn debug(&self) -> Group {
-    //     Group::new()
-    //         .add(mark(self.arc_start()))
-    //         .add(mark(self.arc_end()))
-    //         .add(mark(self.tip_pos))
-    // }
-}
-
-// fn mark(pos: P2) -> Circle {
-//     Circle::new()
-//         .set("cx", pos.x)
-//         .set("cy", pos.y)
-//         .set("fill", Color::Red)
-//         .set("r", 5)
-// }
-
-struct ArcArgs {
-    radius: P2,
-    x_axis_rotation: f64,
-    large_arc_flag: bool,
-    sweep_flag: bool,
-    end: P2,
-}
-
-impl ArcArgs {
-    fn finalize(&self) -> (f64, f64, f64, f64, f64, f64, f64) {
-        (
-            self.radius.x,
-            self.radius.y,
-            self.x_axis_rotation,
-            if self.large_arc_flag { 1. } else { 0. },
-            if self.sweep_flag { 1. } else { 0. },
-            self.end.x,
-            self.end.y,
-        )
-    }
-}
-
 impl SwitchStyle {
     fn chord_style_iter() -> impl Iterator<Item = SwitchStyle> {
         vec![
@@ -628,38 +513,7 @@ impl SwitchStyle {
 }
 
 
-fn polar_vec(radius: f64, radians: f64) -> V2 {
-    let x = radians.cos() * radius;
-    let y = radians.sin() * radius;
-    V2::new(x, y)
-}
-
-// impl Into<Symbol> for &'static str {
-//     fn into(self) -> Symbol {
-//         Symbol {
-//             lines: vec![self.into()],
-//             scale: 1.,
-//         }
-//     }
-// }
-
-// impl Into<Symbol> for (&'static str, usize) {
-//     fn into(self) -> Symbol {
-//         // let a: u8 = self.into_iter();
-//         let lines: Vec<String> =
-//             self.into_iter().map(|s| s.to_string()).collect();
-//         Symbol {
-//             lines: lines,
-//             scale: 1.,
-//         }
-//     }
-// }
-
 impl Symbol {
-    // fn from(line: &str) -> Symbol {
-    //     Symbol::with_scale(line, 1.)
-    // }
-
     fn from(line: &str, scale: f64) -> Symbol {
         Symbol::from_lines(&[line], scale)
     }
@@ -736,11 +590,11 @@ fn get_symbol(key: &Name) -> Symbol {
             ("key_space".into(), Symbol::from("␣", 1.)),
             ("key_backslash".into(), Symbol::from("\\", 1.)),
             ("key_right_paren".into(), Symbol::from(")", 1.)),
-            ("key_right_angle".into(), Symbol::from("&gt;", 1.)), // TODO scale as if len==1
+            ("key_right_angle".into(), Symbol::from("〉", 1.)), // TODO scale as if len==1
             ("key_right_curly".into(), Symbol::from("}", 1.)),
             ("key_right_brace".into(), Symbol::from("]", 1.)),
             ("key_left_paren".into(), Symbol::from("(", 1.)),
-            ("key_left_angle".into(), Symbol::from("&lt;", 1.)), // TODO scale as if len==1
+            ("key_left_angle".into(), Symbol::from("〈", 1.)), // TODO scale as if len==1
             ("key_left_curly".into(), Symbol::from("{", 1.)),
             ("key_left_brace".into(), Symbol::from("[", 1.)),
             ("key_f1".into(), Symbol::from("f1", 1.)),

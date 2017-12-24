@@ -1,11 +1,12 @@
 use std::ops::{Add, Div, MulAssign, Sub};
+use std::f64::consts::PI;
 
 use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Circle, Definitions, Group, Line, Mask, Pattern,
-                         Rectangle, Text};
+use svg::node::element::{Circle, Definitions, Group, Line, Mask, Path,
+                         Pattern, Rectangle, Text};
 use svg::node::element::path::Parameters;
-
+use svg::node::element::path::Data;
 // use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Clone, Copy, Debug)]
@@ -25,6 +26,22 @@ pub struct MyCircle {
     stroke: Option<Stroke>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct Wedge {
+    pub tip_pos: P2,
+    pub radius: f64,
+    pub circle_divisions: usize,
+    pub division_num: usize,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct ArcArgs {
+    radius: P2,
+    x_axis_rotation: f64,
+    large_arc_flag: bool,
+    sweep_flag: bool,
+    end: P2,
+}
 
 #[derive(Clone, Debug)]
 pub struct Label {
@@ -247,6 +264,72 @@ impl MyCircle {
         element
     }
 }
+
+impl Wedge {
+    fn arc_start(&self) -> P2 {
+        self.tip_pos
+            + polar_vec(self.radius, self.rotation_radians()).reflect_xy()
+    }
+
+    fn arc_end(&self) -> P2 {
+        self.tip_pos
+            + polar_vec(
+                self.radius,
+                self.rotation_radians() + self.width_radians(),
+            ).reflect_xy()
+    }
+
+    fn rotation_radians(&self) -> f64 {
+        self.width_radians() * (self.division_num as f64)
+    }
+
+    fn width_radians(&self) -> f64 {
+        PI * 2. / (self.circle_divisions as f64)
+    }
+
+    fn is_large_arc(&self) -> bool {
+        self.width_radians() > PI
+    }
+
+    pub fn finalize(&self, fill: Fill) -> Path {
+        let mut path = Path::new().set("d", self.to_data());
+        fill.assign_to(&mut path);
+        path
+    }
+
+    fn to_data(&self) -> Data {
+        Data::new()
+            .move_to(self.tip_pos)
+            .line_to(self.arc_start())
+            .elliptical_arc_to(
+                ArcArgs {
+                    radius: P2::new(self.radius, self.radius),
+                    x_axis_rotation: 0.,
+                    large_arc_flag: self.is_large_arc(),
+                    sweep_flag: false,
+                    end: self.arc_end(),
+                }.finalize(),
+            )
+            .close()
+    }
+}
+
+impl ArcArgs {
+    fn finalize(&self) -> (f64, f64, f64, f64, f64, f64, f64) {
+        (
+            self.radius.x,
+            self.radius.y,
+            self.x_axis_rotation,
+            if self.large_arc_flag { 1. } else { 0. },
+            if self.sweep_flag { 1. } else { 0. },
+            self.end.x,
+            self.end.y,
+        )
+    }
+}
+
+
+
 
 impl Label {
     pub fn finalize(self) -> Group {
@@ -617,4 +700,10 @@ impl Into<P2> for V2 {
     fn into(self) -> P2 {
         P2::new(self.x, self.y)
     }
+}
+
+fn polar_vec(radius: f64, radians: f64) -> V2 {
+    let x = radians.cos() * radius;
+    let y = radians.sin() * radius;
+    V2::new(x, y)
 }
