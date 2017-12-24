@@ -21,10 +21,16 @@ impl TutorData {
     pub fn new(data: BTreeMap<ModeName, BTreeMap<Name, Chord>>) -> TutorData {
         TutorData(data)
     }
+
     pub fn get_chord(&self, chord_name: &Name) -> Option<Chord> {
         // TODO don't assume default mode
-        let mode_name = ModeName::default();
-        self.0.get(&mode_name)?.get(chord_name).cloned()
+        if chord_name == &Name(String::new()) {
+            // Used for skipping colors in the cheatsheet config
+            Some(Chord::default())
+        } else {
+            let mode_name = ModeName::default();
+            self.0.get(&mode_name)?.get(chord_name).cloned()
+        }
     }
 }
 

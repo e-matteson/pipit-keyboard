@@ -7,6 +7,7 @@ use svg::Document;
 use svg::Node;
 use svg::node::element::{ClipPath, Definitions, Group};
 
+use unicode_segmentation::UnicodeSegmentation;
 use toml;
 
 use tutor::TutorData;
@@ -108,14 +109,14 @@ impl CheatSheet {
             })
             .collect();
 
-        println!("{:?}", col_positions);
-        println!(
-            "{}, {}, {}, {}",
-            x_padding,
-            spec.page_width,
-            num_cols,
-            Keyboard::width()
-        );
+        // println!("{:?}", col_positions);
+        // println!(
+        //     "{}, {}, {}, {}",
+        //     x_padding,
+        //     spec.page_width,
+        //     num_cols,
+        //     Keyboard::width()
+        // );
 
         let height = V2::new(0., Keyboard::height() + y_padding);
 
@@ -181,7 +182,11 @@ impl Keyboard {
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
         for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
-            let style = if chord.count_switches() > 1 {
+            let style = if chord.count_switches() != 1 {
+                // Usually this means there's a multi-switch chord.
+                // We should also consume a chord style if 0 switches are
+                // pressed, meaning this is a blank chord named "", used for
+                // skipping colors.
                 chord_style_iter
                     .next()
                     .expect("ran out of unique switch fill styles")
@@ -393,14 +398,25 @@ impl Switch {
 
     fn add_chord_pie(&self, num_wedges: usize, group: &mut Group) {
         for (i, content) in self.contents.iter().enumerate() {
-            group.append(
-                Wedge {
-                    tip_pos: self.relative_center(),
-                    radius: self.radius(),
-                    circle_divisions: num_wedges,
-                    division_num: i,
-                }.finalize(content.style.fill()),
-            );
+            let wedge = Wedge {
+                tip_pos: self.relative_center(),
+                radius: self.radius(),
+                circle_divisions: num_wedges,
+                division_num: i,
+            };
+            group.append(wedge.finalize(content.style.fill()));
+            // mark(wedge.center());
+            if num_wedges == 2 && content.symbol.is_single_grapheme() {
+                group.append(
+                    Label {
+                        lines: content.symbol.lines.clone(),
+                        pos: wedge.label_pos(),
+                        size: self.font_size() * content.symbol.scale,
+                        color: Color::Black,
+                        font: Font::default(),
+                    }.finalize(),
+                );
+            }
         }
         group.append(Switch::outline(P2::origin()).finalize());
     }
@@ -524,6 +540,10 @@ impl Symbol {
             scale: scale,
         }
     }
+
+    fn is_single_grapheme(&self) -> bool {
+        self.lines.len() == 1 && self.lines[0].graphemes(true).count() == 1
+    }
 }
 
 
@@ -532,15 +552,15 @@ fn get_symbol(key: &Name) -> Symbol {
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
             // ("mod_shift".into(), Symbol::from("shift", 0.9)),
-            ("mod_shift".into(), Symbol::from("⇧", 1.0)),
-            ("mod_ctrl".into(), Symbol::from("ctrl", 0.9)),
+            ("mod_shift".into(), Symbol::from("⇧", 1.1)),
+            ("mod_ctrl".into(), Symbol::from("ctrl", 0.8)),
             ("mod_alt".into(), Symbol::from("alt", 1.)),
             ("mod_gui".into(), Symbol::from("⌘❖", 0.8)),
-            ("mod_anagram_1".into(), Symbol::from_lines(&["ana","gram","1"], 0.6)),
-            ("mod_anagram_2".into(), Symbol::from_lines(&["ana", "gram","2"], 0.6)),
-            ("mod_capital".into(), Symbol::from_lines(&["cap", "mod"], 0.7)),
+            ("mod_anagram_1".into(), Symbol::from_lines(&["ana","gram","1"], 0.5)),
+            ("mod_anagram_2".into(), Symbol::from_lines(&["ana", "gram","2"], 0.5)),
+            ("mod_capital".into(), Symbol::from_lines(&["cap", "mod"], 0.6)),
             ("mod_nospace".into(), Symbol::from_lines(&["no", "space","mod"], 0.5)),
-            ("mod_double".into(), Symbol::from_lines(&["double", "mod"], 0.5)),
+            ("mod_double".into(), Symbol::from_lines(&["double", "mod"], 0.4)),
             ("key_a".into(), Symbol::from("a", 1.)),
             ("key_b".into(), Symbol::from("b", 1.)),
             ("key_c".into(), Symbol::from("c", 1.)),
@@ -579,24 +599,30 @@ fn get_symbol(key: &Name) -> Symbol {
             ("key_9".into(), Symbol::from("9", 1.)),
             // ("key_enter".into(), "".into()),
             // ("key_enter".into(), Symbol::from("enter", 0.6)),
-            ("key_enter".into(), Symbol::from("⏎", 1.)),
-            ("key_left".into(), Symbol::from("←", 1.)),
-            ("key_right".into(), Symbol::from("→", 1.)),
-            ("key_up".into(), Symbol::from("↑", 1.)),
-            ("key_down".into(), Symbol::from("↓", 1.)),
+            ("key_enter".into(), Symbol::from("⏎", 1.2)),
+            ("key_left".into(), Symbol::from("←", 1.1)),
+            ("key_right".into(), Symbol::from("→", 1.1)),
+            ("key_up".into(), Symbol::from("↑", 1.1)),
+            ("key_down".into(), Symbol::from("↓", 1.1)),
             // ("key_backspace".into(), Symbol::from_lines(&["back","space"], 0.5)),
             ("key_backspace".into(), Symbol::from("⌫", 1.)),
             // ("key_space".into(), Symbol::from("space", 0.6)),
-            ("key_space".into(), Symbol::from("␣", 1.)),
+            ("key_space".into(), Symbol::from("␣", 1.2)),
             ("key_backslash".into(), Symbol::from("\\", 1.)),
             ("key_right_paren".into(), Symbol::from(")", 1.)),
-            ("key_right_angle".into(), Symbol::from("〉", 1.)), // TODO scale as if len==1
             ("key_right_curly".into(), Symbol::from("}", 1.)),
             ("key_right_brace".into(), Symbol::from("]", 1.)),
+            ("key_right_angle".into(), Symbol::from("ᐳ", 0.8)),
+            // ("key_right_angle".into(), Symbol::from(">", 0.5)),
+            // ("key_right_angle".into(), Symbol::from("&gt;", 1.)),
+            // ("key_right_angle".into(), Symbol::from("≻", 1.)),
             ("key_left_paren".into(), Symbol::from("(", 1.)),
-            ("key_left_angle".into(), Symbol::from("〈", 1.)), // TODO scale as if len==1
             ("key_left_curly".into(), Symbol::from("{", 1.)),
             ("key_left_brace".into(), Symbol::from("[", 1.)),
+            ("key_left_angle".into(), Symbol::from("ᐸ", 0.8)),
+            // ("key_left_angle".into(), Symbol::from("&lt;", 1.)),
+            // ("key_left_angle".into(), Symbol::from(">", 1.)),
+            // ("key_left_angle".into(), Symbol::from("≺", 1.)),
             ("key_f1".into(), Symbol::from("f1", 1.)),
             ("key_f2".into(), Symbol::from("f2", 1.)),
             ("key_f3".into(), Symbol::from("f3", 1.)),
@@ -611,49 +637,49 @@ fn get_symbol(key: &Name) -> Symbol {
             ("key_caps_lock".into(), Symbol::from_lines(&["caps","lock"], 0.6)),
             ("key_home".into(), Symbol::from("home", 0.5)),
             ("key_end".into(), Symbol::from("end", 0.7)),
-            ("key_page_up".into(), Symbol::from_lines(&["pg", "up"], 0.9)),
-            ("key_page_down".into(), Symbol::from_lines(&["pg", "dn"], 0.9)),
+            ("key_page_up".into(), Symbol::from_lines(&["pg", "up"], 0.8)),
+            ("key_page_down".into(), Symbol::from_lines(&["pg", "dn"], 0.8)),
             ("key_printscreen".into(), Symbol::from_lines(&["print", "scrn"], 0.5)),
             // ("key_delete".into(), Symbol::from("delete", 0.5)),
-            ("key_delete".into(), Symbol::from("⌦", 1.)),
+            ("key_delete".into(), Symbol::from("del", 0.9)),
             ("key_ampersand".into(), Symbol::from("&amp;", 1.)),
             ("key_asterisk".into(), Symbol::from("*", 1.)),
             ("key_at".into(), Symbol::from("@", 1.)),
             ("key_backslash".into(), Symbol::from("\\", 1.)),
             ("key_bang".into(), Symbol::from("!", 1.)),
-            ("key_caret".into(), Symbol::from("^", 1.)),
+            ("key_caret".into(), Symbol::from("^", 1.1)),
             ("key_colon".into(), Symbol::from(":", 1.)),
-            ("key_comma".into(), Symbol::from(",", 1.)),
+            ("key_comma".into(), Symbol::from(",", 1.2)),
             ("key_dollar".into(), Symbol::from("$", 1.)),
             ("key_doublequote".into(), Symbol::from("\"", 1.)),
             ("key_equal".into(), Symbol::from("=", 1.)),
-            ("key_grave".into(), Symbol::from("`", 1.)),
+            ("key_grave".into(), Symbol::from("`", 1.2)),
             ("key_hash".into(), Symbol::from("#", 1.)),
-            ("key_minus".into(), Symbol::from("-", 1.)),
+            ("key_minus".into(), Symbol::from("-", 1.2)),
             ("key_percent".into(), Symbol::from("%", 1.)),
-            ("key_period".into(), Symbol::from(".", 1.)),
+            ("key_period".into(), Symbol::from(".", 1.2)),
             ("key_pipe".into(), Symbol::from("|", 1.)),
             ("key_plus".into(), Symbol::from("+", 1.)),
             ("key_question".into(), Symbol::from("?", 1.)),
-            ("key_quote".into(), Symbol::from("'", 1.)),
+            ("key_quote".into(), Symbol::from("'", 1.2)),
             ("key_semicolon".into(), Symbol::from(";", 1.)),
             ("key_slash".into(), Symbol::from("/", 1.)),
             ("key_tilde".into(), Symbol::from("~", 1.)),
-            ("key_underscore".into(), Symbol::from("_", 1.)),
+            ("key_underscore".into(), Symbol::from("_", 1.2)),
             ("command_pause".into(), Symbol::from("pause", 0.5)),
-            ("command_delete_word".into(), Symbol::from_lines(&["delete", "word"], 0.5)),
-            ("command_cycle_word".into(), Symbol::from_lines(&["cycle", "word"], 0.6)),
-            ("command_cycle_capital".into(), Symbol::from_lines(&["cycle", "cap"], 0.6)),
+            ("command_delete_word".into(), Symbol::from_lines(&["del", "word"], 0.5)),
+            ("command_cycle_word".into(), Symbol::from_lines(&["cycle", "word"], 0.5)),
+            ("command_cycle_capital".into(), Symbol::from_lines(&["cycle", "cap"], 0.5)),
             ("command_left_word".into(), Symbol::from_lines(&["left", "word"], 0.5)),
             ("command_right_word".into(), Symbol::from_lines(&["right", "word"], 0.5)),
             ("command_right_limit".into(), Symbol::from_lines(&["right", "limit"], 0.5)),
-            ("command_gaming_mode".into(), Symbol::from_lines(&["game", "mode"], 0.5)),
-            ("command_left_hand_mode".into(), Symbol::from_lines(&["left","hand", "mode"], 0.5)),
-            ("macro_in_paren".into(), Symbol::from("()", 1.)),
-            ("macro_in_curly".into(), Symbol::from("{}", 1.)),
-            ("macro_in_brace".into(), Symbol::from("[]", 1.)),
-            ("macro_in_angle".into(), Symbol::from("&lt;&gt;", 1.)),
-
+            ("command_gaming_mode".into(), Symbol::from_lines(&["game", "mode"], 0.4)),
+            ("command_left_hand_mode".into(), Symbol::from_lines(&["left","hand", "mode"], 0.4)),
+            ("macro_in_paren".into(), Symbol::from("(|)", 1.)),
+            ("macro_in_curly".into(), Symbol::from("{|}", 1.)),
+            ("macro_in_brace".into(), Symbol::from("[|]", 1.)),
+            ("macro_in_angle".into(), Symbol::from("ᐸ|ᐳ", 0.8)),
+            ("".into(), Symbol::from("", 1.)), // used for skipping colors without displaying anything
         ].into_iter().collect();
     }
     SYMBOLS.get(key).expect("no symbol for key").to_owned()

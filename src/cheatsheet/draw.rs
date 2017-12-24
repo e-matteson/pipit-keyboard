@@ -312,6 +312,14 @@ impl Wedge {
             )
             .close()
     }
+
+    pub fn label_pos(&self) -> P2 {
+        self.tip_pos
+            + polar_vec(
+                self.radius / 3.,
+                self.rotation_radians() + self.width_radians() / 2.,
+            ).reflect_xy()
+    }
 }
 
 impl ArcArgs {
@@ -327,9 +335,6 @@ impl ArcArgs {
         )
     }
 }
-
-
-
 
 impl Label {
     pub fn finalize(self) -> Group {
@@ -707,3 +712,11 @@ fn polar_vec(radius: f64, radians: f64) -> V2 {
     let y = radians.sin() * radius;
     V2::new(x, y)
 }
+
+// pub fn mark(pos: P2) -> Circle {
+//     Circle::new()
+//         .set("cx", pos.x)
+//         .set("cy", pos.y)
+//         .set("fill", Color::Red)
+//         .set("r", 5)
+// }

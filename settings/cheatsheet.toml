@@ -40,7 +40,6 @@ keys = [
   "key_1",
   "key_4",
   "key_5",
-  "key_page_down",
   "key_enter"
 ]
 
@@ -54,6 +53,7 @@ keys = [
   "key_9",
   "key_6",
   "key_8",
+  "key_page_down",
   "key_page_up"
 ]
 
@@ -110,19 +110,21 @@ keys = [
 
 [[keyboards]]
 keys = [
+  "key_right_paren",
+  "key_right_curly",
+  "key_right_brace",
+  "key_right_angle",
+  "",
+  "",
   "key_left_paren",
   "key_left_curly",
   "key_left_brace",
   "key_left_angle",
 ]
 
-[[keyboards]]
-keys = [
-  "key_right_paren",
-  "key_right_curly",
-  "key_right_brace",
-  "key_right_angle",
-]
+# [[keyboards]]
+# keys = [
+# ]
 
 [[keyboards]]
 keys = [
