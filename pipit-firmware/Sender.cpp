@@ -71,7 +71,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
   // This is the first letter, so capitalize it if necessary
   key.copy(data+0);
   if(capitalMod){
-    key.addMod(MODIFIERKEY_SHIFT);
+    key.addMod(MODIFIERKEY_SHIFT&0xff);
   }
   sendKey(&key);
 

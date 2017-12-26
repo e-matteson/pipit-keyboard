@@ -91,10 +91,10 @@ bool Matrix::isInStandby(){
 }
 
 bool Matrix::isSquishedInBackpack(){
-  squished_switch_timer->isDone();
+  return squished_switch_timer->isDone();
 }
 
-bool Matrix::shutdown(){
+void Matrix::shutdown(){
   setColumnsHiZ();
 }
 

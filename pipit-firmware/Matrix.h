@@ -20,7 +20,7 @@ public:
   bool scanIfChanged();
   bool isInStandby();
   bool isSquishedInBackpack();
-  bool shutdown();
+  void shutdown();
 
 private:
 

@@ -278,6 +278,9 @@ uint8_t Switches::fillGamingChords(Chord* chords){
       }
     }
   }
+  // This should never be reached!
+  DEBUG1_LN("WARNING: failed to get chords in gaming mode");
+  return 0;
 }
 
 void Switches::printStatusArray(){

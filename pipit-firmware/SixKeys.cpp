@@ -66,7 +66,7 @@ bool SixKeys::isEqual(const SixKeys* other) const{
   return true;
 }
 
-bool SixKeys::copy(const SixKeys* other){
+void SixKeys::copy(const SixKeys* other){
   for(uint8_t i = 0; i < 6; i++) {
     key_codes[i] = other->key_codes[i];
   }

@@ -14,7 +14,7 @@ public:
   bool isEmpty() const;
   bool isFull() const;
   bool isEqual(const SixKeys* other) const;
-  bool copy(const SixKeys* other);
+  void copy(const SixKeys* other);
   uint8_t get(uint8_t index) const;
   uint8_t getMod() const;
   uint8_t numKeys() const;
