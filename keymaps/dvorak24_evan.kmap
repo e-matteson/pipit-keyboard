@@ -449,11 +449,11 @@ macro_printf    macro_print_py      macro_print_rs    macro_print_debug_rs
   .     .          .     .            .     .           .     .
   ... .*.          ... .*.            ... .*.           ... .*.
 
-macro_return_rs
-**..   ....
-...*   *...
-  .     .
-  ... .*.
+macro_return_rs  macro_amperstr_rs
+**..   ....      ....   ..*.
+...*   *...      ....   .*.*
+  .     .          .     .
+  ... .*.          ... .*.
 
 # macro_lifetime_rs macro_ampermut_rs
 # ....   ...*       *.*.   ....

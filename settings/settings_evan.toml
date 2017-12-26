@@ -651,6 +651,11 @@ macro_ampermut_rs   = [{key="KEY_7", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_T"},
                        # {key="KEY_SPACE"}
                        ]
+macro_amperstr_rs   = [{key="KEY_7", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_S"},
+                       {key="KEY_T"},
+                       {key="KEY_R"},
+                       ]
 macro_bang_dollar   = [{key="KEY_1", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_4", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_SPACE"}]
@@ -1388,8 +1393,9 @@ dictionary = [
     {word="bug"},
     {word="build"},
     {word="built"},
+    {word="bulb", anagram=1},
     {word="bulk"},
-    {word="bull", anagram=1},
+    {word="bull", anagram=2},
     {word="bullet", anagram=2},
     {word="bump", anagram=1},
     {word="bunch"},
@@ -1761,6 +1767,7 @@ dictionary = [
     {word="copy"},
     {word="cord", anagram=3},
     {word="core"},
+    {word="cork", anagram=2},
     {word="cornell", anagram=1},
     {word="corner", anagram=1},
     {word="corporate", anagram=1},
