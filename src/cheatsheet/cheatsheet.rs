@@ -14,7 +14,7 @@ use tutor::TutorData;
 use types::{Chord, Name};
 use types::errors::*;
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
-                       MyRect, P2, V2, Wedge};
+                       MyDescription, MyRect, P2, V2, Wedge};
 
 
 #[derive(Clone, Debug)]
@@ -146,6 +146,7 @@ impl CheatSheet {
         }
 
         let mut defs = Definitions::new();
+
         let background = MyRect::new(
             P2::origin(),
             V2::new(self.page_width, self.page_height),
@@ -153,8 +154,15 @@ impl CheatSheet {
         FillPattern::add_all_definitions(background, &mut defs);
         Switch::add_clip_definition(&mut defs);
 
+        let desc = MyDescription::new(
+            "Cheatsheet reference for a layout of a pipit keyboard. \
+             https://github.com/e-matteson/pipit-keyboard",
+        ).finalize();
+
         let mut doc = Document::new()
             .set("viewBox", (0, 0, self.page_width, self.page_height));
+
+        doc.append(desc);
         doc.append(defs);
         doc.append(group);
         svg::save(filename, &doc).unwrap();
@@ -494,35 +502,38 @@ impl SwitchStyle {
         match *self {
             SwitchStyle::Blank => Fill::new_solid(Color::LightGrey),
             SwitchStyle::Single => Fill::new_solid(Color::DarkGrey),
-            SwitchStyle::Shared0 => Fill::new_solid(Color::Cyan),
-            SwitchStyle::Shared1 => Fill::new_solid(Color::Magenta),
-            SwitchStyle::Shared2 => Fill::new_solid(Color::Yellow),
-            SwitchStyle::Shared3 => Fill::new_solid(Color::Blue),
-            SwitchStyle::Shared4 => Fill::new_solid(Color::Red),
-            SwitchStyle::Shared5 => Fill::new_solid(Color::Green),
+            SwitchStyle::Shared0 => Fill::new_solid(Color::Blue),
+            SwitchStyle::Shared1 => Fill::new_solid(Color::Red),
+            SwitchStyle::Shared2 => Fill::new_solid(Color::Green),
+            SwitchStyle::Shared3 => Fill::new_solid(Color::Magenta),
+            SwitchStyle::Shared4 => Fill::new_solid(Color::Yellow),
+            SwitchStyle::Shared5 => Fill::new_solid(Color::Cyan),
             SwitchStyle::Shared6 => Fill {
-                color: Color::Cyan,
+                color: Color::Blue,
                 pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared7 => Fill {
-                color: Color::Magenta,
-                pattern: Some(FillPattern::Checkers),
+                color: Color::Red,
+                // pattern: Some(FillPattern::Checkers),
+                pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared8 => Fill {
-                color: Color::Yellow,
+                color: Color::Green,
                 pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared9 => Fill {
-                color: Color::Blue,
-                pattern: Some(FillPattern::Checkers),
+                color: Color::Magenta,
+                // pattern: Some(FillPattern::Checkers),
+                pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared10 => Fill {
-                color: Color::Red,
+                color: Color::Yellow,
                 pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared11 => Fill {
-                color: Color::Green,
-                pattern: Some(FillPattern::Checkers),
+                color: Color::Cyan,
+                // pattern: Some(FillPattern::Checkers),
+                pattern: Some(FillPattern::DiagStripes),
             },
         }
     }
@@ -552,7 +563,7 @@ fn get_symbol(key: &Name) -> Symbol {
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
             // ("mod_shift".into(), Symbol::from("shift", 0.9)),
-            ("mod_shift".into(), Symbol::from("⇧", 1.1)),
+            ("mod_shift".into(), Symbol::from("⇧", 1.3)),
             ("mod_ctrl".into(), Symbol::from("ctrl", 0.8)),
             ("mod_alt".into(), Symbol::from("alt", 1.)),
             ("mod_gui".into(), Symbol::from("⌘❖", 0.8)),
@@ -599,11 +610,11 @@ fn get_symbol(key: &Name) -> Symbol {
             ("key_9".into(), Symbol::from("9", 1.)),
             // ("key_enter".into(), "".into()),
             // ("key_enter".into(), Symbol::from("enter", 0.6)),
-            ("key_enter".into(), Symbol::from("⏎", 1.2)),
-            ("key_left".into(), Symbol::from("←", 1.1)),
-            ("key_right".into(), Symbol::from("→", 1.1)),
-            ("key_up".into(), Symbol::from("↑", 1.1)),
-            ("key_down".into(), Symbol::from("↓", 1.1)),
+            ("key_enter".into(), Symbol::from("⏎", 1.3)),
+            ("key_left".into(), Symbol::from("←", 1.2)),
+            ("key_right".into(), Symbol::from("→", 1.2)),
+            ("key_up".into(), Symbol::from("↑", 1.2)),
+            ("key_down".into(), Symbol::from("↓", 1.2)),
             // ("key_backspace".into(), Symbol::from_lines(&["back","space"], 0.5)),
             ("key_backspace".into(), Symbol::from("⌫", 1.)),
             // ("key_space".into(), Symbol::from("space", 0.6)),
@@ -643,30 +654,30 @@ fn get_symbol(key: &Name) -> Symbol {
             // ("key_delete".into(), Symbol::from("delete", 0.5)),
             ("key_delete".into(), Symbol::from("del", 0.9)),
             ("key_ampersand".into(), Symbol::from("&amp;", 1.)),
-            ("key_asterisk".into(), Symbol::from("*", 1.)),
+            ("key_asterisk".into(), Symbol::from("*", 1.2)),
             ("key_at".into(), Symbol::from("@", 1.)),
             ("key_backslash".into(), Symbol::from("\\", 1.)),
             ("key_bang".into(), Symbol::from("!", 1.)),
-            ("key_caret".into(), Symbol::from("^", 1.1)),
+            ("key_caret".into(), Symbol::from("^", 1.2)),
             ("key_colon".into(), Symbol::from(":", 1.)),
-            ("key_comma".into(), Symbol::from(",", 1.2)),
+            ("key_comma".into(), Symbol::from(",", 1.3)),
             ("key_dollar".into(), Symbol::from("$", 1.)),
-            ("key_doublequote".into(), Symbol::from("\"", 1.)),
+            ("key_doublequote".into(), Symbol::from("\"", 1.3)),
             ("key_equal".into(), Symbol::from("=", 1.)),
-            ("key_grave".into(), Symbol::from("`", 1.2)),
+            ("key_grave".into(), Symbol::from("`", 1.3)),
             ("key_hash".into(), Symbol::from("#", 1.)),
             ("key_minus".into(), Symbol::from("-", 1.2)),
             ("key_percent".into(), Symbol::from("%", 1.)),
-            ("key_period".into(), Symbol::from(".", 1.2)),
+            ("key_period".into(), Symbol::from(".", 1.3)),
             ("key_pipe".into(), Symbol::from("|", 1.)),
             ("key_plus".into(), Symbol::from("+", 1.)),
             ("key_question".into(), Symbol::from("?", 1.)),
-            ("key_quote".into(), Symbol::from("'", 1.2)),
+            ("key_quote".into(), Symbol::from("'", 1.3)),
             ("key_semicolon".into(), Symbol::from(";", 1.)),
             ("key_slash".into(), Symbol::from("/", 1.)),
-            ("key_tilde".into(), Symbol::from("~", 1.)),
+            ("key_tilde".into(), Symbol::from("~", 1.3)),
             ("key_underscore".into(), Symbol::from("_", 1.2)),
-            ("command_pause".into(), Symbol::from("pause", 0.5)),
+            ("command_pause".into(), Symbol::from("pause", 0.4)),
             ("command_delete_word".into(), Symbol::from_lines(&["del", "word"], 0.5)),
             ("command_cycle_word".into(), Symbol::from_lines(&["cycle", "word"], 0.5)),
             ("command_cycle_capital".into(), Symbol::from_lines(&["cycle", "cap"], 0.5)),

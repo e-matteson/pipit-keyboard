@@ -3,8 +3,8 @@ use std::f64::consts::PI;
 
 use svg::{node, Node};
 use svg::node::Value;
-use svg::node::element::{Circle, Definitions, Group, Line, Mask, Path,
-                         Pattern, Rectangle, Text};
+use svg::node::element::{Circle, Definitions, Description, Group, Line, Mask,
+                         Path, Pattern, Rectangle, Text};
 use svg::node::element::path::Parameters;
 use svg::node::element::path::Data;
 // use unicode_segmentation::UnicodeSegmentation;
@@ -52,6 +52,9 @@ pub struct Label {
     pub font: Font,
 }
 
+
+#[derive(Clone, Debug)]
+pub struct MyDescription(String);
 
 #[derive(Clone, Debug)]
 pub struct Font {
@@ -367,6 +370,16 @@ impl Label {
 
     fn total_height(&self) -> f64 {
         self.line_height() * ((self.lines.len() as f64) - 1.)
+    }
+}
+
+impl MyDescription {
+    pub fn new(text: &str) -> MyDescription {
+        MyDescription(text.to_owned())
+    }
+
+    pub fn finalize(self) -> Description {
+        Description::new().add(node::Text::new(self.0))
     }
 }
 

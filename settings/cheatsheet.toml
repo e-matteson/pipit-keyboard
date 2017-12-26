@@ -32,79 +32,100 @@ keys = [
 
 [[keyboards]]
 keys = [
-  "key_w",
+  "key_left",
+  "key_right",
+  "key_home",
+  "key_end",
+  "key_esc",
+  "key_tab",
+]
+
+[[keyboards]]
+keys = [
   "key_b",
-  "key_j",
   "key_k",
-  "key_0",
   "key_1",
-  "key_4",
   "key_5",
-  "key_enter"
+  "key_enter",
+  "",
+  "key_w",
+  "key_j",
+  "key_0",
+  "key_4",
 ]
 
 [[keyboards]]
 keys = [
   "key_comma",
   "key_v",
-  "key_period",
-  "key_x",
   "key_7",
   "key_9",
+  "key_page_down",
+  "key_page_up",
+  "key_period",
+  "key_x",
   "key_6",
   "key_8",
-  "key_page_down",
-  "key_page_up"
 ]
 
 [[keyboards]]
 keys = [
   "key_z",
   "key_g",
-  "key_q",
-  "key_y",
   "key_bang",
   "key_3",
+  "",
+  "",
+  "key_q",
+  "key_y",
   "key_question",
   "key_2",
 ]
 
 [[keyboards]]
 keys = [
-  "key_dollar",
-  "key_percent",
-  "key_grave",
-  "key_quote",
   "key_caret",
   "key_asterisk",
   "key_tilde",
   "key_doublequote",
+  "",
+  "",
+  "key_dollar",
+  "key_percent",
+  "key_grave",
+  "key_quote",
 ]
 
 [[keyboards]]
 keys = [
-  "key_slash",
-  "key_ampersand",
-  "key_equal",
   "key_backslash",
   "key_pipe",
   "key_plus",
+  "",
+  "",
+  "",
+  "key_slash",
+  "key_ampersand",
+  "key_equal",
 ]
 
 [[keyboards]]
 keys = [
-  "key_minus",
   "key_underscore",
-  "key_semicolon",
-  "key_colon",
   "key_at",
+  "key_colon",
+  "",
+  "",
+  "",
+  "key_minus",
   "key_hash",
+  "key_semicolon",
 ]
 
 [[keyboards]]
 keys = [
-  "key_caps_lock",
   "key_delete",
+  "key_caps_lock",
   "key_printscreen",
 ]
 
@@ -133,17 +154,6 @@ keys = [
   "macro_in_brace",
   "macro_in_angle",
 ]
-
-[[keyboards]]
-keys = [
-  "key_left",
-  "key_right",
-  "key_home",
-  "key_end",
-  "key_esc",
-  "key_tab",
-]
-
 
 [[keyboards]]
 keys = [
