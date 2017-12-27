@@ -1,8 +1,9 @@
-// A bunch of small, miscellaneous types
+// A bunch of small, miscellaneous types that don't deserve their own file
 
-use std::fmt;
+use std::iter;
+use std::fmt::{self, Debug};
 use std::slice::Iter;
-// use std::collections::BTreeMap;
+use std::string::ToString;
 
 use types::{CCode, KeyPress, Validate};
 use types::errors::*;
@@ -14,13 +15,72 @@ pub enum COption {
     Ifdef(CCode, bool),
     Uint8(CCode, u8),
     Array1D(CCode, Vec<usize>),
-    // Array2D (Vec<Vec<u8>>),
-    // Mode { use_words: bool },
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Pin(pub u8);
+
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SwitchPos {
+    pub row: Pin,
+    pub col: Pin,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct KmapFormat(pub Vec<Vec<SwitchPos>>);
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct KmapInfo {
+    pub file: KmapPath,
+    #[serde(default = "return_false")] pub use_words: bool,
+}
+
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
+pub enum SeqType {
+    Plain,
+    Macro,
+    Command,
+    Word,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModeInfo {
+    pub keymaps: Vec<KmapInfo>,
+    #[serde(default = "return_false")] pub gaming: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct KmapPath(pub String);
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize,
+         Serialize)]
+#[serde(deny_unknown_fields)]
+#[serde(from = "String")]
+pub struct ModeName(pub String);
+
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+#[serde(from = "String")]
+// #[serde(finalize = "Name::sanitize")]
+pub struct Name(pub String);
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Sequence(pub Vec<KeyPress>);
+
+#[derive(Debug, Clone)]
+pub struct Permutation {
+    order: Vec<Option<usize>>,
+    old_length: usize,
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 impl Pin {
     pub fn to_usize(pin_vec: &Vec<Pin>) -> Vec<usize> {
@@ -50,19 +110,7 @@ impl From<Pin> for u8 {
     }
 }
 
-// impl <T> From<Vec<T>> for Vec<usize>
-// where T: From<Pin> for usize {
-//     fn from(pin: Pin) -> usize {
-//         pin.0 as usize
-//     }
-// }
-
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct SwitchPos {
-    pub row: Pin,
-    pub col: Pin,
-}
+////////////////////////////////////////////////////////////////////////////////
 
 impl SwitchPos {
     pub fn new(row: Pin, col: Pin) -> SwitchPos {
@@ -91,33 +139,38 @@ impl fmt::Display for SwitchPos {
 
 //////////////////////////////
 
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct KmapFormat(pub Vec<Vec<SwitchPos>>);
+impl KmapFormat {
+    pub fn chord_length(&self) -> usize {
+        let mut count = 0;
+        for row in self.0.iter() {
+            for _ in row.iter() {
+                count += 1;
+            }
+        }
+        count
+    }
+
+    pub fn flatten(&self) -> Vec<SwitchPos> {
+        let mut flat: Vec<SwitchPos> = Vec::new();
+        for row in self.0.iter() {
+            flat.extend_from_slice(row);
+        }
+        flat
+    }
+}
 
 impl Validate for KmapFormat {
     fn validate(&self) -> Result<()> {
         for row in self.0.iter() {
-            for pair in row.iter() {
-                pair.validate()?;
+            for switch_pos in row.iter() {
+                switch_pos.validate()?;
             }
         }
         Ok(())
     }
 }
 
-
-
-
 //////////////////////////////
-
-#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
-pub enum SeqType {
-    Plain,
-    Macro,
-    Command,
-    Word,
-}
 
 impl fmt::Display for SeqType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -133,14 +186,6 @@ impl fmt::Display for SeqType {
 
 //////////////////////////////
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct KmapInfo {
-    pub file: KmapPath,
-
-    #[serde(default = "return_false")] pub use_words: bool,
-}
-
 impl Validate for KmapInfo {
     fn validate(&self) -> Result<()> {
         self.file.validate()
@@ -152,14 +197,6 @@ fn return_false() -> bool {
 }
 
 //////////////////////////////
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct ModeInfo {
-    pub keymaps: Vec<KmapInfo>,
-
-    #[serde(default = "return_false")] pub gaming: bool,
-}
 
 impl Validate for ModeInfo {
     fn validate(&self) -> Result<()> {
@@ -173,10 +210,6 @@ impl Validate for ModeInfo {
 
 
 //////////////////////////////
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct KmapPath(pub String);
 
 impl Validate for KmapPath {
     fn validate(&self) -> Result<()> {
@@ -192,12 +225,6 @@ impl fmt::Display for KmapPath {
 }
 
 //////////////////////////////
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize,
-         Serialize)]
-#[serde(deny_unknown_fields)]
-#[serde(from = "String")]
-pub struct ModeName(pub String);
 
 impl Validate for ModeName {
     fn validate(&self) -> Result<()> {
@@ -233,12 +260,6 @@ impl From<String> for ModeName {
 
 
 //////////////////////////////
-
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-#[serde(from = "String")]
-// #[serde(finalize = "Name::sanitize")]
-pub struct Name(pub String);
 
 // TODO: sanitize name?
 impl Name {
@@ -281,10 +302,6 @@ impl fmt::Debug for Name {
 
 
 //////////////////////////////
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Sequence(pub Vec<KeyPress>);
 
 impl Sequence {
     pub fn new() -> Sequence {
@@ -334,3 +351,83 @@ impl From<KeyPress> for Sequence {
 //             .collect()
 //     }
 // }
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl Permutation {
+    pub fn from_to<T>(old: &[T], new: &[T]) -> Permutation
+    where
+        T: Clone + Eq + ToString + Debug,
+    {
+        let mut order = Vec::new();
+        for new_item in new {
+            let pos_in_old = old.iter().position(|item| item == new_item);
+            order.push(pos_in_old)
+        }
+        Permutation {
+            order: order,
+            old_length: old.len(),
+        }
+    }
+
+    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>>
+    where
+        T: Clone + Default,
+    {
+        if old.len() != self.old_length {
+            bail!(ErrorKind::Permute);
+        }
+
+        let length = self.order.len();
+        let mut new: Vec<_> = iter::repeat(T::default()).take(length).collect();
+        for new_index in 0..length {
+            if let Some(old_index) = self.order[new_index] {
+                new[new_index] = old[old_index].to_owned();
+            }
+            // Otherwise, leave the default value alone.
+        }
+        Ok(new)
+    }
+}
+
+#[test]
+fn test_permute_reverse() {
+    let p = Permutation::from_to(&[1, 2, 3], &[3, 2, 1]);
+    assert_eq!(vec!["c", "b", "a"], p.permute(&["a", "b", "c"]).unwrap())
+}
+
+#[test]
+fn test_permute_identity() {
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
+    assert_eq!(vec![11, 12, 13], p.permute(&[11, 12, 13]).unwrap())
+}
+
+#[test]
+fn test_permute_shorten() {
+    let p = Permutation::from_to(&[1, 2, 3, 4, 5], &[5, 4, 3]);
+    assert_eq!(vec![15, 14, 13], p.permute(&[11, 12, 13, 14, 15]).unwrap())
+}
+
+#[test]
+fn test_permute_lengthen() {
+    let p = Permutation::from_to(&[1, 2, 3], &[5, 4, 3, 2, 1]);
+    assert_eq!(vec![0, 0, 13, 12, 11], p.permute(&[11, 12, 13]).unwrap())
+}
+
+#[test]
+fn test_permute_err_long() {
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
+    match p.permute(&[11, 12, 13, 14]) {
+        Err(Error(ErrorKind::Permute, _)) => (),
+        _ => panic!("should have returned permute error"),
+    }
+}
+
+#[test]
+fn test_permute_err_short() {
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
+    match p.permute(&[11, 12]) {
+        Err(Error(ErrorKind::Permute, _)) => (),
+        _ => panic!("should have returned permute error"),
+    }
+}

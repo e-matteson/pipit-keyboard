@@ -16,6 +16,11 @@ pub struct Checker {
     all_chords: HashSet<Name>,
 }
 
+#[derive(Debug)]
+pub struct AnagramSet(pub HashMap<AnagramNum, Vec<Name>>);
+
+////////////////////////////////////////////////////////////////////////////////
+
 impl Checker {
     pub fn new() -> Checker {
         Checker {
@@ -63,7 +68,6 @@ impl Checker {
         chord: &Chord,
         kmap: &KmapPath,
     ) -> Result<()> {
-        // TODO take refs
         let mut base_chord = chord.to_owned();
         base_chord.anagram_num = AnagramNum(0);
 
@@ -95,9 +99,6 @@ fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
 
 
 //////////////////////////////
-
-#[derive(Debug)]
-pub struct AnagramSet(pub HashMap<AnagramNum, Vec<Name>>);
 
 impl AnagramSet {
     pub fn new() -> AnagramSet {
@@ -148,7 +149,7 @@ impl AnagramSet {
         // keys. So we may not want to warn about them. (We don't
         // check which hands the switches are on, but close enough)
         if ALLOW_MISSING_DOUBLE_SWITCHES {
-            chord.map_or(true, |c| c.count_switches() != 2)
+            chord.map_or(true, |c| c.count_pressed() != 2)
         } else {
             true
         }

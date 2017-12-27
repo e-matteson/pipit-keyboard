@@ -11,6 +11,7 @@ pub struct KeyPress {
     pub mods: Option<Vec<CCode>>,
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
 impl KeyPress {
     pub fn empty_code() -> CCode {
@@ -35,15 +36,17 @@ impl KeyPress {
         }
     }
 
-    pub fn new_blank() -> KeyPress {
+    pub fn is_mod_blank(&self) -> bool {
+        self.mods.is_none()
+    }
+}
+
+impl Default for KeyPress {
+    fn default() -> KeyPress {
         KeyPress {
             key: None,
             mods: None,
         }
-    }
-
-    pub fn is_mod_blank(&self) -> bool {
-        self.mods.is_none()
     }
 }
 
@@ -105,48 +108,51 @@ fn sanitize(s: &str) -> Result<CCode> {
 
 fn contains_illegal_char(string: &str) -> bool {
     // TODO use regex, for this and c_identifiers, c_macros, etc
-    let legal = vec![
-        '_',
-        '|',
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-    ];
+    lazy_static! {
+        static ref LEGAL: Vec<char>  = vec![
+            '_',
+            '|',
+            'A',
+            'B',
+            'C',
+            'D',
+            'E',
+            'F',
+            'G',
+            'H',
+            'I',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'U',
+            'V',
+            'W',
+            'X',
+            'Y',
+            'Z',
+            '0',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+        ];
+    }
+
     for c in string.chars() {
-        if !legal.contains(&c) {
+        if !LEGAL.contains(&c) {
             return true;
         }
     }

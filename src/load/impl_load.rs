@@ -23,8 +23,8 @@ impl AllData {
 
         all_data.output_directory = Some(settings.options.output_directory());
         all_data.tutor_directory = Some(settings.options.tutor_directory());
-        Chord::set_num_bytes(settings.options.num_bytes_in_chord());
 
+        Chord::set_info(settings.options.global_chord_info());
 
         all_data
             .load_modes(&settings)
@@ -79,18 +79,13 @@ impl AllData {
     }
 
     fn load_chords(&mut self, options: &OptionsConfig) -> Result<()> {
-        let mut kmap_parser = KmapParser::new(
-            &options.kmap_format,
-            &options.row_pins,
-            &options.column_pins,
-        )?;
+        let mut kmap_parser = KmapParser::new(&options.kmap_format)?;
         for kmap in self.get_kmap_paths() {
             let named_chords = kmap_parser
                 .parse(&kmap)
                 .chain_err(|| format!("failure to load kmap: '{}'", kmap))?;
             self.add_chords(&kmap, named_chords)?;
         }
-        self.chord_permutation = Some(kmap_parser.permutation_to_kmap);
         Ok(())
     }
 

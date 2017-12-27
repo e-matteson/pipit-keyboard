@@ -2,6 +2,18 @@
 use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
 use types::errors::*;
 
+#[derive(Debug)]
+pub struct Word {
+    pub name: Name,
+    pub seq: Sequence,
+    pub chord: Chord,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
+         PartialOrd, Hash)]
+#[serde(deny_unknown_fields)]
+pub struct AnagramNum(pub u8);
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct WordConfig {
@@ -10,14 +22,50 @@ pub struct WordConfig {
     pub chord: Option<String>,
 }
 
-impl Validate for WordConfig {
-    fn validate(&self) -> Result<()> {
-        self.anagram.validate()
-        // TODO check for illegal characters?
-        // self.word
-        // self.chord
+pub struct WordBuilder<'a> {
+    pub info: WordConfig,
+    pub kmap: &'a KmapPath,
+    pub all_data: &'a AllData,
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl AnagramNum {
+    pub fn max_allowable() -> u8 {
+        // This depends on the representation in the lookup table
+        7
     }
 }
+
+impl Default for AnagramNum {
+    fn default() -> AnagramNum {
+        AnagramNum(0)
+    }
+}
+
+impl Validate for AnagramNum {
+    fn validate(&self) -> Result<()> {
+        // TODO move max out somewere?
+        // TODO how to keep this matched with make_prefix_byte()?
+        // const MAX_ANAGRAM: u8 = 7;
+        if self.0 > AnagramNum::max_allowable() {
+            bail!(
+                "anagram number too large (max is {}): {}",
+                AnagramNum::max_allowable(),
+                self.0
+            );
+        }
+        Ok(())
+    }
+}
+
+impl From<AnagramNum> for usize {
+    fn from(num: AnagramNum) -> usize {
+        num.0 as usize
+    }
+}
+
 
 impl WordConfig {
     fn seq_spelling(&self) -> String {
@@ -37,51 +85,15 @@ impl WordConfig {
     }
 }
 
-#[derive(Debug)]
-pub struct Word {
-    pub name: Name,
-    pub seq: Sequence,
-    pub chord: Chord,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
-         PartialOrd, Hash)]
-#[serde(deny_unknown_fields)]
-pub struct AnagramNum(pub u8);
-
-impl Default for AnagramNum {
-    fn default() -> AnagramNum {
-        AnagramNum(0)
-    }
-}
-
-impl Validate for AnagramNum {
+impl Validate for WordConfig {
     fn validate(&self) -> Result<()> {
-        // TODO move max out somewere?
-        // TODO how to keep this matched with make_prefix_byte()?
-        const MAX_ANAGRAM: u8 = 7;
-        if self.0 > MAX_ANAGRAM {
-            bail!(
-                "anagram number too large (max is {}): {}",
-                MAX_ANAGRAM,
-                self.0
-            );
-        }
-        Ok(())
+        self.anagram.validate()
+        // TODO check for illegal characters?
+        // self.word
+        // self.chord
     }
 }
 
-impl From<AnagramNum> for usize {
-    fn from(num: AnagramNum) -> usize {
-        num.0 as usize
-    }
-}
-
-pub struct WordBuilder<'a> {
-    pub info: WordConfig,
-    pub kmap: &'a KmapPath,
-    pub all_data: &'a AllData,
-}
 
 impl<'a> WordBuilder<'a> {
     pub fn finalize(&self) -> Result<Word> {

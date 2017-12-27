@@ -13,7 +13,8 @@ pub struct CFiles {
     pub c: CCode, // for cpp file
 }
 
-// TODO rename to a noun!
+////////////////////////////////////////////////////////////////////////////////
+
 impl CFiles {
     pub fn new() -> CFiles {
         CFiles {

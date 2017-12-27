@@ -19,9 +19,8 @@ pub struct AllData {
     pub options: Vec<COption>,
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
-    pub chord_permutation: Option<Vec<usize>>,
     checker: Checker,
-    max_anagram_num: AnagramNum,
+    highest_anagram_num: AnagramNum,
 }
 
 impl AllData {
@@ -38,8 +37,7 @@ impl AllData {
             output_directory: None,
             tutor_directory: None,
             checker: Checker::new(),
-            max_anagram_num: AnagramNum(0),
-            chord_permutation: None,
+            highest_anagram_num: AnagramNum(0),
         }
     }
 
@@ -96,8 +94,8 @@ impl AllData {
         }.finalize()?;
         self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
         self.add_chord(&word.name, &word.chord, kmap)?;
-        if word.chord.anagram_num > self.max_anagram_num {
-            self.max_anagram_num = word.chord.anagram_num;
+        if word.chord.anagram_num > self.highest_anagram_num {
+            self.highest_anagram_num = word.chord.anagram_num;
         }
         Ok(())
     }
@@ -251,12 +249,13 @@ impl AllData {
         chord_name: &Name,
         mode: &ModeName,
     ) -> Option<Chord> {
-        let chord = self.get_chord_in_mode(chord_name, mode);
+        // TODO get rid of wrapper
+        self.get_chord_in_mode(chord_name, mode)
         // TODO why is clone needed?!
-        let permutation = self.chord_permutation
-            .clone()
-            .expect("permutation was never set!");
-        chord.map(|c: Chord| c.permute(&permutation))
+        // let permutation = self.chord_permutation
+        //     .clone()
+        //     .expect("permutation was never set!");
+        // chord.map(|c: Chord| c.permute(&permutation))
     }
 
     pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
@@ -320,7 +319,7 @@ impl AllData {
     }
 
     pub fn get_num_anagrams(&self) -> u8 {
-        self.max_anagram_num.0 + 1
+        self.highest_anagram_num.0 + 1
     }
 
     pub fn check(&self) {

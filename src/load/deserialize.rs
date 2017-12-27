@@ -1,8 +1,9 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use types::{CCode, COption, KeyPress, KmapFormat, ModeInfo, ModeName, Name,
-            Pin, Sequence, ToC, Validate, WordConfig};
+use types::{CCode, COption, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
+            ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
+            Validate, WordConfig};
 
 use types::errors::*;
 
@@ -26,6 +27,7 @@ validated_struct!{
         pub other: OtherConfig,
     }
 }
+
 validated_struct!{
     #[derive(Deserialize, Debug)]
     #[serde(deny_unknown_fields)]
@@ -33,8 +35,8 @@ validated_struct!{
         pub chord_delay: Delay,
         pub held_delay: Delay,
         pub debounce_delay: Delay,
-        pub debug_messages: Verbosity, //TODO enum
-        pub board_name: BoardName, //TODO enum
+        pub debug_messages: Verbosity,
+        pub board_name: BoardName,
         pub row_pins: Vec<Pin>,
         pub column_pins: Vec<Pin>,
         pub kmap_format: KmapFormat,
@@ -88,7 +90,6 @@ always_valid_enum!{
     }
 }
 
-
 #[derive(Deserialize, Debug, Clone, Copy)]
 #[serde(deny_unknown_fields)]
 pub struct Delay(u16);
@@ -101,6 +102,23 @@ impl OptionsConfig {
         let mut ops = self.get_literal_ops();
         ops.extend(self.get_auto());
         ops
+    }
+
+    pub fn global_chord_info(&self) -> GlobalChordInfo {
+        GlobalChordInfo {
+            num_bytes: self.num_bytes_in_chord(),
+            num_switches: self.kmap_format.chord_length(),
+            num_matrix_positions: self.num_matrix_positions(),
+            to_firmware_order: self.permutation_to_firmware_order(),
+        }
+    }
+
+    pub fn output_directory(&self) -> PathBuf {
+        self.output_directory.clone()
+    }
+
+    pub fn tutor_directory(&self) -> PathBuf {
+        self.tutor_directory.clone()
     }
 
     fn get_literal_ops(&self) -> Vec<COption> {
@@ -150,31 +168,24 @@ impl OptionsConfig {
         ops
     }
 
-    fn num_rows(&self) -> usize {
-        self.row_pins.len()
+    fn make_firmware_order(&self) -> Vec<SwitchPos> {
+        // must match the algorithm used in the firmware's scanMatrix()!
+        let mut order: Vec<SwitchPos> = Vec::new();
+        for c in &self.column_pins {
+            for r in &self.row_pins {
+                order.push(SwitchPos::new(*r, *c));
+            }
+        }
+        order
     }
 
-    fn num_columns(&self) -> usize {
-        self.column_pins.len()
+    fn permutation_to_firmware_order(&self) -> Permutation {
+        let kmap_order = self.kmap_format.flatten();
+        let firmware_order = self.make_firmware_order();
+        Permutation::from_to(&kmap_order, &firmware_order)
     }
 
-    fn num_matrix_positions(&self) -> usize {
-        self.num_rows() * self.num_columns()
-    }
-
-    pub fn num_bytes_in_chord(&self) -> usize {
-        round_up_to_num_bytes(self.num_matrix_positions())
-    }
-
-    pub fn output_directory(&self) -> PathBuf {
-        self.output_directory.clone()
-    }
-
-    pub fn tutor_directory(&self) -> PathBuf {
-        self.tutor_directory.clone()
-    }
-
-    pub fn get_auto(&self) -> Vec<COption> {
+    fn get_auto(&self) -> Vec<COption> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
         let has_battery = self.battery_level_pin.is_some();
@@ -182,9 +193,6 @@ impl OptionsConfig {
         let enable_rgb_led = self.rgb_led_pins.is_some();
         let num_rgb_led_pins =
             self.rgb_led_pins.as_ref().map_or(0, |v| v.len());
-
-        // TODO don't magically set Chord's static var here!
-        // Chord::set_num_bytes(num_bytes_in_chord);
 
         vec![
             COption::DefineInt("NUM_ROWS".to_c(), self.num_rows()),
@@ -202,6 +210,22 @@ impl OptionsConfig {
             COption::Ifdef("HAS_BATTERY".to_c(), has_battery),
         ]
     }
+
+    fn num_rows(&self) -> usize {
+        self.row_pins.len()
+    }
+
+    fn num_columns(&self) -> usize {
+        self.column_pins.len()
+    }
+
+    fn num_matrix_positions(&self) -> usize {
+        self.num_rows() * self.num_columns()
+    }
+
+    fn num_bytes_in_chord(&self) -> usize {
+        round_up_to_num_bytes(self.num_matrix_positions())
+    }
 }
 
 impl ToC for BoardName {
@@ -212,7 +236,6 @@ impl ToC for BoardName {
         }
     }
 }
-
 
 impl From<Verbosity> for usize {
     fn from(verbosity: Verbosity) -> usize {
@@ -236,14 +259,9 @@ impl From<Delay> for usize {
     }
 }
 
-
 fn return_false() -> bool {
     false
 }
-
-// fn yes() -> bool {
-//     true
-// }
 
 fn round_up_to_num_bytes(num_bits: usize) -> usize {
     (num_bits as f64 / 8.0).ceil() as usize

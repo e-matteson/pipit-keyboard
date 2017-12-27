@@ -1,27 +1,25 @@
-use itertools::Itertools;
+// use itertools::Itertools;
 use std::fmt;
+use std::sync::Mutex;
 
-use types::AnagramNum;
+use types::{AnagramNum, Permutation};
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
 
-static mut CHORD_LENGTH: usize = 0;
+// static mut INFO: Option<GlobalChordInfo> = None;
 
-fn set_chord_length(len: usize) {
-    unsafe {
-        CHORD_LENGTH = len;
-    }
+lazy_static! {
+    static ref INFO: Mutex<Option<GlobalChordInfo>> = Mutex::new(None);
 }
 
-fn get_chord_length() -> usize {
-    let len = unsafe { CHORD_LENGTH };
-    if len == 0 {
-        panic!("chord length was not set");
-    }
-    len
+#[derive(Clone, Debug)]
+pub struct GlobalChordInfo {
+    pub num_bytes: usize,
+    pub num_switches: usize,
+    pub num_matrix_positions: usize,
+    pub to_firmware_order: Permutation,
 }
-
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct Chord {
@@ -29,22 +27,29 @@ pub struct Chord {
     pub anagram_num: AnagramNum,
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 impl Chord {
-    pub fn set_num_bytes(x: usize) {
-        set_chord_length(x * 8);
+    pub fn set_info(info: GlobalChordInfo) {
+        set_static_info(info);
+    }
+
+    pub fn global_length() -> usize {
+        static_info().num_switches
     }
 
     pub fn new() -> Chord {
         Chord {
-            bits: vec![false; get_chord_length()],
+            bits: vec![false; Chord::global_length()],
             anagram_num: AnagramNum(0),
         }
     }
 
     pub fn from_vec(v: Vec<bool>) -> Chord {
-        if v.len() != get_chord_length() {
+        if v.len() != Chord::global_length() {
             panic!("wrong chord length");
         }
+
         Chord {
             bits: v,
             anagram_num: AnagramNum(0),
@@ -55,11 +60,7 @@ impl Chord {
         self.bits.len()
     }
 
-    pub fn chord_length() -> usize {
-        get_chord_length()
-    }
-
-    pub fn count_switches(&self) -> usize {
+    pub fn count_pressed(&self) -> usize {
         self.bits.iter().filter(|x| **x).count()
     }
 
@@ -70,23 +71,7 @@ impl Chord {
         }
     }
 
-    pub fn permute(&self, order: &[usize]) -> Chord {
-        // TODO use different types for different permutations?
-        assert_eq!(self.len(), order.len());
-        let mut new = Chord::new();
-        for i in 0..self.len() {
-            new.bits[order[i]] = self.bits[i];
-        }
-        new
-    }
-
-    // pub fn to_string(&self) -> String {
-    // let tmp: Vec<_> = self.bits.iter().map(|&b| if b {"1"} else
-    // {"0"}).collect();
-    //     tmp.join("")
-    // }
-
-    pub fn bit_string(&self) -> String {
+    fn bit_string(&self) -> String {
         let tmp: Vec<_> = self.bits
             .iter()
             .map(|&b| if b { "1" } else { "0" })
@@ -99,19 +84,20 @@ impl Chord {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut v: Vec<u8> = Vec::new();
-        for chunk in &self.bits.iter().cloned().chunks(8) {
-            let byte: Vec<_> = chunk.collect();
-            v.push(byte_to_int(&byte));
+        // Permute to the order used in the firmware, pad to a whole number of
+        // bytes, and convert to 8-bit ints
+        // TODO return result
+        let ordered_bools = static_info()
+            .to_firmware_order
+            .permute(&self.bits)
+            .expect("failed to permute chord");
+
+        let mut bytes: Vec<u8> = Vec::new();
+        for chunk in ordered_bools.chunks(8) {
+            bytes.push(bools_to_u8(chunk));
         }
-        v
+        bytes
     }
-
-    pub fn to_usize_vec(&self) -> Vec<usize> {
-        self.iter().map(|&b| if b { 1 } else { 0 }).collect()
-    }
-
-    // pub fn get_anagram(&self)
 }
 
 impl Default for Chord {
@@ -131,14 +117,40 @@ impl fmt::Debug for Chord {
     }
 }
 
-fn byte_to_int(v: &[bool]) -> u8 {
-    assert_eq!(v.len(), 8);
+fn bools_to_u8(v: &[bool]) -> u8 {
+    // If v is shorter than 8, the missing most-significant digits will be zero
+    assert!(v.len() <= 8);
     let mut num: u8 = 0;
     let base: u8 = 2;
-
-    let bits: Vec<u8> = v.iter().map(|&b| if b { 1 } else { 0 }).collect();
     for b in 0..8 {
-        num += base.pow(b) * bits[b as usize]
+        let bit = if *v.get(b).unwrap_or(&false) { 1 } else { 0 };
+        num += base.pow(b as u32) * bit
     }
     num
+}
+
+// fn right_pad_default<T>(v: Vec<T>, pad_width: usize) -> Vec<T>
+// where
+//     T: Default + Clone,
+// {
+//     iter::repeat(T::default())
+//         .take(pad_width)
+//         .chain(v.into_iter())
+//         .collect()
+// }
+
+
+fn set_static_info(info: GlobalChordInfo) {
+    let mut static_info = INFO.lock().unwrap();
+    match *static_info {
+        Some(_) => panic!("static chord info can only be set once"),
+        None => *static_info = Some(info),
+    }
+}
+
+fn static_info() -> GlobalChordInfo {
+    INFO.lock()
+        .unwrap()
+        .clone()
+        .expect("static chord info was not set")
 }

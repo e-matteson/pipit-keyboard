@@ -21,18 +21,6 @@ error_chain! {
     // the same as `quick_error!`, but the `from()` and `cause()`
     // syntax is not supported.
     errors {
-        // MissingTable(s: String) {
-        //     description("Missing table of settings")
-        //         display("missing table: '{}'", s)
-        // }
-        // MissingKey(s: String) {
-        //     description("Missing key in settings")
-        //         display("missing key: '{}'", s)
-        // }
-        // Duplicate(_type: String, name: String) {
-        //     description("Duplicate mapping")
-        //         display("unexpected key: '{}'", s)
-        // }
         UnexpectedKey(s: String) {
             description("Unexpected key in settings")
                 display("unexpected key: '{}'", s)
@@ -61,10 +49,10 @@ error_chain! {
                         }
                 )
         }
-        // FileEmpty {
-        //     description("File is empty")
-        //         display("file is empty")
-        // }
+        Permute {
+            description("Unable to permute")
+                display("Unable to permute this sequence, because it has the wrong length")
+        }
         KmapPins(s: String) {
             description(
                 "Switch positions in kmap format don't match row or column pins"
@@ -85,12 +73,3 @@ error_chain! {
         }
     }
 }
-
-// Test(s: &str) {
-//     description("test")
-//         display("foo: {}", s)
-// }
-// FileError(s: String) {
-//     description("Failed to read file")
-//         display("failed to read file: '{}'", s)
-// }

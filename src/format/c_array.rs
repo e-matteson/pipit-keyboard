@@ -6,6 +6,7 @@ use format::c_files::CFiles;
 use types::{CCode, ToC};
 
 // TODO fix horrible 2d array formatting
+// TODO  delete unused 2d arrays?
 
 pub struct CArray<T>
 where
@@ -99,6 +100,7 @@ where
 {
     let items_per_line = 4;
     let mut lines: Vec<String> = Vec::new();
+    //  TODO use slice chunks instead of itertools
     let chunks = &v.iter().map(|x| x.to_string()).chunks(items_per_line);
     for chunk in chunks {
         let tmp: Vec<_> = chunk.collect();

@@ -180,7 +180,7 @@ impl Keyboard {
     }
 
     fn set_keys(&mut self, keys: &[Name], data: &TutorData) {
-        assert_eq!(Chord::chord_length(), self.switches.len());
+        assert_eq!(Chord::global_length(), self.switches.len());
         let chords: Vec<_> = keys.iter()
             .map(|key| data.get_chord(key).expect("chord not found"))
             .collect();
@@ -190,7 +190,7 @@ impl Keyboard {
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
         for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
-            let style = if chord.count_switches() != 1 {
+            let style = if chord.count_pressed() != 1 {
                 // Usually this means there's a multi-switch chord.
                 // We should also consume a chord style if 0 switches are
                 // pressed, meaning this is a blank chord named "", used for

@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::collections::BTreeMap;
 
 use format::{CArray, CFiles};
-use types::{CCode, Chord, KmapPath, Name, SeqType, Sequence, ToC};
+use types::{AnagramNum, CCode, Chord, KmapPath, Name, SeqType, Sequence, ToC};
 use types::errors::*;
 
 type SeqMap = BTreeMap<Name, Sequence>;
@@ -13,56 +13,6 @@ type LenMap = BTreeMap<usize, Vec<Name>>;
 // At least be more consistent about terminology
 
 
-struct ChordEntry {
-    chord: Chord,
-    offset: u8,
-}
-
-impl ChordEntry {
-    pub fn new() -> ChordEntry {
-        ChordEntry {
-            chord: Chord::new(),
-            offset: 0,
-        }
-    }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        // let mut v = vec![self.offset as i64];
-        let mut v = self.make_prefix_byte();
-        v.extend(self.chord.to_bytes());
-        v
-    }
-
-    pub fn make_prefix_byte(&self) -> Vec<u8> {
-        // This format must match Lookup::readOffset() and
-        // Lookup::readAnagramNum()!
-        // Offset and anagram bits fit into 1 byte, so must add up to 8.
-        const NUM_OFFSET_BITS: u32 = 5; // (least significant)
-        const NUM_ANAGRAM_BITS: u32 = 3; // (most significant)
-
-        let max_offset = 2u32.pow(NUM_OFFSET_BITS) as u8;
-        let max_anagram = 2u32.pow(NUM_ANAGRAM_BITS) as u8;
-
-        if self.offset > max_offset {
-            panic!("offset is too large - too many layouts?");
-        }
-
-        if self.chord.anagram_num.0 > max_anagram {
-            panic!("anagram num is too large");
-        }
-
-        let msb = self.chord
-            .anagram_num
-            .0
-            .checked_shl(NUM_OFFSET_BITS)
-            .unwrap();
-        let lsb = self.offset;
-        vec![msb + lsb]
-    }
-}
-
-//////////////////////
-
 pub struct KmapBuilder<'a> {
     seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
@@ -72,6 +22,22 @@ pub struct KmapBuilder<'a> {
     use_mods: bool,
 }
 
+struct ChordEntry {
+    chord: Chord,
+    offset: u8,
+}
+
+c_struct!(
+    struct KmapStruct {
+        chords: CCode,
+        sequences: CCode,
+        use_compression: bool,
+        use_mods: bool
+    }
+);
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 impl<'a> KmapBuilder<'a> {
     pub fn new(
@@ -191,7 +157,6 @@ impl<'a> KmapBuilder<'a> {
         }
         Ok(chord_arrays)
     }
-
 
     fn make_chord_subarray(
         &self,
@@ -334,6 +299,54 @@ impl<'a> KmapBuilder<'a> {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+impl ChordEntry {
+    pub fn new() -> ChordEntry {
+        ChordEntry {
+            chord: Chord::new(),
+            offset: 0,
+        }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        // let mut v = vec![self.offset as i64];
+        let mut v = self.make_prefix_byte();
+        v.extend(self.chord.to_bytes());
+        v
+    }
+
+    pub fn make_prefix_byte(&self) -> Vec<u8> {
+        // This format must match Lookup::readOffset() and
+        // Lookup::readAnagramNum()!
+        // Offset and anagram bits fit into 1 byte, so must add up to 8.
+        const NUM_OFFSET_BITS: u32 = 5; // (least significant)
+        const NUM_ANAGRAM_BITS: u32 = 3; // (most significant)
+
+        let max_offset = (2u32.pow(NUM_OFFSET_BITS) - 1) as u8;
+        let max_anagram = (2u32.pow(NUM_ANAGRAM_BITS) - 1) as u8;
+        assert_eq!(max_anagram, AnagramNum::max_allowable());
+
+        if self.offset > max_offset {
+            panic!("offset is too large - too many layouts?");
+        }
+
+        if self.chord.anagram_num.0 > max_anagram {
+            panic!("anagram num is too large");
+        }
+
+        let msb = self.chord
+            .anagram_num
+            .0
+            .checked_shl(NUM_OFFSET_BITS)
+            .unwrap();
+        let lsb = self.offset;
+        vec![msb + lsb]
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 fn make_flat_sequence(seq_map: &SeqMap, names: &[Name]) -> Sequence {
     let mut flat_seq = Sequence::new();
     for name in names {
@@ -355,7 +368,6 @@ fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<u8> {
     v
 }
 
-
 fn get_compression_config(seq_type: SeqType) -> bool {
     match seq_type {
         SeqType::Plain | SeqType::Macro | SeqType::Command => false,
@@ -369,13 +381,3 @@ fn get_mods_config(seq_type: SeqType) -> bool {
         SeqType::Command | SeqType::Word => false,
     }
 }
-
-
-c_struct!(
-    struct KmapStruct {
-        chords: CCode,
-        sequences: CCode,
-        use_compression: bool,
-        use_mods: bool
-    }
-);

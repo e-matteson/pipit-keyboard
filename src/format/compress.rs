@@ -38,7 +38,7 @@ fn compress_chunk(mut data: Vec<KeyPress>) -> Vec<CCode> {
     // --bb----         --cccc--         --dddddd
     // aaaaaabb         bbbbcccc         ccdddddd
 
-    pad(&mut data, NUM_KEYS);
+    pad_to_length(&mut data, NUM_KEYS);
 
     let mut bytes: Vec<CCode> = Vec::new();
     for i in 0..NUM_BYTES {
@@ -61,10 +61,13 @@ fn format_mask(i: usize, s1: &CCode, s2: &CCode) -> CCode {
     CCode(format!("{}({},{})", macro_name, s1, s2))
 }
 
-fn pad(v: &mut Vec<KeyPress>, length: usize) {
+fn pad_to_length<T>(v: &mut Vec<T>, length: usize)
+where
+    T: Default,
+{
     assert!(v.len() <= length);
-    let num_to_pad = length.saturating_sub(v.len());
-    for _ in 0..num_to_pad {
-        v.push(KeyPress::new_blank());
+    let pad_width = length.saturating_sub(v.len());
+    for _ in 0..pad_width {
+        v.push(T::default());
     }
 }

@@ -9,6 +9,8 @@ pub trait Validate {
     fn validate(&self) -> Result<()>;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 impl<K, V> Validate for BTreeMap<K, V>
 where
     K: Validate,
