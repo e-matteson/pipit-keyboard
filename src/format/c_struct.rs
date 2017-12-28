@@ -12,7 +12,7 @@ macro_rules! c_struct {
             // TODO inline for efficiency?
             // TODO optionally extern?
             // TODO whats up with semicolons? diff between kmap and mode?
-            fn to_c_tree(&self, name: CCode) -> CTree {
+            fn render(&self, name: CCode) -> CTree {
                 CTree::StructInstance{
                     name: name,
                     fields: vec![

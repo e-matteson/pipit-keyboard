@@ -1,0 +1,397 @@
+use std::io::Write;
+use std::fs::OpenOptions;
+use std::ops::AddAssign;
+use std::path::Path;
+use std::path::PathBuf;
+use std::fmt::Display;
+use itertools::Itertools;
+
+use types::{CCode, CTree, Field, ToC};
+use types::errors::*;
+
+// TODO move to c_code.rs
+
+#[derive(Debug, Default)]
+pub struct CFiles {
+    pub h: CCode, // for header file
+    pub c: CCode, // for cpp file
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl CTree {
+    pub fn format(&self) -> Result<CFiles> {
+        Ok(match *self {
+            CTree::Define {
+                ref name,
+                ref value,
+            } => format_define(name, value),
+            CTree::Ifdef { ref name, value } => if value {
+                format_define(name, &CCode::new())
+            } else {
+                CFiles::new()
+            },
+            CTree::Var {
+                ref name,
+                ref value,
+                ref c_type,
+                is_extern,
+            } => format_var(name, value, c_type, is_extern),
+            CTree::Array {
+                ref name,
+                ref values,
+                ref c_type,
+                is_extern,
+            } => format_array(name, values, c_type, is_extern),
+            CTree::CompoundArray {
+                ref name,
+                ref values,
+                ref subarray_type,
+                is_extern,
+            } => format_compound_array(name, values, subarray_type, is_extern)?,
+            CTree::EnumDecl {
+                ref name,
+                ref variants,
+            } => format_enum_decl(name, variants),
+            CTree::StructInstance {
+                ref name,
+                ref c_type,
+                ref fields,
+                is_extern,
+            } => format_struct_instance(name, c_type, fields, is_extern),
+            CTree::Namespace {
+                ref name,
+                ref contents,
+            } => format_namespace(name, contents)?,
+            CTree::Include { ref path } => format_include(path),
+            CTree::LiteralH(ref text) => CFiles::with_h(text),
+            CTree::LiteralC(ref text) => CFiles::with_c(text),
+            // CTree::CommentH(ref text) => CFiles::with_h(comment(text)),
+            // CTree::CommentC(ref text) => CFiles::with_c(comment(text)),
+            CTree::Group(ref vec) => format_group(vec)?,
+
+            // CTree::LiteralH(ref literal) => CFiles::with_h(literal),
+            CTree::IncludeGuard {
+                ref header_name,
+                ref contents,
+            } => format_guard(header_name, contents)?,
+        })
+    }
+}
+
+impl CFiles {
+    pub fn new() -> CFiles {
+        CFiles {
+            h: CCode::new(),
+            c: CCode::new(),
+        }
+    }
+
+    pub fn with_c<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        CFiles {
+            h: CCode::new(),
+            c: contents.to_c(),
+        }
+    }
+
+    pub fn with_h<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        CFiles {
+            h: contents.to_c(),
+            c: CCode::new(),
+        }
+    }
+
+    pub fn with<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        let contents = contents.to_c();
+        CFiles {
+            h: contents.clone(),
+            c: contents,
+        }
+    }
+
+    pub fn append(&mut self, other: &CFiles) {
+        self.h += &other.h;
+        self.c += &other.c;
+    }
+
+    pub fn append_newline(&mut self) {
+        self.h += "\n";
+        self.c += "\n";
+    }
+
+    pub fn save(&self, directory: &PathBuf, name_base: &str) -> Result<()> {
+        let mut base = directory.to_owned();
+        base.push(name_base);
+
+        let mut h_path = base.clone();
+        h_path.set_extension("h");
+
+        let mut cpp_path = base;
+        cpp_path.set_extension("cpp");
+
+        write_to_file(h_path, &self.h)?;
+        write_to_file(cpp_path, &self.c)?;
+        Ok(())
+    }
+
+    // pub fn join(v: &[CFiles]) -> CFiles {
+    //     v.iter().fold(CFiles::new(), |acc, f| acc + f)
+    // }
+}
+
+impl AddAssign<CFiles> for CFiles {
+    fn add_assign(&mut self, rhs: CFiles) {
+        self.append(&rhs)
+    }
+}
+
+impl<'a> AddAssign<&'a CFiles> for CFiles {
+    fn add_assign(&mut self, rhs: &'a CFiles) {
+        self.append(rhs)
+    }
+}
+
+// impl Add<CFiles> for CFiles {
+//     type Output = P2;
+//     fn add(self, rhs: V2) -> P2 {
+//         P2::new(self.x + rhs.x, self.y + rhs.y)
+//     }
+// }
+
+
+fn format_struct_instance(
+    name: &CCode,
+    c_type: &CCode,
+    fields: &[Field],
+    is_extern: bool,
+) -> CFiles {
+    // TODO only assign first to 0?
+    let mut c = format!(
+        "{}const {} {} = {{\n",
+        format_extern(is_extern),
+        c_type,
+        name
+    );
+    for field in fields {
+        c += &format!("  {}, // {}\n", field.value, field.name);
+    }
+    c += "};\n";
+    CFiles {
+        h: CCode::new(),
+        c: CCode(c),
+    }
+}
+
+fn format_enum_decl(name: &CCode, variants: &[CCode]) -> CFiles {
+    // TODO only assign first to 0?
+    let contents = variants
+        .into_iter()
+        .enumerate()
+        .fold(String::new(), |acc, (index, field)| {
+            format!("{}  {} = {},\n", acc, field, index)
+        });
+    CFiles {
+        h: CCode(format!("enum {}{{\n{}}};\n\n", name, contents)),
+        c: CCode::new(),
+    }
+}
+
+fn format_define(name: &CCode, value: &CCode) -> CFiles {
+    // Name will be written in all-caps.
+    CFiles {
+        h: CCode(format!("#define {} {}\n", name.to_uppercase(), value)),
+        c: CCode::new(),
+    }
+}
+
+fn format_var(
+    name: &CCode,
+    value: &CCode,
+    c_type: &CCode,
+    is_extern: bool,
+) -> CFiles {
+    CFiles {
+        h: format!("{}const {} {};\n", format_extern(is_extern), c_type, name)
+            .to_c(),
+        c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
+    }
+}
+
+fn format_include(path: &CCode) -> CFiles {
+    CFiles::with_h(&format!("#include {}\n", path).to_c())
+}
+
+fn format_guard(header_name: &str, contents: &Box<CTree>) -> Result<CFiles> {
+    let id = make_guard_id(header_name)?;
+    let mut f = CFiles {
+        h: format!("#ifndef {}\n#define {}\n", id, id).to_c(),
+        c: format!("#include \"{}\"\n", header_name).to_c(),
+    };
+    f += contents.format()?;
+    f += CFiles::with_h(&format!("#endif // {}", id));
+    Ok(f)
+}
+
+fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles> {
+    let open = format!("namespace {} {{\n", name).to_c();
+    let close = format!("\n}} // end namespace {}\n", name).to_c();
+    let mut f = CFiles::with(&open);
+    f += contents.format()?;
+    f += CFiles::with(&close);
+    Ok(f)
+}
+fn format_group(v: &[CTree]) -> Result<CFiles> {
+    let mut f = CFiles::new();
+    for node in v {
+        f += node.format()?
+    }
+    Ok(f)
+}
+
+fn format_compound_array(
+    name: &CCode,
+    values: &[Vec<CCode>],
+    subarray_type: &CCode,
+    is_extern: bool,
+) -> Result<CFiles> {
+    // TODO prepend underscore? special meaning?
+    let mut subarray_names: Vec<_> = (0..values.len())
+        .map(|x| CCode(format!("{}_{}", name, x)))
+        .collect();
+    let mut g = Vec::new();
+    for (sub_name, sub_values) in subarray_names.iter().zip(values.into_iter())
+    {
+        g.push(CTree::Array {
+            name: sub_name.to_owned(),
+            values: sub_values.to_owned(),
+            c_type: subarray_type.to_c(),
+            is_extern: false,
+        });
+    }
+
+    subarray_names.push("NULL".to_c());
+    g.push(CTree::Array {
+        name: name.to_owned(),
+        values: subarray_names,
+        c_type: format!("{}*", subarray_type).to_c(),
+        is_extern: is_extern,
+    });
+    CTree::Group(g).format()
+}
+
+fn format_array(
+    name: &CCode,
+    values: &[CCode],
+    c_type: &CCode,
+    is_extern: bool,
+) -> CFiles {
+    let contents = make_c_array_contents(values);
+    if is_extern {
+        CFiles {
+            h: CCode(format!("extern const {} {}[];\n", c_type, name)),
+            c: CCode(format!(
+                "extern const {} {}[] = {};\n\n",
+                c_type,
+                name,
+                contents
+            )),
+        }
+    } else {
+        CFiles {
+            h: CCode::new(),
+            c: CCode(
+                format!("const {} {}[] = {};\n\n", c_type, name, contents),
+            ),
+        }
+    }
+}
+
+fn make_c_array_contents<T>(v: &[T]) -> CCode
+where
+    T: Display,
+{
+    let lines = wrap_in_braces(&to_code_vec(v));
+    CCode::join(&lines, "\n")
+}
+
+
+fn wrap_in_braces(lines: &[CCode]) -> Vec<CCode> {
+    let mut new: Vec<_> =
+        lines.iter().map(|s| CCode(format!(" {}", s))).collect();
+    new.insert(0, "{".to_c());
+    new.push("}".to_c());
+    new
+}
+
+fn to_code_vec<T>(v: &[T]) -> Vec<CCode>
+where
+    T: Display,
+{
+    // TODO rename
+    let items_per_line = 4;
+    let mut lines: Vec<String> = Vec::new();
+    //  TODO use slice chunks instead of itertools?
+    let chunks = &v.iter().map(|x| x.to_string()).chunks(items_per_line);
+    for chunk in chunks {
+        let tmp: Vec<_> = chunk.collect();
+        lines.push(tmp.join(", ") + ", ");
+    }
+    let code_lines: Vec<_> = lines.into_iter().map(CCode).collect();
+    code_lines
+}
+
+
+// fn comment(line: &CCode) -> CCode {
+//     // only works for single lines.  must not contain \n.
+//     format!("// {}", line).to_c()
+// }
+
+fn format_extern(is_extern: bool) -> CCode {
+    let s = if is_extern { "extern " } else { "" };
+    s.to_c()
+}
+
+fn make_guard_id(h_file_name: &str) -> Result<CCode> {
+    // TODO remove unsafe characters, like the python version
+    let error_message = format!("invalid header file name: {}", h_file_name);
+    let p: String = Path::new(h_file_name)
+        .file_name()
+        .ok_or_else(|| "failure to get file name")?
+        .to_str()
+        .unwrap()
+        .to_string()
+        .to_uppercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '_' })
+        .collect();
+    let first = p.chars().nth(0).ok_or_else(|| error_message.clone())?;
+
+    if !first.is_alphabetic() && first != '_' {
+        bail!(error_message);
+    }
+    Ok(CCode(p + "_"))
+}
+
+
+pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
+    // let path = Path::new(full_path);
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(full_path)
+        .chain_err(|| "failure to open output file")?;
+    file.set_len(0)
+        .chain_err(|| "failure to clear output file")?;
+    file.write_all(s.to_string().as_bytes())
+        .chain_err(|| "failure to write to output file")?;
+    Ok(())
+}

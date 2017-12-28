@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 
-// use format::CFiles;
 use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, SeqType,
             ToC};
 use types::errors::*;
@@ -29,21 +28,21 @@ c_struct!(
 ////////////////////////////////////////////////////////////////////////////////
 
 impl<'a> ModeBuilder<'a> {
-    pub fn format(&self, mode_struct_name: &mut CCode) -> Result<CTree> {
-        let mut kmap_array_name = CCode::new();
+    pub fn render(&self) -> Result<(CTree, CCode)> {
         let mut g = Vec::new();
-        g.push(self.format_kmap_array(&mut kmap_array_name)?);
+        let (tree, kmap_array_name) = self.render_kmap_array()?;
+        g.push(tree);
 
-        let mut anagram_array_name = CCode::new();
-        g.push(self.format_anagram_array(&mut anagram_array_name));
+        let (tree, anagram_array_name) = self.render_anagram_array();
+        g.push(tree);
 
-        let mut anagram_mask_name = CCode::new();
-        g.push(self.format_anagram_mask(&mut anagram_mask_name));
+        let (tree, anagram_mask_name) = self.render_anagram_mask();
+        g.push(tree);
 
-        let mut mod_array_name = CCode::new();
-        g.push(self.format_modifier_array(&mut mod_array_name));
+        let (tree, mod_array_name) = self.render_modifier_array();
+        g.push(tree);
 
-        let m = ModeStruct {
+        let mode_struct = ModeStruct {
             num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long!
             kmaps: kmap_array_name.to_c(),
             mod_chords: mod_array_name.to_c(),
@@ -51,12 +50,12 @@ impl<'a> ModeBuilder<'a> {
             anagram_mask: anagram_mask_name.to_c(),
             is_gaming: self.info.gaming,
         };
-        *mode_struct_name = format!("{}_struct", self.mode_name).to_c();
-        g.push(m.to_c_tree(mode_struct_name.to_owned()));
-        Ok(CTree::Group(g))
+        let mode_struct_name = format!("{}_struct", self.mode_name).to_c();
+        g.push(mode_struct.render(mode_struct_name.clone()));
+        Ok((CTree::Group(g), mode_struct_name))
     }
 
-    fn format_kmap_array(&self, kmap_array_name: &mut CCode) -> Result<CTree> {
+    fn render_kmap_array(&self) -> Result<(CTree, CCode)> {
         let mut g = Vec::new();
         let mut subarray_names = Vec::new();
         for seq_type in &self.seq_types {
@@ -88,91 +87,56 @@ impl<'a> ModeBuilder<'a> {
                 c_type: "KmapStruct*".to_c(),
                 is_extern: false,
             });
-
-            // f += CArray::new(&name, &contents)
-            //     .c_extern(false)
-            //     .c_type("KmapStruct*")
-            //     .format();
         }
 
-        *kmap_array_name = format!("{}_kmap_arrays", self.mode_name).to_c();
+        let array_name_out = format!("{}_kmap_arrays", self.mode_name).to_c();
         g.push(CTree::Array {
-            name: kmap_array_name.to_owned(),
+            name: array_name_out.clone(),
             values: subarray_names,
             c_type: "KmapStruct**".to_c(),
             is_extern: false,
         });
-        // f += CArray::new(kmap_array_name, &subarray_names)
-        //     .c_extern(false)
-        //     .c_type("KmapStruct**")
-        //     .format();
-        Ok(CTree::Group(g))
+        Ok((CTree::Group(g), array_name_out))
     }
 
-    fn format_anagram_mask(&self, array_name: &mut CCode) -> CTree {
+    fn render_anagram_mask(&self) -> (CTree, CCode) {
         let mut anagram_mask = Chord::new();
         for c in &self.anagram_chords {
             anagram_mask.intersect(c);
         }
-        *array_name = format!("{}_anagram_mask", self.mode_name).to_c();
-        CTree::Array {
-            name: array_name.to_owned(),
+        let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
+        let tree = CTree::Array {
+            name: array_name_out.clone(),
             values: anagram_mask.to_c_bytes(),
             c_type: "uint8_t".to_c(),
             is_extern: false,
-        }
+        };
+        (tree, array_name_out)
     }
 
-    fn format_anagram_array(&self, new_array_name: &mut CCode) -> CTree {
-        self.format_chord_array_helper(
-            new_array_name,
+    fn render_anagram_array(&self) -> (CTree, CCode) {
+        self.render_chord_array_helper(
             &self.anagram_chords,
             &"anagram_chord".to_c(),
         )
     }
 
-
-    fn format_modifier_array(&self, new_array_name: &mut CCode) -> CTree {
-        self.format_chord_array_helper(
-            new_array_name,
-            &self.mod_chords,
-            &"mod_chord".to_c(),
-        )
+    fn render_modifier_array(&self) -> (CTree, CCode) {
+        self.render_chord_array_helper(&self.mod_chords, &"mod_chord".to_c())
     }
 
-    fn format_chord_array_helper(
+    fn render_chord_array_helper(
         &self,
-        new_array_name: &mut CCode,
         chords: &[Chord],
         label: &CCode,
-    ) -> CTree {
-        *new_array_name = format!("{}_{}", self.mode_name, label).to_c();
-        CTree::CompoundArray {
-            name: new_array_name.to_owned(),
+    ) -> (CTree, CCode) {
+        let array_name_out = format!("{}_{}", self.mode_name, label).to_c();
+        let tree = CTree::CompoundArray {
+            name: array_name_out.clone(),
             values: chords.iter().map(|c| c.to_c_bytes()).collect(),
             subarray_type: "uint8_t".to_c(),
             is_extern: false,
-        }
+        };
+        (tree, array_name_out)
     }
-
-    // fn format_chord_array_helper(
-    //     &self,
-    //     new_array_name: &mut CCode,
-    //     chords: &[Chord],
-    //     label: &CCode,
-    // ) -> CTree {
-    //     let mut f = CFiles::new();
-    //     let mut subarray_names = Vec::new();
-    //     for (i, c) in chords.iter().enumerate() {
-    //         let name = CCode(format!("{}_{}{}", self.mode_name, label, i));
-    //         f += CArray::new(&name, &c.to_bytes()).c_extern(false).format();
-    //         subarray_names.push(name);
-    //     }
-    //     *new_array_name = CCode(format!("{}_{}s", self.mode_name, label));
-    //     f += CArray::new(new_array_name, &subarray_names)
-    //         .c_type(&"uint8_t*".to_c())
-    //         .c_extern(false)
-    //         .format();
-    //     f
-    // }
 }

@@ -1,7 +1,5 @@
-// use std::fmt::Display;
 use std::collections::BTreeMap;
 
-// use format::CFiles;
 use types::{AnagramNum, CCode, CTree, Chord, Field, KmapPath, Name, SeqType,
             Sequence, ToC};
 use types::errors::*;
@@ -57,11 +55,7 @@ impl<'a> KmapBuilder<'a> {
         }
     }
 
-    pub fn format(
-        &self,
-        struct_names_out: &mut BTreeMap<KmapPath, CCode>,
-    ) -> Result<CTree> {
-        // Store the struct names in struct_names_out, for later use
+    pub fn render(&self) -> Result<(CTree, BTreeMap<KmapPath, CCode>)> {
         // TODO don't make chord and seq array names in more than one place?
         // TODO skip words for kmap if never used? gcc seems to optimize them
         // away...
@@ -71,10 +65,11 @@ impl<'a> KmapBuilder<'a> {
         let chord_arrays = self.make_chord_arrays(&names_by_len)?;
 
         let mut g = Vec::new();
-        g.push(self.format_seq_arrays(&seq_arrays));
-        g.push(self.format_chord_arrays(&chord_arrays)?);
+        g.push(self.render_seq_arrays(&seq_arrays));
+        g.push(self.render_chord_arrays(&chord_arrays)?);
 
         let seq_array_name = self.make_seq_array_name();
+        let mut struct_names_out = BTreeMap::new();
         for kmap in chord_arrays.keys() {
             let chord_array_name = self.make_chord_array_name(kmap)?;
             let kmap_struct = KmapStruct {
@@ -84,13 +79,13 @@ impl<'a> KmapBuilder<'a> {
                 use_mods: self.use_mods,
             };
             let struct_name = self.make_lookup_struct_name(kmap);
-            g.push(kmap_struct.to_c_tree(struct_name.clone()));
+            g.push(kmap_struct.render(struct_name.clone()));
             struct_names_out.insert(kmap.clone(), struct_name);
         }
-        Ok(CTree::Group(g))
+        Ok((CTree::Group(g), struct_names_out))
     }
 
-    fn format_chord_arrays(
+    fn render_chord_arrays(
         &self,
         chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>,
     ) -> Result<CTree> {
@@ -118,7 +113,7 @@ impl<'a> KmapBuilder<'a> {
         Ok(CTree::Group(g))
     }
 
-    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> CTree {
+    fn render_seq_arrays(&self, seq_arrays: &[Sequence]) -> CTree {
         let byte_arrays: Vec<_> = seq_arrays
             .iter()
             .map(|keypress| {
@@ -197,33 +192,6 @@ impl<'a> KmapBuilder<'a> {
         entries.push(ChordEntry::new());
         Ok(entries)
     }
-
-
-    // fn format_length_arrays<T>(
-    //     &self,
-    //     arrays: Vec<Vec<T>>,
-    //     name: &CCode,
-    //     is_extern: bool,
-    // ) -> CTree
-    // where
-    //     T: Display + Clone,
-    // {
-    //     let mut subarray_names: Vec<_> = (0..arrays.len())
-    //         .map(|x| CCode(format!("{}_{}", name, x)))
-    //         .collect();
-    //     let mut f = CFiles::new();
-    //     for i in 0..subarray_names.len() {
-    //         f += CArray::new(&subarray_names[i], &arrays[i])
-    //             .c_extern(false)
-    //             .format();
-    //     }
-    //     subarray_names.push("NULL".to_c());
-    //     f += CArray::new(name, &subarray_names)
-    //         .c_extern(is_extern)
-    //         .c_type(&"uint8_t*".to_c())
-    //         .format();
-    //     f
-    // }
 
 
     fn make_length_map(&self) -> LenMap {
