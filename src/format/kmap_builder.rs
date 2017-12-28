@@ -16,7 +16,7 @@ pub struct KmapBuilder<'a> {
     seq_type: SeqType, // word, plain, macro, or command
     seq_map: &'a SeqMap,
     chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
-    kmap_ids: &'a BTreeMap<KmapPath, String>,
+    kmap_nicknames: BTreeMap<KmapPath, String>,
     use_compression: bool,
     use_mods: bool,
 }
@@ -38,18 +38,27 @@ c_struct!(
 
 ////////////////////////////////////////////////////////////////////////////////
 
+fn make_kmap_nicknames(
+    kmap_paths: Vec<&KmapPath>,
+) -> BTreeMap<KmapPath, String> {
+    kmap_paths
+        .into_iter()
+        .enumerate()
+        .map(|(i, kmap)| (kmap.to_owned(), format!("kmap{}", i)))
+        .collect()
+}
+
 impl<'a> KmapBuilder<'a> {
     pub fn new(
         seq_type: SeqType,
         seq_map: &'a SeqMap,
         chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
-        kmap_ids: &'a BTreeMap<KmapPath, String>,
     ) -> KmapBuilder<'a> {
         KmapBuilder {
             seq_type: seq_type,
             seq_map: seq_map,
             chord_maps: chord_maps,
-            kmap_ids: kmap_ids,
+            kmap_nicknames: make_kmap_nicknames(chord_maps.keys().collect()),
             use_compression: get_compression_config(seq_type),
             use_mods: get_mods_config(seq_type),
         }
@@ -64,11 +73,12 @@ impl<'a> KmapBuilder<'a> {
         let seq_arrays = self.make_seq_arrays(&names_by_len);
         let chord_arrays = self.make_chord_arrays(&names_by_len)?;
 
+        let seq_array_name = self.make_seq_array_name();
+
         let mut g = Vec::new();
-        g.push(self.render_seq_arrays(&seq_arrays));
+        g.push(self.render_seq_arrays(&seq_arrays, seq_array_name.clone()));
         g.push(self.render_chord_arrays(&chord_arrays)?);
 
-        let seq_array_name = self.make_seq_array_name();
         let mut struct_names_out = BTreeMap::new();
         for kmap in chord_arrays.keys() {
             let chord_array_name = self.make_chord_array_name(kmap)?;
@@ -96,10 +106,7 @@ impl<'a> KmapBuilder<'a> {
             let length_ints: Vec<Vec<CCode>> = length_entries
                 .iter()
                 .map(|subarray| flatten_chord_entries(subarray))
-                // .map(|x| x.to_c())
                 .collect();
-            // let mut length_ints =  Vec::new();
-            //  for
 
             let array_name = self.make_chord_array_name(kmap)?;
             g.push(CTree::CompoundArray {
@@ -113,7 +120,7 @@ impl<'a> KmapBuilder<'a> {
         Ok(CTree::Group(g))
     }
 
-    fn render_seq_arrays(&self, seq_arrays: &[Sequence]) -> CTree {
+    fn render_seq_arrays(&self, seq_arrays: &[Sequence], name: CCode) -> CTree {
         let byte_arrays: Vec<_> = seq_arrays
             .iter()
             .map(|keypress| {
@@ -122,7 +129,7 @@ impl<'a> KmapBuilder<'a> {
             .collect();
 
         CTree::CompoundArray {
-            name: self.make_seq_array_name(),
+            name: name,
             values: byte_arrays,
             subarray_type: "uint8_t".to_c(),
             is_extern: false,
@@ -132,16 +139,11 @@ impl<'a> KmapBuilder<'a> {
     fn make_seq_arrays(&self, names_by_len: &LenMap) -> Vec<Sequence> {
         let mut seq_arrays = Vec::new();
         for length in 0..max_len(names_by_len) + 1 {
-            let subarray =
-                // match names_by_len.get(&length) {
-                //     Some(names) =>
-                //         make_flat_sequence(self.seq_map, names),
-                //     None => Sequence::new(),
-                // };
-                names_by_len.get(&length).map_or_else(
-                    Sequence::new,
-                    |names| make_flat_sequence(self.seq_map, names)
-                );
+            let subarray = names_by_len
+                .get(&length)
+                .map_or_else(Sequence::new, |names| {
+                    make_flat_sequence(self.seq_map, names)
+                });
             seq_arrays.push(subarray);
         }
         seq_arrays
@@ -154,7 +156,7 @@ impl<'a> KmapBuilder<'a> {
         let mut chord_arrays = BTreeMap::new();
         for kmap in self.chord_maps.keys() {
             let mut kmap_array = Vec::new();
-
+            // TODO inclusive range
             for length in 0..max_len(names_by_len) + 1 {
                 kmap_array
                     .push(self.make_chord_subarray(names_by_len, length, kmap)?);
@@ -261,7 +263,7 @@ impl<'a> KmapBuilder<'a> {
         Ok(CCode(format!(
             "{}_{}_chord_lookup",
             self.seq_type.to_string(),
-            self.kmap_ids.get(kmap).ok_or("kmap name not found")?
+            self.kmap_nicknames.get(kmap).ok_or("kmap name not found")?
         )))
     }
 
@@ -273,7 +275,7 @@ impl<'a> KmapBuilder<'a> {
         CCode(format!(
             "{}_{}_struct",
             self.seq_type.to_string(),
-            self.kmap_ids.get(kmap).expect("kmap name not found")
+            self.kmap_nicknames.get(kmap).expect("kmap name not found")
         ))
     }
 }
@@ -289,7 +291,6 @@ impl ChordEntry {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        // let mut v = vec![self.offset as i64];
         let mut v = self.make_prefix_byte();
         v.extend(self.chord.to_bytes());
         v
@@ -308,7 +309,6 @@ impl ChordEntry {
 
         let max_offset = (2u32.pow(NUM_OFFSET_BITS) - 1) as u8;
         let max_anagram = (2u32.pow(NUM_ANAGRAM_BITS) - 1) as u8;
-        assert_eq!(max_anagram, AnagramNum::max_allowable());
 
         if self.offset > max_offset {
             panic!("offset is too large - too many layouts?");
@@ -317,6 +317,7 @@ impl ChordEntry {
         if self.chord.anagram_num.0 > max_anagram {
             panic!("anagram num is too large");
         }
+        assert_eq!(max_anagram, AnagramNum::max_allowable());
 
         let msb = self.chord
             .anagram_num

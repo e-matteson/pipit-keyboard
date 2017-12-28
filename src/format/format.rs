@@ -9,7 +9,6 @@ use itertools::Itertools;
 use types::{CCode, CTree, Field, ToC};
 use types::errors::*;
 
-// TODO move to c_code.rs
 
 #[derive(Debug, Default)]
 pub struct CFiles {
@@ -22,6 +21,10 @@ pub struct CFiles {
 impl CTree {
     pub fn format(&self) -> Result<CFiles> {
         Ok(match *self {
+            CTree::Include { ref path } => format_include(path),
+            CTree::LiteralH(ref text) => CFiles::with_h(text),
+            CTree::LiteralC(ref text) => CFiles::with_c(text),
+            CTree::Group(ref vec) => format_group(vec)?,
             CTree::Define {
                 ref name,
                 ref value,
@@ -63,18 +66,10 @@ impl CTree {
                 ref name,
                 ref contents,
             } => format_namespace(name, contents)?,
-            CTree::Include { ref path } => format_include(path),
-            CTree::LiteralH(ref text) => CFiles::with_h(text),
-            CTree::LiteralC(ref text) => CFiles::with_c(text),
-            // CTree::CommentH(ref text) => CFiles::with_h(comment(text)),
-            // CTree::CommentC(ref text) => CFiles::with_c(comment(text)),
-            CTree::Group(ref vec) => format_group(vec)?,
-
-            // CTree::LiteralH(ref literal) => CFiles::with_h(literal),
             CTree::IncludeGuard {
                 ref header_name,
                 ref contents,
-            } => format_guard(header_name, contents)?,
+            } => format_include_guard(header_name, contents)?,
         })
     }
 }
@@ -160,13 +155,6 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
     }
 }
 
-// impl Add<CFiles> for CFiles {
-//     type Output = P2;
-//     fn add(self, rhs: V2) -> P2 {
-//         P2::new(self.x + rhs.x, self.y + rhs.y)
-//     }
-// }
-
 
 fn format_struct_instance(
     name: &CCode,
@@ -230,7 +218,10 @@ fn format_include(path: &CCode) -> CFiles {
     CFiles::with_h(&format!("#include {}\n", path).to_c())
 }
 
-fn format_guard(header_name: &str, contents: &Box<CTree>) -> Result<CFiles> {
+fn format_include_guard(
+    header_name: &str,
+    contents: &Box<CTree>,
+) -> Result<CFiles> {
     let id = make_guard_id(header_name)?;
     let mut f = CFiles {
         h: format!("#ifndef {}\n#define {}\n", id, id).to_c(),
@@ -349,11 +340,6 @@ where
     code_lines
 }
 
-
-// fn comment(line: &CCode) -> CCode {
-//     // only works for single lines.  must not contain \n.
-//     format!("// {}", line).to_c()
-// }
 
 fn format_extern(is_extern: bool) -> CCode {
     let s = if is_extern { "extern " } else { "" };

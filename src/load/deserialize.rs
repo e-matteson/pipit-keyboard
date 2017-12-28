@@ -272,16 +272,6 @@ impl ToC for BoardName {
     }
 }
 
-// impl From<Verbosity> for usize {
-//     fn from(verbosity: Verbosity) -> usize {
-//         match verbosity {
-//             Verbosity::None => 0,
-//             Verbosity::Some => 1,
-//             Verbosity::All => 2,
-//         }
-//     }
-// }
-
 impl ToC for Verbosity {
     fn to_c(self) -> CCode {
         match self {

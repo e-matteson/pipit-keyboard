@@ -74,7 +74,6 @@ impl AllData {
                 *seq_type,
                 &self.sequences[seq_type],
                 &self.chords,
-                &self.kmap_ids,
             );
             let (tree, kmap_struct_names_for_seq_type) = builder.render()?;
             g.push(tree);

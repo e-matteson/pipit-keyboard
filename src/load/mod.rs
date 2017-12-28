@@ -1,6 +1,6 @@
 use self::deserialize::{OptionsConfig, Settings};
-use self::kmap_parser::KmapParser;
+use self::parse_kmap::KmapParser;
 
-mod kmap_parser;
-mod impl_load;
+mod parse_kmap;
+mod load;
 mod deserialize;

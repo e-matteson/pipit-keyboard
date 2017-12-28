@@ -15,7 +15,6 @@ pub struct AllData {
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
-    pub kmap_ids: BTreeMap<KmapPath, String>,
     pub options: Vec<CTree>,
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
@@ -32,7 +31,6 @@ impl AllData {
             plain_mods: Vec::new(),
             anagram_mods: Vec::new(),
             modes: BTreeMap::new(),
-            kmap_ids: BTreeMap::new(),
             options: Vec::new(),
             output_directory: None,
             tutor_directory: None,
@@ -41,7 +39,18 @@ impl AllData {
         }
     }
 
-    pub fn add_chord(
+    pub fn add_chords(
+        &mut self,
+        kmap: &KmapPath,
+        named_chords: BTreeMap<Name, Chord>,
+    ) -> Result<()> {
+        for (name, chord) in &named_chords {
+            self.add_chord(name, chord, kmap)?;
+        }
+        Ok(())
+    }
+
+    fn add_chord(
         &mut self,
         name: &Name,
         chord: &Chord,
@@ -58,17 +67,6 @@ impl AllData {
             .chain_err(|| "failure to add chord")
     }
 
-    pub fn add_chords(
-        &mut self,
-        kmap: &KmapPath,
-        named_chords: BTreeMap<Name, Chord>,
-    ) -> Result<()> {
-        for (name, chord) in &named_chords {
-            self.add_chord(name, chord, kmap)?;
-        }
-        Ok(())
-    }
-
     pub fn add_command(&mut self, entry: &Name) -> Result<()> {
         // Commands are a single byte code, not an actual key sequence.
         // But we'll store each one as a KeyPress for convenience.
@@ -79,7 +77,6 @@ impl AllData {
 
         self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code)
     }
-
 
     pub fn add_word(
         &mut self,
@@ -130,20 +127,17 @@ impl AllData {
         // Store the kmaps that are included in this mode
         for kmap_info in &info.keymaps {
             let kmap_path = &kmap_info.file;
-            if self.kmap_ids.contains_key(kmap_path) {
-                continue;
+            if !self.chords.contains_key(kmap_path) {
+                // Initialize new chord map
+                self.chords.insert(kmap_path.clone(), BTreeMap::new());
             }
-            // Initialize new chord map
-            self.chords.insert(kmap_path.clone(), BTreeMap::new());
-            // Generate nickname, for later formatting
-            let nickname = format!("kmap{}", self.kmap_ids.len());
-            self.kmap_ids.insert(kmap_path.clone(), nickname);
+            // Otherwise, kmap was already added by another mode, do nothing.
         }
         self.modes.insert(name.to_owned(), info.to_owned());
         Ok(())
     }
 
-    pub fn add_sequence<T>(
+    fn add_sequence<T>(
         &mut self,
         seq_type: SeqType,
         name: &Name,
@@ -175,20 +169,11 @@ impl AllData {
         Ok(())
     }
 
-    pub fn get_sequences(
+    fn get_sequences(
         &self,
         seq_type: &SeqType,
     ) -> Result<&BTreeMap<Name, Sequence>> {
         self.sequences.get(seq_type).ok_or_else(|| {
-            format!("Sequence type was not initialized: {:?}", seq_type).into()
-        })
-    }
-
-    pub fn get_sequences_mut(
-        &mut self,
-        seq_type: SeqType,
-    ) -> Result<&mut BTreeMap<Name, Sequence>> {
-        self.sequences.get_mut(&seq_type).ok_or_else(|| {
             format!("Sequence type was not initialized: {:?}", seq_type).into()
         })
     }
@@ -206,17 +191,10 @@ impl AllData {
         let seq = self.get_sequence(name)?;
         // TODO iter?
         if seq.len() != 1 {
-            panic!("Expected sequence of length 1");
+            bail!("Expected sequence of length 1");
         }
         Ok(seq.0[0].clone())
     }
-
-    // pub fn get_mod_key(&self, name: &Name) -> KeyPress {
-    //     if seq.len() != 1 || seq.0[0].key.is_some() {
-    //         panic!("bad modifier key sequence");
-    //     }
-    //     seq.0[0].modifier.clone()
-    // }
 
     pub fn get_chord(
         &self,
@@ -241,21 +219,6 @@ impl AllData {
             }
         }
         None
-        // Chord::new()
-    }
-
-    pub fn get_visual_chord_in_mode(
-        &self,
-        chord_name: &Name,
-        mode: &ModeName,
-    ) -> Option<Chord> {
-        // TODO get rid of wrapper
-        self.get_chord_in_mode(chord_name, mode)
-        // TODO why is clone needed?!
-        // let permutation = self.chord_permutation
-        //     .clone()
-        //     .expect("permutation was never set!");
-        // chord.map(|c: Chord| c.permute(&permutation))
     }
 
     pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
@@ -286,8 +249,7 @@ impl AllData {
     }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
-        let v: Vec<_> = self.kmap_ids.keys().cloned().collect();
-        v
+        self.chords.keys().cloned().collect()
     }
 
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
@@ -300,17 +262,6 @@ impl AllData {
             }
         }
         out
-    }
-
-    pub fn get_kmaps_for_mode(&self, mode: &ModeName) -> Vec<KmapPath> {
-        let v: Vec<_> = self.modes
-            .get(mode)
-            .expect("mode not found")
-            .keymaps
-            .iter()
-            .map(|x| x.file.to_owned())
-            .collect();
-        v
     }
 
     pub fn get_seq_types(&self) -> Vec<SeqType> {
@@ -347,7 +298,7 @@ impl AllData {
         for mode in self.modes.keys() {
             let mut mode_chords = BTreeMap::new();
             for name in &names {
-                if let Some(chord) = self.get_visual_chord_in_mode(name, mode) {
+                if let Some(chord) = self.get_chord_in_mode(name, mode) {
                     mode_chords.insert(name.to_owned(), chord);
                 }
             }
