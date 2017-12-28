@@ -1,5 +1,6 @@
 // Macro for creating a struct that knows the names of it's own fields.
 // This allows it to format itself as a C struct.
+// use types::CTree;
 
 macro_rules! c_struct {
     ( struct $struct_type: ident { $( $field:ident : $field_type:ty),* }) => {
@@ -11,21 +12,15 @@ macro_rules! c_struct {
             // TODO inline for efficiency?
             // TODO optionally extern?
             // TODO whats up with semicolons? diff between kmap and mode?
-            fn format(&self, name: &CCode) -> CFiles {
-                let mut c = format!(
-                    "const {} {} = {{\n",
-                    stringify!($struct_type),
-                    name
-                );
-                $(c += &format!(
-                    "  {}, // {}\n",
-                    (&self.$field).to_c(),
-                    stringify!($field));
-                )*
-                c += "};\n";
-                CFiles {
-                    h: CCode::new(),
-                    c: CCode(c),
+            fn to_c_tree(&self, name: CCode) -> CTree {
+                CTree::StructInstance{
+                    name: name,
+                    fields: vec![
+                        $( Field{name: stringify!($field).to_c(), value: (&self.$field).to_c()}, )*
+                    ],
+                    c_type: stringify!($struct_type).to_c(),
+                    // TODO always false?
+                    is_extern: false,
                 }
             }
         }

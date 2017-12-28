@@ -3,9 +3,10 @@ use std::fs::OpenOptions;
 use std::ops::AddAssign;
 use std::path::PathBuf;
 
-use types::CCode;
+use types::{CCode, ToC};
 use types::errors::*;
 
+// TODO move to c_code.rs
 
 #[derive(Debug, Default)]
 pub struct CFiles {
@@ -20,6 +21,37 @@ impl CFiles {
         CFiles {
             h: CCode::new(),
             c: CCode::new(),
+        }
+    }
+
+    pub fn with_c<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        CFiles {
+            h: CCode::new(),
+            c: contents.to_c(),
+        }
+    }
+
+    pub fn with_h<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        CFiles {
+            h: contents.to_c(),
+            c: CCode::new(),
+        }
+    }
+
+    pub fn with<T>(contents: T) -> CFiles
+    where
+        T: ToC,
+    {
+        let contents = contents.to_c();
+        CFiles {
+            h: contents.clone(),
+            c: contents,
         }
     }
 
@@ -47,6 +79,10 @@ impl CFiles {
         write_to_file(cpp_path, &self.c)?;
         Ok(())
     }
+
+    // pub fn join(v: &[CFiles]) -> CFiles {
+    //     v.iter().fold(CFiles::new(), |acc, f| acc + f)
+    // }
 }
 
 impl AddAssign<CFiles> for CFiles {
@@ -61,6 +97,12 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
     }
 }
 
+// impl Add<CFiles> for CFiles {
+//     type Output = P2;
+//     fn add(self, rhs: V2) -> P2 {
+//         P2::new(self.x + rhs.x, self.y + rhs.y)
+//     }
+// }
 
 pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
     // let path = Path::new(full_path);

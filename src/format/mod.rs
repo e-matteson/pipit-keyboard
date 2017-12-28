@@ -1,5 +1,5 @@
 use self::c_files::CFiles;
-use self::c_array::CArray;
+// use self::c_array::CArray;
 use self::kmap_builder::KmapBuilder;
 use self::mode_builder::ModeBuilder;
 use self::compress::*;

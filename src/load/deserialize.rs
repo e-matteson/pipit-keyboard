@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use types::{CCode, COption, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
+use types::{CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
             ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
             Validate, WordConfig};
 
@@ -95,21 +95,27 @@ always_valid_enum!{
 pub struct Delay(u16);
 
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
 impl OptionsConfig {
-    pub fn to_vec(&self) -> Vec<COption> {
+    pub fn to_vec(&self) -> Vec<CTree> {
         let mut ops = self.get_literal_ops();
         ops.extend(self.get_auto());
         ops
     }
 
     pub fn global_chord_info(&self) -> GlobalChordInfo {
+        let permutation = Permutation::from_to(
+            &self.kmap_format.flat_order(),
+            &self.firmware_order(),
+        );
+
         GlobalChordInfo {
             num_bytes: self.num_bytes_in_chord(),
             num_switches: self.kmap_format.chord_length(),
             num_matrix_positions: self.num_matrix_positions(),
-            to_firmware_order: self.permutation_to_firmware_order(),
+            to_firmware_order: permutation,
         }
     }
 
@@ -121,54 +127,73 @@ impl OptionsConfig {
         self.tutor_directory.clone()
     }
 
-    fn get_literal_ops(&self) -> Vec<COption> {
+    fn get_literal_ops(&self) -> Vec<CTree> {
         // TODO use macro to avoid writing out field names as strings?
 
         let mut ops = vec![
-            COption::DefineInt("CHORD_DELAY".to_c(), self.chord_delay.into()),
-            COption::DefineInt("HELD_DELAY".to_c(), self.held_delay.into()),
-            COption::DefineInt(
-                "DEBOUNCE_DELAY".to_c(),
-                self.debounce_delay.into(),
-            ),
-            COption::DefineInt(
-                "DEBUG_MESSAGES".to_c(),
-                self.debug_messages.into(),
-            ),
-            COption::Ifdef(self.board_name.to_c(), true),
-            COption::Array1D("row_pins".to_c(), Pin::to_usize(&self.row_pins)),
-            COption::Array1D(
-                "column_pins".to_c(),
-                Pin::to_usize(&self.column_pins),
-            ),
-            COption::Ifdef(
-                "ENABLE_LED_TYPING_FEEDBACK".to_c(),
-                self.enable_led_typing_feedback,
-            ),
-            COption::Ifdef(
-                "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
-                self.enable_audio_typing_feedback,
-            ),
+            CTree::Define {
+                name: "CHORD_DELAY".to_c(),
+                value: self.chord_delay.to_c(),
+            },
+            CTree::Define {
+                name: "HELD_DELAY".to_c(),
+                value: self.held_delay.to_c(),
+            },
+            CTree::Define {
+                name: "DEBOUNCE_DELAY".to_c(),
+                value: self.debounce_delay.to_c(),
+            },
+            CTree::Define {
+                name: "DEBUG_MESSAGES".to_c(),
+                value: self.debug_messages.to_c(),
+            },
+            CTree::Ifdef {
+                name: self.board_name.to_c(),
+                value: true,
+            },
+            CTree::Array {
+                name: "row_pins".to_c(),
+                values: Pin::to_c_vec(&self.row_pins),
+                c_type: "uint8_t".to_c(),
+                is_extern: true,
+            },
+            CTree::Array {
+                name: "column_pins".to_c(),
+                values: Pin::to_c_vec(&self.column_pins),
+                c_type: "uint8_t".to_c(),
+                is_extern: true,
+            },
+            CTree::Ifdef {
+                name: "ENABLE_LED_TYPING_FEEDBACK".to_c(),
+                value: self.enable_led_typing_feedback,
+            },
+            CTree::Ifdef {
+                name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
+                value: self.enable_audio_typing_feedback,
+            },
         ];
 
-        if self.rgb_led_pins.is_some() {
-            let v = self.rgb_led_pins.clone();
-            ops.push(COption::Array1D(
-                "rgb_led_pins".to_c(),
-                Pin::to_usize(&v.unwrap()),
-            ))
+        if let Some(ref pins) = self.rgb_led_pins {
+            ops.push(CTree::Array {
+                name: "rgb_led_pins".to_c(),
+                values: Pin::to_c_vec(pins),
+                c_type: "uint8_t".to_c(),
+                is_extern: true,
+            });
         }
 
-        if self.battery_level_pin.is_some() {
-            ops.push(COption::Uint8(
-                "battery_level_pin".to_c(),
-                self.battery_level_pin.unwrap().into(),
-            ))
+        if let Some(pin) = self.battery_level_pin {
+            ops.push(CTree::Var {
+                name: "battery_level_pin".to_c(),
+                value: pin.to_c(),
+                c_type: "uint8_t".to_c(),
+                is_extern: true,
+            });
         }
         ops
     }
 
-    fn make_firmware_order(&self) -> Vec<SwitchPos> {
+    fn firmware_order(&self) -> Vec<SwitchPos> {
         // must match the algorithm used in the firmware's scanMatrix()!
         let mut order: Vec<SwitchPos> = Vec::new();
         for c in &self.column_pins {
@@ -179,13 +204,8 @@ impl OptionsConfig {
         order
     }
 
-    fn permutation_to_firmware_order(&self) -> Permutation {
-        let kmap_order = self.kmap_format.flatten();
-        let firmware_order = self.make_firmware_order();
-        Permutation::from_to(&kmap_order, &firmware_order)
-    }
 
-    fn get_auto(&self) -> Vec<COption> {
+    fn get_auto(&self) -> Vec<CTree> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
         let has_battery = self.battery_level_pin.is_some();
@@ -195,19 +215,34 @@ impl OptionsConfig {
             self.rgb_led_pins.as_ref().map_or(0, |v| v.len());
 
         vec![
-            COption::DefineInt("NUM_ROWS".to_c(), self.num_rows()),
-            COption::DefineInt("NUM_COLUMNS".to_c(), self.num_columns()),
-            COption::DefineInt(
-                "NUM_MATRIX_POSITIONS".to_c(),
-                self.num_matrix_positions(),
-            ),
-            COption::DefineInt(
-                "NUM_BYTES_IN_CHORD".to_c(),
-                self.num_bytes_in_chord(),
-            ),
-            COption::DefineInt("NUM_RGB_LED_PINS".to_c(), num_rgb_led_pins),
-            COption::Ifdef("ENABLE_RGB_LED".to_c(), enable_rgb_led),
-            COption::Ifdef("HAS_BATTERY".to_c(), has_battery),
+            CTree::Define {
+                name: "NUM_ROWS".to_c(),
+                value: self.num_rows().to_c(),
+            },
+            CTree::Define {
+                name: "NUM_COLUMNS".to_c(),
+                value: self.num_columns().to_c(),
+            },
+            CTree::Define {
+                name: "NUM_MATRIX_POSITIONS".to_c(),
+                value: self.num_matrix_positions().to_c(),
+            },
+            CTree::Define {
+                name: "NUM_BYTES_IN_CHORD".to_c(),
+                value: self.num_bytes_in_chord().to_c(),
+            },
+            CTree::Define {
+                name: "NUM_RGB_LED_PINS".to_c(),
+                value: num_rgb_led_pins.to_c(),
+            },
+            CTree::Ifdef {
+                name: "ENABLE_RGB_LED".to_c(),
+                value: enable_rgb_led,
+            },
+            CTree::Ifdef {
+                name: "HAS_BATTERY".to_c(),
+                value: has_battery,
+            },
         ]
     }
 
@@ -237,15 +272,26 @@ impl ToC for BoardName {
     }
 }
 
-impl From<Verbosity> for usize {
-    fn from(verbosity: Verbosity) -> usize {
-        match verbosity {
+// impl From<Verbosity> for usize {
+//     fn from(verbosity: Verbosity) -> usize {
+//         match verbosity {
+//             Verbosity::None => 0,
+//             Verbosity::Some => 1,
+//             Verbosity::All => 2,
+//         }
+//     }
+// }
+
+impl ToC for Verbosity {
+    fn to_c(self) -> CCode {
+        match self {
             Verbosity::None => 0,
             Verbosity::Some => 1,
             Verbosity::All => 2,
-        }
+        }.to_c()
     }
 }
+
 
 impl Validate for Delay {
     fn validate(&self) -> Result<()> {
@@ -256,6 +302,12 @@ impl Validate for Delay {
 impl From<Delay> for usize {
     fn from(delay: Delay) -> usize {
         delay.0 as usize
+    }
+}
+
+impl ToC for Delay {
+    fn to_c(self) -> CCode {
+        self.0.to_c()
     }
 }
 

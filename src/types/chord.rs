@@ -2,7 +2,7 @@
 use std::fmt;
 use std::sync::Mutex;
 
-use types::{AnagramNum, Permutation};
+use types::{AnagramNum, CCode, Permutation, ToC};
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
@@ -97,6 +97,11 @@ impl Chord {
             bytes.push(bools_to_u8(chunk));
         }
         bytes
+    }
+
+    pub fn to_c_bytes(&self) -> Vec<CCode> {
+        // TODO  share code - replace with Into<Vec<CCode>> for Vec<T: ToC>?
+        self.to_bytes().into_iter().map(|x| x.to_c()).collect()
     }
 }
 

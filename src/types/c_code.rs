@@ -4,11 +4,60 @@ use std::ops::AddAssign;
 
 use types::{ModeName, Name, SeqType};
 
-//////////////////////////////
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
+
+#[derive(Debug, Clone)]
+pub enum CTree {
+    Define { name: CCode, value: CCode },
+    Ifdef { name: CCode, value: bool },
+    Var {
+        name: CCode,
+        value: CCode,
+        c_type: CCode,
+        is_extern: bool,
+    },
+    Array {
+        name: CCode,
+        values: Vec<CCode>,
+        c_type: CCode,
+        is_extern: bool,
+    },
+    CompoundArray {
+        name: CCode,
+        values: Vec<Vec<CCode>>,
+        subarray_type: CCode,
+        is_extern: bool,
+    },
+    EnumDecl { name: CCode, variants: Vec<CCode> },
+    StructInstance {
+        name: CCode,
+        fields: Vec<Field>,
+        c_type: CCode,
+        is_extern: bool,
+    },
+    Namespace { name: CCode, contents: Box<CTree> },
+    Include { path: CCode },
+    IncludeGuard {
+        header_name: String,
+        contents: Box<CTree>,
+    },
+    // Typedef { name: CCode, value: CCode },
+    LiteralH(CCode),
+    LiteralC(CCode),
+    Group(Vec<CTree>),
+    // CommentC(CCode),
+    // CommentH(CCode),
+}
+
+#[derive(Debug, Clone)]
+pub struct Field {
+    pub name: CCode,
+    pub value: CCode,
+}
+
 
 impl CCode {
     pub fn new() -> CCode {
@@ -21,6 +70,13 @@ impl CCode {
 
     pub fn join(v: &[CCode], separator: &str) -> CCode {
         CCode(v.join(separator))
+    }
+
+    pub fn vec<T>(v: &[T]) -> Vec<CCode>
+    where
+        T: ToC + Clone,
+    {
+        v.iter().map(|ref item| item.to_c()).collect()
     }
 }
 
@@ -83,8 +139,10 @@ where
 }
 
 impl ToC for String {
+    // TODO why clone?
     fn to_c(self) -> CCode {
-        CCode(self.clone())
+        // CCode(self.clone())
+        CCode(self)
     }
 }
 
@@ -137,8 +195,28 @@ impl ToC for u8 {
     }
 }
 
+impl ToC for u16 {
+    fn to_c(self) -> CCode {
+        CCode(self.to_string())
+    }
+}
+
 impl ToC for usize {
     fn to_c(self) -> CCode {
         CCode(self.to_string())
+    }
+}
+
+
+impl<T> ToC for Vec<T>
+where
+    T: ToC,
+{
+    fn to_c(self) -> CCode {
+        let s = self.into_iter().fold(
+            String::new(),
+            |acc, item| format!("{}, {}", acc, item.to_c()),
+        );
+        CCode(s)
     }
 }

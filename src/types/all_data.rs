@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 use std::path::PathBuf;
 
-use types::{AnagramNum, COption, Checker, Chord, KeyPress, KmapPath, ModeInfo,
+use types::{AnagramNum, CTree, Checker, Chord, KeyPress, KmapPath, ModeInfo,
             ModeName, Name, SeqType, Sequence, WordBuilder, WordConfig};
 use types::errors::*;
 
@@ -16,7 +16,7 @@ pub struct AllData {
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub kmap_ids: BTreeMap<KmapPath, String>,
-    pub options: Vec<COption>,
+    pub options: Vec<CTree>,
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
     checker: Checker,

@@ -1,8 +1,9 @@
-use std::fmt::Display;
+// use std::fmt::Display;
 use std::collections::BTreeMap;
 
-use format::{CArray, CFiles};
-use types::{AnagramNum, CCode, Chord, KmapPath, Name, SeqType, Sequence, ToC};
+// use format::CFiles;
+use types::{AnagramNum, CCode, CTree, Chord, Field, KmapPath, Name, SeqType,
+            Sequence, ToC};
 use types::errors::*;
 
 type SeqMap = BTreeMap<Name, Sequence>;
@@ -59,7 +60,7 @@ impl<'a> KmapBuilder<'a> {
     pub fn format(
         &self,
         struct_names_out: &mut BTreeMap<KmapPath, CCode>,
-    ) -> Result<CFiles> {
+    ) -> Result<CTree> {
         // Store the struct names in struct_names_out, for later use
         // TODO don't make chord and seq array names in more than one place?
         // TODO skip words for kmap if never used? gcc seems to optimize them
@@ -69,58 +70,68 @@ impl<'a> KmapBuilder<'a> {
         let seq_arrays = self.make_seq_arrays(&names_by_len);
         let chord_arrays = self.make_chord_arrays(&names_by_len)?;
 
-        let mut f = CFiles::new();
-        f += self.format_seq_arrays(&seq_arrays);
-        f += self.format_chord_arrays(&chord_arrays)?;
+        let mut g = Vec::new();
+        g.push(self.format_seq_arrays(&seq_arrays));
+        g.push(self.format_chord_arrays(&chord_arrays)?);
 
         let seq_array_name = self.make_seq_array_name();
         for kmap in chord_arrays.keys() {
             let chord_array_name = self.make_chord_array_name(kmap)?;
-            let s = KmapStruct {
+            let kmap_struct = KmapStruct {
                 chords: chord_array_name.clone(),
                 sequences: seq_array_name.clone(),
                 use_compression: self.use_compression,
                 use_mods: self.use_mods,
             };
             let struct_name = self.make_lookup_struct_name(kmap);
-            f += s.format(&struct_name);
+            g.push(kmap_struct.to_c_tree(struct_name.clone()));
             struct_names_out.insert(kmap.clone(), struct_name);
         }
-        Ok(f)
+        Ok(CTree::Group(g))
     }
 
     fn format_chord_arrays(
         &self,
         chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>,
-    ) -> Result<CFiles> {
+    ) -> Result<CTree> {
         // TODO be consistent about "array" / "subarray" terminology
-        let mut f = CFiles::new();
+        let mut g = Vec::new();
         let mut array_names: Vec<CCode> = Vec::new();
         for (kmap, length_entries) in chord_arrays {
-            let length_ints: Vec<Vec<u8>> = length_entries
+            let length_ints: Vec<Vec<CCode>> = length_entries
                 .iter()
-                .map(|v| flatten_chord_entries(v))
+                .map(|subarray| flatten_chord_entries(subarray))
+                // .map(|x| x.to_c())
                 .collect();
+            // let mut length_ints =  Vec::new();
+            //  for
 
             let array_name = self.make_chord_array_name(kmap)?;
-            f += self.format_length_arrays(length_ints, &array_name, false);
-            array_names.push(array_name.clone());
+            g.push(CTree::CompoundArray {
+                name: array_name.clone(),
+                values: length_ints,
+                subarray_type: "uint8_t".to_c(),
+                is_extern: false,
+            });
+            array_names.push(array_name);
         }
-        Ok(f)
+        Ok(CTree::Group(g))
     }
 
-    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> CFiles {
+    fn format_seq_arrays(&self, seq_arrays: &[Sequence]) -> CTree {
         let byte_arrays: Vec<_> = seq_arrays
             .iter()
             .map(|keypress| {
-                keypress.to_bytes(self.use_compression, self.use_mods)
+                keypress.as_bytes(self.use_compression, self.use_mods)
             })
             .collect();
-        self.format_length_arrays(
-            byte_arrays,
-            &self.make_seq_array_name(),
-            false,
-        )
+
+        CTree::CompoundArray {
+            name: self.make_seq_array_name(),
+            values: byte_arrays,
+            subarray_type: "uint8_t".to_c(),
+            is_extern: false,
+        }
     }
 
     fn make_seq_arrays(&self, names_by_len: &LenMap) -> Vec<Sequence> {
@@ -188,31 +199,31 @@ impl<'a> KmapBuilder<'a> {
     }
 
 
-    fn format_length_arrays<T>(
-        &self,
-        arrays: Vec<Vec<T>>,
-        name: &CCode,
-        is_extern: bool,
-    ) -> CFiles
-    where
-        T: Display + Clone,
-    {
-        let mut subarray_names: Vec<_> = (0..arrays.len())
-            .map(|x| CCode(format!("{}_{}", name, x)))
-            .collect();
-        let mut f = CFiles::new();
-        for i in 0..subarray_names.len() {
-            f += CArray::new(&subarray_names[i], &arrays[i])
-                .c_extern(false)
-                .format();
-        }
-        subarray_names.push("NULL".to_c());
-        f += CArray::new(name, &subarray_names)
-            .c_extern(is_extern)
-            .c_type(&"uint8_t*".to_c())
-            .format();
-        f
-    }
+    // fn format_length_arrays<T>(
+    //     &self,
+    //     arrays: Vec<Vec<T>>,
+    //     name: &CCode,
+    //     is_extern: bool,
+    // ) -> CTree
+    // where
+    //     T: Display + Clone,
+    // {
+    //     let mut subarray_names: Vec<_> = (0..arrays.len())
+    //         .map(|x| CCode(format!("{}_{}", name, x)))
+    //         .collect();
+    //     let mut f = CFiles::new();
+    //     for i in 0..subarray_names.len() {
+    //         f += CArray::new(&subarray_names[i], &arrays[i])
+    //             .c_extern(false)
+    //             .format();
+    //     }
+    //     subarray_names.push("NULL".to_c());
+    //     f += CArray::new(name, &subarray_names)
+    //         .c_extern(is_extern)
+    //         .c_type(&"uint8_t*".to_c())
+    //         .format();
+    //     f
+    // }
 
 
     fn make_length_map(&self) -> LenMap {
@@ -302,21 +313,25 @@ impl<'a> KmapBuilder<'a> {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl ChordEntry {
-    pub fn new() -> ChordEntry {
+    fn new() -> ChordEntry {
         ChordEntry {
             chord: Chord::new(),
             offset: 0,
         }
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
+    fn to_bytes(&self) -> Vec<u8> {
         // let mut v = vec![self.offset as i64];
         let mut v = self.make_prefix_byte();
         v.extend(self.chord.to_bytes());
         v
     }
 
-    pub fn make_prefix_byte(&self) -> Vec<u8> {
+    pub fn to_c_bytes(&self) -> Vec<CCode> {
+        self.to_bytes().into_iter().map(|x| x.to_c()).collect()
+    }
+
+    fn make_prefix_byte(&self) -> Vec<u8> {
         // This format must match Lookup::readOffset() and
         // Lookup::readAnagramNum()!
         // Offset and anagram bits fit into 1 byte, so must add up to 8.
@@ -360,10 +375,10 @@ fn max_len(names_by_len: &LenMap) -> usize {
     *names_by_len.keys().max().unwrap_or(&0)
 }
 
-fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<u8> {
+fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<CCode> {
     let mut v = Vec::new();
     for entry in entries {
-        v.extend(entry.to_bytes());
+        v.extend(entry.to_c_bytes());
     }
     v
 }

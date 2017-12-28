@@ -1,21 +1,12 @@
-// A bunch of small, miscellaneous types that don't deserve their own file
+// A bunch of small, miscellaneous types that don't deserve their own files
 
 use std::iter;
 use std::fmt::{self, Debug};
 use std::slice::Iter;
 use std::string::ToString;
 
-use types::{CCode, KeyPress, Validate};
+use types::{CCode, KeyPress, ToC, Validate};
 use types::errors::*;
-
-#[derive(Debug, Clone)]
-pub enum COption {
-    DefineInt(CCode, usize),
-    DefineString(CCode, CCode),
-    Ifdef(CCode, bool),
-    Uint8(CCode, u8),
-    Array1D(CCode, Vec<usize>),
-}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -86,6 +77,10 @@ impl Pin {
     pub fn to_usize(pin_vec: &Vec<Pin>) -> Vec<usize> {
         pin_vec.iter().map(|pin| usize::from(*pin)).collect()
     }
+
+    pub fn to_c_vec(pin_vec: &Vec<Pin>) -> Vec<CCode> {
+        pin_vec.iter().map(|pin| pin.to_c()).collect()
+    }
 }
 
 impl Validate for Pin {
@@ -109,6 +104,14 @@ impl From<Pin> for u8 {
         pin.0
     }
 }
+
+impl ToC for Pin {
+    fn to_c(self) -> CCode {
+        self.0.to_c()
+    }
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +153,7 @@ impl KmapFormat {
         count
     }
 
-    pub fn flatten(&self) -> Vec<SwitchPos> {
+    pub fn flat_order(&self) -> Vec<SwitchPos> {
         let mut flat: Vec<SwitchPos> = Vec::new();
         for row in self.0.iter() {
             flat.extend_from_slice(row);

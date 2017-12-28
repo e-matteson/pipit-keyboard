@@ -1,18 +1,27 @@
 use itertools::Itertools;
 
-use types::{CCode, KeyPress, Sequence};
+use types::{CCode, CTree, KeyPress, Sequence, ToC};
 
 // Constants used for compression
 const NUM_BYTES: usize = 3;
 const NUM_KEYS: usize = 4;
 
 
-pub fn make_compression_macros() -> CCode {
-    let mut s = String::new();
-    s += "#define BY0(X,Y) (( X &0x3F)<<2) | (( Y &0x30)>>4)\n";
-    s += "#define BY1(X,Y) (( X &0x0F)<<4) | (( Y &0x3C)>>2)\n";
-    s += "#define BY2(X,Y) (( X &0x03)<<6) | ( Y &0x3F)\n\n";
-    CCode(s)
+pub fn make_compression_macros() -> CTree {
+    let mut g = Vec::new();
+    g.push(CTree::Define {
+        name: "BY0(X,Y)".to_c(),
+        value: "(( X &0x3F)<<2) | (( Y &0x30)>>4)".to_c(),
+    });
+    g.push(CTree::Define {
+        name: "BY1(X,Y)".to_c(),
+        value: "(( X &0x0F)<<4) | (( Y &0x3C)>>2)".to_c(),
+    });
+    g.push(CTree::Define {
+        name: "BY2(X,Y)".to_c(),
+        value: "(( X &0x03)<<6) | ( Y &0x3F)".to_c(),
+    });
+    CTree::Group(g)
 }
 
 
