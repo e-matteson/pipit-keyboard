@@ -506,7 +506,7 @@ macro_tex_item    macro_tex_citep   macro_tex_itemize   macro_tex_enumerate
 
 ## vim/spacemacs macros ##
 
-macro_save             macro_quit
+macro_vim_save         macro_vim_quit
 ....   ....            ....   ....
 ....   *...            ****   *...
   .     .                .     .

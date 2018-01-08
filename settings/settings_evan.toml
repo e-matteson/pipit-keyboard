@@ -147,10 +147,10 @@ key_underscore    = {key="KEY_MINUS", mods=["MODIFIERKEY_SHIFT"]}
 [macros]
 
 macro_save_as       = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
-macro_save          = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
+macro_vim_save      = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_W"},
                        {key="KEY_ENTER"}]
-macro_quit          = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
+macro_vim_quit      = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_Q"},
                        {key="KEY_ENTER"}]
 macro_ls            = [{key="KEY_L"},
@@ -3085,6 +3085,7 @@ dictionary = [
     {word="jet", anagram=1},
     {word="jew", anagram=1},
     {word="jewel"},
+    {word="jig", anagram=2},
     {word="job"},
     {word="jock"},
     {word="Joe", anagram=1},
