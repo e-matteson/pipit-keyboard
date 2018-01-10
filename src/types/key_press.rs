@@ -1,5 +1,9 @@
 use types::{CCode, Name, ToC, Validate};
+use failure::{Error, ResultExt};
 use types::errors::*;
+
+use std::borrow::Borrow;
+use std::string::ToString;
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
 // Rename?
@@ -21,7 +25,7 @@ impl KeyPress {
     pub fn new(
         key: Option<String>,
         modifiers: Option<Vec<String>>,
-    ) -> Result<KeyPress> {
+    ) -> Result<KeyPress, Error> {
         Ok(KeyPress {
             key: make_key(key)?,
             mods: make_mod(modifiers)?,
@@ -51,30 +55,34 @@ impl Default for KeyPress {
 }
 
 impl Validate for KeyPress {
-    fn validate(&self) -> Result<()> {
-        // TODO check against actual list of character defines?
-        let assert_legal = |s: &CCode| -> Result<()> {
-            if contains_illegal_char(&s.0) {
-                bail!("illegal character in keypress")
-            }
-            Ok(())
-        };
+    fn validate(&self) -> Result<(), Error> {
+        // TODO compare to an actual list of defined key codes?
+        //  Could vary with underlying keyboard lib, though
+        let mut is_empty = true;
 
         if let Some(ref s) = self.key {
-            assert_legal(s)?
+            assert_legal(s)?;
+            is_empty = false;
         }
         if let Some(ref v) = self.mods {
             for s in v.iter() {
-                assert_legal(s)?
+                assert_legal(s)?;
+                is_empty = false;
             }
         }
+
+        if is_empty {
+            Err(MissingErr {
+                missing: "key or modifier".into(),
+                container: "key press".into(),
+            })?;
+        }
+
         Ok(())
     }
 }
 
-
-
-fn make_key(key: Option<String>) -> Result<Option<CCode>> {
+fn make_key(key: Option<String>) -> Result<Option<CCode>, Error> {
     // TODO map
     Ok(match key {
         Some(s) => Some(sanitize(&s)?),
@@ -82,7 +90,9 @@ fn make_key(key: Option<String>) -> Result<Option<CCode>> {
     })
 }
 
-fn make_mod(modifiers: Option<Vec<String>>) -> Result<Option<Vec<CCode>>> {
+fn make_mod(
+    modifiers: Option<Vec<String>>,
+) -> Result<Option<Vec<CCode>>, Error> {
     // TODO map
     Ok(match modifiers {
         Some(v) => {
@@ -96,13 +106,22 @@ fn make_mod(modifiers: Option<Vec<String>>) -> Result<Option<Vec<CCode>>> {
     })
 }
 
-fn sanitize(s: &str) -> Result<CCode> {
-    // TODO compare to an actual list of defined key codes?
-    //  Could vary with underlying keyboard lib, though
-    if contains_illegal_char(s) {
-        bail!(ErrorKind::BadValue("KeyPress".into(), Some(s.to_owned())))
+fn sanitize(s: &str) -> Result<CCode, Error> {
+    assert_legal(s)?;
+    Ok(s.to_c())
+}
+
+fn assert_legal<T>(s: T) -> Result<(), Error>
+where
+    T: Borrow<str> + ToString,
+{
+    if !contains_illegal_char(s.borrow()) {
+        Ok(())
     } else {
-        Ok(s.to_c())
+        Err(BadValueErr {
+            thing: "KeyPress".into(),
+            value: s.to_string(),
+        }).context("Contains illegal characters")?
     }
 }
 

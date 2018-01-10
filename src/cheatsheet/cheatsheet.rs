@@ -12,7 +12,9 @@ use toml;
 
 use tutor::TutorData;
 use types::{Chord, Name};
-use types::errors::*;
+// use types::errors::*;
+use failure::Error;
+
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
                        MyDescription, MyRect, P2, V2, Wedge};
 
@@ -696,7 +698,7 @@ fn get_symbol(key: &Name) -> Symbol {
     SYMBOLS.get(key).expect("no symbol for key").to_owned()
 }
 
-fn read_file(path: &str) -> Result<String> {
+fn read_file(path: &str) -> Result<String, Error> {
     let mut f: File = File::open(path)?;
     let mut buffer = String::new();
     f.read_to_string(&mut buffer)?;

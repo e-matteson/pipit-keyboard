@@ -7,9 +7,10 @@ use cursive::theme::ColorStyle;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::errors::*;
-use tutor::utils::{grapheme_slice, offset};
+use types::errors::BadValueErr;
+use failure::{Error, ResultExt};
 
+use tutor::utils::{grapheme_slice, offset};
 
 pub struct Copier {
     pub was_backspace_typed_last: bool,
@@ -61,17 +62,19 @@ impl Copier {
         }
     }
 
-    pub fn next_hint(&mut self) -> Option<String> {
-        let next = self.expected_char_at_point();
+    pub fn next_hint(&mut self) -> Result<Option<String>, Error> {
+        let next = self.expected_char_at_point()?;
 
-        let was_correct = self.was_last_char_correct();
+        let was_correct = self.was_last_char_correct()?;
         let entry = self.keys.entry(next.clone()).or_default();
         entry.update(was_correct);
-        if entry.needs_hint() || self.was_backspace_typed_last {
+
+        let hint = if entry.needs_hint() || self.was_backspace_typed_last {
             Some(next)
         } else {
             None
-        }
+        };
+        Ok(hint)
     }
 
     pub fn type_char(&mut self, character: char) {
@@ -134,23 +137,19 @@ impl Copier {
         let wrong_chars: f64 = self.actual
             .graphemes(true)
             .zip(self.expected.graphemes(true))
-            .map(|(actual, expected)| if actual == expected {
-                0.
-            } else {
-                1.
-            })
+            .map(|(actual, expected)| if actual == expected { 0. } else { 1. })
             .sum();
         // ensure the corrected wpm won't be negative
         f64::max(0., (total_chars / CHARS_PER_WORD) - wrong_chars)
     }
 
-    fn was_last_char_correct(&self) -> bool {
-        self.last_wrong_char()
-            .expect("failed to check if char was wrong")
-            .is_none()
+    fn was_last_char_correct(&self) -> Result<bool, Error> {
+        Ok(self.last_wrong_char()
+            .context("failed to check if char was wrong")?
+            .is_none())
     }
 
-    pub fn last_wrong_char(&self) -> Result<Option<String>> {
+    pub fn last_wrong_char(&self) -> Result<Option<String>, Error> {
         let offset = self.point_offset - 1;
         let actual = self.char_at_offset(&self.actual, offset)?;
         let expected = self.char_at_offset(&self.expected, offset)?;
@@ -161,33 +160,30 @@ impl Copier {
         })
     }
 
-    fn char_at_offset(&self, string: &str, offset: usize) -> Result<String> {
+    fn char_at_offset(
+        &self,
+        string: &str,
+        offset: usize,
+    ) -> Result<String, Error> {
         grapheme_slice(string, self.start(), self.end())
             .nth(offset)
-            .ok_or_else(|| "no character offset".into())
+            .ok_or_else(|| {
+                BadValueErr {
+                    thing: "character offset".into(),
+                    value: offset.to_string(),
+                }.into()
+            })
             .map(|s| s.to_owned())
-
-        // let mut chars = grapheme_slice(string, self.start(), self.end())
-        //     .nth(offset)
-        //     .ok_or_else(|| "no character offset".to_owned())?
-        //     .chars();
-        // let first = chars
-        //     .next()
-        // .ok_or_else(|| "invalid character at offset, no
-        // bytes".to_owned())?;
-        // // if chars.count() > 0 {
-        // //     bail!("invalid character at offset, extra bytes");
-        // // }
-        // Ok(first)
     }
 
-    pub fn expected_char_at_point(&self) -> String {
-        if self.at_end_of_line() {
+    pub fn expected_char_at_point(&self) -> Result<String, Error> {
+        let char = if self.at_end_of_line() {
             "\n".to_owned()
         } else {
             self.char_at_offset(&self.expected, self.point_offset)
-                .expect("failed to get character at point")
-        }
+                .context("failed to get character at point")?
+        };
+        Ok(char)
     }
 
     fn start(&self) -> usize {

@@ -1,4 +1,3 @@
-// use itertools::Itertools;
 use std::fmt;
 use std::sync::Mutex;
 
@@ -6,8 +5,6 @@ use types::{AnagramNum, CCode, Permutation, ToC};
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
-
-// static mut INFO: Option<GlobalChordInfo> = None;
 
 lazy_static! {
     static ref INFO: Mutex<Option<GlobalChordInfo>> = Mutex::new(None);
@@ -133,17 +130,6 @@ fn bools_to_u8(v: &[bool]) -> u8 {
     }
     num
 }
-
-// fn right_pad_default<T>(v: Vec<T>, pad_width: usize) -> Vec<T>
-// where
-//     T: Default + Clone,
-// {
-//     iter::repeat(T::default())
-//         .take(pad_width)
-//         .chain(v.into_iter())
-//         .collect()
-// }
-
 
 fn set_static_info(info: GlobalChordInfo) {
     let mut static_info = INFO.lock().unwrap();

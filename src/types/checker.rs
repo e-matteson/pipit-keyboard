@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
 use types::{AnagramNum, Chord, KmapPath, Name};
-use types::errors::*;
+use types::errors::ConflictErr;
+use failure::Error;
 
 // The Checker warns about sub-optimal configuration. Any config issues that
 // would break the firmware should be caught in the loading (or formatting) code
@@ -12,8 +13,8 @@ use types::errors::*;
 pub struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
     reverse_kmaps: HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
-    all_seqs: HashSet<Name>,
-    all_chords: HashSet<Name>,
+    all_seq_names: HashSet<Name>,
+    all_chord_names: HashSet<Name>,
 }
 
 #[derive(Debug)]
@@ -25,8 +26,8 @@ impl Checker {
     pub fn new() -> Checker {
         Checker {
             reverse_kmaps: HashMap::new(),
-            all_seqs: HashSet::new(),
-            all_chords: HashSet::new(),
+            all_seq_names: HashSet::new(),
+            all_chord_names: HashSet::new(),
         }
     }
 
@@ -45,19 +46,21 @@ impl Checker {
 
     pub fn check_unused(&self) {
         println!("Unused chords:");
-        for name in self.all_chords.difference(&self.all_seqs) {
+        for name in self.all_chord_names.difference(&self.all_seq_names) {
             println!("  {}", name);
         }
         println!("\nUnused sequences:");
-        for name in self.all_seqs.difference(&self.all_chords) {
+        for name in self.all_seq_names.difference(&self.all_chord_names) {
             println!("  {}", name);
         }
     }
 
-    pub fn insert_seq(&mut self, name: &Name) -> Result<()> {
-        if !self.all_seqs.insert(name.to_owned()) {
-            // println!("{:?}", self.all_seqs);
-            bail!("duplicate sequences for: '{}'", name);
+    pub fn insert_seq(&mut self, name: &Name) -> Result<(), Error> {
+        if !self.all_seq_names.insert(name.to_owned()) {
+            Err(ConflictErr {
+                key: name.to_string(),
+                container: "all sequence names".into(),
+            })?;
         }
         Ok(())
     }
@@ -67,7 +70,7 @@ impl Checker {
         name: &Name,
         chord: &Chord,
         kmap: &KmapPath,
-    ) -> Result<()> {
+    ) {
         let mut base_chord = chord.to_owned();
         base_chord.anagram_num = AnagramNum(0);
 
@@ -77,11 +80,9 @@ impl Checker {
             .entry(base_chord)
             .or_insert_with(AnagramSet::new)
             .insert(chord.anagram_num, name.clone());
-        self.all_chords.insert(name.clone());
-        Ok(())
+        self.all_chord_names.insert(name.clone());
     }
 }
-
 
 fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
     if conflicts.is_empty() {
@@ -96,7 +97,6 @@ fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
     }
     println!("");
 }
-
 
 //////////////////////////////
 
@@ -191,7 +191,6 @@ impl fmt::Display for AnagramSet {
         fmt::Display::fmt(&s, f)
     }
 }
-
 
 // fn print_conflict_stats( kmap: &KmapPath){
 //     let mut conflicts = HashMap::new();

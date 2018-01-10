@@ -5,7 +5,8 @@ use types::{CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
             ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
             Validate, WordConfig};
 
-use types::errors::*;
+// use types::errors::*;
+use failure::{Error, ResultExt};
 
 fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
@@ -71,7 +72,6 @@ validated_struct!(
     }
 );
 
-
 always_valid_enum!{
     #[derive(Deserialize, Debug, Clone, Copy)]
     pub enum Verbosity {
@@ -93,8 +93,6 @@ always_valid_enum!{
 #[derive(Deserialize, Debug, Clone, Copy)]
 #[serde(deny_unknown_fields)]
 pub struct Delay(u16);
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -204,7 +202,6 @@ impl OptionsConfig {
         order
     }
 
-
     fn get_auto(&self) -> Vec<CTree> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
@@ -282,9 +279,8 @@ impl ToC for Verbosity {
     }
 }
 
-
 impl Validate for Delay {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         Ok(())
     }
 }

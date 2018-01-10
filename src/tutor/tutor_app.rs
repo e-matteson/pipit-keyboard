@@ -12,7 +12,9 @@ use cursive::views::{Dialog, SelectView, TextView};
 use cursive::vec::Vec2;
 use cursive::event::{Callback, Event, EventResult, Key};
 
-use types::errors::*;
+use types::errors::print_and_panic;
+use failure::{Error, ResultExt};
+
 use tutor::graphic::Graphic;
 use tutor::utils::{offset, read_file_lines, set_tutor_data, TutorData};
 use tutor::copier::Copier;
@@ -72,7 +74,11 @@ impl TutorApp {
     }
 
     fn show_lesson(siv: &mut Cursive, _name: &str, lines: Vec<String>) {
-        siv.add_layer(Lesson::new(lines).with_id("text"));
+        let lesson = match Lesson::new(lines) {
+            Ok(lesson) => lesson,
+            Err(error) => print_and_panic(error),
+        };
+        siv.add_layer(lesson.with_id("text"));
     }
 
     fn cleanup_lesson(siv: &mut Cursive) {
@@ -104,9 +110,8 @@ impl TutorApp {
     }
 }
 
-
 impl Lesson {
-    fn new(lines: Vec<String>) -> Lesson {
+    fn new(lines: Vec<String>) -> Result<Lesson, Error> {
         let copier = Copier::new(79);
 
         let mut lesson = Lesson {
@@ -118,8 +123,8 @@ impl Lesson {
             net_words: 0.,
         };
         lesson.next_line();
-        lesson.update_chord();
-        lesson
+        lesson.update_chord()?;
+        Ok(lesson)
     }
 
     fn size(&self) -> Vec2 {
@@ -154,12 +159,13 @@ impl Lesson {
         Vec2::new(x, 0)
     }
 
-    fn update_chord(&mut self) {
-        let next_char = self.copier.next_hint();
+    fn update_chord(&mut self) -> Result<(), Error> {
+        let next_char = self.copier.next_hint().context("failed to get hint")?;
         let last_wrong_char = self.copier
             .last_wrong_char()
             .expect("failed to check if char was wrong");
         self.graphic.update(next_char, last_wrong_char);
+        Ok(())
     }
 
     fn start_if_not_started(&mut self) {
@@ -201,9 +207,9 @@ impl View for Lesson {
 
     fn on_event(&mut self, event: Event) -> EventResult {
         if let Event::Key(Key::Esc) = event {
-            return EventResult::Consumed(
-                Some(Callback::from_fn(TutorApp::show_confirm_back)),
-            );
+            return EventResult::Consumed(Some(Callback::from_fn(
+                TutorApp::show_confirm_back,
+            )));
         }
         match self.state() {
             LessonState::Typing => match event {
@@ -235,13 +241,18 @@ impl View for Lesson {
                 _ => return EventResult::Ignored,
             },
         }
-        self.update_chord();
+
+        if let Err(error) = self.update_chord() {
+            print_and_panic(error);
+        }
+
         EventResult::Consumed(None)
     }
 }
 
-
-fn load_lessons(lesson_dir: &str) -> Result<BTreeMap<String, Vec<String>>> {
+fn load_lessons(
+    lesson_dir: &str,
+) -> Result<BTreeMap<String, Vec<String>>, Error> {
     let entries = fs::read_dir(lesson_dir)?;
     let mut map = BTreeMap::new();
     for entry in entries {

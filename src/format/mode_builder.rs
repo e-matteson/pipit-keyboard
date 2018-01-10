@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, SeqType,
             ToC};
-use types::errors::*;
-
+use types::errors::LookupErr;
+use failure::Error;
 
 pub struct ModeBuilder<'a> {
     pub info: &'a ModeInfo,
@@ -28,7 +28,7 @@ c_struct!(
 ////////////////////////////////////////////////////////////////////////////////
 
 impl<'a> ModeBuilder<'a> {
-    pub fn render(&self) -> Result<(CTree, CCode)> {
+    pub fn render(&self) -> Result<(CTree, CCode), Error> {
         let mut g = Vec::new();
         let (tree, kmap_array_name) = self.render_kmap_array()?;
         g.push(tree);
@@ -55,28 +55,47 @@ impl<'a> ModeBuilder<'a> {
         Ok((CTree::Group(g), mode_struct_name))
     }
 
-    fn render_kmap_array(&self) -> Result<(CTree, CCode)> {
+    fn get_kmap_struct_names(
+        &self,
+        seq_type: SeqType,
+        kmap: &KmapPath,
+    ) -> Result<CCode, Error> {
+        let first_lookup: Result<_, Error> =
+            self.kmap_struct_names.get(&seq_type).ok_or_else(|| {
+                LookupErr {
+                    key: format!("{:?}", seq_type),
+                    container: "struct names by sequence type".into(),
+                }.into()
+            });
+
+        first_lookup?
+            .get(kmap)
+            .ok_or_else(|| {
+                LookupErr {
+                    key: kmap.to_string(),
+                    container: "struct names by kmap".into(),
+                }.into()
+            })
+            .map(|c| c.to_owned())
+    }
+
+    fn render_kmap_array(&self) -> Result<(CTree, CCode), Error> {
         let mut g = Vec::new();
         let mut subarray_names = Vec::new();
-        for seq_type in &self.seq_types {
+        for &seq_type in &self.seq_types {
             let mut contents = Vec::new();
-            let struct_names = self.kmap_struct_names
-                .get(seq_type)
-                .ok_or("struct name not found")?;
 
             for kmap_info in &self.info.keymaps {
-                contents.push(
-                    if *seq_type == SeqType::Word && !kmap_info.use_words {
-                        "NULL".to_c()
-                    } else {
-                        format!(
-                            "&{}",
-                            struct_names
-                                .get(&kmap_info.file)
-                                .ok_or("kmap struct name not found")?
-                        ).to_c()
-                    },
-                );
+                contents.push(if seq_type == SeqType::Word
+                    && !kmap_info.use_words
+                {
+                    "NULL".to_c()
+                } else {
+                    format!(
+                        "&{}",
+                        self.get_kmap_struct_names(seq_type, &kmap_info.file)?,
+                    ).to_c()
+                });
             }
             let name =
                 format!("{}_{}_kmap_array", self.mode_name, seq_type).to_c();

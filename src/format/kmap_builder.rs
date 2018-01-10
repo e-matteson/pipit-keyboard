@@ -2,7 +2,9 @@ use std::collections::BTreeMap;
 
 use types::{AnagramNum, CCode, CTree, Chord, Field, KmapPath, Name, SeqType,
             Sequence, ToC};
-use types::errors::*;
+use failure::Error;
+
+use types::errors::LookupErr;
 
 type SeqMap = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
@@ -10,7 +12,6 @@ type LenMap = BTreeMap<usize, Vec<Name>>;
 
 // TODO refactor this whole file
 // At least be more consistent about terminology
-
 
 pub struct KmapBuilder<'a> {
     seq_type: SeqType, // word, plain, macro, or command
@@ -34,7 +35,6 @@ c_struct!(
         use_mods: bool
     }
 );
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +64,7 @@ impl<'a> KmapBuilder<'a> {
         }
     }
 
-    pub fn render(&self) -> Result<(CTree, BTreeMap<KmapPath, CCode>)> {
+    pub fn render(&self) -> Result<(CTree, BTreeMap<KmapPath, CCode>), Error> {
         // TODO don't make chord and seq array names in more than one place?
         // TODO skip words for kmap if never used? gcc seems to optimize them
         // away...
@@ -98,7 +98,7 @@ impl<'a> KmapBuilder<'a> {
     fn render_chord_arrays(
         &self,
         chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>,
-    ) -> Result<CTree> {
+    ) -> Result<CTree, Error> {
         // TODO be consistent about "array" / "subarray" terminology
         let mut g = Vec::new();
         let mut array_names: Vec<CCode> = Vec::new();
@@ -152,14 +152,17 @@ impl<'a> KmapBuilder<'a> {
     fn make_chord_arrays(
         &self,
         names_by_len: &LenMap,
-    ) -> Result<BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>> {
+    ) -> Result<BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>, Error> {
         let mut chord_arrays = BTreeMap::new();
         for kmap in self.chord_maps.keys() {
             let mut kmap_array = Vec::new();
             // TODO inclusive range
             for length in 0..max_len(names_by_len) + 1 {
-                kmap_array
-                    .push(self.make_chord_subarray(names_by_len, length, kmap)?);
+                kmap_array.push(self.make_chord_subarray(
+                    names_by_len,
+                    length,
+                    kmap,
+                )?);
             }
             chord_arrays.insert(kmap.to_owned(), kmap_array);
         }
@@ -171,7 +174,7 @@ impl<'a> KmapBuilder<'a> {
         names_by_len: &LenMap,
         length: usize,
         kmap: &KmapPath,
-    ) -> Result<Vec<ChordEntry>> {
+    ) -> Result<Vec<ChordEntry>, Error> {
         let chords = &self.chord_maps[kmap];
         let mut entries = Vec::new();
         if let Some(names) = names_by_len.get(&length) {
@@ -180,12 +183,20 @@ impl<'a> KmapBuilder<'a> {
                 if !chords.contains_key(name) {
                     continue;
                 }
+                // TODO use helper for lookup and error
+                // TODO remove annotations
+                let chord: Result<&Chord, Error> =
+                    chords.get(name).ok_or_else(|| {
+                        LookupErr {
+                            key: name.to_string(),
+                            container: "chord".into(),
+                        }.into()
+                    });
+                // ?
+                // .to_owned();
                 entries.push(ChordEntry {
                     offset: (index - last_index) as u8,
-                    chord: chords
-                        .get(name)
-                        .ok_or("failed to get chord")?
-                        .clone(),
+                    chord: chord?.to_owned(),
                 });
                 last_index = index;
             }
@@ -194,7 +205,6 @@ impl<'a> KmapBuilder<'a> {
         entries.push(ChordEntry::new());
         Ok(entries)
     }
-
 
     fn make_length_map(&self) -> LenMap {
         // collect names by the lengths of their sequences
@@ -259,11 +269,23 @@ impl<'a> KmapBuilder<'a> {
         new_map
     }
 
-    fn make_chord_array_name(&self, kmap: &KmapPath) -> Result<CCode> {
+    fn get_kmap_nickname(&self, kmap: &KmapPath) -> Result<String, Error> {
+        self.kmap_nicknames
+            .get(kmap)
+            .ok_or_else(|| {
+                LookupErr {
+                    key: kmap.to_string(),
+                    container: "kmap nicknames".into(),
+                }.into()
+            })
+            .map(|s| s.to_owned())
+    }
+
+    fn make_chord_array_name(&self, kmap: &KmapPath) -> Result<CCode, Error> {
         Ok(CCode(format!(
             "{}_{}_chord_lookup",
             self.seq_type.to_string(),
-            self.kmap_nicknames.get(kmap).ok_or("kmap name not found")?
+            self.get_kmap_nickname(kmap)?
         )))
     }
 
@@ -323,7 +345,7 @@ impl ChordEntry {
             .anagram_num
             .0
             .checked_shl(NUM_OFFSET_BITS)
-            .unwrap();
+            .expect("failed to shift when making prefix byte");
         let lsb = self.offset;
         vec![msb + lsb]
     }
@@ -338,7 +360,6 @@ fn make_flat_sequence(seq_map: &SeqMap, names: &[Name]) -> Sequence {
     }
     flat_seq
 }
-
 
 fn max_len(names_by_len: &LenMap) -> usize {
     *names_by_len.keys().max().unwrap_or(&0)

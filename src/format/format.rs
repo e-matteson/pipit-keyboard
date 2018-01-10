@@ -7,8 +7,8 @@ use std::fmt::Display;
 use itertools::Itertools;
 
 use types::{CCode, CTree, Field, ToC};
-use types::errors::*;
-
+use types::errors::BadValueErr;
+use failure::{Error, Fail, ResultExt};
 
 #[derive(Debug, Default)]
 pub struct CFiles {
@@ -19,7 +19,7 @@ pub struct CFiles {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CTree {
-    pub fn format(&self) -> Result<CFiles> {
+    pub fn format(&self) -> Result<CFiles, Error> {
         Ok(match *self {
             CTree::Include { ref path } => format_include(path),
             CTree::LiteralH(ref text) => CFiles::with_h(text),
@@ -123,7 +123,11 @@ impl CFiles {
         self.c += "\n";
     }
 
-    pub fn save(&self, directory: &PathBuf, name_base: &str) -> Result<()> {
+    pub fn save(
+        &self,
+        directory: &PathBuf,
+        name_base: &str,
+    ) -> Result<(), Error> {
         let mut base = directory.to_owned();
         base.push(name_base);
 
@@ -154,7 +158,6 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
         self.append(rhs)
     }
 }
-
 
 fn format_struct_instance(
     name: &CCode,
@@ -221,7 +224,7 @@ fn format_include(path: &CCode) -> CFiles {
 fn format_include_guard(
     header_name: &str,
     contents: &Box<CTree>,
-) -> Result<CFiles> {
+) -> Result<CFiles, Error> {
     let id = make_guard_id(header_name)?;
     let mut f = CFiles {
         h: format!("#ifndef {}\n#define {}\n", id, id).to_c(),
@@ -232,7 +235,7 @@ fn format_include_guard(
     Ok(f)
 }
 
-fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles> {
+fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles, Error> {
     let open = format!("namespace {} {{\n", name).to_c();
     let close = format!("\n}} // end namespace {}\n", name).to_c();
     let mut f = CFiles::with(&open);
@@ -240,7 +243,7 @@ fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles> {
     f += CFiles::with(&close);
     Ok(f)
 }
-fn format_group(v: &[CTree]) -> Result<CFiles> {
+fn format_group(v: &[CTree]) -> Result<CFiles, Error> {
     let mut f = CFiles::new();
     for node in v {
         f += node.format()?
@@ -253,7 +256,7 @@ fn format_compound_array(
     values: &[Vec<CCode>],
     subarray_type: &CCode,
     is_extern: bool,
-) -> Result<CFiles> {
+) -> Result<CFiles, Error> {
     // TODO prepend underscore? special meaning?
     let mut subarray_names: Vec<_> = (0..values.len())
         .map(|x| CCode(format!("{}_{}", name, x)))
@@ -291,17 +294,16 @@ fn format_array(
             h: CCode(format!("extern const {} {}[];\n", c_type, name)),
             c: CCode(format!(
                 "extern const {} {}[] = {};\n\n",
-                c_type,
-                name,
-                contents
+                c_type, name, contents
             )),
         }
     } else {
         CFiles {
             h: CCode::new(),
-            c: CCode(
-                format!("const {} {}[] = {};\n\n", c_type, name, contents),
-            ),
+            c: CCode(format!(
+                "const {} {}[] = {};\n\n",
+                c_type, name, contents
+            )),
         }
     }
 }
@@ -313,7 +315,6 @@ where
     let lines = wrap_in_braces(&to_code_vec(v));
     CCode::join(&lines, "\n")
 }
-
 
 fn wrap_in_braces(lines: &[CCode]) -> Vec<CCode> {
     let mut new: Vec<_> =
@@ -340,44 +341,53 @@ where
     code_lines
 }
 
-
 fn format_extern(is_extern: bool) -> CCode {
     let s = if is_extern { "extern " } else { "" };
     s.to_c()
 }
 
-fn make_guard_id(h_file_name: &str) -> Result<CCode> {
+fn make_guard_id(h_file_name: &str) -> Result<CCode, Error> {
     // TODO remove unsafe characters, like the python version
-    let error_message = format!("invalid header file name: {}", h_file_name);
+    let header_error = || BadValueErr {
+        thing: "header file path".into(),
+        value: h_file_name.into(),
+    };
+
     let p: String = Path::new(h_file_name)
         .file_name()
-        .ok_or_else(|| "failure to get file name")?
+        .ok_or_else(|| {
+            header_error().context("unable to extract file name from path")
+        })?
         .to_str()
-        .unwrap()
+        .expect("failed to get file name as str?")
         .to_string()
         .to_uppercase()
         .chars()
         .map(|c| if c.is_alphanumeric() { c } else { '_' })
         .collect();
-    let first = p.chars().nth(0).ok_or_else(|| error_message.clone())?;
 
+    let first = p.chars().nth(0).ok_or_else(|| {
+        header_error().context("unable to get first character of file name")
+    })?;
     if !first.is_alphabetic() && first != '_' {
-        bail!(error_message);
+        Err(header_error()).context(
+            "file name must begin with an alphabet letter or underscore",
+        )?;
     }
     Ok(CCode(p + "_"))
 }
 
-
-pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<()> {
+pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<(), Error> {
     // let path = Path::new(full_path);
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .open(full_path)
-        .chain_err(|| "failure to open output file")?;
-    file.set_len(0)
-        .chain_err(|| "failure to clear output file")?;
+        .context("Failed to open output file")?;
+
+    file.set_len(0).context("Failed to clear output file")?;
+
     file.write_all(s.to_string().as_bytes())
-        .chain_err(|| "failure to write to output file")?;
+        .context("Failed to write to output file")?;
     Ok(())
 }

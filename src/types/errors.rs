@@ -1,75 +1,80 @@
-// #![recursion_limit = "1024"]
+use failure::Error;
 
-error_chain! {
+#[derive(Debug, Fail)]
+#[fail(display = "Invalid ratio: {}", _0)]
+pub struct RatioError(pub f32);
 
-    // Automatic conversions between this error chain and other
-    // error types not defined by the `error_chain!`. These will be
-    // wrapped in a new error with, in the first case, the
-    // `ErrorKind::Fmt` variant. The description and cause will
-    // forward to the description and cause of the original error.
-    //
-    // Optionally, some attributes can be added to a variant.
-    //
-    // This section can be empty.
-    foreign_links {
-        Fmt(::std::fmt::Error);
-        Io(::std::io::Error) #[cfg(unix)];
-        Toml(::toml::de::Error);
+// foreign_links {
+//     Fmt(::std::fmt::Error);
+//     Io(::std::io::Error) #[cfg(unix)];
+//     Toml(::toml::de::Error);
+// }
+
+#[derive(Debug, Fail)]
+#[fail(display = "Missing '{}' from '{}'", missing, container)]
+pub struct MissingErr {
+    pub missing: String,
+    pub container: String,
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "Couldn't find '{}' in '{}'", key, container)]
+pub struct LookupErr {
+    pub key: String,
+    pub container: String,
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "Conflict: '{}' already exists in '{}'", key, container)]
+pub struct ConflictErr {
+    pub key: String,
+    pub container: String,
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "Out of range: '{}' is '{}', must be in range ({}, {})",
+       name, value, min, max)]
+pub struct OutOfRangeErr {
+    pub name: String,
+    pub value: usize,
+    pub min: usize,
+    pub max: usize,
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "Invalid {}: '{}'", thing, value)]
+pub struct BadValueErr {
+    pub thing: String,
+    pub value: String,
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "Unable to permute: wrong length")]
+pub struct PermuteErr;
+
+// #[derive(Debug, Fail)]
+// #[fail(display = "Failed to do file input or output")]
+// pub struct FileErr;
+
+#[derive(Debug, Fail)]
+#[fail(display = "Syntax error near line {}. Is kmap_format correct?", _0)]
+pub struct KmapSyntaxErr(pub usize);
+
+#[derive(Debug, Fail)]
+#[fail(display = "Wrong number of arguments: '{}'", _0)]
+pub struct NumArgsErr(pub usize);
+
+pub fn print_and_panic(e: Error) -> ! {
+    print_error(e);
+    panic!("returned error")
+}
+
+pub fn print_error(e: Error) {
+    let mut causes = e.causes();
+    if let Some(first) = causes.next() {
+        println!("error: {}", first);
     }
-
-    // Define additional `ErrorKind` variants. The syntax here is
-    // the same as `quick_error!`, but the `from()` and `cause()`
-    // syntax is not supported.
-    errors {
-        UnexpectedKey(s: String) {
-            description("Unexpected key in settings")
-                display("unexpected key: '{}'", s)
-        }
-        MissingValue(expected_type: String, for_thing: Option<String>) {
-            description("Missing value")
-                display("missing {}{}",
-                        expected_type,
-                        match *for_thing {
-                            Some(ref s) => format!(" for: '{}'", s),
-                            None => String::new(),
-                        }
-                )
-        }
-        OutOfRange(name: String, min: usize, max: usize) {
-            description("Input out of range")
-                display("Out of range: {}, ({}, {})", name, min, max)
-        }
-        BadValue(expected_type: String, value: Option<String>) {
-            description("Bad value in settings")
-                display("invalid {}{}",
-                        expected_type,
-                        match *value {
-                            None => String::new(),
-                            Some(ref s) => format!(": '{}'", s),
-                        }
-                )
-        }
-        Permute {
-            description("Unable to permute")
-                display("Unable to permute this sequence, because it has the wrong length")
-        }
-        KmapPins(s: String) {
-            description(
-                "Switch positions in kmap format don't match row or column pins"
-            )
-                display(
-                    "invalid position in kmap_format: {}. Check row_pins and \
-                     col_pins.",
-                    s
-                )
-        }
-        KmapSyntax(l: usize) {
-            description("Syntax error in kmap file")
-                display("syntax error near line {}. Is kmap_format correct?", l)
-        }
-        NumArgs(n: usize) {
-            description("Invalid commandline arguments")
-                display("Wrong number of arguments : '{}'", n)
-        }
+    for cause in causes {
+        println!("cause: {}", cause);
     }
 }

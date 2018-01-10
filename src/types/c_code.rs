@@ -4,15 +4,20 @@ use std::ops::AddAssign;
 
 use types::{ModeName, Name, SeqType};
 
-
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
 
 #[derive(Debug, Clone)]
 pub enum CTree {
-    Define { name: CCode, value: CCode },
-    Ifdef { name: CCode, value: bool },
+    Define {
+        name: CCode,
+        value: CCode,
+    },
+    Ifdef {
+        name: CCode,
+        value: bool,
+    },
     Var {
         name: CCode,
         value: CCode,
@@ -31,15 +36,23 @@ pub enum CTree {
         subarray_type: CCode,
         is_extern: bool,
     },
-    EnumDecl { name: CCode, variants: Vec<CCode> },
+    EnumDecl {
+        name: CCode,
+        variants: Vec<CCode>,
+    },
     StructInstance {
         name: CCode,
         fields: Vec<Field>,
         c_type: CCode,
         is_extern: bool,
     },
-    Namespace { name: CCode, contents: Box<CTree> },
-    Include { path: CCode },
+    Namespace {
+        name: CCode,
+        contents: Box<CTree>,
+    },
+    Include {
+        path: CCode,
+    },
     IncludeGuard {
         header_name: String,
         contents: Box<CTree>,
@@ -48,8 +61,8 @@ pub enum CTree {
     LiteralH(CCode),
     LiteralC(CCode),
     Group(Vec<CTree>),
-    // CommentC(CCode),
-    // CommentH(CCode),
+    /* CommentC(CCode),
+     * CommentH(CCode), */
 }
 
 #[derive(Debug, Clone)]
@@ -57,7 +70,6 @@ pub struct Field {
     pub name: CCode,
     pub value: CCode,
 }
-
 
 impl CCode {
     pub fn new() -> CCode {
@@ -81,6 +93,12 @@ impl CCode {
 }
 
 impl<'a> Borrow<str> for CCode {
+    fn borrow(&self) -> &str {
+        &(self.0)
+    }
+}
+
+impl<'a> Borrow<str> for &'a CCode {
     fn borrow(&self) -> &str {
         &(self.0)
     }
@@ -207,16 +225,14 @@ impl ToC for usize {
     }
 }
 
-
 impl<T> ToC for Vec<T>
 where
     T: ToC,
 {
     fn to_c(self) -> CCode {
-        let s = self.into_iter().fold(
-            String::new(),
-            |acc, item| format!("{}, {}", acc, item.to_c()),
-        );
+        let s = self.into_iter().fold(String::new(), |acc, item| {
+            format!("{}, {}", acc, item.to_c())
+        });
         CCode(s)
     }
 }

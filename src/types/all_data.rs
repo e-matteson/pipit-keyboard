@@ -4,8 +4,9 @@ use std::path::PathBuf;
 
 use types::{AnagramNum, CTree, Checker, Chord, KeyPress, KmapPath, ModeInfo,
             ModeName, Name, SeqType, Sequence, WordBuilder, WordConfig};
-use types::errors::*;
 
+use types::errors::{BadValueErr, ConflictErr, LookupErr};
+use failure::{Error, Fail, ResultExt};
 
 #[derive(Debug)]
 pub struct AllData {
@@ -43,7 +44,7 @@ impl AllData {
         &mut self,
         kmap: &KmapPath,
         named_chords: BTreeMap<Name, Chord>,
-    ) -> Result<()> {
+    ) -> Result<(), Error> {
         for (name, chord) in &named_chords {
             self.add_chord(name, chord, kmap)?;
         }
@@ -55,19 +56,21 @@ impl AllData {
         name: &Name,
         chord: &Chord,
         kmap: &KmapPath,
-    ) -> Result<()> {
-        (|| -> Result<()> {
-            self.checker.insert_chord(name, chord, kmap)?;
-            self.chords
-                .get_mut(kmap)
-                .ok_or_else(|| format!("unknown kmap: {}", kmap))?
-                .insert(name.to_owned(), chord.to_owned());
-            Ok(())
-        })()
-            .chain_err(|| "failure to add chord")
+    ) -> Result<(), Error> {
+        self.checker.insert_chord(name, chord, kmap);
+        self.chords
+            .get_mut(kmap)
+            .ok_or_else(|| {
+                BadValueErr {
+                    thing: "kmap".into(),
+                    value: kmap.to_owned().into(),
+                }.context("Failed to add chord to kmap")
+            })?
+            .insert(name.to_owned(), chord.to_owned());
+        Ok(())
     }
 
-    pub fn add_command(&mut self, entry: &Name) -> Result<()> {
+    pub fn add_command(&mut self, entry: &Name) -> Result<(), Error> {
         // Commands are a single byte code, not an actual key sequence.
         // But we'll store each one as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
@@ -82,7 +85,7 @@ impl AllData {
         &mut self,
         info: WordConfig,
         kmap: &KmapPath,
-    ) -> Result<()> {
+    ) -> Result<(), Error> {
         // TODO build word in loader code instead?
         let word = WordBuilder {
             info: info,
@@ -97,7 +100,11 @@ impl AllData {
         Ok(())
     }
 
-    pub fn add_plain_mod<T>(&mut self, name: &Name, seq: &T) -> Result<()>
+    pub fn add_plain_mod<T>(
+        &mut self,
+        name: &Name,
+        seq: &T,
+    ) -> Result<(), Error>
     where
         T: Into<Sequence> + Clone,
     {
@@ -106,23 +113,30 @@ impl AllData {
         self.add_sequence(SeqType::Plain, name, seq)
     }
 
-
-    pub fn add_word_mod(&mut self, name: &Name) -> Result<()> {
+    pub fn add_word_mod(&mut self, name: &Name) -> Result<(), Error> {
         // Add all the word_mods at once
         self.word_mods.push(name.to_owned());
         self.checker.insert_seq(name)
     }
 
-    pub fn add_anagram_mod(&mut self, name: &Name) -> Result<()> {
+    pub fn add_anagram_mod(&mut self, name: &Name) -> Result<(), Error> {
         // Add all the anagram_mods at once
         // TODO share code with set_word_mods()?
         self.anagram_mods.push(name.to_owned());
         self.checker.insert_seq(name)
     }
 
-    pub fn add_mode(&mut self, name: &ModeName, info: &ModeInfo) -> Result<()> {
+    pub fn add_mode(
+        &mut self,
+        name: &ModeName,
+        info: &ModeInfo,
+    ) -> Result<(), Error> {
+        // Check if a mode with this name has been added already
         if self.modes.contains_key(name) {
-            bail!("mode already exists: '{}'", name);
+            Err(ConflictErr {
+                key: name.to_string(),
+                container: "modes".into(),
+            }).context("Mode has already been added")?;
         }
         // Store the kmaps that are included in this mode
         for kmap_info in &info.keymaps {
@@ -142,11 +156,10 @@ impl AllData {
         seq_type: SeqType,
         name: &Name,
         seq: &T,
-    ) -> Result<()>
+    ) -> Result<(), Error>
     where
         T: Into<Sequence> + Clone,
     {
-        // TODO check that name doesn't already exist
         self.checker.insert_seq(name)?;
         self.sequences
             .entry(seq_type)
@@ -159,7 +172,7 @@ impl AllData {
         &mut self,
         seq_type: SeqType,
         seqs: &BTreeMap<Name, T>,
-    ) -> Result<()>
+    ) -> Result<(), Error>
     where
         T: Into<Sequence> + Clone,
     {
@@ -172,26 +185,37 @@ impl AllData {
     fn get_sequences(
         &self,
         seq_type: &SeqType,
-    ) -> Result<&BTreeMap<Name, Sequence>> {
+    ) -> Result<&BTreeMap<Name, Sequence>, Error> {
         self.sequences.get(seq_type).ok_or_else(|| {
-            format!("Sequence type was not initialized: {:?}", seq_type).into()
+            LookupErr {
+                key: format!("{:?}", seq_type),
+                container: "sequences".into(),
+            }.context("sequence type was not initialized")
+                .into()
         })
     }
 
-    fn get_sequence(&self, name: &Name) -> Result<&Sequence> {
+    fn get_sequence(&self, name: &Name) -> Result<&Sequence, Error> {
         for seq_type in self.sequences.keys() {
             if let Some(s) = self.get_sequences(seq_type)?.get(name) {
                 return Ok(s);
             }
         }
-        bail!("No sequence found for name");
+        Err(LookupErr {
+            key: name.into(),
+            container: "sequences".into(),
+        })?
     }
 
-    pub fn get_single_keypress(&self, name: &Name) -> Result<KeyPress> {
-        let seq = self.get_sequence(name)?;
+    pub fn get_single_keypress(&self, name: &Name) -> Result<KeyPress, Error> {
+        let seq = self.get_sequence(name).context("failed to get sequence")?;
         // TODO iter?
-        if seq.len() != 1 {
-            bail!("Expected sequence of length 1");
+        let length = seq.len();
+        if length != 1 {
+            Err(BadValueErr {
+                thing: "sequence length".into(),
+                value: length.to_string(),
+            }).context("Expected sequence containing a single keypress")?;
         }
         Ok(seq.0[0].clone())
     }
@@ -279,13 +303,13 @@ impl AllData {
         self.checker.check_chords();
     }
 
-    fn get_names_for_seq(&self, seq_type: SeqType) -> Result<Vec<Name>> {
+    fn get_names_for_seq(&self, seq_type: SeqType) -> Result<Vec<Name>, Error> {
         Ok(self.get_sequences(&seq_type)?.keys().cloned().collect())
     }
 
     pub fn get_tutor_data(
         &self,
-    ) -> Result<BTreeMap<ModeName, BTreeMap<Name, Chord>>> {
+    ) -> Result<BTreeMap<ModeName, BTreeMap<Name, Chord>>, Error> {
         // TODO clean up, reorganize AllData to make this less bad?
         // TODO think about borrowck
         let mut chords = BTreeMap::new();

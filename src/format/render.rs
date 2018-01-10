@@ -4,25 +4,24 @@ use std::collections::BTreeMap;
 use types::{AllData, CCode, CTree, KeyPress, KmapPath, Name, SeqType,
             Sequence, ToC};
 
-use types::errors::*;
-
 use format::{compress, make_compression_macros, KmapBuilder, ModeBuilder};
 
+use types::errors::MissingErr;
+use failure::Error;
+
 impl AllData {
-    pub fn save_as(&self, file_name_base: &str) -> Result<()> {
-        (|| {
-            let c_tree = self.render(file_name_base)?;
-            let f = c_tree.format()?;
-            // TODO as_ref?
-            let dir = self.output_directory
-                .as_ref()
-                .ok_or_else(|| "output directory option not set")?;
-            f.save(dir, file_name_base)
-        })()
-            .chain_err(|| "failure to save configuration")
+    pub fn save_as(&self, file_name_base: &str) -> Result<(), Error> {
+        let c_tree = self.render(file_name_base)?;
+        let f = c_tree.format()?;
+        // TODO as_ref?
+        let dir = self.output_directory.as_ref().ok_or_else(|| MissingErr {
+            missing: "output directory".into(),
+            container: "settings".into(),
+        })?;
+        f.save(dir, file_name_base)
     }
 
-    pub fn render(&self, file_name_base: &str) -> Result<CTree> {
+    pub fn render(&self, file_name_base: &str) -> Result<CTree, Error> {
         let h_file_name = format!("{}.h", file_name_base);
 
         let mut group = Vec::new();
@@ -35,7 +34,7 @@ impl AllData {
         wrap_intro(&h_file_name, CTree::Group(group))
     }
 
-    fn render_modes(&self) -> Result<CTree> {
+    fn render_modes(&self) -> Result<CTree, Error> {
         let mut g = Vec::new();
         let (tree, kmap_struct_names) = self.render_kmaps()?;
         g.push(tree);
@@ -65,7 +64,8 @@ impl AllData {
 
     fn render_kmaps(
         &self,
-    ) -> Result<(CTree, BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>)> {
+    ) -> Result<(CTree, BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>), Error>
+    {
         // Render all keymap structs as CTrees, and return their names
         let mut kmap_struct_names = BTreeMap::new();
         let mut g = Vec::new();
@@ -119,7 +119,7 @@ impl AllData {
             .collect()
     }
 
-    fn render_modifiers(&self) -> Result<CTree> {
+    fn render_modifiers(&self) -> Result<CTree, Error> {
         let all_index_variants = self.make_mod_index_variants();
         let mut group = Vec::new();
         group.push(CTree::EnumDecl {
@@ -131,7 +131,6 @@ impl AllData {
             name: "NUM_MODIFIERS".to_c(),
             value: all_index_variants.len().to_c(),
         });
-
 
         group.push(CTree::Define {
             name: "NUM_WORD_MODS".to_c(),
@@ -184,7 +183,7 @@ impl AllData {
         Ok(CTree::Group(group))
     }
 
-    fn get_plain_mod_codes(&self) -> Result<Vec<CCode>> {
+    fn get_plain_mod_codes(&self) -> Result<Vec<CCode>, Error> {
         self.plain_mods
             .iter()
             .map(|name| Ok(self.get_single_keypress(name)?.format_mods()))
@@ -213,7 +212,6 @@ impl AllData {
         }
     }
 }
-
 
 impl KeyPress {
     fn truncate(contents: &CCode) -> CCode {
@@ -244,9 +242,6 @@ impl KeyPress {
     }
 }
 
-
-
-
 impl Sequence {
     pub fn as_bytes(
         &self,
@@ -274,9 +269,10 @@ impl Sequence {
     }
 }
 
-
-
-pub fn wrap_intro(h_file_name: &str, namespace_tree: CTree) -> Result<CTree> {
+pub fn wrap_intro(
+    h_file_name: &str,
+    namespace_tree: CTree,
+) -> Result<CTree, Error> {
     // format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
     let mut guard_group = Vec::new();
     guard_group.push(CTree::Include {
@@ -312,7 +308,6 @@ pub fn wrap_intro(h_file_name: &str, namespace_tree: CTree) -> Result<CTree> {
 
     Ok(CTree::Group(outer_group))
 }
-
 
 fn autogen_message() -> CCode {
     const AUTHOR: &str = "pipit-config";

@@ -15,7 +15,7 @@ extern crate unicode_segmentation;
 extern crate serde_derive;
 
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 
 #[macro_use]
 extern crate lazy_static;

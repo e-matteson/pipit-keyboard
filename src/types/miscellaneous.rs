@@ -7,6 +7,7 @@ use std::string::ToString;
 
 use types::{CCode, KeyPress, ToC, Validate};
 use types::errors::*;
+use failure::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -84,12 +85,20 @@ impl Pin {
 }
 
 impl Validate for Pin {
-    fn validate(&self) -> Result<()> {
-        const MAX_PIN_NUM: u8 = 30; // TODO pick value
-        if self.0 > MAX_PIN_NUM {
-            bail!("invalid pin number: {}", self.0);
+    fn validate(&self) -> Result<(), Error> {
+        const MIN_PIN_NUM: u8 = 0;
+        const MAX_PIN_NUM: u8 = 30; // TODO pick real value
+
+        if self.0 <= MAX_PIN_NUM && self.0 >= MIN_PIN_NUM {
+            Ok(())
+        } else {
+            Err(OutOfRangeErr {
+                name: "pin number".into(),
+                value: self.0 as usize,
+                min: MIN_PIN_NUM as usize,
+                max: MAX_PIN_NUM as usize,
+            }.into())
         }
-        Ok(())
     }
 }
 
@@ -111,8 +120,6 @@ impl ToC for Pin {
     }
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 impl SwitchPos {
@@ -127,7 +134,7 @@ impl SwitchPos {
 }
 
 impl Validate for SwitchPos {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         self.row.validate()?;
         self.col.validate()?;
         Ok(())
@@ -163,7 +170,7 @@ impl KmapFormat {
 }
 
 impl Validate for KmapFormat {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         for row in self.0.iter() {
             for switch_pos in row.iter() {
                 switch_pos.validate()?;
@@ -190,7 +197,7 @@ impl fmt::Display for SeqType {
 //////////////////////////////
 
 impl Validate for KmapInfo {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         self.file.validate()
     }
 }
@@ -202,7 +209,7 @@ fn return_false() -> bool {
 //////////////////////////////
 
 impl Validate for ModeInfo {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         for kmap in &self.keymaps {
             kmap.validate()?;
         }
@@ -210,14 +217,18 @@ impl Validate for ModeInfo {
     }
 }
 
-
-
 //////////////////////////////
 
 impl Validate for KmapPath {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         // TODO check if path exists and has .kmap extension?
         Ok(())
+    }
+}
+
+impl Into<String> for KmapPath {
+    fn into(self) -> String {
+        self.0
     }
 }
 
@@ -230,7 +241,7 @@ impl fmt::Display for KmapPath {
 //////////////////////////////
 
 impl Validate for ModeName {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         // TODO check if contains chars other than a-zA-Z_
         Ok(())
     }
@@ -241,7 +252,6 @@ impl Default for ModeName {
         ModeName("default_mode".into())
     }
 }
-
 
 impl fmt::Display for ModeName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -261,7 +271,6 @@ impl From<String> for ModeName {
     }
 }
 
-
 //////////////////////////////
 
 // TODO: sanitize name?
@@ -273,7 +282,7 @@ impl Name {
 }
 
 impl Validate for Name {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         // TODO anything to check? Not used c_code...
         Ok(())
     }
@@ -282,6 +291,18 @@ impl Validate for Name {
 impl From<String> for Name {
     fn from(s: String) -> Name {
         Name(s)
+    }
+}
+
+impl Into<String> for Name {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl<'a> Into<String> for &'a Name {
+    fn into(self) -> String {
+        self.0.to_owned()
     }
 }
 
@@ -302,7 +323,6 @@ impl fmt::Debug for Name {
         write!(f, "{}", self.0)
     }
 }
-
 
 //////////////////////////////
 
@@ -329,14 +349,13 @@ impl Sequence {
 }
 
 impl Validate for Sequence {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         for keypress in &self.0 {
             keypress.validate()?;
         }
         Ok(())
     }
 }
-
 
 impl From<KeyPress> for Sequence {
     fn from(single: KeyPress) -> Self {
@@ -373,12 +392,12 @@ impl Permutation {
         }
     }
 
-    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>>
+    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, Error>
     where
         T: Clone + Default,
     {
         if old.len() != self.old_length {
-            bail!(ErrorKind::Permute);
+            Err(PermuteErr)?;
         }
 
         let length = self.order.len();
@@ -421,8 +440,10 @@ fn test_permute_lengthen() {
 fn test_permute_err_long() {
     let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
     match p.permute(&[11, 12, 13, 14]) {
-        Err(Error(ErrorKind::Permute, _)) => (),
-        _ => panic!("should have returned permute error"),
+        Ok(_) => panic!("should be permute error, but was ok"),
+        Err(error) => if error.downcast_ref::<PermuteErr>().is_none() {
+            panic!("should be permute error, but was another error")
+        },
     }
 }
 
@@ -430,7 +451,9 @@ fn test_permute_err_long() {
 fn test_permute_err_short() {
     let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
     match p.permute(&[11, 12]) {
-        Err(Error(ErrorKind::Permute, _)) => (),
-        _ => panic!("should have returned permute error"),
+        Ok(_) => panic!("should be permute error, but was ok"),
+        Err(error) => if error.downcast_ref::<PermuteErr>().is_none() {
+            panic!("should be permute error, but was another error")
+        },
     }
 }

@@ -8,7 +8,7 @@ use itertools::Itertools;
 use types::{Chord, KmapFormat, KmapPath, Name};
 
 use types::errors::*;
-
+use failure::{Error, ResultExt};
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';
@@ -24,7 +24,7 @@ pub struct KmapParser {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl KmapParser {
-    pub fn new(format: &KmapFormat) -> Result<KmapParser> {
+    pub fn new(format: &KmapFormat) -> Result<KmapParser, Error> {
         let items_per_line: Vec<_> = format.0.iter().map(|v| v.len()).collect();
         Ok(KmapParser {
             items_per_line: items_per_line,
@@ -32,7 +32,10 @@ impl KmapParser {
         })
     }
 
-    pub fn parse(&mut self, path: &KmapPath) -> Result<BTreeMap<Name, Chord>> {
+    pub fn parse(
+        &mut self,
+        path: &KmapPath,
+    ) -> Result<BTreeMap<Name, Chord>, Error> {
         let all_lines = load_lines(path)?;
         let lines_iter = &all_lines.iter()
             .enumerate()                     // track line numbers
@@ -55,7 +58,7 @@ impl KmapParser {
     fn parse_section(
         &mut self,
         section: Section,
-    ) -> Result<Vec<(Name, Chord)>> {
+    ) -> Result<Vec<(Name, Chord)>, Error> {
         let (names, blocks) = self.get_block_strings(section)?;
         let mut pairs: Vec<(Name, Chord)> = Vec::new();
         for (block, name) in blocks.iter().zip(names.iter()) {
@@ -70,10 +73,10 @@ impl KmapParser {
     fn get_block_strings(
         &mut self,
         section: Section,
-    ) -> Result<(Vec<Name>, Vec<String>)> {
+    ) -> Result<(Vec<Name>, Vec<String>), Error> {
         let (line_nums, lines): (Vec<_>, Vec<_>) = section.into_iter().unzip();
         if lines.len() != self.lines_in_block {
-            bail!(ErrorKind::KmapSyntax(last(&line_nums)));
+            Err(KmapSyntaxErr(last(&line_nums)))?;
         }
 
         let names: Vec<_> =
@@ -91,7 +94,7 @@ impl KmapParser {
         for l in 0..body.len() {
             let num_items = self.items_per_line[l];
             if body[l].len() != num_items * num_blocks {
-                bail!(ErrorKind::KmapSyntax(line_nums[l]));
+                Err(KmapSyntaxErr(line_nums[l]))?;
             }
             for s in strings.iter_mut().take(num_blocks) {
                 let end = indices[l] + num_items;
@@ -103,8 +106,7 @@ impl KmapParser {
     }
 }
 
-
-fn load_lines(path: &KmapPath) -> Result<Vec<String>> {
+fn load_lines(path: &KmapPath) -> Result<Vec<String>, Error> {
     // TODO share file reading code?
     let file = File::open(path.0.clone())?;
     let buf = BufReader::new(file);
@@ -125,7 +127,9 @@ fn last(line_nums: &[usize]) -> usize {
     *line_nums.last().unwrap()
 }
 
-fn to_chord_map(pairs: Vec<(Name, Chord)>) -> Result<BTreeMap<Name, Chord>> {
+fn to_chord_map(
+    pairs: Vec<(Name, Chord)>,
+) -> Result<BTreeMap<Name, Chord>, Error> {
     let blank_mapping = Name::from(BLANK_MAPPING);
     let mut map = BTreeMap::new();
     for (name, chord) in pairs {
@@ -133,7 +137,10 @@ fn to_chord_map(pairs: Vec<(Name, Chord)>) -> Result<BTreeMap<Name, Chord>> {
             continue;
         }
         if map.insert(name.clone(), chord).is_some() {
-            bail!("duplicate chords for: '{}'", name);
+            Err(ConflictErr {
+                key: name.to_string(),
+                container: "chords".into(),
+            }).context("Duplicate chords in kmap file")?;
         }
     }
     Ok(map)

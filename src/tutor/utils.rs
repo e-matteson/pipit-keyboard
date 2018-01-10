@@ -7,7 +7,8 @@ use std::sync::Mutex;
 use unicode_segmentation::UnicodeSegmentation;
 
 use types::{Chord, ModeName, Name};
-use types::errors::*;
+// use types::errors::*;
+use failure::{Error, ResultExt};
 
 pub struct TutorData(BTreeMap<ModeName, BTreeMap<Name, Chord>>);
 
@@ -58,7 +59,6 @@ pub fn char_to_chord(character: &str) -> Option<Chord> {
     }
     Some(chord)
 }
-
 
 pub fn char_to_label(character: &str) -> String {
     match character {
@@ -140,9 +140,9 @@ pub fn grapheme_slice<'a>(
     Box::new(s.graphemes(true).skip(start).take(end))
 }
 
-pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>> {
-    let file = File::open(path)
-        .chain_err(|| format!("failed to open file: {}", path.display()))?;
+pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>, Error> {
+    let file = open_file(path)
+        .context(format!("failed to open file: {}", path.display()))?;
     let buf = BufReader::new(file);
     let lines: Vec<String> = buf.lines()
         .map(|w| w.unwrap())
@@ -151,13 +151,9 @@ pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>> {
     Ok(lines)
 }
 
-// fn read_file(path: &str) -> Result<String> {
-//     let file = File::open(path)
-//         .chain_err(|| format!("failed to open file: {}", path))?;
-//     let mut s = String::new();
-//     BufReader::new(file).read_to_string(&mut s)?;
-//     Ok(s)
-// }
+fn open_file(path: &PathBuf) -> Result<File, Error> {
+    Ok(File::open(path)?)
+}
 
 pub fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize

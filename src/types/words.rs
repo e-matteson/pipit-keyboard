@@ -1,6 +1,6 @@
-
 use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
 use types::errors::*;
+use failure::{Error, ResultExt};
 
 #[derive(Debug)]
 pub struct Word {
@@ -28,7 +28,6 @@ pub struct WordBuilder<'a> {
     pub all_data: &'a AllData,
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 impl AnagramNum {
@@ -45,16 +44,18 @@ impl Default for AnagramNum {
 }
 
 impl Validate for AnagramNum {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         // TODO move max out somewere?
         // TODO how to keep this matched with make_prefix_byte()?
         // const MAX_ANAGRAM: u8 = 7;
-        if self.0 > AnagramNum::max_allowable() {
-            bail!(
-                "anagram number too large (max is {}): {}",
-                AnagramNum::max_allowable(),
-                self.0
-            );
+        let max = AnagramNum::max_allowable();
+        if self.0 > max {
+            Err(OutOfRangeErr {
+                name: "anagram number".into(),
+                value: self.0 as usize,
+                min: 0,
+                max: max as usize,
+            })?
         }
         Ok(())
     }
@@ -65,7 +66,6 @@ impl From<AnagramNum> for usize {
         num.0 as usize
     }
 }
-
 
 impl WordConfig {
     fn seq_spelling(&self) -> String {
@@ -86,7 +86,7 @@ impl WordConfig {
 }
 
 impl Validate for WordConfig {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result<(), Error> {
         self.anagram.validate()
         // TODO check for illegal characters?
         // self.word
@@ -94,18 +94,18 @@ impl Validate for WordConfig {
     }
 }
 
-
 impl<'a> WordBuilder<'a> {
-    pub fn finalize(&self) -> Result<Word> {
+    pub fn finalize(&self) -> Result<Word, Error> {
         let seq_spelling = self.info.seq_spelling();
         let error_message = |thing| {
-            format!("failure to make {} for: '{}'", thing, &seq_spelling)
+            format!("Failed to make {} for: '{}'", thing, &seq_spelling)
         };
+
         Ok(Word {
             name: self.make_name(),
-            chord: self.make_chord().chain_err(|| error_message("chord"))?,
+            chord: self.make_chord().with_context(|_| error_message("chord"))?,
             seq: self.make_sequence()
-                .chain_err(|| error_message("sequence"))?,
+                .with_context(|_| error_message("sequence"))?,
         })
     }
 
@@ -123,20 +123,20 @@ impl<'a> WordBuilder<'a> {
         Name(name)
     }
 
-    fn make_sequence(&self) -> Result<Sequence> {
+    fn make_sequence(&self) -> Result<Sequence, Error> {
         let mut seq = Sequence::new();
         for letter in self.info.seq_spelling().chars() {
-            seq.push(
-                KeyPress::new(
-                    Some(self.get_key_code_for_seq(letter)?),
-                    self.get_mod_name_for_seq(letter),
-                ).unwrap(),
-            );
+            let key_press = KeyPress::new(
+                Some(self.get_key_code_for_seq(letter)?),
+                self.get_mod_name_for_seq(letter),
+            )?;
+
+            seq.push(key_press);
         }
         Ok(seq)
     }
 
-    fn get_key_code_for_seq(&self, character: char) -> Result<String> {
+    fn get_key_code_for_seq(&self, character: char) -> Result<String, Error> {
         if character.is_alphanumeric() {
             return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
         }
@@ -146,10 +146,10 @@ impl<'a> WordBuilder<'a> {
             '\'' => "KEY_QUOTE",
             '.' => "KEY_PERIOD",
             ',' => "KEY_COMMA",
-            _ => bail!(ErrorKind::BadValue(
-                "character".into(),
-                Some(character.to_string())
-            )),
+            _ => Err(BadValueErr {
+                thing: "character".into(),
+                value: character.to_string(),
+            }).context("character not allowed in word's sequence")?,
         };
         Ok(s.into())
     }
@@ -162,7 +162,7 @@ impl<'a> WordBuilder<'a> {
         }
     }
 
-    fn make_chord(&self) -> Result<Chord> {
+    fn make_chord(&self) -> Result<Chord, Error> {
         let ignored = vec!['<'];
 
         let mut chord = Chord::new();
@@ -175,22 +175,23 @@ impl<'a> WordBuilder<'a> {
             if ignored.contains(&letter) {
                 continue;
             }
-            chord.intersect(&self.get_letter_chord(letter)?);
+            chord.intersect(&self.get_chord_for_letter(letter)?);
         }
 
         Ok(chord)
     }
 
-    fn get_letter_chord(&self, letter: char) -> Result<Chord> {
-        // TODO return option<chord>, for if not found
+    fn get_chord_for_letter(&self, letter: char) -> Result<Chord, Error> {
         let name = self.get_key_name_for_chord(letter)?;
         self.all_data.get_chord(&name, self.kmap).ok_or_else(|| {
-            ErrorKind::MissingValue("chord".into(), Some(name.to_string()))
-                .into()
+            LookupErr {
+                key: name.to_string(),
+                container: "chords".into(),
+            }.into()
         })
     }
 
-    fn get_key_name_for_chord(&self, character: char) -> Result<Name> {
+    fn get_key_name_for_chord(&self, character: char) -> Result<Name, Error> {
         if character.is_alphanumeric() {
             return Ok(Name(format!("key_{}", character.to_lowercase())));
         }
@@ -199,10 +200,10 @@ impl<'a> WordBuilder<'a> {
             '.' => "key_period".into(),
             ',' => "key_comma".into(),
             '\'' => "key_quote".into(),
-            _ => bail!(ErrorKind::BadValue(
-                "character".into(),
-                Some(character.to_string())
-            )),
+            _ => Err(BadValueErr {
+                thing: "character".into(),
+                value: character.to_string(),
+            }).context("character not allowed in word's chord")?,
         };
         Ok(Name(name))
     }
