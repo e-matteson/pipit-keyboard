@@ -13,7 +13,7 @@ use failure::Error;
 #[serde(deny_unknown_fields)]
 pub struct Pin(pub u8);
 
-#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SwitchPos {
     pub row: Pin,
@@ -22,7 +22,7 @@ pub struct SwitchPos {
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct KmapFormat(pub Vec<Vec<SwitchPos>>);
+pub struct KmapFormat(Vec<Vec<SwitchPos>>);
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -166,6 +166,15 @@ impl KmapFormat {
             flat.extend_from_slice(row);
         }
         flat
+    }
+
+    pub fn switches_per_line(&self) -> Vec<usize> {
+        self.0.iter().map(|v| v.len()).collect()
+    }
+
+    pub fn block_length(&self) -> usize {
+        // 1 extra for the first line with the names
+        1 + self.0.len()
     }
 }
 

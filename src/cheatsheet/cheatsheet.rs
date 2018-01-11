@@ -18,7 +18,6 @@ use failure::Error;
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
                        MyDescription, MyRect, P2, V2, Wedge};
 
-
 #[derive(Clone, Debug)]
 pub struct CheatSheet {
     keyboards: Vec<Keyboard>,
@@ -65,7 +64,6 @@ pub enum SwitchStyle {
     Shared11,
 }
 
-
 #[derive(Clone, Debug)]
 struct Content {
     symbol: Symbol,
@@ -88,9 +86,9 @@ struct Switch {
 
 impl CheatSheet {
     pub fn from_toml(path: &str, data: &TutorData) -> CheatSheet {
-        let spec: CheatSheetSpec = toml::from_str(
-            &read_file(path).expect("failed to read"),
-        ).expect("failed to parse");
+        let spec: CheatSheetSpec =
+            toml::from_str(&read_file(path).expect("failed to read"))
+                .expect("failed to parse");
         CheatSheet::new(spec, data)
     }
 
@@ -183,6 +181,7 @@ impl Keyboard {
 
     fn set_keys(&mut self, keys: &[Name], data: &TutorData) {
         assert_eq!(Chord::global_length(), self.switches.len());
+        // TODO return result instead of expecting
         let chords: Vec<_> = keys.iter()
             .map(|key| data.get_chord(key).expect("chord not found"))
             .collect();
@@ -541,7 +540,6 @@ impl SwitchStyle {
     }
 }
 
-
 impl Symbol {
     fn from(line: &str, scale: f64) -> Symbol {
         Symbol::from_lines(&[line], scale)
@@ -558,7 +556,6 @@ impl Symbol {
         self.lines.len() == 1 && self.lines[0].graphemes(true).count() == 1
     }
 }
-
 
 fn get_symbol(key: &Name) -> Symbol {
     // TODO share with tutor?

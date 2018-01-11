@@ -3,7 +3,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::collections::BTreeMap;
-use itertools::Itertools;
 
 use types::{Chord, KmapFormat, KmapPath, Name};
 
@@ -12,97 +11,165 @@ use failure::{Error, ResultExt};
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';
+const PRESSED_CHAR: char = '*';
 const BLANK_MAPPING: &str = "blank_mapping";
 
-type Section<'a> = Vec<(usize, Vec<&'a str>)>;
-
-pub struct KmapParser {
+struct Section {
+    line_num: usize,
+    lines: Vec<String>,
+    names: Vec<Name>,
     items_per_line: Vec<usize>,
-    lines_in_block: usize,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-impl KmapParser {
-    pub fn new(format: &KmapFormat) -> Result<KmapParser, Error> {
-        let items_per_line: Vec<_> = format.0.iter().map(|v| v.len()).collect();
-        Ok(KmapParser {
-            items_per_line: items_per_line,
-            lines_in_block: 1 + format.0.len(), // 1 extra for the top name line
+pub fn parse_kmap(
+    path: &KmapPath,
+    format: &KmapFormat,
+) -> Result<BTreeMap<Name, Chord>, Error> {
+    let lines = load_lines(path)?.into_iter()
+            .enumerate()                    // track line numbers
+            .map(|(i, l)|                   // trim whitespace
+                 (i, l.trim().to_owned()))
+            .filter(|&(_, ref l)|           // remove comments and empty lines
+                    !is_ignored(l))
+            .map(|(i, l)| check_ascii(i,l))
+            .collect::<Result<Vec<_>, Error>>()?;
+
+    let mut mappings: Vec<(Name, Chord)> = Vec::new();
+    for chunk in lines.chunks(format.block_length()) {
+        let section = Section::new(chunk, format)?;
+        mappings.extend(section.mappings()?);
+    }
+    to_chord_map(mappings)
+}
+
+impl Section {
+    fn new(
+        input: &[(usize, String)],
+        format: &KmapFormat,
+    ) -> Result<Self, Error> {
+        let (line_nums, all_lines): (Vec<_>, Vec<_>) =
+            input.into_iter().cloned().unzip();
+
+        if all_lines.len() != format.block_length() {
+            Err(KmapSyntaxErr(*line_nums.last().unwrap())).context(format!(
+                "According to the kmap_format setting, there should be {} \
+                 lines per block. {} lines were found.",
+                format.block_length(),
+                all_lines.len()
+            ))?
+        }
+
+        Ok(Section {
+            names: all_lines[0].split_whitespace().map(|s| s.into()).collect(),
+            lines: all_lines.into_iter().skip(1).collect(),
+            line_num: line_nums[0],
+            items_per_line: format.switches_per_line(),
         })
     }
 
-    pub fn parse(
-        &mut self,
-        path: &KmapPath,
-    ) -> Result<BTreeMap<Name, Chord>, Error> {
-        let all_lines = load_lines(path)?;
-        let lines_iter = &all_lines.iter()
-            .enumerate()                     // track line numbers
-            .map(|(i, l)| (i, l.trim()))     // trim whitespace
-            .filter(|&(_, l)|                // remove comments and empty lines
-                    !l.is_empty()
-                    && !l.starts_with(COMMENT_START))
-            .map(|(i, l)|                    // split on whitespace
-                 (i, split(l)))
-            .chunks(self.lines_in_block); // chunk into sections
-
-        let mut pairs: Vec<(Name, Chord)> = Vec::new();
-        for chunk in lines_iter {
-            let section: Vec<_> = chunk.collect();
-            pairs.extend(self.parse_section(section)?);
-        }
-        to_chord_map(pairs)
+    /// Get all Name -> Chord mappings from the section.
+    fn mappings(self) -> Result<Vec<(Name, Chord)>, Error> {
+        let chords = self.chords()?;
+        Ok(self.names.into_iter().zip(chords.into_iter()).collect())
     }
 
-    fn parse_section(
-        &mut self,
-        section: Section,
-    ) -> Result<Vec<(Name, Chord)>, Error> {
-        let (names, blocks) = self.get_block_strings(section)?;
-        let mut pairs: Vec<(Name, Chord)> = Vec::new();
-        for (block, name) in blocks.iter().zip(names.iter()) {
-            let chord = Chord::from_vec(
-                block.chars().map(|c| c != UNPRESSED_CHAR).collect(),
-            );
-            pairs.push(((*name).clone(), chord));
+    /// Extract the Chords from the section, in the same order as their
+    /// names.
+    fn chords(&self) -> Result<Vec<Chord>, Error> {
+        let mut chords = Vec::new();
+        let mut switch_chunks = self.switch_chunks()?;
+
+        for _ in 0..self.num_blocks() {
+            let mut chord = Vec::new();
+            for line in switch_chunks.iter_mut() {
+                chord.extend(
+                    line.pop().expect("wrong line length, check failed"),
+                );
+            }
+            chords.push(Chord::from_vec(chord).unwrap());
         }
-        Ok(pairs)
+        Ok(chords)
     }
 
-    fn get_block_strings(
-        &mut self,
-        section: Section,
-    ) -> Result<(Vec<Name>, Vec<String>), Error> {
-        let (line_nums, lines): (Vec<_>, Vec<_>) = section.into_iter().unzip();
-        if lines.len() != self.lines_in_block {
-            Err(KmapSyntaxErr(last(&line_nums)))?;
+    /// Convert each line of switch-characters to bools, and chunk them by
+    /// block. Reverse the order of chunks within the line, so that we can use
+    /// pop() to get them back in the same order as the names.
+    fn switch_chunks(&self) -> Result<Vec<Vec<Vec<bool>>>, Error> {
+        let mut switch_chunks = Vec::new();
+        for i in 0..self.lines.len() {
+            let mut line = self.lines.get(i).unwrap().to_owned();
+
+            // Remove meaningless whitespace between switch characters
+            line.retain(|c| !char::is_whitespace(c));
+
+            // Convert from characters to bools, meaning pressed or unpressed.
+            let switch_line = line.chars()
+                .map(|c| self.char_to_switch(c, i + 1))
+                .collect::<Result<Vec<_>, Error>>()?;
+
+            self.check_line_length(&switch_line, i)?;
+
+            // Put each block's switches in a different chunk, and reverse
+            // chunk order for later popping.
+            let chunks: Vec<Vec<_>> = switch_line
+                .chunks(self.items_per_line[i])
+                .into_iter()
+                .map(|v| v.to_owned())
+                .rev()
+                .collect();
+
+            switch_chunks.push(chunks);
         }
+        Ok(switch_chunks)
+    }
 
-        let names: Vec<_> =
-            lines[0].iter().cloned().map(|s| Name(s.into())).collect();
-        let body: Vec<_> = lines[1..].iter().map(|l| l.join("")).collect();
-
-        let num_blocks = names.len();
-
-        // accumulate one string for each block
-        let mut strings = vec![String::new(); num_blocks];
-
-        // store index into each line
-        let mut indices: Vec<usize> = vec![0; body.len()];
-
-        for l in 0..body.len() {
-            let num_items = self.items_per_line[l];
-            if body[l].len() != num_items * num_blocks {
-                Err(KmapSyntaxErr(line_nums[l]))?;
-            }
-            for s in strings.iter_mut().take(num_blocks) {
-                let end = indices[l] + num_items;
-                *s += &body[l][indices[l]..end];
-                indices[l] = end;
-            }
+    /// If the line length is wrong, produce a syntax error.
+    fn check_line_length(
+        &self,
+        line: &[bool],
+        index: usize,
+    ) -> Result<(), Error> {
+        if line.len() != self.items_per_line[index] * self.num_blocks() {
+            Err(self.error_at(index + 1).context(format!(
+                "Wrong number of switches on line. Expected {} chords in this \
+                 block, each with {} switches on this line. Is kmap_format \
+                 correct for this file?",
+                self.num_blocks(),
+                self.items_per_line[index]
+            )))?;
         }
-        Ok((names, strings))
+        Ok(())
+    }
+
+    /// Produce a syntax error at a line with the given offset from the
+    /// first line of the section.
+    fn error_at(&self, line_offset: usize) -> Error {
+        KmapSyntaxErr(self.line_num + line_offset).into()
+    }
+
+    fn num_blocks(&self) -> usize {
+        self.names.len()
+    }
+
+    fn char_to_switch(
+        &self,
+        c: char,
+        line_index: usize,
+    ) -> Result<bool, Error> {
+        if c == PRESSED_CHAR {
+            Ok(true)
+        } else if c == UNPRESSED_CHAR {
+            Ok(false)
+        } else {
+            Err(self.error_at(line_index)
+                .context(format!(
+                    "Expected '{}', '{}', or whitespace. Found '{}'",
+                    UNPRESSED_CHAR, PRESSED_CHAR, c
+                ))
+                .into())
+        }
     }
 }
 
@@ -118,30 +185,38 @@ fn load_lines(path: &KmapPath) -> Result<Vec<String>, Error> {
     Ok(lines)
 }
 
-fn split(line: &str) -> Vec<&str> {
-    let words: Vec<_> = line.split_whitespace().collect();
-    words
-}
-
-fn last(line_nums: &[usize]) -> usize {
-    *line_nums.last().unwrap()
-}
-
 fn to_chord_map(
-    pairs: Vec<(Name, Chord)>,
+    mappings: Vec<(Name, Chord)>,
 ) -> Result<BTreeMap<Name, Chord>, Error> {
-    let blank_mapping = Name::from(BLANK_MAPPING);
+    // let blank_mapping = Name::from(BLANK_MAPPING);
     let mut map = BTreeMap::new();
-    for (name, chord) in pairs {
-        if name == blank_mapping {
+    for (name, chord) in mappings {
+        if name.0 == BLANK_MAPPING {
             continue;
         }
         if map.insert(name.clone(), chord).is_some() {
             Err(ConflictErr {
                 key: name.to_string(),
-                container: "chords".into(),
-            }).context("Duplicate chords in kmap file")?;
+                container: "chord names".into(),
+            }).context("Duplicate chord names in kmap file")?;
         }
     }
     Ok(map)
+}
+
+fn is_ignored(line: &str) -> bool {
+    line.is_empty() || line.starts_with(COMMENT_START)
+}
+
+fn check_ascii(
+    line_number: usize,
+    line: String,
+) -> Result<(usize, String), Error> {
+    if line.is_ascii() {
+        Ok((line_number, line))
+    } else {
+        Ok(Err(KmapSyntaxErr(line_number)).context(
+            "Non-ascii characters are not allowed outside of comments",
+        )?)
+    }
 }

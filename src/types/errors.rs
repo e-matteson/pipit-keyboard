@@ -57,7 +57,7 @@ pub struct PermuteErr;
 // pub struct FileErr;
 
 #[derive(Debug, Fail)]
-#[fail(display = "Syntax error near line {}. Is kmap_format correct?", _0)]
+#[fail(display = "Syntax error in kmap file near line {}.", _0)]
 pub struct KmapSyntaxErr(pub usize);
 
 #[derive(Debug, Fail)]

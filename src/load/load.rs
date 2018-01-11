@@ -2,7 +2,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use toml;
 
-use load::{KmapParser, OptionsConfig, Settings};
+use load::{parse_kmap, OptionsConfig, Settings};
 use types::{AllData, Chord, SeqType, Validate};
 // use types::errors::*;
 use failure::{Error, ResultExt};
@@ -79,11 +79,11 @@ impl AllData {
     }
 
     fn load_chords(&mut self, options: &OptionsConfig) -> Result<(), Error> {
-        let mut kmap_parser = KmapParser::new(&options.kmap_format)?;
         for kmap in self.get_kmap_paths() {
-            let named_chords = kmap_parser.parse(&kmap).with_context(|_| {
-                format!("Failed to load kmap from file: '{}'", kmap)
-            })?;
+            let named_chords = parse_kmap(&kmap, &options.kmap_format)
+                .with_context(|_| {
+                    format!("Failed to load kmap from file: '{}'", kmap)
+                })?;
             self.add_chords(&kmap, named_chords)?;
         }
         Ok(())

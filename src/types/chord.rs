@@ -2,6 +2,9 @@ use std::fmt;
 use std::sync::Mutex;
 
 use types::{AnagramNum, CCode, Permutation, ToC};
+use types::errors::BadValueErr;
+
+use failure::{Error, ResultExt};
 
 // The chord length should be set once after the Options are read, and then be
 // the same for all chords.
@@ -42,15 +45,18 @@ impl Chord {
         }
     }
 
-    pub fn from_vec(v: Vec<bool>) -> Chord {
+    pub fn from_vec(v: Vec<bool>) -> Result<Chord, Error> {
         if v.len() != Chord::global_length() {
-            panic!("wrong chord length");
+            Err(BadValueErr {
+                thing: "chord length".into(),
+                value: v.len().to_string(),
+            }).context("Failed to create chord")?;
         }
 
-        Chord {
+        Ok(Chord {
             bits: v,
             anagram_num: AnagramNum(0),
-        }
+        })
     }
 
     pub fn len(&self) -> usize {
