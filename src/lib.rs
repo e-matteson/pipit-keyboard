@@ -28,5 +28,6 @@ mod types;
 #[macro_use]
 mod load;
 mod format;
+mod util;
 pub mod tutor;
 pub mod cheatsheet;

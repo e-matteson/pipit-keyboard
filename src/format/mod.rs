@@ -1,6 +1,6 @@
 use self::kmap_builder::KmapBuilder;
 use self::mode_builder::ModeBuilder;
-use self::compress::*;
+// use self::compress::*;
 
 #[macro_use]
 mod c_struct;

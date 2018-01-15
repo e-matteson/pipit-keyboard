@@ -4,7 +4,8 @@ use std::ops::AddAssign;
 
 use types::{ModeName, Name, SeqType};
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize)]
+#[derive(Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd,
+         Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
 
@@ -234,5 +235,17 @@ where
             format!("{}, {}", acc, item.to_c())
         });
         CCode(s)
+    }
+}
+
+impl Into<String> for CCode {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl<'a> Into<String> for &'a CCode {
+    fn into(self) -> String {
+        (&self.0).to_owned()
     }
 }

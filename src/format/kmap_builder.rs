@@ -18,8 +18,6 @@ pub struct KmapBuilder<'a> {
     seq_map: &'a SeqMap,
     chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
     kmap_nicknames: BTreeMap<KmapPath, String>,
-    use_compression: bool,
-    use_mods: bool,
 }
 
 struct ChordEntry {
@@ -59,8 +57,6 @@ impl<'a> KmapBuilder<'a> {
             seq_map: seq_map,
             chord_maps: chord_maps,
             kmap_nicknames: make_kmap_nicknames(chord_maps.keys().collect()),
-            use_compression: get_compression_config(seq_type),
-            use_mods: get_mods_config(seq_type),
         }
     }
 
@@ -68,7 +64,7 @@ impl<'a> KmapBuilder<'a> {
         // TODO don't make chord and seq array names in more than one place?
         // TODO skip words for kmap if never used? gcc seems to optimize them
         // away...
-        let names_by_len = self.make_length_map();
+        let names_by_len = self.make_length_map()?;
 
         let seq_arrays = self.make_seq_arrays(&names_by_len);
         let chord_arrays = self.make_chord_arrays(&names_by_len)?;
@@ -76,7 +72,7 @@ impl<'a> KmapBuilder<'a> {
         let seq_array_name = self.make_seq_array_name();
 
         let mut g = Vec::new();
-        g.push(self.render_seq_arrays(&seq_arrays, seq_array_name.clone()));
+        g.push(self.render_seq_arrays(&seq_arrays, seq_array_name.clone())?);
         g.push(self.render_chord_arrays(&chord_arrays)?);
 
         let mut struct_names_out = BTreeMap::new();
@@ -85,8 +81,8 @@ impl<'a> KmapBuilder<'a> {
             let kmap_struct = KmapStruct {
                 chords: chord_array_name.clone(),
                 sequences: seq_array_name.clone(),
-                use_compression: self.use_compression,
-                use_mods: self.use_mods,
+                use_compression: self.seq_type.use_compression(),
+                use_mods: self.seq_type.use_modifiers(),
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             g.push(kmap_struct.render(struct_name.clone()));
@@ -120,20 +116,23 @@ impl<'a> KmapBuilder<'a> {
         Ok(CTree::Group(g))
     }
 
-    fn render_seq_arrays(&self, seq_arrays: &[Sequence], name: CCode) -> CTree {
-        let byte_arrays: Vec<_> = seq_arrays
+    fn render_seq_arrays(
+        &self,
+        seq_arrays: &[Sequence],
+        name: CCode,
+    ) -> Result<CTree, Error> {
+        // TODO huh? doesn't it map over sequences?
+        let byte_arrays: Result<Vec<_>, Error> = seq_arrays
             .iter()
-            .map(|keypress| {
-                keypress.as_bytes(self.use_compression, self.use_mods)
-            })
+            .map(|seq| seq.as_bytes(self.seq_type))
             .collect();
 
-        CTree::CompoundArray {
+        Ok(CTree::CompoundArray {
             name: name,
-            values: byte_arrays,
+            values: byte_arrays?,
             subarray_type: "uint8_t".to_c(),
             is_extern: false,
-        }
+        })
     }
 
     fn make_seq_arrays(&self, names_by_len: &LenMap) -> Vec<Sequence> {
@@ -206,19 +205,19 @@ impl<'a> KmapBuilder<'a> {
         Ok(entries)
     }
 
-    fn make_length_map(&self) -> LenMap {
+    fn make_length_map(&self) -> Result<LenMap, Error> {
         // collect names by the lengths of their sequences
         let mut names_by_len = BTreeMap::new();
         let mut names: Vec<_> = self.seq_map.keys().collect();
         names.sort();
         for name in names {
-            let length = self.seq_map[name].len();
+            let length = self.seq_map[name].formatted_length(self.seq_type)?;
             names_by_len
                 .entry(length)
                 .or_insert_with(Vec::new)
                 .push(name.to_owned());
         }
-        self.reorder_length_map(names_by_len)
+        Ok(self.reorder_length_map(names_by_len))
     }
 
     fn reorder_length_map(&self, names_by_len: LenMap) -> LenMap {
@@ -313,9 +312,11 @@ impl ChordEntry {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
+        // TODO temporary!
         let mut v = self.make_prefix_byte();
         v.extend(self.chord.to_bytes());
         v
+        // self.chord.to_bytes()
     }
 
     pub fn to_c_bytes(&self) -> Vec<CCode> {
@@ -371,18 +372,4 @@ fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<CCode> {
         v.extend(entry.to_c_bytes());
     }
     v
-}
-
-fn get_compression_config(seq_type: SeqType) -> bool {
-    match seq_type {
-        SeqType::Plain | SeqType::Macro | SeqType::Command => false,
-        SeqType::Word => true,
-    }
-}
-
-fn get_mods_config(seq_type: SeqType) -> bool {
-    match seq_type {
-        SeqType::Plain | SeqType::Macro => true,
-        SeqType::Command | SeqType::Word => false,
-    }
 }

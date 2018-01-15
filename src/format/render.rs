@@ -1,10 +1,11 @@
 use time::*;
 use std::collections::BTreeMap;
 
+use util::bools_to_bytes;
 use types::{AllData, CCode, CTree, KeyPress, KmapPath, Name, SeqType,
             Sequence, ToC};
 
-use format::{compress, make_compression_macros, KmapBuilder, ModeBuilder};
+use format::{KmapBuilder, ModeBuilder};
 
 use types::errors::MissingErr;
 use failure::Error;
@@ -243,17 +244,14 @@ impl KeyPress {
 }
 
 impl Sequence {
-    pub fn as_bytes(
-        &self,
-        use_compression: bool,
-        use_mods: bool,
-    ) -> Vec<CCode> {
+    pub fn as_bytes(&self, seq_type: SeqType) -> Result<Vec<CCode>, Error> {
         // TODO different name for "bytes"?
-        if use_compression {
-            self.as_compressed_bytes(use_mods)
+        Ok(if seq_type.use_compression() {
+            // self.as_compressed_bytes(seq_type.use_modifiers())
+            self.as_huffman_bytes(seq_type.use_modifiers())?
         } else {
-            self.as_raw_bytes(use_mods)
-        }
+            self.as_raw_bytes(seq_type.use_modifiers())
+        })
     }
 
     fn as_raw_bytes(&self, use_mods: bool) -> Vec<CCode> {
@@ -264,9 +262,36 @@ impl Sequence {
         v
     }
 
-    fn as_compressed_bytes(&self, use_mods: bool) -> Vec<CCode> {
-        compress(self, use_mods)
+    pub fn formatted_length(&self, seq_type: SeqType) -> Result<usize, Error> {
+        Ok(if seq_type.use_compression() {
+            self.as_huffman_bits()?.len()
+        } else {
+            self.0.len()
+        })
     }
+
+    fn as_huffman_bytes(&self, use_mods: bool) -> Result<Vec<CCode>, Error> {
+        if use_mods {
+            panic!("Not implemented: compression with stored modifiers")
+        }
+
+        Ok(bools_to_bytes(&self.as_huffman_bits()?)
+            .into_iter()
+            .map(|x: u8| x.to_c())
+            .collect())
+    }
+
+    fn as_huffman_bits(&self) -> Result<Vec<bool>, Error> {
+        let mut v = Vec::new();
+        for keypress in self.keypresses() {
+            v.extend(keypress.huffman()?)
+        }
+        Ok(v)
+    }
+
+    // fn as_compressed_bytes(&self, use_mods: bool) -> Vec<CCode> {
+    //     compress(self, use_mods)
+    // }
 }
 
 pub fn wrap_intro(
@@ -287,7 +312,7 @@ pub fn wrap_intro(
     guard_group.push(CTree::LiteralH(
         "typedef void (*voidFuncPtr)(void);\n".to_c(),
     ));
-    guard_group.push(make_compression_macros());
+    // guard_group.push(make_compression_macros());
     guard_group.push(make_debug_macros());
 
     guard_group.push(CTree::Namespace {
@@ -332,12 +357,14 @@ fn make_debug_macros() -> CTree {
     s += "#define DEBUG2_LN(msg)\n";
     s += "#endif\n\n";
     s += "#if DEBUG_MESSAGES == 1\n";
+    s += "#define ENABLE_SERIAL_DEBUG\n";
     s += "#define DEBUG1(msg) Serial.print(msg)\n";
     s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
     s += "#define DEBUG2(msg)\n";
     s += "#define DEBUG2_LN(msg)\n";
     s += "#endif\n\n";
     s += "#if DEBUG_MESSAGES == 2\n";
+    s += "#define ENABLE_SERIAL_DEBUG\n";
     s += "#define DEBUG1(msg) Serial.print(msg)\n";
     s += "#define DEBUG1_LN(msg) Serial.println(msg)\n";
     s += "#define DEBUG2(msg) Serial.print(msg)\n";

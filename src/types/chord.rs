@@ -1,6 +1,7 @@
 use std::fmt;
 use std::sync::Mutex;
 
+use util::bools_to_bytes;
 use types::{AnagramNum, CCode, Permutation, ToC};
 use types::errors::BadValueErr;
 
@@ -95,11 +96,7 @@ impl Chord {
             .permute(&self.bits)
             .expect("failed to permute chord");
 
-        let mut bytes: Vec<u8> = Vec::new();
-        for chunk in ordered_bools.chunks(8) {
-            bytes.push(bools_to_u8(chunk));
-        }
-        bytes
+        bools_to_bytes(&ordered_bools)
     }
 
     pub fn to_c_bytes(&self) -> Vec<CCode> {
@@ -123,18 +120,6 @@ impl fmt::Debug for Chord {
             self.anagram_num.0
         )
     }
-}
-
-fn bools_to_u8(v: &[bool]) -> u8 {
-    // If v is shorter than 8, the missing most-significant digits will be zero
-    assert!(v.len() <= 8);
-    let mut num: u8 = 0;
-    let base: u8 = 2;
-    for b in 0..8 {
-        let bit = if *v.get(b).unwrap_or(&false) { 1 } else { 0 };
-        num += base.pow(b as u32) * bit
-    }
-    num
 }
 
 fn set_static_info(info: GlobalChordInfo) {

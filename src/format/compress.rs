@@ -1,6 +1,163 @@
 use itertools::Itertools;
+use std::collections::HashMap;
 
-use types::{CCode, CTree, KeyPress, Sequence, ToC};
+use types::{CCode, CTree, KeyPress, SeqType, Sequence, ToC};
+use types::errors::LookupErr;
+use failure::Error;
+
+impl SeqType {
+    pub fn use_compression(&self) -> bool {
+        match *self {
+            SeqType::Word => true,
+            SeqType::Command | SeqType::Macro | SeqType::Plain => false,
+        }
+    }
+    pub fn use_modifiers(&self) -> bool {
+        match *self {
+            SeqType::Plain | SeqType::Macro => true,
+            SeqType::Command | SeqType::Word => false,
+        }
+    }
+}
+
+impl KeyPress {
+    pub fn huffman(&self) -> Result<Vec<bool>, Error> {
+        lazy_static! {
+            static ref TABLE: HashMap<CCode, Vec<bool>> = vec![
+                ("KEY_A".to_c(), vec![false, false, false]),
+                ("KEY_E".to_c(), vec![false, true, true]),
+                ("KEY_C".to_c(), vec![false, false, true, false]),
+                ("KEY_I".to_c(), vec![true, true, false, false]),
+                ("KEY_L".to_c(), vec![false, false, true, true]),
+                ("KEY_N".to_c(), vec![true, false, false, false]),
+                ("KEY_O".to_c(), vec![true, false, false, true]),
+                ("KEY_R".to_c(), vec![true, true, false, true]),
+                ("KEY_S".to_c(), vec![false, true, false, false]),
+                ("KEY_T".to_c(), vec![true, true, true, false]),
+                ("KEY_D".to_c(), vec![false, true, false, true, true]),
+                ("KEY_M".to_c(), vec![true, false, true, false, false]),
+                ("KEY_P".to_c(), vec![true, false, true, true, false]),
+                ("KEY_U".to_c(), vec![true, false, true, false, true]),
+                ("KEY_B".to_c(), vec![true, true, true, true, false, false]),
+                ("KEY_F".to_c(), vec![true, false, true, true, true, true]),
+                ("KEY_G".to_c(), vec![true, true, true, true, true, false]),
+                ("KEY_H".to_c(), vec![true, true, true, true, true, true]),
+                ("KEY_V".to_c(), vec![false, true, false, true, false, false]),
+                ("KEY_Y".to_c(), vec![true, false, true, true, true, false]),
+                (
+                    "KEY_K".to_c(),
+                    vec![false, true, false, true, false, true, true],
+                ),
+                (
+                    "KEY_W".to_c(),
+                    vec![true, true, true, true, false, true, true],
+                ),
+                (
+                    "KEY_J".to_c(),
+                    vec![false, true, false, true, false, true, false, true],
+                ),
+                (
+                    "KEY_X".to_c(),
+                    vec![true, true, true, true, false, true, false, true],
+                ),
+                (
+                    "KEY_Q".to_c(),
+                    vec![true, true, true, true, false, true, false, false, true],
+                ),
+                (
+                    "KEY_Z".to_c(),
+                    vec![true, true, true, true, false, true, false, false, false],
+                ),
+                (
+                    "KEY_QUOTE".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, true,
+                        true,
+                    ],
+                ),
+                (
+                    "KEY_BACKSPACE".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, true,
+                        false,
+                    ],
+                ),
+                (
+                    "KEY_PERIOD".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        true, false,
+                    ],
+                ),
+                (
+                    "KEY_EQUAL".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        false, true,
+                    ],
+                ),
+                (
+                    "KEY_SPACE".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        true, true, false,
+                    ],
+                ),
+                (
+                    "KEY_5".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        false, false, true,
+                    ],
+                ),
+                (
+                    "KEY_2".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        true, true, true, true,
+                    ],
+                ),
+                (
+                    "KEY_4".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        false, false, false, false,
+                    ],
+                ),
+                (
+                    "KEY_6".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        false, false, false, true,
+                    ],
+                ),
+                (
+                    "KEY_0".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        true, true, true, false, false,
+                    ],
+                ),
+                (
+                    "KEY_3".to_c(),
+                    vec![
+                        false, true, false, true, false, true, false, false, false,
+                        true, true, true, false, true,
+                    ],
+                ),
+            ].into_iter()
+                .collect();
+        }
+
+        let key = self.key.as_ref().expect("keypress has no non-mod key");
+        let bits: &Vec<bool> = TABLE.get(key).ok_or_else(|| LookupErr {
+            key: key.into(),
+            container: "huffman code table".into(),
+        })?;
+
+        Ok(bits.to_owned())
+    }
+}
 
 // Constants used for compression
 const NUM_BYTES: usize = 3;
