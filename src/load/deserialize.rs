@@ -42,7 +42,7 @@ validated_struct!{
         pub column_pins: Vec<Pin>,
         pub kmap_format: KmapFormat,
 
-        pub rgb_led_pins: Option<Vec<Pin>>,
+        pub rgb_led_pins: Option<[Pin; 3]>,
         pub battery_level_pin: Option<Pin>,
 
         #[serde(default = "default_output_dir")]
@@ -174,7 +174,7 @@ impl OptionsConfig {
         if let Some(ref pins) = self.rgb_led_pins {
             ops.push(CTree::Array {
                 name: "rgb_led_pins".to_c(),
-                values: Pin::to_c_vec(pins),
+                values: Pin::to_c_vec(&[pins[0], pins[1], pins[2]]),
                 c_type: "uint8_t".to_c(),
                 is_extern: true,
             });

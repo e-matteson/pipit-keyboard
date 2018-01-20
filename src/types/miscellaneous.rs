@@ -75,11 +75,11 @@ pub struct Permutation {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Pin {
-    pub fn to_usize(pin_vec: &Vec<Pin>) -> Vec<usize> {
+    pub fn to_usize(pin_vec: &[Pin]) -> Vec<usize> {
         pin_vec.iter().map(|pin| usize::from(*pin)).collect()
     }
 
-    pub fn to_c_vec(pin_vec: &Vec<Pin>) -> Vec<CCode> {
+    pub fn to_c_vec(pin_vec: &[Pin]) -> Vec<CCode> {
         pin_vec.iter().map(|pin| pin.to_c()).collect()
     }
 }

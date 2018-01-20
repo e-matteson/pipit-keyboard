@@ -41,6 +41,18 @@ where
     }
 }
 
+impl<T> Validate for [T; 3]
+where
+    T: Validate,
+{
+    fn validate(&self) -> Result<(), Error> {
+        self[0].validate()?;
+        self[1].validate()?;
+        self[2].validate()?;
+        Ok(())
+    }
+}
+
 impl<T> Validate for Option<T>
 where
     T: Validate,
