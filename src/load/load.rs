@@ -24,7 +24,7 @@ impl AllData {
         all_data.output_directory = Some(settings.options.output_directory());
         all_data.tutor_directory = Some(settings.options.tutor_directory());
 
-        Chord::set_info(settings.options.global_chord_info());
+        Chord::set_info(settings.options.global_chord_info()?);
 
         all_data
             .load_modes(&settings)

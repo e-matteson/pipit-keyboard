@@ -49,8 +49,13 @@ pub struct BadValueErr {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "Unable to permute: wrong length")]
-pub struct PermuteErr;
+pub enum PermuteErr {
+    #[fail(display = "Unable to permute: input sequence is the wrong length")]
+    Length,
+    #[fail(display = "Unable to create permutation: an element in the old \
+                      sequence is not present in the new sequence")]
+    WouldDrop,
+}
 
 // #[derive(Debug, Fail)]
 // #[fail(display = "Failed to do file input or output")]

@@ -68,8 +68,8 @@ pub struct Sequence(pub Vec<KeyPress>);
 
 #[derive(Debug, Clone)]
 pub struct Permutation {
-    order: Vec<Option<usize>>,
-    old_length: usize,
+    order: Vec<usize>,
+    new_length: usize,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -386,36 +386,49 @@ impl From<KeyPress> for Sequence {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Permutation {
-    pub fn from_to<T>(old: &[T], new: &[T]) -> Permutation
+    /// Create a Permutation that can permute sequences from the order of the
+    /// old one to the order of the new one. All elements in `old_template`
+    /// must be present in `new_template`. However, there can be extra elements
+    /// in `new_template`.
+    pub fn from_to<T>(
+        old_template: &[T],
+        new_template: &[T],
+    ) -> Result<Permutation, PermuteErr>
     where
         T: Clone + Eq + ToString + Debug,
     {
         let mut order = Vec::new();
-        for new_item in new {
-            let pos_in_old = old.iter().position(|item| item == new_item);
-            order.push(pos_in_old)
+        for old_item in old_template {
+            let pos_in_new = new_template
+                .iter()
+                .position(|item| item == old_item)
+                .ok_or_else(|| PermuteErr::WouldDrop)?;
+            order.push(pos_in_new)
         }
-        Permutation {
+
+        Ok(Permutation {
             order: order,
-            old_length: old.len(),
-        }
+            new_length: new_template.len(),
+        })
     }
 
-    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, Error>
+    /// Permute the given sequence to the new order. If the new sequence
+    /// template contained extra elements not in the old sequence template,
+    /// those elements in the returned sequence will be set to their
+    /// default value.
+    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, PermuteErr>
     where
         T: Clone + Default,
     {
-        if old.len() != self.old_length {
-            Err(PermuteErr)?;
+        if old.len() != self.order.len() {
+            Err(PermuteErr::Length)?;
         }
 
-        let length = self.order.len();
-        let mut new: Vec<_> = iter::repeat(T::default()).take(length).collect();
-        for new_index in 0..length {
-            if let Some(old_index) = self.order[new_index] {
-                new[new_index] = old[old_index].to_owned();
-            }
-            // Otherwise, leave the default value alone.
+        let mut new: Vec<_> =
+            iter::repeat(T::default()).take(self.new_length).collect();
+
+        for (old_index, &new_index) in self.order.iter().enumerate() {
+            new[new_index] = old[old_index].to_owned();
         }
         Ok(new)
     }
@@ -423,46 +436,42 @@ impl Permutation {
 
 #[test]
 fn test_permute_reverse() {
-    let p = Permutation::from_to(&[1, 2, 3], &[3, 2, 1]);
+    let p = Permutation::from_to(&[1, 2, 3], &[3, 2, 1]).unwrap();
     assert_eq!(vec!["c", "b", "a"], p.permute(&["a", "b", "c"]).unwrap())
 }
 
 #[test]
 fn test_permute_identity() {
-    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
     assert_eq!(vec![11, 12, 13], p.permute(&[11, 12, 13]).unwrap())
 }
 
 #[test]
-fn test_permute_shorten() {
-    let p = Permutation::from_to(&[1, 2, 3, 4, 5], &[5, 4, 3]);
-    assert_eq!(vec![15, 14, 13], p.permute(&[11, 12, 13, 14, 15]).unwrap())
-}
-
-#[test]
 fn test_permute_lengthen() {
-    let p = Permutation::from_to(&[1, 2, 3], &[5, 4, 3, 2, 1]);
+    let p = Permutation::from_to(&[1, 2, 3], &[5, 4, 3, 2, 1]).unwrap();
+    println!("lengthen permutation: {:?}", p);
     assert_eq!(vec![0, 0, 13, 12, 11], p.permute(&[11, 12, 13]).unwrap())
 }
 
 #[test]
+fn test_permute_err_shorten() {
+    if Permutation::from_to(&[1, 2, 3, 4, 5], &[5, 4, 3]).is_ok() {
+        panic!("should be permute error, but was ok");
+    }
+}
+
+#[test]
 fn test_permute_err_long() {
-    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
-    match p.permute(&[11, 12, 13, 14]) {
-        Ok(_) => panic!("should be permute error, but was ok"),
-        Err(error) => if error.downcast_ref::<PermuteErr>().is_none() {
-            panic!("should be permute error, but was another error")
-        },
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
+    if p.permute(&[11, 12, 13, 14]).is_ok() {
+        panic!("should be permute error, but was ok");
     }
 }
 
 #[test]
 fn test_permute_err_short() {
-    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]);
-    match p.permute(&[11, 12]) {
-        Ok(_) => panic!("should be permute error, but was ok"),
-        Err(error) => if error.downcast_ref::<PermuteErr>().is_none() {
-            panic!("should be permute error, but was another error")
-        },
+    let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
+    if p.permute(&[11, 12]).is_ok() {
+        panic!("should be permute error, but was ok");
     }
 }

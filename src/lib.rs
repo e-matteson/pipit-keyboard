@@ -2,6 +2,7 @@
 #![feature(entry_or_default)]
 #![feature(conservative_impl_trait)]
 #![feature(string_retain)]
+#![feature(match_default_bindings)]
 
 extern crate cursive;
 extern crate itertools;

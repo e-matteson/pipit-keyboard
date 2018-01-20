@@ -103,18 +103,21 @@ impl OptionsConfig {
         ops
     }
 
-    pub fn global_chord_info(&self) -> GlobalChordInfo {
+    pub fn global_chord_info(&self) -> Result<GlobalChordInfo, Error> {
         let permutation = Permutation::from_to(
             &self.kmap_format.flat_order(),
             &self.firmware_order(),
-        );
+        ).context(
+            "'kmap_format' contains pin numbers not present in 'row_pins' or \
+             'column_pins'",
+        )?;
 
-        GlobalChordInfo {
+        Ok(GlobalChordInfo {
             num_bytes: self.num_bytes_in_chord(),
             num_switches: self.kmap_format.chord_length(),
             num_matrix_positions: self.num_matrix_positions(),
             to_firmware_order: permutation,
-        }
+        })
     }
 
     pub fn output_directory(&self) -> PathBuf {
