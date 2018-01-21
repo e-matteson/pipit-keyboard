@@ -1,7 +1,31 @@
 #include "conf.h"
 
-// using namespace conf;
 namespace conf {
+
+int16_t decode_huffman(const bool* bits, uint8_t length) {
+  for(uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
+    if (length != huffman_lookup[i].num_bits) {
+      // Can't be a match, wrong length.
+      continue;
+    }
+    if (are_bools_equal(huffman_lookup[i].bits, bits, length)) {
+      // Success!
+      return huffman_lookup[i].key_code;
+    }
+  }
+  // Fail!
+  DEBUG1_LN("WARNING: Failed to find huffman code in lookup");
+  return -1;
+}
+
+bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {
+  for(uint32_t i = 0; i<length; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
   const ModeStruct* getMode(mode_enum mode){
     return mode_structs[mode];

@@ -25,14 +25,18 @@ private:
   uint8_t readOffset(const uint8_t* start_of_entry);
   uint8_t readAnagramNum(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);
-  bool isZeros(const uint8_t* start_of_entry);
+  bool isEnd(const uint8_t* start_of_entry);
   uint8_t* nextChordEntry(uint8_t* start_of_entry);
 
 
-  uint8_t readRaw(uint8_t* data_out, const uint8_t** seq_lookup,
+  uint8_t readRaw(uint8_t* data_out, const uint8_t* seq_lookup,
                   uint8_t length_index, uint32_t seq_num, bool use_mods);
-  uint8_t readCompressed(uint8_t* data_out, const uint8_t** seq_lookup,
-                         uint8_t length_index, uint32_t seq_num);
+  uint8_t readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
+                              uint16_t seq_length_in_bits, uint32_t seq_num);
+
+  void getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset);
+  bool bitToBool(const uint8_t* address, uint32_t bit_offset);
+
   uint32_t decompressKey(const uint8_t* compressed, uint32_t key_index, uint8_t* key_out);
   uint32_t getStartCompressedIndex(uint32_t key_index);
 

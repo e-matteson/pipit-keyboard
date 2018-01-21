@@ -5,7 +5,7 @@ use util::bools_to_bytes;
 use types::{AllData, CCode, CTree, KeyPress, KmapPath, Name, SeqType,
             Sequence, ToC};
 
-use format::{KmapBuilder, ModeBuilder};
+use format::{render_huffman_lookup, KmapBuilder, ModeBuilder};
 
 use types::errors::MissingErr;
 use failure::Error;
@@ -27,6 +27,7 @@ impl AllData {
 
         let mut group = Vec::new();
         group.push(self.render_options());
+        group.push(render_huffman_lookup());
         group.push(self.render_modifiers()?);
         group.push(self.render_command_enum());
         group.push(self.render_seq_type_enum());

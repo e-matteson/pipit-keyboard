@@ -72,6 +72,28 @@ impl CTree {
             } => format_include_guard(header_name, contents)?,
         })
     }
+
+    pub fn initializer(&self) -> CCode {
+        // TODO reorganize this. Is it really the best way to get struct
+        // initializers (for arrays of structs)?
+        match *self {
+            CTree::StructInstance { ref fields, .. } => {
+                format_struct_initializer(fields)
+            }
+            CTree::Include { .. }
+            | CTree::LiteralH(..)
+            | CTree::LiteralC(..)
+            | CTree::Group(..)
+            | CTree::Define { .. }
+            | CTree::Ifdef { .. }
+            | CTree::Var { .. }
+            | CTree::Array { .. }
+            | CTree::CompoundArray { .. }
+            | CTree::EnumDecl { .. }
+            | CTree::Namespace { .. }
+            | CTree::IncludeGuard { .. } => unimplemented!(),
+        }
+    }
 }
 
 impl CFiles {
@@ -159,6 +181,16 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
     }
 }
 
+fn format_struct_initializer(fields: &[Field]) -> CCode {
+    let mut lines = Vec::new();
+    lines.push("{".into());
+    for field in fields {
+        lines.push(format!("  {}, // {}", field.value, field.name));
+    }
+    lines.push("}".into());
+    CCode(lines.join("\n"))
+}
+
 fn format_struct_instance(
     name: &CCode,
     c_type: &CCode,
@@ -166,19 +198,14 @@ fn format_struct_instance(
     is_extern: bool,
 ) -> CFiles {
     // TODO only assign first to 0?
-    let mut c = format!(
-        "{}const {} {} = {{\n",
-        format_extern(is_extern),
-        c_type,
-        name
-    );
-    for field in fields {
-        c += &format!("  {}, // {}\n", field.value, field.name);
-    }
-    c += "};\n";
+    let mut c =
+        format!("{}const {} {} = ", format_extern(is_extern), c_type, name)
+            .to_c();
+    c += format_struct_initializer(fields);
+    c += ";\n".to_c();
     CFiles {
         h: CCode::new(),
-        c: CCode(c),
+        c: c,
     }
 }
 

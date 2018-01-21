@@ -48,15 +48,15 @@ uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t*
   while(kmap->chords[length_index] != NULL){ // for each length subarray
     uint8_t* entry = (uint8_t*) kmap->chords[length_index];
     uint32_t seq_num = 0;
-    while(!isZeros(entry)){ // for each entry/chunk
+    while(!isEnd(entry)){ // for each entry/chunk
       seq_num += readOffset(entry);
       if(chord->matches(getChordAddress(entry), readAnagramNum(entry))){
         // Found match!
         if(kmap->use_compression){
-          return readCompressed(data, kmap->sequences, length_index, seq_num);
+          return readCompressed(data, kmap->sequences[length_index], length_index, seq_num);
         }
         else{
-          return readRaw(data, kmap->sequences, length_index, seq_num, kmap->use_mods);
+          return readRaw(data, kmap->sequences[length_index], length_index, seq_num, kmap->use_mods);
         }
       }
       // Keep looking.
@@ -87,7 +87,7 @@ uint8_t* Lookup::getChordAddress(const uint8_t* start_of_entry) {
   return (uint8_t*) start_of_entry + num_bytes_in_prefix;
 }
 
-bool Lookup::isZeros(const uint8_t* start_of_entry){
+bool Lookup::isEnd(const uint8_t* start_of_entry){
   // return true if the chord bytes of the entry at the address are all zero
   const uint8_t* chord_address = getChordAddress(start_of_entry);
   bool is_zero = 1;
@@ -103,28 +103,56 @@ uint8_t* Lookup::nextChordEntry(uint8_t* start_of_entry){
 
 /**** Sequence lookup utilities ****/
 
-uint8_t Lookup::readRaw(uint8_t* data_out, const uint8_t** seq_lookup,
+uint8_t Lookup::readRaw(uint8_t* data_out, const uint8_t* seq_lookup,
                         uint8_t length_index, uint32_t seq_num, bool use_mods){
+  // TODO take 1-d seq_lookup, just this length
   uint8_t num_keys = length_index * (use_mods ? 2 : 1);
   uint32_t start_key_index = seq_num * num_keys;
-  memcpy(data_out, seq_lookup[length_index] + start_key_index, num_keys);
+  memcpy(data_out, seq_lookup + start_key_index, num_keys);
   return num_keys;
 }
 
-uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t** seq_lookup,
-                               uint8_t length_index, uint32_t seq_num){
-  // Decompress data. Return the number of keys that were decompressed.
-  uint8_t num_keys = length_index;
-  uint32_t start_key_index = seq_num * num_keys;
-  uint32_t compressed_index = getStartCompressedIndex(start_key_index);
+uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
+                               uint16_t seq_length_in_bits, uint32_t seq_num){
+  // Decompress data. Return the number of bytes that were decompressed.
+  uint32_t bit_offset = seq_num * seq_length_in_bits;
+  bool bits[seq_length_in_bits];
+  getBitArray(bits, seq_length_in_bits, seq_lookup, bit_offset);
 
-  uint8_t key_index_offset;
-  for(key_index_offset = 0; key_index_offset < num_keys; key_index_offset++){
-    compressed_index += decompressKey(seq_lookup[length_index] + compressed_index,
-                                      start_key_index + key_index_offset,
-                                      data_out + key_index_offset);
+  uint16_t code_index = 0;
+  uint16_t code_length = 1;
+  uint32_t data_index = 0;
+
+  while (code_index + code_length <= seq_length_in_bits) {
+    int16_t letter = conf::decode_huffman(bits+code_index, code_length);
+    if (letter == -1) {
+      // Not found! Try with a longer code next time.
+      code_length++;
+    } else {
+      // Found! Store the letter and move on to the next code.
+      data_out[data_index++] = letter;
+      code_index += code_length;
+      code_length = 1;
+    }
   }
-  return key_index_offset;
+  if (code_length > 1) {
+    DEBUG1_LN("WARNING: unused bits in huffman code");
+  }
+  return data_index;
+}
+
+void Lookup::getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset) {
+  for(uint16_t i = 0; i < len_bits_out; i++) {
+    bits_out[i] = bitToBool(start, bit_offset + i);
+  }
+}
+
+bool Lookup::bitToBool(const uint8_t* address, uint32_t bit_offset) {
+  uint32_t byte_offset = bit_offset / 8;
+  uint8_t local_bit_offset = bit_offset % 8;
+
+  uint8_t byte = address[byte_offset];
+  return (byte >> local_bit_offset) & 0x01;
 }
 
 uint32_t Lookup::getStartCompressedIndex(uint32_t key_index){

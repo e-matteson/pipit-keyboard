@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 
-
 struct KmapStruct{
   const uint8_t** chords;
   const uint8_t** sequences;
@@ -20,6 +19,12 @@ struct ModeStruct{
   const uint8_t** anagram_chords;
   const uint8_t* anagram_mask;
   const bool is_gaming;
+};
+
+struct HuffmanChar {
+  const bool* bits;
+  const uint8_t num_bits;
+  const uint8_t key_code;
 };
 
 

@@ -230,11 +230,11 @@ impl<T> ToC for Vec<T>
 where
     T: ToC,
 {
+    /// Format the Vec like a c array initializer.
     fn to_c(self) -> CCode {
-        let s = self.into_iter().fold(String::new(), |acc, item| {
-            format!("{}, {}", acc, item.to_c())
-        });
-        CCode(s)
+        let strings: Vec<String> =
+            self.into_iter().map(|x| x.to_c().into()).collect();
+        CCode(format!("{{ {} }}", strings.join(", ")))
     }
 }
 
