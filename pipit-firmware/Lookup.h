@@ -20,8 +20,7 @@ public:
 
 private:
 
-  uint8_t getKeys(const Chord* chord, const KmapStruct* kmap, Key* keys);
-  uint8_t lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t* data);
+  uint8_t lookupChord(const Chord* chord, const KmapStruct* kmap, Key* keys);
   uint8_t readOffset(const uint8_t* start_of_entry);
   uint8_t readAnagramNum(const uint8_t* start_of_entry);
   uint8_t* getChordAddress(const uint8_t* start_of_entry);
@@ -29,23 +28,15 @@ private:
   uint8_t* nextChordEntry(uint8_t* start_of_entry);
 
 
-  uint8_t readRaw(uint8_t* data_out, const uint8_t* seq_lookup,
-                  uint8_t length_index, uint32_t seq_num, bool use_mods);
-  uint8_t readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
-                              uint16_t seq_length_in_bits, uint32_t seq_num);
+  uint8_t readSequence(const uint8_t* seq_lookup,
+                       uint16_t seq_length_in_bits, uint32_t seq_num, Key* keys_out);
 
   void getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset);
   bool bitToBool(const uint8_t* address, uint32_t bit_offset);
 
-  uint32_t decompressKey(const uint8_t* compressed, uint32_t key_index, uint8_t* key_out);
-  uint32_t getStartCompressedIndex(uint32_t key_index);
-
 
   // void printData(const uint8_t* data, uint8_t data_length);
   // void printBinary(uint8_t byte);
-
-  const uint8_t decompressed_cycle_length = 4;
-  const uint8_t compressed_cycle_length = 3;
 
   // length of prefix that stores offset, and maybe other info someday
   // This must match ChordEntry.make_prefix_byte() in the config code.

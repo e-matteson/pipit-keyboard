@@ -13,7 +13,7 @@ namespace conf {
     ANAGRAM_MOD
   };
 
-  int16_t decode_huffman(const bool* bits, uint8_t length);
+  const HuffmanChar* decode_huffman(const bool* bits, uint8_t length);
   bool are_bools_equal(const bool* a, const bool* b, uint32_t length);
 
   const ModeStruct* getMode(mode_enum mode);

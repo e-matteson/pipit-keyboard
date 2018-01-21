@@ -3,14 +3,14 @@
 Lookup::Lookup(){
 }
 
-uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys){
+uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys_out){
   conf::mode_enum mode = chord->getMode();
   for (uint8_t i = 0; i < conf::getNumKmaps(mode); i++){
     const KmapStruct* kmap = conf::getKmap(mode, type, i);
     if (kmap == NULL || kmap->sequences == NULL || kmap->chords == NULL) {
      continue;
     }
-    uint8_t length = getKeys(chord, kmap, keys);
+    uint8_t length = lookupChord(chord, kmap, keys_out);
     if (length > 0) {
       return length; // Success!
     }
@@ -18,30 +18,7 @@ uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys){
   return 0; // Fail!
 }
 
-uint8_t Lookup::getKeys(const Chord* chord, const KmapStruct* kmap, Key* keys){
-  // TODO arg order
-  uint8_t data[MAX_LOOKUP_DATA_LENGTH] = {0};
-  uint8_t data_length = lookupChord(chord, kmap, data);
-  if(data_length == 0){
-    return 0;
-  }
-  uint8_t byte_index = 0;
-  uint8_t key_index = 0;
-  while(byte_index < data_length){
-    if(kmap->use_mods){
-      keys[key_index].set(data[byte_index], data[byte_index+1]);
-      byte_index += 2;
-    }
-    else{
-      keys[key_index].set(data[byte_index], 0);
-      byte_index++;
-    }
-    key_index++;
-  }
-  return key_index;
-}
-
-uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t* data){
+uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, Key* keys_out){
   // If chord is found in lookup, store data and return its length.
   // Otherwise, return 0.
   uint8_t length_index = 0;
@@ -52,12 +29,7 @@ uint8_t Lookup::lookupChord(const Chord* chord, const KmapStruct* kmap, uint8_t*
       seq_num += readOffset(entry);
       if(chord->matches(getChordAddress(entry), readAnagramNum(entry))){
         // Found match!
-        if(kmap->use_compression){
-          return readCompressed(data, kmap->sequences[length_index], length_index, seq_num);
-        }
-        else{
-          return readRaw(data, kmap->sequences[length_index], length_index, seq_num, kmap->use_mods);
-        }
+        return readSequence(kmap->sequences[length_index], length_index, seq_num, keys_out);
       }
       // Keep looking.
       entry = nextChordEntry(entry);
@@ -103,17 +75,8 @@ uint8_t* Lookup::nextChordEntry(uint8_t* start_of_entry){
 
 /**** Sequence lookup utilities ****/
 
-uint8_t Lookup::readRaw(uint8_t* data_out, const uint8_t* seq_lookup,
-                        uint8_t length_index, uint32_t seq_num, bool use_mods){
-  // TODO take 1-d seq_lookup, just this length
-  uint8_t num_keys = length_index * (use_mods ? 2 : 1);
-  uint32_t start_key_index = seq_num * num_keys;
-  memcpy(data_out, seq_lookup + start_key_index, num_keys);
-  return num_keys;
-}
-
-uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
-                               uint16_t seq_length_in_bits, uint32_t seq_num){
+uint8_t Lookup::readSequence(const uint8_t* seq_lookup,
+                             uint16_t seq_length_in_bits, uint32_t seq_num, Key* keys_out){
   // Decompress data. Return the number of bytes that were decompressed.
   uint32_t bit_offset = seq_num * seq_length_in_bits;
   bool bits[seq_length_in_bits];
@@ -121,16 +84,21 @@ uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
 
   uint16_t code_index = 0;
   uint16_t code_length = 1;
-  uint32_t data_index = 0;
+  uint32_t key_index = 0;
 
   while (code_index + code_length <= seq_length_in_bits) {
-    int16_t letter = conf::decode_huffman(bits+code_index, code_length);
-    if (letter == -1) {
+    const HuffmanChar* huffman = conf::decode_huffman(bits+code_index, code_length);
+    if (huffman == 0) {
       // Not found! Try with a longer code next time.
       code_length++;
     } else {
       // Found! Store the letter and move on to the next code.
-      data_out[data_index++] = letter;
+      if (huffman->is_mod) {
+        keys_out[key_index].addMod(huffman->key_code);
+      } else {
+        keys_out[key_index].setKey(huffman->key_code);
+        key_index++;
+      }
       code_index += code_length;
       code_length = 1;
     }
@@ -138,7 +106,7 @@ uint8_t Lookup::readCompressed(uint8_t* data_out, const uint8_t* seq_lookup,
   if (code_length > 1) {
     DEBUG1_LN("WARNING: unused bits in huffman code");
   }
-  return data_index;
+  return key_index;
 }
 
 void Lookup::getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset) {
@@ -155,33 +123,6 @@ bool Lookup::bitToBool(const uint8_t* address, uint32_t bit_offset) {
   return (byte >> local_bit_offset) & 0x01;
 }
 
-uint32_t Lookup::getStartCompressedIndex(uint32_t key_index){
-  const uint8_t byte_offsets[] = {0,0,1,2};
-  return (((key_index / decompressed_cycle_length) * compressed_cycle_length)
-          + (byte_offsets[key_index % this->decompressed_cycle_length]));
-}
-
-uint32_t Lookup::decompressKey(const uint8_t* compressed, uint32_t key_index, uint8_t* key_out){
-  // Return number of bytes that were completely decompressed and are no longer needed.
-  // Assume we always start on the 1st byte that contains part of the key.
-  switch(key_index % this->decompressed_cycle_length){
-  case 0:
-    *key_out = compressed[0] >> 2;
-    return 0;
-  case 1:
-    *key_out = ((compressed[0]&0x03) << 4) |  ((compressed[1]&0xF0) >> 4);
-    return 1;
-  case 2:
-    *key_out = ((compressed[0]&0x0F) << 2) |  ((compressed[1]&0xC0) >> 6);
-    return 1;
-  case 3:
-    *key_out = (compressed[0]&0x3F);
-    return 1;
-  default:
-    DEBUG1("ERROR: bad decompression offset");
-    return 0;
-  }
-}
 
 /***** Debugging *****/
 

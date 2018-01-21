@@ -25,6 +25,7 @@ struct HuffmanChar {
   const bool* bits;
   const uint8_t num_bits;
   const uint8_t key_code;
+  const bool is_mod;
 };
 
 

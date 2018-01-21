@@ -2,7 +2,7 @@
 
 namespace conf {
 
-int16_t decode_huffman(const bool* bits, uint8_t length) {
+const HuffmanChar* decode_huffman(const bool* bits, uint8_t length) {
   for(uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
     if (length != huffman_lookup[i].num_bits) {
       // Can't be a match, wrong length.
@@ -10,12 +10,12 @@ int16_t decode_huffman(const bool* bits, uint8_t length) {
     }
     if (are_bools_equal(huffman_lookup[i].bits, bits, length)) {
       // Success!
-      return huffman_lookup[i].key_code;
+      return huffman_lookup + i;
     }
   }
   // Fail!
   DEBUG1_LN("WARNING: Failed to find huffman code in lookup");
-  return -1;
+  return 0;
 }
 
 bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {

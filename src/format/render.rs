@@ -7,14 +7,15 @@ use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyPress, KmapPath,
 
 use format::{KmapBuilder, ModeBuilder};
 
-use types::errors::{LookupErr, MissingErr};
-use failure::Error;
+use types::errors::{BadValueErr, MissingErr};
+use failure::{Error, ResultExt};
 
 c_struct!(
     struct HuffmanChar {
         bits: CCode,
         num_bits: usize,
-        key_code: CCode
+        key_code: CCode,
+        is_mod: bool
     }
 );
 
@@ -35,7 +36,7 @@ impl AllData {
 
         let mut group = Vec::new();
         group.push(self.render_options());
-        group.push(self.huffman_table().render());
+        group.push(self.huffman_table().render()?);
         group.push(self.render_modifiers()?);
         group.push(self.render_command_enum());
         group.push(self.render_seq_type_enum());
@@ -225,29 +226,34 @@ impl AllData {
 }
 
 impl HuffmanTable {
-    fn render(&self) -> CTree {
-        let table = &self.0;
+    fn render(&self) -> Result<CTree, Error> {
         let mut group = Vec::new();
 
         group.push(CTree::Define {
+            name: KeyPress::blank(),
+            value: 0.to_c(),
+        });
+        group.push(CTree::Define {
             name: "NUM_HUFFMAN_CODES".to_c(),
-            value: table.len().to_c(),
+            value: self.0.len().to_c(),
         });
 
         let mut initializers = Vec::new();
-        for (key, huffman_code) in table {
+        for key in self.0.keys() {
+            // TODO Don't repeatedly look up key
             let name = format!("_huffman_bits_{}", key).to_c();
             let init = HuffmanChar {
                 bits: name.clone(),
-                num_bits: huffman_code.len(),
+                num_bits: self.num_bits(key)?,
                 key_code: key.to_owned(),
+                is_mod: self.is_mod(key)?,
             }.render(CCode::new())
                 .initializer();
 
             initializers.push(init);
             group.push(CTree::Array {
                 name: name,
-                values: huffman_code.into_iter().map(|b| b.to_c()).collect(),
+                values: self.as_c_bits(key)?,
                 c_type: "bool".to_c(),
                 is_extern: false,
             });
@@ -260,7 +266,7 @@ impl HuffmanTable {
             is_extern: true,
         });
 
-        CTree::Group(group)
+        Ok(CTree::Group(group))
     }
 }
 
@@ -269,118 +275,75 @@ impl KeyPress {
         CCode(format!("({})&0xff", contents))
     }
 
-    pub fn format_key(&self) -> CCode {
-        match self.key {
-            Some(ref code) => KeyPress::truncate(code),
-            None => KeyPress::empty_code(),
-        }
-    }
-
     fn format_mods(&self) -> CCode {
+        // TODO think about this
         match self.mods {
             Some(ref codes) => KeyPress::truncate(&CCode::join(codes, "|")),
             None => KeyPress::empty_code(),
         }
     }
 
-    fn as_bytes(&self, use_mods: bool) -> Vec<CCode> {
-        let mut v: Vec<CCode> = Vec::new();
-        v.push(self.format_key());
-        if use_mods {
-            v.push(self.format_mods());
+    pub fn check_non_empty(&self) -> Result<(), Error> {
+        let error = || {
+            Err(BadValueErr {
+                value: "(empty)".into(),
+                thing: "KeyPress".into(),
+            }).context("KeyPress must contain at least one key or modifier")
+        };
+
+        match (&self.key, &self.mods) {
+            (None, None) => error()?,
+            (None, Some(ref v)) if v.is_empty() => error()?,
+            _ => Ok(()),
         }
-        v
     }
 
     pub fn huffman(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
         // TODO ensure codes are never longer than 255 bits! Firmware uses
         // uint8_t
+        self.check_non_empty()?;
 
-        let key = self.key.as_ref().expect("keypress has no non-mod key");
-        let bits: &Vec<bool> = table.0.get(key).ok_or_else(|| LookupErr {
-            key: key.into(),
-            container: "huffman code table".into(),
-        })?;
+        let mut bits = Vec::new();
+        if let Some(modifiers) = &self.mods {
+            for modifier in modifiers {
+                bits.extend(table.bits(modifier)?);
+            }
+        }
 
-        Ok(bits.to_owned())
+        // There must be a key following the mod(s), so that we know when the
+        // entry ends. If a keypress has a mod but no key,
+        // use a blank dummy value for the key.
+
+        bits.extend(table.bits(&self.key_or_blank())?);
+
+        Ok(bits)
     }
 }
 
 impl Sequence {
-    pub fn as_bytes(
-        &self,
-        seq_type: SeqType,
-        table: &HuffmanTable,
-    ) -> Result<Vec<CCode>, Error> {
+    pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CCode>, Error> {
         // TODO different name for "bytes"?
-        Ok(if seq_type.use_compression() {
-            // self.as_compressed_bytes(seq_type.use_modifiers())
-            self.as_huffman_bytes(seq_type.use_modifiers(), table)?
-        } else {
-            self.as_raw_bytes(seq_type.use_modifiers())
-        })
-    }
-
-    fn as_raw_bytes(&self, use_mods: bool) -> Vec<CCode> {
-        let mut v: Vec<CCode> = Vec::new();
-        for keypress in &self.0 {
-            v.extend(keypress.as_bytes(use_mods));
-        }
-        v
-    }
-
-    pub fn formatted_length(
-        &self,
-        seq_type: SeqType,
-        table: &HuffmanTable,
-    ) -> Result<usize, Error> {
-        Ok(if seq_type.use_compression() {
-            self.as_huffman_bits(table)?.len()
-        } else {
-            self.0.len()
-        })
-    }
-
-    fn as_huffman_bytes(
-        &self,
-        use_mods: bool,
-        table: &HuffmanTable,
-    ) -> Result<Vec<CCode>, Error> {
-        if use_mods {
-            panic!("Not implemented: compression with stored modifiers")
+        let mut v = Vec::new();
+        for keypress in self.keypresses() {
+            v.extend(keypress.huffman(table)?)
         }
 
-        Ok(bools_to_bytes(&self.as_huffman_bits(table)?)
+        Ok(bools_to_bytes(&v)
             .into_iter()
             .map(|x: u8| x.to_c())
             .collect())
     }
 
-    fn as_huffman_bits(
+    pub fn formatted_length(
         &self,
         table: &HuffmanTable,
-    ) -> Result<Vec<bool>, Error> {
+    ) -> Result<usize, Error> {
+        // TODO don't compute twice! switch to bitvec
         let mut v = Vec::new();
         for keypress in self.keypresses() {
             v.extend(keypress.huffman(table)?)
         }
-        Ok(v)
-    }
-}
-
-impl SeqType {
-    pub fn use_compression(&self) -> bool {
-        match *self {
-            SeqType::Word => true,
-            SeqType::Command | SeqType::Macro | SeqType::Plain => false,
-        }
-    }
-
-    pub fn use_modifiers(&self) -> bool {
-        match *self {
-            SeqType::Plain | SeqType::Macro => true,
-            SeqType::Command | SeqType::Word => false,
-        }
+        Ok(v.len())
     }
 }
 

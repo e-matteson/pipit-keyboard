@@ -9,6 +9,7 @@ class Key {
 public:
   Key();
   Key(uint8_t _key_code, uint8_t _mod_byte);
+  void setKey(uint8_t _key_code);
   void set(uint8_t _key_code, uint8_t _mod_byte);
   void addMod(uint8_t new_mod_byte);
   void copy(const Key* other);

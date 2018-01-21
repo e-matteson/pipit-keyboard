@@ -29,9 +29,7 @@ struct ChordEntry {
 c_struct!(
     struct KmapStruct {
         chords: CCode,
-        sequences: CCode,
-        use_compression: bool,
-        use_mods: bool
+        sequences: CCode
     }
 );
 
@@ -84,8 +82,6 @@ impl<'a> KmapBuilder<'a> {
             let kmap_struct = KmapStruct {
                 chords: chord_array_name.clone(),
                 sequences: seq_array_name.clone(),
-                use_compression: self.seq_type.use_compression(),
-                use_mods: self.seq_type.use_modifiers(),
             };
             let struct_name = self.make_lookup_struct_name(kmap);
             g.push(kmap_struct.render(struct_name.clone()));
@@ -127,7 +123,7 @@ impl<'a> KmapBuilder<'a> {
         // TODO huh? doesn't it map over sequences?
         let byte_arrays: Result<Vec<_>, Error> = seq_arrays
             .iter()
-            .map(|seq| seq.as_bytes(self.seq_type, &self.huffman_table))
+            .map(|seq| seq.as_bytes(&self.huffman_table))
             .collect();
 
         Ok(CTree::CompoundArray {
@@ -214,8 +210,8 @@ impl<'a> KmapBuilder<'a> {
         let mut names: Vec<_> = self.seq_map.keys().collect();
         names.sort();
         for name in names {
-            let length = self.seq_map[name]
-                .formatted_length(self.seq_type, &self.huffman_table)?;
+            let length =
+                self.seq_map[name].formatted_length(&self.huffman_table)?;
             names_by_len
                 .entry(length)
                 .or_insert_with(Vec::new)

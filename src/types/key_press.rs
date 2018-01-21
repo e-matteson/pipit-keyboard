@@ -5,9 +5,11 @@ use types::errors::*;
 use std::borrow::Borrow;
 use std::string::ToString;
 
+// Used for when a keypress contains only modifiers and no key.
+pub const BLANK_KEY: &str = "BLANK_KEY";
+
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
 // Rename?
-
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct KeyPress {
@@ -18,6 +20,10 @@ pub struct KeyPress {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl KeyPress {
+    pub fn blank() -> CCode {
+        BLANK_KEY.to_c()
+    }
+
     pub fn empty_code() -> CCode {
         "0".to_c()
     }
@@ -42,6 +48,14 @@ impl KeyPress {
 
     pub fn is_mod_blank(&self) -> bool {
         self.mods.is_none()
+    }
+
+    pub fn key_or_blank(&self) -> CCode {
+        if let Some(key_code) = &self.key {
+            key_code.to_owned()
+        } else {
+            KeyPress::blank()
+        }
     }
 }
 

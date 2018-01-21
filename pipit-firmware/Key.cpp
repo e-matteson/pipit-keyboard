@@ -7,6 +7,10 @@ Key::Key(uint8_t _key_code, uint8_t _mod_byte){
   set(_key_code,  _mod_byte);
 }
 
+void Key::setKey(uint8_t _key_code){
+  key_code = _key_code;
+}
+
 void Key::set(uint8_t _key_code, uint8_t _mod_byte){
   key_code = _key_code;
   mod_byte = _mod_byte;

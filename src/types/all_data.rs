@@ -325,7 +325,7 @@ impl AllData {
 
     pub fn get_all_keypresses(&self) -> Vec<KeyPress> {
         let mut v = Vec::new();
-        for seq_type in vec![SeqType::Macro, SeqType::Plain, SeqType::Word] {
+        for seq_type in self.sequences.keys() {
             for (_, seq) in self.get_sequences(&seq_type).expect("bad SeqType")
             {
                 v.extend(seq.keypresses().cloned())

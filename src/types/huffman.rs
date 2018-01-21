@@ -2,16 +2,23 @@ use std;
 use std::collections::BTreeMap;
 use std::collections::binary_heap::BinaryHeap;
 
-use types::{CCode, KeyPress};
+use types::{CCode, KeyPress, ToC};
+use types::errors::LookupErr;
 
 #[derive(Debug, Clone)]
-pub struct HuffmanTable(pub BTreeMap<CCode, Vec<bool>>);
+pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);
+
+#[derive(Debug, Clone)]
+pub struct HuffmanEntry {
+    bits: Vec<bool>,
+    is_mod: bool,
+}
 
 #[derive(Debug, Eq, PartialEq)]
 enum HuffmanNode {
     Leaf {
         count: usize,
-        key: CCode,
+        key: (CCode, bool),
     },
     Branch {
         left: Box<HuffmanNode>,
@@ -27,6 +34,29 @@ impl HuffmanTable {
         let mut map = BTreeMap::new();
         make_codes(&tree, Vec::new(), &mut map);
         HuffmanTable(map)
+    }
+
+    pub fn bits(&self, key: &CCode) -> Result<Vec<bool>, LookupErr> {
+        Ok(self.get(key)?.to_owned().bits)
+    }
+
+    fn get(&self, key: &CCode) -> Result<&HuffmanEntry, LookupErr> {
+        Ok(self.0.get(key).ok_or_else(|| LookupErr {
+            key: key.into(),
+            container: "huffman code table".into(),
+        })?)
+    }
+
+    pub fn as_c_bits(&self, key: &CCode) -> Result<Vec<CCode>, LookupErr> {
+        Ok(self.bits(key)?.into_iter().map(|b| b.to_c()).collect())
+    }
+
+    pub fn num_bits(&self, key: &CCode) -> Result<usize, LookupErr> {
+        Ok(self.get(key)?.bits.len())
+    }
+
+    pub fn is_mod(&self, key: &CCode) -> Result<bool, LookupErr> {
+        Ok(self.get(key)?.is_mod)
     }
 }
 
@@ -54,7 +84,7 @@ impl PartialOrd for HuffmanNode {
 fn make_codes(
     node: &HuffmanNode,
     prefix: Vec<bool>,
-    out: &mut BTreeMap<CCode, Vec<bool>>,
+    out: &mut BTreeMap<CCode, HuffmanEntry>,
 ) {
     match node {
         HuffmanNode::Branch {
@@ -70,16 +100,22 @@ fn make_codes(
             make_codes(&right, right_prefix, out);
         }
         HuffmanNode::Leaf { ref key, .. } => {
-            out.insert(key.to_owned(), prefix);
+            out.insert(
+                key.0.to_owned(),
+                HuffmanEntry {
+                    bits: prefix,
+                    is_mod: key.1,
+                },
+            );
         }
     }
 }
 
-fn make_tree(counts: BTreeMap<CCode, usize>) -> Option<HuffmanNode> {
+fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
     let mut queue = BinaryHeap::new();
-    for (key, count) in counts {
+    for (key, (count, is_mod)) in counts {
         queue.push(HuffmanNode::Leaf {
-            key: key,
+            key: (key, is_mod),
             count: count,
         });
     }
@@ -94,22 +130,24 @@ fn make_tree(counts: BTreeMap<CCode, usize>) -> Option<HuffmanNode> {
     queue.pop()
 }
 
-fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, usize> {
-    let mut counts = BTreeMap::new();
+fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
+    let mut counts: BTreeMap<CCode, (usize, bool)> = BTreeMap::new();
     for key_press in keys {
-        if let Some(key_code) = key_press.key {
-            increment(&mut counts, key_code);
-        }
+        increment(&mut counts, key_press.key_or_blank(), false);
         if let Some(modifiers) = key_press.mods {
             for modifier in modifiers {
-                increment(&mut counts, modifier);
+                increment(&mut counts, modifier, true);
             }
         }
     }
     counts
 }
 
-fn increment(map: &mut BTreeMap<CCode, usize>, key: CCode) {
-    let count = map.entry(key).or_insert(0);
-    *count += 1;
+fn increment(
+    map: &mut BTreeMap<CCode, (usize, bool)>,
+    key: CCode,
+    is_mod: bool,
+) {
+    let count = map.entry(key).or_insert((0, is_mod));
+    (*count).0 += 1;
 }
