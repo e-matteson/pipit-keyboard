@@ -2,8 +2,9 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 use std::path::PathBuf;
 
-use types::{AnagramNum, CTree, Checker, Chord, KeyPress, KmapPath, ModeInfo,
-            ModeName, Name, SeqType, Sequence, WordBuilder, WordConfig};
+use types::{AnagramNum, CTree, Checker, Chord, HuffmanTable, KeyPress,
+            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+            WordBuilder, WordConfig};
 
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
 use failure::{Error, Fail, ResultExt};
@@ -19,6 +20,7 @@ pub struct AllData {
     pub options: Vec<CTree>,
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
+    pub huffman_table: Option<HuffmanTable>,
     checker: Checker,
     highest_anagram_num: AnagramNum,
 }
@@ -35,6 +37,7 @@ impl AllData {
             options: Vec::new(),
             output_directory: None,
             tutor_directory: None,
+            huffman_table: None,
             checker: Checker::new(),
             highest_anagram_num: AnagramNum(0),
         }
@@ -305,6 +308,30 @@ impl AllData {
 
     fn get_names_for_seq(&self, seq_type: SeqType) -> Result<Vec<Name>, Error> {
         Ok(self.get_sequences(&seq_type)?.keys().cloned().collect())
+    }
+
+    pub fn set_huffman_table(&mut self) {
+        if self.huffman_table.is_some() {
+            panic!("huffman table was already set once");
+        }
+        self.huffman_table = Some(HuffmanTable::new(self.get_all_keypresses()));
+    }
+
+    pub fn huffman_table(&self) -> &HuffmanTable {
+        self.huffman_table
+            .as_ref()
+            .expect("huffman table was never set")
+    }
+
+    pub fn get_all_keypresses(&self) -> Vec<KeyPress> {
+        let mut v = Vec::new();
+        for seq_type in vec![SeqType::Macro, SeqType::Plain, SeqType::Word] {
+            for (_, seq) in self.get_sequences(&seq_type).expect("bad SeqType")
+            {
+                v.extend(seq.keypresses().cloned())
+            }
+        }
+        v
     }
 
     pub fn get_tutor_data(

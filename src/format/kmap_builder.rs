@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
-use types::{AnagramNum, CCode, CTree, Chord, Field, KmapPath, Name, SeqType,
-            Sequence, ToC};
-use failure::Error;
+use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, KmapPath,
+            Name, SeqType, Sequence, ToC};
 
 use types::errors::LookupErr;
+use failure::Error;
 
 type SeqMap = BTreeMap<Name, Sequence>;
 type ChordMap = BTreeMap<Name, Chord>;
@@ -18,6 +18,7 @@ pub struct KmapBuilder<'a> {
     seq_map: &'a SeqMap,
     chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
     kmap_nicknames: BTreeMap<KmapPath, String>,
+    huffman_table: &'a HuffmanTable,
 }
 
 struct ChordEntry {
@@ -51,12 +52,14 @@ impl<'a> KmapBuilder<'a> {
         seq_type: SeqType,
         seq_map: &'a SeqMap,
         chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
+        huffman_table: &'a HuffmanTable,
     ) -> KmapBuilder<'a> {
         KmapBuilder {
             seq_type: seq_type,
             seq_map: seq_map,
             chord_maps: chord_maps,
             kmap_nicknames: make_kmap_nicknames(chord_maps.keys().collect()),
+            huffman_table: huffman_table,
         }
     }
 
@@ -124,7 +127,7 @@ impl<'a> KmapBuilder<'a> {
         // TODO huh? doesn't it map over sequences?
         let byte_arrays: Result<Vec<_>, Error> = seq_arrays
             .iter()
-            .map(|seq| seq.as_bytes(self.seq_type))
+            .map(|seq| seq.as_bytes(self.seq_type, &self.huffman_table))
             .collect();
 
         Ok(CTree::CompoundArray {
@@ -211,7 +214,8 @@ impl<'a> KmapBuilder<'a> {
         let mut names: Vec<_> = self.seq_map.keys().collect();
         names.sort();
         for name in names {
-            let length = self.seq_map[name].formatted_length(self.seq_type)?;
+            let length = self.seq_map[name]
+                .formatted_length(self.seq_type, &self.huffman_table)?;
             names_by_len
                 .entry(length)
                 .or_insert_with(Vec::new)

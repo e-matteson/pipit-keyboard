@@ -67,6 +67,8 @@ impl AllData {
             .load_commands(&settings)
             .with_context(|_| "Failed to load commands")?;
 
+        all_data.set_huffman_table();
+
         Ok(all_data)
     }
 

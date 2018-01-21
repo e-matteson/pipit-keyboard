@@ -5,6 +5,7 @@ pub use self::miscellaneous::{KmapFormat, KmapInfo, KmapPath, ModeInfo,
                               Sequence, SwitchPos};
 pub use self::chord::{Chord, GlobalChordInfo};
 pub use self::words::{AnagramNum, Word, WordBuilder, WordConfig};
+pub use self::huffman::HuffmanTable;
 pub use self::all_data::AllData;
 pub use self::checker::Checker;
 
@@ -23,3 +24,4 @@ mod chord;
 mod words;
 mod all_data;
 mod checker;
+mod huffman;
