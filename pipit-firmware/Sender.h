@@ -21,8 +21,8 @@ public:
   void sendBackspace();
 
   void sendKey(const Key* key);
-  void sendKey(uint8_t key_code, uint8_t mod_byte);
-  void sendKeys(SixKeys* keys);
+  void sendKeyAndMod(uint8_t key_code, uint8_t mod_byte);
+  void sendKeys(SixKeys* keys, bool is_gaming);
 
   void sendRelease();
 
@@ -31,9 +31,7 @@ public:
   History* history;
 
 private:
-  bool isSameAsLastSend(const SixKeys* keys);
-  void setLastSend(const SixKeys* keys);
-  void press(const SixKeys* keys);
+  void press(const SixKeys* keys, bool is_gaming);
 
 
   Comms* comms;

@@ -14,7 +14,7 @@ bool Sender::sendIfEmpty(const Chord* chord){
   if (!chord->isEmpty()){
     return 0;
   }
-  sendKey(0, chord->getModByte());
+  sendKeyAndMod(0, chord->getModByte());
   return 1;
 }
 
@@ -86,14 +86,14 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
 }
 
 void Sender::sendRelease(){
-  sendKey(0,0);
+  sendKeyAndMod(0,0);
 }
 
 void Sender::sendBackspace(){
-  sendKey(KEY_BACKSPACE&0xff, 0);
+  sendKeyAndMod(KEY_BACKSPACE&0xff, 0);
 }
 
-void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
+void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
   Key key;
   key.set(key_code, mod_byte);
   sendKey(&key);
@@ -102,40 +102,34 @@ void Sender::sendKey(uint8_t key_code, uint8_t mod_byte){
 void Sender::sendKey(const Key* key){
   SixKeys keys;
   keys.add(key);
-  sendKeys(&keys);
+  sendKeys(&keys, false);
 }
 
-void Sender::sendKeys(SixKeys* keys){
+void Sender::sendKeys(SixKeys* keys, bool is_gaming){
   if(stickymod && !keys->isEmpty()){
     keys->addMod(stickymod);
     stickymod = 0; // reset stickymod after 1 use
   }
-  this->press(keys);
+  this->press(keys, is_gaming);
   history->save(keys);
-}
-
-bool Sender::isSameAsLastSend(const SixKeys* keys){
-  return last_keys.isEqual(keys);
-}
-
-void Sender::setLastSend(const SixKeys* keys){
-  last_keys.copy(keys);
 }
 
 void Sender::setStickymod(uint8_t mod_byte){
   stickymod = stickymod | mod_byte;
 }
 
-void Sender::press(const SixKeys* keys){
+void Sender::press(const SixKeys* keys, bool is_gaming){
   // If this is a repeated press, send a release first to separate them.
-  if(isSameAsLastSend(keys)){
+  // (doesn't apply when in gaming mode)
+  if(!is_gaming && last_keys.needsExtraRelease(keys)){
     if(keys->isEmpty()){
       return; //repeated release, don't send anything
     }
     SixKeys empty;
-    this->press(&empty); //repeated press, send release first
+    this->press(&empty, is_gaming); //repeated press, send release first
   }
-  setLastSend(keys);
+  last_keys.copy(keys);
+
   keys->printDebug();
 
   // Actually send the keypress, over USB or bluetooth:

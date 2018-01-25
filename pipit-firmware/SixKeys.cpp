@@ -52,18 +52,28 @@ bool SixKeys::isEmpty() const{
     }
   }
   return true;
-};
+}
 
-bool SixKeys::isEqual(const SixKeys* other) const{
-  if(mod_byte != other->mod_byte){
-    return false;
+bool SixKeys::needsExtraRelease(const SixKeys* next) const{
+  // Check whether we need to send an extra report between these two, to
+  // explicitly release all keys. Usually we don't bother, because if the old
+  // key is not included in the new report, it will be released. But if we send
+  // the same key twice in a row, without an explicit release in between, the
+  // host will think it was pressed once and held. This only matters in
+  // words/macros, because you already release the switch when double-tapping it
+  // manually.
+
+  if (mod_byte && (mod_byte == next->mod_byte)) {
+    return true;
   }
+
   for(uint8_t i = 0; i < 6; i++) {
-    if(key_codes[i] != other->key_codes[i]){
-      return false;
+    if(key_codes[i] && (key_codes[i] == next->key_codes[i])) {
+      return true;
     }
   }
-  return true;
+
+  return false;
 }
 
 void SixKeys::copy(const SixKeys* other){
@@ -81,12 +91,22 @@ void SixKeys::clear(){
   num_keys = 0;
 }
 
+// TODO are debug macros broken?
+// void SixKeys::printDebug() const{
+//   DEBUG1("sending keys: ");
+//   for(uint8_t i = 0; i < 6; i++){
+//     DEBUG1(key_codes[i]);
+//     DEBUG1(" ");
+//   }
+//   DEBUG1(", mod: ");
+//   DEBUG1_LN(mod_byte);
+// }
 void SixKeys::printDebug() const{
-  DEBUG1("sending keys: ");
+  Serial.print("sending keys: ");
   for(uint8_t i = 0; i < 6; i++){
-    DEBUG1(key_codes[i]);
-    DEBUG1(" ");
+    Serial.print(key_codes[i]);
+    Serial.print(" ");
   }
-  DEBUG1(", mod: ");
-  DEBUG1_LN(mod_byte);
+  Serial.print(", mod: ");
+  Serial.println(mod_byte);
 }

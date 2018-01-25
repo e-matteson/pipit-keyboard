@@ -265,6 +265,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
   //  supported. Lookup each individual switch, and if they're plain_keys, send
   //  them all together at the end. If any switch is a command, do the command
   //  immediately and ignore the rest of the switches.
+  // TODO what about macros? double letters won't work, since we disable needsExtraRelease()...
   SixKeys keys;
   for(uint8_t i = 0; i < num_chords; i++){
     Chord* chord = gaming_chords+i;
@@ -291,6 +292,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
       continue;
     }
 
+    // TODO is this mod handling correct? shouldn't we extract before looking up plains?
     chord->extractPlainMods();
     uint8_t mod_byte = chord->getModByte();
     if(mod_byte){
@@ -299,7 +301,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
     }
     feedback->triggerUnknown();
   }
-  sender->sendKeys(&keys);
+  sender->sendKeys(&keys, true);
 }
 
 
@@ -310,7 +312,7 @@ void Pipit::move(Motion motion, Direction direction){
   uint16_t count = sender->history->calcDistance(motion, direction);
   uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
   for(int16_t i = 0; i < count; i++){
-    sender->sendKey(key, 0);
+    sender->sendKeyAndMod(key, 0);
     delay(6*comms->proportionalDelay(count));
   }
 }
