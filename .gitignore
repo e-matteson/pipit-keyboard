@@ -1,3 +1,6 @@
 target
 /pipit-firmware/auto_config.cpp
 /pipit-firmware/auto_config.h
+*.svg
+*.pdf
+*.png
