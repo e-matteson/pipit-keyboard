@@ -567,17 +567,6 @@ macro_magit_status
   .     .
   ... .*.
 
-# macro_kill_compile  macro_comment_op
-# .*..   .*..         ....   .*..
-# ....   ....         ....   ....
-#   .     .             .     .
-#   ... .*.             ... .*.
-
-macro_calendar         macro_org_capture
-....   .*..            ....   .*..
-**..   ....            .*..   ....
-  .     .                .     .
-  ... .*.                ... .*.
 
 macro_open_planner    macro_open_timeline  macro_open_settings  macro_open_dvorak
 ...*   ....           ...*   ....          ...*   ....          ...*   *...
@@ -597,17 +586,17 @@ macro_ins_heading      macro_ins_notes
   .     .                .     .
   *.. .*.                ... .*.
 
-macro_org_cycle_ctrl   macro_org_cycle_shift  macro_org_cycle
-....   ...*            ....   ...*            ....   ...*
-...*   ....            ...*   ....            ...*   ....
-  .     .                .     .                .     .
-  ..* ...                *.. ...                ... ...
+macro_org_insert_link  macro_org_store_link  macro_org_capture
+....   ....            ....   ...*           ....   .*..
+**.*   ....            **..   ....           .*..   ....
+  .     .                .     .               .     .
+  ... .*.                ... .*.               ... .*.
 
-macro_org_insert_link  macro_org_store_link  macro_gi           macro_gx
-*...   ...*            ....   ...*           .**.   ....        .**.   .*.*
-...*   ....            **..   ....           ...*   ....        ....   ....
-  .     .                .     .               .     .            .     .
-  ... .*.                ... .*.               ... .*.            ... .*.
+macro_org_calendar     macro_org_tree        macro_org_archive
+....   .*..            ....   ....           ....   ..*.
+**..   ....            **..   .*..           **..   ....
+  .     .                .     .               .     .
+  ... .*.                ... .*.               ... .*.
 
 # macro_g_comma         macro_g_semicolon
 # ....   ....           ....   ....

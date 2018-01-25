@@ -396,7 +396,7 @@ macro_kill_ring     = [{key="KEY_SPACE"},
                        {key="KEY_Y"}]
 macro_comment       = [{key="KEY_SPACE"},
                        {key="KEY_SEMICOLON"}]
-macro_calendar      = [{key="KEY_SPACE"},
+macro_org_calendar  = [{key="KEY_SPACE"},
                        {key="KEY_A"},
                        {key="KEY_O"},
                        {key="KEY_O"},
@@ -820,6 +820,14 @@ macro_org_insert_link=[{key="KEY_SPACE"},
                        {key="KEY_M"},
                        {key="KEY_I"},
                        {key="KEY_L"}]
+macro_org_tree       =[{key="KEY_SPACE"},
+                       {key="KEY_M"},
+                       {key="KEY_T", mods=["MODIFIERKEY_SHIFT"]},
+                       {key="KEY_T"}]
+macro_org_archive    =[{key="KEY_SPACE"},
+                       {key="KEY_M"},
+                       {key="KEY_O"},
+                       {key="KEY_R"}]
 
 
 [other]
@@ -1262,6 +1270,7 @@ dictionary = [
     {word="belong"},
     {word="below"},
     {word="belt", anagram=1},
+    {word="Ben", anagram=1},
     {word="bench"},
     {word="bend"},
     {word="beneath"},
@@ -1339,6 +1348,7 @@ dictionary = [
     {word="bor", anagram=3},
     {word="bore", anagram=1},
     {word="born"},
+    {word="borrow", anagram=1},
     {word="borton"},
     {word="boss", anagram=1},
     {word="Boston"},
@@ -1796,7 +1806,7 @@ dictionary = [
     {word="courtesy"},
     {word="cover"},
     {word="cow", anagram=4},
-    {word="cowboy", anagram=1},
+    {word="cowboy", anagram=2},
     {word="cpp"},
     {word="cpu"},
     {word="crack", anagram=1},
@@ -5249,6 +5259,7 @@ dictionary = [
     {word="urgent"},
     {word="URI"},
     {word="URL"},
+    {word="urn"},
     {word="USA"},
     {word="us"},
     {word="use"},
