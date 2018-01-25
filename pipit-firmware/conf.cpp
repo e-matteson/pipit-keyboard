@@ -14,7 +14,7 @@ const HuffmanChar* decode_huffman(const bool* bits, uint8_t length) {
     }
   }
   // Fail!
-  DEBUG1_LN("WARNING: Failed to find huffman code in lookup");
+  DEBUG2_LN("WARNING: Failed to find huffman code in lookup, try again with a longer code");
   return 0;
 }
 

@@ -365,13 +365,13 @@ pub fn wrap_intro(
     guard_group.push(CTree::LiteralH(
         "typedef void (*voidFuncPtr)(void);\n".to_c(),
     ));
-    // guard_group.push(make_compression_macros());
-    guard_group.push(make_debug_macros());
 
     guard_group.push(CTree::Namespace {
         name: "conf".to_c(),
         contents: Box::new(namespace_tree),
     });
+
+    guard_group.push(make_debug_macros());
 
     let guard = CTree::IncludeGuard {
         header_name: h_file_name.to_owned(),
