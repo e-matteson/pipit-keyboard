@@ -46,16 +46,16 @@ void Comms::setupBluetooth(){
 #endif
 }
 
-void Comms::press(const SixKeys* keys){
+void Comms::press(const Report* report){
 #if defined(TEENSY_LC)
 
-  Keyboard.set_key1(keys->get(0));
-  Keyboard.set_key2(keys->get(1));
-  Keyboard.set_key3(keys->get(2));
-  Keyboard.set_key4(keys->get(3));
-  Keyboard.set_key5(keys->get(4));
-  Keyboard.set_key6(keys->get(5));
-  Keyboard.set_modifier(keys->getMod());
+  Keyboard.set_key1(report->get(0));
+  Keyboard.set_key2(report->get(1));
+  Keyboard.set_key3(report->get(2));
+  Keyboard.set_key4(report->get(3));
+  Keyboard.set_key5(report->get(4));
+  Keyboard.set_key6(report->get(5));
+  Keyboard.set_modifier(report->getMod());
   Keyboard.send_now();
 
 #elif defined(FEATHER_M0_BLE)
@@ -63,13 +63,13 @@ void Comms::press(const SixKeys* keys){
   static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-%02x-%02x-%02x-%02x-%02x";
   char cmd[45] = {0};
   sprintf(cmd, cmd_template,
-          keys->getMod(),
-          keys->get(0),
-          keys->get(1),
-          keys->get(2),
-          keys->get(3),
-          keys->get(4),
-          keys->get(5));
+          report->getMod(),
+          report->get(0),
+          report->get(1),
+          report->get(2),
+          report->get(3),
+          report->get(4),
+          report->get(5));
   bluetooth->println(cmd);
 
 #endif

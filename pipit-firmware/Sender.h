@@ -22,7 +22,7 @@ public:
 
   void sendKey(const Key* key);
   void sendKeyAndMod(uint8_t key_code, uint8_t mod_byte);
-  void sendSixKeys(SixKeys* keys);
+  void sendReport(Report* report);
 
   void sendRelease();
 
@@ -31,12 +31,12 @@ public:
   History* history;
 
 private:
-  void press(const SixKeys* keys);
+  void press(const Report* report);
 
 
   Comms* comms;
   Feedback* feedback;
-  SixKeys last_keys;
+  Report last_report;
 
   uint8_t stickymod = 0; //For programs that use a key like Insert as a fake modifier
   // TODO store stickymod as a Chord?

@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "auto_config.h"
-#include "SixKeys.h"
+#include "Report.h"
 
 #ifdef FEATHER_M0_BLE
 #include <Adafruit_BluefruitLE_SPI.h>
@@ -17,7 +17,7 @@ class Comms {
 public:
   Comms();
   void setup();
-  void press(const SixKeys* keys);
+  void press(const Report* report);
   bool isConnected();
   uint8_t proportionalDelay(uint8_t data_length);
 

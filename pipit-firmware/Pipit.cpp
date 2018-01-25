@@ -266,8 +266,8 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
   //  them all together at the end. If any switch is a command, do the command
   //  immediately and ignore the rest of the switches.
   // TODO what about macros? double letters won't work, since we disable needsExtraRelease()...
-  SixKeys keys;
-  keys.is_gaming = true;
+  Report report;
+  report.is_gaming = true;
   for(uint8_t i = 0; i < num_chords; i++){
     Chord* chord = gaming_chords+i;
     Key data[MAX_LOOKUP_DATA_LENGTH];
@@ -288,15 +288,15 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
       if(data_length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
-      keys.add(data);
-      keys.addMod(chord->getModByte());
+      report.addKey(data);
+      report.addMod(chord->getModByte());
       feedback->triggerPlain();
       continue;
     }
 
     feedback->triggerUnknown();
   }
-  sender->sendSixKeys(&keys);
+  sender->sendReport(&report);
 }
 
 

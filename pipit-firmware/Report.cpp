@@ -1,48 +1,48 @@
-#include "SixKeys.h"
+#include "Report.h"
 
 
-SixKeys::SixKeys(){
+Report::Report(){
   clear();
 }
 
-void SixKeys::add(const Key* key){
+void Report::addKey(const Key* key){
   // We can always add to the mod_byte, but we can only fit 6 key_codes
   addMod(key->mod_byte);
   if(key->key_code == 0){
     return;
   }
   if(isFull()){
-    DEBUG1_LN("WARNING: SixKeys is full");
+    DEBUG1_LN("WARNING: Report is full");
     return;
   }
   key_codes[num_keys] = key->key_code;
   num_keys++;
 }
 
-void SixKeys::addMod(uint8_t _mod_byte){
+void Report::addMod(uint8_t _mod_byte){
   mod_byte = mod_byte | _mod_byte;
 }
 
-uint8_t SixKeys::get(uint8_t index) const{
+uint8_t Report::get(uint8_t index) const{
   if(index >= 6){
-    DEBUG1_LN("WARNING: SixKeys index out of range");
+    DEBUG1_LN("WARNING: Report index out of range");
   }
   return key_codes[index];
 }
 
-uint8_t SixKeys::getMod() const{
+uint8_t Report::getMod() const{
   return mod_byte;
 }
 
-bool SixKeys::isFull() const{
+bool Report::isFull() const{
   return num_keys >= 6;
 }
 
-uint8_t SixKeys::numKeys() const{
+uint8_t Report::numKeys() const{
   return num_keys;
 }
 
-bool SixKeys::isEmpty() const{
+bool Report::isEmpty() const{
   if(mod_byte != 0){
     return false;
   }
@@ -54,7 +54,7 @@ bool SixKeys::isEmpty() const{
   return true;
 }
 
-bool SixKeys::needsExtraRelease(const SixKeys* next) const{
+bool Report::needsExtraRelease(const Report* next) const{
   // Check whether we need to send an extra report between these two, to
   // explicitly release all keys. Usually we don't bother, because if the old
   // key is not included in the new report, it will be released. But if we send
@@ -82,7 +82,7 @@ bool SixKeys::needsExtraRelease(const SixKeys* next) const{
   return false;
 }
 
-void SixKeys::copy(const SixKeys* other){
+void Report::copy(const Report* other){
   for(uint8_t i = 0; i < 6; i++) {
     key_codes[i] = other->key_codes[i];
   }
@@ -90,7 +90,7 @@ void SixKeys::copy(const SixKeys* other){
   is_gaming = other->is_gaming;
 }
 
-void SixKeys::clear(){
+void Report::clear(){
   for(uint8_t i = 0; i < 6; i++) {
     key_codes[i] = 0;
   }
@@ -99,7 +99,7 @@ void SixKeys::clear(){
 }
 
 // TODO are debug macros broken?
-void SixKeys::printDebug() const{
+void Report::printDebug() const{
   DEBUG1("sending keys: ");
   for(uint8_t i = 0; i < 6; i++){
     DEBUG1(key_codes[i]);

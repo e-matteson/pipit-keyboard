@@ -100,9 +100,9 @@ void History::backspace(){
 }
 
 
-void History::save(SixKeys* keys){
-  for(uint8_t i = 0; i < keys->numKeys(); i++){
-    saveKeyCode(keys->get(i), keys->getMod());
+void History::save(Report* report){
+  for(uint8_t i = 0; i < report->numKeys(); i++){
+    saveKeyCode(report->get(i), report->getMod());
   }
 }
 

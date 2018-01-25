@@ -6,7 +6,7 @@
 #include "keycodes.h"
 #include "Chord.h"
 #include "Entry.h"
-#include "SixKeys.h"
+#include "Report.h"
 
 // The number of recent words/sends that can be deleted
 
@@ -29,7 +29,7 @@ class History{
 
 public:
   History();
-  void save(SixKeys* keys);
+  void save(Report* report);
   void startEntry(const Chord* new_chord, bool is_anagrammable);
   void endEntry();
 

@@ -100,38 +100,38 @@ void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
 }
 
 void Sender::sendKey(const Key* key){
-  SixKeys keys;
-  keys.add(key);
-  sendSixKeys(&keys);
+  Report report;
+  report.addKey(key);
+  sendReport(&report);
 }
 
-void Sender::sendSixKeys(SixKeys* keys){
-  if(stickymod && !keys->isEmpty()){
-    keys->addMod(stickymod);
+void Sender::sendReport(Report* report){
+  if(stickymod && !report->isEmpty()){
+    report->addMod(stickymod);
     stickymod = 0; // reset stickymod after 1 use
   }
-  this->press(keys);
-  history->save(keys);
+  this->press(report);
+  history->save(report);
 }
 
 void Sender::setStickymod(uint8_t mod_byte){
   stickymod = stickymod | mod_byte;
 }
 
-void Sender::press(const SixKeys* keys){
-  if(last_keys.needsExtraRelease(keys)){
-    SixKeys empty;
+void Sender::press(const Report* report){
+  if(last_report.needsExtraRelease(report)){
+    Report empty;
     this->press(&empty); //repeated press, send release first
   }
-  if(keys->isEmpty() && last_keys.isEmpty()){
+  if(report->isEmpty() && last_report.isEmpty()){
     return; //repeated release, don't send anything
   }
-  last_keys.copy(keys);
+  last_report.copy(report);
 
-  keys->printDebug();
+  report->printDebug();
 
   // Actually send the keypress, over USB or bluetooth:
-  this->comms->press(keys);
+  this->comms->press(report);
 }
 
 
