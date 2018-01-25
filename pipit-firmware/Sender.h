@@ -22,7 +22,7 @@ public:
 
   void sendKey(const Key* key);
   void sendKeyAndMod(uint8_t key_code, uint8_t mod_byte);
-  void sendKeys(SixKeys* keys, bool is_gaming);
+  void sendSixKeys(SixKeys* keys);
 
   void sendRelease();
 
@@ -31,7 +31,7 @@ public:
   History* history;
 
 private:
-  void press(const SixKeys* keys, bool is_gaming);
+  void press(const SixKeys* keys);
 
 
   Comms* comms;

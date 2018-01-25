@@ -267,6 +267,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
   //  immediately and ignore the rest of the switches.
   // TODO what about macros? double letters won't work, since we disable needsExtraRelease()...
   SixKeys keys;
+  keys.is_gaming = true;
   for(uint8_t i = 0; i < num_chords; i++){
     Chord* chord = gaming_chords+i;
     Key data[MAX_LOOKUP_DATA_LENGTH];
@@ -288,20 +289,14 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
       keys.add(data);
+      keys.addMod(chord->getModByte());
       feedback->triggerPlain();
       continue;
     }
 
-    // TODO is this mod handling correct? shouldn't we extract before looking up plains?
-    chord->extractPlainMods();
-    uint8_t mod_byte = chord->getModByte();
-    if(mod_byte){
-      keys.addMod(mod_byte);
-      continue;
-    }
     feedback->triggerUnknown();
   }
-  sender->sendKeys(&keys, true);
+  sender->sendSixKeys(&keys);
 }
 
 

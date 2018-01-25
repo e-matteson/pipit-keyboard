@@ -102,15 +102,15 @@ void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
 void Sender::sendKey(const Key* key){
   SixKeys keys;
   keys.add(key);
-  sendKeys(&keys, false);
+  sendSixKeys(&keys);
 }
 
-void Sender::sendKeys(SixKeys* keys, bool is_gaming){
+void Sender::sendSixKeys(SixKeys* keys){
   if(stickymod && !keys->isEmpty()){
     keys->addMod(stickymod);
     stickymod = 0; // reset stickymod after 1 use
   }
-  this->press(keys, is_gaming);
+  this->press(keys);
   history->save(keys);
 }
 
@@ -118,15 +118,13 @@ void Sender::setStickymod(uint8_t mod_byte){
   stickymod = stickymod | mod_byte;
 }
 
-void Sender::press(const SixKeys* keys, bool is_gaming){
-  // If this is a repeated press, send a release first to separate them.
-  // (doesn't apply when in gaming mode)
-  if(!is_gaming && last_keys.needsExtraRelease(keys)){
-    if(keys->isEmpty()){
-      return; //repeated release, don't send anything
-    }
+void Sender::press(const SixKeys* keys){
+  if(last_keys.needsExtraRelease(keys)){
     SixKeys empty;
-    this->press(&empty, is_gaming); //repeated press, send release first
+    this->press(&empty); //repeated press, send release first
+  }
+  if(keys->isEmpty() && last_keys.isEmpty()){
+    return; //repeated release, don't send anything
   }
   last_keys.copy(keys);
 

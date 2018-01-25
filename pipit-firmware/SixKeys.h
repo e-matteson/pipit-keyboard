@@ -21,11 +21,12 @@ public:
 
   void printDebug() const;
 
+  bool is_gaming = 0;
+
 private:
   uint8_t key_codes[6];
   uint8_t mod_byte;
   uint8_t num_keys = 0;
-  bool is_gaming = 0;
 };
 
 #endif
