@@ -425,11 +425,11 @@ macro_in_doublequote  macro_in_quote  macro_in_equal
 #   .     .          .     .
 #   .*. .*.          .*. .*.
 
-macro_gmail       macro_bmail       macro_ls          macro_todo
-***.   ...*       *.**   ...*       ....   ...*       ....   *...
-*..*   ....       *..*   ....       ....   ...*       .*..   .*..
-  .     .           .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.           ... ...
+macro_gmail       macro_bmail       macro_ls
+***.   ...*       *.**   ...*       ....   ...*
+*..*   ....       *..*   ....       ....   ...*
+  .     .           .     .           .     .
+  ... .*.           ... .*.           ... .*.
 
 macro_exit_py     macro_self_dot    macro_docstr_py
 ....   .*.*       .*..   ...*       ...*   .**.
