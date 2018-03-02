@@ -5,13 +5,12 @@ Firmware and configuration tools for a small, ergonomic chording keyboard with o
 
 Common letters are typed by pressing a single switch, and rarer letters are typed by pressing 2 switches at once - like playing a piano chord. The keyboard also stores a customizable dictionary of 4000+ words and macros that can each be entered with a single chord.
 
-You can change the keymap, dictionary, and other settings by editing simple text files. You then run the configuration tool once to generate updated firmware, and then load the new firmware onto the keyboard's microcontroller.
+You can change the keymap, dictionary, and other settings by editing simple config files. You then run the configuration tool once to generate updated firmware, and then load the new firmware onto the keyboard's microcontroller.
 
 The firmware is compatible with several varieties of arduino-compatible ARM microcontroller boards. It currently suppports the =Adafruit Feather BLE M0= (for a wireless keyboard) and the =Teensy LC= (for a wired keyboard), and support for the =Teensy 3= is planned.
 
-A [[https://github.com/e-matteson/pipit-keyboard/wiki/Building-the-keyboard][guide to building the hardware]] for this keyboard will be posted to the wiki soon.
 
-** See the [[https://github.com/e-matteson/pipit-keyboard/wiki/][wiki]] for more documentation
+See the [[https://github.com/e-matteson/pipit-keyboard/wiki/][wiki]] for more (slightly outdated) documentation.
 
 ** Brief instructions
 
