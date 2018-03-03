@@ -2,12 +2,21 @@ use std::fmt;
 use std::borrow::Borrow;
 use std::ops::AddAssign;
 
-use types::{ModeName, Name, SeqType};
+use types::{AnagramNum, ModeName, Name, SeqType};
 
 #[derive(Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd,
          Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
+
+pub trait ToC {
+    fn to_c(self) -> CCode;
+}
+
+// pub trait RenderCTree {
+//     fn definitions(self) -> CTree;
+//     fn name(self) -> CTree;
+// }
 
 #[derive(Debug, Clone)]
 pub enum CTree {
@@ -91,6 +100,16 @@ impl CCode {
     {
         v.iter().map(|ref item| item.to_c()).collect()
     }
+
+    pub fn map_prepend<T>(prefix: T, v: &[CCode]) -> Vec<CCode>
+    where
+        T: ToC + Clone,
+    {
+        let prefix = prefix.to_c();
+        v.into_iter()
+            .map(|c| format!("{}{}", prefix, c).to_c())
+            .collect()
+    }
 }
 
 impl<'a> Borrow<str> for CCode {
@@ -133,10 +152,6 @@ impl<'a> AddAssign<&'a str> for CCode {
     fn add_assign(&mut self, rhs: &'a str) {
         self.0 += rhs;
     }
-}
-
-pub trait ToC {
-    fn to_c(self) -> CCode;
 }
 
 impl<'a, T> ToC for &'a T
@@ -192,6 +207,12 @@ impl ToC for ModeName {
 impl ToC for SeqType {
     fn to_c(self) -> CCode {
         CCode(self.to_string())
+    }
+}
+
+impl ToC for AnagramNum {
+    fn to_c(self) -> CCode {
+        self.0.to_c()
     }
 }
 

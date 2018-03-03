@@ -6,6 +6,7 @@ use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyPress, KmapPath,
             Name, SeqType, Sequence, ToC};
 
 use format::{KmapBuilder, ModeBuilder};
+// use format::KmapBuilder;
 
 use types::errors::{BadValueErr, MissingErr};
 use failure::{Error, ResultExt};
@@ -50,23 +51,23 @@ impl AllData {
         let (tree, kmap_struct_names) = self.render_kmaps()?;
         g.push(tree);
 
-        let mut mode_struct_pointers = Vec::new();
+        let mut mode_struct_names = Vec::new();
         for (mode, info) in &self.modes {
             let m = ModeBuilder {
+                mode_name: mode,
                 info: info,
                 kmap_struct_names: &kmap_struct_names,
-                seq_types: self.get_seq_types(),
-                mode_name: mode,
                 mod_chords: self.get_mod_chords(mode),
                 anagram_chords: self.get_anagram_chords(mode),
             };
             let (tree, name) = m.render()?;
             g.push(tree);
-            mode_struct_pointers.push(CCode(format!("&{}", name)));
+            mode_struct_names.push(name);
         }
+
         g.push(CTree::Array {
             name: "mode_structs".to_c(),
-            values: mode_struct_pointers,
+            values: CCode::map_prepend("&", &mode_struct_names),
             c_type: "ModeStruct*".to_c(),
             is_extern: true,
         });
@@ -75,22 +76,20 @@ impl AllData {
 
     fn render_kmaps(
         &self,
-    ) -> Result<(CTree, BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>), Error>
-    {
+    ) -> Result<(CTree, BTreeMap<KmapPath, CCode>), Error> {
         // Render all keymap structs as CTrees, and return their names
         let mut kmap_struct_names = BTreeMap::new();
         let mut g = Vec::new();
-        for seq_type in self.sequences.keys() {
-            let builder = KmapBuilder::new(
-                *seq_type,
-                &self.sequences[seq_type],
-                &self.chords,
-                &self.huffman_table(),
-            );
-            let (tree, kmap_struct_names_for_seq_type) = builder.render()?;
+        for (i, (kmap_name, chords)) in self.chords.iter().enumerate() {
+            let builder = KmapBuilder {
+                kmap_nickname: format!("kmap{}", i),
+                chord_map: chords,
+                seq_maps: &self.sequences,
+                huffman_table: self.huffman_table(),
+            };
+            let (tree, kmap_struct_name) = builder.render()?;
             g.push(tree);
-            kmap_struct_names
-                .insert(seq_type.to_owned(), kmap_struct_names_for_seq_type);
+            kmap_struct_names.insert(kmap_name.to_owned(), kmap_struct_name);
         }
         Ok((CTree::Group(g), kmap_struct_names))
     }

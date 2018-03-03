@@ -35,19 +35,14 @@ bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {
     return getMode(mode)->num_kmaps;
   }
 
-  const KmapStruct* getKmap(mode_enum mode,
+  const LookupsOfSeqType* getLookupsOfSeqType(mode_enum mode,
                       seq_type_enum seq_type,
                       uint8_t kmap_num){
-    return getMode(mode)->kmaps[seq_type][kmap_num];
+    return getMode(mode)->kmaps[kmap_num]->lookups_by_seq_type[seq_type];
   }
 
   const uint8_t* getAnagramMask(mode_enum mode) {
     return getMode(mode)->anagram_mask;
-  }
-
-  const uint8_t* getAnagram(mode_enum mode, uint8_t num) {
-    // TODO assert num < NUM_ANAGRAMS?
-    return getMode(mode)->anagram_chords[num];
   }
 
   const uint8_t* getModChord(mode_enum mode, mod_enum modifier) {
@@ -68,6 +63,10 @@ bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {
   }
 
   const mod_enum getAnagramModEnum(uint8_t index) {
+    // if(index >= NUM_ANAGRAM_MODS) {
+    //   DEBUG1_LN("ERROR: anagram mod index out of bounds");
+    //   exit(1);
+    // }
     return (mod_enum) anagram_mod_indices[index];
   }
 

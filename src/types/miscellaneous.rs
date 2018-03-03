@@ -28,7 +28,8 @@ pub struct KmapFormat(Vec<Vec<SwitchPos>>);
 #[serde(deny_unknown_fields)]
 pub struct KmapInfo {
     pub file: KmapPath,
-    #[serde(default = "return_false")] pub use_words: bool,
+    #[serde(default = "return_false")]
+    pub use_words: bool,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
@@ -43,7 +44,8 @@ pub enum SeqType {
 #[serde(deny_unknown_fields)]
 pub struct ModeInfo {
     pub keymaps: Vec<KmapInfo>,
-    #[serde(default = "return_false")] pub gaming: bool,
+    #[serde(default = "return_false")]
+    pub gaming: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
@@ -340,7 +342,20 @@ impl Sequence {
         Sequence(Vec::new())
     }
 
+    // Flatten a list of sequences into a single sequence containing all of
+    // their keypresses.
+    pub fn flatten(seqs: &[&Sequence]) -> Sequence {
+        Sequence(
+            seqs.into_iter()
+                .flat_map(|seq| seq.keypresses().cloned())
+                .collect(),
+        )
+    }
+
     pub fn extend(&mut self, other: Sequence) {
+        // TODO unused?
+        // TODO let this take a reference or iter or something? Instead of
+        // cloning the sequence first.
         self.0.extend(other.0)
     }
 

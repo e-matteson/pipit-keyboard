@@ -285,7 +285,7 @@ fn format_compound_array(
     is_extern: bool,
 ) -> Result<CFiles, Error> {
     // TODO prepend underscore? special meaning?
-    let mut subarray_names: Vec<_> = (0..values.len())
+    let subarray_names: Vec<_> = (0..values.len())
         .map(|x| CCode(format!("{}_{}", name, x)))
         .collect();
     let mut g = Vec::new();
@@ -299,7 +299,7 @@ fn format_compound_array(
         });
     }
 
-    subarray_names.push("NULL".to_c());
+    // subarray_names.push("NULL".to_c());
     g.push(CTree::Array {
         name: name.to_owned(),
         values: subarray_names,

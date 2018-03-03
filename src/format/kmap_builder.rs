@@ -1,33 +1,49 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
-use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, KmapPath,
-            Name, SeqType, Sequence, ToC};
+use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
+            SeqType, Sequence, ToC};
 
-use types::errors::LookupErr;
+// use types::errors::LookupErr;
 use failure::Error;
 
-type SeqMap = BTreeMap<Name, Sequence>;
-type ChordMap = BTreeMap<Name, Chord>;
-type LenMap = BTreeMap<usize, Vec<Name>>;
+type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
+// type ChordMap = BTreeMap<Name, Chord>;
+type LenMap = BTreeMap<LenAndAnagram, Vec<Name>>;
 
 // TODO refactor this whole file
 // At least be more consistent about terminology
 
-pub struct KmapBuilder<'a> {
-    seq_type: SeqType, // word, plain, macro, or command
-    seq_map: &'a SeqMap,
-    chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
-    kmap_nicknames: BTreeMap<KmapPath, String>,
-    huffman_table: &'a HuffmanTable,
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
+struct LenAndAnagram {
+    pub length: usize,
+    pub anagram: AnagramNum,
 }
 
-struct ChordEntry {
-    chord: Chord,
-    offset: u8,
+pub struct KmapBuilder<'a> {
+    pub kmap_nickname: String,
+    pub chord_map: &'a BTreeMap<Name, Chord>,
+    pub seq_maps: &'a SeqMap,
+    pub huffman_table: &'a HuffmanTable,
 }
 
 c_struct!(
     struct KmapStruct {
+        lookups_by_seq_type: CCode
+    }
+);
+
+c_struct!(
+    struct LookupsOfSeqType {
+        num_lookups: usize,
+        lookups: CCode
+    }
+);
+
+c_struct!(
+    struct LookupOfLength {
+        sequence_bit_length: usize,
+        anagram_number: AnagramNum,
+        num_chords: usize,
         chords: CCode,
         sequences: CCode
     }
@@ -35,341 +51,156 @@ c_struct!(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-fn make_kmap_nicknames(
-    kmap_paths: Vec<&KmapPath>,
-) -> BTreeMap<KmapPath, String> {
-    kmap_paths
-        .into_iter()
-        .enumerate()
-        .map(|(i, kmap)| (kmap.to_owned(), format!("kmap{}", i)))
-        .collect()
-}
-
 impl<'a> KmapBuilder<'a> {
-    pub fn new(
-        seq_type: SeqType,
-        seq_map: &'a SeqMap,
-        chord_maps: &'a BTreeMap<KmapPath, ChordMap>,
-        huffman_table: &'a HuffmanTable,
-    ) -> KmapBuilder<'a> {
-        KmapBuilder {
-            seq_type: seq_type,
-            seq_map: seq_map,
-            chord_maps: chord_maps,
-            kmap_nicknames: make_kmap_nicknames(chord_maps.keys().collect()),
-            huffman_table: huffman_table,
+    pub fn render(&self) -> Result<(CTree, CCode), Error> {
+        let mut g = Vec::new();
+        let mut seq_type_names = Vec::new();
+
+        for &seq_type in self.seq_maps.keys() {
+            let grouped_names = self.group_names(seq_type)?;
+            let (tree, struct_names) =
+                self.make_lookups_of_length(seq_type, &grouped_names)?;
+            g.push(tree);
+
+            let (tree, struct_name) =
+                self.make_lookups_of_seq_type(seq_type, struct_names);
+            g.push(tree);
+            seq_type_names.push(struct_name);
         }
+        let (tree, kmap_struct_name) = self.make_kmap(seq_type_names);
+        g.push(tree);
+        Ok((CTree::Group(g), kmap_struct_name))
     }
 
-    pub fn render(&self) -> Result<(CTree, BTreeMap<KmapPath, CCode>), Error> {
-        // TODO don't make chord and seq array names in more than one place?
-        // TODO skip words for kmap if never used? gcc seems to optimize them
-        // away...
-        let names_by_len = self.make_length_map()?;
-
-        let seq_arrays = self.make_seq_arrays(&names_by_len);
-        let chord_arrays = self.make_chord_arrays(&names_by_len)?;
-
-        let seq_array_name = self.make_seq_array_name();
+    fn make_kmap(&self, seq_type_names: Vec<CCode>) -> (CTree, CCode) {
+        let kmap_struct_name = format!("{}_lookups", self.kmap_nickname).to_c();
+        let array_name = format!("{}_array", kmap_struct_name).to_c();
 
         let mut g = Vec::new();
-        g.push(self.render_seq_arrays(&seq_arrays, seq_array_name.clone())?);
-        g.push(self.render_chord_arrays(&chord_arrays)?);
-
-        let mut struct_names_out = BTreeMap::new();
-        for kmap in chord_arrays.keys() {
-            let chord_array_name = self.make_chord_array_name(kmap)?;
-            let kmap_struct = KmapStruct {
-                chords: chord_array_name.clone(),
-                sequences: seq_array_name.clone(),
-            };
-            let struct_name = self.make_lookup_struct_name(kmap);
-            g.push(kmap_struct.render(struct_name.clone()));
-            struct_names_out.insert(kmap.clone(), struct_name);
-        }
-        Ok((CTree::Group(g), struct_names_out))
+        g.push(CTree::Array {
+            name: array_name.clone(),
+            values: CCode::map_prepend("&", &seq_type_names),
+            // TODO wrong type?
+            c_type: "LookupsOfSeqType*".to_c(),
+            is_extern: false,
+        });
+        g.push(
+            KmapStruct {
+                lookups_by_seq_type: array_name,
+            }.render(kmap_struct_name.clone()),
+        );
+        (CTree::Group(g), kmap_struct_name)
     }
 
-    fn render_chord_arrays(
+    fn make_lookups_of_seq_type(
         &self,
-        chord_arrays: &BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>,
-    ) -> Result<CTree, Error> {
-        // TODO be consistent about "array" / "subarray" terminology
+        seq_type: SeqType,
+        lookups_of_length: Vec<CCode>,
+    ) -> (CTree, CCode) {
         let mut g = Vec::new();
-        let mut array_names: Vec<CCode> = Vec::new();
-        for (kmap, length_entries) in chord_arrays {
-            let length_ints: Vec<Vec<CCode>> = length_entries
+
+        let num_lookups = lookups_of_length.len();
+        let struct_name =
+            format!("{}_{}_lookups", self.kmap_nickname, seq_type).to_c();
+        let array_name = format!("{}_array", struct_name).to_c();
+
+        g.push(CTree::Array {
+            name: array_name.clone(),
+            values: CCode::map_prepend("&", &lookups_of_length),
+            c_type: "LookupOfLength*".to_c(),
+            is_extern: false,
+        });
+
+        g.push(
+            LookupsOfSeqType {
+                num_lookups: num_lookups,
+                lookups: array_name,
+            }.render(struct_name.clone()),
+        );
+
+        (CTree::Group(g), struct_name)
+    }
+
+    fn make_lookups_of_length(
+        &self,
+        seq_type: SeqType,
+        grouped_names: &LenMap,
+    ) -> Result<(CTree, Vec<CCode>), Error> {
+        // TODO split into smaller functions?
+        let mut g = Vec::new();
+        let mut struct_names = Vec::new();
+
+        for (info, names) in grouped_names {
+            let struct_name = format!(
+                "{}_{}_len{}_anagram{}",
+                self.kmap_nickname, seq_type, info.length, info.anagram.0
+            ).to_c();
+
+            let seqs_name = format!("{}_seqs", struct_name).to_c();
+            let chords_name = format!("{}_chords", struct_name).to_c();
+
+            let chord_bytes: Vec<_> = names
                 .iter()
-                .map(|subarray| flatten_chord_entries(subarray))
+                .flat_map(|name| self.chord_map[name].to_c_bytes())
                 .collect();
 
-            let array_name = self.make_chord_array_name(kmap)?;
-            g.push(CTree::CompoundArray {
-                name: array_name.clone(),
-                values: length_ints,
-                subarray_type: "uint8_t".to_c(),
+            let seqs: Vec<_> = names
+                .iter()
+                .map(|name| &self.seq_maps[&seq_type][name])
+                .collect();
+
+            let seq_bytes =
+                Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
+
+            let lookup_struct = LookupOfLength {
+                sequence_bit_length: info.length,
+                anagram_number: info.anagram,
+                num_chords: names.len(),
+                chords: chords_name.clone(),
+                sequences: seqs_name.clone(),
+            };
+
+            g.push(CTree::Array {
+                name: chords_name,
+                values: chord_bytes,
+                c_type: "uint8_t".to_c(),
                 is_extern: false,
             });
-            array_names.push(array_name);
+
+            g.push(CTree::Array {
+                name: seqs_name,
+                values: seq_bytes,
+                c_type: "uint8_t".to_c(),
+                is_extern: false,
+            });
+
+            g.push(lookup_struct.render(struct_name.clone()));
+            struct_names.push(struct_name);
         }
-        Ok(CTree::Group(g))
+        Ok((CTree::Group(g), struct_names))
     }
 
-    fn render_seq_arrays(
-        &self,
-        seq_arrays: &[Sequence],
-        name: CCode,
-    ) -> Result<CTree, Error> {
-        // TODO huh? doesn't it map over sequences?
-        let byte_arrays: Result<Vec<_>, Error> = seq_arrays
-            .iter()
-            .map(|seq| seq.as_bytes(&self.huffman_table))
-            .collect();
+    fn group_names(&self, seq_type: SeqType) -> Result<LenMap, Error> {
+        // Group names by the lengths of their sequences and their anagram
+        // numbers.
+        let mut grouped_names = BTreeMap::new();
 
-        Ok(CTree::CompoundArray {
-            name: name,
-            values: byte_arrays?,
-            subarray_type: "uint8_t".to_c(),
-            is_extern: false,
-        })
-    }
+        let names_in_kmap: BTreeSet<_> = self.chord_map.keys().collect();
+        let names_of_type: BTreeSet<_> =
+            self.seq_maps[&seq_type].keys().collect();
 
-    fn make_seq_arrays(&self, names_by_len: &LenMap) -> Vec<Sequence> {
-        let mut seq_arrays = Vec::new();
-        for length in 0..max_len(names_by_len) + 1 {
-            let subarray = names_by_len
-                .get(&length)
-                .map_or_else(Sequence::new, |names| {
-                    make_flat_sequence(self.seq_map, names)
-                });
-            seq_arrays.push(subarray);
-        }
-        seq_arrays
-    }
+        for &name in names_in_kmap.intersection(&names_of_type) {
+            let info = LenAndAnagram {
+                length: self.seq_maps[&seq_type][name]
+                    .formatted_length(&self.huffman_table)?,
+                anagram: self.chord_map[name].anagram_num,
+            };
 
-    fn make_chord_arrays(
-        &self,
-        names_by_len: &LenMap,
-    ) -> Result<BTreeMap<KmapPath, Vec<Vec<ChordEntry>>>, Error> {
-        let mut chord_arrays = BTreeMap::new();
-        for kmap in self.chord_maps.keys() {
-            let mut kmap_array = Vec::new();
-            // TODO inclusive range
-            for length in 0..max_len(names_by_len) + 1 {
-                kmap_array.push(self.make_chord_subarray(
-                    names_by_len,
-                    length,
-                    kmap,
-                )?);
-            }
-            chord_arrays.insert(kmap.to_owned(), kmap_array);
-        }
-        Ok(chord_arrays)
-    }
-
-    fn make_chord_subarray(
-        &self,
-        names_by_len: &LenMap,
-        length: usize,
-        kmap: &KmapPath,
-    ) -> Result<Vec<ChordEntry>, Error> {
-        let chords = &self.chord_maps[kmap];
-        let mut entries = Vec::new();
-        if let Some(names) = names_by_len.get(&length) {
-            let mut last_index: usize = 0;
-            for (index, name) in names.iter().enumerate() {
-                if !chords.contains_key(name) {
-                    continue;
-                }
-                // TODO use helper for lookup and error
-                // TODO remove annotations
-                let chord: Result<&Chord, Error> =
-                    chords.get(name).ok_or_else(|| {
-                        LookupErr {
-                            key: name.to_string(),
-                            container: "chord".into(),
-                        }.into()
-                    });
-                // ?
-                // .to_owned();
-                entries.push(ChordEntry {
-                    offset: (index - last_index) as u8,
-                    chord: chord?.to_owned(),
-                });
-                last_index = index;
-            }
-        }
-        // blank entry marks the end of the array
-        entries.push(ChordEntry::new());
-        Ok(entries)
-    }
-
-    fn make_length_map(&self) -> Result<LenMap, Error> {
-        // collect names by the lengths of their sequences
-        let mut names_by_len = BTreeMap::new();
-        let mut names: Vec<_> = self.seq_map.keys().collect();
-        names.sort();
-        for name in names {
-            let length =
-                self.seq_map[name].formatted_length(&self.huffman_table)?;
-            names_by_len
-                .entry(length)
+            grouped_names
+                .entry(info)
                 .or_insert_with(Vec::new)
                 .push(name.to_owned());
         }
-        Ok(self.reorder_length_map(names_by_len))
+        Ok(grouped_names)
     }
-
-    fn reorder_length_map(&self, names_by_len: LenMap) -> LenMap {
-        /// Alternately pick one name from each kmap, so no 2
-        /// successive chords
-        /// for a kmap will be too far apart.
-        // Find the first name that's used in the given kmap.
-        let find_name = |names: &Vec<Name>, kmap: &KmapPath| {
-            names
-                .iter()
-                .position(|name| self.chord_maps[kmap].contains_key(name))
-        };
-
-        let mut new_map: LenMap = BTreeMap::new();
-        for (length, mut names) in names_by_len {
-            let mut v: Vec<Name> = Vec::new();
-            let mut remaining_kmaps: Vec<_> = self.chord_maps.keys().collect();
-            while !names.is_empty() {
-                // For each entry/sequence:
-                if remaining_kmaps.len() <= 1 {
-                    // Just dump in all the remaining entries.
-                    v.extend(names.clone());
-                    // Done with this length!
-                    break;
-                }
-                for kmap in remaining_kmaps.clone() {
-                    match find_name(&names, kmap) {
-                        Some(position) => {
-                            // Move the entry to the new map
-                            v.push(names[position].clone());
-                            names.swap_remove(position);
-                        }
-                        None => {
-                            // All of this kmap's entries have already been
-                            // moved.
-                            // Skip it from now on.
-                            let kmap_index = remaining_kmaps
-                                .iter()
-                                .position(|&x| x == kmap)
-                                .unwrap();
-                            remaining_kmaps.remove(kmap_index);
-                        }
-                    }
-                }
-            }
-            new_map.insert(length, v);
-        }
-        new_map
-    }
-
-    fn get_kmap_nickname(&self, kmap: &KmapPath) -> Result<String, Error> {
-        self.kmap_nicknames
-            .get(kmap)
-            .ok_or_else(|| {
-                LookupErr {
-                    key: kmap.to_string(),
-                    container: "kmap nicknames".into(),
-                }.into()
-            })
-            .map(|s| s.to_owned())
-    }
-
-    fn make_chord_array_name(&self, kmap: &KmapPath) -> Result<CCode, Error> {
-        Ok(CCode(format!(
-            "{}_{}_chord_lookup",
-            self.seq_type.to_string(),
-            self.get_kmap_nickname(kmap)?
-        )))
-    }
-
-    fn make_seq_array_name(&self) -> CCode {
-        CCode(format!("{}_seq_lookup", self.seq_type.to_string()))
-    }
-
-    fn make_lookup_struct_name(&self, kmap: &KmapPath) -> CCode {
-        CCode(format!(
-            "{}_{}_struct",
-            self.seq_type.to_string(),
-            self.kmap_nicknames.get(kmap).expect("kmap name not found")
-        ))
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-impl ChordEntry {
-    fn new() -> ChordEntry {
-        ChordEntry {
-            chord: Chord::new(),
-            offset: 0,
-        }
-    }
-
-    fn to_bytes(&self) -> Vec<u8> {
-        // TODO temporary!
-        let mut v = self.make_prefix_byte();
-        v.extend(self.chord.to_bytes());
-        v
-        // self.chord.to_bytes()
-    }
-
-    pub fn to_c_bytes(&self) -> Vec<CCode> {
-        self.to_bytes().into_iter().map(|x| x.to_c()).collect()
-    }
-
-    fn make_prefix_byte(&self) -> Vec<u8> {
-        // This format must match Lookup::readOffset() and
-        // Lookup::readAnagramNum()!
-        // Offset and anagram bits fit into 1 byte, so must add up to 8.
-        const NUM_OFFSET_BITS: u32 = 5; // (least significant)
-        const NUM_ANAGRAM_BITS: u32 = 3; // (most significant)
-
-        let max_offset = (2u32.pow(NUM_OFFSET_BITS) - 1) as u8;
-        let max_anagram = (2u32.pow(NUM_ANAGRAM_BITS) - 1) as u8;
-
-        if self.offset > max_offset {
-            panic!("offset is too large - too many layouts?");
-        }
-
-        if self.chord.anagram_num.0 > max_anagram {
-            panic!("anagram num is too large");
-        }
-        assert_eq!(max_anagram, AnagramNum::max_allowable());
-
-        let msb = self.chord
-            .anagram_num
-            .0
-            .checked_shl(NUM_OFFSET_BITS)
-            .expect("failed to shift when making prefix byte");
-        let lsb = self.offset;
-        vec![msb + lsb]
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-fn make_flat_sequence(seq_map: &SeqMap, names: &[Name]) -> Sequence {
-    let mut flat_seq = Sequence::new();
-    for name in names {
-        flat_seq.extend(seq_map[name].clone());
-    }
-    flat_seq
-}
-
-fn max_len(names_by_len: &LenMap) -> usize {
-    *names_by_len.keys().max().unwrap_or(&0)
-}
-
-fn flatten_chord_entries(entries: &[ChordEntry]) -> Vec<CCode> {
-    let mut v = Vec::new();
-    for entry in entries {
-        v.extend(entry.to_c_bytes());
-    }
-    v
 }

@@ -1,15 +1,13 @@
 use std::collections::BTreeMap;
 
-use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, SeqType,
-            ToC};
-use types::errors::LookupErr;
+use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, ToC};
+// use types::errors::LookupErr;
 use failure::Error;
 
 pub struct ModeBuilder<'a> {
-    pub info: &'a ModeInfo,
-    pub kmap_struct_names: &'a BTreeMap<SeqType, BTreeMap<KmapPath, CCode>>,
-    pub seq_types: Vec<SeqType>,
     pub mode_name: &'a ModeName,
+    pub info: &'a ModeInfo,
+    pub kmap_struct_names: &'a BTreeMap<KmapPath, CCode>,
     pub mod_chords: Vec<Chord>,
     pub anagram_chords: Vec<Chord>,
 }
@@ -30,7 +28,10 @@ c_struct!(
 impl<'a> ModeBuilder<'a> {
     pub fn render(&self) -> Result<(CTree, CCode), Error> {
         let mut g = Vec::new();
-        let (tree, kmap_array_name) = self.render_kmap_array()?;
+        let (tree, kmap_array_name, num_kmaps) = self.render_kmap_array()?;
+        g.push(tree);
+
+        let (tree, mod_array_name) = self.render_modifier_array();
         g.push(tree);
 
         let (tree, anagram_array_name) = self.render_anagram_array();
@@ -39,15 +40,12 @@ impl<'a> ModeBuilder<'a> {
         let (tree, anagram_mask_name) = self.render_anagram_mask();
         g.push(tree);
 
-        let (tree, mod_array_name) = self.render_modifier_array();
-        g.push(tree);
-
         let mode_struct = ModeStruct {
-            num_kmaps: self.info.keymaps.len() as u8, // TODO warn if too long!
-            kmaps: kmap_array_name.to_c(),
-            mod_chords: mod_array_name.to_c(),
-            anagram_chords: anagram_array_name.to_c(),
-            anagram_mask: anagram_mask_name.to_c(),
+            num_kmaps: num_kmaps as u8, // TODO warn if too long!
+            kmaps: kmap_array_name,
+            mod_chords: mod_array_name,
+            anagram_chords: anagram_array_name,
+            anagram_mask: anagram_mask_name,
             is_gaming: self.info.gaming,
         };
         let mode_struct_name = format!("{}_struct", self.mode_name).to_c();
@@ -55,67 +53,30 @@ impl<'a> ModeBuilder<'a> {
         Ok((CTree::Group(g), mode_struct_name))
     }
 
-    fn get_kmap_struct_names(
-        &self,
-        seq_type: SeqType,
-        kmap: &KmapPath,
-    ) -> Result<CCode, Error> {
-        let first_lookup: Result<_, Error> =
-            self.kmap_struct_names.get(&seq_type).ok_or_else(|| {
-                LookupErr {
-                    key: format!("{:?}", seq_type),
-                    container: "struct names by sequence type".into(),
-                }.into()
-            });
-
-        first_lookup?
-            .get(kmap)
-            .ok_or_else(|| {
-                LookupErr {
-                    key: kmap.to_string(),
-                    container: "struct names by kmap".into(),
-                }.into()
-            })
-            .map(|c| c.to_owned())
-    }
-
-    fn render_kmap_array(&self) -> Result<(CTree, CCode), Error> {
+    fn render_kmap_array(&self) -> Result<(CTree, CCode, usize), Error> {
         let mut g = Vec::new();
-        let mut subarray_names = Vec::new();
-        for &seq_type in &self.seq_types {
-            let mut contents = Vec::new();
 
-            for kmap_info in &self.info.keymaps {
-                contents.push(if seq_type == SeqType::Word
-                    && !kmap_info.use_words
-                {
-                    "NULL".to_c()
-                } else {
-                    format!(
-                        "&{}",
-                        self.get_kmap_struct_names(seq_type, &kmap_info.file)?,
-                    ).to_c()
-                });
-            }
-            let name =
-                format!("{}_{}_kmap_array", self.mode_name, seq_type).to_c();
-            subarray_names.push(name.clone());
-            g.push(CTree::Array {
-                name: name,
-                values: contents,
-                c_type: "KmapStruct*".to_c(),
-                is_extern: false,
-            });
-        }
+        let array_name = format!("{}_kmaps_array", self.mode_name).to_c();
 
-        let array_name_out = format!("{}_kmap_arrays", self.mode_name).to_c();
+        let contents: Vec<_> = self.info
+            .keymaps
+            .iter()
+            .map(|info| {
+                self.kmap_struct_names
+                    .get(&info.file)
+                    .expect("no struct name was found for kmap")
+                    .to_owned()
+            })
+            .collect();
+
         g.push(CTree::Array {
-            name: array_name_out.clone(),
-            values: subarray_names,
-            c_type: "KmapStruct**".to_c(),
+            name: array_name.clone(),
+            values: CCode::map_prepend("&", &contents),
+            c_type: "KmapStruct*".to_c(),
             is_extern: false,
         });
-        Ok((CTree::Group(g), array_name_out))
+
+        Ok((CTree::Group(g), array_name, contents.len()))
     }
 
     fn render_anagram_mask(&self) -> (CTree, CCode) {

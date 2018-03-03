@@ -67,6 +67,12 @@ impl From<AnagramNum> for usize {
     }
 }
 
+// impl fmt::Display for AnagramNum {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "{}", self.0)
+//     }
+// }
+
 impl WordConfig {
     fn seq_spelling(&self) -> String {
         self.word.clone()
