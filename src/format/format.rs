@@ -181,34 +181,6 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
     }
 }
 
-fn format_struct_initializer(fields: &[Field]) -> CCode {
-    let mut lines = Vec::new();
-    lines.push("{".into());
-    for field in fields {
-        lines.push(format!("  {}, // {}", field.value, field.name));
-    }
-    lines.push("}".into());
-    CCode(lines.join("\n"))
-}
-
-fn format_struct_instance(
-    name: &CCode,
-    c_type: &CCode,
-    fields: &[Field],
-    is_extern: bool,
-) -> CFiles {
-    // TODO only assign first to 0?
-    let mut c =
-        format!("{}const {} {} = ", format_extern(is_extern), c_type, name)
-            .to_c();
-    c += format_struct_initializer(fields);
-    c += ";\n".to_c();
-    CFiles {
-        h: CCode::new(),
-        c: c,
-    }
-}
-
 fn format_enum_decl(name: &CCode, variants: &[CCode]) -> CFiles {
     // TODO only assign first to 0?
     let contents = variants
@@ -228,19 +200,6 @@ fn format_define(name: &CCode, value: &CCode) -> CFiles {
     CFiles {
         h: CCode(format!("#define {} {}\n", name.to_uppercase(), value)),
         c: CCode::new(),
-    }
-}
-
-fn format_var(
-    name: &CCode,
-    value: &CCode,
-    c_type: &CCode,
-    is_extern: bool,
-) -> CFiles {
-    CFiles {
-        h: format!("{}const {} {};\n", format_extern(is_extern), c_type, name)
-            .to_c(),
-        c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
     }
 }
 
@@ -270,6 +229,7 @@ fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles, Error> {
     f += CFiles::with(&close);
     Ok(f)
 }
+
 fn format_group(v: &[CTree]) -> Result<CFiles, Error> {
     let mut f = CFiles::new();
     for node in v {
@@ -299,7 +259,6 @@ fn format_compound_array(
         });
     }
 
-    // subarray_names.push("NULL".to_c());
     g.push(CTree::Array {
         name: name.to_owned(),
         values: subarray_names,
@@ -309,29 +268,62 @@ fn format_compound_array(
     CTree::Group(g).format()
 }
 
+fn format_var(
+    name: &CCode,
+    value: &CCode,
+    c_type: &CCode,
+    is_extern: bool,
+) -> CFiles {
+    let h = if is_extern {
+        format!("extern const {} {};\n", c_type, name).to_c()
+    } else {
+        CCode::new()
+    };
+    CFiles {
+        h: h,
+        c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
+    }
+}
+
+fn format_struct_instance(
+    name: &CCode,
+    c_type: &CCode,
+    fields: &[Field],
+    is_extern: bool,
+) -> CFiles {
+    format_var(name, &format_struct_initializer(fields), c_type, is_extern)
+}
+
+fn format_struct_initializer(fields: &[Field]) -> CCode {
+    let mut lines = Vec::new();
+    lines.push("{".into());
+    for field in fields {
+        lines.push(format!("  {}, // {}", field.value, field.name));
+    }
+    lines.push("}".into());
+    CCode(lines.join("\n"))
+}
+
 fn format_array(
     name: &CCode,
     values: &[CCode],
     c_type: &CCode,
     is_extern: bool,
 ) -> CFiles {
-    let contents = make_c_array_contents(values);
-    if is_extern {
-        CFiles {
-            h: CCode(format!("extern const {} {}[];\n", c_type, name)),
-            c: CCode(format!(
-                "extern const {} {}[] = {};\n\n",
-                c_type, name, contents
-            )),
-        }
+    let h = if is_extern {
+        CCode(format!("extern const {} {}[];\n", c_type, name))
     } else {
-        CFiles {
-            h: CCode::new(),
-            c: CCode(format!(
-                "const {} {}[] = {};\n\n",
-                c_type, name, contents
-            )),
-        }
+        CCode::new()
+    };
+
+    CFiles {
+        h: h,
+        c: CCode(format!(
+            "const {} {}[] = {};\n\n",
+            c_type,
+            name,
+            make_c_array_contents(values)
+        )),
     }
 }
 
@@ -366,11 +358,6 @@ where
     }
     let code_lines: Vec<_> = lines.into_iter().map(CCode).collect();
     code_lines
-}
-
-fn format_extern(is_extern: bool) -> CCode {
-    let s = if is_extern { "extern " } else { "" };
-    s.to_c()
 }
 
 fn make_guard_id(h_file_name: &str) -> Result<CCode, Error> {
