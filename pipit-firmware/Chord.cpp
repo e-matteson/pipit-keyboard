@@ -53,6 +53,7 @@ void Chord::copy(const Chord* other){
     chord_bytes[i] = other->chord_bytes[i];
   }
   anagram_num = other->anagram_num;
+  flag_cycle_capital = other->flag_cycle_capital;
 }
 
 void Chord::clear(){
@@ -64,11 +65,42 @@ void Chord::clear(){
     chord_bytes[i] = 0;
   }
   anagram_num = 0;
+  flag_cycle_capital = 0;
 }
 
-bool Chord::hasModCapital() const{
-  return hasMod(conf::getCapitalEnum());
+CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
+  bool has_cap_mod = hasMod(conf::getCapitalEnum());
+
+  if(!flag_cycle_capital) {
+    // The simple case, without cap cycling.
+    if(has_cap_mod) {
+      return CAP_FIRST;
+    }
+    return CAP_DEFAULT;
+  }
+
+  // The complicated case, where we might force capitalized dictionary words to
+  // be lowercase.
+  bool has_literal_shift = 0;
+  for(uint8_t i = 0; i < length; i++) {
+    if(data[i].hasShift()) {
+      has_literal_shift = 1;
+      break;
+    }
+  }
+
+  if(has_literal_shift) {
+    // If the word already contained capitalization, force it all to lowercase.
+    return CAP_NONE;
+  }
+
+  // Otherwise, invert the cap mod.
+  if(has_cap_mod) {
+    return CAP_DEFAULT;
+  }
+  return CAP_FIRST;
 }
+
 
 bool Chord::hasModNospace() const{
   return hasMod(conf::getNospaceEnum());
@@ -197,9 +229,9 @@ void Chord::prepareToCycle(){
   unsetMod(conf::getDoubleEnum());
 }
 
-bool Chord::cycleCapital(){
+void Chord::cycleCapital(){
   prepareToCycle();
-  return toggleMod(conf::getCapitalEnum());
+  flag_cycle_capital ^= 1;
 }
 
 

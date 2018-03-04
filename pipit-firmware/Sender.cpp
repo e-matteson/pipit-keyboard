@@ -55,15 +55,6 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
 // }
 
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
-  Key key;
-
-  if(chord->hasModShorten()) {
-    sendBackspace();
-  }
-
-  if(chord->hasModDouble()) {
-    history->getLastLetterAtCursor(&key);
-  }
 
 #if WORD_SPACE_POSITION == 0
   // doubleMod and shortenMod would be kinda useless with a space here...
@@ -75,30 +66,47 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
   }
 #endif
 
-  history->startEntry(chord, 1);
+  if(chord->hasModShorten()) {
+    sendBackspace();
+  }
 
+  Key key;
+  if(chord->hasModDouble()) {
+    // First, get the letter we want to double from the old history entry.
+    history->getLastLetterAtCursor(&key);
+  }
+
+  // Then, send the letter we want to double, as part of the new history entry.
+  history->startEntry(chord, 1);
   if(chord->hasModDouble()) {
     sendKey(&key);
   }
 
 #if WORD_SPACE_POSITION == 0
-  // doubleMod and shortenMod would be kinda useless with a space here...
   if(!chord->hasModNospace()){
     sendSpace();
   }
 #endif
 
-  // This is the first letter, so capitalize it if necessary
+  CapBehaviorEnum cap_behavior = chord->decideCapBehavior(data, data_length);
+
+  // This is the first letter: adjust capitalization if necessary, and send.
   key.copy(data+0);
-  if(chord->hasModCapital()){
-    key.addMod(MODIFIERKEY_SHIFT&0xff);
+  if(cap_behavior == CAP_FIRST) {
+    key.setShift(1);
+  }
+  else if (cap_behavior == CAP_NONE) {
+    key.setShift(0);
   }
   sendKey(&key);
 
   for(uint8_t i = 1; i<data_length; i++){
-    // This is not the first letter, so send the letter without any modifiers.
     delay(comms->proportionalDelay(data_length));
-    sendKey(data+i);
+    key.copy(data+i);
+    if (cap_behavior == CAP_NONE) {
+      key.setShift(0);
+    }
+    sendKey(&key);
   }
 
 #if WORD_SPACE_POSITION == 1

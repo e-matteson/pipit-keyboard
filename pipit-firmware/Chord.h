@@ -5,6 +5,13 @@
 #include "auto_config.h"
 #include "keycodes.h"
 #include "conf.h"
+#include "Key.h"
+
+enum CapBehaviorEnum {
+  CAP_DEFAULT,
+  CAP_FIRST,
+  CAP_NONE,
+};
 
 class Chord{
 public:
@@ -21,7 +28,7 @@ public:
   void restoreAnagramMods();
   uint8_t getAnagramNum();
   uint8_t cycleAnagram();
-  bool cycleCapital();
+  void cycleCapital();
 
   bool matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const;
   bool isEmpty() const;
@@ -29,7 +36,7 @@ public:
   conf::mode_enum getMode() const;
 
   bool hasMod(conf::mod_enum mod) const;
-  bool hasModCapital() const;
+  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
   bool hasModNospace() const;
   bool hasModDouble() const;
   bool hasModShorten() const;
@@ -68,6 +75,7 @@ private:
   bool mods[NUM_MODIFIERS] = {0};
   uint8_t anagram_num = 0;
   conf::mode_enum mode = (conf::mode_enum) 0;
+  bool flag_cycle_capital = 0;
 };
 
 #endif
