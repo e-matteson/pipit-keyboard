@@ -42,10 +42,10 @@ c_struct!(
 c_struct!(
     struct LookupOfLength {
         sequence_bit_length: usize,
-        anagram_number: AnagramNum,
         num_chords: usize,
         chords: CCode,
-        sequences: CCode
+        sequences: CCode,
+        anagram_number: AnagramNum
     }
 );
 

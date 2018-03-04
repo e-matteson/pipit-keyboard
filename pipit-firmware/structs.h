@@ -33,11 +33,11 @@
 // };
 
 struct LookupOfLength {
-  const uint32_t sequence_bit_length;
-  const uint8_t anagram_number;
-  const uint32_t num_chords;
+  const uint16_t sequence_bit_length;
+  const uint16_t num_chords;
   const uint8_t* chords;
   const uint8_t* sequences;
+  const uint8_t anagram_number;
 };
 
 struct LookupsOfSeqType {
