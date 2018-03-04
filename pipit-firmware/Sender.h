@@ -31,6 +31,7 @@ public:
   History* history;
 
 private:
+  void sendSpace();
   void press(const Report* report);
 
 

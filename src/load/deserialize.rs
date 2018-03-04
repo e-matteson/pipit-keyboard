@@ -45,6 +45,8 @@ validated_struct!{
         pub rgb_led_pins: Option<[Pin; 3]>,
         pub battery_level_pin: Option<Pin>,
 
+        pub word_space_position: WordSpacePosition,
+
         #[serde(default = "default_output_dir")]
         // TODO validate strings!
         pub output_directory: PathBuf,
@@ -90,6 +92,15 @@ always_valid_enum!{
     }
 }
 
+always_valid_enum!{
+    #[derive(Deserialize, Debug, Clone, Copy)]
+    pub enum WordSpacePosition {
+        Before,
+        After,
+        None,
+    }
+}
+
 #[derive(Deserialize, Debug, Clone, Copy)]
 #[serde(deny_unknown_fields)]
 pub struct Delay(u16);
@@ -99,7 +110,7 @@ pub struct Delay(u16);
 impl OptionsConfig {
     pub fn to_vec(&self) -> Vec<CTree> {
         let mut ops = self.get_literal_ops();
-        ops.extend(self.get_auto());
+        ops.extend(self.get_auto_ops());
         ops
     }
 
@@ -148,6 +159,10 @@ impl OptionsConfig {
                 name: "DEBUG_MESSAGES".to_c(),
                 value: self.debug_messages.to_c(),
             },
+            CTree::Define {
+                name: "WORD_SPACE_POSITION".to_c(),
+                value: self.word_space_position.to_c(),
+            },
             CTree::Ifdef {
                 name: self.board_name.to_c(),
                 value: true,
@@ -194,18 +209,7 @@ impl OptionsConfig {
         ops
     }
 
-    fn firmware_order(&self) -> Vec<SwitchPos> {
-        // must match the algorithm used in the firmware's scanMatrix()!
-        let mut order: Vec<SwitchPos> = Vec::new();
-        for c in &self.column_pins {
-            for r in &self.row_pins {
-                order.push(SwitchPos::new(*r, *c));
-            }
-        }
-        order
-    }
-
-    fn get_auto(&self) -> Vec<CTree> {
+    fn get_auto_ops(&self) -> Vec<CTree> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
         let has_battery = self.battery_level_pin.is_some();
@@ -261,6 +265,17 @@ impl OptionsConfig {
     fn num_bytes_in_chord(&self) -> usize {
         round_up_to_num_bytes(self.num_matrix_positions())
     }
+
+    fn firmware_order(&self) -> Vec<SwitchPos> {
+        // must match the algorithm used in the firmware's scanMatrix()!
+        let mut order: Vec<SwitchPos> = Vec::new();
+        for c in &self.column_pins {
+            for r in &self.row_pins {
+                order.push(SwitchPos::new(*r, *c));
+            }
+        }
+        order
+    }
 }
 
 impl ToC for BoardName {
@@ -278,6 +293,16 @@ impl ToC for Verbosity {
             Verbosity::None => 0,
             Verbosity::Some => 1,
             Verbosity::All => 2,
+        }.to_c()
+    }
+}
+
+impl ToC for WordSpacePosition {
+    fn to_c(self) -> CCode {
+        match self {
+            WordSpacePosition::Before => 0,
+            WordSpacePosition::After => 1,
+            WordSpacePosition::None => 2,
         }.to_c()
     }
 }

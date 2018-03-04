@@ -45,6 +45,15 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
   history->endEntry();
 }
 
+// void Sender::maybeSendSpace(bool nospaceMod) {
+//   // Used for prepending or appending spaces to words, unless the no-space modifier is pressed.
+//   if(!nospaceMod){
+//     Key key;
+//     key.set(KEY_SPACE&0xff, 0);
+//     sendKey(&key);
+//   }
+// }
+
 void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
   Key key;
   bool capitalMod = chord->hasModCapital();
@@ -57,16 +66,16 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
 
   history->startEntry(chord, 1);
 
-  // TODO doubleMod without nospace is kinda useless...
   if(doubleMod) {
     sendKey(&key);
   }
 
-  // Prepend space to the start of word, unless the no-space modifier is pressed.
-  if(!nospaceMod){
-    key.set(KEY_SPACE&0xff, 0);
-    sendKey(&key);
+#if WORD_SPACE_POSITION == 0
+  if(!nospaceMod && !doubleMod){
+    // doubleMod would be kinda useless if there was a prepended space...
+    sendSpace();
   }
+#endif
 
   // This is the first letter, so capitalize it if necessary
   key.copy(data+0);
@@ -81,9 +90,16 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
     sendKey(data+i);
   }
 
+#if WORD_SPACE_POSITION == 1
+  if(!nospaceMod){
+    sendSpace();
+  }
+#endif
+
   sendRelease();
   history->endEntry();
 }
+
 
 void Sender::sendRelease(){
   sendKeyAndMod(0,0);
@@ -91,6 +107,10 @@ void Sender::sendRelease(){
 
 void Sender::sendBackspace(){
   sendKeyAndMod(KEY_BACKSPACE&0xff, 0);
+}
+
+void Sender::sendSpace() {
+  sendKeyAndMod(KEY_SPACE&0xff, 0);
 }
 
 void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
