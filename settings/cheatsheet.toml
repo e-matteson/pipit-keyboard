@@ -164,6 +164,7 @@ keys = [
   "mod_capital",
   "mod_nospace",
   "mod_double",
+  "mod_backspace",
 
 ]
 

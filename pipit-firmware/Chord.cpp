@@ -58,7 +58,7 @@ void Chord::copy(const Chord* other){
 void Chord::clear(){
   mode = (conf::mode_enum) 0;
   for(uint8_t i = 0; i < NUM_MODIFIERS; i++){
-    mods[i] = 0;
+    unsetMod((conf::mod_enum) i);
   }
   for(uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
@@ -78,17 +78,29 @@ bool Chord::hasModDouble() const{
   return hasMod(conf::getDoubleEnum());
 }
 
+bool Chord::hasModShorten() const{
+  return hasMod(conf::getModShortenEnum());
+}
+
 bool Chord::hasMod(conf::mod_enum mod) const{
   return mods[mod];
+}
+
+void Chord::setModNospace() {
+  setMod(conf::getNospaceEnum());
+}
+
+void Chord::setMod(conf::mod_enum mod) {
+  mods[mod] = 1;
+}
+
+void Chord::unsetMod(conf::mod_enum mod) {
+  mods[mod] = 0;
 }
 
 bool Chord::toggleMod(conf::mod_enum mod){
   mods[mod] ^= 1;
   return mods[mod];
-}
-
-bool Chord::toggleCapital(){
-  return toggleMod(conf::getCapitalEnum());
 }
 
 void Chord::extractPlainMods(){
@@ -160,7 +172,7 @@ bool Chord::extractMod(conf::mod_enum modifier){
   }
 
   // Mod is pressed
-  mods[modifier] = 1;
+  setMod(modifier);
   unsetMask(mod_chord_bytes, chord_bytes);
   return true;
 }
@@ -170,16 +182,38 @@ bool Chord::restoreMod(conf::mod_enum modifier){
   // - add the mod bits to the chord
   // - unset the flag
   // - return true
-  bool was_set = mods[modifier];
+  bool was_set = hasMod(modifier);
   if(was_set){
-    mods[modifier] = 0;
+    unsetMod(modifier);
     setMask(conf::getModChord(mode, modifier), chord_bytes);
   }
   return was_set;
 }
 
+void Chord::prepareToCycle(){
+  // Unset mods that affect the previous word, by backspacing or doubling letters.
+  // We don't want to repeat those effects every time we cycle it.
+  unsetMod(conf::getModShortenEnum());
+  unsetMod(conf::getDoubleEnum());
+}
+
+bool Chord::cycleCapital(){
+  prepareToCycle();
+  return toggleMod(conf::getCapitalEnum());
+}
+
 
 /********** Anagram manipulation ***********/
+
+uint8_t Chord::cycleAnagram(){
+  prepareToCycle();
+  // Unset old mod flag
+  setAnagramModFlag(anagram_num, 0);
+  anagram_num = (anagram_num + 1) % NUM_ANAGRAMS;
+  // Set new mod flag
+  setAnagramModFlag(anagram_num, 1);
+  return anagram_num;
+}
 
 bool Chord::isAnagramMaskBlank(){
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
@@ -210,17 +244,15 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value){
   if(!doesAnagramHaveMod(anagram_num)){
     return;
   }
-  mods[conf::getAnagramModEnum(anagram_num-1)] = value;
-}
+  // TODO why subtract 1? Can we avoid that...
+  conf::mod_enum mod = conf::getAnagramModEnum(anagram_num-1);
 
-
-uint8_t Chord::cycleAnagramModifier(){
-  // Unset old mod flag
-  setAnagramModFlag(anagram_num, 0);
-  anagram_num = (anagram_num + 1) % NUM_ANAGRAMS;
-  // Set new mod flag
-  setAnagramModFlag(anagram_num, 1);
-  return anagram_num;
+  if (value) {
+    setMod(mod);
+  }
+  else {
+    unsetMod(mod);
+  }
 }
 
 /************* Chord int array operations ********/
@@ -279,7 +311,7 @@ bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
 
 void Chord::printMod() const{
   for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
-    Serial.print(mods[i]);
+    Serial.print(hasMod((conf::mod_enum) i));
     Serial.print(" ");
   }
   Serial.println();

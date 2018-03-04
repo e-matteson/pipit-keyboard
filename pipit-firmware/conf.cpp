@@ -107,4 +107,8 @@ bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {
     return MOD_DOUBLE_ENUM;
   }
 
+  const mod_enum getModShortenEnum() {
+    return MOD_SHORTEN_ENUM;
+  }
+
 }

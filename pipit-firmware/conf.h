@@ -35,6 +35,7 @@ namespace conf {
   const mod_enum getNospaceEnum();
   const mod_enum getCapitalEnum();
   const mod_enum getDoubleEnum();
+  const mod_enum getModShortenEnum();
 
 }
 

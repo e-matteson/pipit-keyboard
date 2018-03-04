@@ -54,32 +54,43 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
 //   }
 // }
 
-void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
+void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
   Key key;
-  bool capitalMod = chord->hasModCapital();
-  bool nospaceMod = chord->hasModNospace();
-  bool doubleMod = chord->hasModDouble();
 
-  if(doubleMod) {
+  if(chord->hasModShorten()) {
+    sendBackspace();
+  }
+
+  if(chord->hasModDouble()) {
     history->getLastLetterAtCursor(&key);
   }
 
+#if WORD_SPACE_POSITION == 0
+  // doubleMod and shortenMod would be kinda useless with a space here...
+  // So they should prevent us from ever prepending a space.
+  // The chord is edited before being stored in the history, so that the nospace
+  // will persist if we cycle the word later.
+  if(chord->hasModShorten() || chord->hasModDouble()) {
+    chord->setModNospace();
+  }
+#endif
+
   history->startEntry(chord, 1);
 
-  if(doubleMod) {
+  if(chord->hasModDouble()) {
     sendKey(&key);
   }
 
 #if WORD_SPACE_POSITION == 0
-  if(!nospaceMod && !doubleMod){
-    // doubleMod would be kinda useless if there was a prepended space...
+  // doubleMod and shortenMod would be kinda useless with a space here...
+  if(!chord->hasModNospace()){
     sendSpace();
   }
 #endif
 
   // This is the first letter, so capitalize it if necessary
   key.copy(data+0);
-  if(capitalMod){
+  if(chord->hasModCapital()){
     key.addMod(MODIFIERKEY_SHIFT&0xff);
   }
   sendKey(&key);
@@ -91,7 +102,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, const Chord* chord){
   }
 
 #if WORD_SPACE_POSITION == 1
-  if(!nospaceMod){
+  if(!chord->hasModNospace()){
     sendSpace();
   }
 #endif

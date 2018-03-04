@@ -14,14 +14,14 @@ public:
   void setChordArray(const uint8_t* chord_bytes);
   void copy(const Chord* chord);
   void setMode(conf::mode_enum _mode);
-  bool toggleCapital();
   void extractPlainMods();
   void extractWordMods();
   void extractAnagramMods();
   void restoreWordMods();
   void restoreAnagramMods();
   uint8_t getAnagramNum();
-  uint8_t cycleAnagramModifier();
+  uint8_t cycleAnagram();
+  bool cycleCapital();
 
   bool matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const;
   bool isEmpty() const;
@@ -32,15 +32,21 @@ public:
   bool hasModCapital() const;
   bool hasModNospace() const;
   bool hasModDouble() const;
+  bool hasModShorten() const;
+  void setModNospace();
 
   void printDebug() const;
 
 private:
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
+  void setMod(conf::mod_enum mod);
+  void unsetMod(conf::mod_enum mod);
   bool toggleMod(conf::mod_enum modifier);
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
+
+  void prepareToCycle();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool doesAnagramHaveMod(uint8_t anagram_num);

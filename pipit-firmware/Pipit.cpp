@@ -332,7 +332,7 @@ void Pipit::cycleLastWordCapital(){
   }
   Chord new_chord;
   new_chord.copy(entry->getChord());
-  new_chord.toggleCapital();
+  new_chord.cycleCapital();
 
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
@@ -361,7 +361,7 @@ void Pipit::cycleLastWordAnagram(){
   Key data[MAX_LOOKUP_DATA_LENGTH];
   uint8_t data_length = 0;
   for(uint8_t i = 0; i <= NUM_ANAGRAMS; i++) {
-    new_chord.cycleAnagramModifier();
+    new_chord.cycleAnagram();
     if(new_chord.getAnagramNum() == original_num){
       // We've tried all the anagram modifiers, stop.
       // (The for loop should stop us too, just in case)

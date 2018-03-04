@@ -86,9 +86,8 @@ struct Switch {
 
 impl CheatSheet {
     pub fn from_toml(path: &str, data: &TutorData) -> CheatSheet {
-        let spec: CheatSheetSpec =
-            toml::from_str(&read_file(path).expect("failed to read"))
-                .expect("failed to parse");
+        let spec: CheatSheetSpec = toml::from_str(&read_file(path).expect("failed to read"))
+            .expect("failed to parse");
         CheatSheet::new(spec, data)
     }
 
@@ -571,6 +570,7 @@ fn get_symbol(key: &Name) -> Symbol {
             ("mod_capital".into(), Symbol::from_lines(&["cap", "mod"], 0.6)),
             ("mod_nospace".into(), Symbol::from_lines(&["no", "space","mod"], 0.5)),
             ("mod_double".into(), Symbol::from_lines(&["double", "mod"], 0.4)),
+            ("mod_shorten".into(), Symbol::from_lines(&["shorten", "mod"], 0.3)),
             ("key_a".into(), Symbol::from("a", 1.)),
             ("key_b".into(), Symbol::from("b", 1.)),
             ("key_c".into(), Symbol::from("c", 1.)),
