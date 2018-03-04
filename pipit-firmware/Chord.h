@@ -36,7 +36,7 @@ public:
   conf::mode_enum getMode() const;
 
   bool hasMod(conf::mod_enum mod) const;
-  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
+  void editCaps( Key* data, uint8_t length) const;
   bool hasModNospace() const;
   bool hasModDouble() const;
   bool hasModShorten() const;
@@ -53,6 +53,7 @@ private:
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
+  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
   void prepareToCycle();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);

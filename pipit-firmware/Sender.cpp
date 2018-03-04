@@ -39,7 +39,7 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
     //  get the key, followed by the modifier.
     key.copy(data+i);
     sendKey(&key);
-    delay(comms->proportionalDelay(data_length));
+    comms->proportionalDelay(data_length, 1);
   }
   sendRelease();
   history->endEntry();
@@ -68,6 +68,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
 
   if(chord->hasModShorten()) {
     sendBackspace();
+    comms->proportionalDelay(data_length, 1);
   }
 
   Key key;
@@ -80,38 +81,29 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
   history->startEntry(chord, 1);
   if(chord->hasModDouble()) {
     sendKey(&key);
+    comms->proportionalDelay(data_length, 1);
   }
 
 #if WORD_SPACE_POSITION == 0
   if(!chord->hasModNospace()){
     sendSpace();
+    comms->proportionalDelay(data_length, 1);
   }
 #endif
 
-  CapBehaviorEnum cap_behavior = chord->decideCapBehavior(data, data_length);
+  Key new_data[data_length];
+  memcpy(new_data, data, data_length*sizeof(Key));
+  chord->editCaps(new_data, data_length);
 
-  // This is the first letter: adjust capitalization if necessary, and send.
-  key.copy(data+0);
-  if(cap_behavior == CAP_FIRST) {
-    key.setShift(1);
-  }
-  else if (cap_behavior == CAP_NONE) {
-    key.setShift(0);
-  }
-  sendKey(&key);
-
-  for(uint8_t i = 1; i<data_length; i++){
-    delay(comms->proportionalDelay(data_length));
-    key.copy(data+i);
-    if (cap_behavior == CAP_NONE) {
-      key.setShift(0);
-    }
-    sendKey(&key);
+  for(uint8_t i = 0; i<data_length; i++){
+    sendKey(new_data+i);
+    comms->proportionalDelay(data_length, 1);
   }
 
 #if WORD_SPACE_POSITION == 1
   if(!chord->hasModNospace()){
     sendSpace();
+    comms->proportionalDelay(data_length, 1);
   }
 #endif
 

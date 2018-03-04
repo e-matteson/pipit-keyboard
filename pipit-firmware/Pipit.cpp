@@ -308,7 +308,7 @@ void Pipit::move(Motion motion, Direction direction){
   uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
   for(int16_t i = 0; i < count; i++){
     sender->sendKeyAndMod(key, 0);
-    delay(6*comms->proportionalDelay(count));
+    comms->proportionalDelay(count, 6);
   }
 }
 
@@ -320,7 +320,7 @@ void Pipit::deleteLastWord(){
     sender->sendBackspace();
     // For some reason the backspaces get dropped more easily then word letters
     //  so add a longer delay between sends.
-    delay(6*comms->proportionalDelay(count));
+    comms->proportionalDelay(count, 6);
   }
 }
 

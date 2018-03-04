@@ -94,21 +94,24 @@ void Comms::warnNoBluetooth(){
   DEBUG1_LN("WARNING: Bluetooth not available.");
 }
 
-uint8_t Comms::proportionalDelay(uint8_t data_length){
+void Comms::proportionalDelay(uint8_t data_length, uint8_t multiplier){
+  delay(multiplier * getDelay(data_length));
+}
+
+uint8_t Comms::getDelay(uint8_t data_length){
 #if defined(TEENSY_LC)
   // Little or no delay is needed between presses over USB
-  return 1;
+  return 0;
 
 #elif defined(FEATHER_M0_BLE)
   // When sending long words/macros over bluetooth, some letters in the middle
   // get lost unless there's a delay between presses. This seems to help, without
   // slowing down short words too much.
   if(data_length > 10){
-    return 3;
+    return 2;
   }
   else{
     return 1;
   }
-
 #endif
 }

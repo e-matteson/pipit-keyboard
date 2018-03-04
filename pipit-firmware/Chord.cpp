@@ -68,6 +68,22 @@ void Chord::clear(){
   flag_cycle_capital = 0;
 }
 
+void Chord::editCaps(Key* data, uint8_t length) const {
+  CapBehaviorEnum behavior = decideCapBehavior(data, length);
+  if(behavior == CAP_FIRST) {
+    data[0].setShift(1);
+  }
+  else if (behavior == CAP_NONE) {
+    data[0].setShift(0);
+  }
+
+  for(uint8_t i = 1; i<length; i++){
+    if (behavior == CAP_NONE) {
+      data[i].setShift(0);
+    }
+  }
+}
+
 CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
   bool has_cap_mod = hasMod(conf::getCapitalEnum());
 
@@ -78,7 +94,6 @@ CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const 
     }
     return CAP_DEFAULT;
   }
-
   // The complicated case, where we might force capitalized dictionary words to
   // be lowercase.
   bool has_literal_shift = 0;

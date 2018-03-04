@@ -19,9 +19,10 @@ public:
   void setup();
   void press(const Report* report);
   bool isConnected();
-  uint8_t proportionalDelay(uint8_t data_length);
+  void proportionalDelay(uint8_t data_length, uint8_t multiplier);
 
 private:
+  uint8_t getDelay(uint8_t data_length);
   void setupBluetooth();
 
   void warnNoBluetooth();
