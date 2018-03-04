@@ -2,8 +2,6 @@
 
 
 Battery::Battery(){
-  // empty_reading = voltageToReading(empty_voltage);
-  // full_reading = voltageToReading(full_voltage);
 }
 
 
@@ -17,37 +15,24 @@ int8_t Battery::getLevel(){
 }
 
 uint16_t Battery::readingToLevel(uint16_t reading){
-  float voltage = readingToVoltage(reading);
-
-  DEBUG1("battery voltage: ");
-  DEBUG1_LN(voltage);
+  DEBUG1("battery reading: ");
+  DEBUG1_LN(reading);
 
   // return map(reading, empty_reading, full_reading, empty_level, full_level);
-  if (voltage > 4.36) {
+  if (reading > 676) {
     return 4;  // plugged in, battery disconnected
   }
-  if (voltage > 3.9) {
+  if (reading > 605) {
     return 3;  // fully charged
   }
-  if (voltage > 3.8) {
+  if (reading > 590) {
     return 2;
   }
-  if (voltage > 3.7) {
+  if (reading > 574) {
     return 1;
   }
   return 0; // nearly dead
 }
-
-float Battery::readingToVoltage(uint16_t reading){
-  // multiply by 2 because of the built-in voltage divider
-  return reading * 2.0 * ref_voltage / 1024.0;
-}
-
-// uint16_t Battery::voltageToReading(float voltage){
-//   return (voltage * 1024.0) / (2.0 * ref_voltage);
-// }
-
-
 
 uint16_t Battery::readBattery(){
 #ifndef HAS_BATTERY
@@ -57,10 +42,11 @@ uint16_t Battery::readBattery(){
 #endif
 }
 
-float Battery::getVoltage(){
-#ifndef HAS_BATTERY
-  return 0;
-#endif
-  return readingToVoltage(readBattery());
+// float Battery::readingToVoltage(uint16_t reading){
+//   // multiply by 2 because of the built-in voltage divider
+//   return reading * 2.0 * ref_voltage / 1024.0;
+// }
 
-}
+// uint16_t Battery::voltageToReading(float voltage){
+//   return (voltage * 1024.0) / (2.0 * ref_voltage);
+// }
