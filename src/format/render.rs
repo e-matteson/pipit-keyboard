@@ -244,7 +244,7 @@ impl HuffmanTable {
             let init = HuffmanChar {
                 bits: name.clone(),
                 num_bits: self.num_bits(key)?,
-                key_code: key.to_owned(),
+                key_code: KeyPress::truncate(key),
                 is_mod: self.is_mod(key)?,
             }.render(CCode::new())
                 .initializer();
