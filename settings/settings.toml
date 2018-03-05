@@ -21,7 +21,7 @@ held_delay                 = 200
 # release), and not an accidental bounce.
 #
 # Required. In milliseconds.
-debounce_delay             = 5
+debounce_delay             = 10
 
 
 # How much debugging info to send over the serial connection. Messages can be

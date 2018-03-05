@@ -245,7 +245,7 @@ key_delete    key_printscreen  key_caps_lock
 ..**	 ....   ....   ..**      ....   **..
 ..**   ....		....   ..**      ....   **..
   .     .       .     .          .     .
-  ... ...  	    ... ...          ... ...
+  ... .*.  	    ... .*.          ... .*.
 
 ###### commands ######
 
@@ -267,9 +267,9 @@ command_pause   command_led_rainbow  command_led_battery  command_led_colors
   .     .         .     .              .     .              .     .
   ... ...         ... .*.              ... .*.              ... .*.
 
-command_left_word   command_right_word    command_left_limit  command_right_limit
-....   ....         ....   ....           ....   ....         ....   ....
-..*.   *...         ...*   *...           .**.   *...         ..**   *...
+command_left_word   command_right_word    command_left_limit   command_right_limit
+..**   ....         ....   **..           ...*   ....         ....   *...
+....   ....         ....   ....           ..*.   ....         ....   .*..
   .     .             .     .               .     .             .     .
   ... .*.             ... .*.               ... .*.             ... .*.
 
