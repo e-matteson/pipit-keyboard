@@ -256,7 +256,7 @@ void Switches::fillChord(Chord* chord){
   }
 }
 
-uint8_t Switches::fillGamingChords(Chord* chords){
+uint8_t Switches::fillGamingSwitches(Chord* chords){
   uint8_t switch_index = 0;
   uint8_t num_chords = 0;
   for(uint8_t byte_num = 0; byte_num != NUM_BYTES_IN_CHORD; byte_num++){

@@ -171,12 +171,12 @@ void Pipit::sendIfReady(){
   if(switches->readyToPress(is_gaming)){
     // Lookup the chord and send the corresponding key sequence.
     if(is_gaming){
-      Chord gaming_chords[NUM_MATRIX_POSITIONS];
+      Chord gaming_switches[NUM_MATRIX_POSITIONS];
       for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
-        gaming_chords[i].setMode(mode);
+        gaming_switches[i].setMode(mode);
       }
-      uint8_t num_chords = switches->fillGamingChords(gaming_chords);
-      processGamingChords(gaming_chords, num_chords);
+      uint8_t num_switches = switches->fillGamingSwitches(gaming_switches);
+      processGamingSwitches(gaming_switches, num_switches);
       return;
     }
 
@@ -253,27 +253,28 @@ void Pipit::processChord(Chord* chord){
   DEBUG1_LN("chord not found");
 }
 
-void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
+void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
   // For gaming modes. Only commands, plain_keys, and plain_mods are
   //  supported. Lookup each individual switch, and if they're plain_keys, send
-  //  them all together at the end. If any switch is a command, do the command
+  //  them all together at the end. If any switch is a command or macro, handle it
   //  immediately and ignore the rest of the switches.
-  // TODO what about macros? double letters won't work, since we disable needsExtraRelease()...
   Report report;
   report.is_gaming = true;
-  for(uint8_t i = 0; i < num_chords; i++){
-    Chord* chord = gaming_chords+i;
+  for(uint8_t i = 0; i < num_switches; i++){
     Key data[MAX_LOOKUP_DATA_LENGTH];
     uint8_t data_length = 0;
 
-    if((data_length=lookup->get(conf::COMMAND, chord, data))){
-      // Some key was a command, do that command and nothing else.
+    Chord* chord = gaming_switches+i;
+    if(sendIfFound(conf::COMMAND, chord, data)){
       doCommand(data[0].key_code);
-      feedback->trigger(conf::COMMAND);
       return;
     }
 
     if(is_paused){
+      return;
+    }
+
+    if(sendIfFound(conf::MACRO, chord, data)){
       return;
     }
 

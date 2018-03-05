@@ -27,7 +27,7 @@ public:
   void setup();
   void update();
   void fillChord(Chord* chord);
-  uint8_t fillGamingChords(Chord* chords);
+  uint8_t fillGamingSwitches(Chord* chords);
   bool readyToPress(bool is_gaming);
   bool readyToRelease(bool is_gaming);
   void reuseMods(Chord* chord);

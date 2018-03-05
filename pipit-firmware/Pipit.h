@@ -47,7 +47,7 @@ private:
   void shutdownIfSquished();
 
   void processChord(Chord* new_chord);
-  void processGamingChords(Chord gaming_chords[], uint8_t num_chords);
+  void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
 
   void doCommand(uint8_t code);
 

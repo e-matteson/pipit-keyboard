@@ -21,7 +21,7 @@ bool Chord::isEmpty() const{
   // Doesn't check the mods, just the current chord bytes.
   // This is important because sendIfEmpty should send mods.
   // TODO abort after 1st set bit?
-  return !any(chord_bytes);
+  return allZeroes(chord_bytes);
 }
 
 uint8_t Chord::getModByte() const{
@@ -200,7 +200,7 @@ bool Chord::extractMod(conf::mod_enum modifier){
   // - set a flag saying it's present
   // - return true
   const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
-  if(!any(mod_chord_bytes)){
+  if(allZeroes(mod_chord_bytes)){
     // Mod is all zeroes - that's how we represent a missing mod chord. Ignore.
     return false;
   }
@@ -266,7 +266,7 @@ bool Chord::isAnagramMaskBlank(){
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
   andMask(conf::getAnagramMask(mode), anagram_bytes);
-  return !any(anagram_bytes);
+  return allZeroes(anagram_bytes);
 }
 
 bool Chord::isExactAnagramPressed(const uint8_t* mod_chord,
@@ -334,15 +334,13 @@ bool Chord::isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) con
   return return_val;
 }
 
-bool Chord::any(const uint8_t* _chord_bytes) const{
+bool Chord::allZeroes(const uint8_t* _chord_bytes) const{
   for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
-    for (uint8_t bit = 0; bit < 8; bit++){
-      if((_chord_bytes[byte] >> bit) % 2){
-        return 1;
-      }
+    if(_chord_bytes[byte]) {
+      return 0;
     }
   }
-  return 0;
+  return 1;
 }
 
 bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{

@@ -12,7 +12,7 @@ void Report::addKey(const Key* key){
     return;
   }
   if(isFull()){
-    DEBUG1_LN("WARNING: Report is full");
+    DEBUG1_LN("WARNING: Report is full, key dropped.");
     return;
   }
   key_codes[num_keys] = key->key_code;

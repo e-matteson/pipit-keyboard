@@ -152,7 +152,6 @@ void Matrix::scan(){
 }
 
 void Matrix::printPressedSwitch(uint8_t c, uint8_t r){
-  // TODO This should get optimized away if DEBUG_MESSAGES < 2, right?
   DEBUG2("pressed: pins (");
   DEBUG2(conf::column_pins[c]);
   DEBUG2(", ");
