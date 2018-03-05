@@ -277,7 +277,7 @@ key_delete    key_printscreen  key_caps_lock
 ..**	 ....   ....   ..**      ....   **..
 ..**   ....		....   ..**      ....   **..
   .     .       .     .          .     .
-  ... ...  	    ... ...          ... ...
+  ... .*.  	    ... .*.          ... .*.
 
 ###### commands ######
 
@@ -286,12 +286,6 @@ command_left_hand_mode  command_gaming_mode
 ....   ....             ....   ....
   .     .                 .     .
   ... ...                 ... ...
-
-# command_builder_mode
-# .*..   ..*.
-# ....   ....
-#   .     .
-#   ... .*.
 
 command_delete_word  command_pause   command_led_rainbow
 ....   ....          ****   ****     ****   ..*.
@@ -306,8 +300,8 @@ command_cycle_word   command_cycle_capital command_led_battery command_led_color
   ... ...              *.. ...               ... .*.             ... .*.
 
 command_left_word   command_right_word    command_left_limit   command_right_limit
-....   ....         ....   ....           ....   ....         ....   ....
-..*.   *...         ...*   *...           .**.   *...         ..**   *...
+..**   ....         ....   **..           ...*   ....         ....   *...
+....   ....         ....   ....           ..*.   ....         ....   .*..
   .     .             .     .               .     .             .     .
   ... .*.             ... .*.               ... .*.             ... .*.
 
@@ -476,10 +470,10 @@ macro_nohlsearch
   ... .*.
 
 macro_compile          macro_error_prev       macro_error_next   macro_eval
-....   ....            ...*   ....            ....   ....        ....   ....
-....   **..            ..*.   ....            ..*.   ..*.        ....   .*..
+....   ....            ....   ....            ....   ....        ....   ....
+....   **..            ..*.   ..*.            ..*.   ..*.        ....   .*..
   .     .                .     .                .     .            .     .
-  ... .*.                ... .*.                ... .*.            ... .*.
+  ... .*.                *.. .*.                ... .*.            ... .*.
 
 macro_dotspacemacs
 .*..   *...
@@ -560,11 +554,11 @@ macro_at_at
 #   .     .
 #   ... .*.
 
-macro_col_eighty       macro_inbox
-....   *...            ....   ....
-....   .*..            .*.*   ....
-  .     .                .     .
-  ... .*.                ... .*.
+macro_inbox
+....   ....
+.*.*   ....
+  .     .
+  ... .*.
 
 # macro_dragon_xfer macro_dragon_toggle
 # ....   ..*.       ....   ..*.

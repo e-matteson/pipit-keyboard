@@ -17,7 +17,7 @@ gaming = true
 
 chord_delay                = 30
 held_delay                 = 200
-debounce_delay             = 7
+debounce_delay             = 10
 debug_messages             = "None"
 word_space_position        = "Before"
 
@@ -666,9 +666,6 @@ macro_prev_search   = [{key="KEY_SLASH"},
                        {key="KEY_UP"},
                        {key="KEY_UP"},
                        {key="KEY_ENTER"}]
-macro_col_eighty    = [{key="KEY_8"},
-                       {key="KEY_0"},
-                       {key="KEY_BACKSLASH", mods=["MODIFIERKEY_SHIFT"]}]
 macro_inbox         = [{key="KEY_SPACE"},
                        {key="KEY_O"},
                        {key="KEY_I"}]
