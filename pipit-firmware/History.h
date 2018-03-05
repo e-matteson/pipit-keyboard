@@ -31,7 +31,6 @@ public:
   History();
   void save(Report* report);
   void startEntry(const Chord* new_chord, bool is_anagrammable);
-  void endEntry();
 
   uint16_t calcDistance(Motion motion, Direction direction);
 
@@ -57,6 +56,7 @@ private:
   void splitAtCursor();
   bool shouldKeyClearHistory(uint8_t key_code, uint8_t mod_byte);
   void clear();
+  void pushNewEntryIfNeeded();
 
   struct Cursor{
     uint8_t word = 0;
@@ -65,8 +65,8 @@ private:
   Cursor cursor;
 
   Entry* stack[HISTORY_SIZE+PADDING] = {0};
-  Entry current;
-  // int16_t current_group_length = 0;
+  Entry new_entry;
+  bool has_new_entry_been_pushed = 1;
 };
 
 

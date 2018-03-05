@@ -8,7 +8,6 @@ History::History(){
   //  insert and remove. This makes it easier to detect when we're at the end
   //  of the history.
   for(uint8_t i = 0; i < HISTORY_SIZE+PADDING; i++){
-    // Assume mode 0 exists and is a reasonable default
     stack[i] = new Entry();
   }
 }
@@ -16,19 +15,8 @@ History::History(){
 void History::startEntry(const Chord* new_chord, bool is_anagrammable){
   // Store the chord we're sending, and whether we're allowed to try anagramming
   //  it later (like a word, but not a macro).
-  current.init(new_chord, is_anagrammable);
-}
-
-void History::endEntry(){
-  if (current.getLength() == 0){
-    // Nothing to add to history.
-    return;
-  }
-  if(!atEdge(RIGHT)){
-    // Split current entry in two, so new entry will be added in the middle.
-    splitAtCursor();
-  }
-  insertAtCursor(&current);
+  new_entry.init(new_chord, is_anagrammable);
+  has_new_entry_been_pushed = 0;
 }
 
 void History::splitAtCursor(){
@@ -75,7 +63,7 @@ void History::remove(uint16_t word_position){
 }
 
 void History::clear(){
-  // Consider the current cursor position 0,0
+  // Consider the current cursor position to be (0,0), wherever that is.
   cursor.word = 0;
   cursor.letter = 0;
   // Set all history entries to zero.
@@ -121,14 +109,32 @@ void History::saveKeyCode(uint8_t key_code, uint8_t mod_byte){
     // If certain keys (movement etc) are sent, clear the entire history
     //  so that movement keys etc don't misalign the history
     //  and cause you to delete the wrong characters.
-    current.clear();
+    new_entry.clear();
     clear();
   }
   else if(key_code > 0){
     // If any other non-zero key is sent, increment the current length.
-    current.setLastLetter(key_code, mod_byte);
-    current.increment();
+    pushNewEntryIfNeeded();
+    getEntryAtCursor()->setLastLetter(key_code, mod_byte);
+    getEntryAtCursor()->increment();
   }
+}
+
+void History::pushNewEntryIfNeeded() {
+  // We procrastinate on pushing the new empty entry on to the stack until the
+  // first time we actually need to increment it. That way, if it's never
+  // incremented, we're not left with a crufty empty entry on the stack
+  // that we need to find and pop.
+  if(has_new_entry_been_pushed) {
+    return;
+  }
+
+  if(!atEdge(RIGHT)){
+    // Split current entry in two, so new entry will be added in the middle.
+    splitAtCursor();
+  }
+  insertAtCursor(&new_entry);
+  has_new_entry_been_pushed = 1;
 }
 
 bool History::shouldKeyClearHistory(uint8_t key_code, uint8_t mod_byte){
@@ -297,10 +303,10 @@ void History::printStack(){
     stack[i]->getLastLetter(&last_key);
 
     Serial.print(stack[i]->getLength());
-    Serial.print(" ");
-    Serial.print(last_key.key_code);
-    Serial.print(" ");
-    Serial.print(last_key.mod_byte);
+    // Serial.print(" ");
+    // Serial.print(last_key.key_code);
+    // Serial.print(" ");
+    // Serial.print(last_key.mod_byte);
     // Serial.print(":");
     // Serial.print(stack[i]->isAnagrammable());
     Serial.print(", ");

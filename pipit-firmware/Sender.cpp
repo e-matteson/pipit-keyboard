@@ -29,7 +29,6 @@ void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord)
     key.addMod(chord->getModByte());
     sendKey(&key);
   }
-  history->endEntry();
 }
 
 void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord){
@@ -42,7 +41,6 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
     comms->proportionalDelay(data_length, 1);
   }
   sendRelease();
-  history->endEntry();
 }
 
 // void Sender::maybeSendSpace(bool nospaceMod) {
@@ -108,7 +106,6 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
 #endif
 
   sendRelease();
-  history->endEntry();
 }
 
 
