@@ -203,7 +203,6 @@ void Pipit::processChord(Chord* chord){
   };
 
   Key data[MAX_LOOKUP_DATA_LENGTH];
-  uint8_t data_length = 0;
 
   // If chord is a known command, do it and return.
   if(sendIfFound(conf::COMMAND, chord, data)){
@@ -262,7 +261,6 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
   report.is_gaming = true;
   for(uint8_t i = 0; i < num_switches; i++){
     Key data[MAX_LOOKUP_DATA_LENGTH];
-    uint8_t data_length = 0;
 
     Chord* chord = gaming_switches+i;
     if(sendIfFound(conf::COMMAND, chord, data)){
@@ -278,6 +276,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
       return;
     }
 
+    uint8_t data_length = 0;
     if((data_length=lookup->get(conf::PLAIN, chord, data))){
       if(data_length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
@@ -331,7 +330,6 @@ void Pipit::cycleLastWordCapital(){
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
   Key data[MAX_LOOKUP_DATA_LENGTH];
-  uint8_t data_length = 0;
   if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
     return; // Success
   }
@@ -352,7 +350,6 @@ void Pipit::cycleLastWordAnagram(){
   uint8_t original_num = new_chord.getAnagramNum();
 
   Key data[MAX_LOOKUP_DATA_LENGTH];
-  uint8_t data_length = 0;
   for(uint8_t i = 0; i <= NUM_ANAGRAMS; i++) {
     new_chord.cycleAnagram();
     if(new_chord.getAnagramNum() == original_num){
