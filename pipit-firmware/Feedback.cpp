@@ -19,23 +19,28 @@ Feedback::Feedback(){
 #endif
 }
 
-void Feedback::triggerPlain(){
-  triggerAudioFeedback(PLAIN_FEEDBACK_CODE);
-  // triggerLEDFeedback(PLAIN_FEEDBACK_ROUTINE);
+void Feedback::trigger(conf::seq_type_enum type){
+  switch(type) {
+    case conf::PLAIN:
+      triggerAudioFeedback(PLAIN_FEEDBACK_CODE);
+      // triggerLEDFeedback(PLAIN_FEEDBACK_ROUTINE);
+      break;
+    case conf::WORD:
+      triggerAudioFeedback(WORD_FEEDBACK_CODE);
+      // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
+      break;
+    case conf::MACRO:
+      triggerAudioFeedback(MACRO_FEEDBACK_CODE);
+      // triggerLEDFeedback(MACRO_FEEDBACK_ROUTINE);
+      break;
+    case conf::COMMAND:
+      triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
+      // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
+      break;
+    default: DEBUG1_LN("seq type has no feedback routine");
+  }
 }
 
-void Feedback::triggerMacro(){
-  triggerAudioFeedback(MACRO_FEEDBACK_CODE);
-  // triggerLEDFeedback(MACRO_FEEDBACK_ROUTINE);
-}
-void Feedback::triggerWord(){
-  triggerAudioFeedback(WORD_FEEDBACK_CODE);
-  // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
-}
-void Feedback::triggerCommand(){
-  triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
-  // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
-}
 void Feedback::triggerUnknown(){
   triggerAudioFeedback(UNKNOWN_FEEDBACK_CODE);
   triggerLEDFeedback(UNKNOWN_FEEDBACK_ROUTINE);
@@ -44,7 +49,6 @@ void Feedback::triggerUnknown(){
 void Feedback::triggerNoAnagram(){
   triggerLEDFeedback(NO_ANAGRAM_FEEDBACK_ROUTINE);
 }
-
 
 void Feedback::triggerAudioFeedback(char feedback_code){
 #ifndef ENABLE_AUDIO_TYPING_FEEDBACK

@@ -206,9 +206,8 @@ void Pipit::processChord(Chord* chord){
   uint8_t data_length = 0;
 
   // If chord is a known command, do it and return.
-  if((data_length=lookup->get(conf::COMMAND, chord, data))){
+  if(sendIfFound(conf::COMMAND, chord, data)){
     doCommand(data[0].key_code);
-    feedback->triggerCommand();
     return;
   }
 
@@ -217,19 +216,15 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known macro, send it and return.
-  if((data_length=lookup->get(conf::MACRO, chord, data))){
-    sender->sendMacro(data, data_length, chord);
-    feedback->triggerMacro();
+  if(sendIfFound(conf::MACRO, chord, data)){
     return;
   }
 
   // If chord is a known word, send it and return.
   chord->extractWordMods();
   chord->extractAnagramMods();
-  if((data_length=lookup->get(conf::WORD, chord, data))){
-    sender->sendWord(data, data_length, chord);
+  if(sendIfFound(conf::WORD, chord, data)){
     switches->reuseMods(chord);
-    feedback->triggerWord();
     return;
   }
 
@@ -240,17 +235,15 @@ void Pipit::processChord(Chord* chord){
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
-  if((data_length=lookup->get(conf::PLAIN, chord, data))){
-    sender->sendPlain(data, data_length, chord);
+  if(sendIfFound(conf::PLAIN, chord, data)){
     switches->reuseMods(chord);
-    feedback->triggerPlain();
     return;
   }
 
   if(sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
     switches->reuseMods(chord);
-    feedback->triggerPlain();
+    feedback->trigger(conf::PLAIN);
   }
   else{
     // Unknown chord, release all keys
@@ -276,7 +269,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
     if((data_length=lookup->get(conf::COMMAND, chord, data))){
       // Some key was a command, do that command and nothing else.
       doCommand(data[0].key_code);
-      feedback->triggerCommand();
+      feedback->trigger(conf::COMMAND);
       return;
     }
 
@@ -290,7 +283,7 @@ void Pipit::processGamingChords(Chord* gaming_chords, uint8_t num_chords){
       }
       report.addKey(data);
       report.addMod(chord->getModByte());
-      feedback->triggerPlain();
+      feedback->trigger(conf::PLAIN);
       continue;
     }
 
@@ -338,20 +331,12 @@ void Pipit::cycleLastWordCapital(){
   // changing, because the history doesn't store the characters in a word.
   Key data[MAX_LOOKUP_DATA_LENGTH];
   uint8_t data_length = 0;
-  if((data_length=lookup->get(conf::WORD, &new_chord, data))){
-    deleteLastWord();
-    sender->sendWord(data, data_length, &new_chord);
-    feedback->triggerWord();
+  if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
     return; // Success
   }
-
-  if((data_length=lookup->get(conf::PLAIN, &new_chord, data))){
-    deleteLastWord();
-    sender->sendPlain(data, data_length, &new_chord);
-    feedback->triggerPlain();
+  if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
     return; // Success
   }
-  // The lookup should never fail...
   feedback->triggerNoAnagram();
 }
 
@@ -375,20 +360,33 @@ void Pipit::cycleLastWordAnagram(){
       feedback->triggerNoAnagram();
       return; // Fail
     }
-    if((data_length=lookup->get(conf::WORD, &new_chord, data))){
-      // This anagram mod was found!
-      deleteLastWord();
-      sender->sendWord(data, data_length, &new_chord);
-      feedback->triggerWord();
+    if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
       return; // Success
     }
-    if((data_length=lookup->get(conf::PLAIN, &new_chord, data))){
-      // This anagram mod was found!
-      deleteLastWord();
-      sender->sendPlain(data, data_length, &new_chord);
-      feedback->triggerPlain();
+    if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
       return; // Success
     }
     // Else, this anagram mod wasn't found, try the next one right away.
   }
+}
+
+uint8_t Pipit::sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data) {
+  return sendIfFoundHelper(type, chord, data, 0);
+}
+
+uint8_t Pipit::sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key* data) {
+  return sendIfFoundHelper(type, chord, data, 1);
+}
+
+uint8_t Pipit::sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first) {
+  uint8_t data_length = lookup->get(type, chord, data);
+  if(data_length){
+    if(delete_first) {
+      deleteLastWord();
+    }
+    sender->sendType(type, data, data_length, chord);
+    feedback->trigger(type);
+    return data_length; // Success
+  }
+  return 0; // Fail
 }

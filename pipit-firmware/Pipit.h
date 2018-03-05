@@ -56,6 +56,10 @@ private:
   void deleteLastWord();
   void move(Motion motion, Direction direction);
 
+  uint8_t sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first);
+  uint8_t sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key* data);
+  uint8_t sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data);
+
   Switches* switches;
   Lookup* lookup;
   Feedback* feedback;

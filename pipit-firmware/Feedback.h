@@ -56,10 +56,7 @@ public:
 
   Feedback();
 
-  void triggerPlain();
-  void triggerMacro();
-  void triggerWord();
-  void triggerCommand();
+  void trigger(conf::seq_type_enum type);
   void triggerUnknown();
   void triggerNoAnagram();
   void updateLED();
