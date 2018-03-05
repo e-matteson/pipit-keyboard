@@ -76,4 +76,3 @@ bool Entry::isAnagrammable(){
 bool Entry::isClear(){
   return length == 0;
 }
-

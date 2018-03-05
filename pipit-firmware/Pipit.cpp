@@ -344,6 +344,13 @@ void Pipit::cycleLastWordCapital(){
     feedback->triggerWord();
     return; // Success
   }
+
+  if((data_length=lookup->get(conf::PLAIN, &new_chord, data))){
+    deleteLastWord();
+    sender->sendPlain(data, data_length, &new_chord);
+    feedback->triggerPlain();
+    return; // Success
+  }
   // The lookup should never fail...
   feedback->triggerNoAnagram();
 }
@@ -373,6 +380,13 @@ void Pipit::cycleLastWordAnagram(){
       deleteLastWord();
       sender->sendWord(data, data_length, &new_chord);
       feedback->triggerWord();
+      return; // Success
+    }
+    if((data_length=lookup->get(conf::PLAIN, &new_chord, data))){
+      // This anagram mod was found!
+      deleteLastWord();
+      sender->sendPlain(data, data_length, &new_chord);
+      feedback->triggerPlain();
       return; // Success
     }
     // Else, this anagram mod wasn't found, try the next one right away.
