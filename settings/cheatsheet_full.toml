@@ -124,6 +124,13 @@ keys = [
 
 [[keyboards]]
 keys = [
+  "key_delete",
+  "key_caps_lock",
+  "key_printscreen",
+]
+
+[[keyboards]]
+keys = [
   "key_right_paren",
   "key_right_curly",
   "key_right_brace",
@@ -136,9 +143,21 @@ keys = [
   "key_left_angle",
 ]
 
+# [[keyboards]]
+# keys = [
+# ]
+
 [[keyboards]]
 keys = [
-  # "command_pause",
+  "macro_in_paren",
+  "macro_in_curly",
+  "macro_in_brace",
+  "macro_in_angle",
+]
+
+[[keyboards]]
+keys = [
+  "command_pause",
   "command_delete_word",
   "command_cycle_word",
   "mod_anagram_1",
@@ -146,14 +165,15 @@ keys = [
   "mod_nospace",
   "mod_double",
   "mod_shorten",
-  "command_left_word",
-  "command_right_word",
 ]
 
 [[keyboards]]
 keys = [
+  # "command_left_hand_mode",
+  # "command_gaming_mode",
   "mod_anagram_2",
+  "command_left_word",
+  # "command_right_word",
   # "command_right_limit",
   "command_cycle_capital",
-  "command_cycle_nospace",
 ]
