@@ -12,8 +12,8 @@ use toml;
 
 use tutor::TutorData;
 use types::{Chord, Name};
-// use types::errors::*;
-use failure::Error;
+use types::errors::MissingErr;
+use failure::{Error, ResultExt};
 
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
                        MyDescription, MyRect, P2, V2, Wedge};
@@ -85,13 +85,19 @@ struct Switch {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CheatSheet {
-    pub fn from_toml(path: &str, data: &TutorData) -> CheatSheet {
-        let spec: CheatSheetSpec = toml::from_str(&read_file(path).expect("failed to read"))
-            .expect("failed to parse");
+    pub fn from_toml(
+        path: &str,
+        data: &TutorData,
+    ) -> Result<CheatSheet, Error> {
+        let spec: CheatSheetSpec = toml::from_str(&read_file(path).context("failed to read cheatsheet config file")?)
+            .context("failed to parse cheatsheet config file")?;
         CheatSheet::new(spec, data)
     }
 
-    pub fn new(spec: CheatSheetSpec, data: &TutorData) -> CheatSheet {
+    pub fn new(
+        spec: CheatSheetSpec,
+        data: &TutorData,
+    ) -> Result<CheatSheet, Error> {
         // TODO keyboards are not exactly centered
         let num_cols = 2.;
         let num_rows = (spec.keyboards.len() as f64 / num_cols).ceil();
@@ -125,15 +131,17 @@ impl CheatSheet {
                 .get_mut(i % (num_cols as usize))
                 .expect("bug in CheatSheet::new()");
             let mut keyboard = Keyboard::new(*pos);
-            keyboard.set_keys(&kb_spec.keys, data);
+            keyboard
+                .set_keys(&kb_spec.keys, data)
+                .context(format!("Failed to create image of keyboard #{}", i))?;
             all.push(keyboard);
             *pos = *pos + height;
         }
-        CheatSheet {
+        Ok(CheatSheet {
             keyboards: all,
             page_width: spec.page_width,
             page_height: spec.page_height,
-        }
+        })
     }
 
     pub fn save(&self, filename: &str) {
@@ -178,14 +186,20 @@ impl Keyboard {
         }
     }
 
-    fn set_keys(&mut self, keys: &[Name], data: &TutorData) {
+    fn set_keys(
+        &mut self,
+        keys: &[Name],
+        data: &TutorData,
+    ) -> Result<(), Error> {
         assert_eq!(Chord::global_length(), self.switches.len());
-        // TODO return result instead of expecting
+        // TODO return result instead of expecting!
         let chords: Vec<_> = keys.iter()
             .map(|key| data.get_chord(key).expect("chord not found"))
             .collect();
 
-        let symbols: Vec<_> = keys.iter().map(|key| get_symbol(key)).collect();
+        let symbols: Result<Vec<_>, Error> =
+            keys.iter().map(|key| get_symbol(key)).collect();
+        let symbols = symbols?;
 
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
@@ -212,6 +226,7 @@ impl Keyboard {
                 }
             }
         }
+        Ok(())
     }
 
     fn add_to(&self, group: &mut Group) {
@@ -556,7 +571,7 @@ impl Symbol {
     }
 }
 
-fn get_symbol(key: &Name) -> Symbol {
+fn get_symbol(key: &Name) -> Result<Symbol, Error> {
     // TODO share with tutor?
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
@@ -570,7 +585,7 @@ fn get_symbol(key: &Name) -> Symbol {
             ("mod_capital".into(), Symbol::from_lines(&["cap", "mod"], 0.6)),
             ("mod_nospace".into(), Symbol::from_lines(&["no", "space","mod"], 0.5)),
             ("mod_double".into(), Symbol::from_lines(&["double", "mod"], 0.4)),
-            ("mod_shorten".into(), Symbol::from_lines(&["shorten", "mod"], 0.3)),
+            ("mod_shorten".into(), Symbol::from_lines(&["shorten", "mod"], 0.4)),
             ("key_a".into(), Symbol::from("a", 1.)),
             ("key_b".into(), Symbol::from("b", 1.)),
             ("key_c".into(), Symbol::from("c", 1.)),
@@ -680,6 +695,7 @@ fn get_symbol(key: &Name) -> Symbol {
             ("command_delete_word".into(), Symbol::from_lines(&["del", "word"], 0.5)),
             ("command_cycle_word".into(), Symbol::from_lines(&["cycle", "word"], 0.5)),
             ("command_cycle_capital".into(), Symbol::from_lines(&["cycle", "cap"], 0.5)),
+            ("command_cycle_nospace".into(), Symbol::from_lines(&["cycle", "space"], 0.5)),
             ("command_left_word".into(), Symbol::from_lines(&["left", "word"], 0.5)),
             ("command_right_word".into(), Symbol::from_lines(&["right", "word"], 0.5)),
             ("command_right_limit".into(), Symbol::from_lines(&["right", "limit"], 0.5)),
@@ -692,7 +708,13 @@ fn get_symbol(key: &Name) -> Symbol {
             ("".into(), Symbol::from("", 1.)), // used for skipping colors without displaying anything
         ].into_iter().collect();
     }
-    SYMBOLS.get(key).expect("no symbol for key").to_owned()
+    Ok(SYMBOLS
+        .get(key)
+        .ok_or_else(|| MissingErr {
+            missing: key.into(),
+            container: "cheatsheet symbol lookup".into(),
+        })?
+        .to_owned())
 }
 
 fn read_file(path: &str) -> Result<String, Error> {
