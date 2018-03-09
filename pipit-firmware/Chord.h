@@ -29,6 +29,7 @@ public:
   uint8_t getAnagramNum();
   uint8_t cycleAnagram();
   void cycleCapital();
+  void cycleNospace();
 
   bool matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const;
   bool isEmpty() const;

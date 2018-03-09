@@ -35,7 +35,7 @@ void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord)
     // Get the key, followed by the modifier.
     key.copy(data+i);
     key.addMod(chord->getModByte());
-    // Let the chord change capitalization, like if cycle_capital was pressed.
+    // Let the chord change the key's capitalization, like if cycle_capital was pressed.
     chord->editCaps(&key, 1);
     sendKey(&key);
   }
@@ -53,26 +53,17 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
   sendRelease();
 }
 
-// void Sender::maybeSendSpace(bool nospaceMod) {
-//   // Used for prepending or appending spaces to words, unless the no-space modifier is pressed.
-//   if(!nospaceMod){
-//     Key key;
-//     key.set(KEY_SPACE&0xff, 0);
-//     sendKey(&key);
-//   }
-// }
-
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
 
-#if WORD_SPACE_POSITION == 0
-  // doubleMod and shortenMod would be kinda useless with a space here...
-  // So they should prevent us from ever prepending a space.
-  // The chord is edited before being stored in the history, so that the nospace
-  // will persist if we cycle the word later.
-  if(chord->hasModShorten() || chord->hasModDouble()) {
-    chord->setModNospace();
+  if (WORD_SPACE_POSITION == 0) {
+    // doubleMod and shortenMod would be kinda useless with a space here...
+    // So they should prevent us from ever prepending a space.
+    // The chord is edited before being stored in the history, so that the nospace
+    // will persist if we cycle the word later.
+    if(chord->hasModShorten() || chord->hasModDouble()) {
+      chord->setModNospace();
+    }
   }
-#endif
 
   if(chord->hasModShorten()) {
     sendBackspace();
@@ -92,12 +83,12 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
     comms->proportionalDelay(data_length, 1);
   }
 
-#if WORD_SPACE_POSITION == 0
-  if(!chord->hasModNospace()){
-    sendSpace();
-    comms->proportionalDelay(data_length, 1);
+  if (WORD_SPACE_POSITION == 0) {
+    if(!chord->hasModNospace()){
+      sendSpace();
+      comms->proportionalDelay(data_length, 1);
+    }
   }
-#endif
 
   Key new_data[data_length];
   memcpy(new_data, data, data_length*sizeof(Key));
@@ -108,12 +99,12 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
     comms->proportionalDelay(data_length, 1);
   }
 
-#if WORD_SPACE_POSITION == 1
-  if(!chord->hasModNospace()){
-    sendSpace();
-    comms->proportionalDelay(data_length, 1);
+  if (WORD_SPACE_POSITION == 1){
+    if(!chord->hasModNospace()){
+      sendSpace();
+      comms->proportionalDelay(data_length, 1);
+    }
   }
-#endif
 
   sendRelease();
 }
@@ -122,6 +113,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
 void Sender::sendRelease(){
   sendKeyAndMod(0,0);
 }
+
 
 void Sender::sendBackspace(){
   sendKeyAndMod(KEY_BACKSPACE&0xff, 0);

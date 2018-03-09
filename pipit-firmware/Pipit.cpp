@@ -64,6 +64,10 @@ void Pipit::doCommand(uint8_t code){
     cycleLastWordCapital();
     break;
 
+  case conf::COMMAND_CYCLE_NOSPACE:
+    cycleLastWordNospace();
+    break;
+
   case conf::COMMAND_STICKY_CTRL:
     sender->setStickymod(MODIFIERKEY_CTRL&0xff);
     break;
@@ -326,6 +330,30 @@ void Pipit::cycleLastWordCapital(){
   Chord new_chord;
   new_chord.copy(entry->getChord());
   new_chord.cycleCapital();
+
+  // We need to lookup the chord again, even though only the capitalization is
+  // changing, because the history doesn't store the characters in a word.
+  Key data[MAX_LOOKUP_DATA_LENGTH];
+  if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
+    return; // Success
+  }
+  if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
+    return; // Success
+  }
+  feedback->triggerNoAnagram();
+}
+
+void Pipit::cycleLastWordNospace(){
+  // TODO share code with cycleLastWordCapital
+  Entry* entry = sender->history->getEntryAtCursor();
+  if(!entry->isAnagrammable()){
+    feedback->triggerNoAnagram();
+    return;
+  }
+
+  Chord new_chord;
+  new_chord.copy(entry->getChord());
+  new_chord.cycleNospace();
 
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.

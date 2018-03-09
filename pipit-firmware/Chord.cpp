@@ -238,8 +238,9 @@ bool Chord::restoreMod(conf::mod_enum modifier){
 }
 
 void Chord::prepareToCycle(){
-  // Unset mods that affect the previous word, by backspacing or doubling letters.
-  // We don't want to repeat those effects every time we cycle it.
+  // Unset mods that affect the word before this one, like by backspacing or
+  // doubling its letters. We don't want to repeat those effects every time we
+  // cycle this chord.
   unsetMod(conf::getModShortenEnum());
   unsetMod(conf::getDoubleEnum());
 }
@@ -247,6 +248,11 @@ void Chord::prepareToCycle(){
 void Chord::cycleCapital(){
   prepareToCycle();
   flag_cycle_capital ^= 1;
+}
+
+void Chord::cycleNospace(){
+  prepareToCycle();
+  toggleMod(conf::getNospaceEnum());
 }
 
 

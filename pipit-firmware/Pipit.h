@@ -53,6 +53,7 @@ private:
 
   void cycleLastWordAnagram();
   void cycleLastWordCapital();
+  void cycleLastWordNospace();
   void deleteLastWord();
   void move(Motion motion, Direction direction);
 
