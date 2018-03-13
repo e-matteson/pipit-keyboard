@@ -4,8 +4,9 @@ use std::iter;
 use std::fmt::{self, Debug};
 use std::slice::Iter;
 use std::string::ToString;
+use std::collections::BTreeMap;
 
-use types::{CCode, KeyPress, ToC, Validate};
+use types::{CCode, Chord, KeyPress, ToC, Validate};
 use types::errors::*;
 use failure::Error;
 
@@ -72,6 +73,11 @@ pub struct Sequence(pub Vec<KeyPress>);
 pub struct Permutation {
     order: Vec<usize>,
     new_length: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct TutorData {
+    pub chords: BTreeMap<ModeName, BTreeMap<Name, Chord>>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////

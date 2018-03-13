@@ -1,28 +1,85 @@
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::PathBuf;
 use std::io::{BufRead, BufReader};
 use std::sync::Mutex;
 
+use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{Chord, ModeName, Name};
+use types::{Chord, ModeName, Name, TutorData};
+use types::errors::BadValueErr;
 // use types::errors::*;
 use failure::{Error, ResultExt};
-
-pub struct TutorData(BTreeMap<ModeName, BTreeMap<Name, Chord>>);
 
 lazy_static! {
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
 }
 
+#[derive(Debug, Clone)]
+pub enum SlideLine {
+    Letters(String),
+    Words {
+        words: Vec<SlideWord>,
+        check_errors: bool,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub struct SlideWord {
+    pub names: Vec<Name>,
+    pub text: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct SlideEntry {
+    pub text: String,
+    pub chord: Chord,
+}
+
+#[derive(Debug, Clone)]
+pub struct Slide {
+    // pub instructions: Option<String>,
+    pub line: SlideLine,
+}
+
+#[derive(Debug, Clone)]
+pub enum LastChar {
+    Correct,
+    Incorrect(Option<LabeledChord>),
+}
+
+#[derive(Debug, Clone)]
+pub struct LabeledChord {
+    pub chord: Chord,
+    pub label: Option<String>,
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-impl TutorData {
-    pub fn new(data: BTreeMap<ModeName, BTreeMap<Name, Chord>>) -> TutorData {
-        TutorData(data)
+impl LastChar {
+    pub fn backspace(&self) -> Option<LabeledChord> {
+        match self {
+            LastChar::Correct => None,
+            LastChar::Incorrect(_) => LabeledChord::backspace(),
+        }
     }
 
+    pub fn error(&self) -> Option<LabeledChord> {
+        match self {
+            LastChar::Correct => None,
+            LastChar::Incorrect(x) => x.clone(),
+        }
+    }
+
+    pub fn is_correct(&self) -> bool {
+        match self {
+            LastChar::Correct => true,
+            LastChar::Incorrect(_) => false,
+        }
+    }
+}
+
+impl TutorData {
     pub fn get_chord(&self, chord_name: &Name) -> Option<Chord> {
         // TODO don't assume default mode
         if chord_name == &Name(String::new()) {
@@ -30,7 +87,7 @@ impl TutorData {
             Some(Chord::default())
         } else {
             let mode_name = ModeName::default();
-            self.0.get(&mode_name)?.get(chord_name).cloned()
+            self.chords.get(&mode_name)?.get(chord_name).cloned()
         }
     }
 }
@@ -43,19 +100,98 @@ pub fn set_tutor_data(data: TutorData) {
     }
 }
 
-pub fn get_tutor_data_chord(chord_name: Name) -> Option<Chord> {
+pub fn get_tutor_data_chord(name: &Name) -> Option<Chord> {
     if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-        data.get_chord(&chord_name)
+        data.get_chord(name)
     } else {
         panic!("tutor data was not set")
     }
 }
 
+impl SlideLine {
+    pub fn check_errors(&self) -> bool {
+        match self {
+            SlideLine::Letters(_) => true,
+            SlideLine::Words { check_errors, .. } => *check_errors,
+        }
+    }
+
+    pub fn to_entries(&self) -> Result<(Vec<SlideEntry>, String), Error> {
+        Ok(match self {
+            SlideLine::Letters(string) => {
+                let entries: Result<Vec<_>, Error> = string
+                    .graphemes(true)
+                    .map(|letter| SlideEntry::new(letter.into()))
+                    .collect();
+                (entries?, string.to_owned())
+            }
+            SlideLine::Words { words, .. } => {
+                let entries: Result<Vec<_>, _> =
+                    words.iter().map(|word| word.to_entry()).collect();
+                let entries = entries?;
+                let string =
+                    entries.iter().map(|entry| entry.text.clone()).join("");
+                (entries, string)
+            }
+        })
+    }
+}
+
+impl SlideWord {
+    fn to_entry(&self) -> Result<SlideEntry, Error> {
+        let chords: Option<Vec<_>> = self.names
+            .iter()
+            .map(|name| get_tutor_data_chord(name))
+            .collect();
+
+        let chord = match chords {
+            None => bail!("failed to create chords for word"),
+            Some(v) => v.into_iter().fold(Chord::default(), |acc, mut c| {
+                c.intersect(&acc);
+                c
+            }),
+        };
+
+        Ok(SlideEntry {
+            chord: chord,
+            text: self.text.clone(),
+        })
+    }
+}
+
+impl SlideEntry {
+    fn new(letter: String) -> Result<SlideEntry, Error> {
+        Ok(SlideEntry {
+            chord: char_to_chord(&letter).ok_or_else(|| BadValueErr {
+                thing: "character".into(),
+                value: letter.clone(),
+            })?,
+            text: letter,
+        })
+    }
+}
+
+impl LabeledChord {
+    pub fn from_letter(letter: &str) -> Option<LabeledChord> {
+        Some(LabeledChord {
+            chord: char_to_chord(&letter)?,
+            label: Some(char_to_label(&letter)),
+        })
+    }
+
+    fn backspace() -> Option<LabeledChord> {
+        Some(LabeledChord {
+            chord: backspace_chord()?,
+            label: Some("bak".into()),
+        })
+    }
+}
+
 pub fn char_to_chord(character: &str) -> Option<Chord> {
     let (name, is_uppercase) = get_char_name(character)?;
-    let mut chord = get_tutor_data_chord(name)?;
+    let mut chord = get_tutor_data_chord(&name)?;
     if is_uppercase {
-        chord.intersect(&get_tutor_data_chord(Name("mod_shift".into()))?)
+        chord.intersect(&get_tutor_data_chord(&Name("mod_shift".into()))?)
     }
     Some(chord)
 }
@@ -157,4 +293,8 @@ fn open_file(path: &PathBuf) -> Result<File, Error> {
 
 pub fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize
+}
+
+fn backspace_chord() -> Option<Chord> {
+    get_tutor_data_chord(&"key_backspace".into())
 }

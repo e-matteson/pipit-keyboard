@@ -10,17 +10,20 @@ use unicode_segmentation::UnicodeSegmentation;
 use types::errors::BadValueErr;
 use failure::{Error, ResultExt};
 
-use tutor::utils::{grapheme_slice, offset};
+use tutor::utils::{grapheme_slice, offset, LabeledChord, LastChar, SlideEntry,
+                   SlideLine};
 
 pub struct Copier {
-    pub was_backspace_typed_last: bool,
+    was_backspace_typed_last: bool,
     expected: String,
     actual: String,
     num_chars: usize,
     point_marker: String,
     point_offset: usize,
     index: usize,
-    keys: HashMap<String, LearnState>,
+    learned_keys: HashMap<String, LearnState>,
+    entries: Vec<SlideEntry>,
+    check_errors: bool,
 }
 
 struct LearnState(i64);
@@ -43,7 +46,7 @@ impl Default for LearnState {
     fn default() -> LearnState {
         // Set the number of times you must type this character correctly
         // before the hint goes away
-        LearnState(3)
+        LearnState(5)
     }
 }
 
@@ -58,23 +61,45 @@ impl Copier {
             actual: String::new(),
             index: 0,
             was_backspace_typed_last: false,
-            keys: HashMap::new(),
+            learned_keys: HashMap::new(),
+            entries: Vec::new(),
+            check_errors: true,
         }
     }
 
-    pub fn next_hint(&mut self) -> Result<Option<String>, Error> {
-        let next = self.expected_char_at_point()?;
+    pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
+        let next_char = self.expected_char_at_point()?;
+        let entry = self.learned_keys.entry(next_char.clone()).or_default();
 
-        let was_correct = self.was_last_char_correct()?;
-        let entry = self.keys.entry(next.clone()).or_default();
-        entry.update(was_correct);
+        // TODO wait is this updating the wrong key? last one instead of next
+        // one?
+        // entry.update(self.was_last_char_correct()?);
 
         let hint = if entry.needs_hint() || self.was_backspace_typed_last {
-            Some(next)
+            LabeledChord::from_letter(&next_char)
         } else {
             None
         };
         Ok(hint)
+    }
+
+    pub fn last_wrong_char(&self) -> Result<LastChar, Error> {
+        // TODO support words
+
+        if !self.check_errors {
+            return Ok(LastChar::Correct);
+        }
+
+        let offset = self.point_offset - 1;
+        let actual = self.char_at_offset(&self.actual, offset)?;
+        let expected = self.char_at_offset(&self.expected, offset)?;
+
+        // TODO don't include actual if not at word boundary!
+        Ok(if actual != expected {
+            LastChar::Incorrect(LabeledChord::from_letter(&actual))
+        } else {
+            LastChar::Correct
+        })
     }
 
     pub fn type_char(&mut self, character: char) {
@@ -92,15 +117,20 @@ impl Copier {
         }
     }
 
-    pub fn start_line(&mut self, line: &str) {
+    pub fn start_line(&mut self, line: &SlideLine) -> Result<(), Error> {
+        let (entries, text) = line.to_entries()?;
+
         let pad = " ".repeat(self.extra_spaces());
-        let expected = pad.clone() + line;
+        let expected = pad.clone() + &text;
         let mut actual = String::from(pad);
         actual.reserve(expected.len());
 
         self.expected = expected;
         self.actual = actual;
         self.index = 0;
+        self.entries = entries;
+        self.check_errors = line.check_errors();
+        Ok(())
     }
 
     pub fn at_end_of_line(&self) -> bool {
@@ -145,19 +175,8 @@ impl Copier {
 
     fn was_last_char_correct(&self) -> Result<bool, Error> {
         Ok(self.last_wrong_char()
-            .context("failed to check if char was wrong")?
-            .is_none())
-    }
-
-    pub fn last_wrong_char(&self) -> Result<Option<String>, Error> {
-        let offset = self.point_offset - 1;
-        let actual = self.char_at_offset(&self.actual, offset)?;
-        let expected = self.char_at_offset(&self.expected, offset)?;
-        Ok(if actual != expected {
-            Some(actual)
-        } else {
-            None
-        })
+            .context("failed to check if last char was correct")?
+            .is_correct())
     }
 
     fn char_at_offset(

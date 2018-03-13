@@ -12,17 +12,19 @@ use cursive::views::{Dialog, SelectView, TextView};
 use cursive::vec::Vec2;
 use cursive::event::{Callback, Event, EventResult, Key};
 
-use types::errors::print_and_panic;
+use types::TutorData;
+use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
 use tutor::graphic::Graphic;
-use tutor::utils::{offset, read_file_lines, set_tutor_data, TutorData};
+use tutor::utils::{offset, read_file_lines, set_tutor_data, Slide, SlideLine,
+                   SlideWord};
 use tutor::copier::Copier;
 
 pub struct TutorApp;
 
 struct Lesson {
-    lines: Vec<String>,
+    slides: Vec<Slide>,
     graphic: Graphic,
     graphic_spacing: usize,
     copier: Copier,
@@ -49,8 +51,9 @@ impl TutorApp {
     }
 
     fn show_menu(siv: &mut Cursive) {
-        let lessons =
-            load_lessons("tutor/lessons/").expect("failed to get lessons");
+        load_lessons("tutor/lessons/").expect("failed to get lessons");
+
+        let lessons = fake_lessons();
         let mut names: Vec<String> = lessons.keys().cloned().collect();
         names.sort_by(|a, b| natord::compare(a, b));
 
@@ -59,8 +62,8 @@ impl TutorApp {
         select.add_all_str(names);
         select.set_on_submit(move |siv, name| {
             TutorApp::cleanup_menu(siv);
-            let lines = lessons.get(name).cloned().expect("lesson not found");
-            TutorApp::show_lesson(siv, name, lines)
+            let slides = lessons.get(name).cloned().expect("lesson not found");
+            TutorApp::show_lesson(siv, name, slides)
         });
 
         siv.add_layer(
@@ -73,8 +76,8 @@ impl TutorApp {
         siv.pop_layer();
     }
 
-    fn show_lesson(siv: &mut Cursive, _name: &str, lines: Vec<String>) {
-        let lesson = match Lesson::new(lines) {
+    fn show_lesson(siv: &mut Cursive, _name: &str, slides: Vec<Slide>) {
+        let lesson = match Lesson::new(slides) {
             Ok(lesson) => lesson,
             Err(error) => print_and_panic(error),
         };
@@ -111,36 +114,48 @@ impl TutorApp {
 }
 
 impl Lesson {
-    fn new(lines: Vec<String>) -> Result<Lesson, Error> {
+    fn new(slides: Vec<Slide>) -> Result<Lesson, Error> {
         let copier = Copier::new(79);
 
         let mut lesson = Lesson {
-            lines: lines.into_iter().rev().collect(),
+            // TODO why reverse?
+            slides: slides.into_iter().rev().collect(),
             graphic: Graphic::new(),
             graphic_spacing: 1,
             copier: copier,
             start_time: None,
             net_words: 0.,
         };
-        lesson.next_line();
+        lesson.next_slide().unwrap();
         lesson.update_chord()?;
         Ok(lesson)
     }
 
-    fn size(&self) -> Vec2 {
-        let graphic_size = self.graphic.size();
-        let copy_size = self.copier.size();
-        let x = graphic_size.x.max(copy_size.x);
-        let y = graphic_size.y + copy_size.y + self.graphic_spacing;
-        Vec2::new(x, y)
+    fn next_slide(&mut self) -> Result<(), Error> {
+        // TODO check for empty lessons when loading from file, instead
+        // We should panic here instead if we failed to end the lesson after
+        // going through all the slides.
+        let slide = self.slides.pop().ok_or_else(|| BadValueErr {
+            thing: "lesson contents".into(),
+            value: "(empty)".into(),
+        })?;
+        self.copier.start_line(&slide.line)?;
+        // TODO otherwise... other transition?
+        Ok(())
     }
 
-    fn next_line(&mut self) {
-        self.copier
-            .start_line(&self.lines.pop().expect("lesson was empty"))
+    fn update_chord(&mut self) -> Result<(), Error> {
+        let next_char = self.copier.next_hint().context("failed to get hint")?;
+        let last_wrong_char = self.copier
+            .last_wrong_char()
+            .expect("failed to check if char was wrong");
+        self.graphic.update(next_char, last_wrong_char);
+        Ok(())
     }
 
     fn state(&self) -> LessonState {
+        // TODO what if no copier...
+        // Should always exist, and start and stop timer as needed?
         if self.copier.at_end_of_line() {
             LessonState::EndOfLine
         } else {
@@ -157,15 +172,6 @@ impl Lesson {
     fn copy_padding(&self) -> Vec2 {
         let x = offset(self.copier.size().x, self.size().x);
         Vec2::new(x, 0)
-    }
-
-    fn update_chord(&mut self) -> Result<(), Error> {
-        let next_char = self.copier.next_hint().context("failed to get hint")?;
-        let last_wrong_char = self.copier
-            .last_wrong_char()
-            .expect("failed to check if char was wrong");
-        self.graphic.update(next_char, last_wrong_char);
-        Ok(())
     }
 
     fn start_if_not_started(&mut self) {
@@ -185,6 +191,15 @@ impl Lesson {
     fn words_per_minute(&self) -> usize {
         (self.net_words / self.minutes()) as usize
     }
+
+    fn size(&self) -> Vec2 {
+        let graphic_size = self.graphic.size();
+        let copy_size = self.copier.size();
+        // self.copier.map(|c| c.size()).unwrap_or(Vec2::new(0, 0));
+        let x = graphic_size.x.max(copy_size.x);
+        let y = graphic_size.y + copy_size.y + self.graphic_spacing;
+        Vec2::new(x, y)
+    }
 }
 
 impl View for Lesson {
@@ -193,6 +208,7 @@ impl View for Lesson {
     }
 
     fn draw(&self, printer: &Printer) {
+        // TODO draw nothing if copier is not in use?
         self.copier.draw(&printer.sub_printer(
             self.copy_padding(),
             self.copier.size(),
@@ -229,14 +245,15 @@ impl View for Lesson {
                         self.net_words,
                         self.minutes()
                     );
-                    if self.lines.is_empty() {
+                    if self.slides.is_empty() {
                         // Lesson is done
                         let wpm = self.words_per_minute();
                         return EventResult::Consumed(Some(Callback::from_fn(
                             move |siv| TutorApp::end_lesson_callback(siv, wpm),
                         )));
                     }
-                    self.next_line()
+                    // TODO don't unwrap
+                    self.next_slide().unwrap();
                 }
                 _ => return EventResult::Ignored,
             },
@@ -261,6 +278,42 @@ fn load_lessons(
         map.insert(name, read_file_lines(&path)?);
     }
     Ok(map)
+}
+
+fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
+    vec![
+        (
+            "fake lesson".into(),
+            vec![
+                Slide {
+                    line: SlideLine::Words {
+                        check_errors: true,
+                        words: vec![
+                            SlideWord {
+                                names: vec![
+                                    "word_tap".into(),
+                                    "mod_nospace".into(),
+                                    "mod_capital".into(),
+                                ],
+                                text: "Tap".into(),
+                            },
+                            SlideWord {
+                                names: vec![
+                                    "word_ing".into(),
+                                    "mod_double".into(),
+                                ],
+                                text: "ping".into(),
+                            },
+                        ],
+                    },
+                },
+                Slide {
+                    line: SlideLine::Letters("goodbye".into()),
+                },
+            ],
+        ),
+    ].into_iter()
+        .collect()
 }
 
 fn lesson_path_to_name(path: &PathBuf) -> String {

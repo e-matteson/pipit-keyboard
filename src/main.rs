@@ -4,7 +4,6 @@ extern crate pipit_config;
 use pipit_config::AllData;
 use pipit_config::errors::*;
 
-use pipit_config::tutor::TutorData;
 use pipit_config::tutor::TutorApp;
 use pipit_config::cheatsheet::CheatSheet;
 
@@ -32,11 +31,11 @@ fn run() -> Result<(), Error> {
     all_data
         .save_as("auto_config")
         .context("Failed to save configuration")?;
-    let tutor_data = TutorData::new(all_data.get_tutor_data()?);
-    CheatSheet::from_toml("settings/cheatsheet.toml", &tutor_data)
-        .context("Failed to make cheatsheet")?
-        .save("out.svg");
-    // TutorApp::run(tutor_data);
+    let tutor_data = all_data.get_tutor_data()?;
+    // CheatSheet::from_toml("settings/cheatsheet.toml", &tutor_data)
+    //     .context("Failed to make cheatsheet")?
+    //     .save("out.svg");
+    TutorApp::run(tutor_data);
     Ok(())
 }
 

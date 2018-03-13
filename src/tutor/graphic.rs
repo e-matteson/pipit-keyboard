@@ -3,23 +3,16 @@ use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::theme::{Color, ColorStyle};
 
-use types::{Chord, Name};
+use types::Chord;
 // use types::errors::*;
 
-use tutor::utils::{char_to_chord, char_to_label, get_tutor_data_chord,
-                   grapheme_slice};
+use tutor::utils::{grapheme_slice, LabeledChord, LastChar};
 
 pub struct Graphic {
     pub next: Option<LabeledChord>,
     pub error: Option<LabeledChord>,
     pub backspace: Option<LabeledChord>,
     switches: Vec<Switch>,
-}
-
-#[derive(Clone)]
-pub struct LabeledChord {
-    pub chord: Option<Chord>,
-    pub label: String,
 }
 
 #[derive(Clone, Copy)]
@@ -63,33 +56,11 @@ impl Graphic {
         Vec2::new(78, 12)
     }
 
-    pub fn update(
-        &mut self,
-        next_char: Option<String>,
-        last_wrong_char: Option<String>,
-    ) {
+    pub fn update(&mut self, next: Option<LabeledChord>, last: LastChar) {
         // TODO use some map fn
-        self.next = match next_char {
-            Some(ref c) => Some(LabeledChord {
-                chord: char_to_chord(c),
-                label: char_to_label(c),
-            }),
-            None => None,
-        };
-
-        if let Some(ref wrong_char) = last_wrong_char {
-            self.backspace = Some(LabeledChord {
-                chord: backspace_chord(),
-                label: "bak".into(),
-            });
-            self.error = Some(LabeledChord {
-                chord: char_to_chord(wrong_char),
-                label: char_to_label(wrong_char),
-            });
-        } else {
-            self.backspace = None;
-            self.error = None;
-        }
+        self.next = next;
+        self.error = last.error();
+        self.backspace = last.backspace();
         self.update_switches();
     }
 
@@ -118,11 +89,11 @@ impl Graphic {
     }
 
     pub fn get_chord(&self, chord_type: ChordType) -> Option<Chord> {
-        self.get(chord_type)?.chord
+        Some(self.get(chord_type)?.chord)
     }
 
     pub fn get_label(&self, chord_type: ChordType) -> Option<String> {
-        Some(self.get(chord_type)?.label)
+        self.get(chord_type)?.label
     }
 
     fn get(&self, chord_type: ChordType) -> Option<LabeledChord> {
@@ -175,7 +146,6 @@ impl Switch {
             printer.print((x + 1, y + 2), "───╯");
         });
     }
-
 
     fn clear(&mut self) {
         self.next = None;
@@ -279,9 +249,4 @@ fn get_switch_positions() -> Vec<(usize, usize)> {
         (46, 8),
         (52, 8),
     ]
-}
-
-
-fn backspace_chord() -> Option<Chord> {
-    get_tutor_data_chord(Name("key_backspace".into()))
 }

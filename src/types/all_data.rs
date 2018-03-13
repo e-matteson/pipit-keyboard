@@ -3,7 +3,7 @@ use std::clone::Clone;
 use std::path::PathBuf;
 
 use types::{AnagramNum, CTree, Checker, Chord, HuffmanTable, KeyPress,
-            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, TutorData,
             WordBuilder, WordConfig};
 
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
@@ -306,10 +306,6 @@ impl AllData {
         self.checker.check_chords();
     }
 
-    fn get_names_for_seq(&self, seq_type: SeqType) -> Result<Vec<Name>, Error> {
-        Ok(self.get_sequences(&seq_type)?.keys().cloned().collect())
-    }
-
     pub fn set_huffman_table(&mut self) {
         if self.huffman_table.is_some() {
             panic!("huffman table was already set once");
@@ -334,18 +330,23 @@ impl AllData {
         v
     }
 
-    pub fn get_tutor_data(
-        &self,
-    ) -> Result<BTreeMap<ModeName, BTreeMap<Name, Chord>>, Error> {
+    fn get_all_names(&self) -> Vec<Name> {
+        self.sequences
+            .iter()
+            .flat_map(|(_seq_type, inner)| inner.keys())
+            .cloned()
+            .chain(self.anagram_mods.clone())
+            .chain(self.word_mods.clone())
+            .chain(self.plain_mods.clone())
+            .collect()
+    }
+
+    pub fn get_tutor_data(&self) -> Result<TutorData, Error> {
         // TODO clean up, reorganize AllData to make this less bad?
         // TODO think about borrowck
+        // TODO this is REALLY SLOW!!!
         let mut chords = BTreeMap::new();
-        let mut names = self.get_names_for_seq(SeqType::Plain)?;
-        names.extend(self.get_names_for_seq(SeqType::Command)?);
-        names.extend(self.get_names_for_seq(SeqType::Macro)?);
-        names.extend(self.anagram_mods.clone());
-        names.extend(self.word_mods.clone());
-
+        let names = self.get_all_names();
         for mode in self.modes.keys() {
             let mut mode_chords = BTreeMap::new();
             for name in &names {
@@ -355,6 +356,6 @@ impl AllData {
             }
             chords.insert(mode.to_owned(), mode_chords);
         }
-        Ok(chords)
+        Ok(TutorData { chords: chords })
     }
 }

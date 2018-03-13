@@ -3,6 +3,7 @@
 #![feature(conservative_impl_trait)]
 #![feature(string_retain)]
 #![feature(match_default_bindings)]
+#![feature(iterator_try_fold)]
 
 extern crate cursive;
 extern crate itertools;
@@ -21,7 +22,7 @@ extern crate failure;
 #[macro_use]
 extern crate lazy_static;
 
-pub use types::AllData;
+pub use types::{AllData, TutorData};
 pub use types::errors;
 
 #[macro_use]

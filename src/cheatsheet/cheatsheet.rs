@@ -10,8 +10,7 @@ use svg::node::element::{ClipPath, Definitions, Group};
 use unicode_segmentation::UnicodeSegmentation;
 use toml;
 
-use tutor::TutorData;
-use types::{Chord, Name};
+use types::{Chord, Name, TutorData};
 use types::errors::MissingErr;
 use failure::{Error, ResultExt};
 
