@@ -288,6 +288,43 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
             vec![
                 Slide {
                     line: SlideLine::Words {
+                        check_errors: false,
+                        words: vec![
+                            // SlideWord {
+                            //     names: vec!["word_the".into()],
+                            //     text: " teeth".into(),
+                            //     length_override: Some(4),
+                            // },
+                            // SlideWord {
+                            //     names: vec!["command_cycle_word".into()],
+                            //     text: "".into(),
+                            //     length_override: None,
+                            // },
+                            SlideWord {
+                                names: vec!["word_teeth_1".into()],
+                                text: " the".into(),
+                                length_override: Some(6),
+                            },
+                            SlideWord {
+                                names: vec!["command_cycle_word".into()],
+                                text: "".into(),
+                                length_override: None,
+                            },
+                            SlideWord {
+                                names: vec!["command_cycle_word".into()],
+                                text: "".into(),
+                                length_override: None,
+                            },
+                            /* SlideWord {
+                             *     names: vec!["word_different_dif".into()],
+                             *     text: "different".into(),
+                             *     length_override: None,
+                             * }, */
+                        ],
+                    },
+                },
+                Slide {
+                    line: SlideLine::Words {
                         check_errors: true,
                         words: vec![
                             SlideWord {
@@ -297,6 +334,7 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
                                     "mod_capital".into(),
                                 ],
                                 text: "Tap".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec![
@@ -304,34 +342,42 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
                                     "mod_double".into(),
                                 ],
                                 text: "ping".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_space".into()],
                                 text: " ".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_l".into()],
                                 text: "l".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_e".into()],
                                 text: "e".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_t".into()],
                                 text: "t".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_t".into()],
                                 text: "t".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_e".into()],
                                 text: "e".into(),
+                                length_override: None,
                             },
                             SlideWord {
                                 names: vec!["key_r".into()],
                                 text: "r".into(),
+                                length_override: None,
                             },
                         ],
                     },

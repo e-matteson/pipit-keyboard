@@ -28,12 +28,14 @@ pub enum SlideLine {
 pub struct SlideWord {
     pub names: Vec<Name>,
     pub text: String,
+    pub length_override: Option<usize>,
 }
 
 #[derive(Debug, Clone)]
 pub struct SlideEntry {
     pub text: String,
     pub chord: Chord,
+    pub length: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -119,6 +121,15 @@ impl SlideLine {
         }
     }
 
+    pub fn has_length_overrides(&self) -> bool {
+        match self {
+            SlideLine::Letters(_) => false,
+            SlideLine::Words { words, .. } => {
+                words.iter().any(|w| w.length_override.is_some())
+            }
+        }
+    }
+
     pub fn to_entries(&self) -> Result<(Vec<SlideEntry>, String), Error> {
         Ok(match self {
             SlideLine::Letters(string) => {
@@ -157,6 +168,8 @@ impl SlideWord {
 
         Ok(SlideEntry {
             chord: chord,
+            length: self.length_override
+                .unwrap_or_else(|| self.text.graphemes(true).count()),
             text: self.text.clone(),
         })
     }
@@ -169,12 +182,13 @@ impl SlideEntry {
                 thing: "character".into(),
                 value: letter.clone(),
             })?,
+            length: letter.graphemes(true).count(),
             text: letter,
         })
     }
 
     pub fn len(&self) -> usize {
-        self.text.graphemes(true).count()
+        self.length
     }
 
     pub fn to_labeled_chord(&self) -> LabeledChord {

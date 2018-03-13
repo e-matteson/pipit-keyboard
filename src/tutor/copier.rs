@@ -13,6 +13,7 @@ use failure::{Error, ResultExt};
 use tutor::utils::{grapheme_slice, offset, LabeledChord, LastChar, SlideEntry,
                    SlideLine};
 
+// TODO compose from CopierLine?
 pub struct Copier {
     was_backspace_typed_last: bool,
     expected: String,
@@ -25,6 +26,7 @@ pub struct Copier {
     entries: Vec<SlideEntry>,
     check_errors: bool,
     hint_map: HashMap<usize, LabeledChord>,
+    show_hints_within_words: bool,
 }
 
 struct LearnState(i64);
@@ -66,13 +68,18 @@ impl Copier {
             entries: Vec::new(),
             check_errors: true,
             hint_map: HashMap::new(),
+            show_hints_within_words: true,
         }
     }
 
     pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
-        let special_hint = self.hint_map.get(&self.index);
-        if special_hint.is_some() {
-            return Ok(special_hint.cloned());
+        let word_edge_hint = self.hint_map.get(&self.index);
+        if word_edge_hint.is_some() {
+            return Ok(word_edge_hint.cloned());
+        }
+
+        if !self.show_hints_within_words {
+            return Ok(None);
         }
 
         let next_letter = self.expected_char_at_point()?;
@@ -133,7 +140,9 @@ impl Copier {
         self.index = 0;
         self.check_errors = line.check_errors();
         self.hint_map = make_hint_map(&entries);
+        eprintln!("{:?}", self.hint_map);
         self.entries = entries;
+        self.show_hints_within_words = !line.has_length_overrides();
         Ok(())
     }
 
