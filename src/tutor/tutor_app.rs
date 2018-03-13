@@ -240,11 +240,11 @@ impl View for Lesson {
                 Event::Key(Key::Backspace) => self.copier.type_backspace(),
                 Event::CtrlChar('j') | Event::Key(Key::Enter) => {
                     self.net_words += self.copier.net_words();
-                    eprintln!(
-                        "net_words: {}, minutes: {}",
-                        self.net_words,
-                        self.minutes()
-                    );
+                    // eprintln!(
+                    //     "net_words: {}, minutes: {}",
+                    //     self.net_words,
+                    //     self.minutes()
+                    // );
                     if self.slides.is_empty() {
                         // Lesson is done
                         let wpm = self.words_per_minute();
@@ -252,6 +252,7 @@ impl View for Lesson {
                             move |siv| TutorApp::end_lesson_callback(siv, wpm),
                         )));
                     }
+
                     // TODO don't unwrap
                     self.next_slide().unwrap();
                 }
@@ -303,6 +304,34 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
                                     "mod_double".into(),
                                 ],
                                 text: "ping".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_space".into()],
+                                text: " ".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_l".into()],
+                                text: "l".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_e".into()],
+                                text: "e".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_t".into()],
+                                text: "t".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_t".into()],
+                                text: "t".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_e".into()],
+                                text: "e".into(),
+                            },
+                            SlideWord {
+                                names: vec!["key_r".into()],
+                                text: "r".into(),
                             },
                         ],
                     },

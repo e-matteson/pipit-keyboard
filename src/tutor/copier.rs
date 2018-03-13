@@ -24,6 +24,7 @@ pub struct Copier {
     learned_keys: HashMap<String, LearnState>,
     entries: Vec<SlideEntry>,
     check_errors: bool,
+    hint_map: HashMap<usize, LabeledChord>,
 }
 
 struct LearnState(i64);
@@ -64,28 +65,29 @@ impl Copier {
             learned_keys: HashMap::new(),
             entries: Vec::new(),
             check_errors: true,
+            hint_map: HashMap::new(),
         }
     }
 
     pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
-        let next_char = self.expected_char_at_point()?;
-        let entry = self.learned_keys.entry(next_char.clone()).or_default();
+        let special_hint = self.hint_map.get(&self.index);
+        if special_hint.is_some() {
+            return Ok(special_hint.cloned());
+        }
 
-        // TODO wait is this updating the wrong key? last one instead of next
-        // one?
-        // entry.update(self.was_last_char_correct()?);
-
-        let hint = if entry.needs_hint() || self.was_backspace_typed_last {
-            LabeledChord::from_letter(&next_char)
+        let next_letter = self.expected_char_at_point()?;
+        let entry = self.learned_keys.entry(next_letter.clone()).or_default();
+        let letter_hint = if entry.needs_hint() || self.was_backspace_typed_last
+        {
+            LabeledChord::from_letter(&next_letter)
         } else {
             None
         };
-        Ok(hint)
+
+        Ok(letter_hint)
     }
 
     pub fn last_wrong_char(&self) -> Result<LastChar, Error> {
-        // TODO support words
-
         if !self.check_errors {
             return Ok(LastChar::Correct);
         }
@@ -120,6 +122,7 @@ impl Copier {
     pub fn start_line(&mut self, line: &SlideLine) -> Result<(), Error> {
         let (entries, text) = line.to_entries()?;
 
+        // TODO why String::from?
         let pad = " ".repeat(self.extra_spaces());
         let expected = pad.clone() + &text;
         let mut actual = String::from(pad);
@@ -128,8 +131,9 @@ impl Copier {
         self.expected = expected;
         self.actual = actual;
         self.index = 0;
-        self.entries = entries;
         self.check_errors = line.check_errors();
+        self.hint_map = make_hint_map(&entries);
+        self.entries = entries;
         Ok(())
     }
 
@@ -246,4 +250,14 @@ fn get_style(actual_char: &str, expected_char: &str) -> ColorStyle {
     } else {
         ColorStyle::Secondary
     }
+}
+
+fn make_hint_map(entries: &[SlideEntry]) -> HashMap<usize, LabeledChord> {
+    let mut position = 0;
+    let mut map = HashMap::new();
+    for entry in entries {
+        map.insert(position, entry.to_labeled_chord());
+        position += entry.len();
+    }
+    map
 }

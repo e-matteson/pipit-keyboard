@@ -3,10 +3,10 @@ use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::theme::{Color, ColorStyle};
 
-use types::Chord;
+// use types::Chord;
 // use types::errors::*;
 
-use tutor::utils::{grapheme_slice, LabeledChord, LastChar};
+use tutor::utils::{Label, LabeledChord, LastChar};
 
 pub struct Graphic {
     pub next: Option<LabeledChord>,
@@ -24,9 +24,9 @@ pub enum ChordType {
 
 struct Switch {
     position: (usize, usize),
-    next: Option<String>,
-    error: Option<String>,
-    backspace: Option<String>,
+    next: Option<Label>,
+    error: Option<Label>,
+    backspace: Option<Label>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,11 +72,13 @@ impl Graphic {
     }
 
     fn update_switches_with_type(&mut self, chord_type: ChordType) {
-        if let Some(ref chord) = self.get_chord(chord_type) {
-            let label = self.get_label(chord_type).clone();
+        // let labeled_chord = ;
+
+        if let Some(labeled_chord) = self.get(chord_type) {
+            let chord = labeled_chord.chord;
             for (&bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
                 if bit {
-                    switch.set(chord_type, label.clone());
+                    switch.set(chord_type, labeled_chord.label.clone());
                 }
             }
         }
@@ -86,14 +88,6 @@ impl Graphic {
         for switch in self.switches.iter_mut() {
             switch.clear()
         }
-    }
-
-    pub fn get_chord(&self, chord_type: ChordType) -> Option<Chord> {
-        Some(self.get(chord_type)?.chord)
-    }
-
-    pub fn get_label(&self, chord_type: ChordType) -> Option<String> {
-        self.get(chord_type)?.label
     }
 
     fn get(&self, chord_type: ChordType) -> Option<LabeledChord> {
@@ -133,7 +127,7 @@ impl Switch {
 
     fn draw(&self, printer: &Printer) {
         let (x, y) = self.position;
-        let row2_left = format!("│{}", Switch::center_pad(&self.label(), 3));
+        let row2_left = format!("│{}", self.label().pad(3));
         let (left, right) = self.styles();
         printer.with_color(left, |printer| {
             printer.print((x, y), "╭───");
@@ -153,15 +147,15 @@ impl Switch {
         self.backspace = None;
     }
 
-    fn label<'a>(&'a self) -> &'a str {
+    fn label(&self) -> Label {
         if let Some(ref label) = self.next {
-            label
+            label.to_owned()
         } else if let Some(ref label) = self.error {
-            label
+            label.to_owned()
         } else if let Some(ref label) = self.backspace {
-            label
+            label.to_owned()
         } else {
-            ""
+            Label::default()
         }
     }
 
@@ -186,18 +180,12 @@ impl Switch {
         }
     }
 
-    pub fn set(&mut self, chord_type: ChordType, label: Option<String>) {
+    pub fn set(&mut self, chord_type: ChordType, label: Label) {
         match chord_type {
-            ChordType::Next => self.next = label,
-            ChordType::Error => self.error = label,
-            ChordType::Backspace => self.backspace = label,
+            ChordType::Next => self.next = Some(label),
+            ChordType::Error => self.error = Some(label),
+            ChordType::Backspace => self.backspace = Some(label),
         }
-    }
-
-    fn center_pad(label: &str, width: usize) -> String {
-        let len = grapheme_slice(label, 0, label.len()).count();
-        let start = (width - len) / 2. as usize;
-        " ".repeat(start) + label + &" ".repeat(width - start)
     }
 
     fn next_style() -> ColorStyle {

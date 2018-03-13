@@ -51,8 +51,11 @@ pub enum LastChar {
 #[derive(Debug, Clone)]
 pub struct LabeledChord {
     pub chord: Chord,
-    pub label: Option<String>,
+    pub label: Label,
 }
+
+#[derive(Debug, Clone)]
+pub struct Label(String);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -169,20 +172,39 @@ impl SlideEntry {
             text: letter,
         })
     }
+
+    pub fn len(&self) -> usize {
+        self.text.graphemes(true).count()
+    }
+
+    pub fn to_labeled_chord(&self) -> LabeledChord {
+        LabeledChord {
+            label: self.label(),
+            chord: self.chord.clone(),
+        }
+    }
+
+    pub fn label(&self) -> Label {
+        if self.text.graphemes(true).count() == 1 {
+            Label::from_char(&self.text)
+        } else {
+            Label::default()
+        }
+    }
 }
 
 impl LabeledChord {
     pub fn from_letter(letter: &str) -> Option<LabeledChord> {
         Some(LabeledChord {
             chord: char_to_chord(&letter)?,
-            label: Some(char_to_label(&letter)),
+            label: Label::from_char(&letter),
         })
     }
 
     fn backspace() -> Option<LabeledChord> {
         Some(LabeledChord {
             chord: backspace_chord()?,
-            label: Some("bak".into()),
+            label: "bak".into(),
         })
     }
 }
@@ -196,14 +218,52 @@ pub fn char_to_chord(character: &str) -> Option<Chord> {
     Some(chord)
 }
 
-pub fn char_to_label(character: &str) -> String {
-    match character {
-        "\n" => "ret".into(), // "⏎"
-        "\t" => "tab".into(),
-        " " => "spc".into(),
-        c => c.to_string(),
+impl Label {
+    pub fn from_char(character: &str) -> Label {
+        match character {
+            "\n" => "ret".into(), // "⏎"
+            "\t" => "tab".into(),
+            " " => "spc".into(),
+            c => c.into(),
+        }
+    }
+
+    pub fn pad(&self, width: usize) -> String {
+        let start = (width - self.len()) / 2. as usize;
+        " ".repeat(start) + &self.0 + &" ".repeat(width - start)
+    }
+
+    fn len(&self) -> usize {
+        self.0.graphemes(true).count()
     }
 }
+
+impl Default for Label {
+    fn default() -> Label {
+        Label(String::new())
+    }
+}
+
+impl Into<Label> for String {
+    fn into(self) -> Label {
+        Label(self)
+    }
+}
+
+impl<'a> Into<Label> for &'a str {
+    fn into(self) -> Label {
+        self.to_owned().into()
+    }
+}
+
+// impl<'a, T> Into<Label> for &'a T
+// where
+//     T: Into<Label>,
+// {
+//     fn into(t: &T) -> Label {
+//         t.to_owned().into()
+//     }
+// }
 
 fn to_ascii(character: &str) -> Option<char> {
     let mut chars = character.chars();

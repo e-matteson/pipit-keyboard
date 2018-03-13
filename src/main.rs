@@ -5,7 +5,7 @@ use pipit_config::AllData;
 use pipit_config::errors::*;
 
 use pipit_config::tutor::TutorApp;
-use pipit_config::cheatsheet::CheatSheet;
+// use pipit_config::cheatsheet::CheatSheet;
 
 use failure::{Error, ResultExt};
 
