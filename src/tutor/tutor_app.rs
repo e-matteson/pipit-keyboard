@@ -8,6 +8,8 @@ use cursive::traits::*;
 use cursive::views::{Dialog, SelectView, TextView};
 use cursive::vec::Vec2;
 use cursive::event::{Callback, Event, EventResult, Key};
+use cursive::utils::lines::simple::make_lines;
+use cursive::theme::ColorStyle;
 
 use types::TutorData;
 use types::errors::{print_and_panic, BadValueErr};
@@ -23,9 +25,11 @@ struct Lesson {
     slides: Vec<Slide>,
     graphic: Graphic,
     graphic_spacing: usize,
+    instruction_spacing: usize,
     copier: Copier,
     start_time: Option<Instant>,
     net_words: f64,
+    instruction: String,
 }
 
 enum LessonState {
@@ -117,9 +121,11 @@ impl Lesson {
             slides: slides.into_iter().rev().collect(),
             graphic: Graphic::new(),
             graphic_spacing: 1,
+            instruction_spacing: 3,
             copier: copier,
             start_time: None,
             net_words: 0.,
+            instruction: String::new(),
         };
         lesson.next_slide().unwrap();
         lesson.update_chord()?;
@@ -135,6 +141,7 @@ impl Lesson {
             value: "(empty)".into(),
         })?;
         self.copier.start_line(&slide.line)?;
+        self.instruction = slide.instruction;
         // TODO otherwise... other transition?
         Ok(())
     }
@@ -149,8 +156,6 @@ impl Lesson {
     }
 
     fn state(&self) -> LessonState {
-        // TODO what if no copier...
-        // Should always exist, and start and stop timer as needed?
         if self.copier.at_end_of_line() {
             LessonState::EndOfLine
         } else {
@@ -158,15 +163,40 @@ impl Lesson {
         }
     }
 
-    fn graphic_padding(&self) -> Vec2 {
-        let x = offset(self.graphic.size().x, self.size().x);
-        let y = self.copier.size().y + self.graphic_spacing;
-        Vec2::new(x, y)
+    fn instruction_size(&self) -> Vec2 {
+        let max_width = 80;
+        let rows = make_lines(&self.instruction, max_width);
+        if rows.len() > 1 {
+            panic!("instruction is too long!")
+        }
+        if rows.len() == 0 {
+            Vec2::new(0, 1)
+        } else {
+            let row = rows[0];
+            Vec2::new(row.width, 1)
+            // Vec2::new(max_width, 1)
+        }
+    }
+
+    fn instruction_padding(&self) -> Vec2 {
+        eprintln!("size: {:?}", self.instruction_size());
+        let x = offset(self.instruction_size().x, self.size().x);
+        Vec2::new(x, 0)
+        // Vec2::new(5, 0)
     }
 
     fn copy_padding(&self) -> Vec2 {
+        eprintln!("padding: {:?}", self.instruction_padding());
         let x = offset(self.copier.size().x, self.size().x);
-        Vec2::new(x, 0)
+        let y = self.instruction_padding().y + self.instruction_spacing;
+        Vec2::new(x, y)
+    }
+
+    fn graphic_padding(&self) -> Vec2 {
+        let x = offset(self.graphic.size().x, self.size().x);
+        let y =
+            self.copy_padding().y + self.copier.size().y + self.graphic_spacing;
+        Vec2::new(x, y)
     }
 
     fn start_if_not_started(&mut self) {
@@ -190,10 +220,19 @@ impl Lesson {
     fn size(&self) -> Vec2 {
         let graphic_size = self.graphic.size();
         let copy_size = self.copier.size();
-        // self.copier.map(|c| c.size()).unwrap_or(Vec2::new(0, 0));
-        let x = graphic_size.x.max(copy_size.x);
-        let y = graphic_size.y + copy_size.y + self.graphic_spacing;
+        let instruction_size = self.instruction_size();
+        let x = graphic_size.x.max(copy_size.x).max(instruction_size.x);
+
+        let y = graphic_size.y + copy_size.y + self.graphic_spacing
+            + instruction_size.y + self.instruction_spacing;
+        // let y = graphic_size.y + self.graphic_padding().y;
         Vec2::new(x, y)
+    }
+
+    fn draw_instruction(&self, printer: &Printer) {
+        printer.with_color(ColorStyle::title_primary(), |printer| {
+            printer.print((self.instruction_padding().x, 0), &self.instruction);
+        });
     }
 }
 
@@ -204,6 +243,21 @@ impl View for Lesson {
 
     fn draw(&self, printer: &Printer) {
         // TODO draw nothing if copier is not in use?
+        eprintln!(
+            "copy pad: {:?}, size: {:?}",
+            self.copy_padding(),
+            self.copier.size()
+        );
+        let fake_padding =
+            self.copy_padding() - Vec2::new(0, self.instruction_spacing);
+        eprintln!("fake pad: {:?} ", fake_padding);
+        self.draw_instruction(&printer.sub_printer(
+            // self.instruction_padding(),
+            // self.instruction_size() + self.instruction_padding(),
+            fake_padding,
+            self.copier.size(),
+            false,
+        ));
         self.copier.draw(&printer.sub_printer(
             self.copy_padding(),
             self.copier.size(),

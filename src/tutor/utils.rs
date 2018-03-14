@@ -16,7 +16,8 @@ lazy_static! {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Slide {
-    // pub instructions: Option<String>,
+    #[serde(default)]
+    pub instruction: String,
     pub line: SlideLine,
 }
 
@@ -34,7 +35,6 @@ pub enum SlideLine {
 pub struct SlideWord {
     pub names: Vec<Name>,
     pub text: String,
-
     #[serde(default)]
     pub length_override: Option<usize>,
 }

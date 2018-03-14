@@ -1,5 +1,7 @@
 [
-Slide(line: Letters("foobar")),
+Slide(
+  instruction: "Type this stuff!",
+  line: Letters("foobar")),
 Slide(
   line: Words (
         words: [

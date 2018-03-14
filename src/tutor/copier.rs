@@ -228,7 +228,7 @@ impl View for Copier {
     fn draw(&self, printer: &Printer) {
         let pad = self.text_padding().x;
 
-        printer.with_color(ColorStyle::TitleSecondary, |printer| {
+        printer.with_color(ColorStyle::title_secondary(), |printer| {
             printer.print((self.point_offset + pad, 0), &self.point_marker);
         });
 
@@ -294,14 +294,14 @@ fn get_style(actual_char: &str, expected_char: Option<&str>) -> ColorStyle {
     if let Some(expected_char) = expected_char {
         if actual_char == expected_char {
             // correct
-            ColorStyle::Primary
+            ColorStyle::primary()
         } else {
             // incorrect
-            ColorStyle::Secondary
+            ColorStyle::secondary()
         }
     } else {
         // incorrect
-        ColorStyle::Secondary
+        ColorStyle::secondary()
     }
 }
 

@@ -189,24 +189,21 @@ impl Switch {
     }
 
     fn next_style() -> ColorStyle {
-        ColorStyle::Tertiary
+        ColorStyle::tertiary()
     }
 
     fn backspace_style() -> ColorStyle {
         // TODO the background color is hardcoded, instead of inheriting from
         // the theme!
-        ColorStyle::Custom {
-            front: Color::Rgb(100, 95, 0),
-            back: Color::Rgb(0, 0, 0),
-        }
+        ColorStyle::new(Color::Rgb(100, 95, 0), Color::Rgb(0, 0, 0))
     }
 
     fn error_style() -> ColorStyle {
-        ColorStyle::Secondary
+        ColorStyle::secondary()
     }
 
     fn default_style() -> ColorStyle {
-        ColorStyle::TitleSecondary
+        ColorStyle::title_secondary()
     }
 }
 
