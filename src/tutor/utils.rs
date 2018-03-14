@@ -7,8 +7,6 @@ use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 
 use types::{Chord, ModeName, Name, TutorData};
-use types::errors::BadValueErr;
-// use types::errors::*;
 use failure::{Error, ResultExt};
 
 lazy_static! {
@@ -20,7 +18,7 @@ pub enum SlideLine {
     Letters(String),
     Words {
         words: Vec<SlideWord>,
-        check_errors: bool,
+        show_errors: bool,
     },
 }
 
@@ -50,7 +48,7 @@ pub enum LastChar {
     Incorrect(Option<LabeledChord>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct LabeledChord {
     pub chord: Chord,
     pub label: Label,
@@ -114,10 +112,10 @@ pub fn get_tutor_data_chord(name: &Name) -> Option<Chord> {
 }
 
 impl SlideLine {
-    pub fn check_errors(&self) -> bool {
+    pub fn show_errors(&self) -> bool {
         match self {
             SlideLine::Letters(_) => true,
-            SlideLine::Words { check_errors, .. } => *check_errors,
+            SlideLine::Words { show_errors, .. } => *show_errors,
         }
     }
 
@@ -132,16 +130,12 @@ impl SlideLine {
 
     pub fn to_entries(&self) -> Result<(Vec<SlideEntry>, String), Error> {
         Ok(match self {
-            SlideLine::Letters(string) => {
-                let entries: Result<Vec<_>, Error> = string
-                    .graphemes(true)
-                    .map(|letter| SlideEntry::new(letter.into()))
-                    .collect();
-                (entries?, string.to_owned())
-            }
+            SlideLine::Letters(string) => (Vec::new(), string.to_owned()),
             SlideLine::Words { words, .. } => {
-                let entries: Result<Vec<_>, _> =
-                    words.iter().map(|word| word.to_entry()).collect();
+                let entries: Result<Vec<_>, _> = words
+                    .iter()
+                    .map(|word| SlideEntry::from_word(word))
+                    .collect();
                 let entries = entries?;
                 let string =
                     entries.iter().map(|entry| entry.text.clone()).join("");
@@ -151,9 +145,20 @@ impl SlideLine {
     }
 }
 
-impl SlideWord {
-    fn to_entry(&self) -> Result<SlideEntry, Error> {
-        let chords: Option<Vec<_>> = self.names
+impl SlideEntry {
+    // fn from_letter(letter: String) -> Result<SlideEntry, Error> {
+    //     Ok(SlideEntry {
+    //         chord: char_to_chord(&letter).ok_or_else(|| BadValueErr {
+    //             thing: "character".into(),
+    //             value: letter.clone(),
+    //         })?,
+    //         length: letter.graphemes(true).count(),
+    //         text: letter.clone(),
+    //     })
+    // }
+
+    fn from_word(word: &SlideWord) -> Result<SlideEntry, Error> {
+        let chords: Option<Vec<_>> = word.names
             .iter()
             .map(|name| get_tutor_data_chord(name))
             .collect();
@@ -168,22 +173,9 @@ impl SlideWord {
 
         Ok(SlideEntry {
             chord: chord,
-            length: self.length_override
-                .unwrap_or_else(|| self.text.graphemes(true).count()),
-            text: self.text.clone(),
-        })
-    }
-}
-
-impl SlideEntry {
-    fn new(letter: String) -> Result<SlideEntry, Error> {
-        Ok(SlideEntry {
-            chord: char_to_chord(&letter).ok_or_else(|| BadValueErr {
-                thing: "character".into(),
-                value: letter.clone(),
-            })?,
-            length: letter.graphemes(true).count(),
-            text: letter,
+            length: word.length_override
+                .unwrap_or_else(|| word.text.graphemes(true).count()),
+            text: word.text.clone(),
         })
     }
 

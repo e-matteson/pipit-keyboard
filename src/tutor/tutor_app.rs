@@ -287,8 +287,11 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
             "fake lesson".into(),
             vec![
                 Slide {
+                    line: SlideLine::Letters("abababababab".into()),
+                },
+                Slide {
                     line: SlideLine::Words {
-                        check_errors: false,
+                        show_errors: false,
                         words: vec![
                             // SlideWord {
                             //     names: vec!["word_the".into()],
@@ -325,7 +328,7 @@ fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
                 },
                 Slide {
                     line: SlideLine::Words {
-                        check_errors: true,
+                        show_errors: true,
                         words: vec![
                             SlideWord {
                                 names: vec![

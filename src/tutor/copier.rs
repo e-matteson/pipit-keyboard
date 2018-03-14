@@ -14,24 +14,27 @@ use tutor::utils::{grapheme_slice, offset, LabeledChord, LastChar, SlideEntry,
                    SlideLine};
 
 // TODO compose from CopierLine?
+#[derive(Debug, Clone)]
 pub struct Copier {
     num_chars: usize,
     point_marker: String,
     point_offset: usize,
-    learned_keys: HashMap<String, LearnState>,
+    learning_map: HashMap<String, LearnState>,
     line: CopierLine,
 }
 
+#[derive(Debug, Clone)]
 struct CopierLine {
     expected: String,
     actual: String,
     index: usize,
-    check_errors: bool,
+    show_errors: bool,
     hint_map: HashMap<usize, LabeledChord>,
     show_hints_within_words: bool,
     was_backspace_typed_last: bool,
 }
 
+#[derive(Debug, Clone)]
 struct LearnState(i64);
 
 impl LearnState {
@@ -43,7 +46,7 @@ impl LearnState {
         }
     }
 
-    fn needs_hint(&self) -> bool {
+    fn is_learned(&self) -> bool {
         self.0 >= 0
     }
 }
@@ -52,7 +55,7 @@ impl Default for LearnState {
     fn default() -> LearnState {
         // Set the number of times you must type this character correctly
         // before the hint goes away
-        LearnState(5)
+        LearnState(2)
     }
 }
 
@@ -63,8 +66,16 @@ impl Copier {
             num_chars: num_chars,
             point_offset: point_offset,
             point_marker: "▼".into(),
-            learned_keys: HashMap::new(),
+            learning_map: HashMap::new(),
             line: CopierLine::default(),
+        }
+    }
+
+    pub fn needs_hint(&self, letter: &str) -> bool {
+        if let Some(state) = self.learning_map.get(letter) {
+            state.is_learned()
+        } else {
+            true
         }
     }
 
@@ -85,19 +96,19 @@ impl Copier {
         let next_letter = self.expected_at_offset(self.point_offset)
             .expect("failed to get next char, did we check for end of line?");
 
-        let entry = self.learned_keys.entry(next_letter.clone()).or_default();
-        let letter_hint =
-            if entry.needs_hint() || self.line.was_backspace_typed_last {
-                LabeledChord::from_letter(&next_letter)
-            } else {
-                None
-            };
+        let letter_hint = if self.needs_hint(&next_letter)
+            || self.line.was_backspace_typed_last
+        {
+            LabeledChord::from_letter(&next_letter)
+        } else {
+            None
+        };
 
         Ok(letter_hint)
     }
 
     pub fn last_wrong_char(&self) -> Result<LastChar, Error> {
-        if !self.line.check_errors {
+        if !self.line.show_errors {
             return Ok(LastChar::Correct);
         }
 
@@ -122,6 +133,10 @@ impl Copier {
         self.line.actual += &s;
         self.line.index += 1;
         self.line.was_backspace_typed_last = false;
+
+        let was_correct = self.was_last_char_correct()
+            .expect("failed to type character");
+        self.learning_map.entry(s).or_default().update(was_correct);
     }
 
     pub fn type_backspace(&mut self) {
@@ -253,7 +268,7 @@ impl CopierLine {
             expected: expected,
             actual: actual,
             index: 0,
-            check_errors: line.check_errors(),
+            show_errors: line.show_errors(),
             hint_map: make_hint_map(&entries),
             show_hints_within_words: !line.has_length_overrides(),
             was_backspace_typed_last: false,
@@ -268,7 +283,7 @@ impl Default for CopierLine {
             actual: String::new(),
             index: 0,
             was_backspace_typed_last: false,
-            check_errors: true,
+            show_errors: true,
             hint_map: HashMap::new(),
             show_hints_within_words: true,
         }
