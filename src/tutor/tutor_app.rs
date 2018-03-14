@@ -240,11 +240,6 @@ impl View for Lesson {
                 Event::Key(Key::Backspace) => self.copier.type_backspace(),
                 Event::CtrlChar('j') | Event::Key(Key::Enter) => {
                     self.net_words += self.copier.net_words();
-                    // eprintln!(
-                    //     "net_words: {}, minutes: {}",
-                    //     self.net_words,
-                    //     self.minutes()
-                    // );
                     if self.slides.is_empty() {
                         // Lesson is done
                         let wpm = self.words_per_minute();
@@ -255,6 +250,11 @@ impl View for Lesson {
 
                     // TODO don't unwrap
                     self.next_slide().unwrap();
+                }
+                Event::Char(letter) => {
+                    // Let them keep typing past the end of the line (important
+                    // for cycling to shorter words)
+                    self.copier.type_char(letter);
                 }
                 _ => return EventResult::Ignored,
             },
