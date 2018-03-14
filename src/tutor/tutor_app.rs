@@ -1,6 +1,3 @@
-use std::collections::BTreeMap;
-use std::fs;
-use std::path::PathBuf;
 use std::time::Instant;
 
 use natord;
@@ -17,8 +14,7 @@ use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
 use tutor::graphic::Graphic;
-use tutor::utils::{offset, read_file_lines, set_tutor_data, Slide, SlideLine,
-                   SlideWord};
+use tutor::utils::{load_lessons, offset, set_tutor_data, Slide};
 use tutor::copier::Copier;
 
 pub struct TutorApp;
@@ -51,9 +47,8 @@ impl TutorApp {
     }
 
     fn show_menu(siv: &mut Cursive) {
-        load_lessons("tutor/lessons/").expect("failed to get lessons");
-
-        let lessons = fake_lessons();
+        let lessons =
+            load_lessons("tutor/lessons/").expect("failed to get lessons");
         let mut names: Vec<String> = lessons.keys().cloned().collect();
         names.sort_by(|a, b| natord::compare(a, b));
 
@@ -266,141 +261,4 @@ impl View for Lesson {
 
         EventResult::Consumed(None)
     }
-}
-
-fn load_lessons(
-    lesson_dir: &str,
-) -> Result<BTreeMap<String, Vec<String>>, Error> {
-    let entries = fs::read_dir(lesson_dir)?;
-    let mut map = BTreeMap::new();
-    for entry in entries {
-        let path = entry?.path();
-        let name = lesson_path_to_name(&path);
-        map.insert(name, read_file_lines(&path)?);
-    }
-    Ok(map)
-}
-
-fn fake_lessons() -> BTreeMap<String, Vec<Slide>> {
-    vec![
-        (
-            "fake lesson".into(),
-            vec![
-                Slide {
-                    line: SlideLine::Letters("abababababab".into()),
-                },
-                Slide {
-                    line: SlideLine::Words {
-                        show_errors: false,
-                        words: vec![
-                            // SlideWord {
-                            //     names: vec!["word_the".into()],
-                            //     text: " teeth".into(),
-                            //     length_override: Some(4),
-                            // },
-                            // SlideWord {
-                            //     names: vec!["command_cycle_word".into()],
-                            //     text: "".into(),
-                            //     length_override: None,
-                            // },
-                            SlideWord {
-                                names: vec!["word_teeth_1".into()],
-                                text: " the".into(),
-                                length_override: Some(6),
-                            },
-                            SlideWord {
-                                names: vec!["command_cycle_word".into()],
-                                text: "".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["command_cycle_word".into()],
-                                text: "".into(),
-                                length_override: None,
-                            },
-                            /* SlideWord {
-                             *     names: vec!["word_different_dif".into()],
-                             *     text: "different".into(),
-                             *     length_override: None,
-                             * }, */
-                        ],
-                    },
-                },
-                Slide {
-                    line: SlideLine::Words {
-                        show_errors: true,
-                        words: vec![
-                            SlideWord {
-                                names: vec![
-                                    "word_tap".into(),
-                                    "mod_nospace".into(),
-                                    "mod_capital".into(),
-                                ],
-                                text: "Tap".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec![
-                                    "word_ing".into(),
-                                    "mod_double".into(),
-                                ],
-                                text: "ping".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_space".into()],
-                                text: " ".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_l".into()],
-                                text: "l".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_e".into()],
-                                text: "e".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_t".into()],
-                                text: "t".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_t".into()],
-                                text: "t".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_e".into()],
-                                text: "e".into(),
-                                length_override: None,
-                            },
-                            SlideWord {
-                                names: vec!["key_r".into()],
-                                text: "r".into(),
-                                length_override: None,
-                            },
-                        ],
-                    },
-                },
-                Slide {
-                    line: SlideLine::Letters("goodbye".into()),
-                },
-            ],
-        ),
-    ].into_iter()
-        .collect()
-}
-
-fn lesson_path_to_name(path: &PathBuf) -> String {
-    let s = path.file_stem()
-        .expect("invalid lesson file name")
-        .to_str()
-        .expect("lesson path is not valid unicode");
-    let mut sections = s.split("_");
-    let number = sections.next().expect("invalid lesson file name");
-    let words: Vec<_> = sections.collect();
-    format!("{}) {}", number, words.join(" "))
 }

@@ -1,10 +1,11 @@
-use std::fs::File;
+use std::fs::{self, File};
 use std::path::PathBuf;
-use std::io::{BufRead, BufReader};
 use std::sync::Mutex;
+use std::collections::BTreeMap;
 
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
+use ron::de::from_reader;
 
 use types::{Chord, ModeName, Name, TutorData};
 use failure::{Error, ResultExt};
@@ -13,19 +14,28 @@ lazy_static! {
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
+pub struct Slide {
+    // pub instructions: Option<String>,
+    pub line: SlideLine,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub enum SlideLine {
     Letters(String),
     Words {
         words: Vec<SlideWord>,
+        #[serde(default = "return_true")]
         show_errors: bool,
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct SlideWord {
     pub names: Vec<Name>,
     pub text: String,
+
+    #[serde(default)]
     pub length_override: Option<usize>,
 }
 
@@ -34,12 +44,6 @@ pub struct SlideEntry {
     pub text: String,
     pub chord: Chord,
     pub length: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct Slide {
-    // pub instructions: Option<String>,
-    pub line: SlideLine,
 }
 
 #[derive(Debug, Clone)]
@@ -342,25 +346,161 @@ pub fn grapheme_slice<'a>(
     Box::new(s.graphemes(true).skip(start).take(end))
 }
 
-pub fn read_file_lines(path: &PathBuf) -> Result<Vec<String>, Error> {
-    let file = open_file(path)
-        .context(format!("failed to open file: {}", path.display()))?;
-    let buf = BufReader::new(file);
-    let lines: Vec<String> = buf.lines()
-        .map(|w| w.unwrap())
-        .filter(|s| !s.is_empty())
-        .collect();
-    Ok(lines)
-}
-
-fn open_file(path: &PathBuf) -> Result<File, Error> {
-    Ok(File::open(path)?)
-}
-
 pub fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize
 }
 
 fn backspace_chord() -> Option<Chord> {
     get_tutor_data_chord(&"key_backspace".into())
+}
+
+pub fn load_lessons(
+    lesson_dir: &str,
+) -> Result<BTreeMap<String, Vec<Slide>>, Error> {
+    let entries = fs::read_dir(lesson_dir)?;
+    let mut map = BTreeMap::new();
+    for entry in entries {
+        let path = entry?.path();
+        let name = lesson_path_to_name(&path);
+        map.insert(name, read_lesson_file(&path)?);
+    }
+    Ok(map)
+}
+
+// vec![
+//     (
+//         "fake lesson".into(),
+//         vec![
+//             Slide {
+//                 line: SlideLine::Letters("abababababab".into()),
+//             },
+//             Slide {
+//                 line: SlideLine::Words {
+//                     show_errors: false,
+//                     words: vec![
+//                         // SlideWord {
+//                         //     names: vec!["word_the".into()],
+//                         //     text: " teeth".into(),
+//                         //     length_override: Some(4),
+//                         // },
+//                         // SlideWord {
+//                         //     names: vec!["command_cycle_word".into()],
+//                         //     text: "".into(),
+//                         //     length_override: None,
+//                         // },
+//                         SlideWord {
+//                             names: vec!["word_raw_2".into()],
+//                             text: " raw".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["word_teeth_1".into()],
+//                             text: " the".into(),
+//                             length_override: Some(6),
+//                         },
+//                         SlideWord {
+//                             names: vec!["command_cycle_word".into()],
+//                             text: "".into(),
+//                             length_override: None,
+//                         },
+//                         /* SlideWord {
+//                          *     names: vec!["word_different_dif".into()],
+//                          *     text: "different".into(),
+//                          *     length_override: None,
+//                          * }, */
+//                     ],
+//                 },
+//             },
+//             Slide {
+//                 line: SlideLine::Words {
+//                     show_errors: true,
+//                     words: vec![
+//                         SlideWord {
+//                             names: vec![
+//                                 "word_tap".into(),
+//                                 "mod_nospace".into(),
+//                                 "mod_capital".into(),
+//                             ],
+//                             text: "Tap".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec![
+//                                 "word_ing".into(),
+//                                 "mod_double".into(),
+//                             ],
+//                             text: "ping".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_space".into()],
+//                             text: " ".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_l".into()],
+//                             text: "l".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_e".into()],
+//                             text: "e".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_t".into()],
+//                             text: "t".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_t".into()],
+//                             text: "t".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_e".into()],
+//                             text: "e".into(),
+//                             length_override: None,
+//                         },
+//                         SlideWord {
+//                             names: vec!["key_r".into()],
+//                             text: "r".into(),
+//                             length_override: None,
+//                         },
+//                     ],
+//                 },
+//             },
+//             Slide {
+//                 line: SlideLine::Letters("goodbye".into()),
+//             },
+//         ],
+//     ),
+// ].into_iter()
+//     .collect()
+
+fn lesson_path_to_name(path: &PathBuf) -> String {
+    let s = path.file_stem()
+        .expect("invalid lesson file name")
+        .to_str()
+        .expect("lesson path is not valid unicode");
+    let mut sections = s.split("_");
+    let number = sections.next().expect("invalid lesson file name");
+    let words: Vec<_> = sections.collect();
+    format!("{}) {}", number, words.join(" "))
+}
+
+pub fn read_lesson_file(path: &PathBuf) -> Result<Vec<Slide>, Error> {
+    let file = open_file(path)
+        .context(format!("failed to open file: {}", path.display()))?;
+    let slides: Vec<Slide> = from_reader(file)
+        .context(format!("failed to read RON file: {}", path.display()))?;
+    Ok(slides)
+}
+
+fn open_file(path: &PathBuf) -> Result<File, Error> {
+    Ok(File::open(path)?)
+}
+
+fn return_true() -> bool {
+    true
 }

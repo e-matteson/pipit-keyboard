@@ -251,6 +251,7 @@ impl AllData {
     pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
         for name in &self.anagram_mods {
+            // TODO why default? Shouldn't that be an error?
             out.push(self.get_chord_in_mode(name, mode).unwrap_or_default());
         }
         out
@@ -341,17 +342,37 @@ impl AllData {
             .collect()
     }
 
+    pub fn incorporate_anagram(
+        &self,
+        mut chord: Chord,
+        mode: &ModeName,
+    ) -> Option<Chord> {
+        let num = chord.anagram_num.0 as usize;
+        if num > 0 {
+            let mod_chord =
+                self.get_chord_in_mode(self.anagram_mods.get(num - 1)?, mode)?;
+            chord.intersect(&mod_chord);
+            chord.anagram_num = AnagramNum(0);
+        };
+        Some(chord)
+    }
+
     pub fn get_tutor_data(&self) -> Result<TutorData, Error> {
         // TODO clean up, reorganize AllData to make this less bad?
         // TODO think about borrowck
-        // TODO this is REALLY SLOW!!!
+        // TODO this is pretty slow
         let mut chords = BTreeMap::new();
         let names = self.get_all_names();
         for mode in self.modes.keys() {
             let mut mode_chords = BTreeMap::new();
             for name in &names {
-                if let Some(chord) = self.get_chord_in_mode(name, mode) {
-                    mode_chords.insert(name.to_owned(), chord);
+                if let Some(mut chord) = self.get_chord_in_mode(name, mode) {
+                    // TODO speed up by fetching all anagram chords in advance?
+                    if let Some(new) = self.incorporate_anagram(chord, mode) {
+                        mode_chords.insert(name.to_owned(), new);
+                    }
+                    // Otherwise we couldn't incorporate the anagram number into
+                    // the chord, so skip it.
                 }
             }
             chords.insert(mode.to_owned(), mode_chords);
