@@ -55,7 +55,7 @@ impl Default for LearnState {
     fn default() -> LearnState {
         // Set the number of times you must type this character correctly
         // before the hint goes away
-        LearnState(2)
+        LearnState(10)
     }
 }
 

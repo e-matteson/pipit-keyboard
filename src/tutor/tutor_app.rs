@@ -179,14 +179,14 @@ impl Lesson {
     }
 
     fn instruction_padding(&self) -> Vec2 {
-        eprintln!("size: {:?}", self.instruction_size());
+        // eprintln!("size: {:?}", self.instruction_size());
         let x = offset(self.instruction_size().x, self.size().x);
         Vec2::new(x, 0)
         // Vec2::new(5, 0)
     }
 
     fn copy_padding(&self) -> Vec2 {
-        eprintln!("padding: {:?}", self.instruction_padding());
+        // eprintln!("padding: {:?}", self.instruction_padding());
         let x = offset(self.copier.size().x, self.size().x);
         let y = self.instruction_padding().y + self.instruction_spacing;
         Vec2::new(x, y)
@@ -242,15 +242,14 @@ impl View for Lesson {
     }
 
     fn draw(&self, printer: &Printer) {
-        // TODO draw nothing if copier is not in use?
-        eprintln!(
-            "copy pad: {:?}, size: {:?}",
-            self.copy_padding(),
-            self.copier.size()
-        );
+        // eprintln!(
+        //     "copy pad: {:?}, size: {:?}",
+        //     self.copy_padding(),
+        //     self.copier.size()
+        // );
         let fake_padding =
             self.copy_padding() - Vec2::new(0, self.instruction_spacing);
-        eprintln!("fake pad: {:?} ", fake_padding);
+        // eprintln!("fake pad: {:?} ", fake_padding);
         self.draw_instruction(&printer.sub_printer(
             // self.instruction_padding(),
             // self.instruction_size() + self.instruction_padding(),

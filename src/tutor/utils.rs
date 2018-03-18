@@ -15,6 +15,7 @@ lazy_static! {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Slide {
     #[serde(default)]
     pub instruction: String,
@@ -22,6 +23,7 @@ pub struct Slide {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub enum SlideLine {
     Letters(String),
     Words {
@@ -32,8 +34,10 @@ pub enum SlideLine {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct SlideWord {
     pub names: Vec<Name>,
+    #[serde(default)]
     pub text: String,
     #[serde(default)]
     pub length_override: Option<usize>,
