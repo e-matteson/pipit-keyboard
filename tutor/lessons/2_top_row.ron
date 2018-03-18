@@ -1,7 +1,25 @@
 [
 (line: Letters("pufm mfup ppuu ffmm fu pf mu up")),
+(line: Letters("fume pipe puff pop pump mop")),
+(line: Letters("ppuuffmm mufp uppmf mffup uufp pufm")),
+(line: Letters("a poem of miami fame")),
+(line: Letters("fpu mffp upup fmfm pufm ffmu mfup")),
+(line: Letters("pop up map femme meme")),
+(line: Letters("mfupufm fpfp ummu fump mpufm")),
+
 (line: Letters("dcrl lrcd ddcc rrll rc dr lc cd")),
+(line: Letters("carol called local area radio")),
+(line: Letters("rcdl lrrrl drl cld crc ddlrc")),
+(line: Letters("dale carried real railroad coal")),
+(line: Letters("ccd rlrl dcrl ldcr ddccrrll dcrl ldcd")),
+(line: Letters("claire decided to race in colorado")),
+(line: Letters("lrcd drcd dcrl rrcdd dldl crcr drcl")),
+
 (line: Letters("pufm dcrl pduc frml prfu dmfl rcpm mrul lpur frmc")),
-(line: Letters("real parade frame crime placid mule rude moral palace flared parole flapped")),
-(line: Letters("drool leap prairie carp pummel")),
+(line: Letters("paul produced a popular crime film")),
+(line: Letters("pduc cfur plfp mdrcd pclufm ffpuc mrfcld dpcu rflm mfup dcrl")),
+(line: Letters("memorial parades for dead emperors are full of color")),
+(line: Letters("dcrlpufm fmuu rldcu frld mmrcp urlf drluf mfpurf")),
+(line: Letters("placid prairie mules feel real relief")),
+(line: Letters("four people circled as flames flared")),
 ]
