@@ -1,11 +1,10 @@
 # This file defines a keymap for a chording keyboard with 24 keys. It's based
 # on the dvorak layout, and designed to work well with vim. It also contains a
-# bunch of macros that are specific to my workflow. It has NOT been carefully
-# optimized to reduce anagram collisions.
+# bunch of macros that are specific to my workflow.
 
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
-##### modifier keys #####
+##### modifiers #####
 
 mod_shift        key_backspace     mod_ctrl
 ....   ....	     ....   ....   	   ....   ....
@@ -91,12 +90,6 @@ key_esc
  .     .
   ... ...
 
-# key_tab
-# ....   ....
-# ...*   .*..
-#  .     .
-#   ... ...
-
 key_bang        key_question
 ....   ....     ....   ....
 *..*   ....     ....   *..*
@@ -130,7 +123,7 @@ key_underscore  key_minus
  .     .          .     .
   ... ...         ... ...
 
-key_doublequote       key_quote
+key_doublequote key_quote
 *...   ....     ....   ...*
 ...*   ....     ....   *...
  .     .          .     .
@@ -147,12 +140,6 @@ key_pipe        key_ampersand
 ..*.   ....     ....   .*..
  .     .         .     .
   ... ...         ... ...
-
-# key_            key_
-# *...   ....     ....   ...*
-# ..*.   ....     ....   .*..
-#  .     .         .     .
-#   ... ...         ... ...
 
 ## ring ##
 
@@ -174,13 +161,6 @@ key_tab
 .*..   ....
  .     .
   ... ...
-
-
-# key_
-# ....   ...*
-# ....   ..*.
-#  .     .
-#   ... ...
 
 ## pinky ##
 
@@ -315,8 +295,22 @@ command_led_battery command_led_colors  command_led_rainbow
   .     .             .     .             .     .
   ... .*.             ... .*.             ... .*.
 
-## text macros ##
 
+#### web browser macros ####
+
+macro_next_tab  macro_prev_tab  macro_zotero_save
+....   ....     ....   ....     *..*   ....
+....   ...*     ....   ..*.     ....   ....
+  .     .         .     .         .     .
+  ... .*.         ... .*.         ... .*.
+
+#### general text-like macros ####
+
+macro_gmail       macro_bmail
+***.   ...*       *.**   ...*
+*..*   ....       *..*   ....
+  .     .           .     .
+  ... .*.           ... .*.
 
 macro_in_paren   macro_in_curly     macro_in_brace   macro_in_angle
 ...*   ....      ..*.   ....        .*..   ....      *...   ....
@@ -330,89 +324,35 @@ macro_out_paren   macro_out_curly   macro_out_brace   macro_out_angle
   .     .          .     .            .     .          .     .
   ... .*.          ... .*.            ... .*.          ... .*.
 
-macro_in_doublequote  macro_in_quote  macro_in_equal
-*...   ....           ....   ...*     ....   *...
-...*   ....           ....   *...     ....   ...*
-  .     .               .     .         .     .
-  ... .*.               ... .*.         ... .*.
+macro_in_quote  macro_in_equal   macro_in_doublequote
+....   ...*     ....   *...      *...   ....
+....   *...     ....   ...*      ...*   ....
+  .     .         .     .          .     .
+  ... .*.         ... .*.          ... .*.
 
-# macro_bang_dollar macro_backslash_n
-# .*..   ....       ...*   .*..
-# ...*   ..*.       ....   ..*.
-#   .     .           .     .
-#   ... ...           ... ...
+macro_backslash_n
+..*.   ....
+...*   ..*.
+  .     .
+  ... ...
 
-# macro_out_quote macro_out_doublequote
-# ....   ....      ....   ....
-# .*..   ...*      *...   ...*
-#   .     .          .     .
-#   .*. .*.          .*. .*.
+#### python macros ####
 
-macro_gmail       macro_bmail       macro_ls
-***.   ...*       *.**   ...*       ....   ...*
-*..*   ....       *..*   ....       ....   ...*
-  .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.
+macro_print_py   macro_exit_py     macro_self_dot    macro_docstr_py
+...*   .**.      ....   .*.*       .*..   ...*       ...*   .**.
+....   ....      ..**   .*..       ..*.   ...*       *...   ...*
+  .     .          .     .           .     .           .     .
+  ... .*.          ... .*.           ... .*.           ... .*.
 
-macro_exit_py     macro_self_dot    macro_docstr_py
-....   .*.*       .*..   ...*       ...*   .**.
-..**   .*..       ..*.   ...*       *...   ...*
-  .     .           .     .           .     .
-  ... .*.           ... .*.           ... .*.
+#### bash macros ####
 
-# macro_hash_bang
-# .*.*   ..*.
-# ....   ..*.
-#   .     .
-#   ... .*.
+macro_bang_dollar  macro_hash_bang   macro_ls
+....   *...        ....   .*..       ....   ...*
+*..*   .*..        *..*   ...*       ....   ...*
+  .     .            .     .           .     .
+  ... ...            ... .*.           ... .*.
 
-macro_printf    macro_print_py      macro_print_rs    macro_print_debug_rs
-...*   .*..      ...*   .**.        ...*   ..*.       ...*   *.*.
-....   ....      ....   ....        ....   ....       ....   ....
-  .     .          .     .            .     .           .     .
-  ... .*.          ... .*.            ... .*.           ... .*.
-
-macro_return_rs  macro_amperstr_rs
-**..   ....      ....   ..*.
-...*   *...      ....   .*.*
-  .     .          .     .
-  ... .*.          ... .*.
-
-# macro_lifetime_rs macro_ampermut_rs
-# ....   ...*       *.*.   ....
-# ***.   ....       ....   .**.
-#   .     .          .     .
-#   ... .*.          ... ...
-
-macro_btreemap    macro_new_rs
-*.**   ....       ....   **..
-*...   ....       ..*.   ..*.
-  .     .           .     .
-  ... .*.           ... .*.
-
-macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
-....   .*..       ....   .*..       .*..   .*..        .*..   *...
-...*   ....       ..*.   ....       ....   ....        ..**   ....
-  .     .           .     .           .     .            .     .
-  ... .*.           ... .*.           ... .*.            ... .*.
-
-macro_while_c    macro_right_arrow    macro_left_arrow
-....   **.*      ....   ...*          ....   ...*
-..**   *...      *.*.   *...          **..   *...
-  .     .          .     .              .     .
-  ... .*.          ... ...              ... ...
-
-# macro_arg_c
-# ....   **..
-# .**.   ....
-#   .     .
-#   ... .*.
-
-macro_cout        macro_endl        macro_cerr          macro_this_arrow
-..*.   .*..       ....   *..*       ....   .**.         ....   ....
-.*..   .*..       ..*.   ..*.       ..*.   ....         ...*   **.*
-  .     .           .     .           .     .             .     .
-  ... .*.           ... .*.           ... .*.             ... .*.
+#### arduino macros ####
 
 macro_print_ino   macro_println_ino
 ...*   ....       ...*   ...*
@@ -420,26 +360,100 @@ macro_print_ino   macro_println_ino
   .     .           .     .
   ... .*.           ... .*.
 
+#### LaTeX macros ####
+
 macro_tex_item    macro_tex_citep   macro_tex_itemize   macro_tex_enumerate
 ....   ...*       ...*   .*.*       ....   ...*         ....   ...*
 .*..   ....       ....   ....       ...*   ....         ..*.   ....
   .     .           .     .           .     .             .     .
   ... .*.           ... .*.           ... .*.             ... .*.
 
+#### pipit macros ####
 
-## vim/spacemacs macros ##
+macro_anagram_1
+....   ....
+*.**   ....
+  .     .
+  ... .*.
 
-macro_vim_save         macro_vim_quit
-....   ....            ....   ....
-....   *...            ****   *...
-  .     .                .     .
-  ... .*.                ... .*.
+#### rust macros ####
 
-macro_helm_mini        macro_helm_imenu      macro_find_file    macro_mx
-..*.   ....   	       ...*   ....           ....   .*..        ....   *...
-..*.   ....   	       ...*   ....           ....   .*..        ....   *...
-  .     .                .     .               .     .            .     .
-  ... ...     	         ... ...               ... ...            ... ...
+macro_print_rs    macro_print_debug_rs
+...*   ..*.       ...*   *.*.
+....   ....       ....   ....
+  .     .           .     .
+  ... .*.           ... .*.
+
+macro_return_rs  macro_amperstr_rs  macro_lifetime_rs  macro_new_rs
+*...   ..*.      ....   ..*.        *...   ....        ....   **..
+....   **..      ....   .*.*        *...   **..        ..*.   ..*.
+  .     .          .     .            .     .            .     .
+  ... .*.          ... .*.            ... .*.            ... .*.
+
+#### c/c++ macros ####
+
+macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
+....   .*..       ....   .*..       .*..   .*..        .*..   *...
+...*   ....       ..*.   ....       ....   ....        ..**   ....
+  .     .           .     .           .     .            .     .
+  ... .*.           ... .*.           ... .*.            ... .*.
+
+macro_while_c    macro_right_arrow    macro_left_arrow  macro_arg_c
+....   **.*      ....   ...*          ....   ...*       ..**   ....
+..**   *...      *.*.   *...          **..   *...       ....   **..
+  .     .          .     .              .     .           .     .
+  ... .*.          ... ...              ... ...           ... .*.
+
+macro_cout        macro_endl        macro_cerr          macro_this_arrow
+..*.   .*..       ....   *..*       ....   .**.         ....   ....
+.*..   .*..       ..*.   ..*.       ..*.   ....         ...*   **.*
+  .     .           .     .           .     .             .     .
+  ... .*.           ... .*.           ... .*.             ... .*.
+
+macro_printf
+...*   .*..
+....   ....
+  .     .
+  ... .*.
+
+
+#### vim/spacemacs macros ####
+
+macro_vim_save      macro_vim_quit     macro_at_at      macro_yank_eol
+....   ....         ....   ....        ..*.   ....      ....   .**.
+....   *...         ****   *...        *...   ....      ....   ....
+  .     .             .     .            .     .          .     .
+  ... .*.             ... .*.            ... .*.          ... .*.
+
+macro_f_comma      macro_cap_f_comma   macro_blackhole
+...*   ....        ...*   ....         **..   ....
+....   .*..        ....   *...         ...*   ....
+  .     .            .     .             .     .
+  ... .*.            ... .*.             ... .*.
+
+macro_aspace       macro_aspace_p      macro_cap_aspace   macro_cap_aspace_p
+....   ....        ...*   ....         ....   ....        ...*   ....
+*.*.   .*..        *.*.   .*..         *.*.   .*..        *.*.   .*..
+  .     .            .     .             .     .            .     .
+  ... .*.            ... .*.             *.. .*.            *.. .*.
+
+macro_compile      macro_error_prev       macro_error_next   macro_eval
+....   ....        ....   ....            ....   ....        ....   ....
+....   **..        ..*.   ..*.            ..*.   ..*.        ....   .*..
+  .     .            .     .                .     .            .     .
+  ... .*.            *.. .*.                ... .*.            ... .*.
+
+macro_decrement     macro_increment    macro_prev_search
+....   .*.*         ....   ....        ....   .*..
+*...   ....         *...   ....        ....   *.*.
+  .     .             .     .            .     .
+  ... .*.             ... .*.            ... .*.
+
+macro_helm_mini     macro_helm_imenu      macro_find_file    macro_mx
+..*.   ....   	    ...*   ....           ....   .*..        ....   *...
+..*.   ....   	    ...*   ....           ....   .*..        ....   *...
+  .     .             .     .               .     .            .     .
+  ... ...     	      ... ...               ... ...            ... ...
 
 macro_find_other_file  macro_proj_find_file   macro_recentf      macro_kill_buffer
 .*..   ....            ....   .*..            ..*.   ....        ..**   *...
@@ -459,37 +473,17 @@ macro_other_buffer1    macro_other_buffer2    macro_other_buffer3 macro_other_bu
   .     .                .     .                 .     .             .     .
   ... .*.                ... .*.                 ... .*.             ... .*.
 
-macro_kill_ring        macro_comment
-...*   ....            ....   ....
-....   ....            .*..   ....
-  .     .                .     .
-  ... .*.                ... .*.
+macro_kill_ring        macro_comment        macro_nohlsearch
+...*   ....            ....   .*.*          ..**   **..
+....   ....            ....   ....          ....   ....
+  .     .                .     .              .     .
+  ... .*.                ... .*.              ... .*.
 
-# TODO update for new slash?
-macro_nohlsearch
-..**   **..
-....   ....
-  .     .
-  ... .*.
-
-macro_compile          macro_error_prev       macro_error_next   macro_eval
-....   ....            ....   ....            ....   ....        ....   ....
-....   **..            ..*.   ..*.            ..*.   ..*.        ....   .*..
-  .     .                .     .                .     .            .     .
-  ... .*.                *.. .*.                ... .*.            ... .*.
-
-macro_dotspacemacs
-.*..   *...
-..*.   ....
-  .     .
-  ... .*.
-
-macro_magit_status
-.**.   ....
-....   ...*
-  .     .
-  ... .*.
-
+macro_dotspacemacs    macro_magit_status     macro_inbox
+.*..   *...           .**.   ....            ....   ....
+..*.   ....           ....   ...*            .*.*   ....
+  .     .               .     .                .     .
+  ... .*.               ... .*.                ... .*.
 
 macro_open_planner    macro_open_timeline  macro_open_settings  macro_open_dvorak
 ...*   ....           ...*   ....          ...*   ....          ...*   *...
@@ -527,97 +521,3 @@ macro_org_calendar     macro_org_tree        macro_org_archive
 #   .     .               .     .
 #   ... .*.               ... .*.
 
-# macro_f_comma         macro_cap_f_comma       macro_blackhole
-# ....   *...           ....   *...             ....   ....
-# ..*.   ....           .*..   ....             **..   *..*
-#   .     .               .     .                 .     .
-#   ... .*.               ... .*.                 ... ...
-
-macro_aspace          macro_aspace_p      macro_cap_aspace   macro_cap_aspace_p
-....   ....           ...*   ....         ....   ....        ...*   ....
-*.*.   .*..           *.*.   .*..         *.*.   .*..        *.*.   .*..
-  .     .               .     .             .     .            .     .
-  ... .*.               ... .*.             *.. .*.            *.. .*.
-
-macro_decrement        macro_increment    macro_prev_search
-....   .*.*            ....   ....        ....   .*..
-*...   ....            *...   ....        ....   *.*.
-  .     .                .     .            .     .
-  ... .*.                ... .*.            ... .*.
-
-macro_at_at
-..*.   ....
-*...   ....
-  .     .
-  ... .*.
-
-# macro_yank_eol
-# ....   .**.
-# ....   ....
-#   .     .
-#   ... .*.
-
-macro_inbox
-....   ....
-.*.*   ....
-  .     .
-  ... .*.
-
-# macro_dragon_xfer macro_dragon_toggle
-# ....   ..*.       ....   ..*.
-# ....   ....       ....   .*..
-#   .     .           .     .
-#   ... .*.           ... .*.
-
-## window manager macros ##
-
-# macro_speak_toggle macro_speak_slower macro_speak_faster
-# ....   ....        ....   *...        ....   .*..
-# ....   *..*        ....   ...*        ....   ...*
-#   .     .            .     .            .     .
-#   ... .*.            ... .*.            ... .*.
-
-# macro_speak_start  macro_speak_line_s macro_speak_line_r
-# ....   ....        ....   ....        ....   ....
-# ....   ...*        .*.*   *...        .*.*   ...*
-#   .     .            .     .            .     .
-#   ... .*.            ... .*.            ... .*.
-
-# macro_speak_line   macro_speak_silence
-# ....   ....        ....   ....
-# .*.*   .*..        .*.*   ***.
-#   .     .            .     .
-#   ... .*.            ... .*.
-
-#  macro_eloud
-#  ....   ....
-#  .**.   ....
-#    .     .
-#    ... .*.
-
-# macro_mate_wsl   macro_mate_wsr  macro_next_ws
-# ....   *...      ....   ...*     ....   ....
-# ....   ....      ....   ....     ..*.   ....
-#   .     .          .     .         .     .
-#   ... .*.          ... .*.         ... **.
-
-
-## web browser macros ##
-
-macro_zotero_save
-*..*   ....
-....   ....
-  .     .
-  ... .*.
-
-macro_next_tab  macro_prev_tab
-....   ....     ....   ....
-....   ...*     ....   ..*.
-  .     .         .     .
-  ... .*.         ... .*.
-
-# macro_     macro_     macro_    macro_    macro_
-# ....   ....      ....   ....        ....   ....       ....   ....
-# ....   ....      ....   ....        ....   ....       ....   ....
-#   .     .          .     .            .     .           .     .
-#   ... ...          ... ...            ... ...           ... ...

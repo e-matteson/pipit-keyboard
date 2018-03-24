@@ -147,7 +147,7 @@ key_underscore    = {key="KEY_MINUS", mods=["MODIFIERKEY_SHIFT"]}
 
 [macros]
 
-macro_save_as       = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
+# macro_save_as       = [{key="KEY_S", mods=["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
 macro_vim_save      = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_W"},
                        {key="KEY_ENTER"}]
@@ -158,6 +158,8 @@ macro_ls            = [{key="KEY_L"},
                        {key="KEY_S"},
                        {key="KEY_ENTER"}]
 macro_f_comma       = [{key="KEY_F"},
+                       {key="KEY_COMMA"}]
+macro_cap_f_comma   = [{key="KEY_F", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_COMMA"}]
 macro_mx            = [{key="KEY_X", mods=["MODIFIERKEY_ALT"]}]
 macro_other_buffer1 = [{key="KEY_SPACE"},
@@ -371,11 +373,14 @@ macro_cap_aspace_p  = [{key="KEY_A", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_P"}]
 macro_at_at         = [{key="KEY_2", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_2", mods=["MODIFIERKEY_SHIFT"]}]
+macro_yank_eol      = [{key="KEY_Y"},
+                       {key="KEY_4", mods=["MODIFIERKEY_SHIFT"]}]
 macro_kill_ring     = [{key="KEY_SPACE"},
                        {key="KEY_R"},
                        {key="KEY_Y"}]
 macro_comment       = [{key="KEY_SPACE"},
-                       {key="KEY_SEMICOLON"}]
+                       {key="KEY_C"},
+                       {key="KEY_L"}]
 macro_org_calendar  = [{key="KEY_SPACE"},
                        {key="KEY_A"},
                        {key="KEY_O"},
@@ -563,14 +568,6 @@ macro_new_rs        = [{key="KEY_SEMICOLON", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_W"},
                        {key="KEY_9", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_0", mods=["MODIFIERKEY_SHIFT"]}]
-macro_btreemap      = [{key="KEY_B", mods=["MODIFIERKEY_SHIFT"]},
-                       {key="KEY_T", mods=["MODIFIERKEY_SHIFT"]},
-                       {key="KEY_R"},
-                       {key="KEY_E"},
-                       {key="KEY_E"},
-                       {key="KEY_M", mods=["MODIFIERKEY_SHIFT"]},
-                       {key="KEY_A"},
-                       {key="KEY_P"}]
 macro_print_rs      = [{key="KEY_P"},
                        {key="KEY_R"},
                        {key="KEY_I"},
@@ -619,12 +616,6 @@ macro_return_rs      = [{key="KEY_SPACE"},
                        {key="KEY_UP"},
                        {key="KEY_END"},
                        {key="KEY_LEFT"}]
-macro_ampermut_rs   = [{key="KEY_7", mods=["MODIFIERKEY_SHIFT"]},
-                       {key="KEY_M"},
-                       {key="KEY_U"},
-                       {key="KEY_T"},
-                       # {key="KEY_SPACE"}
-                       ]
 macro_amperstr_rs   = [{key="KEY_7", mods=["MODIFIERKEY_SHIFT"]},
                        {key="KEY_S"},
                        {key="KEY_T"},
@@ -799,6 +790,17 @@ macro_org_archive    =[{key="KEY_SPACE"},
                        {key="KEY_M"},
                        {key="KEY_O"},
                        {key="KEY_R"}]
+macro_anagram_1      =[{key="KEY_COMMA"},
+                       {key="KEY_SPACE"},
+                       {key="KEY_A"},
+                       {key="KEY_N"},
+                       {key="KEY_A"},
+                       {key="KEY_G"},
+                       {key="KEY_R"},
+                       {key="KEY_A"},
+                       {key="KEY_M"},
+                       {key="KEY_EQUAL"},
+                       {key="KEY_1"}]
 
 
 [other]
@@ -2191,7 +2193,7 @@ dictionary = [
     {word="en"},
     {word="enable"},
     {word="ence"},
-    {word="encoder"},
+    {word="encoder", anagram=1},
     {word="end"},
     {word="endanger", anagram=2},
     {word="endif", anagram=2},
@@ -3015,7 +3017,7 @@ dictionary = [
     {word="intra"},
     {word="intro"},
     {word="introduce"},
-    {word="intuit"},
+    {word="intuit", anagram=1},
     {word="intuitive", anagram=2},
     {word="invest", anagram=1},
     {word="invite", anagram=1},
@@ -5250,7 +5252,7 @@ dictionary = [
     {word="un"},
     {word="uncle"},
     {word="under"},
-    {word="uni"},
+    {word="uni", anagram=1},
     {word="unify"},
     {word="union"},
     {word="unique"},
