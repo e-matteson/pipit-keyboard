@@ -237,7 +237,9 @@ impl View for Copier {
                 .collect();
 
         for (i, letter) in expected.iter().enumerate() {
-            printer.print((i + pad, 1), letter);
+            printer.with_color(ColorStyle::primary(), |printer| {
+                printer.print((i + pad, 1), letter);
+            })
         }
 
         let actual =
@@ -294,7 +296,7 @@ fn get_style(actual_char: &str, expected_char: Option<&str>) -> ColorStyle {
     if let Some(expected_char) = expected_char {
         if actual_char == expected_char {
             // correct
-            ColorStyle::primary()
+            ColorStyle::tertiary()
         } else {
             // incorrect
             ColorStyle::secondary()

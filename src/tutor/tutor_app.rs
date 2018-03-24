@@ -230,7 +230,7 @@ impl Lesson {
     }
 
     fn draw_instruction(&self, printer: &Printer) {
-        printer.with_color(ColorStyle::title_primary(), |printer| {
+        printer.with_color(ColorStyle::primary(), |printer| {
             printer.print((self.instruction_padding().x, 0), &self.instruction);
         });
     }
