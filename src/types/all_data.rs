@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 use std::path::PathBuf;
 
-use types::{AnagramNum, CTree, Checker, Chord, HuffmanTable, KeyPress,
-            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, TutorData,
+use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyPress, KmapPath,
+            ModeInfo, ModeName, Name, SeqType, Sequence, TutorData,
             WordBuilder, WordConfig};
 
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
@@ -21,7 +21,6 @@ pub struct AllData {
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
     pub huffman_table: Option<HuffmanTable>,
-    checker: Checker,
     highest_anagram_num: AnagramNum,
 }
 
@@ -38,7 +37,6 @@ impl AllData {
             output_directory: None,
             tutor_directory: None,
             huffman_table: None,
-            checker: Checker::new(),
             highest_anagram_num: AnagramNum(0),
         }
     }
@@ -60,7 +58,7 @@ impl AllData {
         chord: &Chord,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
-        self.checker.insert_chord(name, chord, kmap);
+        // self.checker.insert_chord(name, chord, kmap);
         self.chords
             .get_mut(kmap)
             .ok_or_else(|| {
@@ -73,7 +71,7 @@ impl AllData {
         Ok(())
     }
 
-    pub fn add_command(&mut self, entry: &Name) -> Result<(), Error> {
+    pub fn add_command(&mut self, entry: &Name) {
         // Commands are a single byte code, not an actual key sequence.
         // But we'll store each one as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
@@ -81,7 +79,7 @@ impl AllData {
         fake_seq_with_command_code
             .push(KeyPress::new_fake(&entry.to_uppercase()));
 
-        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code)
+        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code);
     }
 
     pub fn add_word(
@@ -95,7 +93,7 @@ impl AllData {
             kmap: kmap,
             all_data: self,
         }.finalize()?;
-        self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
+        self.add_sequence(SeqType::Word, &word.name, &word.seq);
         self.add_chord(&word.name, &word.chord, kmap)?;
         if word.chord.anagram_num > self.highest_anagram_num {
             self.highest_anagram_num = word.chord.anagram_num;
@@ -103,30 +101,26 @@ impl AllData {
         Ok(())
     }
 
-    pub fn add_plain_mod<T>(
-        &mut self,
-        name: &Name,
-        seq: &T,
-    ) -> Result<(), Error>
+    pub fn add_plain_mod<T>(&mut self, name: &Name, seq: &T)
     where
         T: Into<Sequence> + Clone,
     {
         // TODO check if sequence is valid! length 1, no key
         self.plain_mods.push(name.to_owned());
-        self.add_sequence(SeqType::Plain, name, seq)
+        self.add_sequence(SeqType::Plain, name, seq);
     }
 
-    pub fn add_word_mod(&mut self, name: &Name) -> Result<(), Error> {
+    pub fn add_word_mod(&mut self, name: &Name) {
         // Add all the word_mods at once
         self.word_mods.push(name.to_owned());
-        self.checker.insert_word_mod_or_anagram_mod(name)
+        // self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
-    pub fn add_anagram_mod(&mut self, name: &Name) -> Result<(), Error> {
+    pub fn add_anagram_mod(&mut self, name: &Name) {
         // Add all the anagram_mods at once
         // TODO share code with set_word_mods()?
         self.anagram_mods.push(name.to_owned());
-        self.checker.insert_word_mod_or_anagram_mod(name)
+        // self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
     pub fn add_mode(
@@ -154,35 +148,26 @@ impl AllData {
         Ok(())
     }
 
-    fn add_sequence<T>(
-        &mut self,
-        seq_type: SeqType,
-        name: &Name,
-        seq: &T,
-    ) -> Result<(), Error>
+    fn add_sequence<T>(&mut self, seq_type: SeqType, name: &Name, seq: &T)
     where
         T: Into<Sequence> + Clone,
     {
-        self.checker.insert_seq(name)?;
         self.sequences
             .entry(seq_type)
             .or_insert_with(BTreeMap::new)
             .insert(name.to_owned(), seq.to_owned().into());
-        Ok(())
     }
 
     pub fn add_sequences<T>(
         &mut self,
         seq_type: SeqType,
         seqs: &BTreeMap<Name, T>,
-    ) -> Result<(), Error>
-    where
+    ) where
         T: Into<Sequence> + Clone,
     {
         for (name, seq) in seqs {
-            self.add_sequence(seq_type, name, seq)?;
+            self.add_sequence(seq_type, name, seq);
         }
-        Ok(())
     }
 
     fn get_sequences(
@@ -299,12 +284,6 @@ impl AllData {
 
     pub fn get_num_anagrams(&self) -> u8 {
         self.highest_anagram_num.0 + 1
-    }
-
-    pub fn check(&self) {
-        // TODO check for missing sequences
-        self.checker.check_unused();
-        self.checker.check_chords();
     }
 
     pub fn set_huffman_table(&mut self) {

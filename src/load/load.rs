@@ -28,44 +28,32 @@ impl AllData {
 
         all_data
             .load_modes(&settings)
-            .with_context(|_| "Failed to load modes")?;
+            .context("Failed to load modes")?;
 
         all_data
             .load_options(&settings.options)
-            .with_context(|_| "Failed to load options")?;
+            .context("Failed to load options")?;
 
         all_data
             .load_chords(&settings.options)
-            .with_context(|_| "Failed to load chords")?;
+            .context("Failed to load chords")?;
 
-        all_data
-            .load_plains(&settings)
-            .with_context(|_| "Failed to load plain keys")?;
+        all_data.load_plains(&settings);
 
-        all_data
-            .load_macros(&settings)
-            .with_context(|_| "Failed to load macros")?;
+        all_data.load_macros(&settings);
 
-        all_data
-            .load_plain_mods(&settings)
-            .with_context(|_| "Failed to load plain modifiers")?;
+        all_data.load_plain_mods(&settings);
 
-        all_data
-            .load_word_mods(&settings)
-            .with_context(|_| "Failed to load word modifiers")?;
+        all_data.load_word_mods(&settings);
 
-        all_data
-            .load_anagram_mods(&settings)
-            .with_context(|_| "Failed to load anagram modifiers")?;
+        all_data.load_anagram_mods(&settings);
 
         // TODO rename word_list?
         all_data
             .load_word_list(&settings)
-            .with_context(|_| "Failed to load dictionary")?;
+            .context("Failed to load dictionary")?;
 
-        all_data
-            .load_commands(&settings)
-            .with_context(|_| "Failed to load commands")?;
+        all_data.load_commands(&settings);
 
         all_data.set_huffman_table();
 
@@ -96,41 +84,37 @@ impl AllData {
         Ok(())
     }
 
-    fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
-        self.add_sequences(SeqType::Macro, &settings.macros)
+    fn load_macros(&mut self, settings: &Settings) {
+        self.add_sequences(SeqType::Macro, &settings.macros);
     }
 
-    fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
-        self.add_sequences(SeqType::Plain, &settings.plain_keys)
+    fn load_plains(&mut self, settings: &Settings) {
+        self.add_sequences(SeqType::Plain, &settings.plain_keys);
     }
 
-    fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {
+    fn load_plain_mods(&mut self, settings: &Settings) {
         for (name, seq) in &settings.plain_modifiers {
-            self.add_plain_mod(name, seq)?;
+            self.add_plain_mod(name, seq);
         }
-        Ok(())
     }
 
-    fn load_word_mods(&mut self, settings: &Settings) -> Result<(), Error> {
+    fn load_word_mods(&mut self, settings: &Settings) {
         for name in &settings.other.word_modifiers {
-            self.add_word_mod(name)?;
+            self.add_word_mod(name);
         }
-        Ok(())
     }
 
-    fn load_anagram_mods(&mut self, settings: &Settings) -> Result<(), Error> {
+    fn load_anagram_mods(&mut self, settings: &Settings) {
         for name in &settings.other.anagram_modifiers {
-            self.add_anagram_mod(name)?;
+            self.add_anagram_mod(name);
         }
-        Ok(())
     }
 
-    fn load_commands(&mut self, settings: &Settings) -> Result<(), Error> {
+    fn load_commands(&mut self, settings: &Settings) {
         // TODO use set sequences, and then process after?
         for name in &settings.other.commands {
-            self.add_command(name)?;
+            self.add_command(name);
         }
-        Ok(())
     }
 
     fn load_word_list(&mut self, settings: &Settings) -> Result<(), Error> {

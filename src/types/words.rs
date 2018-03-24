@@ -38,8 +38,9 @@ impl AnagramNum {
         7
     }
 
-    /// Return an iterator over all the anagram numbers from zero to self, in order.
-    pub fn up_to(&self) ->Box<Iterator<Item = AnagramNum>> {
+    /// Return an iterator over all the anagram numbers from zero to self,
+    /// in order.
+    pub fn up_to(&self) -> Box<Iterator<Item = AnagramNum>> {
         Box::new((0..=self.0).map(|i| AnagramNum(i)))
     }
 }
@@ -122,6 +123,10 @@ impl<'a> WordBuilder<'a> {
         })
     }
 
+    pub fn allowed_in_chord(name: &Name) -> bool {
+        names_for_chord().values().any(|x| x == name)
+    }
+
     fn make_name(&self) -> Name {
         // Ensure that each word has a unique name.
 
@@ -183,8 +188,6 @@ impl<'a> WordBuilder<'a> {
             }.into()
         })
     }
-
-
 }
 
 fn get_key_code_for_seq(character: char) -> Result<String, Error> {
@@ -212,7 +215,6 @@ fn get_mod_name_for_seq(character: char) -> Option<Vec<String>> {
         None
     }
 }
-
 
 fn get_key_name_for_chord(character: char) -> Option<Name> {
     names_for_chord()

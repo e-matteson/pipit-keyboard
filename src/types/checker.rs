@@ -1,15 +1,13 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{AnagramNum, Chord, KmapPath, Name, Word};
-use types::errors::ConflictErr;
-use failure::Error;
+use types::{AllData, AnagramNum, Chord, KmapPath, Name, WordBuilder};
 
 /// The Checker warns about sub-optimal configuration, like conflicting chords
 /// or skipped anagram numbers. Any config issues that would break the firmware
 /// should be caught in the loading or formatting code instead.
 #[derive(Debug)]
-pub struct Checker {
+struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
     reverse_kmaps: HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
     seq_names: HashSet<Name>,
@@ -22,21 +20,69 @@ struct AnagramSet(HashMap<AnagramNum, Vec<Name>>);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-impl Checker {
-    /// Create an empty checker.
-    pub fn new() -> Checker {
+impl AllData {
+    pub fn check(&self) {
+        let checker = self.checker();
+        checker.check_unused();
+        checker.check_conflicts();
+    }
+
+    fn checker(&self) -> Checker {
         Checker {
-            reverse_kmaps: HashMap::new(),
-            seq_names: HashSet::new(),
-            word_mod_names: HashSet::new(),
-            chord_names: HashSet::new(),
+            reverse_kmaps: self.reverse_chords(),
+            seq_names: self.seq_names(),
+            chord_names: self.chord_names(),
+            word_mod_names: self.word_mods(),
         }
     }
 
+    fn reverse_chords(&self) -> HashMap<KmapPath, HashMap<Chord, AnagramSet>> {
+        let mut reversed = HashMap::new();
+        for (kmap, chord_map) in &self.chords {
+            for (name, chord) in chord_map {
+                let mut base_chord = chord.to_owned();
+                base_chord.anagram_num = AnagramNum(0);
+
+                reversed
+                    .entry(kmap.to_owned())
+                    .or_insert_with(HashMap::new)
+                    .entry(base_chord)
+                    .or_insert_with(AnagramSet::new)
+                    .insert(chord.anagram_num, name.clone());
+            }
+        }
+        reversed
+    }
+
+    fn seq_names(&self) -> HashSet<Name> {
+        self.sequences
+            .iter()
+            .flat_map(|(_, seq_type)| seq_type.keys())
+            .cloned()
+            .collect()
+    }
+
+    fn chord_names(&self) -> HashSet<Name> {
+        self.chords
+            .iter()
+            .flat_map(|(_, kmap)| kmap.keys())
+            .cloned()
+            .collect()
+    }
+
+    fn word_mods(&self) -> HashSet<Name> {
+        self.word_mods
+            .iter()
+            .chain(self.anagram_mods.iter())
+            .cloned()
+            .collect()
+    }
+}
+
+impl Checker {
     /// If two names have the same chord, or there's a skipped anagram
     /// number, print out that whole set of names.
-    pub fn check_chords(&self) {
-        // TODO take args for types of checks
+    pub fn check_conflicts(&self) {
         // TODO option to check for mode conflicts instead
         for (kmap, reversed) in &self.reverse_kmaps {
             let heading = format!(
@@ -49,7 +95,9 @@ impl Checker {
                 &heading,
                 reversed
                     .iter()
-                    .filter(|&(_chord, set)| set.is_invalid())
+                    .filter(|&(_chord, set)| {
+                        set.is_invalid(&self.word_mod_names)
+                    })
                     .map(|(_chord, set)| set),
             );
         }
@@ -58,62 +106,20 @@ impl Checker {
     /// Compare the stored chords and sequences (and word mods), and print
     /// any names that don't appear in both.
     pub fn check_unused(&self) {
-        let seqs_etc: HashSet<_> = self.seq_names
+        let seqs_and_mods: HashSet<_> = self.seq_names
             .union(&self.word_mod_names)
             .cloned()
             .collect();
-        print_iter("Unused chords:", self.chord_names.difference(&seqs_etc));
-        print_iter("Unused sequences:", seqs_etc.difference(&self.chord_names));
-    }
-
-    /// Store the name of a sequence in the checker.
-    pub fn insert_seq(&mut self, name: &Name) -> Result<(), Error> {
-        if !self.seq_names.insert(name.to_owned()) {
-            Err(ConflictErr {
-                key: name.to_string(),
-                container: "sequence names".into(),
-            })?;
-        }
-        Ok(())
-    }
-
-    /// Store the name of a word mod or anagram mod in the checker. These
-    /// are treated separately from sequences because it's sometimes okay for
-    /// their chords to conflict with some other chords.
-    pub fn insert_word_mod_or_anagram_mod(
-        &mut self,
-        name: &Name,
-    ) -> Result<(), Error> {
-        if !self.word_mod_names.insert(name.to_owned()) {
-            Err(ConflictErr {
-                key: name.to_string(),
-                container: "word mod and anagram mod names".into(),
-            })?;
-        }
-        Ok(())
-    }
-
-    /// Store a chord, its name, and the kmap its defined in.
-    pub fn insert_chord(
-        &mut self,
-        name: &Name,
-        chord: &Chord,
-        kmap: &KmapPath,
-    ) {
-        let mut base_chord = chord.to_owned();
-        base_chord.anagram_num = AnagramNum(0);
-
-        self.reverse_kmaps
-            .entry(kmap.to_owned())
-            .or_insert_with(HashMap::new)
-            .entry(base_chord)
-            .or_insert_with(AnagramSet::new)
-            .insert(chord.anagram_num, name.clone());
-        self.chord_names.insert(name.clone());
+        print_iter(
+            "Unused chords:",
+            self.chord_names.difference(&seqs_and_mods),
+        );
+        print_iter(
+            "Unused sequences:",
+            seqs_and_mods.difference(&self.chord_names),
+        );
     }
 }
-
-//////////////////////////////
 
 impl AnagramSet {
     fn new() -> AnagramSet {
@@ -127,8 +133,8 @@ impl AnagramSet {
             .push(name);
     }
 
-    fn is_invalid(&self) -> bool {
-        if self.has_chord_conflict() {
+    fn is_invalid(&self, word_mod_names: &HashSet<Name>) -> bool {
+        if self.has_chord_conflict(word_mod_names) {
             return true;
         }
         for num in self.max_anagram().up_to() {
@@ -139,13 +145,13 @@ impl AnagramSet {
         false
     }
 
-    fn has_chord_conflict(&self) -> bool {
+    fn has_chord_conflict(&self, word_mod_names: &HashSet<Name>) -> bool {
         for v in self.0.values() {
             match v.len() {
                 1 => continue,
-                // 2 => ,
-                // TODO check if one is in word_mods and the other is not in
-                // names_for_chord
+                2 => if !is_pair_legal(&v[0], &v[1], word_mod_names) {
+                    return true;
+                },
                 _ => return true,
             }
         }
@@ -186,12 +192,13 @@ impl AnagramSet {
 
 impl fmt::Display for AnagramSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO use color?
         let mut strings = Vec::new();
         for num in self.max_anagram().up_to() {
             // TODO get iterator over all AnagramNums?
             strings.push(self.anagram_to_string(num));
         }
-        let s = format!("[{}]", strings.join(", "));
+        let s = format!("anagrams: [{}]", strings.join(", "));
         fmt::Display::fmt(&s, f)
     }
 }
@@ -211,5 +218,26 @@ where
     for thing in iter {
         println!("  {}", thing);
     }
-    println!("\n");
+    println!("");
+}
+
+/// Return true if one is a word_mod or anagram_mod, and the other cannot be
+/// used in a word chord (letters, mostly). This lets us map
+/// word_mods/anagram_mods to chords that do something different when pressed
+/// separately from a word (like mod_shift and mod_capital). It doesn't catch
+/// all bad mappings, though! If a word_mod/anagram_mod shares even a single
+/// switch with a multi-switch letter, that will mess up the word lookup
+/// process. We don't check for that yet, because it's unlikely to happen
+/// accidentally and it's annoying to implement.
+// TODO make sure the above warning is easily findable
+fn is_pair_legal(
+    name1: &Name,
+    name2: &Name,
+    word_mod_names: &HashSet<Name>,
+) -> bool {
+    let okay = |a, b| {
+        word_mod_names.contains(a) && !word_mod_names.contains(b)
+            && !WordBuilder::allowed_in_chord(b)
+    };
+    okay(name1, name2) || okay(name2, name1)
 }

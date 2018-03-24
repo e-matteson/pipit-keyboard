@@ -7,7 +7,6 @@ pub use self::chord::{Chord, GlobalChordInfo};
 pub use self::words::{AnagramNum, Word, WordBuilder, WordConfig};
 pub use self::huffman::HuffmanTable;
 pub use self::all_data::AllData;
-pub use self::checker::Checker;
 
 pub use self::validate::Validate;
 // pub use self::errors::*;
