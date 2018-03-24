@@ -33,13 +33,13 @@ mod_anagram_1     mod_anagram_2
 
 ##### single-switch letters #####
 
-key_a          key_o         	 key_e		      key_i
+key_a          key_o          key_e		      key_i
 ....   ....		 ....   ....   	....   ....	  ....   ....
 *...   ....		 .*..   ....   	..*.   ....	  ...*   ....
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-key_h         key_t         	 key_n		      key_s
+key_h          key_t         key_n		      key_s
 ....   ....		 ....   ....   	....   ....	  ....   ....
 ....   *...		 ....   .*..   	....   ..*.	  ....   ...*
   .     .        .     .        .     .       .     .
@@ -135,8 +135,6 @@ key_doublequote       key_quote
 ...*   ....     ....   *...
  .     .          .     .
   ... ...         ... ...
-
-## middle ##
 
 key_caret       key_dollar
 ...*   ....     ....   *...
