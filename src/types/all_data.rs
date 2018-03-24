@@ -119,14 +119,14 @@ impl AllData {
     pub fn add_word_mod(&mut self, name: &Name) -> Result<(), Error> {
         // Add all the word_mods at once
         self.word_mods.push(name.to_owned());
-        self.checker.insert_seq(name)
+        self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
     pub fn add_anagram_mod(&mut self, name: &Name) -> Result<(), Error> {
         // Add all the anagram_mods at once
         // TODO share code with set_word_mods()?
         self.anagram_mods.push(name.to_owned());
-        self.checker.insert_seq(name)
+        self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
     pub fn add_mode(

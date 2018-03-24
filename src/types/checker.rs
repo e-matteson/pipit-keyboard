@@ -1,70 +1,99 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{AnagramNum, Chord, KmapPath, Name};
+use types::{AnagramNum, Chord, KmapPath, Name, Word};
 use types::errors::ConflictErr;
 use failure::Error;
 
-// The Checker warns about sub-optimal configuration. Any config issues that
-// would break the firmware should be caught in the loading (or formatting) code
-// instead.
-
+/// The Checker warns about sub-optimal configuration, like conflicting chords
+/// or skipped anagram numbers. Any config issues that would break the firmware
+/// should be caught in the loading or formatting code instead.
 #[derive(Debug)]
 pub struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
     reverse_kmaps: HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
-    all_seq_names: HashSet<Name>,
-    all_chord_names: HashSet<Name>,
+    seq_names: HashSet<Name>,
+    chord_names: HashSet<Name>,
+    word_mod_names: HashSet<Name>,
 }
 
 #[derive(Debug)]
-pub struct AnagramSet(pub HashMap<AnagramNum, Vec<Name>>);
+struct AnagramSet(HashMap<AnagramNum, Vec<Name>>);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Checker {
+    /// Create an empty checker.
     pub fn new() -> Checker {
         Checker {
             reverse_kmaps: HashMap::new(),
-            all_seq_names: HashSet::new(),
-            all_chord_names: HashSet::new(),
+            seq_names: HashSet::new(),
+            word_mod_names: HashSet::new(),
+            chord_names: HashSet::new(),
         }
     }
 
+    /// If two names have the same chord, or there's a skipped anagram
+    /// number, print out that whole set of names.
     pub fn check_chords(&self) {
         // TODO take args for types of checks
         // TODO option to check for mode conflicts instead
         for (kmap, reversed) in &self.reverse_kmaps {
-            let v: Vec<_> = reversed
-                .iter()
-                .filter(|&(chord, set)| set.is_invalid(Some(chord)))
-                .map(|(_, set)| set)
-                .collect();
-            print_conflicts(&v, kmap);
+            let heading = format!(
+                "Conflicting chords (in parens) or skipped anagrams (\"{}\") \
+                 in {}:",
+                AnagramSet::missing_symbol(),
+                kmap
+            );
+            print_iter(
+                &heading,
+                reversed
+                    .iter()
+                    .filter(|&(_chord, set)| set.is_invalid())
+                    .map(|(_chord, set)| set),
+            );
         }
     }
 
+    /// Compare the stored chords and sequences (and word mods), and print
+    /// any names that don't appear in both.
     pub fn check_unused(&self) {
-        println!("Unused chords:");
-        for name in self.all_chord_names.difference(&self.all_seq_names) {
-            println!("  {}", name);
-        }
-        println!("\nUnused sequences:");
-        for name in self.all_seq_names.difference(&self.all_chord_names) {
-            println!("  {}", name);
-        }
+        let seqs_etc: HashSet<_> = self.seq_names
+            .union(&self.word_mod_names)
+            .cloned()
+            .collect();
+        print_iter("Unused chords:", self.chord_names.difference(&seqs_etc));
+        print_iter("Unused sequences:", seqs_etc.difference(&self.chord_names));
     }
 
+    /// Store the name of a sequence in the checker.
     pub fn insert_seq(&mut self, name: &Name) -> Result<(), Error> {
-        if !self.all_seq_names.insert(name.to_owned()) {
+        if !self.seq_names.insert(name.to_owned()) {
             Err(ConflictErr {
                 key: name.to_string(),
-                container: "all sequence names".into(),
+                container: "sequence names".into(),
             })?;
         }
         Ok(())
     }
 
+    /// Store the name of a word mod or anagram mod in the checker. These
+    /// are treated separately from sequences because it's sometimes okay for
+    /// their chords to conflict with some other chords.
+    pub fn insert_word_mod_or_anagram_mod(
+        &mut self,
+        name: &Name,
+    ) -> Result<(), Error> {
+        if !self.word_mod_names.insert(name.to_owned()) {
+            Err(ConflictErr {
+                key: name.to_string(),
+                container: "word mod and anagram mod names".into(),
+            })?;
+        }
+        Ok(())
+    }
+
+    /// Store a chord, its name, and the kmap its defined in.
     pub fn insert_chord(
         &mut self,
         name: &Name,
@@ -80,94 +109,64 @@ impl Checker {
             .entry(base_chord)
             .or_insert_with(AnagramSet::new)
             .insert(chord.anagram_num, name.clone());
-        self.all_chord_names.insert(name.clone());
+        self.chord_names.insert(name.clone());
     }
-}
-
-fn print_conflicts<T: Display>(conflicts: &[&AnagramSet], label: &T) {
-    if conflicts.is_empty() {
-        return;
-    }
-    println!(
-        "\nConflicting chords (in parens) or useless anagrams (\"?\") in {}:",
-        label
-    );
-    for conflict in conflicts {
-        println!("  {}", conflict);
-    }
-    println!("");
 }
 
 //////////////////////////////
 
 impl AnagramSet {
-    pub fn new() -> AnagramSet {
+    fn new() -> AnagramSet {
         AnagramSet(HashMap::new())
     }
 
-    pub fn insert(&mut self, anagram_num: AnagramNum, name: Name) {
+    fn insert(&mut self, anagram_num: AnagramNum, name: Name) {
         self.0
             .entry(anagram_num)
             .or_insert_with(Vec::new)
             .push(name);
     }
 
-    pub fn is_invalid(&self, chord: Option<&Chord>) -> bool {
+    fn is_invalid(&self) -> bool {
         if self.has_chord_conflict() {
             return true;
         }
-        for num in 0..self.num_anagrams() {
-            if self.is_anagram_missing(AnagramNum(num), chord) {
+        for num in self.max_anagram().up_to() {
+            if !self.contains_anagram(num) {
                 return true;
             }
         }
         false
     }
 
-    pub fn has_chord_conflict(&self) -> bool {
+    fn has_chord_conflict(&self) -> bool {
         for v in self.0.values() {
-            if v.len() > 1 {
-                return true;
+            match v.len() {
+                1 => continue,
+                // 2 => ,
+                // TODO check if one is in word_mods and the other is not in
+                // names_for_chord
+                _ => return true,
             }
         }
         false
     }
 
-    pub fn is_anagram_missing(
-        &self,
-        anagram_num: AnagramNum,
-        chord: Option<&Chord>,
-    ) -> bool {
-        const ALLOW_MISSING_DOUBLE_SWITCHES: bool = false;
-
-        if self.0.contains_key(&anagram_num) {
-            return false;
-        }
-        // By convention, all words made of 2 switches on the same
-        // hand use an anagram mod. It's because it's hard to
-        // remember which of those would conflict with double-switch plain
-        // keys. So we may not want to warn about them. (We don't
-        // check which hands the switches are on, but close enough)
-        if ALLOW_MISSING_DOUBLE_SWITCHES {
-            chord.map_or(true, |c| c.count_pressed() != 2)
-        } else {
-            true
-        }
+    fn contains_anagram(&self, anagram_num: AnagramNum) -> bool {
+        self.0.contains_key(&anagram_num)
     }
 
-    pub fn num_anagrams(&self) -> u8 {
-        // TODO use actual max from elsewhere?
-        let max_num = self.0
+    fn max_anagram(&self) -> AnagramNum {
+        self.0
             .keys()
             .max()
             .expect("failed to get max anagram num")
-            .to_owned();
-        max_num.0 + 1
+            .to_owned()
     }
 
-    pub fn anagram_to_string(&self, anagram_num: AnagramNum) -> String {
+    fn anagram_to_string(&self, anagram_num: AnagramNum) -> String {
         match self.0.get(&anagram_num) {
-            None => "?".to_string(),
+            None => AnagramSet::missing_symbol(),
             Some(v) => {
                 let strings: Vec<_> = v.iter().map(|x| x.to_string()).collect();
                 if strings.len() == 1 {
@@ -178,32 +177,39 @@ impl AnagramSet {
             }
         }
     }
+
+    /// String used when there is no mapping for a give anagram number.
+    fn missing_symbol() -> String {
+        "???".to_string()
+    }
 }
 
 impl fmt::Display for AnagramSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = Vec::new();
-        for i in 0..self.num_anagrams() {
+        for num in self.max_anagram().up_to() {
             // TODO get iterator over all AnagramNums?
-            strings.push(self.anagram_to_string(AnagramNum(i)));
+            strings.push(self.anagram_to_string(num));
         }
         let s = format!("[{}]", strings.join(", "));
         fmt::Display::fmt(&s, f)
     }
 }
 
-// fn print_conflict_stats( kmap: &KmapPath){
-//     let mut conflicts = HashMap::new();
-//     for (_, names) in reversed {
-//         let len = names.len();
-//         if len == 1 {
-//             continue;
-//         }
-//         println!("WARNING: duplicate chords: {:?}", names);
-//         *conflicts.entry(len).or_insert(0) += 1;
-//     }
-//     let total: i64 = conflicts.values().sum();
-//     let mut conflict_vec: Vec<_> = conflicts.iter().collect();
-//     conflict_vec.sort_by(|a, b| b.1.cmp(a.1));
-//     println!("{}: {} conflicts: {:?}", kmap, total, conflict_vec);
-// }
+/// If the iterator is non-empty, print the given heading and then print each
+/// element of the iterator on a separate line with some spaces before it.
+fn print_iter<T>(heading: &str, iter: T)
+where
+    T: Iterator,
+    <T as Iterator>::Item: Display,
+{
+    let mut iter = iter.peekable();
+    if !iter.peek().is_some() {
+        return;
+    }
+    println!("{}", heading);
+    for thing in iter {
+        println!("  {}", thing);
+    }
+    println!("\n");
+}

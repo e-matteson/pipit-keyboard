@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
 use types::errors::*;
 use failure::{Error, ResultExt};
@@ -34,6 +36,11 @@ impl AnagramNum {
     pub fn max_allowable() -> u8 {
         // This depends on the representation in the lookup table
         7
+    }
+
+    /// Return an iterator over all the anagram numbers from zero to self, in order.
+    pub fn up_to(&self) ->Box<Iterator<Item = AnagramNum>> {
+        Box::new((0..=self.0).map(|i| AnagramNum(i)))
     }
 }
 
@@ -133,39 +140,13 @@ impl<'a> WordBuilder<'a> {
         let mut seq = Sequence::new();
         for letter in self.info.seq_spelling().chars() {
             let key_press = KeyPress::new(
-                Some(self.get_key_code_for_seq(letter)?),
-                self.get_mod_name_for_seq(letter),
+                Some(get_key_code_for_seq(letter)?),
+                get_mod_name_for_seq(letter),
             )?;
 
             seq.push(key_press);
         }
         Ok(seq)
-    }
-
-    fn get_key_code_for_seq(&self, character: char) -> Result<String, Error> {
-        if character.is_alphanumeric() {
-            return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
-        }
-        let s = match character {
-            ' ' => "KEY_SPACE",
-            '<' => "KEY_BACKSPACE",
-            '\'' => "KEY_QUOTE",
-            '.' => "KEY_PERIOD",
-            ',' => "KEY_COMMA",
-            _ => Err(BadValueErr {
-                thing: "character".into(),
-                value: character.to_string(),
-            }).context("character not allowed in word's sequence")?,
-        };
-        Ok(s.into())
-    }
-
-    fn get_mod_name_for_seq(&self, character: char) -> Option<Vec<String>> {
-        if character.is_uppercase() {
-            Some(vec!["MODIFIERKEY_SHIFT".into()])
-        } else {
-            None
-        }
     }
 
     fn make_chord(&self) -> Result<Chord, Error> {
@@ -188,7 +169,13 @@ impl<'a> WordBuilder<'a> {
     }
 
     fn get_chord_for_letter(&self, letter: char) -> Result<Chord, Error> {
-        let name = self.get_key_name_for_chord(letter)?;
+        let name = get_key_name_for_chord(letter)
+            .ok_or_else(|| BadValueErr {
+                thing: "character".into(),
+                value: letter.to_string(),
+            })
+            .context("character not allowed in word's chord")?;
+
         self.all_data.get_chord(&name, self.kmap).ok_or_else(|| {
             LookupErr {
                 key: name.to_string(),
@@ -197,20 +184,86 @@ impl<'a> WordBuilder<'a> {
         })
     }
 
-    fn get_key_name_for_chord(&self, character: char) -> Result<Name, Error> {
-        if character.is_alphanumeric() {
-            return Ok(Name(format!("key_{}", character.to_lowercase())));
-        }
-        let name = match character {
-            ' ' => "key_space".into(),
-            '.' => "key_period".into(),
-            ',' => "key_comma".into(),
-            '\'' => "key_quote".into(),
-            _ => Err(BadValueErr {
-                thing: "character".into(),
-                value: character.to_string(),
-            }).context("character not allowed in word's chord")?,
-        };
-        Ok(Name(name))
+
+}
+
+fn get_key_code_for_seq(character: char) -> Result<String, Error> {
+    if character.is_alphanumeric() {
+        return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
     }
+    let s = match character {
+        ' ' => "KEY_SPACE",
+        '<' => "KEY_BACKSPACE",
+        '\'' => "KEY_QUOTE",
+        '.' => "KEY_PERIOD",
+        ',' => "KEY_COMMA",
+        _ => Err(BadValueErr {
+            thing: "character".into(),
+            value: character.to_string(),
+        }).context("character not allowed in word's sequence")?,
+    };
+    Ok(s.into())
+}
+
+fn get_mod_name_for_seq(character: char) -> Option<Vec<String>> {
+    if character.is_uppercase() {
+        Some(vec!["MODIFIERKEY_SHIFT".into()])
+    } else {
+        None
+    }
+}
+
+
+fn get_key_name_for_chord(character: char) -> Option<Name> {
+    names_for_chord()
+        .get(character.to_lowercase().to_string().as_str())
+        .cloned()
+}
+
+fn names_for_chord() -> &'static HashMap<&'static str, Name> {
+    lazy_static! {
+        static ref NAMES_FOR_CHORD: HashMap<&'static str, Name>  = vec![
+            ("a", "key_a"),
+            ("b", "key_b"),
+            ("c", "key_c"),
+            ("d", "key_d"),
+            ("e", "key_e"),
+            ("f", "key_f"),
+            ("g", "key_g"),
+            ("h", "key_h"),
+            ("i", "key_i"),
+            ("j", "key_j"),
+            ("k", "key_k"),
+            ("l", "key_l"),
+            ("m", "key_m"),
+            ("n", "key_n"),
+            ("o", "key_o"),
+            ("p", "key_p"),
+            ("q", "key_q"),
+            ("r", "key_r"),
+            ("s", "key_s"),
+            ("t", "key_t"),
+            ("u", "key_u"),
+            ("v", "key_v"),
+            ("w", "key_w"),
+            ("x", "key_x"),
+            ("y", "key_y"),
+            ("z", "key_z"),
+            ("0", "key_0"),
+            ("1", "key_1"),
+            ("2", "key_2"),
+            ("3", "key_3"),
+            ("4", "key_4"),
+            ("5", "key_5"),
+            ("6", "key_6"),
+            ("7", "key_7"),
+            ("8", "key_8"),
+            ("9", "key_9"),
+            (" ", "key_space"),
+            (".", "key_period"),
+            (",", "key_comma"),
+            ("\'", "key_quote"),
+        ].into_iter().map(|(character,name)| (character, name.into())).collect();
+    }
+    &NAMES_FOR_CHORD
 }

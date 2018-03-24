@@ -4,6 +4,7 @@
 #![feature(string_retain)]
 #![feature(match_default_bindings)]
 #![feature(iterator_try_fold)]
+#![feature(inclusive_range_syntax)]
 
 extern crate cursive;
 extern crate itertools;
