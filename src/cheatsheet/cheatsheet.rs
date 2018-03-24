@@ -8,7 +8,7 @@ use svg::Node;
 use svg::node::element::{ClipPath, Definitions, Group};
 
 use unicode_segmentation::UnicodeSegmentation;
-use toml;
+use serde_yaml;
 
 use types::{Chord, Name, TutorData};
 use types::errors::MissingErr;
@@ -84,12 +84,16 @@ struct Switch {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CheatSheet {
-    pub fn from_toml(
+    pub fn from_yaml(
         path: &str,
         data: &TutorData,
     ) -> Result<CheatSheet, Error> {
-        let spec: CheatSheetSpec = toml::from_str(&read_file(path).context("failed to read cheatsheet config file")?)
-            .context("failed to parse cheatsheet config file")?;
+        let file = read_file(path).with_context(|_| {
+            format!("failed to read cheatsheet config file: {}", path)
+        })?;
+        let spec: CheatSheetSpec = serde_yaml::from_str(&file).with_context(
+            |_| format!("failed to parse cheatsheet config file: {}", path),
+        )?;
         CheatSheet::new(spec, data)
     }
 

@@ -81,7 +81,7 @@ impl Validate for bool {
 }
 
 // impl Validate for String {
-//     fn validate(&self) -> Result<()> {
+//     fn validate(&self) -> Result<(), Error> {
 //         // Primitive types are always valid.
 //         Ok(())
 //     }

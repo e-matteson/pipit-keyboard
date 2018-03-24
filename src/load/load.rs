@@ -1,6 +1,6 @@
 use std::io::prelude::*;
 use std::fs::File;
-use toml;
+use serde_yaml;
 
 use load::{parse_kmap, OptionsConfig, Settings};
 use types::{AllData, Chord, SeqType, Validate};
@@ -8,15 +8,16 @@ use types::{AllData, Chord, SeqType, Validate};
 use failure::{Error, ResultExt};
 
 impl AllData {
-    pub fn load(toml_path: &str) -> Result<AllData, Error> {
-        Ok(AllData::load_helper(toml_path).with_context(|_| {
-            format!("Failed to load settings from file: '{}'", toml_path)
+    pub fn load(settings_path: &str) -> Result<AllData, Error> {
+        Ok(AllData::load_helper(settings_path).with_context(|_| {
+            format!("Failed to load settings from file: '{}'", settings_path)
         })?)
     }
 
-    fn load_helper(toml_path: &str) -> Result<AllData, Error> {
+    fn load_helper(settings_path: &str) -> Result<AllData, Error> {
         /// Load stuff into AllData
-        let settings: Settings = toml::from_str(&read_file(toml_path)?)?;
+        let settings: Settings =
+            serde_yaml::from_str(&read_file(settings_path)?)?;
         settings.validate()?;
 
         let mut all_data = AllData::new();
@@ -99,27 +100,27 @@ impl AllData {
     }
 
     fn load_word_mods(&mut self, settings: &Settings) {
-        for name in &settings.other.word_modifiers {
+        for name in &settings.word_modifiers {
             self.add_word_mod(name);
         }
     }
 
     fn load_anagram_mods(&mut self, settings: &Settings) {
-        for name in &settings.other.anagram_modifiers {
+        for name in &settings.anagram_modifiers {
             self.add_anagram_mod(name);
         }
     }
 
     fn load_commands(&mut self, settings: &Settings) {
         // TODO use set sequences, and then process after?
-        for name in &settings.other.commands {
+        for name in &settings.commands {
             self.add_command(name);
         }
     }
 
     fn load_word_list(&mut self, settings: &Settings) -> Result<(), Error> {
         for kmap in &self.get_kmaps_with_words() {
-            for info in &settings.other.dictionary {
+            for info in &settings.dictionary {
                 self.add_word(info.to_owned(), kmap)?
             }
         }

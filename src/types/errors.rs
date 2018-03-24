@@ -4,12 +4,6 @@ use failure::Error;
 #[fail(display = "Invalid ratio: {}", _0)]
 pub struct RatioError(pub f32);
 
-// foreign_links {
-//     Fmt(::std::fmt::Error);
-//     Io(::std::io::Error) #[cfg(unix)];
-//     Toml(::toml::de::Error);
-// }
-
 #[derive(Debug, Fail)]
 #[fail(display = "Missing '{}' from '{}'", missing, container)]
 pub struct MissingErr {

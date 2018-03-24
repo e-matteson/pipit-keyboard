@@ -25,7 +25,10 @@ validated_struct!{
         pub plain_modifiers: BTreeMap<Name, KeyPress>,
         pub plain_keys: BTreeMap<Name, KeyPress>,
         pub macros: BTreeMap<Name, Sequence>,
-        pub other: OtherConfig,
+        pub word_modifiers: Vec<Name>,
+        pub anagram_modifiers: Vec<Name>,
+        pub commands: Vec<Name>,
+        pub dictionary: Vec<WordConfig>,
     }
 }
 
@@ -62,17 +65,6 @@ validated_struct!{
         pub enable_audio_typing_feedback: bool,
     }
 }
-
-validated_struct!(
-    #[derive(Deserialize, Debug, Clone)]
-    #[serde(deny_unknown_fields)]
-    pub struct OtherConfig {
-        pub word_modifiers: Vec<Name>,
-        pub anagram_modifiers: Vec<Name>,
-        pub commands: Vec<Name>,
-        pub dictionary: Vec<WordConfig>,
-    }
-);
 
 always_valid_enum!{
     #[derive(Deserialize, Debug, Clone, Copy)]

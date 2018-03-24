@@ -11,7 +11,7 @@ use failure::{Error, ResultExt};
 
 use std::env::args;
 
-const DEFAULT_SETTINGS_FILE: &str = "settings/settings.toml";
+const DEFAULT_SETTINGS_FILE: &str = "settings/settings.yaml";
 
 fn get_settings_path() -> Result<String, Error> {
     // check command line arguments
@@ -33,7 +33,7 @@ fn run() -> Result<(), Error> {
         .save_as("auto_config")
         .context("Failed to save configuration")?;
     // let tutor_data = all_data.get_tutor_data()?;
-    // CheatSheet::from_toml("settings/cheatsheet.toml", &tutor_data)
+    // CheatSheet::from_yaml("settings/cheatsheet_full.yaml", &tutor_data)
     //     .context("Failed to make cheatsheet")?
     //     .save("out.svg");
     // TutorApp::run(tutor_data);

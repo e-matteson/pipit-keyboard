@@ -16,7 +16,7 @@ See the [[https://github.com/e-matteson/pipit-keyboard/wiki/][wiki]] for more (s
 
 - Install [[https://www.rust-lang.org][rust]] and the [[https://www.arduino.cc/en/Main/Software][Arduino IDE]] (along with support for your microcontroller).
 - Clone this repository.
-- [[Configuration][configure the keyboard]] by editing =settings/settings.toml=.
+- [[Configuration][configure the keyboard]] by editing =settings/settings.yaml=.
 - Run the pipit-config tool to generate the firmware: =$ cargo run=
 - Open =pipit-firmware/pipit-firmware.ino= in the Arduino IDE, and upload to your microcontroller.
 

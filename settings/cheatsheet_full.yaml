@@ -1,0 +1,150 @@
+page_width: 816
+page_height: 1056
+
+
+keyboards:
+  - keys:
+    - "key_a"
+    - "key_c"
+    - "key_d"
+    - "key_e"
+    - "key_f"
+    - "key_h"
+    - "key_i"
+    - "key_l"
+    - "key_m"
+    - "key_n"
+    - "key_o"
+    - "key_p"
+    - "key_r"
+    - "key_s"
+    - "key_t"
+    - "key_u"
+    - "key_space"
+    - "key_backspace"
+    - "key_up"
+    - "key_down"
+    - "mod_shift"
+    - "mod_ctrl"
+    - "mod_gui"
+    - "mod_alt"
+
+  - keys:
+    - "key_left"
+    - "key_right"
+    - "key_home"
+    - "key_end"
+    - "key_esc"
+    - "key_tab"
+
+  - keys:
+    - "key_b"
+    - "key_k"
+    - "key_1"
+    - "key_5"
+    - "key_enter"
+    - ""
+    - "key_w"
+    - "key_j"
+    - "key_0"
+    - "key_4"
+
+  - keys:
+    - "key_comma"
+    - "key_v"
+    - "key_7"
+    - "key_9"
+    - "key_page_down"
+    - "key_page_up"
+    - "key_period"
+    - "key_x"
+    - "key_6"
+    - "key_8"
+
+  - keys:
+    - "key_z"
+    - "key_g"
+    - "key_bang"
+    - "key_3"
+    - ""
+    - ""
+    - "key_q"
+    - "key_y"
+    - "key_question"
+    - "key_2"
+
+  - keys:
+    - "key_caret"
+    - "key_asterisk"
+    - "key_tilde"
+    - "key_doublequote"
+    - ""
+    - ""
+    - "key_dollar"
+    - "key_percent"
+    - "key_grave"
+    - "key_quote"
+
+  - keys:
+    - "key_backslash"
+    - "key_pipe"
+    - "key_plus"
+    - ""
+    - ""
+    - ""
+    - "key_slash"
+    - "key_ampersand"
+    - "key_equal"
+
+  - keys:
+    - "key_underscore"
+    - "key_at"
+    - "key_colon"
+    - ""
+    - ""
+    - ""
+    - "key_minus"
+    - "key_hash"
+    - "key_semicolon"
+
+  - keys:
+    - "key_delete"
+    - "key_caps_lock"
+    - "key_printscreen"
+
+  - keys:
+    - "key_right_paren"
+    - "key_right_curly"
+    - "key_right_brace"
+    - "key_right_angle"
+    - ""
+    - ""
+    - "key_left_paren"
+    - "key_left_curly"
+    - "key_left_brace"
+    - "key_left_angle"
+
+  - keys:
+    - "macro_in_paren"
+    - "macro_in_curly"
+    - "macro_in_brace"
+    - "macro_in_angle"
+
+  - keys:
+    - "command_pause"
+    - "command_delete_word"
+    - "command_cycle_word"
+    - "mod_anagram_1"
+    - "mod_capital"
+    - "mod_nospace"
+    - "mod_double"
+    - "mod_shorten"
+
+  - keys:
+    # "command_left_hand_mode"
+    # "command_gaming_mode"
+    - "mod_anagram_2"
+    - "command_left_word"
+    # "command_right_word"
+    # "command_right_limit"
+    - "command_cycle_capital"
