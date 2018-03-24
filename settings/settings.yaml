@@ -3,15 +3,15 @@ options:
 # How quickly all the switches in a chord must be pressed for them to be
 # recognized as a single chord. Increase it if you often fail to press whole
 # chords at once. Decrease it if you often type too quickly and accidentally
-# combine separate presses into a single chord. Required.
+# combine separate presses into a single chord. Required. Milliseconds.
   chord_delay:                 30
 
 # How long a switch must be held down before it will be reused in future chords.
-# Required.
+# Required. Milliseconds.
   held_delay:                  200
 
 # How long a switch must stay down (or up) to be considered a real press (or
-# release), and not an accidental bounce. Required.
+# release), and not an accidental bounce. Required. Milliseconds.
   debounce_delay:              10
 
 # How much debugging info to send over the serial connection. Messages can be
@@ -29,20 +29,25 @@ options:
 # RGB LED, if one is present. Optional. Default: LED disabled.
   rgb_led_pins:                [10, 11, 12]
 
-# If true, flash the LED when a unrecognized chord is typed. Optional. Default: false.
+# If true, flash the LED when a unrecognized chord is typed. Optional. Default:
+# false.
   enable_led_typing_feedback:  true
 
   # enable_audio_typing_feedback: true
 
-# The microcontroller pin used to sense battery voltage, if a battery is present. Optional. Default: battery sensing disabled.
+# The microcontroller pin used to sense battery voltage, if a battery is
+# present. Optional. Default: battery sensing disabled.
   battery_level_pin:           9
 
 # The microcontroller pins connected to each row in the switch matrix. Required.
   row_pins:                    [1, 0, 19]
 
-# The microcontroller pins connected to each column in the switch matrix. Required.
+# The microcontroller pins connected to each column in the switch matrix.
+# Required.
   column_pins:                 [15,16,17,18, 20,21,5,6]
 
+# Where to save the auto-generated .cpp/.h files containing the firmware
+# configuration.
   output_directory:            pipit-firmware
 
 # The format of the chord blocks in the .kmap files. Each pair of numbers
