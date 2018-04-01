@@ -40,8 +40,7 @@ private:
   void updateSwitchStatuses();
   bool debouncePress(uint8_t switch_index);
   bool debounceRelease(uint8_t switch_index);
-  void stopDebouncingPress(uint8_t i);
-  void stopDebouncingRelease(uint8_t i);
+  void stopDebouncing(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
   // bool isAnySwitchStillBouncing();
@@ -53,10 +52,10 @@ private:
   Timer* chord_timer;
   Timer* release_timer;
   Timer* held_timer;
-  // TODO use the same timers for both press and release?
-  Timer* debounce_press_timers[NUM_MATRIX_POSITIONS];
-  Timer* debounce_release_timers[NUM_MATRIX_POSITIONS];
 
+  // We're now using the same timers for both press and release.
+  // Will that always work? Why did we decide to have separate ones before?
+  Timer* debounce_timers[NUM_MATRIX_POSITIONS];
 
   switch_status_enum switch_status[NUM_MATRIX_POSITIONS] = {(switch_status_enum)0};
   bool was_switch_double_tapped = 0;

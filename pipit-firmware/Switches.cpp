@@ -10,8 +10,7 @@ Switches::Switches(){
 
   for(uint8_t i = 0; i != NUM_MATRIX_POSITIONS; i++){
     switch_status[i] = Switches::NOT_PRESSED;
-    debounce_press_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
-    debounce_release_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
+    debounce_timers[i] = new Timer(DEBOUNCE_DELAY, 0);
   }
 }
 
@@ -40,10 +39,7 @@ bool Switches::readyToPress(bool is_gaming){
   if(!chord_timer->peekDone()){
     return 0; // Not ready
   }
-  // if(isAnySwitchStillBouncing()){
-  //   // Let's give this bouncy switch a little more time to settle before sending.
-  //   return 0;
-  // }
+
   // Ready!
   chord_timer->disable();
   return 1;
@@ -67,7 +63,7 @@ void Switches::updateSwitchStatuses(){
       case Switches::PRESSED:
       case Switches::ALREADY_SENT:
       case Switches::HELD:
-        stopDebouncingRelease(i);
+        stopDebouncing(i);
         break;
       case Switches::NOT_PRESSED:
         // Might be a new press, debounce it first
@@ -82,7 +78,7 @@ void Switches::updateSwitchStatuses(){
         debounceRelease(i);
         break;
       case Switches::NOT_PRESSED:
-        stopDebouncingPress(i);
+        stopDebouncing(i);
         break;
       case Switches::PRESSED:
         if(debounceRelease(i)){
@@ -103,14 +99,14 @@ bool Switches::debouncePress(uint8_t switch_index){
   // Maybe it's a new press, debounce it first.
   // Count down from DEBOUNCE_DELAY to 0.
   bool is_debounce_done = 0;
-  if(debounce_press_timers[switch_index]->isDisabled()){
+  if(debounce_timers[switch_index]->isDisabled()){
     // Start debouncing, don't change status.
-    debounce_press_timers[switch_index]->start();
+    debounce_timers[switch_index]->start();
   }
-  else if(debounce_press_timers[switch_index]->isDone()){
+  else if(debounce_timers[switch_index]->isDone()){
     // Debounce done, it's a real press!
     switch_status[switch_index] = Switches::PRESSED;
-    debounce_press_timers[switch_index]->disable();
+    debounce_timers[switch_index]->disable();
 
     chord_timer->start();
     held_timer->start();
@@ -129,13 +125,13 @@ bool Switches::debounceRelease(uint8_t switch_index){
   // Maybe it's a new release, debounce it first.
   // Count down from DEBOUNCE_DELAY to 0.
   bool is_debounce_done = 0;
-  if(debounce_release_timers[switch_index]->isDisabled()){
+  if(debounce_timers[switch_index]->isDisabled()){
     // Start debouncing, don't change status.
-    debounce_release_timers[switch_index]->start();
+    debounce_timers[switch_index]->start();
   }
-  else if(debounce_release_timers[switch_index]->isDone()){
+  else if(debounce_timers[switch_index]->isDone()){
     // Debouncing done, it's a real release.
-    debounce_release_timers[switch_index]->disable();
+    debounce_timers[switch_index]->disable();
     switch_status[switch_index] = Switches::NOT_PRESSED;
     last_released_switch = switch_index;
     release_timer->start();
@@ -146,14 +142,9 @@ bool Switches::debounceRelease(uint8_t switch_index){
   return is_debounce_done;
 }
 
-void Switches::stopDebouncingPress(uint8_t i){
-  // It was not a real press.
-  debounce_press_timers[i]->disable();
-}
-
-void Switches::stopDebouncingRelease(uint8_t i){
-  // It was not a real release.
-  debounce_release_timers[i]->disable();
+void Switches::stopDebouncing(uint8_t i){
+  // It was not a real press/release.
+  debounce_timers[i]->disable();
 }
 
 void Switches::checkForHeldSwitches(){
