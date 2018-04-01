@@ -23,10 +23,10 @@ bool Matrix::get(uint8_t index) const{
 
 void Matrix::set(uint8_t index, bool value) {
   if(value) {
-    pressed |= (1 >> index);
+    pressed |= (1 << index);
   }
   else {
-    pressed &= ~(1 >> index);
+    pressed &= ~(1 << index);
   }
 }
 
