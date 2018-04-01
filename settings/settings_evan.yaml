@@ -453,11 +453,11 @@ macros:
     - {key: "KEY_O"}
     - {key: "KEY_P"}
     - {key: "KEY_P"}
-  macro_open_timeline:
+  macro_open_active:
     - {key: "KEY_SPACE"}
     - {key: "KEY_O"}
     - {key: "KEY_P"}
-    - {key: "KEY_T"}
+    - {key: "KEY_U"}
   macro_open_settings:
     - {key: "KEY_SPACE"}
     - {key: "KEY_O"}
@@ -756,13 +756,13 @@ macros:
   macro_blackhole:
     - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_MINUS", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_tex_item:
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_M"}
-    - {key: "KEY_SPACE"}
+  # macro_tex_item:
+  #   - {key: "KEY_BACKSLASH"}
+  #   - {key: "KEY_I"}
+  #   - {key: "KEY_T"}
+  #   - {key: "KEY_E"}
+  #   - {key: "KEY_M"}
+  #   - {key: "KEY_SPACE"}
   macro_tex_citep:
     - {key: "KEY_BACKSLASH"}
     - {key: "KEY_C"}
@@ -870,15 +870,19 @@ macros:
     - {key: "KEY_O"}
     - {key: "KEY_Z"}
     - {key: "KEY_E"}
-  macro_org_store_link:
+  # macro_org_store_link:
+  #   - {key: "KEY_SPACE"}
+  #   - {key: "KEY_A"}
+  #   - {key: "KEY_O"}
+  #   - {key: "KEY_L"}
+  # macro_org_insert_link:
+  #   - {key: "KEY_SPACE"}
+  #   - {key: "KEY_M"}
+  #   - {key: "KEY_I"}
+  #   - {key: "KEY_L"}
+  macro_org_clock:
     - {key: "KEY_SPACE"}
-    - {key: "KEY_A"}
     - {key: "KEY_O"}
-    - {key: "KEY_L"}
-  macro_org_insert_link: 
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_M"}
-    - {key: "KEY_I"}
     - {key: "KEY_L"}
   macro_org_tree:
     - {key: "KEY_SPACE"}
@@ -890,6 +894,11 @@ macros:
     - {key: "KEY_M"}
     - {key: "KEY_O"}
     - {key: "KEY_R"}
+  macro_org_someday:
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_M"}
+    - {key: "KEY_O"}
+    - {key: "KEY_S"}
   macro_anagram_1:
     - {key: "KEY_COMMA"}
     - {key: "KEY_SPACE"}
@@ -1060,6 +1069,7 @@ dictionary:
   - {word: "align", anagram: 1}
   - {word: "all"}
   - {word: "alleged"}
+  - {word: "Allen", anagram: 2}
   - {word: "allergy", anagram: 1}
   - {word: "alliance"}
   - {word: "allocate", anagram: 1}
@@ -2895,6 +2905,7 @@ dictionary:
   - {word: "heritage"}
   - {word: "hero"}
   - {word: "heron"}
+  - {word: "hesitate"}
   - {word: "hex"}
   - {word: "hey"}
   - {word: "hi"}
@@ -5003,7 +5014,7 @@ dictionary:
   - {word: "sum"}
   - {word: "summary"}
   - {word: "summer", anagram: 4}
-  - {word: "summit"}
+  - {word: "summit", anagram: 1}
   - {word: "sun"}
   - {word: "super"}
   - {word: "superb", anagram: 3}
@@ -5468,7 +5479,7 @@ dictionary:
   - {word: "visa"}
   - {word: "visible"}
   - {word: "vision"}
-  - {word: "visit", anagram: 1}
+  - {word: "visit"}
   - {word: "vista"}
   - {word: "visual"}
   - {word: "vital"}

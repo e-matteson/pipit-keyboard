@@ -362,11 +362,17 @@ macro_print_ino   macro_println_ino
 
 #### LaTeX macros ####
 
-macro_tex_item    macro_tex_citep   macro_tex_itemize   macro_tex_enumerate
-....   ...*       ...*   .*.*       ....   ...*         ....   ...*
-.*..   ....       ....   ....       ...*   ....         ..*.   ....
-  .     .           .     .           .     .             .     .
-  ... .*.           ... .*.           ... .*.             ... .*.
+macro_tex_citep   macro_tex_itemize   macro_tex_enumerate
+...*   .*.*       ....   ...*         ....   ...*
+....   ....       ...*   ....         ..*.   ....
+  .     .           .     .             .     .
+  ... .*.           ... .*.             ... .*.
+
+# macro_tex_item
+# ....   ...*
+# .*..   ....
+#   .     .
+#   ... .*.
 
 #### pipit macros ####
 
@@ -485,9 +491,9 @@ macro_dotspacemacs    macro_magit_status     macro_inbox
   .     .               .     .                .     .
   ... .*.               ... .*.                ... .*.
 
-macro_open_planner    macro_open_timeline  macro_open_settings  macro_open_dvorak
-...*   ....           ...*   ....          ...*   ....          ...*   *...
-.*..   ....           .*..   .*..          .*..   ...*          .*..   ....
+macro_open_planner    macro_open_active    macro_open_settings  macro_open_dvorak
+...*   ....           ..*.   ....          ...*   ....          ...*   *...
+.*..   ....           .*..   ....          .*..   ...*          .*..   ....
   .     .               .     .              .     .              .     .
   ... .*.               ... .*.              ... .*.              ... .*.
 
@@ -503,17 +509,23 @@ macro_ins_heading      macro_ins_notes
   .     .                .     .
   *.. .*.                ... .*.
 
-macro_org_insert_link  macro_org_store_link  macro_org_capture
-....   ....            ....   ...*           ....   .*..
-**.*   ....            **..   ....           .*..   ....
-  .     .                .     .               .     .
-  ... .*.                ... .*.               ... .*.
+# macro_org_insert_link  macro_org_store_link
+# ....   ....            ....   ...*
+# **.*   ....            **..   ....
+#   .     .                .     .
+#   ... .*.                ... .*.
 
-macro_org_calendar     macro_org_tree        macro_org_archive
-....   .*..            ....   ....           ....   ..*.
-**..   ....            **..   .*..           **..   ....
-  .     .                .     .               .     .
-  ... .*.                ... .*.               ... .*.
+macro_org_capture     macro_org_clock
+....   .*..           ....   ...*
+.*..   ....           .*..   ....
+  .     .               .     .
+  ... .*.               ... .*.
+
+macro_org_calendar    macro_org_tree   macro_org_archive  macro_org_someday
+....   .*..           ....   ....      ....   ..*.        ....   ....
+**..   ....           **..   .*..      **..   ....        **..   ...*
+  .     .               .     .          .     .            .     .
+  ... .*.               ... .*.          ... .*.            ... .*.
 
 # macro_g_comma         macro_g_semicolon
 # ....   ....           ....   ....
