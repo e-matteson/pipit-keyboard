@@ -49,6 +49,7 @@ pub enum CTree {
     EnumDecl {
         name: CCode,
         variants: Vec<CCode>,
+        size: Option<CCode>,
     },
     StructInstance {
         name: CCode,

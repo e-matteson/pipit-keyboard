@@ -55,7 +55,8 @@ impl CTree {
             CTree::EnumDecl {
                 ref name,
                 ref variants,
-            } => format_enum_decl(name, variants),
+                ref size,
+            } => format_enum_decl(name, variants, size),
             CTree::StructInstance {
                 ref name,
                 ref c_type,
@@ -181,7 +182,11 @@ impl<'a> AddAssign<&'a CFiles> for CFiles {
     }
 }
 
-fn format_enum_decl(name: &CCode, variants: &[CCode]) -> CFiles {
+fn format_enum_decl(
+    name: &CCode,
+    variants: &[CCode],
+    size: &Option<CCode>,
+) -> CFiles {
     // TODO only assign first to 0?
     let contents = variants
         .into_iter()
@@ -189,8 +194,16 @@ fn format_enum_decl(name: &CCode, variants: &[CCode]) -> CFiles {
         .fold(String::new(), |acc, (index, field)| {
             format!("{}  {} = {},\n", acc, field, index)
         });
+    let inheritance = if let Some(ref parent_type) = size {
+        format!(" : {} ", parent_type)
+    } else {
+        String::new()
+    };
     CFiles {
-        h: CCode(format!("enum {}{{\n{}}};\n\n", name, contents)),
+        h: CCode(format!(
+            "enum {}{}{{\n{}}};\n\n",
+            name, inheritance, contents
+        )),
         c: CCode::new(),
     }
 }

@@ -104,6 +104,7 @@ impl AllData {
         CTree::EnumDecl {
             name: "mode_enum".to_c(),
             variants: modes_list,
+            size: Some("uint8_t".to_c()),
         }
     }
 
@@ -136,6 +137,7 @@ impl AllData {
         group.push(CTree::EnumDecl {
             name: "mod_enum".to_c(),
             variants: all_index_variants.values().cloned().collect(),
+            size: Some("uint8_t".to_c()),
         });
 
         group.push(CTree::Define {
@@ -209,6 +211,7 @@ impl AllData {
         CTree::EnumDecl {
             name: "command_enum".to_c(),
             variants: command_list,
+            size: Some("uint8_t".to_c()),
         }
     }
 
@@ -220,6 +223,7 @@ impl AllData {
         CTree::EnumDecl {
             name: "seq_type_enum".to_c(),
             variants: v,
+            size: Some("uint8_t".to_c()),
         }
     }
 }
