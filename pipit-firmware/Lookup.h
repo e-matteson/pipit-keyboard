@@ -9,8 +9,8 @@
 #include "Key.h"
 
 // Max # of bytes of data in a word/macro lookup array entry.
-//  TODO enforce in config
-#define MAX_LOOKUP_DATA_LENGTH 256
+//  TODO enforce in config!
+#define MAX_LOOKUP_DATA_LENGTH 50
 
 class Lookup{
 

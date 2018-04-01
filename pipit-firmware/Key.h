@@ -19,6 +19,7 @@ public:
   void clear();
   void print();
 
+  // As small as it can get...
   uint8_t key_code = 0;
   uint8_t mod_byte = 0;
 };

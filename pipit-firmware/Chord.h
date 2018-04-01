@@ -74,8 +74,10 @@ private:
   void printMod() const;
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
+  // TODO use bits, not bools?
   bool mods[NUM_MODIFIERS] = {0};
   uint8_t anagram_num = 0;
+  // TODO can we control enum size?
   conf::mode_enum mode = (conf::mode_enum) 0;
   bool flag_cycle_capital = 0;
 };

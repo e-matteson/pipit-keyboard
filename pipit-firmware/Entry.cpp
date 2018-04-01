@@ -15,20 +15,17 @@ Chord* Entry::getChord(){
 void Entry::init(const Chord* _chord, bool _is_anagrammable){
   chord.copy(_chord);
   is_anagrammable = _is_anagrammable;
-  // is_clear = 0;
   length = 0;
 }
 
 void Entry::copy(const Entry* other){
   length = other->length;
   is_anagrammable = other->is_anagrammable;
-  // is_clear = other->is_clear;
   chord.copy(&other->chord);
   last_key = other->last_key;
 }
 
 void Entry::clear(){
-  // is_clear = 1;
   length = 0;
   is_anagrammable = 0;
   chord.clear();

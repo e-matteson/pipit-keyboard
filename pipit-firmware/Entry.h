@@ -27,8 +27,8 @@ public:
   void setAnagrammable(bool value);
 
 private:
+  //  gotta shrink chord to make it smaller
   Chord chord;
-  // bool is_clear = 1;
   uint8_t length = 0;
   Key last_key;
   bool is_anagrammable = 0;
