@@ -14,7 +14,8 @@
 class Matrix{
 public:
   Matrix();
-  bool get(uint8_t index);
+  bool get(uint8_t index) const;
+  void set(uint8_t index, bool value);
   void setup();
 
   bool scanIfChanged();
@@ -46,7 +47,12 @@ private:
   Timer* squished_switch_timer;
   const uint16_t squished_delay = 60000;
 
-  bool pressed [NUM_MATRIX_POSITIONS] = {0};
+  // Each bit stores whether one switch is pressed. Make sure 32 bits is enough
+  // for all the scanned matrix positions.
+#if NUM_MATRIX_POSITIONS > 32
+#error "Too many rows and columns, increase `pressed` storage size in Matrix.h"
+#endif
+  uint32_t pressed = 0;
 
 };
 

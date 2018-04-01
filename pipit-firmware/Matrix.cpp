@@ -17,8 +17,17 @@ void Matrix::setup(){
 }
 
 
-bool Matrix::get(uint8_t index){
-  return pressed[index];
+bool Matrix::get(uint8_t index) const{
+  return 1 & (pressed >> index);
+}
+
+void Matrix::set(uint8_t index, bool value) {
+  if(value) {
+    pressed |= (1 >> index);
+  }
+  else {
+    pressed &= ~(1 >> index);
+  }
 }
 
 
@@ -147,11 +156,11 @@ void Matrix::scan(){
       delayMicroseconds(10);
       for(uint8_t r = 0; r != NUM_ROWS; r++){
         // Reading is low if the switch is pressed.
-        digitalRead(conf::row_pins[h][r]);
-        pressed[i] = (digitalRead(conf::row_pins[h][r]) == LOW);
-        is_any_switch_down |= pressed[i];
+        bool state = (digitalRead(conf::row_pins[h][r]) == LOW);
+        set(i, state);
+        is_any_switch_down |= state;
 
-        if(pressed[i]){
+        if(state){
           printPressedSwitch(h, c,r);
         }
         i++;
@@ -160,9 +169,9 @@ void Matrix::scan(){
     }
   }
 
-    if (is_any_switch_down) {
-      standby_timer->start();
-    }
+  if (is_any_switch_down) {
+    standby_timer->start();
+  }
 }
 
 void Matrix::printPressedSwitch(uint8_t h, uint8_t c, uint8_t r){
