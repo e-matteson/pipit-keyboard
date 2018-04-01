@@ -44,7 +44,7 @@ private:
 
   Timer* standby_timer;
   Timer* squished_switch_timer;
-  const uint32_t squished_delay = 100000;
+  const uint16_t squished_delay = 60000;
 
   bool pressed [NUM_MATRIX_POSITIONS] = {0};
 

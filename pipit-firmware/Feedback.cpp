@@ -10,7 +10,7 @@
 
 Feedback::Feedback(){
   battery = new Battery;
-  led_timer = new Timer(Timer::MILLISECONDS);
+  led_timer = new Timer();
 
 #ifdef ENABLE_RGB_LED
   for(uint8_t p = 0; p != NUM_RGB_LED_PINS; p++){

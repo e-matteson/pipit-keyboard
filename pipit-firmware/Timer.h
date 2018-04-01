@@ -6,13 +6,8 @@
 
 class Timer{
 public:
-  enum time_units_enum {
-    MILLISECONDS,
-    MICROSECONDS,
-  };
-
-  Timer(time_units_enum _units);
-  Timer(uint32_t new_default_value, bool start_now, time_units_enum _units);
+  Timer();
+  Timer(uint32_t new_default_value, bool start_now);
   void start();
   void start(uint32_t new_value);
   void disable();
@@ -33,8 +28,6 @@ private:
   uint32_t start_time = 0;
   uint32_t value = 0;
   uint32_t default_value = 0;
-  time_units_enum units;
-  const time_units_enum default_units = MILLISECONDS;
 };
 
 

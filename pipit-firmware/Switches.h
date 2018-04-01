@@ -44,7 +44,7 @@ private:
   void stopDebouncingRelease(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-  bool isAnySwitchStillBouncing();
+  // bool isAnySwitchStillBouncing();
 
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);
@@ -53,10 +53,10 @@ private:
   Timer* chord_timer;
   Timer* release_timer;
   Timer* held_timer;
+  // TODO use the same timers for both press and release?
   Timer* debounce_press_timers[NUM_MATRIX_POSITIONS];
   Timer* debounce_release_timers[NUM_MATRIX_POSITIONS];
 
-  Timer* first_contact_timers[NUM_MATRIX_POSITIONS];
 
   switch_status_enum switch_status[NUM_MATRIX_POSITIONS] = {(switch_status_enum)0};
   bool was_switch_double_tapped = 0;

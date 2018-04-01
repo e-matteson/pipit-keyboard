@@ -4,8 +4,8 @@ VolatileFlag* change_flag = new VolatileFlag(0);
 
 Matrix::Matrix(){
   // milliseconds to wait after the last keypress before entering standby:
-  standby_timer = new Timer(100, 0, Timer::MILLISECONDS);
-  squished_switch_timer = new Timer(squished_delay, 0, Timer::MILLISECONDS);
+  standby_timer = new Timer(100, 0);
+  squished_switch_timer = new Timer(squished_delay, 0);
 }
 
 void Matrix::setup(){

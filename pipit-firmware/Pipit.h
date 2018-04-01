@@ -75,10 +75,9 @@ private:
 
   bool is_paused = 0;
 
-  Timer* loop_timer;
-  const uint32_t loop_delay_micros = 500;
+  // Timer* loop_timer;
+  // const uint32_t loop_delay_micros = 500;
 
-  Timer* connection_timer;
   bool is_connected = 0;
   const uint8_t disconnect_readings_threshold = 3;
   uint8_t num_disconnect_readings = disconnect_readings_threshold;

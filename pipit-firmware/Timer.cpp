@@ -1,15 +1,13 @@
 #include "Timer.h"
 
-Timer::Timer(time_units_enum _units){
+Timer::Timer(){
   // For making arrays of Timers.
   // If you use this, you must manually set the default value!
   disable();
-  units = _units;
 }
 
 
-Timer::Timer(uint32_t _default_value, bool start_now, time_units_enum _units){
-  units = _units;
+Timer::Timer(uint32_t _default_value, bool start_now){
   setDefaultValue(_default_value);
   disable();
   if(start_now){
@@ -81,13 +79,5 @@ void Timer::jumpAhead(uint32_t units_ahead){
 }
 
 uint32_t Timer::getSystemTime(){
-  switch(units){
-  case Timer::MILLISECONDS:
-    return millis();
-  case Timer::MICROSECONDS:
-    return micros();
-  default:
-    DEBUG1_LN("WARNING: unknown timer units");
-    return 0;
-  }
+  return millis();
 }

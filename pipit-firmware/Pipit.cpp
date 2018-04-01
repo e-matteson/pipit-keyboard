@@ -110,8 +110,7 @@ Pipit::Pipit(){
   sender = new Sender(comms);
   feedback = new Feedback();
 
-  loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
-  connection_timer = new Timer(connection_check_delay_long, 1, Timer::MILLISECONDS);
+  // loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
 }
 
 void Pipit::setup(){
@@ -125,11 +124,11 @@ void Pipit::setup(){
 void Pipit::loop(){
   switches->update();
   sendIfReady();
-  // updateConnection();
   feedback->updateLED();
   shutdownIfSquished();
-  delayMicroseconds(loop_timer->remaining());
-  loop_timer->start();
+  // delay(loop_timer->remaining());
+  // loop_timer->start();
+  delayMicroseconds(100);
 }
 
 void Pipit::shutdownIfSquished(){
@@ -145,29 +144,6 @@ void Pipit::shutdownIfSquished(){
   exit(0); // Exit the firmware! Must reboot to use keyboard again.
 }
 
-void Pipit::updateConnection(){
-  if(!switches->matrix->isInStandby()){
-    // Switches have been pressed recently, don't check connection for a while
-    connection_timer->start();
-    return;
-  }
-  if(!connection_timer->isDone()){
-    return;
-  }
-  if(comms->isConnected()){
-    DEBUG1_LN("connected");
-    num_disconnect_readings = 0;
-    connection_timer->start(connection_check_delay_long);
-    return;
-  }
-
-  num_disconnect_readings++;
-  if(num_disconnect_readings > disconnect_readings_threshold){
-    DEBUG1_LN("not connected");
-    feedback->startRoutine(BLE_NO_CONNECTION_ROUTINE);
-  }
-  connection_timer->start(connection_check_delay_short);
-}
 
 void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
