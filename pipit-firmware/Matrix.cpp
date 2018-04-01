@@ -37,39 +37,50 @@ void Matrix::disablePinChangeInterrupt(){
 }
 
 void Matrix::setRowsInput(){
-  for(uint8_t r = 0; r != NUM_ROWS; r++){
-    pinMode(conf::row_pins[r], INPUT_PULLUP);
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for(uint8_t r = 0; r != NUM_ROWS; r++){
+      pinMode(conf::row_pins[h][r], INPUT_PULLUP);
+    }
   }
 }
 
 void Matrix::setColumnsLow(){
   // To prepare for setting pin interrupts, to wake from standby
-  for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(conf::column_pins[c], OUTPUT);
-    digitalWrite(conf::column_pins[c], LOW);
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for(uint8_t c = 0; c != NUM_COLUMNS; c++){
+      pinMode(conf::column_pins[h][c], OUTPUT);
+      digitalWrite(conf::column_pins[h][c], LOW);
+    }
   }
 }
 
 void Matrix::setColumnsHiZ(){
   // To prepare for scanning, after waking from standby
-  for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(conf::column_pins[c], HI_Z);
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for(uint8_t c = 0; c != NUM_COLUMNS; c++){
+      pinMode(conf::column_pins[h][c], HI_Z);
+    }
   }
+
 }
 
 void Matrix::attachRowPinInterrupts(voidFuncPtr isr){
   // uint32_t wakeup_pins = 0;
-  for(uint8_t r = 0; r != NUM_ROWS; r++){
-    // Triggering on FALLING/RISING/CHANGE requires some clocks, which could be a problem in deep sleep.
-    // But it's fine for normal use. Although it seems to trigger as soon as it's attached, if a switch is already down.
-    attachInterrupt(digitalPinToInterrupt(conf::row_pins[r]), isr, CHANGE);
-    // attachInterrupt(digitalPinToInterrupt(conf::row_pins[r]), isr, LOW);
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for(uint8_t r = 0; r != NUM_ROWS; r++){
+      // Triggering on FALLING/RISING/CHANGE requires some clocks, which could be a problem in deep sleep.
+      // But it's fine for normal use. Although it seems to trigger as soon as it's attached, if a switch is already down.
+      attachInterrupt(digitalPinToInterrupt(conf::row_pins[h][r]), isr, CHANGE);
+      // attachInterrupt(digitalPinToInterrupt(conf::row_pins[h][r]), isr, LOW);
+    }
   }
 }
 
 void Matrix::detachRowPinInterrupts(){
-  for(uint8_t r = 0; r != NUM_ROWS; r++){
-    detachInterrupt(digitalPinToInterrupt(conf::row_pins[r]));
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for(uint8_t r = 0; r != NUM_ROWS; r++){
+      detachInterrupt(digitalPinToInterrupt(conf::row_pins[h][r]));
+    }
   }
 }
 
@@ -127,35 +138,38 @@ void Matrix::scan(){
   // Scan the matrix for pressed switches.
   bool is_any_switch_down = 0;
   int i = 0;
-  for (uint8_t c = 0; c != NUM_COLUMNS; c++){
-    pinMode(conf::column_pins[c], OUTPUT);
-    digitalWrite(conf::column_pins[c], LOW);
-    // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
-    // The required length can depend on the properties of the ethernet cable.
-    delayMicroseconds(10);
-    for(uint8_t r = 0; r != NUM_ROWS; r++){
-      // Reading is low if the switch is pressed.
-      digitalRead(conf::row_pins[r]);
-      pressed[i] = (digitalRead(conf::row_pins[r]) == LOW);
-      is_any_switch_down |= pressed[i];
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for (uint8_t c = 0; c != NUM_COLUMNS; c++){
+      pinMode(conf::column_pins[h][c], OUTPUT);
+      digitalWrite(conf::column_pins[h][c], LOW);
+      // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
+      // The required length can depend on the properties of the ethernet cable.
+      delayMicroseconds(10);
+      for(uint8_t r = 0; r != NUM_ROWS; r++){
+        // Reading is low if the switch is pressed.
+        digitalRead(conf::row_pins[h][r]);
+        pressed[i] = (digitalRead(conf::row_pins[h][r]) == LOW);
+        is_any_switch_down |= pressed[i];
 
         if(pressed[i]){
-          printPressedSwitch(c,r);
+          printPressedSwitch(h, c,r);
         }
         i++;
       }
-      pinMode(conf::column_pins[c], HI_Z);
+      pinMode(conf::column_pins[h][c], HI_Z);
     }
+  }
+
     if (is_any_switch_down) {
       standby_timer->start();
     }
 }
 
-void Matrix::printPressedSwitch(uint8_t c, uint8_t r){
+void Matrix::printPressedSwitch(uint8_t h, uint8_t c, uint8_t r){
   DEBUG2("pressed: pins (");
-  DEBUG2(conf::column_pins[c]);
+  DEBUG2(conf::column_pins[h][c]);
   DEBUG2(", ");
-  DEBUG2(conf::row_pins[r]);
+  DEBUG2(conf::row_pins[h][r]);
   DEBUG2("), \tindices (");
   DEBUG2(c);
   DEBUG2(", ");

@@ -40,7 +40,7 @@ private:
 
   static void pinChangeISR();
 
-  void printPressedSwitch(uint8_t c, uint8_t r);
+  void printPressedSwitch(uint8_t h, uint8_t c, uint8_t r);
 
   Timer* standby_timer;
   Timer* squished_switch_timer;

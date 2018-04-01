@@ -41,8 +41,8 @@ validated_struct!{
         pub debounce_delay: Delay,
         pub debug_messages: Verbosity,
         pub board_name: BoardName,
-        pub row_pins: Vec<Pin>,
-        pub column_pins: Vec<Pin>,
+        pub row_pins: Vec<Vec<Pin>>,
+        pub column_pins: Vec<Vec<Pin>>,
         pub kmap_format: KmapFormat,
 
         pub rgb_led_pins: Option<[Pin; 3]>,
@@ -159,16 +159,22 @@ impl OptionsConfig {
                 name: self.board_name.to_c(),
                 value: true,
             },
-            CTree::Array {
+            CTree::CompoundArray {
                 name: "row_pins".to_c(),
-                values: Pin::to_c_vec(&self.row_pins),
-                c_type: "uint8_t".to_c(),
+                values: self.row_pins
+                    .iter()
+                    .map(|hand| Pin::to_c_vec(hand))
+                    .collect(),
+                subarray_type: "uint8_t".to_c(),
                 is_extern: true,
             },
-            CTree::Array {
+            CTree::CompoundArray {
                 name: "column_pins".to_c(),
-                values: Pin::to_c_vec(&self.column_pins),
-                c_type: "uint8_t".to_c(),
+                values: self.column_pins
+                    .iter()
+                    .map(|hand| Pin::to_c_vec(hand))
+                    .collect(),
+                subarray_type: "uint8_t".to_c(),
                 is_extern: true,
             },
             CTree::Ifdef {
@@ -220,6 +226,10 @@ impl OptionsConfig {
                 value: self.num_columns().to_c(),
             },
             CTree::Define {
+                name: "NUM_HANDS".to_c(),
+                value: self.num_hands().to_c(),
+            },
+            CTree::Define {
                 name: "NUM_MATRIX_POSITIONS".to_c(),
                 value: self.num_matrix_positions().to_c(),
             },
@@ -243,15 +253,25 @@ impl OptionsConfig {
     }
 
     fn num_rows(&self) -> usize {
-        self.row_pins.len()
+        // TODO ensure both hands have same number of rows
+        self.row_pins.get(0).expect("row_pins was empty").len()
     }
 
     fn num_columns(&self) -> usize {
-        self.column_pins.len()
+        // TODO ensure both hands have same number of cols
+        self.column_pins
+            .get(0)
+            .expect("column_pins was empty")
+            .len()
+    }
+
+    fn num_hands(&self) -> usize {
+        // TODO ensure rows and cols agree about number of hands
+        self.row_pins.len()
     }
 
     fn num_matrix_positions(&self) -> usize {
-        self.num_rows() * self.num_columns()
+        self.num_hands() * self.num_rows() * self.num_columns()
     }
 
     fn num_bytes_in_chord(&self) -> usize {
@@ -261,9 +281,11 @@ impl OptionsConfig {
     fn firmware_order(&self) -> Vec<SwitchPos> {
         // must match the algorithm used in the firmware's scanMatrix()!
         let mut order: Vec<SwitchPos> = Vec::new();
-        for c in &self.column_pins {
-            for r in &self.row_pins {
-                order.push(SwitchPos::new(*r, *c));
+        for h in 0..self.num_hands() {
+            for c in &self.column_pins[h] {
+                for r in &self.row_pins[h] {
+                    order.push(SwitchPos::new(*r, *c));
+                }
             }
         }
         order

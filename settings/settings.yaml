@@ -40,11 +40,11 @@ options:
   battery_level_pin:           9
 
 # The microcontroller pins connected to each row in the switch matrix. Required.
-  row_pins:                    [1, 0, 19]
+  row_pins:                    [[1, 0, 19]]
 
 # The microcontroller pins connected to each column in the switch matrix.
 # Required.
-  column_pins:                 [15,16,17,18, 20,21,5,6]
+  column_pins:                 [[15,16,17,18, 20,21,5,6]]
 
 # Where to save the auto-generated .cpp/.h files containing the firmware
 # configuration.
