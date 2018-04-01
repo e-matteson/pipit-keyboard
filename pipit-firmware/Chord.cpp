@@ -46,9 +46,7 @@ bool Chord::matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const{
 
 void Chord::copy(const Chord* other){
   mode = other->mode;
-  for(int i = 0; i < NUM_MODIFIERS; i++){
-    mods[i] = other->mods[i];
-  }
+  mods = other->mods;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = other->chord_bytes[i];
   }
@@ -129,25 +127,30 @@ bool Chord::hasModShorten() const{
   return hasMod(conf::getModShortenEnum());
 }
 
-bool Chord::hasMod(conf::mod_enum mod) const{
-  return mods[mod];
-}
-
 void Chord::setModNospace() {
   setMod(conf::getNospaceEnum());
 }
 
+bool Chord::hasMod(conf::mod_enum mod) const{
+  // return mods[mod];
+  return (mods >> mod) & 1;
+}
+
 void Chord::setMod(conf::mod_enum mod) {
-  mods[mod] = 1;
+  // mods[mod] = 1;
+  mods |= (1 << mod);
 }
 
 void Chord::unsetMod(conf::mod_enum mod) {
-  mods[mod] = 0;
+  // mods[mod] = 0;
+  mods &= ~(1 << mod);
 }
 
-bool Chord::toggleMod(conf::mod_enum mod){
-  mods[mod] ^= 1;
-  return mods[mod];
+void Chord::toggleMod(conf::mod_enum mod){
+  // TODO
+  // mods[mod] ^= 1;
+  // return mods[mod];
+  mods ^= (1 << mod);
 }
 
 void Chord::extractPlainMods(){
@@ -161,7 +164,6 @@ void Chord::extractWordMods(){
     extractMod(conf::getWordModEnum(i));
   }
 }
-
 
 void Chord::extractAnagramMods(){
   // TODO how does blank anagram0 work? Other blank mods are ignored...

@@ -50,7 +50,7 @@ private:
 
   void setMod(conf::mod_enum mod);
   void unsetMod(conf::mod_enum mod);
-  bool toggleMod(conf::mod_enum modifier);
+  void toggleMod(conf::mod_enum modifier);
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
@@ -74,8 +74,16 @@ private:
   void printMod() const;
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
+
   // TODO use bits, not bools?
-  bool mods[NUM_MODIFIERS] = {0};
+  // bool mods[NUM_MODIFIERS] = {0};
+
+  // Make sure the modifiers will fit in the bits of a uint16_t:
+#if NUM_MODIFIERS > 16
+#error "Too many modifiers, increase mods storage size in Chord.h"
+#endif
+  uint16_t mods = 0;
+
   uint8_t anagram_num = 0;
   // TODO can we control enum size?
   conf::mode_enum mode = (conf::mode_enum) 0;
