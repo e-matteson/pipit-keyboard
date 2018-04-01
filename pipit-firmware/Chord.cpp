@@ -46,24 +46,20 @@ bool Chord::matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const{
 
 void Chord::copy(const Chord* other){
   mode = other->mode;
-  mods = other->mods;
+  mods_and_flags = other->mods_and_flags;
   for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = other->chord_bytes[i];
   }
   anagram_num = other->anagram_num;
-  flag_cycle_capital = other->flag_cycle_capital;
 }
 
 void Chord::clear(){
   mode = (conf::mode_enum) 0;
-  for(uint8_t i = 0; i < NUM_MODIFIERS; i++){
-    unsetMod((conf::mod_enum) i);
-  }
+  mods_and_flags = 0;
   for(uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
   }
   anagram_num = 0;
-  flag_cycle_capital = 0;
 }
 
 void Chord::editCaps(Key* data, uint8_t length) const {
@@ -85,7 +81,7 @@ void Chord::editCaps(Key* data, uint8_t length) const {
 CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
   bool has_cap_mod = hasMod(conf::getCapitalEnum());
 
-  if(!flag_cycle_capital) {
+  if(!getFlagCycleCapital()) {
     // The simple case, without cap cycling.
     if(has_cap_mod) {
       return CAP_FIRST;
@@ -133,24 +129,32 @@ void Chord::setModNospace() {
 
 bool Chord::hasMod(conf::mod_enum mod) const{
   // return mods[mod];
-  return (mods >> mod) & 1;
+  return (mods_and_flags >> mod) & 1;
 }
 
 void Chord::setMod(conf::mod_enum mod) {
   // mods[mod] = 1;
-  mods |= (1 << mod);
+  mods_and_flags |= (1 << mod);
 }
 
 void Chord::unsetMod(conf::mod_enum mod) {
   // mods[mod] = 0;
-  mods &= ~(1 << mod);
+  mods_and_flags &= ~(1 << mod);
 }
 
 void Chord::toggleMod(conf::mod_enum mod){
   // TODO
   // mods[mod] ^= 1;
   // return mods[mod];
-  mods ^= (1 << mod);
+  mods_and_flags ^= (1 << mod);
+}
+
+bool Chord::getFlagCycleCapital() const {
+  return 1 & (mods_and_flags >> 15);
+}
+
+void Chord::toggleFlagCycleCapital() {
+  mods_and_flags ^= (1 >> 15);
 }
 
 void Chord::extractPlainMods(){
@@ -249,7 +253,7 @@ void Chord::prepareToCycle(){
 
 void Chord::cycleCapital(){
   prepareToCycle();
-  flag_cycle_capital ^= 1;
+  toggleFlagCycleCapital();
 }
 
 void Chord::cycleNospace(){

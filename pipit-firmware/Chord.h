@@ -54,6 +54,9 @@ private:
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
+  bool getFlagCycleCapital() const;
+  void toggleFlagCycleCapital();
+
   CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
   void prepareToCycle();
 
@@ -78,16 +81,20 @@ private:
   // TODO use bits, not bools?
   // bool mods[NUM_MODIFIERS] = {0};
 
-  // Make sure the modifiers will fit in the bits of a uint16_t:
-#if NUM_MODIFIERS > 16
+  // Make sure the modifiers will fit in the bits of a uint16_t. The least
+  // significants bits will each represent one modifier, and the most
+  // significant bit will store the flag_cycle_capital. It's important to keep
+  // Chords as small as possible, since we create a bunch of them (especially in
+  // the history).
+#if NUM_MODIFIERS > 15
 #error "Too many modifiers, increase mods storage size in Chord.h"
 #endif
-  uint16_t mods = 0;
+  uint16_t mods_and_flags = 0;
 
   uint8_t anagram_num = 0;
   // TODO can we control enum size?
   conf::mode_enum mode = (conf::mode_enum) 0;
-  bool flag_cycle_capital = 0;
+  // bool flag_cycle_capital = 0;
 };
 
 #endif
