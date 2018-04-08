@@ -10,7 +10,7 @@
 
 // The number of recent words/sends that can be deleted
 
-#define HISTORY_SIZE 2
+#define HISTORY_SIZE 5
 #define PADDING 2
 
 enum Direction{

@@ -45,7 +45,7 @@ private:
 
   Timer* standby_timer;
   Timer* squished_switch_timer;
-  const uint16_t squished_delay = 60000;
+  const uint32_t squished_delay = 60000;
 
   // Each bit stores whether one switch is pressed. Make sure 32 bits is enough
   // for all the scanned matrix positions.

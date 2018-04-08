@@ -36,9 +36,15 @@ void History::splitAtCursor(){
 }
 
 void History::insertAtCursor(Entry* entry){
+  if(isCursorAtLimit(LEFT)) {
+    // There won't be space to add a new entry here, past the end of the stack.
+    // Pop the front of the stack to make space.
+    remove(0);
+  }
+
   // Insert the entry into the stack.
   uint8_t position = cursor.word;
-  for(uint8_t i = HISTORY_SIZE-1; i != position; i--){
+  for(uint8_t i = HISTORY_SIZE-1; i > position; i--){
     stack[i]->copy(stack[i-1]);
   }
   stack[position]->copy(entry);
@@ -279,8 +285,8 @@ bool History::atEdge(Direction direction){
 
 bool History::isCursorAtLimit(Direction direction){
   if(direction == LEFT){
-    // At the beginning of an entry, and the entry to the left is empty.
-    // return atEdge(LEFT) && getEntryAt(cursor.word+1)->isClear();
+    // TODO if we're ever on an empty entry, is that good enough? Could get rid of the 2nd padding.
+    // But what if we have an empty entry in the middle we haven't deleted yet.
     return getEntryAtCursor()->isClear() && getEntryAt(cursor.word+1)->isClear();
   }
   else if(direction == RIGHT){
