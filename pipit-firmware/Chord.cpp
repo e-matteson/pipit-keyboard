@@ -20,7 +20,6 @@ void Chord::setMode(conf::mode_enum _mode){
 bool Chord::isEmpty() const{
   // Doesn't check the mods, just the current chord bytes.
   // This is important because sendIfEmpty should send mods.
-  // TODO abort after 1st set bit?
   return allZeroes(chord_bytes);
 }
 
@@ -128,24 +127,18 @@ void Chord::setModNospace() {
 }
 
 bool Chord::hasMod(conf::mod_enum mod) const{
-  // return mods[mod];
   return (mods_and_flags >> mod) & 1;
 }
 
 void Chord::setMod(conf::mod_enum mod) {
-  // mods[mod] = 1;
   mods_and_flags |= (1 << mod);
 }
 
 void Chord::unsetMod(conf::mod_enum mod) {
-  // mods[mod] = 0;
   mods_and_flags &= ~(1 << mod);
 }
 
 void Chord::toggleMod(conf::mod_enum mod){
-  // TODO
-  // mods[mod] ^= 1;
-  // return mods[mod];
   mods_and_flags ^= (1 << mod);
 }
 
@@ -154,7 +147,7 @@ bool Chord::getFlagCycleCapital() const {
 }
 
 void Chord::toggleFlagCycleCapital() {
-  mods_and_flags ^= (1 >> 15);
+  mods_and_flags ^= (1 << 15);
 }
 
 void Chord::extractPlainMods(){
