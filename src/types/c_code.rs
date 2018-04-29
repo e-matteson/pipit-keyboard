@@ -24,9 +24,13 @@ pub enum CTree {
         name: CCode,
         value: CCode,
     },
-    Ifdef {
+    DefineIf {
         name: CCode,
         value: bool,
+    },
+    Ifndef {
+        conditional: CCode,
+        contents: Box<CTree>,
     },
     Var {
         name: CCode,

@@ -155,7 +155,7 @@ impl OptionsConfig {
                 name: "WORD_SPACE_POSITION".to_c(),
                 value: self.word_space_position.to_c(),
             },
-            CTree::Ifdef {
+            CTree::DefineIf {
                 name: self.board_name.to_c(),
                 value: true,
             },
@@ -177,11 +177,11 @@ impl OptionsConfig {
                 subarray_type: "uint8_t".to_c(),
                 is_extern: true,
             },
-            CTree::Ifdef {
+            CTree::DefineIf {
                 name: "ENABLE_LED_TYPING_FEEDBACK".to_c(),
                 value: self.enable_led_typing_feedback,
             },
-            CTree::Ifdef {
+            CTree::DefineIf {
                 name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
                 value: self.enable_audio_typing_feedback,
             },
@@ -241,11 +241,11 @@ impl OptionsConfig {
                 name: "NUM_RGB_LED_PINS".to_c(),
                 value: num_rgb_led_pins.to_c(),
             },
-            CTree::Ifdef {
+            CTree::DefineIf {
                 name: "ENABLE_RGB_LED".to_c(),
                 value: enable_rgb_led,
             },
-            CTree::Ifdef {
+            CTree::DefineIf {
                 name: "HAS_BATTERY".to_c(),
                 value: has_battery,
             },

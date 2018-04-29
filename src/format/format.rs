@@ -29,11 +29,15 @@ impl CTree {
                 ref name,
                 ref value,
             } => format_define(name, value),
-            CTree::Ifdef { ref name, value } => if value {
+            CTree::DefineIf { ref name, value } => if value {
                 format_define(name, &CCode::new())
             } else {
                 CFiles::new()
             },
+            CTree::Ifndef {
+                ref conditional,
+                ref contents,
+            } => format_ifndef(conditional, contents)?,
             CTree::Var {
                 ref name,
                 ref value,
@@ -86,7 +90,8 @@ impl CTree {
             | CTree::LiteralC(..)
             | CTree::Group(..)
             | CTree::Define { .. }
-            | CTree::Ifdef { .. }
+            | CTree::DefineIf { .. }
+            | CTree::Ifndef { .. }
             | CTree::Var { .. }
             | CTree::Array { .. }
             | CTree::CompoundArray { .. }
@@ -218,6 +223,17 @@ fn format_define(name: &CCode, value: &CCode) -> CFiles {
 
 fn format_include(path: &CCode) -> CFiles {
     CFiles::with_h(&format!("#include {}\n", path).to_c())
+}
+
+fn format_ifndef(
+    conditional: &CCode,
+    contents: &Box<CTree>,
+) -> Result<CFiles, Error> {
+    let mut f = CFiles::new();
+    f += CFiles::with_h(&format!("\n#ifndef {}\n", conditional));
+    f += contents.format()?;
+    f += CFiles::with_h(&format!("#endif // ifndef {}\n\n", conditional));
+    Ok(f)
 }
 
 fn format_include_guard(
