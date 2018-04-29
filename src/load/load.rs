@@ -39,11 +39,17 @@ impl AllData {
             .load_chords(&settings.options)
             .context("Failed to load chords")?;
 
-        all_data.load_plains(&settings);
+        all_data
+            .load_plains(&settings)
+            .context("Failed to load plain keys")?;
 
-        all_data.load_macros(&settings);
+        all_data
+            .load_macros(&settings)
+            .context("Failed to load macros")?;
 
-        all_data.load_plain_mods(&settings);
+        all_data
+            .load_plain_mods(&settings)
+            .context("Failed to load plain mods")?;
 
         all_data.load_word_mods(&settings);
 
@@ -54,9 +60,13 @@ impl AllData {
             .load_word_list(&settings)
             .context("Failed to load dictionary")?;
 
-        all_data.load_commands(&settings);
+        all_data
+            .load_commands(&settings)
+            .context("Failed to load commands")?;
 
-        all_data.set_huffman_table();
+        all_data
+            .set_huffman_table()
+            .context("Failed to make table of huffman encodings")?;
 
         Ok(all_data)
     }
@@ -64,7 +74,8 @@ impl AllData {
     fn load_modes(&mut self, settings: &Settings) -> Result<(), Error> {
         // TODO map?
         for (name, info) in &settings.modes {
-            self.add_mode(name, info)?;
+            self.add_mode(name, info)
+                .with_context(|_| format!("Failed to load mode: '{}'", name))?;
         }
         Ok(())
     }
@@ -85,18 +96,19 @@ impl AllData {
         Ok(())
     }
 
-    fn load_macros(&mut self, settings: &Settings) {
-        self.add_sequences(SeqType::Macro, &settings.macros);
+    fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
+        self.add_sequences(SeqType::Macro, &settings.macros)
     }
 
-    fn load_plains(&mut self, settings: &Settings) {
-        self.add_sequences(SeqType::Plain, &settings.plain_keys);
+    fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
+        self.add_sequences(SeqType::Plain, &settings.plain_keys)
     }
 
-    fn load_plain_mods(&mut self, settings: &Settings) {
+    fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {
         for (name, seq) in &settings.plain_modifiers {
-            self.add_plain_mod(name, seq);
+            self.add_plain_mod(name, seq)?;
         }
+        Ok(())
     }
 
     fn load_word_mods(&mut self, settings: &Settings) {
@@ -111,17 +123,22 @@ impl AllData {
         }
     }
 
-    fn load_commands(&mut self, settings: &Settings) {
+    fn load_commands(&mut self, settings: &Settings) -> Result<(), Error> {
         // TODO use set sequences, and then process after?
         for name in &settings.commands {
-            self.add_command(name);
+            self.add_command(name).with_context(|_| {
+                format!("Failed to load command: '{}'", name)
+            })?;
         }
+        Ok(())
     }
 
     fn load_word_list(&mut self, settings: &Settings) -> Result<(), Error> {
         for kmap in &self.get_kmaps_with_words() {
             for info in &settings.dictionary {
-                self.add_word(info.to_owned(), kmap)?
+                self.add_word(info.to_owned(), kmap).with_context(|_| {
+                    format!("Failed to add word: {}", info.word)
+                })?
             }
         }
         Ok(())

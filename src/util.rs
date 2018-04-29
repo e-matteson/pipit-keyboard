@@ -22,6 +22,11 @@ fn bools_to_u8(v: &[bool]) -> u8 {
 }
 
 pub fn usize_to_u8(input: usize) -> Result<u8, Error> {
+    ensure_u8(input)?;
+    Ok(input as u8)
+}
+
+pub fn ensure_u8(input: usize) -> Result<(), Error> {
     let truncated = input as u8;
     if input != (truncated as usize) {
         Err(OutOfRangeErr {
@@ -31,10 +36,15 @@ pub fn usize_to_u8(input: usize) -> Result<u8, Error> {
             max: u8::max_value() as usize,
         })?;
     }
-    Ok(truncated)
+    Ok(())
 }
 
 pub fn usize_to_u16(input: usize) -> Result<u16, Error> {
+    ensure_u16(input)?;
+    Ok(input as u16)
+}
+
+pub fn ensure_u16(input: usize) -> Result<(), Error> {
     let truncated = input as u16;
     if input != (truncated as usize) {
         Err(OutOfRangeErr {
@@ -44,5 +54,5 @@ pub fn usize_to_u16(input: usize) -> Result<u16, Error> {
             max: u16::max_value() as usize,
         })?;
     }
-    Ok(truncated)
+    Ok(())
 }

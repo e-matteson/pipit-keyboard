@@ -1,7 +1,7 @@
 use time::*;
 use std::collections::BTreeMap;
 
-use util::{bools_to_bytes, usize_to_u8};
+use util::bools_to_bytes;
 use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyPress, KmapPath,
             Name, SeqType, Sequence, ToC};
 
@@ -48,6 +48,14 @@ impl AllData {
 
     fn render_modes(&self) -> Result<CTree, Error> {
         let mut g = Vec::new();
+
+        g.push(CTree::Define {
+            name: "MAX_KEYS_IN_SEQUENCE".to_c(),
+            // We should have already checked whether any sequences are too
+            // long for the firmware to handle when they were first added.
+            value: self.get_max_uncompressed_seq_length().to_c(),
+        });
+
         let (tree, kmap_struct_names) = self.render_kmaps()?;
         g.push(tree);
 
@@ -316,9 +324,7 @@ impl KeyPress {
         // There must be a key following the mod(s), so that we know when the
         // entry ends. If a keypress has a mod but no key,
         // use a blank dummy value for the key.
-
         bits.extend(table.bits(&self.key_or_blank())?);
-
         Ok(bits)
     }
 }

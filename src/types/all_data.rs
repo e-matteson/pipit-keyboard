@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use std::clone::Clone;
 use std::path::PathBuf;
 
+use util::ensure_u8;
+
 use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyPress, KmapPath,
             ModeInfo, ModeName, Name, SeqType, Sequence, TutorData,
             WordBuilder, WordConfig};
@@ -71,7 +73,7 @@ impl AllData {
         Ok(())
     }
 
-    pub fn add_command(&mut self, entry: &Name) {
+    pub fn add_command(&mut self, entry: &Name) -> Result<(), Error> {
         // Commands are a single byte code, not an actual key sequence.
         // But we'll store each one as a KeyPress for convenience.
         let mut fake_seq_with_command_code = Sequence::new();
@@ -79,7 +81,7 @@ impl AllData {
         fake_seq_with_command_code
             .push(KeyPress::new_fake(&entry.to_uppercase()));
 
-        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code);
+        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code)
     }
 
     pub fn add_word(
@@ -93,7 +95,7 @@ impl AllData {
             kmap: kmap,
             all_data: self,
         }.finalize()?;
-        self.add_sequence(SeqType::Word, &word.name, &word.seq);
+        self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
         self.add_chord(&word.name, &word.chord, kmap)?;
         if word.chord.anagram_num > self.highest_anagram_num {
             self.highest_anagram_num = word.chord.anagram_num;
@@ -101,13 +103,17 @@ impl AllData {
         Ok(())
     }
 
-    pub fn add_plain_mod<T>(&mut self, name: &Name, seq: &T)
+    pub fn add_plain_mod<T>(
+        &mut self,
+        name: &Name,
+        seq: &T,
+    ) -> Result<(), Error>
     where
         T: Into<Sequence> + Clone,
     {
         // TODO check if sequence is valid! length 1, no key
         self.plain_mods.push(name.to_owned());
-        self.add_sequence(SeqType::Plain, name, seq);
+        self.add_sequence(SeqType::Plain, name, seq)
     }
 
     pub fn add_word_mod(&mut self, name: &Name) {
@@ -148,26 +154,38 @@ impl AllData {
         Ok(())
     }
 
-    fn add_sequence<T>(&mut self, seq_type: SeqType, name: &Name, seq: &T)
+    fn add_sequence<T>(
+        &mut self,
+        seq_type: SeqType,
+        name: &Name,
+        seq: &T,
+    ) -> Result<(), Error>
     where
         T: Into<Sequence> + Clone,
     {
+        let seq = seq.to_owned().into();
+        ensure_u8(seq.len()).with_context(|_| {
+            format!("Sequence contains too many keypresses: '{}'", name)
+        })?;
         self.sequences
             .entry(seq_type)
             .or_insert_with(BTreeMap::new)
-            .insert(name.to_owned(), seq.to_owned().into());
+            .insert(name.to_owned(), seq);
+        Ok(())
     }
 
     pub fn add_sequences<T>(
         &mut self,
         seq_type: SeqType,
         seqs: &BTreeMap<Name, T>,
-    ) where
+    ) -> Result<(), Error>
+    where
         T: Into<Sequence> + Clone,
     {
         for (name, seq) in seqs {
-            self.add_sequence(seq_type, name, seq);
+            self.add_sequence(seq_type, name, seq)?;
         }
+        Ok(())
     }
 
     fn get_sequences(
@@ -286,11 +304,13 @@ impl AllData {
         self.highest_anagram_num.0 + 1
     }
 
-    pub fn set_huffman_table(&mut self) {
+    pub fn set_huffman_table(&mut self) -> Result<(), Error> {
         if self.huffman_table.is_some() {
             panic!("huffman table was already set once");
         }
-        self.huffman_table = Some(HuffmanTable::new(self.get_all_keypresses()));
+        self.huffman_table =
+            Some(HuffmanTable::new(self.get_all_keypresses())?);
+        Ok(())
     }
 
     pub fn huffman_table(&self) -> &HuffmanTable {
@@ -308,6 +328,17 @@ impl AllData {
             }
         }
         v
+    }
+
+    pub fn get_max_uncompressed_seq_length(&self) -> usize {
+        let mut max_length = 0;
+        for seq_type in self.sequences.keys() {
+            for (_, seq) in self.get_sequences(&seq_type).expect("bad SeqType")
+            {
+                max_length = max_length.max(seq.len())
+            }
+        }
+        max_length
     }
 
     fn get_all_names(&self) -> Vec<Name> {

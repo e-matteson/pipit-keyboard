@@ -3,7 +3,8 @@ use std::collections::BTreeMap;
 use std::collections::binary_heap::BinaryHeap;
 
 use types::{CCode, KeyPress, ToC};
-use types::errors::LookupErr;
+use types::errors::{LookupErr, OutOfRangeErr};
+use failure::{Error, ResultExt};
 
 #[derive(Debug, Clone)]
 pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);
@@ -18,7 +19,8 @@ pub struct HuffmanEntry {
 enum HuffmanNode {
     Leaf {
         count: usize,
-        key: (CCode, bool),
+        key: CCode,
+        is_mod: bool,
     },
     Branch {
         left: Box<HuffmanNode>,
@@ -27,13 +29,13 @@ enum HuffmanNode {
 }
 
 impl HuffmanTable {
-    pub fn new(keys: Vec<KeyPress>) -> HuffmanTable {
+    pub fn new(keys: Vec<KeyPress>) -> Result<HuffmanTable, Error> {
         assert!(!keys.is_empty());
         let counts = count(keys);
-        let tree = make_tree(counts).expect("failed to get huffman tree");
+        let tree = make_tree(counts).expect("failed to make huffman tree");
         let mut map = BTreeMap::new();
-        make_codes(&tree, Vec::new(), &mut map);
-        HuffmanTable(map)
+        make_codes(&tree, Vec::new(), &mut map)?;
+        Ok(HuffmanTable(map))
     }
 
     pub fn bits(&self, key: &CCode) -> Result<Vec<bool>, LookupErr> {
@@ -81,11 +83,33 @@ impl PartialOrd for HuffmanNode {
     }
 }
 
+impl HuffmanEntry {
+    fn new(bits: Vec<bool>, is_mod: bool) -> Result<HuffmanEntry, Error> {
+        // When each huffman code is stored as a uint32_t, this check will
+        // matter
+        const MAX_LEN: usize = 32;
+        let len = bits.len();
+
+        if len > MAX_LEN {
+            Err(OutOfRangeErr {
+                name: "huffman code length".into(),
+                value: len,
+                min: 0,
+                max: MAX_LEN,
+            })?;
+        }
+        Ok(HuffmanEntry {
+            bits: bits,
+            is_mod: is_mod,
+        })
+    }
+}
+
 fn make_codes(
     node: &HuffmanNode,
     prefix: Vec<bool>,
     out: &mut BTreeMap<CCode, HuffmanEntry>,
-) {
+) -> Result<(), Error> {
     match node {
         HuffmanNode::Branch {
             ref left,
@@ -93,29 +117,32 @@ fn make_codes(
         } => {
             let mut left_prefix = prefix.clone();
             left_prefix.push(false);
-            make_codes(&left, left_prefix, out);
+            make_codes(&left, left_prefix, out)?;
 
             let mut right_prefix = prefix;
             right_prefix.push(true);
-            make_codes(&right, right_prefix, out);
+            make_codes(&right, right_prefix, out)?;
         }
-        HuffmanNode::Leaf { ref key, .. } => {
+        HuffmanNode::Leaf {
+            ref key, is_mod, ..
+        } => {
             out.insert(
-                key.0.to_owned(),
-                HuffmanEntry {
-                    bits: prefix,
-                    is_mod: key.1,
-                },
+                key.to_owned(),
+                HuffmanEntry::new(prefix, *is_mod).with_context(|_| {
+                    format!("Failed to make huffman code for: '{}'", key)
+                })?,
             );
         }
     }
+    Ok(())
 }
 
 fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
     let mut queue = BinaryHeap::new();
     for (key, (count, is_mod)) in counts {
         queue.push(HuffmanNode::Leaf {
-            key: (key, is_mod),
+            key: key,
+            is_mod: is_mod,
             count: count,
         });
     }

@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
-use util::{usize_to_u16, usize_to_u8};
+use util::{ensure_u8, usize_to_u16, usize_to_u8};
 use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
             SeqType, Sequence, ToC};
 
-use failure::Error;
+use failure::{Error, ResultExt};
 
 type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
 // type ChordMap = BTreeMap<Name, Chord>;
@@ -152,11 +152,13 @@ impl<'a> KmapBuilder<'a> {
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
             let lookup_struct = LookupOfLength {
-                sequence_bit_length: usize_to_u8(info.length)?,
-                num_chords: usize_to_u16(names.len())?,
                 chords: chords_name.clone(),
                 sequences: seqs_name.clone(),
                 anagram_number: info.anagram,
+                num_chords: usize_to_u16(names.len()).with_context(|_| {
+                    format!("Too many chords in '{}'", struct_name,)
+                })?,
+                sequence_bit_length: usize_to_u8(info.length)?,
             };
 
             g.push(CTree::Array {
@@ -189,11 +191,12 @@ impl<'a> KmapBuilder<'a> {
             self.seq_maps[&seq_type].keys().collect();
 
         for &name in names_in_kmap.intersection(&names_of_type) {
-            let info = LenAndAnagram {
-                length: self.seq_maps[&seq_type][name]
-                    .formatted_length_in_bits(&self.huffman_table)?,
-                anagram: self.chord_map[name].anagram_num,
-            };
+            let info =
+                LenAndAnagram::new(
+                    self.seq_maps[&seq_type][name]
+                        .formatted_length_in_bits(&self.huffman_table)?,
+                    self.chord_map[name].anagram_num,
+                ).with_context(|_| format!("Failed to render '{}'", name))?;
 
             grouped_names
                 .entry(info)
@@ -201,5 +204,19 @@ impl<'a> KmapBuilder<'a> {
                 .push(name.to_owned());
         }
         Ok(grouped_names)
+    }
+}
+
+impl LenAndAnagram {
+    fn new(
+        bit_length: usize,
+        anagram: AnagramNum,
+    ) -> Result<LenAndAnagram, Error> {
+        ensure_u8(bit_length).context("Compressed sequence is too long")?;
+
+        Ok(LenAndAnagram {
+            length: bit_length,
+            anagram: anagram,
+        })
     }
 }
