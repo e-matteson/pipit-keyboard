@@ -2,6 +2,7 @@ use std;
 use std::collections::BTreeMap;
 use std::collections::binary_heap::BinaryHeap;
 
+use util::ensure_u8;
 use types::{CCode, KeyPress, ToC};
 use types::errors::{LookupErr, OutOfRangeErr};
 use failure::{Error, ResultExt};
@@ -35,6 +36,8 @@ impl HuffmanTable {
         let tree = make_tree(counts).expect("failed to make huffman tree");
         let mut map = BTreeMap::new();
         make_codes(&tree, Vec::new(), &mut map)?;
+        ensure_u8(map.len())
+            .context("Huffman table contains too many encodings")?;
         Ok(HuffmanTable(map))
     }
 
@@ -92,7 +95,7 @@ impl HuffmanEntry {
 
         if len > MAX_LEN {
             Err(OutOfRangeErr {
-                name: "huffman code length".into(),
+                name: "huffman encoding length".into(),
                 value: len,
                 min: 0,
                 max: MAX_LEN,
@@ -129,7 +132,7 @@ fn make_codes(
             out.insert(
                 key.to_owned(),
                 HuffmanEntry::new(prefix, *is_mod).with_context(|_| {
-                    format!("Failed to make huffman code for: '{}'", key)
+                    format!("Failed to make huffman encoding for: '{}'", key)
                 })?,
             );
         }
