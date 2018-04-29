@@ -106,7 +106,11 @@ anagram_modifiers:
   - mod_anagram_2
 
 # Add new macro key sequences here!
+# If they don't contain alt, ctrl, or gui, you can just write out the sequence
+# in quotes. If they do contain these modifiers, you'll need to manually specify
+# the key and modifiers sent during each press.
 macros:
+  macro_email: "me@example.com"
   macro_save_as:
     - {key: "KEY_S", mods: ["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}
   macro_vim_save:
@@ -147,21 +151,6 @@ macros:
     - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_LEFT"}
-  macro_email:
-    - {key: "KEY_M"}
-    - {key: "KEY_E"}
-    - {key: "KEY_2", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_X"}
-    - {key: "KEY_A"}
-    - {key: "KEY_M"}
-    - {key: "KEY_P"}
-    - {key: "KEY_L"}
-    - {key: "KEY_E"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_C"}
-    - {key: "KEY_O"}
-    - {key: "KEY_M"}
   macro_if_c:
     - {key: "KEY_I"}
     - {key: "KEY_F"}

@@ -1,10 +1,14 @@
 // A bunch of small, miscellaneous types that don't deserve their own files
 
 use std::iter;
-use std::fmt::{self, Debug};
 use std::slice::Iter;
+use std::fmt::{self, Debug};
 use std::string::ToString;
 use std::collections::BTreeMap;
+
+use std::str::FromStr;
+
+use unicode_segmentation::UnicodeSegmentation;
 
 use types::{CCode, Chord, KeyPress, ToC, Validate};
 use types::errors::*;
@@ -65,8 +69,7 @@ pub struct ModeName(pub String);
 // #[serde(finalize = "Name::sanitize")]
 pub struct Name(pub String);
 
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone)]
 pub struct Sequence(pub Vec<KeyPress>);
 
 #[derive(Debug, Clone)]
@@ -341,8 +344,7 @@ impl fmt::Debug for Name {
     }
 }
 
-//////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////
 impl Sequence {
     pub fn new() -> Sequence {
         Sequence(Vec::new())
@@ -378,6 +380,16 @@ impl Sequence {
     }
 }
 
+impl FromStr for Sequence {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let presses: Result<Vec<_>, Self::Err> =
+            s.graphemes(true).map(|c| KeyPress::from_str(c)).collect();
+        Ok(Sequence(presses?))
+    }
+}
+
 impl Validate for Sequence {
     fn validate(&self) -> Result<(), Error> {
         for keypress in &self.0 {
@@ -394,15 +406,6 @@ impl From<KeyPress> for Sequence {
         s
     }
 }
-
-// impl From<BTreeMap<Name, KeyPress>> for BTreeMap<Name, Sequence> {
-//     fn from(kp_map: BTreeMap<Name, KeyPress>) -> Self {
-//         kp_map.iter()
-//             .map(|(name, keypress)|
-//                  (name.to_owned(), Sequence::from(keypress.to_owned())))
-//             .collect()
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 

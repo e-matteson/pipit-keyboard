@@ -10,6 +10,7 @@ extern crate cursive;
 extern crate itertools;
 extern crate natord;
 extern crate ron;
+extern crate serde;
 extern crate serde_yaml;
 extern crate svg;
 extern crate time;

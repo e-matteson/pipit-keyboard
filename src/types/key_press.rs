@@ -219,23 +219,55 @@ impl FromStr for KeyPress {
 
     fn from_str(character_string: &str) -> Result<Self, Self::Err> {
         let character = to_single_char(character_string)?;
+        let shift = Some(vec!["MODIFIERKEY_SHIFT".to_c()]);
         if character.is_alphanumeric() {
             return Ok(KeyPress {
                 key: Some(format!("KEY_{}", character.to_uppercase()).to_c()),
                 mods: if character.is_uppercase() {
-                    Some(vec!["MODIFIERKEY_SHIFT".to_c()])
+                    shift
                 } else {
                     None
                 },
             });
         }
-
+        // TODO share info with plain_keys in settings?
+        // Want it to be visible in settings, as an example of how to write
+        // macros manually. And don't want weird order dependencies in
+        // deserializing settings.
         let (key, mods) = match character {
             ' ' => ("KEY_SPACE", None),
-            '<' => ("KEY_BACKSPACE", None),
-            '\'' => ("KEY_QUOTE", None),
             '.' => ("KEY_PERIOD", None),
             ',' => ("KEY_COMMA", None),
+            '&' => ("KEY_7", shift),
+            '*' => ("KEY_8", shift),
+            '@' => ("KEY_2", shift),
+            '\\' => ("KEY_BACKSLASH", None),
+            '!' => ("KEY_1", shift),
+            '^' => ("KEY_6", shift),
+            ':' => ("KEY_SEMICOLON", shift),
+            '$' => ("KEY_4", shift),
+            '"' => ("KEY_QUOTE", shift),
+            '=' => ("KEY_EQUAL", None),
+            '`' => ("KEY_TILDE", None),
+            '~' => ("KEY_TILDE", shift),
+            '#' => ("KEY_3", shift),
+            '<' => ("KEY_COMMA", shift),
+            '[' => ("KEY_LEFT_BRACE", None),
+            '{' => ("KEY_LEFT_BRACE", shift),
+            '(' => ("KEY_9", shift),
+            '-' => ("KEY_MINUS", None),
+            '%' => ("KEY_5", shift),
+            '|' => ("KEY_BACKSLASH", shift),
+            '+' => ("KEY_EQUAL", shift),
+            '?' => ("KEY_SLASH", shift),
+            '\'' => ("KEY_QUOTE", None),
+            '>' => ("KEY_PERIOD", shift),
+            ']' => ("KEY_RIGHT_BRACE", None),
+            '}' => ("KEY_RIGHT_BRACE", shift),
+            ')' => ("KEY_0", shift),
+            ';' => ("KEY_SEMICOLON", None),
+            '/' => ("KEY_SLASH", None),
+            '_' => ("KEY_MINUS", shift),
             _ => Err(BadValueErr {
                 thing: "character".into(),
                 value: character.to_string(),

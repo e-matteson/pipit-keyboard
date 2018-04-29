@@ -32,6 +32,7 @@ fn run() -> Result<(), Error> {
     all_data
         .save_as("auto_config")
         .context("Failed to save configuration")?;
+
     // let tutor_data = all_data.get_tutor_data()?;
     // CheatSheet::from_yaml("settings/cheatsheet_full.yaml", &tutor_data)
     //     .context("Failed to make cheatsheet")?

@@ -1,11 +1,14 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::fmt;
+use std::str::FromStr;
+use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
 
 use types::{CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
             ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
             Validate, WordConfig};
 
-// use types::errors::*;
+use types::errors::print_error;
 use failure::{Error, ResultExt};
 
 fn default_output_dir() -> PathBuf {
@@ -289,6 +292,53 @@ impl OptionsConfig {
             }
         }
         order
+    }
+}
+
+impl<'de> Deserialize<'de> for Sequence {
+    fn deserialize<D>(deserializer: D) -> Result<Sequence, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // We create a `Visitor` type, with one method for each data type
+        // we support.  The deserializer will call the method corresponding
+        // to the data that's actually in the file.
+        struct SequenceVisitor;
+
+        impl<'de> Visitor<'de> for SequenceVisitor {
+            type Value = Sequence;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence of keypresses")
+            }
+
+            // The deserializer found a string, so handle it.
+            fn visit_str<E>(self, value: &str) -> Result<Sequence, E>
+            where
+                E: de::Error,
+            {
+                Sequence::from_str(value).map_err(|error| {
+                    // TODO figure out a proper way to get failure's error info
+                    // into de::Error
+                    print_error(error);
+                    de::Error::custom("invalid sequence string")
+                })
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Vec::new();
+
+                while let Some(value) = seq.next_element()? {
+                    values.push(value)
+                }
+
+                Ok(Sequence(values))
+            }
+        }
+        deserializer.deserialize_seq(SequenceVisitor)
     }
 }
 
