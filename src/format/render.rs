@@ -360,14 +360,13 @@ pub fn wrap_intro(
         path: "<Arduino.h>".to_c(),
     });
     guard_group.push(CTree::Include {
-        path: "\"keycodes.h\"".to_c(),
-    });
-    guard_group.push(CTree::Include {
         path: "\"structs.h\"".to_c(),
     });
     guard_group.push(CTree::LiteralH(
         "typedef void (*voidFuncPtr)(void);\n".to_c(),
     ));
+
+    guard_group.push(render_keycode_definitions());
 
     guard_group.push(CTree::Namespace {
         name: "conf".to_c(),
@@ -427,4 +426,28 @@ fn make_debug_macros() -> CTree {
     s += "#define DEBUG2_LN(msg) Serial.println(msg)\n";
     s += "#endif\n\n";
     CTree::LiteralH(CCode(s))
+}
+
+fn render_keycode_definitions() -> CTree {
+    let keycodes = KeyPress::defined_keycodes();
+    let example = keycodes
+        .keys()
+        .nth(0)
+        .expect("KeyPress::defined_keycodes() is empty!")
+        .to_owned();
+
+    let keycode_definitions = CTree::Group(
+        keycodes
+            .iter()
+            .map(|(name, value)| CTree::Define {
+                name: name.to_owned(),
+                value: value.to_owned(),
+            })
+            .collect(),
+    );
+
+    CTree::Ifndef {
+        conditional: example,
+        contents: Box::new(keycode_definitions),
+    }
 }

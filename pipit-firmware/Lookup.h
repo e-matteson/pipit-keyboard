@@ -2,7 +2,6 @@
 #define LOOKUP_H_
 
 #include <Arduino.h>
-#include "keycodes.h"
 #include "auto_config.h"
 #include "conf.h"
 #include "Chord.h"

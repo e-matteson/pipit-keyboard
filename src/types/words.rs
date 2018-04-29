@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::str::FromStr;
+use unicode_segmentation::UnicodeSegmentation;
 
 use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
 use types::errors::*;
@@ -143,12 +145,8 @@ impl<'a> WordBuilder<'a> {
 
     fn make_sequence(&self) -> Result<Sequence, Error> {
         let mut seq = Sequence::new();
-        for letter in self.info.seq_spelling().chars() {
-            let key_press = KeyPress::new(
-                Some(get_key_code_for_seq(letter)?),
-                get_mod_name_for_seq(letter),
-            )?;
-
+        for letter in self.info.seq_spelling().graphemes(true) {
+            let key_press = KeyPress::from_str(&letter.to_string())?;
             seq.push(key_press);
         }
         Ok(seq)
@@ -187,32 +185,6 @@ impl<'a> WordBuilder<'a> {
                 container: "chords".into(),
             }.into()
         })
-    }
-}
-
-fn get_key_code_for_seq(character: char) -> Result<String, Error> {
-    if character.is_alphanumeric() {
-        return Ok(format!("KEY_{}", character.to_uppercase()).to_string());
-    }
-    let s = match character {
-        ' ' => "KEY_SPACE",
-        '<' => "KEY_BACKSPACE",
-        '\'' => "KEY_QUOTE",
-        '.' => "KEY_PERIOD",
-        ',' => "KEY_COMMA",
-        _ => Err(BadValueErr {
-            thing: "character".into(),
-            value: character.to_string(),
-        }).context("character not allowed in word's sequence")?,
-    };
-    Ok(s.into())
-}
-
-fn get_mod_name_for_seq(character: char) -> Option<Vec<String>> {
-    if character.is_uppercase() {
-        Some(vec!["MODIFIERKEY_SHIFT".into()])
-    } else {
-        None
     }
 }
 

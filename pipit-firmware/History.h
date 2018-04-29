@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "auto_config.h"
-#include "keycodes.h"
 #include "Chord.h"
 #include "Entry.h"
 #include "Report.h"
