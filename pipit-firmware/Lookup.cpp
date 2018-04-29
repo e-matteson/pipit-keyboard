@@ -39,7 +39,7 @@ uint8_t Lookup::lookupChord(const Chord* chord, const LookupsOfSeqType* table, K
 /**** Sequence lookup utilities ****/
 
 uint8_t Lookup::readSequence(const uint8_t* seq_lookup,
-                             uint16_t seq_length_in_bits, uint16_t seq_num, Key* keys_out){
+                             uint8_t seq_length_in_bits, uint16_t seq_num, Key* keys_out){
   // Decompress data. Return the number of bytes that were decompressed.
   uint32_t bit_offset = seq_num * seq_length_in_bits;
   bool bits[seq_length_in_bits];
@@ -72,8 +72,8 @@ uint8_t Lookup::readSequence(const uint8_t* seq_lookup,
   return key_index;
 }
 
-void Lookup::getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset) {
-  for(uint16_t i = 0; i < len_bits_out; i++) {
+void Lookup::getBitArray(bool* bits_out, uint8_t len_bits_out, const uint8_t* start, uint32_t bit_offset) {
+  for(uint8_t i = 0; i < len_bits_out; i++) {
     bits_out[i] = bitToBool(start, bit_offset + i);
   }
 }

@@ -1,9 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
-
+use util::{usize_to_u16, usize_to_u8};
 use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
             SeqType, Sequence, ToC};
 
-// use types::errors::LookupErr;
 use failure::Error;
 
 type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
@@ -41,8 +40,8 @@ c_struct!(
 
 c_struct!(
     struct LookupOfLength {
-        sequence_bit_length: usize,
-        num_chords: usize,
+        sequence_bit_length: u8,
+        num_chords: u16,
         chords: CCode,
         sequences: CCode,
         anagram_number: AnagramNum
@@ -153,11 +152,11 @@ impl<'a> KmapBuilder<'a> {
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
             let lookup_struct = LookupOfLength {
-                sequence_bit_length: info.length,
-                anagram_number: info.anagram,
-                num_chords: names.len(),
+                sequence_bit_length: usize_to_u8(info.length)?,
+                num_chords: usize_to_u16(names.len())?,
                 chords: chords_name.clone(),
                 sequences: seqs_name.clone(),
+                anagram_number: info.anagram,
             };
 
             g.push(CTree::Array {
@@ -192,7 +191,7 @@ impl<'a> KmapBuilder<'a> {
         for &name in names_in_kmap.intersection(&names_of_type) {
             let info = LenAndAnagram {
                 length: self.seq_maps[&seq_type][name]
-                    .formatted_length(&self.huffman_table)?,
+                    .formatted_length_in_bits(&self.huffman_table)?,
                 anagram: self.chord_map[name].anagram_num,
             };
 

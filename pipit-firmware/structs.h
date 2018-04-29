@@ -33,7 +33,7 @@
 // };
 
 struct LookupOfLength {
-  const uint16_t sequence_bit_length;
+  const uint8_t sequence_bit_length;
   const uint16_t num_chords;
   const uint8_t* chords;
   const uint8_t* sequences;

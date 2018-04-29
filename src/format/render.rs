@@ -326,27 +326,26 @@ impl KeyPress {
 impl Sequence {
     pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CCode>, Error> {
         // TODO different name for "bytes"?
-        let mut v = Vec::new();
-        for keypress in self.keypresses() {
-            v.extend(keypress.huffman(table)?)
-        }
-
-        Ok(bools_to_bytes(&v)
+        Ok(bools_to_bytes(&self.as_bits(table)?)
             .into_iter()
             .map(|x: u8| x.to_c())
             .collect())
     }
 
-    pub fn formatted_length(
+    pub fn formatted_length_in_bits(
         &self,
         table: &HuffmanTable,
     ) -> Result<usize, Error> {
         // TODO don't compute twice! switch to bitvec
-        let mut v = Vec::new();
+        Ok(self.as_bits(table)?.len())
+    }
+
+    pub fn as_bits(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
+        let mut bits = Vec::new();
         for keypress in self.keypresses() {
-            v.extend(keypress.huffman(table)?)
+            bits.extend(keypress.huffman(table)?)
         }
-        Ok(v.len())
+        Ok(bits)
     }
 }
 

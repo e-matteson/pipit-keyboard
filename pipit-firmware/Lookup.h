@@ -23,9 +23,9 @@ private:
   uint8_t lookupChord(const Chord* chord, const LookupsOfSeqType* table, Key* keys_out);
 
   uint8_t readSequence(const uint8_t* seq_lookup,
-                       uint16_t seq_length_in_bits, uint16_t seq_num, Key* keys_out);
+                       uint8_t seq_length_in_bits, uint16_t seq_num, Key* keys_out);
 
-  void getBitArray(bool* bits_out, uint16_t len_bits_out, const uint8_t* start, uint32_t bit_offset);
+  void getBitArray(bool* bits_out, uint8_t len_bits_out, const uint8_t* start, uint32_t bit_offset);
   bool bitToBool(const uint8_t* address, uint32_t bit_offset);
 
 
