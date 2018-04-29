@@ -156,6 +156,9 @@ plain_keys:
 
 macros:
   # macro_save_as       :  [{key: "KEY_S", mods: ["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
+  # macro_vim_save:
+  #   - ":w"
+  #   - {key: "KEY_ENTER"}
   macro_vim_save:
     - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_W"}
@@ -168,47 +171,19 @@ macros:
     - {key: "KEY_L"}
     - {key: "KEY_S"}
     - {key: "KEY_ENTER"}
-  macro_f_comma:
-    - {key: "KEY_F"}
-    - {key: "KEY_COMMA"}
-  macro_cap_f_comma:
-    - {key: "KEY_F", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA"}
+  macro_f_comma: "f,"
+  macro_cap_f_comma: "F,"
   macro_mx:
     - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
   macro_other_buffer1:
     - {key: "KEY_SPACE"}
     - {key: "KEY_TAB"}
-  macro_other_buffer2:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_B"}
-    - {key: "KEY_2"}
-  macro_other_buffer3:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_B"}
-    - {key: "KEY_3"}
-  macro_other_buffer4:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_B"}
-    - {key: "KEY_4"}
-  macro_next_buffer:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_B"}
-    - {key: "KEY_N"}
-  macro_prev_buffer:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_B"}
-    - {key: "KEY_P"}
-  macro_kill_buffer:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_B"}
-    - {key: "KEY_D"}
+  macro_other_buffer2: " ozb2"
+  macro_other_buffer3: " ozb3"
+  macro_other_buffer4: " ozb4"
+  macro_next_buffer: " bn"
+  macro_prev_buffer: " bp"
+  macro_kill_buffer: " bd"
   macro_in_paren:
     - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
@@ -225,18 +200,10 @@ macros:
     - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_LEFT"}
-  macro_out_paren:
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_out_angle:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_out_brace:
-    - {key: "KEY_LEFT_BRACE"}
-    - {key: "KEY_RIGHT_BRACE"}
-  macro_out_curly:
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+  macro_out_paren: "()"
+  macro_out_angle: "<>"
+  macro_out_brace: "[]"
+  macro_out_curly: "{}"
   macro_in_quote:
     - {key: "KEY_QUOTE"}
     - {key: "KEY_QUOTE"}
@@ -245,45 +212,12 @@ macros:
     - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_LEFT"}
-  macro_right_arrow:
-    - {key: "KEY_MINUS"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_left_arrow:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_MINUS"}
-  macro_this_arrow:
-    - {key: "KEY_T"}
-    - {key: "KEY_H"}
-    - {key: "KEY_I"}
-    - {key: "KEY_S"}
-    - {key: "KEY_MINUS"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_cerr:
-    - {key: "KEY_C"}
-    - {key: "KEY_E"}
-    - {key: "KEY_R"}
-    - {key: "KEY_R"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-  macro_cout:
-    - {key: "KEY_C"}
-    - {key: "KEY_O"}
-    - {key: "KEY_U"}
-    - {key: "KEY_T"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-  macro_endl:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_D"}
-    - {key: "KEY_L"}
+  macro_right_arrow: "->"
+  macro_left_arrow: "<-"
+  macro_this_arrow: "this->"
+  macro_cerr: "cerr << "
+  macro_cout: "cout <<"
+  macro_endl: "<< endl"
   macro_print_ino:
     - {key: "KEY_S", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_E"}
@@ -322,91 +256,19 @@ macros:
     - {key: "KEY_SEMICOLON"}
     - {key: "KEY_LEFT"}
     - {key: "KEY_LEFT"}
-  macro_gmail:
-    - {key: "KEY_E"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_R"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_M"}
-    - {key: "KEY_A"}
-    - {key: "KEY_T"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_S"}
-    - {key: "KEY_O"}
-    - {key: "KEY_N"}
-    - {key: "KEY_2", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_G"}
-    - {key: "KEY_M"}
-    - {key: "KEY_A"}
-    - {key: "KEY_I"}
-    - {key: "KEY_L"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_C"}
-    - {key: "KEY_O"}
-    - {key: "KEY_M"}
-  macro_bmail:
-    - {key: "KEY_E"}
-    - {key: "KEY_V"}
-    - {key: "KEY_A"}
-    - {key: "KEY_N"}
-    - {key: "KEY_MINUS", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_M"}
-    - {key: "KEY_A"}
-    - {key: "KEY_T"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_S"}
-    - {key: "KEY_O"}
-    - {key: "KEY_N"}
-    - {key: "KEY_2", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_B"}
-    - {key: "KEY_R"}
-    - {key: "KEY_O"}
-    - {key: "KEY_W"}
-    - {key: "KEY_N"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_E"}
-    - {key: "KEY_D"}
-    - {key: "KEY_U"}
-  macro_compile:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_M"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_C"}
-  macro_helm_mini:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_B"}
-    - {key: "KEY_B"}
-  macro_helm_imenu:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_I"}
-  macro_find_file:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_F"}
-    - {key: "KEY_F"}
-  macro_proj_find_file:  
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_P"}
-    - {key: "KEY_F"}
-  macro_recentf:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_F"}
-    - {key: "KEY_R"}
-  macro_find_other_file: 
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_F"}
-  macro_del_other_wins:  
+  macro_gmail: "e.r.matteson@gmail.com"
+  macro_bmail: "evan_matteson@brown.edu"
+  macro_compile: " mozc"
+  macro_helm_mini: " bb"
+  macro_helm_imenu: " ozi"
+  macro_find_file: " ff"
+  macro_proj_find_file:  " pf"
+  macro_recentf: " fr"
+  macro_find_other_file: " of"
+  macro_del_other_wins:
     - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_1"}
-  macro_other_win:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_W"}
-    - {key: "KEY_W"}
+  macro_other_win: " ww"
   macro_aspace:
     - {key: "KEY_A"}
     - {key: "KEY_SPACE"}
@@ -425,88 +287,23 @@ macros:
     - {key: "KEY_SPACE"}
     - {key: "KEY_ESC"}
     - {key: "KEY_P"}
-  macro_at_at:
-    - {key: "KEY_2", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_2", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_yank_eol:
-    - {key: "KEY_Y"}
-    - {key: "KEY_4", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_kill_ring:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_R"}
-    - {key: "KEY_Y"}
-  macro_comment:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_C"}
-    - {key: "KEY_L"}
-  macro_org_calendar:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_A"}
-    - {key: "KEY_O"}
-    - {key: "KEY_O"}
-    - {key: "KEY_C"}
-  macro_magit_status:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_G"}
-    - {key: "KEY_S"}
-  macro_org_capture:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_A"}
-    - {key: "KEY_O"}
-    - {key: "KEY_C"}
-  macro_dotspacemacs:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_F"}
-    - {key: "KEY_E"}
-    - {key: "KEY_D"}
-  macro_open_planner:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_P"}
-  macro_open_active:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_U"}
-  macro_open_settings:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_S"}
-  macro_open_dvorak:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_D"}
-  macro_open_starred:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_C"}
-  macro_set_starred:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_Q"}
-  macro_ins_heading:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_Y"}
-    - {key: "KEY_H"}
-  macro_ins_notes:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_Y"}
-    - {key: "KEY_N"}
-  macro_self_dot:
-    - {key: "KEY_S"}
-    - {key: "KEY_E"}
-    - {key: "KEY_L"}
-    - {key: "KEY_F"}
-    - {key: "KEY_PERIOD"}
+  macro_at_at: "@@"
+  macro_yank_eol: "y$"
+  macro_kill_ring: " ry"
+  macro_comment: " cl"
+  macro_org_calendar: " aooc"
+  macro_magit_status: " gs"
+  macro_org_capture: " aoc"
+  macro_dotspacemacs: " fed"
+  macro_open_planner: " opp"
+  macro_open_active: " opu"
+  macro_open_settings: " ops"
+  macro_open_dvorak: " opd"
+  macro_open_starred: " opc"
+  macro_set_starred: " opq"
+  macro_ins_heading: " ozyh"
+  macro_ins_notes: " ozyn"
+  macro_self_dot: "self."
   macro_if_c:
     - {key: "KEY_I"}
     - {key: "KEY_F"}
@@ -637,19 +434,8 @@ macros:
     - {key: "KEY_LEFT"}
     - {key: "KEY_LEFT"}
     - {key: "KEY_LEFT"}
-  macro_lifetime_rs:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE"}
-    - {key: "KEY_A"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_new_rs:
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_N"}
-    - {key: "KEY_E"}
-    - {key: "KEY_W"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
+  macro_lifetime_rs: "<'a>"
+  macro_new_rs: "::new()"
   macro_print_rs:
     - {key: "KEY_P"}
     - {key: "KEY_R"}
@@ -701,43 +487,12 @@ macros:
     - {key: "KEY_UP"}
     - {key: "KEY_END"}
     - {key: "KEY_LEFT"}
-  macro_amperstr_rs:
-    - {key: "KEY_7", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_S"}
-    - {key: "KEY_T"}
-    - {key: "KEY_R"}
-  macro_bang_dollar:
-    - {key: "KEY_1", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_4", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-  macro_hash_bang:
-    - {key: "KEY_3", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_1", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SLASH"}
-    - {key: "KEY_B"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_SLASH"}
-    - {key: "KEY_B"}
-    - {key: "KEY_A"}
-    - {key: "KEY_S"}
-    - {key: "KEY_H"}
-  macro_exit_py:
-    - {key: "KEY_E"}
-    - {key: "KEY_X"}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_3"}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_error_next:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-  macro_error_prev:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_E"}
-    - {key: "KEY_P"}
+  macro_amperstr_rs: "&str"
+  macro_bang_dollar: "!$ "
+  macro_hash_bang: "#!/bin/bash"
+  macro_exit_py: "exit(3)"
+  macro_error_next: " en"
+  macro_error_prev: " ep"
   macro_increment:
     - {key: "KEY_A", mods: ["MODIFIERKEY_CTRL"]}
   macro_decrement:
@@ -751,22 +506,15 @@ macros:
     - {key: "KEY_UP"}
     - {key: "KEY_UP"}
     - {key: "KEY_ENTER"}
-  macro_inbox:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_I"}
+  macro_inbox: " oi"
   macro_zotero_save:
     - {key: "KEY_Z", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
   macro_next_tab:
     - {key: "KEY_TAB", mods: ["MODIFIERKEY_CTRL"]}
   macro_prev_tab:
     - {key: "KEY_TAB", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
-  macro_backslash_n:
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_N"}
-  macro_blackhole:
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_MINUS", mods: ["MODIFIERKEY_SHIFT"]}
+  macro_backslash_n: "\\n"
+  macro_blackhole: "\"_"
   # macro_tex_item:
   #   - {key: "KEY_BACKSLASH"}
   #   - {key: "KEY_I"}
@@ -867,20 +615,9 @@ macros:
     - {key: "KEY_EQUAL"}
     - {key: "KEY_EQUAL"}
     - {key: "KEY_LEFT"}
-  macro_open_scratch:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_B"}
-    - {key: "KEY_S"}
-  macro_open_messages:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_P"}
-    - {key: "KEY_M"}
-  macro_eval:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_E"}
+  macro_open_scratch: " bs"
+  macro_open_messages: " opm"
+  macro_eval: " oze"
   # macro_org_store_link:
   #   - {key: "KEY_SPACE"}
   #   - {key: "KEY_A"}
@@ -891,38 +628,11 @@ macros:
   #   - {key: "KEY_M"}
   #   - {key: "KEY_I"}
   #   - {key: "KEY_L"}
-  macro_org_clock:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_O"}
-    - {key: "KEY_L"}
-  macro_org_tree:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_M"}
-    - {key: "KEY_T", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_T"}
-  macro_org_archive:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_M"}
-    - {key: "KEY_O"}
-    - {key: "KEY_R"}
-  macro_org_someday:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_M"}
-    - {key: "KEY_O"}
-    - {key: "KEY_S"}
-  macro_anagram_1:
-    - {key: "KEY_COMMA"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_A"}
-    - {key: "KEY_N"}
-    - {key: "KEY_A"}
-    - {key: "KEY_G"}
-    - {key: "KEY_R"}
-    - {key: "KEY_A"}
-    - {key: "KEY_M"}
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_1"}
+  macro_org_clock: " ol"
+  macro_org_tree: " mTt"
+  macro_org_archive: " mor"
+  macro_org_someday: " mos"
+  macro_anagram_1: ", anagram: 1"
 
 
 word_modifiers:
