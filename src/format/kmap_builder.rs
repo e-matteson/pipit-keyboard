@@ -1,7 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
-use util::{ensure_u8, usize_to_u16, usize_to_u8};
+use std::ops::BitOr;
+
+use util::usize_to_u16;
 use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
             SeqType, Sequence, ToC};
+use types::errors::OutOfRangeErr;
 
 use failure::{Error, ResultExt};
 
@@ -40,11 +43,12 @@ c_struct!(
 
 c_struct!(
     struct LookupOfLength {
-        sequence_bit_length: u8,
+        seq_bit_len_and_anagram: u16,
+        // sequence_bit_length: u8,
+        // anagram_number: AnagramNum,
         num_chords: u16,
         chords: CCode,
-        sequences: CCode,
-        anagram_number: AnagramNum
+        sequences: CCode
     }
 );
 
@@ -151,15 +155,15 @@ impl<'a> KmapBuilder<'a> {
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
-            let lookup_struct = LookupOfLength {
-                chords: chords_name.clone(),
-                sequences: seqs_name.clone(),
-                anagram_number: info.anagram,
-                num_chords: usize_to_u16(names.len()).with_context(|_| {
-                    format!("Too many chords in '{}'", struct_name,)
-                })?,
-                sequence_bit_length: usize_to_u8(info.length)?,
-            };
+            let lookup_struct = LookupOfLength::new(
+                chords_name.clone(),
+                seqs_name.clone(),
+                names.len(),
+                info.anagram,
+                info.length,
+            ).with_context(|_| {
+                format!("Failed to render lookup: '{}'", struct_name)
+            })?;
 
             g.push(CTree::Array {
                 name: chords_name,
@@ -191,12 +195,11 @@ impl<'a> KmapBuilder<'a> {
             self.seq_maps[&seq_type].keys().collect();
 
         for &name in names_in_kmap.intersection(&names_of_type) {
-            let info =
-                LenAndAnagram::new(
-                    self.seq_maps[&seq_type][name]
-                        .formatted_length_in_bits(&self.huffman_table)?,
-                    self.chord_map[name].anagram_num,
-                ).with_context(|_| format!("Failed to render '{}'", name))?;
+            let info = LenAndAnagram {
+                length: self.seq_maps[&seq_type][name]
+                    .formatted_length_in_bits(&self.huffman_table)?,
+                anagram: self.chord_map[name].anagram_num,
+            };
 
             grouped_names
                 .entry(info)
@@ -207,16 +210,55 @@ impl<'a> KmapBuilder<'a> {
     }
 }
 
-impl LenAndAnagram {
+impl LookupOfLength {
+    // TODO use a builder pattern instead of taking so many unnamed arguments?
     fn new(
-        bit_length: usize,
+        chords: CCode,
+        sequences: CCode,
+        num_chords: usize,
         anagram: AnagramNum,
-    ) -> Result<LenAndAnagram, Error> {
-        ensure_u8(bit_length).context("Compressed sequence is too long")?;
-
-        Ok(LenAndAnagram {
-            length: bit_length,
-            anagram: anagram,
+        seq_bit_len: usize,
+    ) -> Result<LookupOfLength, Error> {
+        Ok(LookupOfLength {
+            num_chords: usize_to_u16(num_chords)
+                .context("Too many chords in lookup struct")?,
+            chords: chords,
+            sequences: sequences,
+            seq_bit_len_and_anagram: LookupOfLength::pack(
+                seq_bit_len,
+                anagram,
+            )?,
         })
     }
+
+    fn pack(seq_bit_len: usize, anagram: AnagramNum) -> Result<u16, Error> {
+        let bits_for_len = 12;
+        let bits_for_anagram = 4;
+
+        assert!(16 == bits_for_anagram + bits_for_len);
+        assert!(
+            AnagramNum::max_allowable() as u32 == max_val(bits_for_anagram)
+        );
+
+        let max_len = max_val(bits_for_len) as usize;
+        if seq_bit_len > max_len {
+            Err(OutOfRangeErr {
+                name: "length of compressed sequence".into(),
+                value: seq_bit_len,
+                min: 0,
+                max: max_len,
+            })?;
+        }
+
+        let packed = (anagram.0 as u16).bitor(
+            usize_to_u16(seq_bit_len)
+                .unwrap()
+                .checked_shl(bits_for_anagram)
+                .expect("failed to pack seq len and anagram"),
+        );
+        Ok(packed)
+    }
+}
+fn max_val(num_bits: u32) -> u32 {
+    2u32.pow(num_bits) - 1
 }

@@ -21,14 +21,15 @@ uint8_t Lookup::lookupChord(const Chord* chord, const LookupsOfSeqType* table, K
   // Otherwise, return 0.
   for(uint32_t lookup_index = 0; lookup_index < table->num_lookups; lookup_index++){
     const LookupOfLength* lookup =  table->lookups[lookup_index];
+
     for(uint16_t chord_index = 0; chord_index < lookup->num_chords; chord_index++){
       // for each entry/chunk:
       // TODO accumulate instead of multiplying, to be faster?
       if(chord->matches(lookup->chords + chord_index*NUM_BYTES_IN_CHORD,
-                        lookup->anagram_number))
+                        lookup->anagram()))
       {
         // Found match!
-        return readSequence(lookup->sequences, lookup->sequence_bit_length, chord_index, keys_out);
+        return readSequence(lookup->sequences, lookup->seq_bit_len(), chord_index, keys_out);
       }
     }
   }

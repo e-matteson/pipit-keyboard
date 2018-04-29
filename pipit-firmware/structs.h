@@ -33,11 +33,15 @@
 // };
 
 struct LookupOfLength {
-  const uint8_t sequence_bit_length;
+  // const uint8_t sequence_bit_length;
+  // const uint8_t anagram_number;
+  const uint16_t seq_bit_len_and_anagram;
   const uint16_t num_chords;
   const uint8_t* chords;
   const uint8_t* sequences;
-  const uint8_t anagram_number;
+
+  uint16_t  seq_bit_len() const ;
+  uint8_t  anagram() const;
 };
 
 struct LookupsOfSeqType {
@@ -52,12 +56,12 @@ struct KmapStruct {
 };
 
 struct ModeStruct {
+  const bool is_gaming;
   const uint8_t num_kmaps;
   const KmapStruct** kmaps;
   const uint8_t** mod_chords;
   const uint8_t** anagram_chords;
   const uint8_t* anagram_mask;
-  const bool is_gaming;
 };
 
 struct HuffmanChar {

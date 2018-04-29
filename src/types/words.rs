@@ -37,7 +37,7 @@ pub struct WordBuilder<'a> {
 impl AnagramNum {
     pub fn max_allowable() -> u8 {
         // This depends on the representation in the lookup table
-        7
+        15
     }
 
     /// Return an iterator over all the anagram numbers from zero to self,
