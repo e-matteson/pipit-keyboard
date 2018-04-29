@@ -240,6 +240,12 @@ impl ToC for u8 {
     }
 }
 
+impl ToC for u32 {
+    fn to_c(self) -> CCode {
+        CCode(self.to_string())
+    }
+}
+
 impl ToC for u16 {
     fn to_c(self) -> CCode {
         CCode(self.to_string())

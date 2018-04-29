@@ -21,9 +21,9 @@ private:
   uint8_t readSequence(const uint8_t* seq_lookup,
                        uint8_t seq_length_in_bits, uint16_t seq_num, Key* keys_out);
 
-  void getBitArray(bool* bits_out, uint8_t len_bits_out, const uint8_t* start, uint32_t bit_offset);
-  bool bitToBool(const uint8_t* address, uint32_t bit_offset);
+  uint32_t getUnalignedCode(uint32_t bit_offset, uint8_t length, const uint8_t* array);
 
+  bool bitToBool(const uint8_t* address, uint32_t bit_offset);
 
   // void printData(const uint8_t* data, uint8_t data_length);
   // void printBinary(uint8_t byte);

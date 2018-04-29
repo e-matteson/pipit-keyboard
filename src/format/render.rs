@@ -252,22 +252,16 @@ impl HuffmanTable {
         let mut initializers = Vec::new();
         for key in self.0.keys() {
             // TODO Don't repeatedly look up key
-            let name = format!("_huffman_bits_{}", key).to_c();
+            let entry = self.get(key)?;
             let init = HuffmanChar {
-                bits: name.clone(),
-                num_bits: self.num_bits(key)?,
+                bits: entry.as_uint32()?,
+                num_bits: entry.len(),
                 key_code: KeyPress::truncate(key),
-                is_mod: self.is_mod(key)?,
+                is_mod: entry.is_mod,
             }.render(CCode::new())
                 .initializer();
 
             initializers.push(init);
-            group.push(CTree::Array {
-                name: name,
-                values: self.as_c_bits(key)?,
-                c_type: "bool".to_c(),
-                is_extern: false,
-            });
         }
 
         group.push(CTree::Array {
@@ -310,8 +304,6 @@ impl KeyPress {
     }
 
     pub fn huffman(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
-        // TODO ensure codes are never longer than 255 bits! Firmware uses
-        // uint8_t
         self.check_non_empty()?;
 
         let mut bits = Vec::new();

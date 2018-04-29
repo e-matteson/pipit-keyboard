@@ -61,8 +61,8 @@ struct ModeStruct {
 };
 
 struct HuffmanChar {
-  const bool* bits;
-  const uint8_t num_bits;
+  const uint32_t bits;
+  const uint8_t num_bits; // actual max is 32, not 255
   const uint8_t key_code;
   const bool is_mod;
 };

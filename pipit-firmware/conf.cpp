@@ -2,13 +2,14 @@
 
 namespace conf {
 
-const HuffmanChar* decode_huffman(const bool* bits, uint8_t length) {
+const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
+  uint32_t mask = makeMask(length);
   for(uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
     if (length != huffman_lookup[i].num_bits) {
       // Can't be a match, wrong length.
       continue;
     }
-    if (are_bools_equal(huffman_lookup[i].bits, bits, length)) {
+    if (areBitsEqual(huffman_lookup[i].bits, bits, mask)) {
       // Success!
       return huffman_lookup + i;
     }
@@ -18,14 +19,19 @@ const HuffmanChar* decode_huffman(const bool* bits, uint8_t length) {
   return 0;
 }
 
-bool are_bools_equal(const bool* a, const bool* b, uint32_t length) {
-  for(uint32_t i = 0; i<length; i++) {
-    if (a[i] != b[i]) {
-      return false;
+  uint32_t makeMask(uint8_t length) {
+    // The first "length" bits are 1, and the rest are 0
+    if(length >= 32) {
+      return ~((uint32_t) 0);
     }
+    return (2 << length) - 1;
   }
-  return true;
+
+
+bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
+  return (a & mask) == (b & mask);
 }
+
 
   const ModeStruct* getMode(mode_enum mode){
     return mode_structs[mode];

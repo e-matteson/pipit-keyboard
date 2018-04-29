@@ -2,7 +2,7 @@ use std;
 use std::collections::BTreeMap;
 use std::collections::binary_heap::BinaryHeap;
 
-use util::ensure_u8;
+use util::{bools_to_u32, ensure_u8};
 use types::{CCode, KeyPress, ToC};
 use types::errors::{LookupErr, OutOfRangeErr};
 use failure::{Error, ResultExt};
@@ -12,8 +12,8 @@ pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);
 
 #[derive(Debug, Clone)]
 pub struct HuffmanEntry {
+    pub is_mod: bool,
     bits: Vec<bool>,
-    is_mod: bool,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -27,6 +27,16 @@ enum HuffmanNode {
         left: Box<HuffmanNode>,
         right: Box<HuffmanNode>,
     },
+}
+
+impl HuffmanEntry {
+    pub fn len(&self) -> usize {
+        self.bits.len()
+    }
+
+    pub fn as_uint32(&self) -> Result<CCode, Error> {
+        Ok(bools_to_u32(&self.bits)?.to_c())
+    }
 }
 
 impl HuffmanTable {
@@ -45,23 +55,11 @@ impl HuffmanTable {
         Ok(self.get(key)?.to_owned().bits)
     }
 
-    fn get(&self, key: &CCode) -> Result<&HuffmanEntry, LookupErr> {
+    pub fn get(&self, key: &CCode) -> Result<&HuffmanEntry, LookupErr> {
         Ok(self.0.get(key).ok_or_else(|| LookupErr {
             key: key.into(),
             container: "huffman code table".into(),
         })?)
-    }
-
-    pub fn as_c_bits(&self, key: &CCode) -> Result<Vec<CCode>, LookupErr> {
-        Ok(self.bits(key)?.into_iter().map(|b| b.to_c()).collect())
-    }
-
-    pub fn num_bits(&self, key: &CCode) -> Result<usize, LookupErr> {
-        Ok(self.get(key)?.bits.len())
-    }
-
-    pub fn is_mod(&self, key: &CCode) -> Result<bool, LookupErr> {
-        Ok(self.get(key)?.is_mod)
     }
 }
 

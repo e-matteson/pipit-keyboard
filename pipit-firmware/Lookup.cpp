@@ -38,33 +38,41 @@ uint8_t Lookup::lookupChord(const Chord* chord, const LookupsOfSeqType* table, K
 
 /**** Sequence lookup utilities ****/
 
-uint8_t Lookup::readSequence(const uint8_t* seq_lookup,
-                             uint8_t seq_length_in_bits, uint16_t seq_num, Key* keys_out){
-  // Decompress data. Return the number of bytes that were decompressed.
-  uint32_t bit_offset = seq_num * seq_length_in_bits;
-  bool bits[seq_length_in_bits];
-  getBitArray(bits, seq_length_in_bits, seq_lookup, bit_offset);
+uint8_t Lookup::readSequence (const uint8_t* seq_lookup,
+                              uint8_t seq_length_in_bits,
+                              uint16_t seq_num,
+                              Key* keys_out)
+{
+  // Decompress huffman-encoded data.
+  // Return the number of bytes that were decompressed.
+  uint32_t start_bit_offset = seq_num * seq_length_in_bits;
 
   uint32_t code_index = 0;
   uint32_t code_length = 1;
   uint32_t key_index = 0;
 
   while (code_index + code_length <= seq_length_in_bits) {
-    const HuffmanChar* huffman = conf::decode_huffman(bits+code_index, code_length);
+    uint32_t code = getUnalignedCode(start_bit_offset+code_index, code_length, seq_lookup);
+
+    const HuffmanChar* huffman = conf::decodeHuffman(code, code_length);
     if (huffman == 0) {
       // Not found! Try with a longer code next time.
       code_length++;
-    } else {
-      // Found! Store the letter and move on to the next code.
-      if (huffman->is_mod) {
-        keys_out[key_index].addMod(huffman->key_code);
-      } else {
-        keys_out[key_index].setKey(huffman->key_code);
-        key_index++;
-      }
-      code_index += code_length;
-      code_length = 1;
+      continue;
     }
+    // Found! Store the decoded key or mod and move on to the next code.
+
+    if (huffman->is_mod) {
+      // Add a mod, and wait for more keys/mods to be added to this keypress in
+      // the next iteration.
+      keys_out[key_index].addMod(huffman->key_code);
+    } else {
+      // Add a key and move on
+      keys_out[key_index].setKey(huffman->key_code);
+      key_index++;
+    }
+    code_index += code_length;
+    code_length = 1;
   }
   if (code_length > 1) {
     DEBUG1_LN("WARNING: unused bits in huffman code");
@@ -72,10 +80,14 @@ uint8_t Lookup::readSequence(const uint8_t* seq_lookup,
   return key_index;
 }
 
-void Lookup::getBitArray(bool* bits_out, uint8_t len_bits_out, const uint8_t* start, uint32_t bit_offset) {
-  for(uint8_t i = 0; i < len_bits_out; i++) {
-    bits_out[i] = bitToBool(start, bit_offset + i);
+uint32_t Lookup::getUnalignedCode(uint32_t bit_offset, uint8_t length, const uint8_t* array) {
+  uint32_t out = 0;
+  for(int16_t i = length-1; i >= 0; i--) {
+    if(bitToBool(array, bit_offset+i)){
+      out |= (1 << i);
+   }
   }
+ return out;
 }
 
 bool Lookup::bitToBool(const uint8_t* address, uint32_t bit_offset) {

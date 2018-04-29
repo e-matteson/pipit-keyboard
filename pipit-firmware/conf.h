@@ -13,8 +13,11 @@ namespace conf {
     ANAGRAM_MOD
   };
 
-  const HuffmanChar* decode_huffman(const bool* bits, uint8_t length);
-  bool are_bools_equal(const bool* a, const bool* b, uint32_t length);
+  const HuffmanChar* decodeHuffman(uint32_t code, uint8_t length);
+
+  bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask);
+
+  uint32_t makeMask(uint8_t length);
 
   const ModeStruct* getMode(mode_enum mode);
   const LookupsOfSeqType* getLookupsOfSeqType(mode_enum mode, seq_type_enum seq_type, uint8_t kmap_num);
