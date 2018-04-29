@@ -1,7 +1,7 @@
 use time::*;
 use std::collections::BTreeMap;
 
-use util::bools_to_bytes;
+use util::{bools_to_bytes, usize_to_u8};
 use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyPress, KmapPath,
             Name, SeqType, Sequence, ToC};
 

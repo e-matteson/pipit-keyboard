@@ -182,7 +182,7 @@ void Pipit::processChord(Chord* chord){
     return;
   };
 
-  Key data[MAX_LOOKUP_DATA_LENGTH];
+  Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
   if(sendIfFound(conf::COMMAND, chord, data)){
@@ -240,7 +240,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
   Report report;
   report.is_gaming = true;
   for(uint8_t i = 0; i < num_switches; i++){
-    Key data[MAX_LOOKUP_DATA_LENGTH];
+    Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* chord = gaming_switches+i;
     if(sendIfFound(conf::COMMAND, chord, data)){
@@ -309,7 +309,7 @@ void Pipit::cycleLastWordCapital(){
 
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
-  Key data[MAX_LOOKUP_DATA_LENGTH];
+  Key data[MAX_KEYS_IN_SEQUENCE];
   if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
     return; // Success
   }
@@ -333,7 +333,7 @@ void Pipit::cycleLastWordNospace(){
 
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
-  Key data[MAX_LOOKUP_DATA_LENGTH];
+  Key data[MAX_KEYS_IN_SEQUENCE];
   if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
     return; // Success
   }
@@ -353,7 +353,7 @@ void Pipit::cycleLastWordAnagram(){
   new_chord.copy(entry->getChord());
   uint8_t original_num = new_chord.getAnagramNum();
 
-  Key data[MAX_LOOKUP_DATA_LENGTH];
+  Key data[MAX_KEYS_IN_SEQUENCE];
   for(uint8_t i = 0; i <= NUM_ANAGRAMS; i++) {
     new_chord.cycleAnagram();
     if(new_chord.getAnagramNum() == original_num){
