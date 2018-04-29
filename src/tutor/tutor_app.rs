@@ -16,7 +16,7 @@ use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
 use tutor::graphic::Graphic;
-use tutor::utils::{load_lessons, offset, set_tutor_data, Slide};
+use tutor::tutor_util::{load_lessons, offset, set_tutor_data, Slide};
 use tutor::copier::Copier;
 
 pub struct TutorApp;

@@ -224,7 +224,7 @@ impl LabeledChord {
 }
 
 pub fn char_to_chord(character: &str) -> Option<Chord> {
-    let (name, is_uppercase) = get_char_name(character)?;
+    let (name, is_uppercase) = get_char_chord_name(character)?;
     let mut chord = get_tutor_data_chord(&name)?;
     if is_uppercase {
         chord.intersect(&get_tutor_data_chord(&Name("mod_shift".into()))?)
@@ -292,7 +292,7 @@ fn to_ascii(character: &str) -> Option<char> {
     }
 }
 
-fn get_char_name(character: &str) -> Option<(Name, bool)> {
+fn get_char_chord_name(character: &str) -> Option<(Name, bool)> {
     if let Some(c) = to_ascii(character) {
         if c.is_alphanumeric() {
             return Some((
@@ -340,14 +340,6 @@ fn get_char_name(character: &str) -> Option<(Name, bool)> {
         _ => return None,
     };
     Some((Name(name), false))
-}
-
-pub fn grapheme_slice<'a>(
-    s: &'a str,
-    start: usize,
-    end: usize,
-) -> Box<Iterator<Item = &'a str> + 'a> {
-    Box::new(s.graphemes(true).skip(start).take(end))
 }
 
 pub fn offset(width1: usize, width2: usize) -> usize {
@@ -507,4 +499,12 @@ fn open_file(path: &PathBuf) -> Result<File, Error> {
 
 fn return_true() -> bool {
     true
+}
+
+pub fn grapheme_slice<'a>(
+    s: &'a str,
+    start: usize,
+    end: usize,
+) -> Box<Iterator<Item = &'a str> + 'a> {
+    Box::new(s.graphemes(true).skip(start).take(end))
 }

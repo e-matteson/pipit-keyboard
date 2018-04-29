@@ -6,7 +6,7 @@ use cursive::theme::{Color, ColorStyle};
 // use types::Chord;
 // use types::errors::*;
 
-use tutor::utils::{Label, LabeledChord, LastChar};
+use tutor::tutor_util::{Label, LabeledChord, LastChar};
 
 pub struct Graphic {
     pub next: Option<LabeledChord>,

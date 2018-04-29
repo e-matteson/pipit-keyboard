@@ -9,9 +9,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use types::errors::BadValueErr;
 use failure::{Error, ResultExt};
-
-use tutor::utils::{grapheme_slice, offset, LabeledChord, LastChar, SlideEntry,
-                   SlideLine};
+use tutor::tutor_util::{grapheme_slice, offset, LabeledChord, LastChar,
+                        SlideEntry, SlideLine};
 
 // TODO compose from CopierLine?
 #[derive(Debug, Clone)]
