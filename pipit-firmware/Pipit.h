@@ -11,12 +11,12 @@
 
 #if defined (TEENSY_LC)
 #if !defined (TEENSYDUINO) || !defined(__MKL26Z64__)
-#error "Wrong board_name, this is not a teensy_lc"
+#error "Wrong board_name, the arduino IDE did not expect a teensy_lc"
 #endif
 
 #elif defined(FEATHER_M0_BLE)
 #ifndef ARDUINO_SAMD_FEATHER_M0
-#error "Wrong board_name, this is not a feather_m0_ble"
+#error "Wrong board_name, the arduino IDE did not expect a feather_m0_ble"
 #endif
 
 #else
