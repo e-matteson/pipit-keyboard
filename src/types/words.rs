@@ -136,10 +136,7 @@ impl<'a> WordBuilder<'a> {
         if self.info.has_alternate_chord() {
             name += &format!("_{}", self.info.chord_spelling());
         }
-        let num = self.info.anagram_num();
-        if num != AnagramNum(0) {
-            name += &format!("_{}", num.0);
-        }
+        name += &format!("_{}", self.info.anagram_num().0);
         Name(name)
     }
 
