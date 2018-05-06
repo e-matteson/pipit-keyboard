@@ -34,7 +34,6 @@ options:
   #     - [        [22,17],[22,18],[22,19],   [5,7],[5,8],[5,9]      ]
 
 
-
 modes:
   default_mode:
     keymaps:
@@ -487,6 +486,102 @@ macros:
     - {key: "KEY_UP"}
     - {key: "KEY_END"}
     - {key: "KEY_LEFT"}
+  macro_fn_rs:
+    - {key: "KEY_F"}
+    - {key: "KEY_N"}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_MINUS"}
+    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_ENTER"}
+    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_UP"}
+    - {key: "KEY_END"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+  macro_fn_self_rs:
+    - {key: "KEY_F"}
+    - {key: "KEY_N"}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_7", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_S"}
+    - {key: "KEY_E"}
+    - {key: "KEY_L"}
+    - {key: "KEY_F"}
+    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_MINUS"}
+    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_ENTER"}
+    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_UP"}
+    - {key: "KEY_END"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+  macro_fn_void_rs:
+    - {key: "KEY_F"}
+    - {key: "KEY_N"}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_ENTER"}
+    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_UP"}
+    - {key: "KEY_END"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+  macro_fn_self_void_rs:
+    - {key: "KEY_F"}
+    - {key: "KEY_N"}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_7", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_S"}
+    - {key: "KEY_E"}
+    - {key: "KEY_L"}
+    - {key: "KEY_F"}
+    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_SPACE"}
+    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_ENTER"}
+    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_UP"}
+    - {key: "KEY_END"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
+    - {key: "KEY_LEFT"}
   macro_amperstr_rs: "&str"
   macro_bang_dollar: "!$ "
   macro_hash_bang: "#!/bin/bash"
@@ -671,6 +766,10 @@ commands:
 dictionary:
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
+  - {word: "vlPFC"}
+  - {word: "dACC"}
+  - {word: "dmPFC"}
+  - {word: "OFC"}
   - {word: "abandon"}
   - {word: "abbrev", anagram: 2}
   - {word: "abc", anagram: 1}
@@ -1233,7 +1332,7 @@ dictionary:
   - {word: "cabinet"}
   - {word: "cable"}
   - {word: "cache", anagram: 2}
-  - {word: "cad"}
+  - {word: "cad", anagram: 1}
   - {word: "cafe", anagram: 1}
   - {word: "cage"}
   - {word: "cake"}
@@ -1865,6 +1964,7 @@ dictionary:
   - {word: "division"}
   - {word: "divorce"}
   - {word: "DIY"}
+  - {word: "dlPFC"}
   - {word: "DNA", anagram: 1}
   - {word: "DNS"}
   - {word: "do"}
@@ -2110,7 +2210,7 @@ dictionary:
   - {word: "excerpt", anagram: 1}
   - {word: "excess"}
   - {word: "exchange", anagram: 1}
-  - {word: "excitat"}
+  - {word: "excitat", anagram: 1}
   - {word: "excitation"}
   - {word: "excitatory"}
   - {word: "excite"}
@@ -2564,6 +2664,8 @@ dictionary:
   - {word: "halloween"}
   - {word: "halo", anagram: 1}
   - {word: "halt"}
+  - {word: "halve"}
+  - {word: "halves"}
   - {word: "ham"}
   - {word: "hammer"}
   - {word: "hamster"}
@@ -2689,6 +2791,7 @@ dictionary:
   - {word: "Huffman"}
   - {word: "hug"}
   - {word: "huge"}
+  - {word: "huh", anagram: 1}
   - {word: "huion"}
   - {word: "hull"}
   - {word: "human"}
@@ -2871,6 +2974,7 @@ dictionary:
   - {word: "item", anagram: 1}
   - {word: "iter", anagram: 2}
   - {word: "iteration", anagram: 1}
+  - {word: "iterator"}
   - {word: "it's"}
   - {word: "its"}
   - {word: "ity"}
@@ -3381,7 +3485,7 @@ dictionary:
   - {word: "movie"}
   - {word: "mozilla"}
   - {word: "mpc"}
-  - {word: "mpd"}
+  - {word: "mpd", anagram: 1}
   - {word: "MPG", anagram: 2}
   - {word: "MPH", anagram: 1}
   - {word: "Mr."}
@@ -3689,7 +3793,7 @@ dictionary:
   - {word: "pay"}
   - {word: "PCB"}
   - {word: "PCI"}
-  # {word: "PC+S"}
+  - {word: "PC+S"}
   - {word: "pdf"}
   - {word: "PDMS"}
   - {word: "peace", anagram: 1}
@@ -3741,6 +3845,7 @@ dictionary:
   - {word: "petite"}
   - {word: "petition"}
   - {word: "petroleum"}
+  - {word: "PFC"}
   - {word: "pgrep", anagram: 2}
   - {word: "phantom"}
   - {word: "pharma"}
@@ -3815,6 +3920,7 @@ dictionary:
   - {word: "plumb"}
   - {word: "plus"}
   - {word: "PM", anagram: 1}
+  - {word: "PMd"}
   - {word: "pocket"}
   - {word: "pod"}
   - {word: "poem"}
@@ -4058,7 +4164,7 @@ dictionary:
   - {word: "raw", anagram: 2}
   - {word: "ray", anagram: 4}
   - {word: "razor"}
-  # {word: "RC+S"}
+  - {word: "RC+S"}
   - {word: "'re"}
   - {word: "reach", anagram: 1}
   - {word: "react", anagram: 1}
@@ -4314,7 +4420,7 @@ dictionary:
   - {word: "scope"}
   - {word: "score"}
   - {word: "scout"}
-  - {word: "scrap"}
+  - {word: "scrap", anagram: 1}
   - {word: "scrape"}
   - {word: "scratch"}
   - {word: "screen"}
@@ -4594,7 +4700,7 @@ dictionary:
   - {word: "sport"}
   - {word: "spot", anagram: 2}
   - {word: "spouse", anagram: 1}
-  - {word: "spray", anagram: 1}
+  - {word: "spray", anagram: 2}
   - {word: "spread"}
   - {word: "spring"}
   - {word: "sprint"}
@@ -4663,6 +4769,7 @@ dictionary:
   - {word: "stimulation", chord: "stimn"}
   - {word: "stimulus"}
   - {word: "stitute", anagram: 1}
+  - {word: "STN"}
   - {word: "stock"}
   - {word: "stole"}
   - {word: "stomach"}
@@ -4795,6 +4902,7 @@ dictionary:
   - {word: "tack", anagram: 1}
   - {word: "tackle"}
   - {word: "tact", anagram: 2}
+  - {word: "tactile"}
   - {word: "tactic"}
   - {word: "tag"}
   - {word: "tail"}
@@ -5136,6 +5244,7 @@ dictionary:
   - {word: "vat"}
   - {word: "vatican"}
   - {word: "vault", anagram: 1}
+  - {word: "VC/VS"}
   - {word: "'ve"}
   - {word: "vec"}
   - {word: "vector"}

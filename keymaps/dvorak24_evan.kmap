@@ -396,6 +396,12 @@ macro_return_rs  macro_amperstr_rs  macro_lifetime_rs  macro_new_rs
   .     .          .     .            .     .            .     .
   ... .*.          ... .*.            ... .*.            ... .*.
 
+macro_fn_rs    macro_fn_self_rs  macro_fn_void_rs   macro_fn_self_void_rs
+.*..   ..*.    .*..   ..*.       ***.   ..*.        ***.   ..*.
+....   ....    ....   ...*       ....   ....        ....   ...*
+  .     .        .     .           .     .            .     .
+  ... .*.        ... .*.           ... .*.            ... .*.
+
 #### c/c++ macros ####
 
 macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
