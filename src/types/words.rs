@@ -234,6 +234,8 @@ fn names_for_chord() -> &'static HashMap<&'static str, Name> {
             (".", "key_period"),
             (",", "key_comma"),
             ("\'", "key_quote"),
+            ("/", "key_slash"),
+            ("+", "key_plus"),
         ].into_iter().map(|(character,name)| (character, name.into())).collect();
     }
     &NAMES_FOR_CHORD

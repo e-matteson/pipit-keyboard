@@ -48,7 +48,7 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
     //  get the key, followed by the modifier.
     key.copy(data+i);
     sendKey(&key);
-    comms->proportionalDelay(data_length, 1);
+    comms->proportionalDelay(data_length, 2);
   }
   sendRelease();
 }
