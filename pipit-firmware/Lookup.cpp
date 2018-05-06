@@ -40,7 +40,7 @@ uint8_t Lookup::lookupChord(const Chord* chord, const LookupsOfSeqType* table, K
 /**** Sequence lookup utilities ****/
 
 uint8_t Lookup::readSequence (const uint8_t* seq_lookup,
-                              uint8_t seq_length_in_bits,
+                              uint16_t seq_length_in_bits,
                               uint16_t seq_num,
                               Key* keys_out)
 {
@@ -49,7 +49,8 @@ uint8_t Lookup::readSequence (const uint8_t* seq_lookup,
   uint32_t start_bit_offset = seq_num * seq_length_in_bits;
 
   uint32_t code_index = 0;
-  uint32_t code_length = 1;
+  // the config code should enforce a maximum code length of 32
+  uint8_t code_length = 1;
   uint32_t key_index = 0;
 
   while (code_index + code_length <= seq_length_in_bits) {

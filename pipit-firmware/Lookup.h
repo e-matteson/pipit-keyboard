@@ -19,7 +19,9 @@ private:
   uint8_t lookupChord(const Chord* chord, const LookupsOfSeqType* table, Key* keys_out);
 
   uint8_t readSequence(const uint8_t* seq_lookup,
-                       uint8_t seq_length_in_bits, uint16_t seq_num, Key* keys_out);
+                       uint16_t seq_length_in_bits,
+                       uint16_t seq_num,
+                       Key* keys_out);
 
   uint32_t getUnalignedCode(uint32_t bit_offset, uint8_t length, const uint8_t* array);
 

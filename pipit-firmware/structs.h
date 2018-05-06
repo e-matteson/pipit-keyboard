@@ -33,8 +33,6 @@
 // };
 
 struct LookupOfLength {
-  // const uint8_t sequence_bit_length;
-  // const uint8_t anagram_number;
   const uint16_t seq_bit_len_and_anagram;
   const uint16_t num_chords;
   const uint8_t* chords;

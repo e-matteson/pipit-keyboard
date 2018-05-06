@@ -44,8 +44,6 @@ c_struct!(
 c_struct!(
     struct LookupOfLength {
         seq_bit_len_and_anagram: u16,
-        // sequence_bit_length: u8,
-        // anagram_number: AnagramNum,
         num_chords: u16,
         chords: CCode,
         sequences: CCode
