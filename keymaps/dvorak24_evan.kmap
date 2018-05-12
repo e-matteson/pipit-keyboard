@@ -422,11 +422,11 @@ macro_cout        macro_endl        macro_cerr          macro_this_arrow
   .     .           .     .           .     .             .     .
   ... .*.           ... .*.           ... .*.             ... .*.
 
-macro_printf
-...*   .*..
-....   ....
-  .     .
-  ... .*.
+macro_printf     macro_include_c
+...*   .*..      ....   .*..
+....   ....      ...*   ..*.
+  .     .          .     .
+  ... .*.          ... .*.
 
 
 #### vim/spacemacs macros ####
