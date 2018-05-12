@@ -22,3 +22,4 @@ lazy_static = "0.2"
 natord = "*"
 # svg =  "0.5"
 svg = {git = "https://github.com/e-matteson/svg.git"}
+# cpuprofiler = "0.0.3"

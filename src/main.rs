@@ -1,3 +1,4 @@
+// extern crate cpuprofiler;
 extern crate failure;
 extern crate pipit_config;
 
@@ -8,6 +9,8 @@ use pipit_config::errors::*;
 // use pipit_config::cheatsheet::CheatSheet;
 
 use failure::{Error, ResultExt};
+
+// use cpuprofiler::PROFILER;
 
 use std::env::args;
 
@@ -42,10 +45,12 @@ fn run() -> Result<(), Error> {
 }
 
 fn main() {
+    // PROFILER.lock().unwrap().start("./my-prof.profile").unwrap();
     if let Err(error) = run() {
         print_error(error);
         ::std::process::exit(1);
     } else {
         println!("Done.");
     }
+    // PROFILER.lock().unwrap().stop().unwrap();
 }
