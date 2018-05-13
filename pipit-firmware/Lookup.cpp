@@ -1,4 +1,5 @@
 #include "Lookup.h"
+#include "util.h"
 
 Lookup::Lookup(){
 }
@@ -54,7 +55,7 @@ uint8_t Lookup::readSequence (const uint8_t* seq_lookup,
   uint32_t key_index = 0;
 
   while (code_index + code_length <= seq_length_in_bits) {
-    uint32_t code = getUnalignedCode(start_bit_offset+code_index, code_length, seq_lookup);
+    uint32_t code = getUnalignedBits(start_bit_offset+code_index, code_length, seq_lookup);
 
     const HuffmanChar* huffman = conf::decodeHuffman(code, code_length);
     if (huffman == 0) {
@@ -80,24 +81,6 @@ uint8_t Lookup::readSequence (const uint8_t* seq_lookup,
     DEBUG1_LN("WARNING: unused bits in huffman code");
   }
   return key_index;
-}
-
-uint32_t Lookup::getUnalignedCode(uint32_t bit_offset, uint8_t length, const uint8_t* array) {
-  uint32_t out = 0;
-  for(int16_t i = length-1; i >= 0; i--) {
-    if(bitToBool(array, bit_offset+i)){
-      out |= (1 << i);
-   }
-  }
- return out;
-}
-
-bool Lookup::bitToBool(const uint8_t* address, uint32_t bit_offset) {
-  uint32_t byte_offset = bit_offset / 8;
-  uint8_t local_bit_offset = bit_offset % 8;
-
-  uint8_t byte = address[byte_offset];
-  return (byte >> local_bit_offset) & 0x01;
 }
 
 

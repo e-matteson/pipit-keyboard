@@ -1,9 +1,10 @@
 #include "conf.h"
+#include "util.h"
 
 namespace conf {
 
 const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
-  uint32_t mask = makeMask(length);
+  uint32_t mask = makeMask32(length);
   for(uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
     if (length != huffman_lookup[i].num_bits) {
       // Can't be a match, wrong length.
@@ -19,18 +20,6 @@ const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
   return 0;
 }
 
-  uint32_t makeMask(uint8_t length) {
-    // The first "length" bits are 1, and the rest are 0
-    if(length >= 32) {
-      return ~((uint32_t) 0);
-    }
-    return (1 << length) - 1;
-  }
-
-
-bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
-  return (a & mask) == (b & mask);
-}
 
 
   const ModeStruct* getMode(mode_enum mode){

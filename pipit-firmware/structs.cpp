@@ -1,6 +1,7 @@
 #include "structs.h"
 #include "util.h"
 
+// Should sum to 16
 #define BITS_FOR_ANAGRAM 4
 #define BITS_FOR_LEN 12
 

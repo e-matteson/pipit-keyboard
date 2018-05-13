@@ -1,4 +1,5 @@
 #include "Chord.h"
+#include "util.h"
 
 Chord::Chord(conf::mode_enum mode) : mode(mode){
 }
@@ -325,10 +326,6 @@ void Chord::andMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
   for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
     _chord_bytes[byte] &= mask[byte];
   }
-}
-
-bool Chord::isByteMaskSet(const uint8_t mask, const uint8_t byte) const{
-  return mask == (byte & mask);
 }
 
 bool Chord::isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) const{

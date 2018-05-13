@@ -76,6 +76,7 @@ void Comms::press(const Report* report){
 }
 
 bool Comms::isConnected(){
+  // TODO use else to check for unknown boards
 #if defined(TEENSY_LC)
 
   warnNoBluetooth();
@@ -99,6 +100,7 @@ void Comms::proportionalDelay(uint8_t data_length, uint8_t multiplier){
 }
 
 uint8_t Comms::getDelay(uint8_t data_length){
+  // TODO use else to check for unknown boards
 #if defined(TEENSY_LC)
   // Little or no delay is needed between presses over USB
   return 0;

@@ -23,9 +23,6 @@ private:
                        uint16_t seq_num,
                        Key* keys_out);
 
-  uint32_t getUnalignedCode(uint32_t bit_offset, uint8_t length, const uint8_t* array);
-
-  bool bitToBool(const uint8_t* address, uint32_t bit_offset);
 
   // void printData(const uint8_t* data, uint8_t data_length);
   // void printBinary(uint8_t byte);

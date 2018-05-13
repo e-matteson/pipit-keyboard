@@ -68,7 +68,6 @@ private:
   void setMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
   void unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
   void andMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
-  bool isByteMaskSet(const uint8_t mask, const uint8_t byte) const;
   bool isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) const;
   bool allZeroes(const uint8_t* _chord_bytes) const;
 
