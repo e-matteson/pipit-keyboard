@@ -7,7 +7,7 @@ uint32_t makeMask32(uint8_t length) {
   if(length >= 32) {
     return ~((uint32_t) 0);
   }
-  return (2 << length) - 1;
+  return (1 << length) - 1;
 }
 uint16_t makeMask16(uint8_t length) {
   // TODO share code with other makeMask

@@ -24,7 +24,7 @@ const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
     if(length >= 32) {
       return ~((uint32_t) 0);
     }
-    return (2 << length) - 1;
+    return (1 << length) - 1;
   }
 
 
