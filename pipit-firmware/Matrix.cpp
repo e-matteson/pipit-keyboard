@@ -13,7 +13,11 @@ void Matrix::setup(){
   //  shouldn't be set in the constructor, that's might be too early and they
   //  might fail.
   setRowsInput(); // rows should always stay in input mode
-  enablePinChangeInterrupt();
+  setColumnsHiZ(); // columns will change, during scanning and during standby
+
+#ifdef USE_STANDBY_INTERRUPTS
+  enterStandby();
+#endif
 }
 
 
@@ -107,7 +111,13 @@ void Matrix::exitStandby(){
 }
 
 bool Matrix::isInStandby(){
+#ifdef USE_STANDBY_INTERRUPTS
   return standby_timer->isDisabled();
+#endif
+
+  // Don't use standby at all if we're not using interrupts.
+  // Always scan the matrix.
+  return 0;
 }
 
 bool Matrix::isSquishedInBackpack(){
@@ -121,24 +131,22 @@ void Matrix::shutdown(){
 bool Matrix::scanIfChanged(){
   // Return true if we scan. Handle entering and exiting standby.
 
-  if(isInStandby()){
-    if(change_flag->get()){
-      // an interrupt happened since the last scan
-      exitStandby();
-      scan();
-      return 1;
-    }
-    // nothing happened, don't scan
-    return 0;
-  }
-
+#ifdef USE_STANDBY_INTERRUPTS
   if(standby_timer->isDone()){
-    // a bunch of time has passed since a switch was pressed - enter standby
+    // A bunch of time has passed since a switch was pressed
     enterStandby();
     return 0;
   }
+  if(isInStandby()){
+    if(!change_flag->get()){
+      // Nothing happened, don't scan
+      return 0;
+    }
+    // A pin-change interrupt happened since the last scan!
+    exitStandby();
+  }
+#endif
 
-  // not much time has passed - keep scanning
   scan();
   return 1;
 }
@@ -169,9 +177,12 @@ void Matrix::scan(){
     }
   }
 
+#ifdef USE_STANDBY_INTERRUPTS
   if (is_any_switch_down) {
     standby_timer->start();
   }
+#endif
+
 }
 
 void Matrix::printPressedSwitch(uint8_t h, uint8_t c, uint8_t r){

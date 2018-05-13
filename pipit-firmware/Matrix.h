@@ -19,13 +19,13 @@ public:
   void setup();
 
   bool scanIfChanged();
-  bool isInStandby();
   bool isSquishedInBackpack();
   void shutdown();
 
 private:
 
   void scan();
+  bool isInStandby();
   void enterStandby();
   void exitStandby();
 

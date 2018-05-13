@@ -66,6 +66,9 @@ validated_struct!{
 
         #[serde(default = "return_false")]
         pub enable_audio_typing_feedback: bool,
+
+        #[serde(default = "return_true")]
+        pub use_standby_interrupts: bool,
     }
 }
 
@@ -187,6 +190,10 @@ impl OptionsConfig {
             CTree::DefineIf {
                 name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
                 value: self.enable_audio_typing_feedback,
+            },
+            CTree::DefineIf {
+                name: "USE_STANDBY_INTERRUPTS".to_c(),
+                value: self.use_standby_interrupts,
             },
         ];
 
@@ -391,6 +398,10 @@ impl ToC for Delay {
 
 fn return_false() -> bool {
     false
+}
+
+fn return_true() -> bool {
+    true
 }
 
 fn round_up_to_num_bytes(num_bits: usize) -> usize {
