@@ -779,10 +779,6 @@ commands:
 dictionary:
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
-  - {word: "vlPFC"}
-  - {word: "dACC"}
-  - {word: "dmPFC"}
-  - {word: "OFC"}
   - {word: "abandon"}
   - {word: "abbrev", anagram: 2}
   - {word: "abc", anagram: 1}
@@ -1784,6 +1780,7 @@ dictionary:
   - {word: "cycle", anagram: 1}
   - {word: "cylinder"}
   - {word: "'d"}
+  - {word: "dACC"}
   - {word: "dad", anagram: 1}
   - {word: "daemon"}
   - {word: "daily"}
@@ -1882,6 +1879,7 @@ dictionary:
   - {word: "depression"}
   - {word: "depth"}
   - {word: "deputy"}
+  - {word: "Derek"}
   - {word: "derive", anagram: 1}
   - {word: "descend"}
   - {word: "describe"}
@@ -1978,6 +1976,7 @@ dictionary:
   - {word: "divorce"}
   - {word: "DIY"}
   - {word: "dlPFC"}
+  - {word: "dmPFC"}
   - {word: "DNA", anagram: 1}
   - {word: "DNS"}
   - {word: "do"}
@@ -3656,6 +3655,7 @@ dictionary:
   - {word: "October"}
   - {word: "odd", anagram: 1}
   - {word: "of"}
+  - {word: "OFC"}
   - {word: "off", anagram: 1}
   - {word: "offense"}
   - {word: "offer"}
@@ -4915,8 +4915,8 @@ dictionary:
   - {word: "tack", anagram: 1}
   - {word: "tackle"}
   - {word: "tact", anagram: 2}
-  - {word: "tactile"}
   - {word: "tactic"}
+  - {word: "tactile"}
   - {word: "tag"}
   - {word: "tail"}
   - {word: "take"}
@@ -5329,6 +5329,7 @@ dictionary:
   - {word: "vitamin", anagram: 1}
   - {word: "vitro"}
   - {word: "vivo"}
+  - {word: "vlPFC"}
   - {word: "vocabulary"}
   - {word: "vocal"}
   - {word: "voice"}
