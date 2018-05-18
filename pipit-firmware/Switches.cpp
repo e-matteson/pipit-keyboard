@@ -25,24 +25,18 @@ void Switches::setup(){
 }
 
 bool Switches::readyToPress(bool is_gaming){
-  if(is_gaming){
-    // If gaming, ignore chord timers and everything else.
-    // Just check if anything changed since we last checked.
-    if(!chord_timer->isDisabled() || !release_timer->isDisabled()){
-      chord_timer->disable();
-      release_timer->disable();
-      return 1; // Changed! Ready.
-    }
-    return 0; // No change.
-  }
-  // Otherwise, regular chording mode:
-  if(!chord_timer->peekDone()){
-    return 0; // Not ready
+  if(!is_gaming){
+    return chord_timer->isDone();
   }
 
-  // Ready!
-  chord_timer->disable();
-  return 1;
+  // If gaming, ignore chord timers and everything else.
+  // Just check if anything changed since we last checked.
+  if(!chord_timer->isDisabled() || !release_timer->isDisabled()){
+    chord_timer->disable();
+    release_timer->disable();
+    return 1; // Changed! Ready.
+  }
+  return 0; // No change.
 }
 
 bool Switches::readyToRelease(bool is_gaming){
@@ -63,6 +57,7 @@ void Switches::updateSwitchStatuses(){
       case Switches::PRESSED:
       case Switches::ALREADY_SENT:
       case Switches::HELD:
+        // If we were debouncing a release, stop, it wasn't real.
         stopDebouncing(i);
         break;
       case Switches::NOT_PRESSED:
@@ -75,9 +70,11 @@ void Switches::updateSwitchStatuses(){
       switch(switch_status[i]){ //Old status is:
       case Switches::ALREADY_SENT:
       case Switches::HELD:
+        // Might be a new release, debounce it first
         debounceRelease(i);
         break;
       case Switches::NOT_PRESSED:
+        // If we were debouncing a press, stop, it wasn't real.
         stopDebouncing(i);
         break;
       case Switches::PRESSED:
