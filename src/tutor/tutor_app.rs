@@ -44,15 +44,15 @@ impl TutorApp {
         let mut siv = Cursive::new();
 
         // TODO move theme file to an assets folder?
-        siv.load_theme_file("src/tutor/theme.toml")
+        siv.load_theme_file("settings/tutor/color_theme.toml")
             .expect("failed to load theme");
         TutorApp::show_menu(&mut siv);
         siv.run();
     }
 
     fn show_menu(siv: &mut Cursive) {
-        let lessons =
-            load_lessons("tutor/lessons/").expect("failed to get lessons");
+        let lessons = load_lessons("settings/tutor/lessons/")
+            .expect("failed to get lessons");
         let mut names: Vec<String> = lessons.keys().cloned().collect();
         names.sort_by(|a, b| natord::compare(a, b));
 
