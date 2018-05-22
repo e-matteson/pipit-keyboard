@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-use std::io::prelude::*;
-use std::fs::File;
+use std::path::PathBuf;
 
 use svg;
 use svg::Document;
@@ -13,6 +12,7 @@ use serde_yaml;
 use types::{Chord, Name, TutorData};
 use types::errors::MissingErr;
 use failure::{Error, ResultExt};
+use util::read_file;
 
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
                        MyDescription, MyRect, P2, V2, Wedge};
@@ -85,14 +85,14 @@ struct Switch {
 
 impl CheatSheet {
     pub fn from_yaml(
-        path: &str,
+        path: &PathBuf,
         data: &TutorData,
     ) -> Result<CheatSheet, Error> {
         let file = read_file(path).with_context(|_| {
-            format!("failed to read cheatsheet config file: {}", path)
+            format!("failed to read cheatsheet config file: {:?}", path)
         })?;
         let spec: CheatSheetSpec = serde_yaml::from_str(&file).with_context(
-            |_| format!("failed to parse cheatsheet config file: {}", path),
+            |_| format!("failed to parse cheatsheet config file: {:?}", path),
         )?;
         CheatSheet::new(spec, data)
     }
@@ -718,11 +718,4 @@ fn get_symbol(key: &Name) -> Result<Symbol, Error> {
             container: "cheatsheet symbol lookup".into(),
         })?
         .to_owned())
-}
-
-fn read_file(path: &str) -> Result<String, Error> {
-    let mut f: File = File::open(path)?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
-    Ok(buffer)
 }

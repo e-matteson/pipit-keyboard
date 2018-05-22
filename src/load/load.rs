@@ -1,20 +1,20 @@
-use std::io::prelude::*;
-use std::fs::File;
+use std::path::PathBuf;
 use serde_yaml;
 
 use load::{parse_kmap, OptionsConfig, Settings};
 use types::{AllData, Chord, SeqType, Validate};
+use util::read_file;
 // use types::errors::*;
 use failure::{Error, ResultExt};
 
 impl AllData {
-    pub fn load(settings_path: &str) -> Result<AllData, Error> {
+    pub fn load(settings_path: &PathBuf) -> Result<AllData, Error> {
         Ok(AllData::load_helper(settings_path).with_context(|_| {
-            format!("Failed to load settings from file: '{}'", settings_path)
+            format!("Failed to load settings from file: '{:?}'", settings_path)
         })?)
     }
 
-    fn load_helper(settings_path: &str) -> Result<AllData, Error> {
+    fn load_helper(settings_path: &PathBuf) -> Result<AllData, Error> {
         /// Load stuff into AllData
         let settings: Settings =
             serde_yaml::from_str(&read_file(settings_path)?)?;
@@ -143,11 +143,4 @@ impl AllData {
         }
         Ok(())
     }
-}
-
-fn read_file(path: &str) -> Result<String, Error> {
-    let mut f: File = File::open(path)?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
-    Ok(buffer)
 }

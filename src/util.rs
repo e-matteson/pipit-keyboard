@@ -1,3 +1,7 @@
+use std::io::prelude::*;
+use std::fs::File;
+use std::path::PathBuf;
+
 use types::errors::OutOfRangeErr;
 use failure::Error;
 
@@ -85,4 +89,11 @@ pub fn ensure_u16(input: usize) -> Result<(), Error> {
         })?;
     }
     Ok(())
+}
+
+pub fn read_file(path: &PathBuf) -> Result<String, Error> {
+    let mut f: File = File::open(path)?;
+    let mut buffer = String::new();
+    f.read_to_string(&mut buffer)?;
+    Ok(buffer)
 }

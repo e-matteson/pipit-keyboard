@@ -1,46 +1,64 @@
 // extern crate cpuprofiler;
 extern crate failure;
 extern crate pipit_config;
+#[macro_use]
+extern crate structopt;
+
+use std::path::PathBuf;
+use structopt::StructOpt;
 
 use pipit_config::AllData;
 use pipit_config::errors::*;
 
-// use pipit_config::tutor::TutorApp;
-// use pipit_config::cheatsheet::CheatSheet;
+use pipit_config::tutor::TutorApp;
+use pipit_config::cheatsheet::CheatSheet;
 
 use failure::{Error, ResultExt};
 
 // use cpuprofiler::PROFILER;
 
-use std::env::args;
+/// Pipit keyboard configuration tool, typing tutor, and cheatsheet generator
+#[derive(StructOpt, Debug)]
+#[structopt(name = "pipit-config")]
+struct Opt {
+    /// Runs the typing tutor
+    #[structopt(short = "t", long = "tutor")]
+    tutor: bool,
 
-const DEFAULT_SETTINGS_FILE: &str = "settings/settings.yaml";
+    /// Generates a cheatsheet, according to the given config file
+    #[structopt(short = "c", long = "cheatsheet", parse(from_os_str))]
+    cheatsheet: Option<PathBuf>,
 
-fn get_settings_path() -> Result<String, Error> {
-    // check command line arguments
-    // TODO use docopt or something
-    match args().len() {
-        1 => Ok(DEFAULT_SETTINGS_FILE.to_string()),
-        2 => Ok(args().nth(1).unwrap()),
-        x => Err(NumArgsErr(x).into()),
-    }
+    /// Settings file that includes the keymaps, dictionary, etc
+    #[structopt(parse(from_os_str))]
+    settings: Option<PathBuf>,
 }
 
 fn run() -> Result<(), Error> {
-    println!("");
-    let settings_path = get_settings_path()?;
+    let opt = Opt::from_args();
+
+    let settings_path = opt.settings
+        .unwrap_or_else(|| PathBuf::from("settings/settings.yaml"));
+
     let all_data = AllData::load(&settings_path)?;
     all_data.check();
-    // TODO automatically extract path parts
+
     all_data
         .save_as("auto_config")
         .context("Failed to save configuration")?;
 
-    // let tutor_data = all_data.get_tutor_data()?;
-    // CheatSheet::from_yaml("settings/cheatsheet_full.yaml", &tutor_data)
-    //     .context("Failed to make cheatsheet")?
-    //     .save("out.svg");
-    // TutorApp::run(tutor_data);
+    let tutor_data = all_data.get_tutor_data()?;
+
+    if let Some(ref config) = opt.cheatsheet {
+        CheatSheet::from_yaml(config, &tutor_data)
+            .context("Failed to make cheatsheet")?
+            .save("cheatsheet/out.svg");
+    }
+
+    if opt.tutor {
+        TutorApp::run(tutor_data);
+    }
+
     Ok(())
 }
 
