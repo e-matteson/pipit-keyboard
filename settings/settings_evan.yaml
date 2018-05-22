@@ -49,15 +49,15 @@ options:
 modes:
   default_mode:
     keymaps:
-      - {file: "keymaps/dvorak24_evan.kmap", use_words: true}
+      - {file: "settings/keymaps/dvorak24_evan.kmap", use_words: true}
 
   left_hand_mode:
     keymaps:
-      - {file: "keymaps/dvorak24_left.kmap"}
+      - {file: "settings/keymaps/dvorak24_left.kmap"}
 
   gaming_mode:
     keymaps:
-      - {file: "keymaps/gaming_test.kmap"}
+      - {file: "settings/keymaps/gaming_test.kmap"}
     gaming: true
 
 
