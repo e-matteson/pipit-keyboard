@@ -1,0 +1,11 @@
+# This is an example of why you might want to override some mappings from
+# another keymap. You could switch between windows and apple shortcuts by
+# changing to "windows_shortcut_mode", which overrides the default
+# "macro_apple_save_as" with "macro_windows_save_as".
+
+
+macro_windows_save_as      command_default_mode
+....   ....                ****   ....
+....   ...*                ....   ....
+  .     .                    .     .
+  ... .*.                    ... ...

@@ -61,49 +61,38 @@ options:
     - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
 
 
-# TODO document modes
+# You can change the keyboard layout by switching modes.
 modes:
+  # The keyboard will always start in `default_mode` after powering on. If you
+  # change modes, you can switch back using `command_default_mode`.
   default_mode:
     keymaps:
-      - {file: "keymaps/dvorak24.kmap", use_words: true}
+      # Keymap files specify which chord you press to type each plain_key,
+      # macro, or command. If `use_words` is true, use this keymap to generate
+      # chords for all the words in the dictionary.
+      - {file: "settings/keymaps/dvorak24.kmap", use_words: true}
+
+  # Each mode can use multiple keymap files. If the same chord appears in more than 1
+  # keymap, the last keymap takes priority. This is useful if you want to
+  # override just a few chords, like to change apple shortcuts to windows shortcuts
+  # when you switch between computers.
+  windows_mode:
+    keymaps:
+      - {file: "settings/keymaps/dvorak24.kmap", use_words: true}
+      - {file: "settings/keymaps/windows_shortcuts.kmap"}
 
   left_hand_mode:
     keymaps:
-      - {file: "keymaps/dvorak24_left.kmap"}
+      - {file: "settings/keymaps/dvorak24_left.kmap"}
 
+  # If `gaming` is true, it will act like a normal keyboard and not treat
+  # multiple pressed switches as a chord. You can create multiple gaming modes
+  # tailored for specific games.
   gaming_mode:
     keymaps:
-      - {file: "keymaps/gaming_test.kmap"}
+      - {file: "settings/keymaps/gaming_test.kmap"}
     gaming: true
 
-
-# Add new commands here, and in pipit-firmware/pipit.cpp
-commands:
-  - command_delete_word
-  - command_shorten_last_word
-  - command_left_word
-  - command_left_limit
-  - command_right_word
-  - command_right_limit
-  - command_cycle_word
-  - command_cycle_capital
-  - command_cycle_nospace
-  - command_pause
-  - command_sticky_ctrl
-  - command_sticky_alt
-  - command_sticky_shift
-  - command_sticky_gui
-  - command_led_battery
-  - command_led_colors
-  - command_led_rainbow
-  - command_left_hand_mode
-  - command_default_mode
-  - command_gaming_mode
-
-# Add up to 7 anagram mods here.
-anagram_modifiers:
-  - mod_anagram_1
-  - mod_anagram_2
 
 # Add new macro key sequences here!
 # If they don't contain alt, ctrl, or gui, you can just write out the sequence
@@ -111,22 +100,12 @@ anagram_modifiers:
 # the key and modifiers sent during each press.
 macros:
   macro_email: "me@example.com"
-  macro_save_as:
-    - {key: "KEY_S", mods: ["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}
-  macro_vim_save:
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_W"}
-    - {key: "KEY_ENTER"}
-  macro_vim_quit      :
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_Q"}
-    - {key: "KEY_ENTER"}
-  macro_next_tab:
-    - {key: "KEY_TAB", mods: ["MODIFIERKEY_CTRL"]}
-  macro_prev_tab:
-    - {key: "KEY_TAB", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
-  macro_alt_tab:
-    - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
+  macro_apple_save_as:
+    - {key: "KEY_S", mods: ["MODIFIERKEY_GUI", "MODIFIERKEY_SHIFT"]}
+
+  macro_windows_save_as:
+    - {key: "KEY_S", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+
   macro_in_paren:
     - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
     - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
@@ -163,6 +142,14 @@ macros:
     - {key: "KEY_END"}
     - {key: "KEY_LEFT"}
     - {key: "KEY_LEFT"}
+  macro_vim_save:
+    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_W"}
+    - {key: "KEY_ENTER"}
+  macro_vim_quit      :
+    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_Q"}
+    - {key: "KEY_ENTER"}
 
 # Add new words here!
 dictionary:
@@ -4896,6 +4883,36 @@ dictionary:
   - {word: "zoom"}
   - {word: "zotero"}
   - {word: "zsh"}
+
+# Add new commands here, and in pipit-firmware/pipit.cpp
+commands:
+  - command_default_mode
+  - command_left_hand_mode
+  - command_windows_mode
+  - command_gaming_mode
+  - command_delete_word
+  - command_shorten_last_word
+  - command_left_word
+  - command_left_limit
+  - command_right_word
+  - command_right_limit
+  - command_cycle_word
+  - command_cycle_capital
+  - command_cycle_nospace
+  - command_pause
+  - command_sticky_ctrl
+  - command_sticky_alt
+  - command_sticky_shift
+  - command_sticky_gui
+  - command_led_battery
+  - command_led_colors
+  - command_led_rainbow
+
+# Add up to 7 anagram mods here.
+anagram_modifiers:
+  - mod_anagram_1
+  - mod_anagram_2
+
 
 # You shouldn't need to edit these.
 plain_modifiers:

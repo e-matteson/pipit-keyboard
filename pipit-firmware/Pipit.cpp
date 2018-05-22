@@ -22,6 +22,10 @@ void Pipit::doCommand(uint8_t code){
     mode = conf::mode_enum::DEFAULT_MODE;
     break;
 
+  case conf::COMMAND_WINDOWS_MODE:
+    mode = conf::mode_enum::WINDOWS_MODE;
+    break;
+
   case conf::COMMAND_LEFT_HAND_MODE:
     mode = conf::mode_enum::LEFT_HAND_MODE;
     break;

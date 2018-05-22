@@ -33,25 +33,25 @@ mod_anagram_1     mod_anagram_2
 
 ##### single-switch letters #####
 
-key_a          key_o         	 key_e		      key_i
+key_a          key_o         	key_e		      key_i
 ....   ....		 ....   ....   	....   ....	  ....   ....
 *...   ....		 .*..   ....   	..*.   ....	  ...*   ....
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-key_h         key_t         	 key_n		      key_s
+key_h          key_t         	key_n		      key_s
 ....   ....		 ....   ....   	....   ....	  ....   ....
 ....   *...		 ....   .*..   	....   ..*.	  ....   ...*
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-key_d          key_c           key_r         key_l
+key_d          key_c          key_r         key_l
 ....   *...		 ....   .*..   	....   ..*.	  ....   ...*
 ....   ....		 ....   ....   	....   ....	  ....   ....
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-key_m          key_f           key_u         key_p
+key_m          key_f          key_u         key_p
 *...   ....		 .*..   ....   	..*.   ....	  ...*   ....
 ....   ....		 ....   ....   	....   ....	  ....   ....
   .     .        .     .        .     .       .     .
@@ -117,7 +117,7 @@ key_underscore  key_minus
  .     .          .     .
   ... ...         ... ...
 
-key_doublequote       key_quote
+key_doublequote key_quote
 *...   ....     ....   ...*
 ...*   ....     ....   *...
  .     .          .     .
@@ -214,7 +214,7 @@ key_f5         key_f3         key_f1
   .     .        .     .        .     .
   ... .*.  	     ... .*.     	  ... .*.
 
- key_f2         key_f4
+key_f2         key_f4
 .*..   ....    .*..   ....
 ....   .**.    ....   ..**
   .     .        .     .
@@ -242,67 +242,66 @@ key_home       key_end        key_page_up   key_page_down
   ... .*.       ... .*.         ... .*.  	    ... ...
 
 key_delete    key_printscreen  key_caps_lock
-..**	 ....   ....   ..**      ....   **..
-..**   ....		....   ..**      ....   **..
+....	 *..*   ...*   ....      ....   .*.*
+....   ....		....   ...*      ....   ....
   .     .       .     .          .     .
   ... .*.  	    ... .*.          ... .*.
 
 ###### commands ######
 
-command_delete_word    command_cycle_word   command_cycle_capital
-....   ....            ....   ....          ....   ....
-....   ***.            .***   ....          .***   ....
-  .     .                .     .              .     .
-  ... ...                ... ...              *.. ...
+command_delete_word    command_cycle_word
+....   ....            ....   ....
+....   ***.            .***   ....
+  .     .                .     .
+  ... ...                ... ...
 
-command_shorten_last_word  command_cycle_nospace
-....   ....                ....   ....
-....   ***.                .***   ....
-  .     .                    .     .
-  ... .*.                    ... ..*
+command_cycle_capital  command_cycle_nospace    command_shorten_last_word
+....   ....            ....   ....              ....   ....
+.***   ....            .***   ....              ....   ***.
+  .     .                .     .                  .     .
+  *.. ...                ... ..*                  ... .*.
 
-command_pause   command_led_rainbow  command_led_battery  command_led_colors
-****   ****     ****   ..*.          ****   ....          ****   .*..
-....   ....     ....   ....          ....   *...          ....   ....
-  .     .         .     .              .     .              .     .
-  ... ...         ... .*.              ... .*.              ... .*.
+command_left_word      command_right_word       command_left_limit    command_right_limit
+..**   ....            ....   **..              ...*   ....           ....   *...
+....   ....            ....   ....              ..*.   ....           ....   .*..
+  .     .                .     .                  .     .               .     .
+  ... .*.                ... .*.                  ... .*.               ... .*.
 
-command_left_word   command_right_word    command_left_limit   command_right_limit
-..**   ....         ....   **..           ...*   ....         ....   *...
-....   ....         ....   ....           ..*.   ....         ....   .*..
-  .     .             .     .               .     .             .     .
-  ... .*.             ... .*.               ... .*.             ... .*.
+command_pause          command_led_battery       command_led_colors  command_led_rainbow
+****   ****            ****   ....               ****   .*..         ****   ..*.
+....   ....            ....   *...               ....   ....         ....   ....
+  .     .                .     .                   .     .             .     .
+  ... ...                ... .*.                   ... .*.             ... .*.
 
-command_left_hand_mode  command_gaming_mode
-****   ....             ....   ****
-....   ....             ....   ....
-  .     .                 .     .
-  ... ...                 ... ...
+command_left_hand_mode  command_gaming_mode  command_windows_mode
+****   ....             ....   ****          ****   **..
+....   ....             ....   ....          ....   ....
+  .     .                 .     .              .     .
+  ... ...                 ... ...              ... ...
 
 
-## macros ##
+####### macros #######
 
-macro_save_as    macro_alt_tab       macro_vim_save   macro_vim_quit
-....   ....      ....   ....         ....   ....      ....   ....
-....   ...*      ....   .*..         ....   *...      ****   *...
-  .     .          .     .             .     .          .     .
-  ... .*.          ... .*.             ... .*.          ... .*.
-
-macro_email      macro_if_c
-*...   ....      .*..   .*..
-....   ....      ...*   ....
+macro_email      macro_apple_save_as
+*...   ....      ....   ....
+....   ....      ....   ...*
   .     .          .     .
   ... .*.          ... .*.
 
-macro_in_paren   macro_in_curly     macro_in_brace   macro_in_angle
-...*   ....      ..*.   ....        .*..   ....      *...   ....
-....   **..      ....   **..        ....   **..      ....   **..
-  .     .          .     .            .     .          .     .
-  ... ...          ... ...            ... ...          ... ...
+macro_in_paren   macro_in_curly   macro_in_brace   macro_in_angle
+...*   ....      ..*.   ....      .*..   ....      *...   ....
+....   **..      ....   **..      ....   **..      ....   **..
+  .     .          .     .          .     .          .     .
+  ... ...          ... ...          ... ...          ... ...
 
-macro_in_doublequote  macro_in_quote
-*...   ....           ....   ...*
-...*   ....           ....   *...
-  .     .               .     .
-  ... .*.               ... .*.
+macro_in_quote   macro_in_doublequote
+....   ...*      *...   ....
+....   *...      ...*   ....
+  .     .          .     .
+  ... .*.          ... .*.
 
+macro_if_c       macro_vim_save   macro_vim_quit
+.*..   .*..      ....   ....      ....   ....
+...*   ....      ....   *...      ****   *...
+  .     .          .     .          .     .
+  ... .*.          ... .*.          ... .*.
