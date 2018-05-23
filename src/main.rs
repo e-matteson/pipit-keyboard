@@ -29,12 +29,16 @@ struct Opt {
     #[structopt(short = "c", long = "cheatsheet", parse(from_os_str))]
     cheatsheet: Option<PathBuf>,
 
+    // #[structopt(short = "o", long = "output", parse(from_os_str))]
+    // output: Option<PathBuf>
+    //
     /// Settings file that includes the keymaps, dictionary, etc
     #[structopt(parse(from_os_str))]
     settings: Option<PathBuf>,
 }
 
 fn run() -> Result<(), Error> {
+    println!("");
     let opt = Opt::from_args();
 
     let settings_path = opt.settings
@@ -43,20 +47,18 @@ fn run() -> Result<(), Error> {
     let all_data = AllData::load(&settings_path)?;
     all_data.check();
 
-    all_data
-        .save_as("auto_config")
-        .context("Failed to save configuration")?;
-
     let tutor_data = all_data.get_tutor_data()?;
 
     if let Some(ref config) = opt.cheatsheet {
         CheatSheet::from_yaml(config, &tutor_data)
             .context("Failed to make cheatsheet")?
-            .save("cheatsheet/out.svg");
-    }
-
-    if opt.tutor {
+            .save("cheatsheet.svg")?;
+    } else if opt.tutor {
         TutorApp::run(tutor_data);
+    } else {
+        all_data
+            .save_as("auto_config")
+            .context("Failed to save configuration")?;
     }
 
     Ok(())

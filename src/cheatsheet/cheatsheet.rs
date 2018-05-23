@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use svg;
 use svg::Document;
@@ -12,7 +12,7 @@ use serde_yaml;
 use types::{Chord, Name, TutorData};
 use types::errors::MissingErr;
 use failure::{Error, ResultExt};
-use util::read_file;
+use util::{read_file, user_confirm, ConfirmDefault};
 
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
                        MyDescription, MyRect, P2, V2, Wedge};
@@ -147,7 +147,7 @@ impl CheatSheet {
         })
     }
 
-    pub fn save(&self, filename: &str) {
+    fn render(&self) -> Document {
         // TODO add metadata
         let mut group = Group::new();
 
@@ -175,7 +175,27 @@ impl CheatSheet {
         doc.append(desc);
         doc.append(defs);
         doc.append(group);
-        svg::save(filename, &doc).unwrap();
+        doc
+    }
+
+    pub fn save(&self, filename: &str) -> Result<(), Error> {
+        if Path::new(filename).exists() {
+            let confirmed = user_confirm(
+                &format!(
+                    "The file {} already exists, do you want to overwrite it?",
+                    filename
+                ),
+                ConfirmDefault::No,
+            )?;
+            if !confirmed {
+                println!("Cheatsheet not saved.");
+                return Ok(());
+            }
+        }
+
+        println!("Saving cheatsheet as '{}'.", filename);
+        let doc = self.render();
+        Ok(svg::save(filename, &doc).context("Failed to save cheatsheet")?)
     }
 }
 

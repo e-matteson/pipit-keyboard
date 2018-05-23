@@ -86,8 +86,8 @@ impl Checker {
         // TODO option to check for mode conflicts instead
         for (kmap, reversed) in &self.reverse_kmaps {
             let heading = format!(
-                "Conflicting chords (in parens) or skipped anagrams (\"{}\") \
-                 in {}:",
+                "\nConflicting chords (in parens) or skipped anagrams \
+                 (\"{}\") in \'{}\':",
                 AnagramSet::missing_symbol(),
                 kmap
             );

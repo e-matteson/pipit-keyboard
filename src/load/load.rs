@@ -9,9 +9,11 @@ use failure::{Error, ResultExt};
 
 impl AllData {
     pub fn load(settings_path: &PathBuf) -> Result<AllData, Error> {
-        Ok(AllData::load_helper(settings_path).with_context(|_| {
+        let data = AllData::load_helper(settings_path).with_context(|_| {
             format!("Failed to load settings from file: '{:?}'", settings_path)
-        })?)
+        })?;
+        println!("\nLoaded keyboard settings from: {:?}", settings_path);
+        Ok(data)
     }
 
     fn load_helper(settings_path: &PathBuf) -> Result<AllData, Error> {

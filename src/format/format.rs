@@ -155,7 +155,7 @@ impl CFiles {
         &self,
         directory: &PathBuf,
         name_base: &str,
-    ) -> Result<(), Error> {
+    ) -> Result<Vec<PathBuf>, Error> {
         let mut base = directory.to_owned();
         base.push(name_base);
 
@@ -165,9 +165,9 @@ impl CFiles {
         let mut cpp_path = base;
         cpp_path.set_extension("cpp");
 
-        write_to_file(h_path, &self.h)?;
-        write_to_file(cpp_path, &self.c)?;
-        Ok(())
+        write_to_file(h_path.clone(), &self.h)?;
+        write_to_file(cpp_path.clone(), &self.c)?;
+        Ok(vec![h_path, cpp_path])
     }
 
     // pub fn join(v: &[CFiles]) -> CFiles {

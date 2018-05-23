@@ -1,9 +1,10 @@
 use std::io::prelude::*;
+use std::io::{stdin, stdout};
 use std::fs::File;
 use std::path::PathBuf;
 
 use types::errors::OutOfRangeErr;
-use failure::Error;
+use failure::{Error, ResultExt};
 
 pub fn bools_to_bytes(v: &[bool]) -> Vec<u8> {
     let mut bytes = Vec::new();
@@ -96,4 +97,48 @@ pub fn read_file(path: &PathBuf) -> Result<String, Error> {
     let mut buffer = String::new();
     f.read_to_string(&mut buffer)?;
     Ok(buffer)
+}
+
+#[allow(dead_code)]
+pub enum ConfirmDefault {
+    Yes,
+    No,
+    None,
+}
+
+fn get_input() -> Result<String, Error> {
+    stdout().flush()?;
+    let mut buffer = String::new();
+    stdin().read_line(&mut buffer)?;
+    Ok(buffer)
+}
+
+pub fn user_confirm(
+    message: &str,
+    default: ConfirmDefault,
+) -> Result<bool, Error> {
+    let suggestion = match default {
+        ConfirmDefault::Yes => "(Y/n)",
+        ConfirmDefault::No => "(y/N)",
+        ConfirmDefault::None => "(y/n)",
+    };
+
+    print!("{} {}: ", message, suggestion);
+
+    loop {
+        let input = get_input().context("Failed to get user input")?;
+        let output = match input.trim() {
+            "y" | "Y" | "yes" => true,
+            "n" | "N" | "no" => false,
+            _ => match default {
+                ConfirmDefault::Yes => true,
+                ConfirmDefault::No => false,
+                ConfirmDefault::None => {
+                    print!("Please respond with yes or no: ");
+                    continue;
+                }
+            },
+        };
+        return Ok(output);
+    }
 }

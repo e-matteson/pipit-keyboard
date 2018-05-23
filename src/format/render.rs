@@ -24,12 +24,20 @@ impl AllData {
     pub fn save_as(&self, file_name_base: &str) -> Result<(), Error> {
         let c_tree = self.render(file_name_base)?;
         let f = c_tree.format()?;
-        // TODO as_ref?
+
         let dir = self.output_directory.as_ref().ok_or_else(|| MissingErr {
             missing: "output directory".into(),
             container: "settings".into(),
         })?;
-        f.save(dir, file_name_base)
+
+        let file_names = f.save(dir, file_name_base)?
+            .iter()
+            .map(|path| format!("{:?}", path))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        println!("Saved keyboard configuration to: {}", file_names);
+        Ok(())
     }
 
     pub fn render(&self, file_name_base: &str) -> Result<CTree, Error> {
