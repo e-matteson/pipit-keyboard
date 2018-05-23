@@ -274,6 +274,7 @@ dictionary:
   - {word: "align", anagram: 1}
   - {word: "all"}
   - {word: "alleged"}
+  - {word: "Allen", anagram: 2}
   - {word: "allergy", anagram: 1}
   - {word: "alliance"}
   - {word: "allocate", anagram: 1}
@@ -432,7 +433,6 @@ dictionary:
   - {word: "athlete", anagram: 1}
   - {word: "athletic"}
   - {word: "ation"}
-  # {word: "<ation", anagram: 1}
   - {word: "atom"}
   - {word: "atomic"}
   - {word: "attach", anagram: 2}
@@ -470,7 +470,6 @@ dictionary:
   - {word: "avr", anagram: 1}
   - {word: "award", anagram: 6}
   - {word: "aware", anagram: 5}
-  # {word: "away", anagram: 8}
   - {word: "awesome"}
   - {word: "awful"}
   - {word: "awk"}
@@ -716,7 +715,7 @@ dictionary:
   - {word: "cabinet"}
   - {word: "cable"}
   - {word: "cache", anagram: 2}
-  - {word: "cad"}
+  - {word: "cad", anagram: 1}
   - {word: "cafe", anagram: 1}
   - {word: "cage"}
   - {word: "cake"}
@@ -794,7 +793,6 @@ dictionary:
   - {word: "caution"}
   - {word: "cave"}
   - {word: "cd", anagram: 1}
-  # {word: "<ce"}
   - {word: "ceil"}
   - {word: "celebrate"}
   - {word: "celebrity", anagram: 1}
@@ -1150,11 +1148,11 @@ dictionary:
   - {word: "custom"}
   - {word: "cut"}
   - {word: "cute"}
-  # {word: "<cy", anagram: 4}
   - {word: "cyber", anagram: 1}
   - {word: "cycle", anagram: 1}
   - {word: "cylinder"}
   - {word: "'d"}
+  - {word: "dACC"}
   - {word: "dad", anagram: 1}
   - {word: "daemon"}
   - {word: "daily"}
@@ -1253,6 +1251,7 @@ dictionary:
   - {word: "depression"}
   - {word: "depth"}
   - {word: "deputy"}
+  - {word: "Derek"}
   - {word: "derive", anagram: 1}
   - {word: "descend"}
   - {word: "describe"}
@@ -1348,6 +1347,8 @@ dictionary:
   - {word: "division"}
   - {word: "divorce"}
   - {word: "DIY"}
+  - {word: "dlPFC"}
+  - {word: "dmPFC"}
   - {word: "DNA", anagram: 1}
   - {word: "DNS"}
   - {word: "do"}
@@ -1593,7 +1594,7 @@ dictionary:
   - {word: "excerpt", anagram: 1}
   - {word: "excess"}
   - {word: "exchange", anagram: 1}
-  - {word: "excitat"}
+  - {word: "excitat", anagram: 1}
   - {word: "excitation"}
   - {word: "excitatory"}
   - {word: "excite"}
@@ -2047,6 +2048,8 @@ dictionary:
   - {word: "halloween"}
   - {word: "halo"}
   - {word: "halt"}
+  - {word: "halve"}
+  - {word: "halves"}
   - {word: "ham"}
   - {word: "hammer"}
   - {word: "hamster"}
@@ -2109,6 +2112,7 @@ dictionary:
   - {word: "heritage"}
   - {word: "hero"}
   - {word: "heron"}
+  - {word: "hesitate"}
   - {word: "hex"}
   - {word: "hey"}
   - {word: "hi"}
@@ -2171,6 +2175,7 @@ dictionary:
   - {word: "Huffman"}
   - {word: "hug"}
   - {word: "huge"}
+  - {word: "huh", anagram: 1}
   - {word: "huion"}
   - {word: "hull"}
   - {word: "human"}
@@ -2209,22 +2214,15 @@ dictionary:
   - {word: "idiot"}
   - {word: "idle"}
   - {word: "idol"}
-  # {word: "<ied", anagram: 1}
   - {word: "ier"}
-  # {word: "<ier", anagram: 1}
-  - {word: "ies"}
-  # {word: "<ies", anagram: 1}
-  - {word: "if", anagram: 1}
   - {word: "ifndef", anagram: 1}
   - {word: "ify"}
-  # {word: "<ify", anagram: 1}
   - {word: "ignore"}
   - {word: "ill"}
   - {word: "I'll"}
   - {word: "illegal"}
   - {word: "illustrate"}
   - {word: "ily"}
-  # {word: "<ily", anagram: 1}
   - {word: "I'm"}
   - {word: "image"}
   - {word: "imagine"}
@@ -2263,7 +2261,6 @@ dictionary:
   - {word: "induce"}
   - {word: "industry"}
   - {word: "iness"}
-  # {word: "<iness", anagram: 1}
   - {word: "inf"}
   - {word: "infant"}
   - {word: "infect", anagram: 1}
@@ -2274,7 +2271,6 @@ dictionary:
   - {word: "information"}
   - {word: "infra"}
   - {word: "ing"}
-  # {word: "<ing", anagram: 1}
   - {word: "ingredient"}
   - {word: "inherit", anagram: 1}
   - {word: "inhibit"}
@@ -2328,10 +2324,8 @@ dictionary:
   - {word: "invite", anagram: 1}
   - {word: "involve"}
   - {word: "ion"}
-  # {word: "<ion", anagram: 1}
   - {word: "ior"}
   - {word: "ious"}
-  # {word: "<ious", anagram: 1}
   - {word: "ip", anagram: 1}
   - {word: "iris"}
   - {word: "iron"}
@@ -2353,10 +2347,10 @@ dictionary:
   - {word: "item", anagram: 1}
   - {word: "iter", anagram: 2}
   - {word: "iteration", anagram: 1}
+  - {word: "iterator"}
   - {word: "it's"}
   - {word: "its"}
   - {word: "ity"}
-  # {word: "<ity", anagram: 1}
   - {word: "ium", anagram: 1}
   - {word: "ive"}
   - {word: "I've"}
@@ -2624,7 +2618,6 @@ dictionary:
   - {word: "lurk"}
   - {word: "luxury", anagram: 2}
   - {word: "ly"}
-  # {word: "<ly", anagram: 1}
   - {word: "lyric", anagram: 1}
   - {word: "mac"}
   - {word: "machine"}
@@ -2863,7 +2856,7 @@ dictionary:
   - {word: "movie"}
   - {word: "mozilla"}
   - {word: "mpc"}
-  - {word: "mpd"}
+  - {word: "mpd", anagram: 1}
   - {word: "MPG", anagram: 2}
   - {word: "MPH", anagram: 1}
   - {word: "Mr."}
@@ -2898,7 +2891,6 @@ dictionary:
   - {word: "mutter", anagram: 1}
   - {word: "mutual"}
   - {word: "mv", anagram: 1}
-  # {word: "mvmt", anagram: 1}
   - {word: "Mx."}
   - {word: "my"}
   - {word: "mysql"}
@@ -3021,6 +3013,7 @@ dictionary:
   - {word: "October"}
   - {word: "odd", anagram: 1}
   - {word: "of"}
+  - {word: "OFC"}
   - {word: "off", anagram: 1}
   - {word: "offense"}
   - {word: "offer"}
@@ -3062,7 +3055,6 @@ dictionary:
   - {word: "or"}
   - {word: "oracle"}
   - {word: "oral"}
-  # {word: "<or", anagram: 1}
   - {word: "orange"}
   - {word: "orbit"}
   - {word: "orca"}
@@ -3171,7 +3163,7 @@ dictionary:
   - {word: "pay"}
   - {word: "PCB"}
   - {word: "PCI"}
-  # {word: "PC+S"}
+  - {word: "PC+S"}
   - {word: "pdf"}
   - {word: "PDMS"}
   - {word: "peace", anagram: 1}
@@ -3223,6 +3215,7 @@ dictionary:
   - {word: "petite"}
   - {word: "petition"}
   - {word: "petroleum"}
+  - {word: "PFC"}
   - {word: "pgrep", anagram: 2}
   - {word: "phantom"}
   - {word: "pharma"}
@@ -3297,6 +3290,7 @@ dictionary:
   - {word: "plumb"}
   - {word: "plus"}
   - {word: "PM", anagram: 1}
+  - {word: "PMd"}
   - {word: "pocket"}
   - {word: "pod"}
   - {word: "poem"}
@@ -3540,7 +3534,7 @@ dictionary:
   - {word: "raw", anagram: 2}
   - {word: "ray", anagram: 4}
   - {word: "razor"}
-  # {word: "RC+S"}
+  - {word: "RC+S"}
   - {word: "'re"}
   - {word: "reach", anagram: 1}
   - {word: "react", anagram: 1}
@@ -3796,7 +3790,7 @@ dictionary:
   - {word: "scope"}
   - {word: "score"}
   - {word: "scout"}
-  - {word: "scrap"}
+  - {word: "scrap", anagram: 1}
   - {word: "scrape"}
   - {word: "scratch"}
   - {word: "screen"}
@@ -3811,6 +3805,7 @@ dictionary:
   - {word: "sea", anagram: 1}
   - {word: "seal", anagram: 1}
   - {word: "search"}
+  - {word: "season"}
   - {word: "seat", anagram: 1}
   - {word: "sec"}
   - {word: "second"}
@@ -3944,7 +3939,6 @@ dictionary:
   - {word: "sink"}
   - {word: "sinter", anagram: 2}
   - {word: "sion"}
-  # {word: "<sion", anagram: 1}
   - {word: "sip", anagram: 3}
   - {word: "sir", anagram: 1}
   - {word: "sister", anagram: 1}
@@ -4076,7 +4070,7 @@ dictionary:
   - {word: "sport"}
   - {word: "spot", anagram: 2}
   - {word: "spouse", anagram: 1}
-  - {word: "spray", anagram: 1}
+  - {word: "spray", anagram: 2}
   - {word: "spread"}
   - {word: "spring"}
   - {word: "sprint"}
@@ -4145,6 +4139,7 @@ dictionary:
   - {word: "stimulation", chord: "stimn"}
   - {word: "stimulus"}
   - {word: "stitute", anagram: 1}
+  - {word: "STN"}
   - {word: "stock"}
   - {word: "stole"}
   - {word: "stomach"}
@@ -4217,7 +4212,7 @@ dictionary:
   - {word: "sum"}
   - {word: "summary"}
   - {word: "summer", anagram: 4}
-  - {word: "summit"}
+  - {word: "summit", anagram: 1}
   - {word: "sun"}
   - {word: "super"}
   - {word: "superb", anagram: 3}
@@ -4278,6 +4273,7 @@ dictionary:
   - {word: "tackle"}
   - {word: "tact", anagram: 2}
   - {word: "tactic"}
+  - {word: "tactile"}
   - {word: "tag"}
   - {word: "tail"}
   - {word: "take"}
@@ -4574,7 +4570,6 @@ dictionary:
   - {word: "update"}
   - {word: "urban"}
   - {word: "ure"}
-  # {word: "<ure", anagram: 1}
   - {word: "urge"}
   - {word: "urgent"}
   - {word: "URI"}
@@ -4618,6 +4613,7 @@ dictionary:
   - {word: "vat"}
   - {word: "vatican"}
   - {word: "vault", anagram: 1}
+  - {word: "VC/VS"}
   - {word: "'ve"}
   - {word: "vec"}
   - {word: "vector"}
@@ -4649,7 +4645,6 @@ dictionary:
   - {word: "vertical"}
   - {word: "vertices"}
   - {word: "very"}
-  # {word: "<ves", anagram: 1}
   - {word: "vessel", anagram: 1}
   - {word: "vest"}
   - {word: "veteran"}
@@ -4682,13 +4677,14 @@ dictionary:
   - {word: "visa"}
   - {word: "visible"}
   - {word: "vision"}
-  - {word: "visit", anagram: 1}
+  - {word: "visit"}
   - {word: "vista"}
   - {word: "visual"}
   - {word: "vital"}
   - {word: "vitamin", anagram: 1}
   - {word: "vitro"}
   - {word: "vivo"}
+  - {word: "vlPFC"}
   - {word: "vocabulary"}
   - {word: "vocal"}
   - {word: "voice"}
@@ -4845,10 +4841,8 @@ dictionary:
   - {word: "yacht", anagram: 1}
   - {word: "Yale", anagram: 5}
   - {word: "yaml"}
-  # {word: "<y", anagram: 1}
   - {word: "Yang", anagram: 1}
   - {word: "yaourt"}
-  # {word: "yard", anagram: 9}
   - {word: "yarn", anagram: 1}
   - {word: "yeah"}
   - {word: "year"}
@@ -4884,7 +4878,7 @@ dictionary:
   - {word: "zotero"}
   - {word: "zsh"}
 
-# Add new commands here, and in pipit-firmware/pipit.cpp
+# Add new commands here, and in `doCommand()` in pipit-firmware/Pipit.cpp
 commands:
   - command_default_mode
   - command_left_hand_mode

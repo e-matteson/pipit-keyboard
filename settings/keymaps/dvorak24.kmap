@@ -5,7 +5,6 @@
 
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
-##### modifier keys #####
 
 mod_shift        key_backspace     mod_ctrl
 ....   ....	     ....   ....   	   ....   ....
@@ -18,6 +17,9 @@ mod_gui          key_space         mod_alt
 ....   ....   	 ....   ....	     ....   ....
   .     .          .     .          .     .
   ... *..     	   ... .*.  	       ... ..*
+
+
+#####  special word modifiers #####
 
 mod_capital      mod_nospace       mod_double      mod_shorten
 ....   ....      ....   ....       ....   ....     ....   ....
@@ -57,13 +59,13 @@ key_m          key_f          key_u         key_p
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-######## double-switch letters
+##### double-switch letters #####
 
-key_b          key_comma      key_z
-..**   ....    .*.*   ....    *..*   ....
-....   ....    ....   ....    ....   ....
-  .     .        .     .        .     .
-  ... ...        ... ...        ... ...
+key_b          key_z
+..**   ....    *..*   ....
+....   ....    ....   ....
+  .     .        .     .
+  ... ...        ... ...
 
 key_g          key_v          key_k
 .**.   ....    *.*.   ....    **..   ....
@@ -71,11 +73,11 @@ key_g          key_v          key_k
   .     .        .     .        .     .
   ... ...        ... ...        ... ...
 
-key_w          key_period     key_q
-....   **..    ....   *.*.    ....   *..*
-....   ....    ....   ....    ....   ....
-  .     .        .     .        .     .
-  ... ...        ... ...        ... ...
+key_w          key_q
+....   **..    ....   *..*
+....   ....    ....   ....
+  .     .        .     .
+  ... ...        ... ...
 
 key_y          key_x          key_j
 ....   .**.    ....   .*.*    ....   ..**
@@ -83,7 +85,13 @@ key_y          key_x          key_j
   .     .        .     .        .     .
   ... ...        ... ...        ... ...
 
-# ###### double-switch punctuation and special keys #######
+##### double-switch punctuation and special keys #####
+
+key_comma      key_period
+.*.*   ....    ....   *.*.
+....   ....    ....   ....
+  .     .        .     .
+  ... ...        ... ...
 
 key_esc       key_bang        key_question
 ....   ....   ....   ....     ....   ....
@@ -186,7 +194,7 @@ key_enter
   .     .
   .*. .*.
 
-######## numbers ###########
+##### numbers #####
 
 key_5          key_3          key_1
 ....   ....		 ....   ....   	....   ....
@@ -206,7 +214,7 @@ key_9          key_8          key_7           key_6
   .     .        .     .        .     .         .     .
   ... ...  	     ... ...        ... ...         ... ...
 
-######## function keys #########
+##### function keys #####
 
 key_f5         key_f3         key_f1
 .*..   ....		 .*..   ....   	.*..   ....
@@ -227,7 +235,7 @@ key_f9         key_f7          key_f6         key_f8
   ... .*.  	     ... .*.         ... .*.        ... .*.
 
 
-##### movement keys, etc #######
+##### movement keys, etc #####
 
 key_down       key_up          key_left       key_right
 ....   ....    ....   ....		 ....   *...	  ....   .*..
@@ -247,7 +255,7 @@ key_delete    key_printscreen  key_caps_lock
   .     .       .     .          .     .
   ... .*.  	    ... .*.          ... .*.
 
-###### commands ######
+##### commands #####
 
 command_delete_word    command_cycle_word
 ....   ....            ....   ....
@@ -280,7 +288,7 @@ command_left_hand_mode  command_gaming_mode  command_windows_mode
   ... ...                 ... ...              ... ...
 
 
-####### macros #######
+##### macros #####
 
 macro_email      macro_apple_save_as
 *...   ....      ....   ....
