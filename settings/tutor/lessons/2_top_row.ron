@@ -1,17 +1,17 @@
 [
-(line: Letters("pufm mfup ppuu ffmm fu pf mu up")),
+(line: Letters("pufm mfup ppuu ffmm mfup pufm")),
 (line: Letters("fume pipe puff pop pump mop")),
 (line: Letters("ppuuffmm mufp uppmf mffup uufp pufm")),
 (line: Letters("a poem of miami fame")),
-(line: Letters("fpu mffp upup fmfm pufm ffmu mfup")),
+(line: Letters("fpfp umum ufuf pmpm pufm")),
 (line: Letters("pop up map femme meme")),
 (line: Letters("mfupufm fpfp ummu fump mpufm")),
 
-(line: Letters("dcrl lrcd ddcc rrll rc dr lc cd")),
+(line: Letters("dcrl lrcd ddcc rrll mfup pufm")),
 (line: Letters("carol called local area radio")),
-(line: Letters("rcdl lrrrl drl cld crc ddlrc")),
+(line: Letters("drdr lclc rdrd ldld lrcd dcrl")),
 (line: Letters("dale carried real railroad coal")),
-(line: Letters("ccd rlrl dcrl ldcr ddccrrll dcrl ldcd")),
+(line: Letters("rcdl lrrrl drl cld crc ddlrc")),
 (line: Letters("claire decided to race in colorado")),
 (line: Letters("lrcd drcd dcrl rrcdd dldl crcr drcl")),
 

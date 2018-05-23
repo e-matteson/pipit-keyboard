@@ -11,5 +11,5 @@
 (line: Letters("for(int i=this->cue_list.size(); i>0; i--){")),
 (line: Letters("(let ((x (+ 2 (* (+ 7 4) 3)))) (message \"%d\" x))")),
 (line: Letters("\"2048\".parse::<u32>()")),
-(line: Letters("printf(\"%d\n\", getpid());")),
+(line: Letters("printf(\"%d\\n\", getpid());")),
 ]
