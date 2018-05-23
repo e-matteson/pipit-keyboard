@@ -129,6 +129,8 @@ key_doublequote key_quote
  .     .          .     .
   ... ...         ... ...
 
+## middle ##
+
 key_caret       key_dollar
 ...*   ....     ....   *...
 ..*.   ....     ....   .*..

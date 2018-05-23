@@ -1057,7 +1057,6 @@ dictionary:
   - {word: "athlete", anagram: 1}
   - {word: "athletic"}
   - {word: "ation"}
-  # {word: "<ation", anagram: 1}
   - {word: "atom"}
   - {word: "atomic"}
   - {word: "attach", anagram: 2}
@@ -1095,7 +1094,6 @@ dictionary:
   - {word: "avr", anagram: 1}
   - {word: "award", anagram: 6}
   - {word: "aware", anagram: 5}
-  # {word: "away", anagram: 8}
   - {word: "awesome"}
   - {word: "awful"}
   - {word: "awk"}
@@ -1419,7 +1417,6 @@ dictionary:
   - {word: "caution"}
   - {word: "cave"}
   - {word: "cd", anagram: 1}
-  # {word: "<ce"}
   - {word: "ceil"}
   - {word: "celebrate"}
   - {word: "celebrity", anagram: 1}
@@ -1775,7 +1772,6 @@ dictionary:
   - {word: "custom"}
   - {word: "cut"}
   - {word: "cute"}
-  # {word: "<cy", anagram: 4}
   - {word: "cyber", anagram: 1}
   - {word: "cycle", anagram: 1}
   - {word: "cylinder"}
@@ -2842,22 +2838,17 @@ dictionary:
   - {word: "idiot"}
   - {word: "idle"}
   - {word: "idol"}
-  # {word: "<ied", anagram: 1}
   - {word: "ier"}
-  # {word: "<ier", anagram: 1}
   - {word: "ies"}
-  # {word: "<ies", anagram: 1}
   - {word: "if", anagram: 1}
   - {word: "ifndef", anagram: 1}
   - {word: "ify"}
-  # {word: "<ify", anagram: 1}
   - {word: "ignore"}
   - {word: "ill"}
   - {word: "I'll"}
   - {word: "illegal"}
   - {word: "illustrate"}
   - {word: "ily"}
-  # {word: "<ily", anagram: 1}
   - {word: "I'm"}
   - {word: "image"}
   - {word: "imagine"}
@@ -2896,7 +2887,6 @@ dictionary:
   - {word: "induce"}
   - {word: "industry"}
   - {word: "iness"}
-  # {word: "<iness", anagram: 1}
   - {word: "inf"}
   - {word: "infant"}
   - {word: "infect", anagram: 1}
@@ -2907,7 +2897,6 @@ dictionary:
   - {word: "information"}
   - {word: "infra"}
   - {word: "ing"}
-  # {word: "<ing", anagram: 1}
   - {word: "ingredient"}
   - {word: "inherit", anagram: 1}
   - {word: "inhibit"}
@@ -2961,10 +2950,8 @@ dictionary:
   - {word: "invite", anagram: 1}
   - {word: "involve"}
   - {word: "ion"}
-  # {word: "<ion", anagram: 1}
   - {word: "ior"}
   - {word: "ious"}
-  # {word: "<ious", anagram: 1}
   - {word: "ip", anagram: 2}
   - {word: "iris"}
   - {word: "iron"}
@@ -2990,7 +2977,6 @@ dictionary:
   - {word: "it's"}
   - {word: "its"}
   - {word: "ity"}
-  # {word: "<ity", anagram: 1}
   - {word: "ium", anagram: 1}
   - {word: "ive"}
   - {word: "I've"}
@@ -3258,7 +3244,6 @@ dictionary:
   - {word: "lurk"}
   - {word: "luxury", anagram: 2}
   - {word: "ly"}
-  # {word: "<ly", anagram: 1}
   - {word: "lyric", anagram: 1}
   - {word: "mac"}
   - {word: "machine"}
@@ -3532,7 +3517,6 @@ dictionary:
   - {word: "mutter", anagram: 1}
   - {word: "mutual"}
   - {word: "mv", anagram: 1}
-  # {word: "mvmt", anagram: 1}
   - {word: "Mx."}
   - {word: "my"}
   - {word: "mysql"}
@@ -3697,7 +3681,6 @@ dictionary:
   - {word: "or"}
   - {word: "oracle"}
   - {word: "oral"}
-  # {word: "<or", anagram: 1}
   - {word: "orange"}
   - {word: "orbit"}
   - {word: "orca"}
@@ -4448,6 +4431,7 @@ dictionary:
   - {word: "sea", anagram: 1}
   - {word: "seal", anagram: 1}
   - {word: "search"}
+  - {word: "season"}
   - {word: "seat", anagram: 1}
   - {word: "sec"}
   - {word: "second"}
@@ -4581,7 +4565,6 @@ dictionary:
   - {word: "sink"}
   - {word: "sinter", anagram: 2}
   - {word: "sion"}
-  # {word: "<sion", anagram: 1}
   - {word: "sip", anagram: 3}
   - {word: "sir", anagram: 1}
   - {word: "sister", anagram: 1}
@@ -5213,7 +5196,6 @@ dictionary:
   - {word: "update"}
   - {word: "urban"}
   - {word: "ure"}
-  # {word: "<ure", anagram: 1}
   - {word: "urge"}
   - {word: "urgent"}
   - {word: "URI"}
@@ -5289,7 +5271,6 @@ dictionary:
   - {word: "vertical"}
   - {word: "vertices"}
   - {word: "very"}
-  # {word: "<ves", anagram: 1}
   - {word: "vessel", anagram: 1}
   - {word: "vest"}
   - {word: "veteran"}
@@ -5486,10 +5467,8 @@ dictionary:
   - {word: "yacht", anagram: 1}
   - {word: "Yale", anagram: 5}
   - {word: "yaml"}
-  # {word: "<y", anagram: 1}
   - {word: "Yang", anagram: 1}
   - {word: "yaourt"}
-  # {word: "yard", anagram: 9}
   - {word: "yarn", anagram: 1}
   - {word: "yeah"}
   - {word: "year"}
