@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
@@ -12,7 +12,11 @@ use failure::{Error, ResultExt};
 
 lazy_static! {
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
+    static ref LEARNING_MAP: Mutex<HashMap<String, LearnState>> = Mutex::new(HashMap::new());
 }
+
+#[derive(Debug, Clone)]
+pub struct LearnState(pub i64);
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -51,7 +55,7 @@ pub struct SlideEntry {
 }
 
 #[derive(Debug, Clone)]
-pub enum LastChar {
+pub enum PrevCharStatus {
     Correct,
     Incorrect(Option<LabeledChord>),
 }
@@ -67,25 +71,64 @@ pub struct Label(String);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-impl LastChar {
+pub fn check_if_learned(name: &str) -> Option<bool> {
+    LEARNING_MAP
+        .lock()
+        .unwrap()
+        .get(name)
+        .map(|state| state.is_learned())
+}
+
+pub fn update_learn_state(name: String, was_correct: bool) {
+    LEARNING_MAP
+        .lock()
+        .unwrap()
+        .entry(name)
+        .or_default()
+        .update(was_correct);
+}
+
+impl LearnState {
+    pub fn update(&mut self, was_correct: bool) {
+        if was_correct {
+            self.0 -= 1;
+        } else {
+            self.0 += 1;
+        }
+    }
+
+    pub fn is_learned(&self) -> bool {
+        self.0 <= 0
+    }
+}
+
+impl Default for LearnState {
+    fn default() -> LearnState {
+        // Set the number of times you must type this character correctly
+        // before the hint goes away
+        LearnState(10)
+    }
+}
+
+impl PrevCharStatus {
     pub fn backspace(&self) -> Option<LabeledChord> {
         match self {
-            LastChar::Correct => None,
-            LastChar::Incorrect(_) => LabeledChord::backspace(),
+            PrevCharStatus::Correct => None,
+            PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
         }
     }
 
     pub fn error(&self) -> Option<LabeledChord> {
         match self {
-            LastChar::Correct => None,
-            LastChar::Incorrect(x) => x.clone(),
+            PrevCharStatus::Correct => None,
+            PrevCharStatus::Incorrect(x) => x.clone(),
         }
     }
 
     pub fn is_correct(&self) -> bool {
         match self {
-            LastChar::Correct => true,
-            LastChar::Incorrect(_) => false,
+            PrevCharStatus::Correct => true,
+            PrevCharStatus::Incorrect(_) => false,
         }
     }
 }

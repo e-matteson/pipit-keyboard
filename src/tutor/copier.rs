@@ -9,16 +9,15 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use types::errors::BadValueErr;
 use failure::{Error, ResultExt};
-use tutor::tutor_util::{grapheme_slice, offset, LabeledChord, LastChar,
+use tutor::tutor_util::{check_if_learned, grapheme_slice, offset,
+                        update_learn_state, LabeledChord, PrevCharStatus,
                         SlideEntry, SlideLine};
 
-// TODO compose from CopierLine?
 #[derive(Debug, Clone)]
 pub struct Copier {
     num_chars: usize,
     point_marker: String,
     point_offset: usize,
-    learning_map: HashMap<String, LearnState>,
     line: CopierLine,
 }
 
@@ -33,31 +32,6 @@ struct CopierLine {
     was_backspace_typed_last: bool,
 }
 
-#[derive(Debug, Clone)]
-struct LearnState(i64);
-
-impl LearnState {
-    fn update(&mut self, was_correct: bool) {
-        if was_correct {
-            self.0 -= 1;
-        } else {
-            self.0 += 1;
-        }
-    }
-
-    fn is_learned(&self) -> bool {
-        self.0 >= 0
-    }
-}
-
-impl Default for LearnState {
-    fn default() -> LearnState {
-        // Set the number of times you must type this character correctly
-        // before the hint goes away
-        LearnState(10)
-    }
-}
-
 impl Copier {
     pub fn new(num_chars: usize) -> Copier {
         let point_offset = (num_chars + 1) / 2. as usize;
@@ -65,17 +39,12 @@ impl Copier {
             num_chars: num_chars,
             point_offset: point_offset,
             point_marker: "▼".into(),
-            learning_map: HashMap::new(),
             line: CopierLine::default(),
         }
     }
 
     pub fn needs_hint(&self, letter: &str) -> bool {
-        if let Some(state) = self.learning_map.get(letter) {
-            state.is_learned()
-        } else {
-            true
-        }
+        !check_if_learned(letter).unwrap_or(false)
     }
 
     pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
@@ -106,36 +75,47 @@ impl Copier {
         Ok(letter_hint)
     }
 
-    pub fn last_wrong_char(&self) -> Result<LastChar, Error> {
+    /// Offset of the most recently typed character
+    fn prev_offset(&self) -> usize {
+        self.point_offset - 1
+    }
+
+    pub fn prev_char_status(&self) -> Result<PrevCharStatus, Error> {
         if !self.line.show_errors {
-            return Ok(LastChar::Correct);
+            return Ok(PrevCharStatus::Correct);
         }
 
-        let offset = self.point_offset - 1;
-        let actual = self.actual_at_offset(offset)?;
-        let expected = if let Some(expected) = self.expected_at_offset(offset) {
-            expected
+        let offset = self.prev_offset();
+        let actual_char = self.actual_at_offset(offset)?;
+        let expected_char;
+        if let Some(c) = self.expected_at_offset(offset) {
+            expected_char = c;
         } else {
-            return Ok(LastChar::Incorrect(None));
+            return Ok(PrevCharStatus::Incorrect(None));
         };
 
-        // TODO don't include actual if not at word boundary?
-        Ok(if actual != expected {
-            LastChar::Incorrect(LabeledChord::from_letter(&actual))
+        // TODO don't include actual_char if not at word boundary?
+        Ok(if actual_char != expected_char {
+            PrevCharStatus::Incorrect(LabeledChord::from_letter(&actual_char))
         } else {
-            LastChar::Correct
+            PrevCharStatus::Correct
         })
     }
 
     pub fn type_char(&mut self, character: char) {
-        let s = character.to_string();
-        self.line.actual += &s;
+        self.line.actual += &character.to_string();
         self.line.index += 1;
         self.line.was_backspace_typed_last = false;
 
-        let was_correct = self.was_last_char_correct()
-            .expect("failed to type character");
-        self.learning_map.entry(s).or_default().update(was_correct);
+        let was_correct = self.prev_char_status()
+            .context("failed to check if most recently typed char was correct")
+            .expect("failed to type character")
+            .is_correct();
+
+        if let Some(expected_char) = self.expected_at_offset(self.prev_offset())
+        {
+            update_learn_state(expected_char, was_correct);
+        }
     }
 
     pub fn type_backspace(&mut self) {
@@ -184,12 +164,6 @@ impl Copier {
 
         // ensure the corrected wpm won't be negative
         f64::max(0., (total_chars / CHARS_PER_WORD) - wrong_chars)
-    }
-
-    fn was_last_char_correct(&self) -> Result<bool, Error> {
-        Ok(self.last_wrong_char()
-            .context("failed to check if last char was correct")?
-            .is_correct())
     }
 
     fn actual_at_offset(&self, offset: usize) -> Result<String, Error> {
@@ -260,7 +234,6 @@ impl CopierLine {
     ) -> Result<CopierLine, Error> {
         let (entries, text) = line.to_entries()?;
 
-        // TODO why String::from?
         let pad = " ".repeat(extra_spaces);
         let expected = pad.clone() + &text;
         let mut actual = String::from(pad);

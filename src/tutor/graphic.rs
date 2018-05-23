@@ -6,7 +6,7 @@ use cursive::theme::{Color, ColorStyle};
 // use types::Chord;
 // use types::errors::*;
 
-use tutor::tutor_util::{Label, LabeledChord, LastChar};
+use tutor::tutor_util::{Label, LabeledChord, PrevCharStatus};
 
 pub struct Graphic {
     pub next: Option<LabeledChord>,
@@ -56,11 +56,11 @@ impl Graphic {
         Vec2::new(78, 12)
     }
 
-    pub fn update(&mut self, next: Option<LabeledChord>, last: LastChar) {
+    pub fn update(&mut self, next: Option<LabeledChord>, prev: PrevCharStatus) {
         // TODO use some map fn
         self.next = next;
-        self.error = last.error();
-        self.backspace = last.backspace();
+        self.error = prev.error();
+        self.backspace = prev.backspace();
         self.update_switches();
     }
 

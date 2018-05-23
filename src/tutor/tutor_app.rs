@@ -148,10 +148,10 @@ impl Lesson {
 
     fn update_chord(&mut self) -> Result<(), Error> {
         let next_char = self.copier.next_hint().context("failed to get hint")?;
-        let last_wrong_char = self.copier
-            .last_wrong_char()
+        let prev_char_status = self.copier
+            .prev_char_status()
             .expect("failed to check if char was wrong");
-        self.graphic.update(next_char, last_wrong_char);
+        self.graphic.update(next_char, prev_char_status);
         Ok(())
     }
 
