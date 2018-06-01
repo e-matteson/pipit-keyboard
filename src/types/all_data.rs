@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::clone::Clone;
 use std::path::PathBuf;
 
@@ -284,15 +284,15 @@ impl AllData {
     }
 
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
-        let mut out = Vec::new();
+        let mut out = HashSet::new();
         for mode_info in self.modes.values() {
             for kmap_info in &mode_info.keymaps {
                 if kmap_info.use_words {
-                    out.push(kmap_info.file.clone());
+                    out.insert(kmap_info.file.clone());
                 }
             }
         }
-        out
+        out.into_iter().collect()
     }
 
     pub fn get_seq_types(&self) -> Vec<SeqType> {
