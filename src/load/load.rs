@@ -4,7 +4,6 @@ use serde_yaml;
 use load::{parse_kmap, OptionsConfig, Settings};
 use types::{AllData, Chord, SeqType, Validate};
 use util::read_file;
-// use types::errors::*;
 use failure::{Error, ResultExt};
 
 impl AllData {
@@ -52,6 +51,10 @@ impl AllData {
         all_data
             .load_plain_mods(&settings)
             .context("Failed to load plain mods")?;
+
+        all_data
+            .make_spelling_table()
+            .context("Failed to make spelling table")?;
 
         all_data.load_word_mods(&settings);
 

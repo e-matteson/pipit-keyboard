@@ -7,10 +7,11 @@ use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 use ron::de::from_reader;
 
-use types::{Chord, ModeName, Name, TutorData};
+use types::{Chord, ModeName, Name, Spelling, TutorData};
 use failure::{Error, ResultExt};
 
 lazy_static! {
+    // TODO don't use mutex?
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
     static ref LEARNING_MAP: Mutex<HashMap<String, LearnState>> = Mutex::new(HashMap::new());
 }
@@ -162,6 +163,14 @@ pub fn get_tutor_data_chord(name: &Name) -> Option<Chord> {
     }
 }
 
+pub fn get_tutor_data_name(spelling: &Spelling) -> Option<Name> {
+    if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
+        data.spellings.get(spelling).map(|name| name.clone())
+    } else {
+        panic!("tutor data was not set")
+    }
+}
+
 impl SlideLine {
     pub fn show_errors(&self) -> bool {
         match self {
@@ -267,9 +276,10 @@ impl LabeledChord {
 }
 
 pub fn char_to_chord(character: &str) -> Option<Chord> {
-    let (name, is_uppercase) = get_char_chord_name(character)?;
+    let spelling = Spelling::new(character).ok()?;
+    let name = get_tutor_data_name(&spelling)?;
     let mut chord = get_tutor_data_chord(&name)?;
-    if is_uppercase {
+    if spelling.is_uppercase() {
         chord.intersect(&get_tutor_data_chord(&Name("mod_shift".into()))?)
     }
     Some(chord)
@@ -313,78 +323,6 @@ impl<'a> Into<Label> for &'a str {
     }
 }
 
-// impl<'a, T> Into<Label> for &'a T
-// where
-//     T: Into<Label>,
-// {
-//     fn into(t: &T) -> Label {
-//         t.to_owned().into()
-//     }
-// }
-
-fn to_ascii(character: &str) -> Option<char> {
-    let mut chars = character.chars();
-    let first_char = chars
-        .next()
-        .expect("string should contain exactly one grapheme, but is empty");
-    if chars.count() > 0 {
-        // this grapheme contained more than one byte, so it's not ascii.
-        None
-    } else {
-        Some(first_char)
-    }
-}
-
-fn get_char_chord_name(character: &str) -> Option<(Name, bool)> {
-    if let Some(c) = to_ascii(character) {
-        if c.is_alphanumeric() {
-            return Some((
-                Name(format!("key_{}", c.to_lowercase())),
-                c.is_uppercase(),
-            ));
-        }
-    }
-    let name = match character {
-        "&" => "key_ampersand".into(),
-        "*" => "key_asterisk".into(),
-        "@" => "key_at".into(),
-        "\\" => "key_backslash".into(),
-        "!" => "key_bang".into(),
-        "^" => "key_caret".into(),
-        ":" => "key_colon".into(),
-        "," => "key_comma".into(),
-        "$" => "key_dollar".into(),
-        "\"" => "key_doublequote".into(),
-        "\n" => "key_enter".into(),
-        "=" => "key_equal".into(),
-        "`" => "key_grave".into(),
-        "#" => "key_hash".into(),
-        "<" => "key_left_angle".into(),
-        "[" => "key_left_brace".into(),
-        "{" => "key_left_curly".into(),
-        "(" => "key_left_paren".into(),
-        "-" => "key_minus".into(),
-        "%" => "key_percent".into(),
-        "." => "key_period".into(),
-        "|" => "key_pipe".into(),
-        "+" => "key_plus".into(),
-        "?" => "key_question".into(),
-        "'" => "key_quote".into(),
-        ">" => "key_right_angle".into(),
-        "]" => "key_right_brace".into(),
-        "}" => "key_right_curly".into(),
-        ")" => "key_right_paren".into(),
-        ";" => "key_semicolon".into(),
-        "/" => "key_slash".into(),
-        " " => "key_space".into(),
-        "\t" => "key_tab".into(),
-        "~" => "key_tilde".into(),
-        "_" => "key_underscore".into(),
-        _ => return None,
-    };
-    Some((Name(name), false))
-}
-
 pub fn offset(width1: usize, width2: usize) -> usize {
     ((width2 - width1) as f32 / 2.).round() as usize
 }
@@ -405,117 +343,6 @@ pub fn load_lessons(
     }
     Ok(map)
 }
-
-// vec![
-//     (
-//         "fake lesson".into(),
-//         vec![
-//             Slide {
-//                 line: SlideLine::Letters("abababababab".into()),
-//             },
-//             Slide {
-//                 line: SlideLine::Words {
-//                     show_errors: false,
-//                     words: vec![
-//                         // SlideWord {
-//                         //     names: vec!["word_the".into()],
-//                         //     text: " teeth".into(),
-//                         //     length_override: Some(4),
-//                         // },
-//                         // SlideWord {
-//                         //     names: vec!["command_cycle_word".into()],
-//                         //     text: "".into(),
-//                         //     length_override: None,
-//                         // },
-//                         SlideWord {
-//                             names: vec!["word_raw_2".into()],
-//                             text: " raw".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["word_teeth_1".into()],
-//                             text: " the".into(),
-//                             length_override: Some(6),
-//                         },
-//                         SlideWord {
-//                             names: vec!["command_cycle_word".into()],
-//                             text: "".into(),
-//                             length_override: None,
-//                         },
-//                         /* SlideWord {
-//                          *     names: vec!["word_different_dif".into()],
-//                          *     text: "different".into(),
-//                          *     length_override: None,
-//                          * }, */
-//                     ],
-//                 },
-//             },
-//             Slide {
-//                 line: SlideLine::Words {
-//                     show_errors: true,
-//                     words: vec![
-//                         SlideWord {
-//                             names: vec![
-//                                 "word_tap".into(),
-//                                 "mod_nospace".into(),
-//                                 "mod_capital".into(),
-//                             ],
-//                             text: "Tap".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec![
-//                                 "word_ing".into(),
-//                                 "mod_double".into(),
-//                             ],
-//                             text: "ping".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_space".into()],
-//                             text: " ".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_l".into()],
-//                             text: "l".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_e".into()],
-//                             text: "e".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_t".into()],
-//                             text: "t".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_t".into()],
-//                             text: "t".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_e".into()],
-//                             text: "e".into(),
-//                             length_override: None,
-//                         },
-//                         SlideWord {
-//                             names: vec!["key_r".into()],
-//                             text: "r".into(),
-//                             length_override: None,
-//                         },
-//                     ],
-//                 },
-//             },
-//             Slide {
-//                 line: SlideLine::Letters("goodbye".into()),
-//             },
-//         ],
-//     ),
-// ].into_iter()
-//     .collect()
 
 fn lesson_path_to_name(path: &PathBuf) -> String {
     let s = path.file_stem()

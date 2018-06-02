@@ -162,10 +162,8 @@ fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
     let mut counts: BTreeMap<CCode, (usize, bool)> = BTreeMap::new();
     for key_press in keys {
         increment(&mut counts, key_press.key_or_blank(), false);
-        if let Some(modifiers) = key_press.mods {
-            for modifier in modifiers {
-                increment(&mut counts, modifier, true);
-            }
+        for modifier in key_press.mods {
+            increment(&mut counts, modifier, true);
         }
     }
     counts

@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use types::{CCode, Chord, KeyPress, ToC, Validate};
 use types::errors::*;
-use failure::Error;
+use failure::{Error, ResultExt};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -81,7 +81,11 @@ pub struct Permutation {
 #[derive(Debug, Clone)]
 pub struct TutorData {
     pub chords: BTreeMap<ModeName, BTreeMap<Name, Chord>>,
+    pub spellings: BTreeMap<Spelling, Name>,
 }
+
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
+pub struct Spelling(pub char);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -341,6 +345,41 @@ impl fmt::Display for Name {
 impl fmt::Debug for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl Spelling {
+    pub fn new(s: &str) -> Result<Spelling, Error> {
+        let mut chars = s.chars();
+        Ok(match (chars.next(), chars.next()) {
+            (Some(first), None) => Spelling(first),
+            (_, _) => Err(BadValueErr {
+                thing: "single ascii character".into(),
+                value: s.into(),
+            }).context("failed to make spelling")?,
+        })
+    }
+
+    pub fn is_uppercase(&self) -> bool {
+        self.0.is_uppercase()
+    }
+
+    pub fn to_lowercase(&self) -> Spelling {
+        Spelling(
+            self.0
+                .to_lowercase()
+                .next()
+                .expect("failed to get lowercase spelling"),
+        )
+    }
+}
+
+impl fmt::Display for Spelling {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = self.0.to_string();
+        fmt::Display::fmt(&s, f)
     }
 }
 

@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{AllData, AnagramNum, Chord, KmapPath, Name, WordBuilder};
+use types::{AllData, AnagramNum, Chord, KmapPath, Name};
 
 /// The Checker warns about sub-optimal configuration, like conflicting chords
 /// or skipped anagram numbers. Any config issues that would break the firmware
@@ -237,7 +237,8 @@ fn is_pair_legal(
 ) -> bool {
     let okay = |a, b| {
         word_mod_names.contains(a) && !word_mod_names.contains(b)
-            && !WordBuilder::allowed_in_chord(b)
+        // TODO re-add some test like this one
+        // && !WordBuilder::allowed_in_chord(b)
     };
     okay(name1, name2) || okay(name2, name1)
 }

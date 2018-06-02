@@ -2,14 +2,14 @@ use time::*;
 use std::collections::BTreeMap;
 
 use util::bools_to_bytes;
-use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyPress, KmapPath,
-            Name, SeqType, Sequence, ToC};
+use types::{AllData, CCode, CTree, Field, HuffmanTable, KeyDefs, KeyPress,
+            KmapPath, Name, SeqType, Sequence, ToC};
 
 use format::{KmapBuilder, ModeBuilder};
 // use format::KmapBuilder;
 
-use types::errors::{BadValueErr, MissingErr};
-use failure::{Error, ResultExt};
+use types::errors::MissingErr;
+use failure::Error;
 
 c_struct!(
     struct HuffmanChar {
@@ -290,35 +290,23 @@ impl KeyPress {
 
     fn format_mods(&self) -> CCode {
         // TODO think about this
-        match self.mods {
-            Some(ref codes) => KeyPress::truncate(&CCode::join(codes, "|")),
-            None => KeyPress::empty_code(),
+        if self.mods.is_empty() {
+            KeyPress::empty_code()
+        } else {
+            KeyPress::truncate(&CCode::join(&self.mods, "|"))
         }
     }
 
-    pub fn check_non_empty(&self) -> Result<(), Error> {
-        let error = || {
-            Err(BadValueErr {
-                value: "(empty)".into(),
-                thing: "KeyPress".into(),
-            }).context("KeyPress must contain at least one key or modifier")
-        };
-
-        match (&self.key, &self.mods) {
-            (None, None) => error()?,
-            (None, Some(ref v)) if v.is_empty() => error()?,
-            _ => Ok(()),
-        }
+    fn empty_code() -> CCode {
+        "0".to_c()
     }
 
     pub fn huffman(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
-        self.check_non_empty()?;
+        self.ensure_non_empty()?;
 
         let mut bits = Vec::new();
-        if let Some(modifiers) = &self.mods {
-            for modifier in modifiers {
-                bits.extend(table.bits(modifier)?);
-            }
+        for modifier in &self.mods {
+            bits.extend(table.bits(modifier)?);
         }
 
         // There must be a key following the mod(s), so that we know when the
@@ -434,25 +422,25 @@ fn make_debug_macros() -> CTree {
 }
 
 fn render_keycode_definitions() -> CTree {
-    let keycodes = KeyPress::defined_keycodes();
+    let keycodes = KeyDefs::scancode_table();
     let example = keycodes
         .keys()
         .nth(0)
-        .expect("KeyPress::defined_keycodes() is empty!")
+        .expect("KeyDefs::scancode_table() is empty!")
         .to_owned();
 
     let keycode_definitions = CTree::Group(
         keycodes
             .iter()
-            .map(|(name, value)| CTree::Define {
+            .map(|(&name, &value)| CTree::Define {
                 name: name.to_owned(),
-                value: value.to_owned(),
+                value: value.to_c(),
             })
             .collect(),
     );
 
     CTree::Ifndef {
-        conditional: example,
+        conditional: example.to_owned(),
         contents: Box::new(keycode_definitions),
     }
 }

@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 use util::ensure_u8;
 
-use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyPress, KmapPath,
-            ModeInfo, ModeName, Name, SeqType, Sequence, TutorData,
-            WordBuilder, WordConfig};
+use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyDefs, KeyPress,
+            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, Spelling,
+            TutorData, WordBuilder, WordConfig};
 
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
 use failure::{Error, Fail, ResultExt};
@@ -23,6 +23,7 @@ pub struct AllData {
     pub output_directory: Option<PathBuf>,
     pub tutor_directory: Option<PathBuf>,
     pub huffman_table: Option<HuffmanTable>,
+    spellings: BTreeMap<Spelling, Name>,
     highest_anagram_num: AnagramNum,
 }
 
@@ -40,6 +41,7 @@ impl AllData {
             tutor_directory: None,
             huffman_table: None,
             highest_anagram_num: AnagramNum(0),
+            spellings: BTreeMap::new(),
         }
     }
 
@@ -188,6 +190,7 @@ impl AllData {
         Ok(())
     }
 
+    // TODO don't take reference to seq_type
     fn get_sequences(
         &self,
         seq_type: &SeqType,
@@ -387,6 +390,42 @@ impl AllData {
             }
             chords.insert(mode.to_owned(), mode_chords);
         }
-        Ok(TutorData { chords: chords })
+        // TODO use references instead of cloning spellings
+        Ok(TutorData {
+            chords: chords,
+            spellings: self.spellings.clone(),
+        })
+    }
+
+    pub fn name_from_spelling(
+        &self,
+        spelling: &Spelling,
+    ) -> Result<Name, Error> {
+        Ok(self.spellings
+            .get(spelling)
+            .ok_or_else(|| LookupErr {
+                key: format!("name for '{}'", spelling),
+                container: "spelling table".into(),
+            })?
+            .to_owned())
+    }
+
+    pub fn make_spelling_table(&mut self) -> Result<(), Error> {
+        let mut map = BTreeMap::new();
+        {
+            let plain_names = self.get_sequences(&SeqType::Plain)?
+                .keys()
+                .chain(self.plain_mods.iter());
+            for name in plain_names {
+                let spelling = KeyDefs::spelling_from_keypress(
+                    &self.get_single_keypress(name)?,
+                )?;
+                if let Some(spelling) = spelling {
+                    map.insert(spelling, name.to_owned());
+                }
+            }
+        }
+        self.spellings = map;
+        Ok(())
     }
 }

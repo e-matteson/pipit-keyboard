@@ -595,7 +595,6 @@ impl Symbol {
 }
 
 fn get_symbol(key: &Name) -> Result<Symbol, Error> {
-    // TODO share with tutor?
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
             // ("mod_shift".into(), Symbol::from("shift", 0.9)),

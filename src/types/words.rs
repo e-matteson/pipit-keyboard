@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use std::str::FromStr;
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Validate};
+use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Spelling,
+            Validate};
 use types::errors::*;
 use failure::{Error, ResultExt};
 
@@ -125,10 +125,6 @@ impl<'a> WordBuilder<'a> {
         })
     }
 
-    pub fn allowed_in_chord(name: &Name) -> bool {
-        names_for_chord().values().any(|x| x == name)
-    }
-
     fn make_name(&self) -> Name {
         // Ensure that each word has a unique name.
 
@@ -150,8 +146,6 @@ impl<'a> WordBuilder<'a> {
     }
 
     fn make_chord(&self) -> Result<Chord, Error> {
-        let ignored = vec!['<'];
-
         let mut chord = Chord::new();
 
         let num = self.info.anagram_num();
@@ -159,84 +153,17 @@ impl<'a> WordBuilder<'a> {
         chord.anagram_num = num;
 
         for letter in self.info.chord_spelling().chars() {
-            if ignored.contains(&letter) {
-                continue;
-            }
-            chord.intersect(&self.get_chord_for_letter(letter)?);
-        }
+            let name = self.all_data
+                .name_from_spelling(&Spelling(letter).to_lowercase())?;
 
+            let new_chord: Chord = self.all_data
+                .get_chord(&name, self.kmap)
+                .ok_or_else(|| LookupErr {
+                    key: name.to_string(),
+                    container: "chords".into(),
+                })?;
+            chord.intersect(&new_chord);
+        }
         Ok(chord)
     }
-
-    fn get_chord_for_letter(&self, letter: char) -> Result<Chord, Error> {
-        let name = get_key_name_for_chord(letter)
-            .ok_or_else(|| BadValueErr {
-                thing: "character".into(),
-                value: letter.to_string(),
-            })
-            .context("character not allowed in word's chord")?;
-
-        self.all_data.get_chord(&name, self.kmap).ok_or_else(|| {
-            LookupErr {
-                key: name.to_string(),
-                container: "chords".into(),
-            }.into()
-        })
-    }
-}
-
-fn get_key_name_for_chord(character: char) -> Option<Name> {
-    names_for_chord()
-        .get(character.to_lowercase().to_string().as_str())
-        .cloned()
-}
-
-fn names_for_chord() -> &'static HashMap<&'static str, Name> {
-    lazy_static! {
-        static ref NAMES_FOR_CHORD: HashMap<&'static str, Name>  = vec![
-            ("a", "key_a"),
-            ("b", "key_b"),
-            ("c", "key_c"),
-            ("d", "key_d"),
-            ("e", "key_e"),
-            ("f", "key_f"),
-            ("g", "key_g"),
-            ("h", "key_h"),
-            ("i", "key_i"),
-            ("j", "key_j"),
-            ("k", "key_k"),
-            ("l", "key_l"),
-            ("m", "key_m"),
-            ("n", "key_n"),
-            ("o", "key_o"),
-            ("p", "key_p"),
-            ("q", "key_q"),
-            ("r", "key_r"),
-            ("s", "key_s"),
-            ("t", "key_t"),
-            ("u", "key_u"),
-            ("v", "key_v"),
-            ("w", "key_w"),
-            ("x", "key_x"),
-            ("y", "key_y"),
-            ("z", "key_z"),
-            ("0", "key_0"),
-            ("1", "key_1"),
-            ("2", "key_2"),
-            ("3", "key_3"),
-            ("4", "key_4"),
-            ("5", "key_5"),
-            ("6", "key_6"),
-            ("7", "key_7"),
-            ("8", "key_8"),
-            ("9", "key_9"),
-            (" ", "key_space"),
-            (".", "key_period"),
-            (",", "key_comma"),
-            ("\'", "key_quote"),
-            ("/", "key_slash"),
-            ("+", "key_plus"),
-        ].into_iter().map(|(character,name)| (character, name.into())).collect();
-    }
-    &NAMES_FOR_CHORD
 }
