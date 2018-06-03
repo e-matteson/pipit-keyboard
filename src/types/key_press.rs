@@ -30,6 +30,7 @@ pub struct KeyDefs;
 
 lazy_static!{
     static ref TABLE: Vec<KeyDef> = vec![
+        // keypress                                   spelling    scancode
         (KeyPress::new_mod("MODIFIERKEY_CTRL"),        None,       Some(1)),
         (KeyPress::new_mod("MODIFIERKEY_SHIFT"),       None,       Some(2)),
         (KeyPress::new_mod("MODIFIERKEY_ALT"),         None,       Some(4)),
@@ -181,6 +182,117 @@ lazy_static!{
         .collect();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+impl KeyPress {
+    fn new_key<T>(keycode: T) -> KeyPress
+    where
+        T: ToC,
+    {
+        KeyPress {
+            key: Some(keycode.to_c()),
+            mods: Vec::new(),
+        }
+    }
+
+    fn new_cap<T>(keycode: T) -> KeyPress
+    where
+        T: ToC,
+    {
+        KeyPress {
+            key: Some(keycode.to_c()),
+            mods: vec!["MODIFIERKEY_SHIFT".to_c()],
+        }
+    }
+
+    fn new_mod<T>(modifier: T) -> KeyPress
+    where
+        T: ToC,
+    {
+        KeyPress {
+            key: None,
+            mods: vec![modifier.to_c()],
+        }
+    }
+
+    pub fn new_fake(command_code: &Name) -> KeyPress {
+        // We also use KeyPresses to store command codes
+        KeyPress {
+            key: Some(command_code.to_c()),
+            mods: Vec::new(),
+        }
+    }
+
+    pub fn key_or_blank(&self) -> CCode {
+        if let Some(key_code) = &self.key {
+            key_code.to_owned()
+        } else {
+            KeyPress::blank()
+        }
+    }
+
+    /// Blanks are used in the huffman encoded sequences, to represent when a
+    /// keypress contains only a mod - the key is stored as BLANK_KEY.
+    pub fn blank() -> CCode {
+        BLANK_KEY.to_c()
+    }
+
+    fn capitalize(&mut self) {
+        let shift = "MODIFIERKEY_SHIFT".to_c();
+        if !self.mods.contains(&shift) {
+            self.mods.push(shift);
+        }
+    }
+
+    pub fn ensure_non_empty(&self) -> Result<(), Error> {
+        if self.key.is_none() && self.mods.is_empty() {
+            Ok(Err(BadValueErr {
+                value: "(empty)".into(),
+                thing: "KeyPress".into(),
+            }).context(
+                "KeyPress must contain at least one key or modifier",
+            )?)
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl Default for KeyPress {
+    fn default() -> KeyPress {
+        KeyPress {
+            key: None,
+            mods: Vec::new(),
+        }
+    }
+}
+
+impl Validate for KeyPress {
+    fn validate(&self) -> Result<(), Error> {
+        self.ensure_non_empty()?;
+        if let Some(ref s) = self.key {
+            KeyDefs::assert_defined_keycode(s)?;
+        }
+        for modifier in self.mods.iter() {
+            KeyDefs::assert_defined_keycode(modifier)?;
+        }
+        Ok(())
+    }
+}
+
+impl FromStr for KeyPress {
+    type Err = Error;
+
+    fn from_str(character_string: &str) -> Result<Self, Self::Err> {
+        let spelling = Spelling::new(character_string.into())?;
+        let keypress = KeyDefs::keypress_from_spelling(&spelling)?;
+        Ok(keypress.ok_or_else(|| BadValueErr {
+            thing: "character".into(),
+            value: character_string.into(),
+        })?)
+    }
+}
+
 impl KeyDef {
     fn has_spelling(&self, spelling: &Spelling) -> bool {
         self.spelling.as_ref().map_or(false, |x| x == spelling)
@@ -277,115 +389,5 @@ impl KeyDefs {
                 value: keycode.to_string(),
             }).context("Not defined in the firmware")?
         }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-impl KeyPress {
-    pub fn blank() -> CCode {
-        BLANK_KEY.to_c()
-    }
-
-    fn new_key<T>(keycode: T) -> KeyPress
-    where
-        T: ToC,
-    {
-        KeyPress {
-            key: Some(keycode.to_c()),
-            mods: Vec::new(),
-        }
-    }
-
-    fn new_cap<T>(keycode: T) -> KeyPress
-    where
-        T: ToC,
-    {
-        KeyPress {
-            key: Some(keycode.to_c()),
-            mods: vec!["MODIFIERKEY_SHIFT".to_c()],
-        }
-    }
-
-    fn new_mod<T>(modifier: T) -> KeyPress
-    where
-        T: ToC,
-    {
-        KeyPress {
-            key: None,
-            mods: vec![modifier.to_c()],
-        }
-    }
-
-    pub fn new_fake(code: &Name) -> KeyPress {
-        // We also use KeyPresses to store command codes
-        KeyPress {
-            key: Some(code.to_c()),
-            mods: Vec::new(),
-        }
-    }
-
-    pub fn key_or_blank(&self) -> CCode {
-        if let Some(key_code) = &self.key {
-            key_code.to_owned()
-        } else {
-            KeyPress::blank()
-        }
-    }
-
-    fn capitalize(&mut self) {
-        let shift = "MODIFIERKEY_SHIFT".to_c();
-        if !self.mods.contains(&shift) {
-            self.mods.push(shift);
-        }
-    }
-
-    pub fn ensure_non_empty(&self) -> Result<(), Error> {
-        if self.key.is_none() && self.mods.is_empty() {
-            Ok(Err(BadValueErr {
-                value: "(empty)".into(),
-                thing: "KeyPress".into(),
-            }).context(
-                "KeyPress must contain at least one key or modifier",
-            )?)
-        } else {
-            Ok(())
-        }
-    }
-}
-
-impl Default for KeyPress {
-    fn default() -> KeyPress {
-        KeyPress {
-            key: None,
-            mods: Vec::new(),
-        }
-    }
-}
-
-impl Validate for KeyPress {
-    fn validate(&self) -> Result<(), Error> {
-        self.ensure_non_empty()?;
-        if let Some(ref s) = self.key {
-            KeyDefs::assert_defined_keycode(s)?;
-        }
-        for modifier in self.mods.iter() {
-            KeyDefs::assert_defined_keycode(modifier)?;
-        }
-        Ok(())
-    }
-}
-
-impl FromStr for KeyPress {
-    type Err = Error;
-
-    fn from_str(character_string: &str) -> Result<Self, Self::Err> {
-        let spelling = Spelling::new(character_string.into())?;
-        let keypress = KeyDefs::keypress_from_spelling(&spelling)?;
-        Ok(keypress.ok_or_else(|| BadValueErr {
-            thing: "character".into(),
-            value: character_string.into(),
-        })?)
-        // _ => Err().context("Unkown character not allowed in sequence")?,
     }
 }

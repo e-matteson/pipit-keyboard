@@ -1,12 +1,13 @@
 use std::collections::{BTreeMap, HashSet};
 use std::clone::Clone;
 use std::path::PathBuf;
+use itertools::Itertools;
 
 use util::ensure_u8;
 
 use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyDefs, KeyPress,
             KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, Spelling,
-            TutorData, WordBuilder, WordConfig};
+            TutorData, Word};
 
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
 use failure::{Error, Fail, ResultExt};
@@ -40,7 +41,7 @@ impl AllData {
             output_directory: None,
             tutor_directory: None,
             huffman_table: None,
-            highest_anagram_num: AnagramNum(0),
+            highest_anagram_num: AnagramNum::default(),
             spellings: BTreeMap::new(),
         }
     }
@@ -62,7 +63,6 @@ impl AllData {
         chord: &Chord,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
-        // self.checker.insert_chord(name, chord, kmap);
         self.chords
             .get_mut(kmap)
             .ok_or_else(|| {
@@ -88,19 +88,28 @@ impl AllData {
 
     pub fn add_word(
         &mut self,
-        info: WordConfig,
+        word: Word,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
-        // TODO build word in loader code instead?
-        let word = WordBuilder {
-            info: info,
-            kmap: kmap,
-            all_data: self,
-        }.finalize()?;
-        self.add_sequence(SeqType::Word, &word.name, &word.seq)?;
-        self.add_chord(&word.name, &word.chord, kmap)?;
-        if word.chord.anagram_num > self.highest_anagram_num {
-            self.highest_anagram_num = word.chord.anagram_num;
+        let name = word.name();
+        self.add_sequence(SeqType::Word, &name, &word.sequence()?)?;
+
+        // Get a chord for each letter in the word, and combine them.
+        let chord: Chord = word.chord_spellings()?
+            .iter()
+            .map(|s| self.chord_from_spelling(s, kmap))
+            .fold_results(
+                Chord::with_anagram(word.anagram_num()),
+                |mut accumulator, ref chord| {
+                    accumulator.intersect(chord);
+                    accumulator
+                },
+            )?;
+
+        self.add_chord(&name, &chord, kmap)?;
+
+        if chord.anagram_num > self.highest_anagram_num {
+            self.highest_anagram_num = chord.anagram_num;
         }
         Ok(())
     }
@@ -119,16 +128,11 @@ impl AllData {
     }
 
     pub fn add_word_mod(&mut self, name: &Name) {
-        // Add all the word_mods at once
         self.word_mods.push(name.to_owned());
-        // self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
     pub fn add_anagram_mod(&mut self, name: &Name) {
-        // Add all the anagram_mods at once
-        // TODO share code with set_word_mods()?
         self.anagram_mods.push(name.to_owned());
-        // self.checker.insert_word_mod_or_anagram_mod(name)
     }
 
     pub fn add_mode(
@@ -204,29 +208,16 @@ impl AllData {
         })
     }
 
-    fn get_sequence(&self, name: &Name) -> Result<&Sequence, Error> {
+    pub fn get_sequence(&self, name: &Name) -> Result<&Sequence, Error> {
         for seq_type in self.sequences.keys() {
             if let Some(s) = self.get_sequences(seq_type)?.get(name) {
                 return Ok(s);
             }
         }
-        Err(LookupErr {
+        Ok(Err(LookupErr {
             key: name.into(),
             container: "sequences".into(),
-        })?
-    }
-
-    pub fn get_single_keypress(&self, name: &Name) -> Result<KeyPress, Error> {
-        let seq = self.get_sequence(name).context("failed to get sequence")?;
-        // TODO iter?
-        let length = seq.len();
-        if length != 1 {
-            Err(BadValueErr {
-                thing: "sequence length".into(),
-                value: length.to_string(),
-            }).context("Expected sequence containing a single keypress")?;
-        }
-        Ok(seq.0[0].clone())
+        })?)
     }
 
     pub fn get_chord(
@@ -304,7 +295,7 @@ impl AllData {
     }
 
     pub fn get_num_anagrams(&self) -> u8 {
-        self.highest_anagram_num.0 + 1
+        self.highest_anagram_num.unwrap() + 1
     }
 
     pub fn set_huffman_table(&mut self) -> Result<(), Error> {
@@ -360,12 +351,12 @@ impl AllData {
         mut chord: Chord,
         mode: &ModeName,
     ) -> Option<Chord> {
-        let num = chord.anagram_num.0 as usize;
+        let num = chord.anagram_num.unwrap() as usize;
         if num > 0 {
             let mod_chord =
                 self.get_chord_in_mode(self.anagram_mods.get(num - 1)?, mode)?;
             chord.intersect(&mod_chord);
-            chord.anagram_num = AnagramNum(0);
+            chord.anagram_num = AnagramNum::default();
         };
         Some(chord)
     }
@@ -397,10 +388,19 @@ impl AllData {
         })
     }
 
-    pub fn name_from_spelling(
+    pub fn chord_from_spelling(
         &self,
         spelling: &Spelling,
-    ) -> Result<Name, Error> {
+        kmap: &KmapPath,
+    ) -> Result<Chord, Error> {
+        let name = self.name_from_spelling(spelling)?;
+        Ok(self.get_chord(&name, kmap).ok_or_else(|| LookupErr {
+            key: name.to_string(),
+            container: "chords".into(),
+        })?)
+    }
+
+    fn name_from_spelling(&self, spelling: &Spelling) -> Result<Name, Error> {
         Ok(self.spellings
             .get(spelling)
             .ok_or_else(|| LookupErr {
@@ -417,10 +417,10 @@ impl AllData {
                 .keys()
                 .chain(self.plain_mods.iter());
             for name in plain_names {
-                let spelling = KeyDefs::spelling_from_keypress(
-                    &self.get_single_keypress(name)?,
-                )?;
-                if let Some(spelling) = spelling {
+                let keypress = self.get_sequence(name)?.lone_keypress()?;
+                if let Some(spelling) =
+                    KeyDefs::spelling_from_keypress(&keypress)?
+                {
                     map.insert(spelling, name.to_owned());
                 }
             }

@@ -41,7 +41,7 @@ impl AllData {
         for (kmap, chord_map) in &self.chords {
             for (name, chord) in chord_map {
                 let mut base_chord = chord.to_owned();
-                base_chord.anagram_num = AnagramNum(0);
+                base_chord.anagram_num = AnagramNum::default();
 
                 reversed
                     .entry(kmap.to_owned())

@@ -215,7 +215,9 @@ impl AllData {
     fn get_plain_mod_codes(&self) -> Result<Vec<CCode>, Error> {
         self.plain_mods
             .iter()
-            .map(|name| Ok(self.get_single_keypress(name)?.format_mods()))
+            .map(|name| {
+                Ok(self.get_sequence(name)?.lone_keypress()?.format_mods())
+            })
             .collect()
     }
 

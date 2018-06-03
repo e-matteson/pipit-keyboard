@@ -134,7 +134,10 @@ impl<'a> KmapBuilder<'a> {
         for (info, names) in grouped_names {
             let struct_name = format!(
                 "{}_{}_len{}_anagram{}",
-                self.kmap_nickname, seq_type, info.length, info.anagram.0
+                self.kmap_nickname,
+                seq_type,
+                info.length,
+                info.anagram.unwrap()
             ).to_c();
 
             let seqs_name = format!("{}_seqs", struct_name).to_c();
@@ -248,7 +251,7 @@ impl LookupOfLength {
             })?;
         }
 
-        let packed = (anagram.0 as u16).bitor(
+        let packed = (anagram.unwrap() as u16).bitor(
             usize_to_u16(seq_bit_len)
                 .unwrap()
                 .checked_shl(bits_for_anagram)

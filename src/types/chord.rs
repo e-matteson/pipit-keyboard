@@ -42,8 +42,14 @@ impl Chord {
     pub fn new() -> Chord {
         Chord {
             bits: vec![false; Chord::global_length()],
-            anagram_num: AnagramNum(0),
+            anagram_num: AnagramNum::default(),
         }
+    }
+
+    pub fn with_anagram(num: AnagramNum) -> Chord {
+        let mut chord = Chord::default();
+        chord.anagram_num = num;
+        chord
     }
 
     pub fn from_vec(v: Vec<bool>) -> Result<Chord, Error> {
@@ -56,7 +62,7 @@ impl Chord {
 
         Ok(Chord {
             bits: v,
-            anagram_num: AnagramNum(0),
+            anagram_num: AnagramNum::default(),
         })
     }
 
@@ -68,8 +74,19 @@ impl Chord {
         self.bits.iter().filter(|x| **x).count()
     }
 
+    /// The AnagramNum of the other chord must be zero/default, or it will
+    /// return an error. That's because otherwise we're probably doing something
+    /// wrong, and might lose information by discarding the anagram number.
+    /// Usually we'll just be intersecting plain_keys and/or plain_mods.
     pub fn intersect(&mut self, other: &Chord) {
         assert_eq!(self.len(), other.len());
+        if other.anagram_num != AnagramNum::default() {
+            // TODO return Result instead of unwrapping
+            Err(BadValueErr {
+                thing: "anagram number of other chord".into(),
+                value: format!("{}", other.anagram_num),
+            }).expect("Failed to intersect chords")
+        }
         for i in 0..self.len() {
             self.bits[i] |= other.bits[i];
         }
@@ -117,7 +134,7 @@ impl fmt::Debug for Chord {
             f,
             "Chord {{ {} : {}}}",
             self.bit_string(),
-            self.anagram_num.0
+            self.anagram_num.unwrap()
         )
     }
 }

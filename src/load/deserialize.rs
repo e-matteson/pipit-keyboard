@@ -6,7 +6,7 @@ use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
 
 use types::{CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
             ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
-            Validate, WordConfig};
+            Validate, Word};
 
 use types::errors::print_error;
 use failure::{Error, ResultExt};
@@ -31,7 +31,7 @@ validated_struct!{
         pub word_modifiers: Vec<Name>,
         pub anagram_modifiers: Vec<Name>,
         pub commands: Vec<Name>,
-        pub dictionary: Vec<WordConfig>,
+        pub dictionary: Vec<Word>,
     }
 }
 

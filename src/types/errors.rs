@@ -51,17 +51,9 @@ pub enum PermuteErr {
     WouldDrop,
 }
 
-// #[derive(Debug, Fail)]
-// #[fail(display = "Failed to do file input or output")]
-// pub struct FileErr;
-
 #[derive(Debug, Fail)]
 #[fail(display = "Syntax error in kmap file near line {}.", _0)]
 pub struct KmapSyntaxErr(pub usize);
-
-#[derive(Debug, Fail)]
-#[fail(display = "Wrong number of arguments: '{}'", _0)]
-pub struct NumArgsErr(pub usize);
 
 pub fn print_and_panic(e: Error) -> ! {
     print_error(e);

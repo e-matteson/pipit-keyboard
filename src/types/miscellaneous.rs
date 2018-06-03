@@ -85,6 +85,8 @@ pub struct TutorData {
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
+/// How a key would be represented in text. The Spelling for `key_a` would be
+/// "a", and for `
 pub struct Spelling(pub char);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -389,8 +391,8 @@ impl Sequence {
         Sequence(Vec::new())
     }
 
-    // Flatten a list of sequences into a single sequence containing all of
-    // their keypresses.
+    /// Flatten a list of sequences into a single sequence containing all of
+    /// their keypresses.
     pub fn flatten(seqs: &[&Sequence]) -> Sequence {
         Sequence(
             seqs.into_iter()
@@ -416,6 +418,17 @@ impl Sequence {
 
     pub fn keypresses(&self) -> Iter<KeyPress> {
         self.0.iter()
+    }
+
+    pub fn lone_keypress(&self) -> Result<KeyPress, Error> {
+        Ok(if self.len() == 1 {
+            self.0[0].clone()
+        } else {
+            Err(BadValueErr {
+                thing: "sequence length".into(),
+                value: self.len().to_string(),
+            }).context("Expected sequence containing only a single keypress")?
+        })
     }
 }
 

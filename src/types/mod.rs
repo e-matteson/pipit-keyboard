@@ -4,7 +4,7 @@ pub use self::miscellaneous::{KmapFormat, KmapInfo, KmapPath, ModeInfo,
                               ModeName, Name, Permutation, Pin, SeqType,
                               Sequence, Spelling, SwitchPos, TutorData};
 pub use self::chord::{Chord, GlobalChordInfo};
-pub use self::words::{AnagramNum, Word, WordBuilder, WordConfig};
+pub use self::words::{AnagramNum, Word};
 pub use self::huffman::HuffmanTable;
 pub use self::all_data::AllData;
 

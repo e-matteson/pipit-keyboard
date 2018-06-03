@@ -1,42 +1,89 @@
 use std::str::FromStr;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{AllData, Chord, KeyPress, KmapPath, Name, Sequence, Spelling,
-            Validate};
+use types::{KeyPress, Name, Sequence, Spelling, Validate};
 use types::errors::*;
-use failure::{Error, ResultExt};
-
-#[derive(Debug)]
-pub struct Word {
-    pub name: Name,
-    pub seq: Sequence,
-    pub chord: Chord,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
-         PartialOrd, Hash)]
-#[serde(deny_unknown_fields)]
-pub struct AnagramNum(pub u8);
+use failure::Error;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
-pub struct WordConfig {
+pub struct Word {
     pub word: String,
     pub anagram: Option<AnagramNum>,
     pub chord: Option<String>,
 }
 
-pub struct WordBuilder<'a> {
-    pub info: WordConfig,
-    pub kmap: &'a KmapPath,
-    pub all_data: &'a AllData,
-}
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
+         PartialOrd, Hash)]
+#[serde(deny_unknown_fields)]
+pub struct AnagramNum(u8);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+impl Word {
+    pub fn seq_spelling(&self) -> String {
+        self.word.clone()
+    }
+
+    fn chord_spelling(&self) -> String {
+        self.chord.clone().unwrap_or(self.word.clone())
+    }
+
+    pub fn chord_spellings(&self) -> Result<Vec<Spelling>, Error> {
+        self.chord_spelling()
+            .graphemes(true)
+            .map(|letter| Ok(Spelling::new(letter)?.to_lowercase()))
+            .collect()
+    }
+
+    pub fn anagram_num(&self) -> AnagramNum {
+        self.anagram.unwrap_or(AnagramNum(0))
+    }
+
+    fn has_alternate_chord(&self) -> bool {
+        self.chord.is_some()
+    }
+
+    /// Generate a name for this word mapping that will be unique
+    pub fn name(&self) -> Name {
+        let mut name = format!("word_{}", self.seq_spelling());
+        if self.has_alternate_chord() {
+            name += &format!("_{}", self.chord_spelling());
+        }
+        name += &format!("_{}", self.anagram_num().0);
+        Name(name)
+    }
+
+    pub fn sequence(&self) -> Result<Sequence, Error> {
+        let mut seq = Sequence::new();
+        for letter in self.seq_spelling().graphemes(true) {
+            let key_press = KeyPress::from_str(&letter.to_string())?;
+            seq.push(key_press);
+        }
+        Ok(seq)
+    }
+}
+
+impl Validate for Word {
+    fn validate(&self) -> Result<(), Error> {
+        self.anagram.validate()
+    }
+}
+
 impl AnagramNum {
+    pub fn new(num: u8) -> Result<AnagramNum, Error> {
+        let a = AnagramNum(num);
+        a.validate()?;
+        Ok(a)
+    }
+
+    pub fn unwrap(&self) -> u8 {
+        self.0
+    }
+
+    /// This depends on the representation in the firmware lookup tables.
     pub fn max_allowable() -> u8 {
-        // This depends on the representation in the lookup table
         15
     }
 
@@ -55,9 +102,6 @@ impl Default for AnagramNum {
 
 impl Validate for AnagramNum {
     fn validate(&self) -> Result<(), Error> {
-        // TODO move max out somewere?
-        // TODO how to keep this matched with make_prefix_byte()?
-        // const MAX_ANAGRAM: u8 = 7;
         let max = AnagramNum::max_allowable();
         if self.0 > max {
             Err(OutOfRangeErr {
@@ -77,93 +121,10 @@ impl From<AnagramNum> for usize {
     }
 }
 
-// impl fmt::Display for AnagramNum {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{}", self.0)
-//     }
-// }
-
-impl WordConfig {
-    fn seq_spelling(&self) -> String {
-        self.word.clone()
-    }
-
-    fn chord_spelling(&self) -> String {
-        self.chord.clone().unwrap_or(self.word.clone())
-    }
-
-    fn anagram_num(&self) -> AnagramNum {
-        self.anagram.unwrap_or(AnagramNum(0))
-    }
-
-    fn has_alternate_chord(&self) -> bool {
-        self.chord.is_some()
-    }
-}
-
-impl Validate for WordConfig {
-    fn validate(&self) -> Result<(), Error> {
-        self.anagram.validate()
-        // TODO check for illegal characters?
-        // self.word
-        // self.chord
-    }
-}
-
-impl<'a> WordBuilder<'a> {
-    pub fn finalize(&self) -> Result<Word, Error> {
-        let seq_spelling = self.info.seq_spelling();
-        let error_message = |thing| {
-            format!("Failed to make {} for: '{}'", thing, &seq_spelling)
-        };
-
-        Ok(Word {
-            name: self.make_name(),
-            chord: self.make_chord().with_context(|_| error_message("chord"))?,
-            seq: self.make_sequence()
-                .with_context(|_| error_message("sequence"))?,
-        })
-    }
-
-    fn make_name(&self) -> Name {
-        // Ensure that each word has a unique name.
-
-        let mut name = format!("word_{}", self.info.seq_spelling());
-        if self.info.has_alternate_chord() {
-            name += &format!("_{}", self.info.chord_spelling());
-        }
-        name += &format!("_{}", self.info.anagram_num().0);
-        Name(name)
-    }
-
-    fn make_sequence(&self) -> Result<Sequence, Error> {
-        let mut seq = Sequence::new();
-        for letter in self.info.seq_spelling().graphemes(true) {
-            let key_press = KeyPress::from_str(&letter.to_string())?;
-            seq.push(key_press);
-        }
-        Ok(seq)
-    }
-
-    fn make_chord(&self) -> Result<Chord, Error> {
-        let mut chord = Chord::new();
-
-        let num = self.info.anagram_num();
-        num.validate()?;
-        chord.anagram_num = num;
-
-        for letter in self.info.chord_spelling().chars() {
-            let name = self.all_data
-                .name_from_spelling(&Spelling(letter).to_lowercase())?;
-
-            let new_chord: Chord = self.all_data
-                .get_chord(&name, self.kmap)
-                .ok_or_else(|| LookupErr {
-                    key: name.to_string(),
-                    container: "chords".into(),
-                })?;
-            chord.intersect(&new_chord);
-        }
-        Ok(chord)
+impl fmt::Display for AnagramNum {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO use color?
+        let s = format!("{}", self.unwrap());
+        fmt::Display::fmt(&s, f)
     }
 }
