@@ -5,34 +5,34 @@ options:
   chord_delay:                 30
   held_delay:                  200
   debounce_delay:              10
-  debug_messages:              Some
+  debug_messages:              None
   word_space_position:         Before
   output_directory:            pipit-firmware
 
-  # board_name:                  FEATHER_M0_BLE
-  # rgb_led_pins:                [10, 11, 12]
-  # enable_led_typing_feedback:  true
-  # # enable_audio_typing_feedback: true
-  # battery_level_pin:           9
-  # row_pins:                    [[1, 0, 19]]
-  # column_pins:                 [[15,16,17,18, 20,21,5,6]]
+  board_name:                  FEATHER_M0_BLE
+  rgb_led_pins:                [10, 11, 12]
+  enable_led_typing_feedback:  true
+  # enable_audio_typing_feedback: true
+  battery_level_pin:           9
+  row_pins:                    [[1, 0, 19]]
+  column_pins:                 [[15,16,17,18, 20,21,5,6]]
 
-  # kmap_format:
-  #   - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
-  #   - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
-  #   - [                  [1, 18],                      [1,  6]                ]
-  #   - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
-
-  ######## NEWEST
-  board_name:                TEENSY_LC
-  row_pins:                  [[16, 17, 18, 19, 20, 21]]
-  column_pins:               [[11, 12, 14, 15]]
-  use_standby_interrupts:    false
   kmap_format:
-      - [[16,15],[16,14],[16,12],[16,11],   [19,11],[19,12],[19,14],[19,15]]
-      - [[17,15],[17,14],[17,12],[17,11],   [20,11],[20,12],[20,14],[20,15]]
-      - [                [18,15],                 [21,15]                  ]
-      - [        [18,14],[18,12],[18,11],   [21,11],[21,12],[21,14]        ]
+    - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
+    - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
+    - [                  [1, 18],                      [1,  6]                ]
+    - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
+
+  # ######## NEWEST
+  # board_name:                TEENSY_LC
+  # row_pins:                  [[16, 17, 18, 19, 20, 21]]
+  # column_pins:               [[11, 12, 14, 15]]
+  # use_standby_interrupts:    false
+  # kmap_format:
+  #     - [[16,15],[16,14],[16,12],[16,11],   [19,11],[19,12],[19,14],[19,15]]
+  #     - [[17,15],[17,14],[17,12],[17,11],   [20,11],[20,12],[20,14],[20,15]]
+  #     - [                [18,15],                 [21,15]                  ]
+  #     - [        [18,14],[18,12],[18,11],   [21,11],[21,12],[21,14]        ]
 
 
   ####### OLDEST BOARD
@@ -59,6 +59,11 @@ modes:
     keymaps:
       - {file: "settings/keymaps/gaming_test.kmap"}
     gaming: true
+
+  windows_mode:
+    keymaps:
+      - {file: "settings/keymaps/dvorak24_evan.kmap", use_words: true}
+      - {file: "settings/keymaps/windows_shortcuts.kmap"}
 
 
 plain_modifiers:
@@ -754,6 +759,7 @@ anagram_modifiers:
   - mod_anagram_2
 
 commands:
+  - command_windows_mode
   - command_delete_word
   - command_shorten_last_word
   - command_left_word
