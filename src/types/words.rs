@@ -58,8 +58,8 @@ impl Word {
     pub fn sequence(&self) -> Result<Sequence, Error> {
         let mut seq = Sequence::new();
         for letter in self.seq_spelling().graphemes(true) {
-            let key_press = KeyPress::from_str(&letter.to_string())?;
-            seq.push(key_press);
+            let keypress = KeyPress::from_str(&letter.to_string())?;
+            seq.push(keypress);
         }
         Ok(seq)
     }

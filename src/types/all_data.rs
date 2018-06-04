@@ -122,9 +122,14 @@ impl AllData {
     where
         T: Into<Sequence> + Clone,
     {
-        // TODO check if sequence is valid! length 1, no key
+        let keypress = seq.to_owned()
+            .into()
+            .lone_keypress()
+            .context("plain_mod sequence is too long")?;
+
+        KeyDefs::ensure_plain_mod(&keypress)?;
         self.plain_mods.push(name.to_owned());
-        self.add_sequence(SeqType::Plain, name, seq)
+        self.add_sequence(SeqType::Plain, name, &keypress)
     }
 
     pub fn add_word_mod(&mut self, name: &Name) {
@@ -194,7 +199,6 @@ impl AllData {
         Ok(())
     }
 
-    // TODO don't take reference to seq_type
     fn get_sequences(
         &self,
         seq_type: &SeqType,

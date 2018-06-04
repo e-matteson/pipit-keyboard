@@ -160,9 +160,9 @@ fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
 
 fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
     let mut counts: BTreeMap<CCode, (usize, bool)> = BTreeMap::new();
-    for key_press in keys {
-        increment(&mut counts, key_press.key_or_blank(), false);
-        for modifier in key_press.mods {
+    for keypress in keys {
+        increment(&mut counts, keypress.key_or_blank(), false);
+        for modifier in keypress.mods {
             increment(&mut counts, modifier, true);
         }
     }

@@ -54,11 +54,9 @@ validated_struct!{
         pub word_space_position: WordSpacePosition,
 
         #[serde(default = "default_output_dir")]
-        // TODO validate strings!
         pub output_directory: PathBuf,
 
         #[serde(default = "default_tutor_dir")]
-        // TODO validate strings!
         pub tutor_directory: PathBuf,
 
         #[serde(default = "return_false")]
@@ -106,25 +104,25 @@ pub struct Delay(u16);
 ////////////////////////////////////////////////////////////////////////////////
 
 impl OptionsConfig {
-    pub fn to_vec(&self) -> Vec<CTree> {
+    pub fn to_vec(&self) -> Result<Vec<CTree>, Error> {
         let mut ops = self.get_literal_ops();
-        ops.extend(self.get_auto_ops());
-        ops
+        ops.extend(self.get_auto_ops()?);
+        Ok(ops)
     }
 
     pub fn global_chord_info(&self) -> Result<GlobalChordInfo, Error> {
         let permutation = Permutation::from_to(
             &self.kmap_format.flat_order(),
-            &self.firmware_order(),
+            &self.firmware_order()?,
         ).context(
             "'kmap_format' contains pin numbers not present in 'row_pins' or \
              'column_pins'",
         )?;
 
         Ok(GlobalChordInfo {
-            num_bytes: self.num_bytes_in_chord(),
+            num_bytes: self.num_bytes_in_chord()?,
             num_switches: self.kmap_format.chord_length(),
-            num_matrix_positions: self.num_matrix_positions(),
+            num_matrix_positions: self.num_matrix_positions()?,
             to_firmware_order: permutation,
         })
     }
@@ -138,8 +136,6 @@ impl OptionsConfig {
     }
 
     fn get_literal_ops(&self) -> Vec<CTree> {
-        // TODO use macro to avoid writing out field names as strings?
-
         let mut ops = vec![
             CTree::Define {
                 name: "CHORD_DELAY".to_c(),
@@ -217,7 +213,7 @@ impl OptionsConfig {
         ops
     }
 
-    fn get_auto_ops(&self) -> Vec<CTree> {
+    fn get_auto_ops(&self) -> Result<Vec<CTree>, Error> {
         /// Generate the OpReq::Auto options that depend only on other
         /// options
         let has_battery = self.battery_level_pin.is_some();
@@ -226,26 +222,26 @@ impl OptionsConfig {
         let num_rgb_led_pins =
             self.rgb_led_pins.as_ref().map_or(0, |v| v.len());
 
-        vec![
+        Ok(vec![
             CTree::Define {
                 name: "NUM_ROWS".to_c(),
-                value: self.num_rows().to_c(),
+                value: self.num_rows()?.to_c(),
             },
             CTree::Define {
                 name: "NUM_COLUMNS".to_c(),
-                value: self.num_columns().to_c(),
+                value: self.num_columns()?.to_c(),
             },
             CTree::Define {
                 name: "NUM_HANDS".to_c(),
-                value: self.num_hands().to_c(),
+                value: self.num_hands()?.to_c(),
             },
             CTree::Define {
                 name: "NUM_MATRIX_POSITIONS".to_c(),
-                value: self.num_matrix_positions().to_c(),
+                value: self.num_matrix_positions()?.to_c(),
             },
             CTree::Define {
                 name: "NUM_BYTES_IN_CHORD".to_c(),
-                value: self.num_bytes_in_chord().to_c(),
+                value: self.num_bytes_in_chord()?.to_c(),
             },
             CTree::Define {
                 name: "NUM_RGB_LED_PINS".to_c(),
@@ -259,46 +255,55 @@ impl OptionsConfig {
                 name: "HAS_BATTERY".to_c(),
                 value: has_battery,
             },
-        ]
+        ])
     }
 
-    fn num_rows(&self) -> usize {
-        // TODO ensure both hands have same number of rows
-        self.row_pins.get(0).expect("row_pins was empty").len()
+    fn num_rows(&self) -> Result<usize, Error> {
+        let len = self.row_pins.get(0).expect("row_pins was empty").len();
+        if !self.row_pins.iter().all(|hand| len == hand.len()) {
+            bail!("Each hand must have the same number of rows")
+        }
+        Ok(len)
     }
 
-    fn num_columns(&self) -> usize {
-        // TODO ensure both hands have same number of cols
-        self.column_pins
+    fn num_columns(&self) -> Result<usize, Error> {
+        let len = self.column_pins
             .get(0)
             .expect("column_pins was empty")
-            .len()
+            .len();
+        if !self.column_pins.iter().all(|hand| len == hand.len()) {
+            bail!("Each hand must have the same number of columns")
+        }
+        Ok(len)
     }
 
-    fn num_hands(&self) -> usize {
-        // TODO ensure rows and cols agree about number of hands
-        self.row_pins.len()
+    fn num_hands(&self) -> Result<usize, Error> {
+        let len = self.row_pins.len();
+        if len != self.column_pins.len() {
+            bail!("Row and column pins disagree about the number of hands")
+        }
+        Ok(len)
     }
 
-    fn num_matrix_positions(&self) -> usize {
-        self.num_hands() * self.num_rows() * self.num_columns()
+    fn num_matrix_positions(&self) -> Result<usize, Error> {
+        Ok(self.num_hands()? * self.num_rows()? * self.num_columns()?)
     }
 
-    fn num_bytes_in_chord(&self) -> usize {
-        round_up_to_num_bytes(self.num_matrix_positions())
+    fn num_bytes_in_chord(&self) -> Result<usize, Error> {
+        Ok(round_up_to_num_bytes(self.num_matrix_positions()?))
     }
 
-    fn firmware_order(&self) -> Vec<SwitchPos> {
+    fn firmware_order(&self) -> Result<Vec<SwitchPos>, Error> {
         // must match the algorithm used in the firmware's scanMatrix()!
         let mut order: Vec<SwitchPos> = Vec::new();
-        for h in 0..self.num_hands() {
+        for h in 0..self.num_hands()? {
             for c in &self.column_pins[h] {
                 for r in &self.row_pins[h] {
                     order.push(SwitchPos::new(*r, *c));
                 }
             }
         }
-        order
+        Ok(order)
     }
 }
 

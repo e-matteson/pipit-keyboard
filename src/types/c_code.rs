@@ -178,9 +178,7 @@ where
 }
 
 impl ToC for String {
-    // TODO why clone?
     fn to_c(self) -> CCode {
-        // CCode(self.clone())
         CCode(self)
     }
 }

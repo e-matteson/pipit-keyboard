@@ -192,7 +192,6 @@ fn format_enum_decl(
     variants: &[CCode],
     size: &Option<CCode>,
 ) -> CFiles {
-    // TODO only assign first to 0?
     let contents = variants
         .into_iter()
         .enumerate()

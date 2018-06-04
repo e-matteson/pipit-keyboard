@@ -174,14 +174,12 @@ impl Section {
 }
 
 fn load_lines(path: &KmapPath) -> Result<Vec<String>, Error> {
-    // TODO share file reading code?
-    let file = File::open(path.0.clone())?;
-    let buf = BufReader::new(file);
-    let mut lines: Vec<String> = buf.lines().map(|w| w.unwrap()).collect();
-    lines.insert(0, "".into()); // to make 0-indexed line numbering work
+    let buf = BufReader::new(File::open(&path.0)?);
+    let mut lines: Vec<_> = buf.lines().map(|w| w.unwrap()).collect();
     if lines.is_empty() {
         bail!("file is empty");
     }
+    lines.insert(0, "".into()); // to make 0-indexed line numbering work
     Ok(lines)
 }
 

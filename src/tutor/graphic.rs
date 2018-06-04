@@ -57,7 +57,6 @@ impl Graphic {
     }
 
     pub fn update(&mut self, next: Option<LabeledChord>, prev: PrevCharStatus) {
-        // TODO use some map fn
         self.next = next;
         self.error = prev.error();
         self.backspace = prev.backspace();
@@ -72,8 +71,6 @@ impl Graphic {
     }
 
     fn update_switches_with_type(&mut self, chord_type: ChordType) {
-        // let labeled_chord = ;
-
         if let Some(labeled_chord) = self.get(chord_type) {
             let chord = labeled_chord.chord;
             for (&bit, switch) in chord.iter().zip(self.switches.iter_mut()) {

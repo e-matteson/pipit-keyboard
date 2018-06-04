@@ -256,6 +256,17 @@ impl KeyPress {
             Ok(())
         }
     }
+
+    fn lone_mod(&self) -> Result<CCode, Error> {
+        Ok(if self.mods.len() == 1 {
+            self.mods[0].clone()
+        } else {
+            Err(BadValueErr {
+                thing: "number of modifiers".into(),
+                value: self.mods.len().to_string(),
+            }).context("Expected KeyPress to contain exactly one modifier")?
+        })
+    }
 }
 
 impl Default for KeyPress {
@@ -271,10 +282,10 @@ impl Validate for KeyPress {
     fn validate(&self) -> Result<(), Error> {
         self.ensure_non_empty()?;
         if let Some(ref s) = self.key {
-            KeyDefs::assert_defined_keycode(s)?;
+            KeyDefs::ensure_defined_key_or_mod(s)?;
         }
         for modifier in self.mods.iter() {
-            KeyDefs::assert_defined_keycode(modifier)?;
+            KeyDefs::ensure_defined_key_or_mod(modifier)?;
         }
         Ok(())
     }
@@ -298,11 +309,15 @@ impl KeyDef {
         self.spelling.as_ref().map_or(false, |x| x == spelling)
     }
 
+    fn has_mod(&self, modifier: &CCode) -> bool {
+        self.keypress.mods.contains(modifier)
+    }
+
     fn has_keycode_or_mod(&self, keycode: &CCode) -> bool {
         if let Some(x) = self.keypress.key.as_ref() {
             x == keycode
         } else {
-            self.keypress.mods.contains(keycode)
+            self.has_mod(keycode)
         }
     }
 }
@@ -380,13 +395,25 @@ impl KeyDefs {
         &SCANCODES
     }
 
-    fn assert_defined_keycode(keycode: &CCode) -> Result<(), Error> {
+    fn ensure_defined_key_or_mod(keycode: &CCode) -> Result<(), Error> {
         if TABLE.iter().any(|def| def.has_keycode_or_mod(keycode)) {
             Ok(())
         } else {
             Err(BadValueErr {
-                thing: "keycode".into(),
+                thing: "keycode or mod".into(),
                 value: keycode.to_string(),
+            }).context("Not defined in the firmware")?
+        }
+    }
+
+    pub fn ensure_plain_mod(keypress: &KeyPress) -> Result<(), Error> {
+        let modifier = keypress.lone_mod()?;
+        if TABLE.iter().any(|def| def.has_mod(&modifier)) {
+            Ok(())
+        } else {
+            Err(BadValueErr {
+                thing: "modifier".into(),
+                value: modifier.to_string(),
             }).context("Not defined in the firmware")?
         }
     }

@@ -11,7 +11,6 @@ use types::{Chord, ModeName, Name, Spelling, TutorData};
 use failure::{Error, ResultExt};
 
 lazy_static! {
-    // TODO don't use mutex?
     static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
     static ref LEARNING_MAP: Mutex<HashMap<String, LearnState>> = Mutex::new(HashMap::new());
 }

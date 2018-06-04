@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::BitOr;
+use itertools::Itertools;
 
 use util::usize_to_u16;
 use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
@@ -81,7 +82,6 @@ impl<'a> KmapBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &seq_type_names),
-            // TODO wrong type?
             c_type: "LookupsOfSeqType*".to_c(),
             is_extern: false,
         });
@@ -143,9 +143,12 @@ impl<'a> KmapBuilder<'a> {
             let seqs_name = format!("{}_seqs", struct_name).to_c();
             let chords_name = format!("{}_chords", struct_name).to_c();
 
-            let chord_bytes: Vec<_> = names
+            let chord_bytes = names
                 .iter()
-                .flat_map(|name| self.chord_map[name].to_c_bytes())
+                .map(|name| self.chord_map[name].to_c_bytes())
+                .collect::<Result<Vec<_>, Error>>()?
+                .into_iter()
+                .flatten()
                 .collect();
 
             let seqs: Vec<_> = names

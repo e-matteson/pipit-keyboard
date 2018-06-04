@@ -43,7 +43,6 @@ impl TutorApp {
 
         let mut siv = Cursive::new();
 
-        // TODO move theme file to an assets folder?
         siv.load_theme_file("settings/tutor/color_theme.toml")
             .expect("failed to load theme");
         TutorApp::show_menu(&mut siv);
@@ -117,7 +116,7 @@ impl Lesson {
         let copier = Copier::new(79);
 
         let mut lesson = Lesson {
-            // TODO why reverse?
+            // reverse slide order so we can pop them off the end of a vec
             slides: slides.into_iter().rev().collect(),
             graphic: Graphic::new(),
             graphic_spacing: 1,
@@ -133,7 +132,7 @@ impl Lesson {
     }
 
     fn next_slide(&mut self) -> Result<(), Error> {
-        // TODO check for empty lessons when loading from file, instead
+        // TODO check for empty lessons when loading from file, instead.
         // We should panic here instead if we failed to end the lesson after
         // going through all the slides.
         let slide = self.slides.pop().ok_or_else(|| BadValueErr {
@@ -296,8 +295,8 @@ impl View for Lesson {
                         )));
                     }
 
-                    // TODO don't unwrap
-                    self.next_slide().unwrap();
+                    // TODO don't expect
+                    self.next_slide().expect("failed to get next slide");
                 }
                 Event::Char(letter) => {
                     // Let them keep typing past the end of the line (important

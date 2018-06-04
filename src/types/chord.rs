@@ -104,21 +104,18 @@ impl Chord {
         self.bits.iter()
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
         // Permute to the order used in the firmware, pad to a whole number of
         // bytes, and convert to 8-bit ints
-        // TODO return result
-        let ordered_bools = static_info()
-            .to_firmware_order
-            .permute(&self.bits)
-            .expect("failed to permute chord");
+        let ordered_bools =
+            static_info().to_firmware_order.permute(&self.bits)?;
 
-        bools_to_bytes(&ordered_bools)
+        Ok(bools_to_bytes(&ordered_bools))
     }
 
-    pub fn to_c_bytes(&self) -> Vec<CCode> {
+    pub fn to_c_bytes(&self) -> Result<Vec<CCode>, Error> {
         // TODO  share code - replace with Into<Vec<CCode>> for Vec<T: ToC>?
-        self.to_bytes().into_iter().map(|x| x.to_c()).collect()
+        Ok(self.to_bytes()?.into_iter().map(|x| x.to_c()).collect())
     }
 }
 

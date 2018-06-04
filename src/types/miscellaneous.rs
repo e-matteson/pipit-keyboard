@@ -401,13 +401,6 @@ impl Sequence {
         )
     }
 
-    pub fn extend(&mut self, other: Sequence) {
-        // TODO unused?
-        // TODO let this take a reference or iter or something? Instead of
-        // cloning the sequence first.
-        self.0.extend(other.0)
-    }
-
     pub fn push(&mut self, keypress: KeyPress) {
         self.0.push(keypress)
     }

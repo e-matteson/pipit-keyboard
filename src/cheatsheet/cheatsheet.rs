@@ -10,8 +10,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use serde_yaml;
 
 use types::{Chord, Name, TutorData};
-use types::errors::MissingErr;
-use failure::{Error, ResultExt};
+use types::errors::{LookupErr, MissingErr};
+use failure::{err_msg, Error, ResultExt};
 use util::{read_file, user_confirm, ConfirmDefault};
 
 use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
@@ -117,15 +117,6 @@ impl CheatSheet {
             })
             .collect();
 
-        // println!("{:?}", col_positions);
-        // println!(
-        //     "{}, {}, {}, {}",
-        //     x_padding,
-        //     spec.page_width,
-        //     num_cols,
-        //     Keyboard::width()
-        // );
-
         let height = V2::new(0., Keyboard::height() + y_padding);
 
         let mut all = Vec::new();
@@ -215,10 +206,14 @@ impl Keyboard {
         data: &TutorData,
     ) -> Result<(), Error> {
         assert_eq!(Chord::global_length(), self.switches.len());
-        // TODO return result instead of expecting!
-        let chords: Vec<_> = keys.iter()
-            .map(|key| data.get_chord(key).expect("chord not found"))
-            .collect();
+        let chords = keys.iter()
+            .map(|key| {
+                data.get_chord(key).ok_or_else(|| LookupErr {
+                    key: key.into(),
+                    container: "tutor data chords".into(),
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
 
         let symbols: Result<Vec<_>, Error> =
             keys.iter().map(|key| get_symbol(key)).collect();
@@ -232,9 +227,9 @@ impl Keyboard {
                 // We should also consume a chord style if 0 switches are
                 // pressed, meaning this is a blank chord named "", used for
                 // skipping colors.
-                chord_style_iter
-                    .next()
-                    .expect("ran out of unique switch fill styles")
+                chord_style_iter.next().ok_or_else(|| {
+                    err_msg("ran out of unique switch fill styles")
+                })?
             } else {
                 SwitchStyle::Single
             };
@@ -451,7 +446,6 @@ impl Switch {
                 division_num: i,
             };
             group.append(wedge.finalize(content.style.fill()));
-            // mark(wedge.center());
             if num_wedges == 2 && content.symbol.is_single_grapheme() {
                 group.append(
                     Label {
@@ -561,7 +555,6 @@ impl SwitchStyle {
             },
             SwitchStyle::Shared9 => Fill {
                 color: Color::Magenta,
-                // pattern: Some(FillPattern::Checkers),
                 pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared10 => Fill {
@@ -570,7 +563,6 @@ impl SwitchStyle {
             },
             SwitchStyle::Shared11 => Fill {
                 color: Color::Cyan,
-                // pattern: Some(FillPattern::Checkers),
                 pattern: Some(FillPattern::DiagStripes),
             },
         }
@@ -644,7 +636,6 @@ fn get_symbol(key: &Name) -> Result<Symbol, Error> {
             ("key_7".into(), Symbol::from("7", 1.)),
             ("key_8".into(), Symbol::from("8", 1.)),
             ("key_9".into(), Symbol::from("9", 1.)),
-            // ("key_enter".into(), "".into()),
             // ("key_enter".into(), Symbol::from("enter", 0.6)),
             ("key_enter".into(), Symbol::from("⏎", 1.3)),
             ("key_left".into(), Symbol::from("←", 1.2)),
@@ -660,16 +651,10 @@ fn get_symbol(key: &Name) -> Result<Symbol, Error> {
             ("key_right_curly".into(), Symbol::from("}", 1.)),
             ("key_right_brace".into(), Symbol::from("]", 1.)),
             ("key_right_angle".into(), Symbol::from("ᐳ", 0.8)),
-            // ("key_right_angle".into(), Symbol::from(">", 0.5)),
-            // ("key_right_angle".into(), Symbol::from("&gt;", 1.)),
-            // ("key_right_angle".into(), Symbol::from("≻", 1.)),
             ("key_left_paren".into(), Symbol::from("(", 1.)),
             ("key_left_curly".into(), Symbol::from("{", 1.)),
             ("key_left_brace".into(), Symbol::from("[", 1.)),
             ("key_left_angle".into(), Symbol::from("ᐸ", 0.8)),
-            // ("key_left_angle".into(), Symbol::from("&lt;", 1.)),
-            // ("key_left_angle".into(), Symbol::from(">", 1.)),
-            // ("key_left_angle".into(), Symbol::from("≺", 1.)),
             ("key_f1".into(), Symbol::from("f1", 1.)),
             ("key_f2".into(), Symbol::from("f2", 1.)),
             ("key_f3".into(), Symbol::from("f3", 1.)),
@@ -687,7 +672,6 @@ fn get_symbol(key: &Name) -> Result<Symbol, Error> {
             ("key_page_up".into(), Symbol::from_lines(&["pg", "up"], 0.8)),
             ("key_page_down".into(), Symbol::from_lines(&["pg", "dn"], 0.8)),
             ("key_printscreen".into(), Symbol::from_lines(&["print", "scrn"], 0.5)),
-            // ("key_delete".into(), Symbol::from("delete", 0.5)),
             ("key_delete".into(), Symbol::from("del", 0.9)),
             ("key_ampersand".into(), Symbol::from("&amp;", 1.)),
             ("key_asterisk".into(), Symbol::from("*", 1.2)),

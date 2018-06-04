@@ -54,6 +54,7 @@ fn run() -> Result<(), Error> {
             .context("Failed to make cheatsheet")?
             .save("cheatsheet.svg")?;
     } else if opt.tutor {
+        drop(all_data);
         TutorApp::run(tutor_data);
     } else {
         all_data

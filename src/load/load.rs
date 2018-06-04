@@ -60,9 +60,8 @@ impl AllData {
 
         all_data.load_anagram_mods(&settings);
 
-        // TODO rename word_list?
         all_data
-            .load_word_list(&settings)
+            .load_dictionary(&settings)
             .context("Failed to load dictionary")?;
 
         all_data
@@ -77,7 +76,6 @@ impl AllData {
     }
 
     fn load_modes(&mut self, settings: &Settings) -> Result<(), Error> {
-        // TODO map?
         for (name, info) in &settings.modes {
             self.add_mode(name, info)
                 .with_context(|_| format!("Failed to load mode: '{}'", name))?;
@@ -97,7 +95,7 @@ impl AllData {
     }
 
     fn load_options(&mut self, options: &OptionsConfig) -> Result<(), Error> {
-        self.options = options.to_vec();
+        self.options = options.to_vec()?;
         Ok(())
     }
 
@@ -111,7 +109,9 @@ impl AllData {
 
     fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {
         for (name, seq) in &settings.plain_modifiers {
-            self.add_plain_mod(name, seq)?;
+            self.add_plain_mod(name, seq).with_context(|_| {
+                format!("Failed to add plain_mod '{}'", name)
+            })?;
         }
         Ok(())
     }
@@ -129,7 +129,6 @@ impl AllData {
     }
 
     fn load_commands(&mut self, settings: &Settings) -> Result<(), Error> {
-        // TODO use set sequences, and then process after?
         for name in &settings.commands {
             self.add_command(name).with_context(|_| {
                 format!("Failed to load command: '{}'", name)
@@ -138,7 +137,7 @@ impl AllData {
         Ok(())
     }
 
-    fn load_word_list(&mut self, settings: &Settings) -> Result<(), Error> {
+    fn load_dictionary(&mut self, settings: &Settings) -> Result<(), Error> {
         for kmap in &self.get_kmaps_with_words() {
             for info in &settings.dictionary {
                 self.add_word(info.to_owned(), kmap).with_context(|_| {
