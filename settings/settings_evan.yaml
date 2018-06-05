@@ -171,107 +171,38 @@ plain_keys:
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
 macros:
-  # macro_save_as       :  [{key: "KEY_S", mods: ["MODIFIERKEY_SHIFT", "MODIFIERKEY_CTRL"]}]
-  # macro_vim_save:
-  #   - ":w"
-  #   - {key: "KEY_ENTER"}
-  macro_vim_save:
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_W"}
-    - {key: "KEY_ENTER"}
-  macro_vim_quit      :  
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_Q"}
-    - {key: "KEY_ENTER"}
-  macro_ls:
-    - {key: "KEY_L"}
-    - {key: "KEY_S"}
-    - {key: "KEY_ENTER"}
+  macro_vim_save: ":w\n"
+  macro_vim_quit: ":q\n"
+  macro_ls: "ls\n"
   macro_f_comma: "f,"
   macro_cap_f_comma: "F,"
   macro_mx:
     - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
-  macro_other_buffer1:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_TAB"}
+  macro_other_buffer1: " \t"
   macro_other_buffer2: " ozb2"
   macro_other_buffer3: " ozb3"
   macro_other_buffer4: " ozb4"
   macro_next_buffer: " bn"
   macro_prev_buffer: " bp"
   macro_kill_buffer: " bd"
-  macro_in_paren:
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_in_angle:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_in_brace:
-    - {key: "KEY_LEFT_BRACE"}
-    - {key: "KEY_RIGHT_BRACE"}
-    - {key: "KEY_LEFT"}
-  macro_in_curly:
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
+  macro_in_paren: "()←"
+  macro_in_angle: "<>←"
+  macro_in_brace: "[]←"
+  macro_in_curly: "{}←"
+  macro_in_quote: "''←"
+  macro_in_doublequote: "\"\"←"
   macro_out_paren: "()"
   macro_out_angle: "<>"
   macro_out_brace: "[]"
   macro_out_curly: "{}"
-  macro_in_quote:
-    - {key: "KEY_QUOTE"}
-    - {key: "KEY_QUOTE"}
-    - {key: "KEY_LEFT"}
-  macro_in_doublequote:  
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
   macro_right_arrow: "->"
   macro_left_arrow: "<-"
   macro_this_arrow: "this->"
   macro_cerr: "cerr << "
   macro_cout: "cout <<"
   macro_endl: "<< endl"
-  macro_print_ino:
-    - {key: "KEY_S", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_A"}
-    - {key: "KEY_L"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_println_ino:
-    - {key: "KEY_S", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_A"}
-    - {key: "KEY_L"}
-    - {key: "KEY_PERIOD"}
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_L"}
-    - {key: "KEY_N"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
+  macro_print_ino: "Serial.print();←←"
+  macro_println_ino: "Serial.println();←←"
   macro_gmail: "e.r.matteson@gmail.com"
   macro_bmail: "evan_matteson@brown.edu"
   macro_compile: " mozc"
@@ -321,285 +252,24 @@ macros:
   macro_ins_notes: " ozyn"
   macro_self_dot: "self."
   macro_include_c: "#include "
-  macro_if_c:
-    - {key: "KEY_I"}
-    - {key: "KEY_F"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_else_c:
-    - {key: "KEY_E"}
-    - {key: "KEY_L"}
-    - {key: "KEY_S"}
-    - {key: "KEY_E"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-  macro_for_c:
-    - {key: "KEY_F"}
-    - {key: "KEY_O"}
-    - {key: "KEY_R"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_while_c:
-    - {key: "KEY_W"}
-    - {key: "KEY_H"}
-    - {key: "KEY_I"}
-    - {key: "KEY_L"}
-    - {key: "KEY_E"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_arg_c:
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_ifdef_guard:
-    - {key: "KEY_3", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_I"}
-    - {key: "KEY_F"}
-    - {key: "KEY_N"}
-    - {key: "KEY_D"}
-    - {key: "KEY_E"}
-    - {key: "KEY_F"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_H", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_3", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_D"}
-    - {key: "KEY_E"}
-    - {key: "KEY_F"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_E"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_H", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_3", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_D"}
-    - {key: "KEY_I"}
-    - {key: "KEY_F"}
-    - {key: "KEY_UP"}
-    - {key: "KEY_UP"}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-  macro_printf:
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_F"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_N"}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_print_py:
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_docstr_py:
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
+  macro_if_c: "if(){\n}↑▶←←"
+  macro_else_c: "else{\n\n}↑"
+  macro_for_c: "for(;;){\n}↑▶←←←←"
+  macro_while_c: "while(){\n}↑▶←←"
+  macro_arg_c: "(){\n}↑▶←←"
+  macro_ifdef_guard: "#ifndef H\n#define H\n\n\n#endif↑↑↑▶"
+  macro_printf: "printf(\"\n\");←←←←←"
+  macro_print_py: "print()←"
+  macro_docstr_py: "\"\"\"\"\"\"←←←"
   macro_lifetime_rs: "<'a>"
   macro_new_rs: "::new()"
-  macro_print_rs:
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_L"}
-    - {key: "KEY_N"}
-    - {key: "KEY_1", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA"}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_print_debug_rs:  
-    - {key: "KEY_P"}
-    - {key: "KEY_R"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_T"}
-    - {key: "KEY_L"}
-    - {key: "KEY_N"}
-    - {key: "KEY_1", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SLASH", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_COMMA"}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SEMICOLON"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_return_rs:
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_MINUS"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-  macro_fn_rs:
-    - {key: "KEY_F"}
-    - {key: "KEY_N"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_MINUS"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_fn_self_rs:
-    - {key: "KEY_F"}
-    - {key: "KEY_N"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_7", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_S"}
-    - {key: "KEY_E"}
-    - {key: "KEY_L"}
-    - {key: "KEY_F"}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_MINUS"}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_fn_void_rs:
-    - {key: "KEY_F"}
-    - {key: "KEY_N"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_fn_self_void_rs:
-    - {key: "KEY_F"}
-    - {key: "KEY_N"}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_7", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_S"}
-    - {key: "KEY_E"}
-    - {key: "KEY_L"}
-    - {key: "KEY_F"}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_SPACE"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
+  macro_print_rs: "println!(\"{}\",);←←"
+  macro_print_debug_rs: "println!(\"{:?}\",);←←"
+  macro_return_rs: " -> {\n}↑▶←"
+  macro_fn_rs: "fn () -> {\n}↑▶←←←←←←←"
+  macro_fn_self_rs: "fn (&self) -> {\n}↑▶←←←←←←←←←←←←"
+  macro_fn_self_void_rs: "fn (&self){\n}↑▶←←←←←←←←"
+  macro_fn_void_rs: "fn (&self){\n}↑▶←←←←"
   macro_amperstr_rs: "&str"
   macro_bang_dollar: "!$ "
   macro_hash_bang: "#!/bin/bash"
@@ -614,11 +284,7 @@ macros:
   macro_nohlsearch:
     - {key: "KEY_SLASH"}
     - {key: "KEY_ESC"}
-  macro_prev_search:
-    - {key: "KEY_SLASH"}
-    - {key: "KEY_UP"}
-    - {key: "KEY_UP"}
-    - {key: "KEY_ENTER"}
+  macro_prev_search: "/↑↑\n"
   macro_inbox: " oi"
   macro_zotero_save:
     - {key: "KEY_Z", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
@@ -635,112 +301,15 @@ macros:
   #   - {key: "KEY_E"}
   #   - {key: "KEY_M"}
   #   - {key: "KEY_SPACE"}
-  macro_tex_citep:
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_C"}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_P"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_tex_itemize:
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_B"}
-    - {key: "KEY_E"}
-    - {key: "KEY_G"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_M"}
-    - {key: "KEY_I"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_E"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_D"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_M"}
-    - {key: "KEY_I"}
-    - {key: "KEY_Z"}
-    - {key: "KEY_E"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_M"}
-    - {key: "KEY_SPACE"}
-  macro_tex_enumerate:
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_B"}
-    - {key: "KEY_E"}
-    - {key: "KEY_G"}
-    - {key: "KEY_I"}
-    - {key: "KEY_N"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_U"}
-    - {key: "KEY_M"}
-    - {key: "KEY_E"}
-    - {key: "KEY_R"}
-    - {key: "KEY_A"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_D"}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_E"}
-    - {key: "KEY_N"}
-    - {key: "KEY_U"}
-    - {key: "KEY_M"}
-    - {key: "KEY_E"}
-    - {key: "KEY_R"}
-    - {key: "KEY_A"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_BACKSLASH"}
-    - {key: "KEY_I"}
-    - {key: "KEY_T"}
-    - {key: "KEY_E"}
-    - {key: "KEY_M"}
-    - {key: "KEY_SPACE"}
-  macro_in_equal:
-    - {key: "KEY_EQUAL"}
-    - {key: "KEY_EQUAL"}
-    - {key: "KEY_LEFT"}
+  macro_tex_citep: "\\citep{}←"
+  macro_tex_itemize: "\\begin{itemize}\n\n\\end{itemize}↑\\item "
+  macro_tex_enumerate: "\\begin{enumerate}\n\n\\end{enumerate}↑\\item "
+  macro_in_equal: "==←"
   macro_open_scratch: " bs"
   macro_open_messages: " opm"
   macro_eval: " oze"
-  # macro_org_store_link:
-  #   - {key: "KEY_SPACE"}
-  #   - {key: "KEY_A"}
-  #   - {key: "KEY_O"}
-  #   - {key: "KEY_L"}
-  # macro_org_insert_link:
-  #   - {key: "KEY_SPACE"}
-  #   - {key: "KEY_M"}
-  #   - {key: "KEY_I"}
-  #   - {key: "KEY_L"}
+  # macro_org_store_link: " aol"
+  # macro_org_insert_link: " mil"
   macro_org_clock: " ol"
   macro_org_tree: " mTt"
   macro_org_archive: " mor"
