@@ -106,50 +106,15 @@ macros:
   macro_windows_save_as:
     - {key: "KEY_S", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
 
-  macro_in_paren:
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_in_angle:
-    - {key: "KEY_COMMA", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_PERIOD", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_in_brace:
-    - {key: "KEY_LEFT_BRACE"}
-    - {key: "KEY_RIGHT_BRACE"}
-    - {key: "KEY_LEFT"}
-  macro_in_curly:
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_in_quote:
-    - {key: "KEY_QUOTE"}
-    - {key: "KEY_QUOTE"}
-    - {key: "KEY_LEFT"}
-  macro_in_doublequote:
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_QUOTE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT"}
-  macro_if_c:
-    - {key: "KEY_I"}
-    - {key: "KEY_F"}
-    - {key: "KEY_9", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_0", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_LEFT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_ENTER"}
-    - {key: "KEY_RIGHT_BRACE", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_UP"}
-    - {key: "KEY_END"}
-    - {key: "KEY_LEFT"}
-    - {key: "KEY_LEFT"}
-  macro_vim_save:
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_W"}
-    - {key: "KEY_ENTER"}
-  macro_vim_quit      :
-    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
-    - {key: "KEY_Q"}
-    - {key: "KEY_ENTER"}
+  macro_in_paren: "()←"
+  macro_in_angle: "<>←"
+  macro_in_brace: "[]←"
+  macro_in_curly: "{}←"
+  macro_in_quote: "''←"
+  macro_in_doublequote: "\"\"←"
+  macro_if_c: "if(){\n}↑▶←←"
+  macro_vim_save: ":w\n"
+  macro_vim_quit: ":q\n"
 
 # Add new words here!
 dictionary:
