@@ -9,9 +9,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use types::errors::BadValueErr;
 use failure::{Error, ResultExt};
-use tutor::tutor_util::{check_if_learned, grapheme_slice, offset,
-                        update_learn_state, LabeledChord, PrevCharStatus,
-                        SlideEntry, SlideLine};
+use tutor::tutor_util::{grapheme_slice, offset, LabeledChord, PrevCharStatus,
+                        SlideEntry, SlideLine, State};
 
 #[derive(Debug, Clone)]
 pub struct Copier {
@@ -44,7 +43,7 @@ impl Copier {
     }
 
     pub fn needs_hint(&self, letter: &str) -> bool {
-        !check_if_learned(letter).unwrap_or(false)
+        !State::is_learned(letter).unwrap_or(false)
     }
 
     pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
@@ -114,7 +113,7 @@ impl Copier {
 
         if let Some(expected_char) = self.expected_at_offset(self.prev_offset())
         {
-            update_learn_state(expected_char, was_correct);
+            State::update_learn_state(expected_char, was_correct);
         }
     }
 

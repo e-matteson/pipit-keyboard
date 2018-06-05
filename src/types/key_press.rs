@@ -109,6 +109,7 @@ lazy_static!{
         (KeyPress::new_cap("KEY_SEMICOLON"),           Some(":"),  None),
         (KeyPress::new_key("KEY_QUOTE"),               Some("'"), Some(52)),
         (KeyPress::new_cap("KEY_QUOTE"),               Some("\""), None),
+        // Tilde and grave are apparently swapped in the teensy usb library
         (KeyPress::new_key("KEY_TILDE"),               Some("`"),  Some(53)),
         (KeyPress::new_cap("KEY_TILDE"),               Some("~"),  None),
         (KeyPress::new_key("KEY_COMMA"),               Some(","),  Some(54)),

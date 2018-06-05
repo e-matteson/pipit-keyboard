@@ -16,7 +16,7 @@ use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
 use tutor::graphic::Graphic;
-use tutor::tutor_util::{load_lessons, offset, set_tutor_data, Slide};
+use tutor::tutor_util::{load_lessons, offset, Slide, State};
 use tutor::copier::Copier;
 
 pub struct TutorApp;
@@ -39,7 +39,7 @@ enum LessonState {
 
 impl TutorApp {
     pub fn run(data: TutorData) {
-        set_tutor_data(data);
+        State::set_tutor_data(data);
 
         let mut siv = Cursive::new();
 

@@ -11,8 +11,14 @@ use types::{Chord, ModeName, Name, Spelling, TutorData};
 use failure::{Error, ResultExt};
 
 lazy_static! {
-    static ref TUTOR_DATA: Mutex<Option<TutorData>> = Mutex::new(None);
-    static ref LEARNING_MAP: Mutex<HashMap<String, LearnState>> = Mutex::new(HashMap::new());
+    static ref STATE: Mutex<State> = Mutex::new(State::new());
+}
+
+#[derive(Debug, Clone)]
+pub struct State {
+    tutor_data: Option<TutorData>,
+    learning_map: HashMap<String, LearnState>,
+    initial_learn_state: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -71,21 +77,59 @@ pub struct Label(String);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-pub fn check_if_learned(name: &str) -> Option<bool> {
-    LEARNING_MAP
-        .lock()
-        .unwrap()
-        .get(name)
-        .map(|state| state.is_learned())
-}
+impl State {
+    fn new() -> State {
+        State {
+            tutor_data: None,
+            learning_map: HashMap::new(),
+            initial_learn_state: 3,
+        }
+    }
 
-pub fn update_learn_state(name: String, was_correct: bool) {
-    LEARNING_MAP
-        .lock()
-        .unwrap()
-        .entry(name)
-        .or_default()
-        .update(was_correct);
+    pub fn set_tutor_data(data: TutorData) {
+        let mut state = STATE.lock().unwrap();
+        match state.tutor_data {
+            Some(_) => panic!("tutor data can only be set once"),
+            None => state.tutor_data = Some(data),
+        }
+    }
+
+    pub fn chord(name: &Name) -> Option<Chord> {
+        let state = STATE.lock().unwrap();
+        if let Some(ref data) = state.tutor_data {
+            data.chord(name)
+        } else {
+            panic!("tutor data was not set")
+        }
+    }
+
+    fn name(spelling: &Spelling) -> Option<Name> {
+        let state = STATE.lock().unwrap();
+        if let Some(ref data) = state.tutor_data {
+            data.spellings.get(spelling).map(|name| name.clone())
+        } else {
+            panic!("tutor data was not set")
+        }
+    }
+
+    pub fn is_learned(name: &str) -> Option<bool> {
+        STATE
+            .lock()
+            .unwrap()
+            .learning_map
+            .get(name)
+            .map(|state| state.is_learned())
+    }
+
+    pub fn update_learn_state(name: String, was_correct: bool) {
+        let mut state = STATE.lock().unwrap();
+        let initial_learn_state = state.initial_learn_state;
+        state
+            .learning_map
+            .entry(name)
+            .or_insert_with(|| LearnState(initial_learn_state))
+            .update(was_correct);
+    }
 }
 
 impl LearnState {
@@ -99,14 +143,6 @@ impl LearnState {
 
     pub fn is_learned(&self) -> bool {
         self.0 <= 0
-    }
-}
-
-impl Default for LearnState {
-    fn default() -> LearnState {
-        // Set the number of times you must type this character correctly
-        // before the hint goes away
-        LearnState(10)
     }
 }
 
@@ -134,7 +170,7 @@ impl PrevCharStatus {
 }
 
 impl TutorData {
-    pub fn get_chord(&self, chord_name: &Name) -> Option<Chord> {
+    pub fn chord(&self, chord_name: &Name) -> Option<Chord> {
         // TODO don't assume default mode
         if chord_name == &Name(String::new()) {
             // Used for skipping colors in the cheatsheet config
@@ -143,30 +179,6 @@ impl TutorData {
             let mode_name = ModeName::default();
             self.chords.get(&mode_name)?.get(chord_name).cloned()
         }
-    }
-}
-
-pub fn set_tutor_data(data: TutorData) {
-    let mut tutor_data = TUTOR_DATA.lock().unwrap();
-    match *tutor_data {
-        Some(_) => panic!("tutor data can only be set once"),
-        None => *tutor_data = Some(data),
-    }
-}
-
-pub fn get_tutor_data_chord(name: &Name) -> Option<Chord> {
-    if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-        data.get_chord(name)
-    } else {
-        panic!("tutor data was not set")
-    }
-}
-
-pub fn get_tutor_data_name(spelling: &Spelling) -> Option<Name> {
-    if let Some(ref data) = *TUTOR_DATA.lock().unwrap() {
-        data.spellings.get(spelling).map(|name| name.clone())
-    } else {
-        panic!("tutor data was not set")
     }
 }
 
@@ -217,10 +229,8 @@ impl SlideEntry {
     // }
 
     fn from_word(word: &SlideWord) -> Result<SlideEntry, Error> {
-        let chords: Option<Vec<_>> = word.names
-            .iter()
-            .map(|name| get_tutor_data_chord(name))
-            .collect();
+        let chords: Option<Vec<_>> =
+            word.names.iter().map(|name| State::chord(name)).collect();
 
         let chord = match chords {
             None => bail!("failed to create chords for word"),
@@ -276,10 +286,10 @@ impl LabeledChord {
 
 pub fn char_to_chord(character: &str) -> Option<Chord> {
     let spelling = Spelling::new(character).ok()?;
-    let name = get_tutor_data_name(&spelling)?;
-    let mut chord = get_tutor_data_chord(&name)?;
+    let name = State::name(&spelling)?;
+    let mut chord = State::chord(&name)?;
     if spelling.is_uppercase() {
-        chord.intersect(&get_tutor_data_chord(&Name("mod_shift".into()))?)
+        chord.intersect(&State::chord(&Name("mod_shift".into()))?)
     }
     Some(chord)
 }
@@ -327,7 +337,7 @@ pub fn offset(width1: usize, width2: usize) -> usize {
 }
 
 fn backspace_chord() -> Option<Chord> {
-    get_tutor_data_chord(&"key_backspace".into())
+    State::chord(&"key_backspace".into())
 }
 
 pub fn load_lessons(

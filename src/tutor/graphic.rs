@@ -102,10 +102,6 @@ impl View for Graphic {
     }
 
     fn draw(&self, printer: &Printer) {
-        // if self.get_chord(ChordType::Next).is_none() {
-        // // This might just mean we're not showing hints right now
-        //     self.draw_question_mark(printer);
-        // }
         for switch in &self.switches {
             switch.draw(printer);
         }

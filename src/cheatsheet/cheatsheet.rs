@@ -208,7 +208,7 @@ impl Keyboard {
         assert_eq!(Chord::global_length(), self.switches.len());
         let chords = keys.iter()
             .map(|key| {
-                data.get_chord(key).ok_or_else(|| LookupErr {
+                data.chord(key).ok_or_else(|| LookupErr {
                     key: key.into(),
                     container: "tutor data chords".into(),
                 })
