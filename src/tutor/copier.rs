@@ -9,8 +9,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use types::errors::BadValueErr;
 use failure::{Error, ResultExt};
-use tutor::tutor_util::{grapheme_slice, offset, LabeledChord, PrevCharStatus,
-                        SlideEntry, SlideLine, State};
+use tutor::{grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
+            SlideLine, State};
 
 #[derive(Debug, Clone)]
 pub struct Copier {
