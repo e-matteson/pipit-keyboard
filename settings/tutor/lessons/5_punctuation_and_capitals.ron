@@ -1,3 +1,5 @@
+(
+slides:
 [
 (line: Letters(".,?! ..,, ??!! !?,. .,?!")),
 (line: Letters("Punctuation, and CaPiTaL Letters.")),
@@ -7,3 +9,4 @@
 (line: Letters("No. Yes! Well, maybe? Or not...")),
 (line: Letters("?!.,. !!,, ??.. ,?,? !.!. ,.,. ?,!. !?!? .?.? ,!,! !?,. .,?!")),
 ]
+)

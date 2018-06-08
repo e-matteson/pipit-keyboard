@@ -298,6 +298,13 @@ impl From<String> for ModeName {
 }
 
 //////////////////////////////
+impl ModeName {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+//////////////////////////////
 
 // TODO: sanitize name?
 impl Name {

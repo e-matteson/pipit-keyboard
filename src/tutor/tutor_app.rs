@@ -3,9 +3,10 @@ use std::time::Instant;
 use natord;
 
 use cursive::{Cursive, Printer};
+use cursive::direction::Orientation;
 use cursive::align::HAlign;
 use cursive::traits::*;
-use cursive::views::{Dialog, SelectView, TextView};
+use cursive::views::{Dialog, ListView, SelectView, SliderView, TextView};
 use cursive::vec::Vec2;
 use cursive::event::{Callback, Event, EventResult, Key};
 use cursive::utils::lines::simple::make_lines;
@@ -16,13 +17,14 @@ use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
 use tutor::graphic::Graphic;
-use tutor::tutor_util::{load_lessons, offset, Slide, State};
+use tutor::tutor_util::{load_lessons, offset, LessonConfig, Slide, State};
 use tutor::copier::Copier;
 
 pub struct TutorApp;
 
 struct Lesson {
     slides: Vec<Slide>,
+    popup: String,
     graphic: Graphic,
     graphic_spacing: usize,
     instruction_spacing: usize,
@@ -45,11 +47,51 @@ impl TutorApp {
 
         siv.load_theme_file("settings/tutor/color_theme.toml")
             .expect("failed to load theme");
-        TutorApp::show_menu(&mut siv);
+
+        TutorApp::show_main_menu(&mut siv);
         siv.run();
     }
 
-    fn show_menu(siv: &mut Cursive) {
+    fn show_main_menu(siv: &mut Cursive) {
+        let items = vec!["Lessons", "Options"];
+        let select = SelectView::new()
+            .h_align(HAlign::Left)
+            .with_all_str(items)
+            .on_submit(move |siv, item| match item {
+                "Lessons" => TutorApp::show_lesson_menu(siv),
+                "Options" => TutorApp::show_option_menu(siv),
+                _ => panic!("unknown menu item"),
+            });
+        siv.add_layer(Dialog::around(select).title("Pipit Typing Tutor"));
+    }
+
+    fn show_option_menu(siv: &mut Cursive) {
+        let initial = State::initial_learn_state() as usize;
+        let max = initial.max(10);
+
+        let list = ListView::new()
+            .child(
+                "Mode:",
+                SelectView::new()
+                    .popup()
+                    .with_all_str(State::mode_list())
+                    .on_submit(|_siv, mode| State::set_mode(mode)),
+            )
+            .child(
+                "Hint difficulty:",
+                SliderView::new(Orientation::Horizontal, max)
+                    .value(max - initial)
+                    .on_change(move |_siv, value| {
+                        State::set_initial_learn_state(max - value)
+                    }),
+            );
+        siv.add_layer(Dialog::new().title("Options").content(list).button(
+            "Back",
+            |siv| siv.pop_layer(), // TODO how to go back?
+        ));
+    }
+
+    fn show_lesson_menu(siv: &mut Cursive) {
         let lessons = load_lessons("settings/tutor/lessons/")
             .expect("failed to get lessons");
         let mut names: Vec<String> = lessons.keys().cloned().collect();
@@ -59,31 +101,36 @@ impl TutorApp {
 
         select.add_all_str(names);
         select.set_on_submit(move |siv, name| {
-            TutorApp::cleanup_menu(siv);
-            let slides = lessons.get(name).cloned().expect("lesson not found");
-            TutorApp::show_lesson(siv, name, slides)
+            let lesson = lessons.get(name).cloned().expect("lesson not found");
+            TutorApp::show_lesson(siv, name, lesson)
         });
 
         siv.add_layer(
-            // Dialog::around(select.fixed_size((20, 10)))
-            Dialog::around(select).title("Lessons"),
+            Dialog::around(select)
+                .title("Lessons")
+                .button("Back", |siv| siv.pop_layer()),
         );
     }
 
-    fn cleanup_menu(siv: &mut Cursive) {
-        siv.pop_layer();
-    }
-
-    fn show_lesson(siv: &mut Cursive, _name: &str, slides: Vec<Slide>) {
-        let lesson = match Lesson::new(slides) {
+    fn show_lesson(
+        siv: &mut Cursive,
+        _name: &str,
+        lesson_config: LessonConfig,
+    ) {
+        let lesson = match Lesson::new(lesson_config) {
             Ok(lesson) => lesson,
             Err(error) => print_and_panic(error),
         };
-        siv.add_layer(lesson.with_id("text"));
-    }
-
-    fn cleanup_lesson(siv: &mut Cursive) {
-        siv.pop_layer();
+        let popup = lesson.popup.clone();
+        siv.add_layer(lesson);
+        if !popup.is_empty() {
+            siv.add_layer(Dialog::around(TextView::new(popup)).button(
+                "Begin",
+                |siv| {
+                    siv.pop_layer(); // pop dialog
+                },
+            ))
+        }
     }
 
     fn show_confirm_back(siv: &mut Cursive) {
@@ -91,9 +138,8 @@ impl TutorApp {
             Dialog::around(TextView::new("Return to lesson menu?"))
                 .dismiss_button("Cancel")
                 .button("Yes", |siv| {
-                    siv.pop_layer();
-                    TutorApp::cleanup_lesson(siv);
-                    TutorApp::show_menu(siv);
+                    siv.pop_layer(); // pop dialog
+                    siv.pop_layer(); // pop lesson
                 }),
         )
     }
@@ -103,21 +149,21 @@ impl TutorApp {
         siv.add_layer(Dialog::around(TextView::new(message)).button(
             "back",
             |siv| {
-                siv.pop_layer();
-                TutorApp::cleanup_lesson(siv);
-                TutorApp::show_menu(siv)
+                siv.pop_layer(); // pop dialog
+                siv.pop_layer(); // pop lesson
             },
         ));
     }
 }
 
 impl Lesson {
-    fn new(slides: Vec<Slide>) -> Result<Lesson, Error> {
+    fn new(config: LessonConfig) -> Result<Lesson, Error> {
         let copier = Copier::new(79);
 
         let mut lesson = Lesson {
             // reverse slide order so we can pop them off the end of a vec
-            slides: slides.into_iter().rev().collect(),
+            slides: config.slides.into_iter().rev().collect(),
+            popup: config.popup,
             graphic: Graphic::new(),
             graphic_spacing: 1,
             instruction_spacing: 3,

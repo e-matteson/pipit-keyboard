@@ -1,3 +1,5 @@
+(
+slides:
 [
 (line: Letters("def main():")),
 (line: Letters("const uint8_t fan_control_pin = 11;")),
@@ -13,3 +15,4 @@
 (line: Letters("\"2048\".parse::<u32>()")),
 (line: Letters("printf(\"%d\\n\", getpid());")),
 ]
+)

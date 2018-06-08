@@ -18,11 +18,20 @@ lazy_static! {
 pub struct State {
     tutor_data: Option<TutorData>,
     learning_map: HashMap<String, LearnState>,
-    initial_learn_state: i64,
+    initial_learn_state: usize,
+    mode: ModeName,
 }
 
 #[derive(Debug, Clone)]
-pub struct LearnState(pub i64);
+pub struct LearnState(pub usize);
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LessonConfig {
+    pub slides: Vec<Slide>,
+    #[serde(default)]
+    pub popup: String,
+}
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -82,7 +91,8 @@ impl State {
         State {
             tutor_data: None,
             learning_map: HashMap::new(),
-            initial_learn_state: 3,
+            initial_learn_state: 10,
+            mode: ModeName::default(),
         }
     }
 
@@ -95,9 +105,14 @@ impl State {
     }
 
     pub fn chord(name: &Name) -> Option<Chord> {
+        if name == &Name(String::new()) {
+            // Used for skipping colors in the cheatsheet config
+            return Some(Chord::default());
+        }
+
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.chord(name)
+            data.chords.get(&state.mode)?.get(name).cloned()
         } else {
             panic!("tutor data was not set")
         }
@@ -130,19 +145,77 @@ impl State {
             .or_insert_with(|| LearnState(initial_learn_state))
             .update(was_correct);
     }
+
+    pub fn initial_learn_state() -> usize {
+        STATE.lock().unwrap().initial_learn_state
+    }
+
+    pub fn set_initial_learn_state(initial: usize) {
+        let mut state = STATE.lock().unwrap();
+        for (_, learn_state) in state.learning_map.iter_mut() {
+            learn_state.reset(initial);
+        }
+        state.initial_learn_state = initial;
+    }
+
+    pub fn mode_list() -> Vec<String> {
+        let state = STATE.lock().unwrap();
+        if let Some(ref data) = state.tutor_data {
+            data.chords.keys().map(|mode| mode.0.clone()).collect()
+        } else {
+            panic!("tutor data was not set")
+        }
+    }
+
+    pub fn set_mode(mode_str: &str) {
+        let mode = ModeName::from(mode_str);
+        let mut state = STATE.lock().unwrap();
+        if let Some(ref data) = state.tutor_data {
+            if !data.chords.contains_key(&mode) {
+                panic!("tried to switch unknown ModeName: {}", mode);
+            }
+        } else {
+            panic!("tutor data was not set")
+        }
+
+        state.mode = mode;
+
+        // Reset the learning state for each letter, since the chords could be
+        // totally different now.
+        let initial = state.initial_learn_state;
+        for (_, learn_state) in state.learning_map.iter_mut() {
+            learn_state.reset(initial);
+        }
+    }
+}
+
+impl TutorData {
+    pub fn chord(&self, name: &Name, mode: &ModeName) -> Option<Chord> {
+        if name == &Name(String::new()) {
+            // Used for skipping colors in the cheatsheet config
+            return Some(Chord::default());
+        }
+        self.chords.get(mode)?.get(name).cloned()
+    }
 }
 
 impl LearnState {
     pub fn update(&mut self, was_correct: bool) {
         if was_correct {
-            self.0 -= 1;
+            if self.0 > 0 {
+                self.0 -= 1;
+            }
         } else {
             self.0 += 1;
         }
     }
 
+    pub fn reset(&mut self, initial: usize) {
+        self.0 = initial;
+    }
+
     pub fn is_learned(&self) -> bool {
-        self.0 <= 0
+        self.0 == 0
     }
 }
 
@@ -165,19 +238,6 @@ impl PrevCharStatus {
         match self {
             PrevCharStatus::Correct => true,
             PrevCharStatus::Incorrect(_) => false,
-        }
-    }
-}
-
-impl TutorData {
-    pub fn chord(&self, chord_name: &Name) -> Option<Chord> {
-        // TODO don't assume default mode
-        if chord_name == &Name(String::new()) {
-            // Used for skipping colors in the cheatsheet config
-            Some(Chord::default())
-        } else {
-            let mode_name = ModeName::default();
-            self.chords.get(&mode_name)?.get(chord_name).cloned()
         }
     }
 }
@@ -342,7 +402,7 @@ fn backspace_chord() -> Option<Chord> {
 
 pub fn load_lessons(
     lesson_dir: &str,
-) -> Result<BTreeMap<String, Vec<Slide>>, Error> {
+) -> Result<BTreeMap<String, LessonConfig>, Error> {
     let entries = fs::read_dir(lesson_dir)?;
     let mut map = BTreeMap::new();
     for entry in entries {
@@ -364,12 +424,12 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
     format!("{}) {}", number, words.join(" "))
 }
 
-pub fn read_lesson_file(path: &PathBuf) -> Result<Vec<Slide>, Error> {
+pub fn read_lesson_file(path: &PathBuf) -> Result<LessonConfig, Error> {
     let file = open_file(path)
         .context(format!("failed to open file: {}", path.display()))?;
-    let slides: Vec<Slide> = from_reader(file)
+    let lesson: LessonConfig = from_reader(file)
         .context(format!("failed to read RON file: {}", path.display()))?;
-    Ok(slides)
+    Ok(lesson)
 }
 
 fn open_file(path: &PathBuf) -> Result<File, Error> {

@@ -1,3 +1,5 @@
+(popup: "This is a quick introduction to the features of the keyboard",
+slides:
 [
     (instruction: "Type each of the most common letters by pressing a single switch.",
      line: Letters("htns ieoa dcrl pufm")),
@@ -40,4 +42,4 @@
      line: Words (words: [SlideWord (names: ["word_these"], text: " these"),
                           SlideWord (names: ["command_delete_word"]),
      ])),
-]
+])

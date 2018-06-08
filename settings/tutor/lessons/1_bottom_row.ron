@@ -1,16 +1,18 @@
+(popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, the red hints will show your last mistake, and yellow hints will show where backspace is.",
+slides:
 [
 (
-  // instruction: "Blue shows the next letter, red shows your last mistake, and yellow shows backspace",
-  instruction: "Blue shows the next letter, red shows your last mistake",
-  line: Letters("ieoa aoei ioae oaie ieoa aaee ooii eeoo iiaa")
+  line: Letters("ieoa htns aoei ieoa snth htns")
 ),
 
 (
   instruction: "The blue hints will disappear as you learn each letter",
-  line: Letters("htns snth hnst nsht htns nntt hhss tthh ssnn")
+  line: Letters("ioae aoei oaie ieoa aeae oioi eoeo iaia oiae aoie eoia oaoa ioio ieoa aoei")
 ),
 
-(line: Letters("hat hot heat hit sit soot set sat shine shone shane sheen")),
+(line: Letters("htns snth hnst nsht htns ntnt hshs thth snsn tshn thns nhst hnhn htns snth")),
+
+(line: Letters("ieoa htns hat hot heat hit sit soot set sat shine shone shane sheen")),
 
 (line: Letters("i sat on the stone seat")),
 (line: Letters("the hot season is soon")),
@@ -34,3 +36,4 @@
 (line: Letters("santa has nineteen hats")),
 (line: Letters("the noise has the attention of the assistant")),
 ]
+)

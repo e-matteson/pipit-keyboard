@@ -9,7 +9,7 @@ use svg::node::element::{ClipPath, Definitions, Group};
 use unicode_segmentation::UnicodeSegmentation;
 use serde_yaml;
 
-use types::{Chord, Name, TutorData};
+use types::{Chord, ModeName, Name, TutorData};
 use types::errors::{LookupErr, MissingErr};
 use failure::{err_msg, Error, ResultExt};
 use util::{read_file, user_confirm, ConfirmDefault};
@@ -29,6 +29,7 @@ pub struct CheatSheetSpec {
     keyboards: Vec<KeyboardSpec>,
     page_width: f64,
     page_height: f64,
+    mode: ModeName,
     // TODO add title?
 }
 
@@ -126,7 +127,7 @@ impl CheatSheet {
                 .expect("bug in CheatSheet::new()");
             let mut keyboard = Keyboard::new(*pos);
             keyboard
-                .set_keys(&kb_spec.keys, data)
+                .set_keys(&kb_spec.keys, data, &spec.mode)
                 .context(format!("Failed to create image of keyboard #{}", i))?;
             all.push(keyboard);
             *pos = *pos + height;
@@ -204,11 +205,12 @@ impl Keyboard {
         &mut self,
         keys: &[Name],
         data: &TutorData,
+        mode: &ModeName,
     ) -> Result<(), Error> {
         assert_eq!(Chord::global_length(), self.switches.len());
         let chords = keys.iter()
             .map(|key| {
-                data.chord(key).ok_or_else(|| LookupErr {
+                data.chord(key, mode).ok_or_else(|| LookupErr {
                     key: key.into(),
                     container: "tutor data chords".into(),
                 })

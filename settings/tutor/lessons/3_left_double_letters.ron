@@ -1,4 +1,6 @@
+(slides:
 [
+(line: Letters("bgk zv kgb bgk vz zv")),
 (line: Letters("bgk kgb bbgg ggkk gkb ggkb ggbb bkbg")),
 (line: Letters("book bike bee bag gig age egg bib geek beak")),
 (line: Letters("zv vz vvzz zvzv vzzv zvvz")),
@@ -23,3 +25,5 @@
 (line: Letters("pizza puzzle zazu plaza muzzle fuzzies")),
 (line: Letters("bgkzv vzkgb")),
 ]
+
+)

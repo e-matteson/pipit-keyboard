@@ -1,4 +1,7 @@
+(popup: "Next you'll learn the 8 letters on the top row of the keyboard",
+slides:
 [
+(line: Letters("pufm dcrl mfup pufm lrcd dcrl")),
 (line: Letters("pufm mfup ppuu ffmm mfup pufm")),
 (line: Letters("fume pipe puff pop pump mop")),
 (line: Letters("ppuuffmm mufp uppmf mffup uufp pufm")),
@@ -23,3 +26,5 @@
 (line: Letters("placid prairie mules feel real relief")),
 (line: Letters("four people circled as flames flared")),
 ]
+
+)
