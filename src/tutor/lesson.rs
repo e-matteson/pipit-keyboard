@@ -11,7 +11,7 @@ use cursive::theme::ColorStyle;
 use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
 
-use tutor::{offset, Copier, Graphic, LessonConfig, Slide};
+use tutor::{offset, Copier, Graphic, LessonConfig, PrevCharStatus, Slide};
 
 pub struct Lesson {
     pub popup: String,
@@ -23,11 +23,6 @@ pub struct Lesson {
     start_time: Option<Instant>,
     net_words: f64,
     instruction: String,
-}
-
-enum LessonState {
-    Typing,
-    EndOfLine,
 }
 
 impl Lesson {
@@ -46,12 +41,12 @@ impl Lesson {
             net_words: 0.,
             instruction: String::new(),
         };
-        lesson.next_slide().unwrap();
-        lesson.update_chord()?;
+        let status = lesson.next_slide().unwrap();
+        lesson.update_chord(status)?;
         Ok(lesson)
     }
 
-    fn next_slide(&mut self) -> Result<(), Error> {
+    fn next_slide(&mut self) -> Result<PrevCharStatus, Error> {
         // TODO check for empty lessons when loading from file, instead.
         // We should panic here instead if we failed to end the lesson after
         // going through all the slides.
@@ -62,24 +57,13 @@ impl Lesson {
         self.copier.start_line(&slide.line)?;
         self.instruction = slide.instruction;
         // TODO otherwise... other transition?
-        Ok(())
+        Ok(PrevCharStatus::Correct)
     }
 
-    fn update_chord(&mut self) -> Result<(), Error> {
+    fn update_chord(&mut self, status: PrevCharStatus) -> Result<(), Error> {
         let next_char = self.copier.next_hint().context("failed to get hint")?;
-        let prev_char_status = self.copier
-            .prev_char_status()
-            .expect("failed to check if char was wrong");
-        self.graphic.update(next_char, prev_char_status);
+        self.graphic.update(next_char, status);
         Ok(())
-    }
-
-    fn state(&self) -> LessonState {
-        if self.copier.at_end_of_line() {
-            LessonState::EndOfLine
-        } else {
-            LessonState::Typing
-        }
     }
 
     fn instruction_size(&self) -> Vec2 {
@@ -194,40 +178,30 @@ impl View for Lesson {
                 show_confirm_back,
             )));
         }
-        match self.state() {
-            LessonState::Typing => match event {
-                Event::Key(Key::Backspace) => self.copier.type_backspace(),
-                Event::Char(letter) => {
-                    self.copier.type_char(letter);
-                    self.start_if_not_started()
+        let status = match event {
+            Event::Key(Key::Backspace) => self.copier.type_backspace(),
+            Event::Char(letter) => {
+                self.start_if_not_started();
+                self.copier.type_char(letter)
+            }
+            Event::CtrlChar('j') | Event::Key(Key::Enter)
+                if self.copier.at_end_of_line() =>
+            {
+                // End the line, and maybe the whole lesson.
+                self.net_words += self.copier.net_words();
+                if self.slides.is_empty() {
+                    // Lesson is done
+                    let wpm = self.words_per_minute();
+                    return EventResult::Consumed(Some(Callback::from_fn(
+                        move |siv| end_lesson_callback(siv, wpm),
+                    )));
                 }
-                _ => return EventResult::Ignored,
-            },
-            LessonState::EndOfLine => match event {
-                Event::Key(Key::Backspace) => self.copier.type_backspace(),
-                Event::CtrlChar('j') | Event::Key(Key::Enter) => {
-                    self.net_words += self.copier.net_words();
-                    if self.slides.is_empty() {
-                        // Lesson is done
-                        let wpm = self.words_per_minute();
-                        return EventResult::Consumed(Some(Callback::from_fn(
-                            move |siv| end_lesson_callback(siv, wpm),
-                        )));
-                    }
+                self.next_slide().expect("failed to get next slide")
+            }
+            _ => return EventResult::Ignored,
+        };
 
-                    // TODO don't expect
-                    self.next_slide().expect("failed to get next slide");
-                }
-                Event::Char(letter) => {
-                    // Let them keep typing past the end of the line (important
-                    // for cycling to shorter words)
-                    self.copier.type_char(letter);
-                }
-                _ => return EventResult::Ignored,
-            },
-        }
-
-        if let Err(error) = self.update_chord() {
+        if let Err(error) = self.update_chord(status) {
             print_and_panic(error);
         }
 
@@ -238,7 +212,7 @@ impl View for Lesson {
 fn end_lesson_callback(siv: &mut Cursive, wpm: usize) {
     let message = format!("Lesson complete.\nNet WPM: {}", wpm);
     siv.add_layer(Dialog::around(TextView::new(message)).button(
-        "back",
+        "Back",
         |siv| {
             siv.pop_layer(); // pop dialog
             siv.pop_layer(); // pop lesson

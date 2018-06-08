@@ -39,9 +39,13 @@ impl LabeledChord {
 
 impl PrevCharStatus {
     pub fn backspace(&self) -> Option<LabeledChord> {
-        match self {
-            PrevCharStatus::Correct => None,
-            PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
+        if State::freeze_on_error() {
+            None
+        } else {
+            match self {
+                PrevCharStatus::Correct => None,
+                PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
+            }
         }
     }
 

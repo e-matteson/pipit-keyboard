@@ -13,7 +13,7 @@ pub struct State {
     learning_map: HashMap<String, LearnState>,
     initial_learn_state: usize,
     mode: ModeName,
-    // allow_errors: bool,
+    freeze_on_error: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -26,6 +26,7 @@ impl State {
             learning_map: HashMap::new(),
             initial_learn_state: 10,
             mode: ModeName::default(),
+            freeze_on_error: true,
         }
     }
 
@@ -90,6 +91,13 @@ impl State {
 
     pub fn initial_learn_state() -> usize {
         STATE.lock().unwrap().initial_learn_state
+    }
+
+    pub fn freeze_on_error() -> bool {
+        STATE.lock().unwrap().freeze_on_error
+    }
+    pub fn set_freeze_on_error(value: bool) {
+        STATE.lock().unwrap().freeze_on_error = value;
     }
 
     pub fn set_initial_learn_state(initial: usize) {

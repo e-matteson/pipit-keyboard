@@ -3,7 +3,8 @@ use natord;
 use cursive::Cursive;
 use cursive::direction::Orientation;
 use cursive::align::HAlign;
-use cursive::views::{Dialog, ListView, SelectView, SliderView, TextView};
+use cursive::views::{Checkbox, Dialog, ListView, SelectView, SliderView,
+                     TextView};
 
 use types::TutorData;
 use types::errors::print_and_panic;
@@ -42,6 +43,9 @@ impl TutorApp {
         let initial = State::initial_learn_state() as usize;
         let max = initial.max(10);
 
+        let mut check_box = Checkbox::new();
+        check_box.set_checked(State::freeze_on_error());
+
         let list = ListView::new()
             .child(
                 "Mode:",
@@ -57,6 +61,11 @@ impl TutorApp {
                     .on_change(move |_siv, value| {
                         State::set_initial_learn_state(max - value)
                     }),
+            )
+            .child(
+                "Freeze progress after an error:",
+                check_box
+                    .on_change(|_siv, value| State::set_freeze_on_error(value)),
             );
         siv.add_layer(Dialog::new().title("Options").content(list).button(
             "Back",

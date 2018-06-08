@@ -8,7 +8,7 @@ use cursive::theme::ColorStyle;
 use unicode_segmentation::UnicodeSegmentation;
 
 use types::errors::BadValueErr;
-use failure::{Error, ResultExt};
+use failure::Error;
 use tutor::{grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
             SlideLine, State};
 
@@ -28,7 +28,6 @@ struct CopierLine {
     show_errors: bool,
     hint_map: HashMap<usize, LabeledChord>,
     show_hints_within_words: bool,
-    was_backspace_typed_last: bool,
 }
 
 impl Copier {
@@ -60,12 +59,10 @@ impl Copier {
             return Ok(None);
         }
 
-        let next_letter = self.expected_at_offset(self.point_offset)
+        let next_letter = self.expected_next()
             .expect("failed to get next char, did we check for end of line?");
 
-        let letter_hint = if self.needs_hint(&next_letter)
-            || self.line.was_backspace_typed_last
-        {
+        let letter_hint = if self.needs_hint(&next_letter) {
             LabeledChord::from_letter(&next_letter)
         } else {
             None
@@ -79,49 +76,61 @@ impl Copier {
         self.point_offset - 1
     }
 
-    pub fn prev_char_status(&self) -> Result<PrevCharStatus, Error> {
-        if !self.line.show_errors {
-            return Ok(PrevCharStatus::Correct);
+    fn next_offset(&self) -> usize {
+        self.point_offset
+    }
+
+    fn expected_next(&self) -> Option<String> {
+        self.expected_at_offset(self.next_offset())
+        // .expect("failed to get next expected char")
+    }
+
+    fn expected_prev(&self) -> Option<String> {
+        self.expected_at_offset(self.prev_offset())
+        // .expect("failed to get prev expected char")
+    }
+
+    fn actual_prev(&self) -> String {
+        self.actual_at_offset(self.prev_offset())
+            .expect("failed to get prev actual char")
+    }
+
+    pub fn type_char(&mut self, character: char) -> PrevCharStatus {
+        let expected = self.expected_next();
+        let actual = character.to_string();
+        let status = self.prev_char_status(&actual, &expected);
+
+        if status.is_correct() || !State::freeze_on_error() {
+            // make the typed char appear
+            self.line.actual += &actual;
+            self.line.index += 1;
         }
+        if let Some(e) = &expected {
+            State::update_learn_state(e.clone(), status.is_correct());
+        }
+        status
+    }
 
-        let offset = self.prev_offset();
-        let actual_char = self.actual_at_offset(offset)?;
-        let expected_char;
-        if let Some(c) = self.expected_at_offset(offset) {
-            expected_char = c;
-        } else {
-            return Ok(PrevCharStatus::Incorrect(None));
-        };
-
-        // TODO don't include actual_char if not at word boundary?
-        Ok(if actual_char != expected_char {
-            PrevCharStatus::Incorrect(LabeledChord::from_letter(&actual_char))
-        } else {
+    fn prev_char_status(
+        &self,
+        actual: &str,
+        expected: &Option<String>,
+    ) -> PrevCharStatus {
+        let correct = expected.as_ref().map(|e| e == &actual).unwrap_or(false);
+        if correct || !self.line.show_errors {
             PrevCharStatus::Correct
-        })
-    }
-
-    pub fn type_char(&mut self, character: char) {
-        self.line.actual += &character.to_string();
-        self.line.index += 1;
-        self.line.was_backspace_typed_last = false;
-
-        let was_correct = self.prev_char_status()
-            .context("failed to check if most recently typed char was correct")
-            .expect("failed to type character")
-            .is_correct();
-
-        if let Some(expected_char) = self.expected_at_offset(self.prev_offset())
-        {
-            State::update_learn_state(expected_char, was_correct);
+        } else {
+            PrevCharStatus::Incorrect(LabeledChord::from_letter(&actual))
         }
     }
 
-    pub fn type_backspace(&mut self) {
+    pub fn type_backspace(&mut self) -> PrevCharStatus {
         if self.line.index > 0 {
             self.line.actual.pop();
             self.line.index -= 1;
-            self.line.was_backspace_typed_last = true;
+            self.prev_char_status(&self.actual_prev(), &self.expected_prev())
+        } else {
+            PrevCharStatus::Correct
         }
     }
 
@@ -244,7 +253,6 @@ impl CopierLine {
             show_errors: line.show_errors(),
             hint_map: make_hint_map(&entries),
             show_hints_within_words: !line.has_length_overrides(),
-            was_backspace_typed_last: false,
         })
     }
 }
@@ -255,7 +263,6 @@ impl Default for CopierLine {
             expected: String::new(),
             actual: String::new(),
             index: 0,
-            was_backspace_typed_last: false,
             show_errors: true,
             hint_map: HashMap::new(),
             show_hints_within_words: true,
