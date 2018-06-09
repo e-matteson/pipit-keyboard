@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::collections::BTreeMap;
 
 use unicode_segmentation::UnicodeSegmentation;
-use ron::de::from_reader;
+use serde_yaml;
 
 use failure::{Error, ResultExt};
 use tutor::Slide;
@@ -26,7 +26,10 @@ pub fn load_lessons(
     let entries = fs::read_dir(lesson_dir)?;
     let mut map = BTreeMap::new();
     for entry in entries {
-        let path = entry?.path();
+        let path: PathBuf = entry?.path();
+        if path.extension().map(|ext| ext != "yaml").unwrap_or(false) {
+            continue;
+        }
         let name = lesson_path_to_name(&path);
         map.insert(name, read_lesson_file(&path)?);
     }
@@ -47,8 +50,8 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
 pub fn read_lesson_file(path: &PathBuf) -> Result<LessonConfig, Error> {
     let file = open_file(path)
         .context(format!("failed to open file: {}", path.display()))?;
-    let lesson: LessonConfig = from_reader(file)
-        .context(format!("failed to read RON file: {}", path.display()))?;
+    let lesson: LessonConfig = serde_yaml::from_reader(file)
+        .context(format!("failed to read lesson file: {}", path.display()))?;
     Ok(lesson)
 }
 

@@ -1,9 +1,0 @@
-(popup: "For these 4 symbols, your middle finger will stay in the same place",
-slides:
-[
-(line: Letters("$^ &| $$^^ &&|| |&^$ $^&|")),
-(line: Letters("$^^$ ^$^$ $^^$ &||& |&&| &|&| |^|^ $&$& |^^| ^|^| &$&$ &|$| ^&&| $^&| |$|$")),
-(line: Letters("&|&| ^$^$ |$^& |&$^ $&$& ^|^| &||& ^$$^ |^$& &$^| |^|^ $&$&")),
-(line: Letters("$^&| |&^$ ^%%|^ &|$|& ^$&| ^|&$ |&|^|$|")),
-]
-)

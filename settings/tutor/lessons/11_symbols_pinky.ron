@@ -1,9 +1,0 @@
-(popup: "For these 6 symbols, your pinky finger will stay in the same place",
-slides:
-[
-(line: Letters("=+ #@ `~ =#` +@~ =+#@`~ ==++ ##@@ ``~~ ~`@#+=")),
-(line: Letters("=+=+ @#@# +#+# @=@= @=#+ =++@= #@+@# +##@@= #==+# @@=+@")),
-(line: Letters("`~ #@ ``~~ ##@@ ~`~` ~#~# @`@` @#~` ~@@~ ~`#@~ ~``# @~`~")),
-(line: Letters("=+ #@ `~ =+#@`~ +@~ =#` #=+@ ~`+= @`~+ +#+# ~=~= @+@+ `=`=")),
-]
-)

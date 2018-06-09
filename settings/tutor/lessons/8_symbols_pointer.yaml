@@ -1,0 +1,11 @@
+---
+popup: "For these 4 symbols, your pointer finger will stay in the same place"
+slides:
+  - line:
+      Letters: "/\\ -_ '\" /\\-_'\" //\\\\ --__ ''\"\" /\\-_'\" \"'_-\\/"
+  - line:
+      Letters: "\\\\ // /\\/\\ \\/\\/ _-_- --__ _--_ _/_/ \\-\\- -_/- \\-\\/_/ -_-/\\"
+  - line:
+      Letters: "-_-_ \"'\"' '_--_' \"_-_-\" \"-\"'_'\" '--' \"__\""
+  - line:
+      Letters: "''\"\" '\"'\" \"''\" \\/\\/ /'/' \\\"\\\" /-' \\_\""

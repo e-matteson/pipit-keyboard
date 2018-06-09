@@ -22,6 +22,7 @@ pub struct State {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Saveable {
     initial_learn_state: usize,
     mode: ModeName,
