@@ -34,11 +34,11 @@ slides:
             text: e
             length_override: ~
           - names:
-              - word_these
+              - word_these_0
             text: " these"
             length_override: ~
           - names:
-              - word_these
+              - word_these_0
             text: " these"
             length_override: ~
         show_errors: true
@@ -71,7 +71,7 @@ slides:
             text: " sheet"
             length_override: ~
           - names:
-              - word_these
+              - word_these_0
             text: " these"
             length_override: ~
           - names:
@@ -79,7 +79,7 @@ slides:
             text: " sheet"
             length_override: ~
           - names:
-              - word_these
+              - word_these_0
             text: " these"
             length_override: ~
         show_errors: true
@@ -88,7 +88,7 @@ slides:
       Words:
         words:
           - names:
-              - word_these
+              - word_these_0
             text: " sheet"
             length_override: ~
           - names:
@@ -101,7 +101,7 @@ slides:
       Words:
         words:
           - names:
-              - word_these
+              - word_these_0
             text: " these"
             length_override: ~
           - names:
