@@ -23,15 +23,19 @@ pub struct Lesson {
     start_time: Option<Instant>,
     net_words: f64,
     instruction: String,
+    info_bar: String,
+    info_bar_spacing: usize,
+    total_slides: usize,
 }
 
 impl Lesson {
     pub fn new(config: LessonConfig) -> Result<Lesson, Error> {
         let copier = Copier::new(79);
-
+        let slides: Vec<_> = config.slides.into_iter().rev().collect();
         let mut lesson = Lesson {
             // reverse slide order so we can pop them off the end of a vec
-            slides: config.slides.into_iter().rev().collect(),
+            total_slides: slides.len(),
+            slides: slides,
             popup: config.popup,
             graphic: Graphic::new(),
             graphic_spacing: 1,
@@ -40,6 +44,8 @@ impl Lesson {
             start_time: None,
             net_words: 0.,
             instruction: String::new(),
+            info_bar: String::new(),
+            info_bar_spacing: 1,
         };
         let status = lesson.next_slide().unwrap();
         lesson.update_chord(status)?;
@@ -56,8 +62,15 @@ impl Lesson {
         })?;
         self.copier.start_line(&slide.line)?;
         self.instruction = slide.instruction;
+        self.info_bar =
+            format!("Line {}.  Press `esc` to exit.", self.slide_counter());
         // TODO otherwise... other transition?
         Ok(PrevCharStatus::Correct)
+    }
+
+    fn slide_counter(&self) -> String {
+        let current_num = self.total_slides - self.slides.len();
+        format!("{}/{}", current_num, self.total_slides)
     }
 
     fn update_chord(&mut self, status: PrevCharStatus) -> Result<(), Error> {
@@ -102,6 +115,26 @@ impl Lesson {
         Vec2::new(x, y)
     }
 
+    fn info_bar_size(&self) -> Vec2 {
+        // This is making assumptions about size based on the length of the
+        // string. Not sure why I can't just ask a TextView for its
+        // size... And this panics if the string is longer than 1 line.
+        let x = self.info_bar.len();
+        // I would compare it to the total size, but that checks info_bar_size,
+        // so we'd get infinite recursion. Comparing to the graphic
+        // size is close enough.
+        assert!(x < self.graphic.size().x);
+        let y = 1;
+        Vec2::new(x, y)
+    }
+
+    fn info_bar_padding(&self) -> Vec2 {
+        let x = 1;
+        let y = self.graphic_padding().y + self.graphic.size().y
+            + self.info_bar_spacing;
+        Vec2::new(x, y)
+    }
+
     fn start_if_not_started(&mut self) {
         if self.start_time.is_none() {
             self.start_time = Some(Instant::now());
@@ -124,17 +157,28 @@ impl Lesson {
         let graphic_size = self.graphic.size();
         let copy_size = self.copier.size();
         let instruction_size = self.instruction_size();
-        let x = graphic_size.x.max(copy_size.x).max(instruction_size.x);
+        let info_bar_size = self.info_bar_size();
+        let x = graphic_size
+            .x
+            .max(copy_size.x)
+            .max(instruction_size.x)
+            .max(info_bar_size.x);
 
-        let y = graphic_size.y + copy_size.y + self.graphic_spacing
-            + instruction_size.y + self.instruction_spacing;
-        // let y = graphic_size.y + self.graphic_padding().y;
+        let y = info_bar_size.y + graphic_size.y + copy_size.y
+            + instruction_size.y + self.info_bar_spacing
+            + self.graphic_spacing + self.instruction_spacing;
         Vec2::new(x, y)
     }
 
     fn draw_instruction(&self, printer: &Printer) {
         printer.with_color(ColorStyle::primary(), |printer| {
             printer.print((self.instruction_padding().x, 0), &self.instruction);
+        });
+    }
+
+    fn draw_info_bar(&self, printer: &Printer) {
+        printer.with_color(ColorStyle::title_primary(), |printer| {
+            printer.print(self.info_bar_padding(), &self.info_bar);
         });
     }
 }
@@ -169,7 +213,9 @@ impl View for Lesson {
             self.graphic_padding(),
             self.graphic.size(),
             false,
-        ))
+        ));
+
+        self.draw_info_bar(printer)
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
