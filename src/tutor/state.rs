@@ -1,7 +1,13 @@
 use std::sync::Mutex;
 use std::collections::HashMap;
+use std::path::PathBuf;
+use std::fs::File;
+use std::io::Write;
+use std::fs::OpenOptions;
+use serde_yaml;
 
 use types::{Chord, ModeName, Name, Spelling, TutorData};
+use failure::{Error, ResultExt};
 
 lazy_static! {
     static ref STATE: Mutex<State> = Mutex::new(State::new());
@@ -11,6 +17,12 @@ lazy_static! {
 pub struct State {
     tutor_data: Option<TutorData>,
     learning_map: HashMap<String, LearnState>,
+    save_path: PathBuf,
+    saveable: Saveable,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Saveable {
     initial_learn_state: usize,
     mode: ModeName,
     freeze_on_error: bool,
@@ -24,10 +36,42 @@ impl State {
         State {
             tutor_data: None,
             learning_map: HashMap::new(),
-            initial_learn_state: 10,
-            mode: ModeName::default(),
-            freeze_on_error: true,
+            save_path: PathBuf::from("settings/tutor/saved_options.yaml"),
+            saveable: Saveable {
+                initial_learn_state: 10,
+                mode: ModeName::default(),
+                freeze_on_error: true,
+            },
         }
+    }
+
+    pub fn load() -> Result<(), Error> {
+        eprintln!("load");
+        let path = State::save_path();
+        let saveable = read_state_file(&path)?;
+        saveable.validate()?;
+        STATE.lock().unwrap().saveable = saveable;
+        Ok(())
+    }
+
+    pub fn save(&self) -> Result<(), Error> {
+        let s = serde_yaml::to_string(&self.saveable)?;
+        eprintln!("{:?}", s);
+        let mut file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(&self.save_path)
+            .context("Failed to open output file")?;
+
+        file.set_len(0).context("Failed to clear output file")?;
+
+        file.write_all(s.as_bytes())
+            .context("Failed to write to output file")?;
+        Ok(())
+    }
+
+    fn save_path() -> PathBuf {
+        STATE.lock().unwrap().save_path.clone()
     }
 
     pub fn set_tutor_data(data: TutorData) {
@@ -46,7 +90,7 @@ impl State {
 
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.chords.get(&state.mode)?.get(name).cloned()
+            data.chords.get(&state.saveable.mode)?.get(name).cloned()
         } else {
             panic!("tutor data was not set")
         }
@@ -81,7 +125,7 @@ impl State {
 
     pub fn update_learn_state(name: String, was_correct: bool) {
         let mut state = STATE.lock().unwrap();
-        let initial_learn_state = state.initial_learn_state;
+        let initial_learn_state = state.saveable.initial_learn_state;
         state
             .learning_map
             .entry(name)
@@ -90,14 +134,19 @@ impl State {
     }
 
     pub fn initial_learn_state() -> usize {
-        STATE.lock().unwrap().initial_learn_state
+        STATE.lock().unwrap().saveable.initial_learn_state
     }
 
     pub fn freeze_on_error() -> bool {
-        STATE.lock().unwrap().freeze_on_error
+        STATE.lock().unwrap().saveable.freeze_on_error
     }
+
     pub fn set_freeze_on_error(value: bool) {
-        STATE.lock().unwrap().freeze_on_error = value;
+        let mut state = STATE.lock().unwrap();
+        state.saveable.freeze_on_error = value;
+
+        // ignore any errors while saving
+        state.save().ok();
     }
 
     pub fn set_initial_learn_state(initial: usize) {
@@ -105,16 +154,35 @@ impl State {
         for (_, learn_state) in state.learning_map.iter_mut() {
             learn_state.reset(initial);
         }
-        state.initial_learn_state = initial;
+        state.saveable.initial_learn_state = initial;
+
+        // ignore any errors while saving
+        state.save().ok();
     }
 
-    pub fn mode_list() -> Vec<String> {
+    fn mode_list() -> Vec<ModeName> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.chords.keys().map(|mode| mode.0.clone()).collect()
+            data.chords.keys().cloned().collect()
         } else {
             panic!("tutor data was not set")
         }
+    }
+
+    pub fn mode_string_list() -> Vec<String> {
+        State::mode_list()
+            .into_iter()
+            .map(|mode| mode.0.clone())
+            .collect()
+    }
+
+    fn mode_index(mode: &ModeName) -> Option<usize> {
+        State::mode_list().into_iter().position(|m| &m == mode)
+    }
+
+    pub fn current_mode_index() -> usize {
+        let mode = STATE.lock().unwrap().saveable.mode.clone();
+        State::mode_index(&mode).expect("current mode not found in list")
     }
 
     pub fn set_mode(mode_str: &str) {
@@ -128,14 +196,23 @@ impl State {
             panic!("tutor data was not set")
         }
 
-        state.mode = mode;
+        state.saveable.mode = mode;
 
         // Reset the learning state for each letter, since the chords could be
         // totally different now.
-        let initial = state.initial_learn_state;
+        let initial = state.saveable.initial_learn_state;
         for (_, learn_state) in state.learning_map.iter_mut() {
             learn_state.reset(initial);
         }
+        // ignore any errors while saving
+        state.save().ok();
+    }
+}
+impl Saveable {
+    pub fn validate(&self) -> Result<(), Error> {
+        State::mode_index(&self.mode)
+            .ok_or(format_err!("Unknown ModeName: {}", &self.mode))?;
+        Ok(())
     }
 }
 
@@ -167,4 +244,13 @@ impl LearnState {
     pub fn is_learned(&self) -> bool {
         self.0 == 0
     }
+}
+
+pub fn read_state_file(path: &PathBuf) -> Result<Saveable, Error> {
+    let file = File::open(path)
+        .context(format!("failed to open file: {}", path.display()))?;
+    let saveable: Saveable = serde_yaml::from_reader(file)
+        .context(format!("failed to read RON file: {}", path.display()))?;
+    saveable.validate()?;
+    Ok(saveable)
 }

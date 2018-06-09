@@ -16,6 +16,7 @@ pub struct TutorApp;
 impl TutorApp {
     pub fn run(data: TutorData) {
         State::set_tutor_data(data);
+        State::load().ok(); // ignore errors
 
         let mut siv = Cursive::new();
 
@@ -51,7 +52,8 @@ impl TutorApp {
                 "Mode:",
                 SelectView::new()
                     .popup()
-                    .with_all_str(State::mode_list())
+                    .with_all_str(State::mode_string_list())
+                    .selected(State::current_mode_index())
                     .on_submit(|_siv, mode| State::set_mode(mode)),
             )
             .child(
