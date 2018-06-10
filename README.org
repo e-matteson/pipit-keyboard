@@ -9,18 +9,17 @@ You can change the keymap, dictionary, and other settings by editing simple conf
 
 The firmware is compatible with several varieties of arduino-compatible ARM microcontroller boards. It currently suppports the =Adafruit Feather BLE M0= (for a wireless keyboard) and the =Teensy LC= (for a wired keyboard), and support for the =Teensy 3= is planned.
 
-
-See the [[https://github.com/e-matteson/pipit-keyboard/wiki/][wiki]] for more (slightly outdated) documentation.
+** [[https://e-matteson.github.io/pipit-guide/][User Guide]]
 
 ** Brief instructions
 
 - Install [[https://www.rust-lang.org][rust]] and the [[https://www.arduino.cc/en/Main/Software][Arduino IDE]] (along with support for your microcontroller).
 - Clone this repository.
-- [[Configuration][configure the keyboard]] by editing =settings/settings.yaml=.
+- Configure the keyboard by editing =settings/settings.yaml=.
 - Run the pipit-config tool to generate the firmware: =$ cargo run=
 - Open =pipit-firmware/pipit-firmware.ino= in the Arduino IDE, and upload to your microcontroller.
 
-See [[https://github.com/e-matteson/pipit-keyboard/wiki/Running-the-code][here]] for more detail.
+See the [[https://e-matteson.github.io/pipit-guide/][User Guide]] for more detail.
 
 ** Contributing
 Feedback, issue reports, and pull requests are very welcome. If you make new settings files or =.kmap= files, consider contributing them to the repository for others to use.
