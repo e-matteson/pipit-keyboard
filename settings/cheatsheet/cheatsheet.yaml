@@ -4,6 +4,9 @@ mode: "default_mode"
 
 
 keyboards:
+  # Leave a blank space where the first keyboard would be
+  - null
+
   - keys:
     - "key_a"
     - "key_c"

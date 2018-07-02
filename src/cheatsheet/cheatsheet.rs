@@ -26,7 +26,7 @@ pub struct CheatSheet {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CheatSheetSpec {
-    keyboards: Vec<KeyboardSpec>,
+    keyboards: Vec<Option<KeyboardSpec>>,
     page_width: f64,
     page_height: f64,
     mode: ModeName,
@@ -125,11 +125,18 @@ impl CheatSheet {
             let mut pos = col_positions
                 .get_mut(i % (num_cols as usize))
                 .expect("bug in CheatSheet::new()");
-            let mut keyboard = Keyboard::new(*pos);
-            keyboard
-                .set_keys(&kb_spec.keys, data, &spec.mode)
-                .context(format!("Failed to create image of keyboard #{}", i))?;
-            all.push(keyboard);
+
+            if let Some(kb_spec) = kb_spec {
+                let mut keyboard = Keyboard::new(*pos);
+                keyboard.set_keys(&kb_spec.keys, data, &spec.mode).context(
+                    format!("Failed to create image of keyboard #{}", i),
+                )?;
+
+                all.push(keyboard);
+            }
+            // Otherwise, the config told us to just leave a blank space where
+            // this keyboard would be.
+
             *pos = *pos + height;
         }
         Ok(CheatSheet {

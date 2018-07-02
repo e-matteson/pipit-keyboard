@@ -601,8 +601,8 @@ impl Into<Value> for Color {
             Color::Magenta => "#b9acf6",
             Color::Black => "#000000",
             Color::White => "#ffffff",
-            Color::LightGrey => "#eeeeee",
-            Color::DarkGrey => "#b6b6b6",
+            Color::LightGrey => "#f3f1f1",
+            Color::DarkGrey => "#d0c9c8",
         }.into()
     }
 }
