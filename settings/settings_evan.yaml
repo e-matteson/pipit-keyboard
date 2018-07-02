@@ -1092,7 +1092,7 @@ dictionary:
   - {word: "cloth"}
   - {word: "cloud", anagram: 2}
   - {word: "club"}
-  - {word: "clutter",, anagram: 3}
+  - {word: "clutter", anagram: 3}
   - {word: "cluster"}
   - {word: "co"}
   - {word: "coach"}
@@ -4570,7 +4570,7 @@ dictionary:
   - {word: "three", anagram: 2}
   - {word: "thresh"}
   - {word: "threshold"}
-  - {word: "threw",, anagram: 1}
+  - {word: "threw", anagram: 1}
   - {word: "through"}
   - {word: "throw"}
   - {word: "thumb"}
