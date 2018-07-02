@@ -95,11 +95,23 @@ modes:
 
 
 # Add new macro key sequences here!
-# If they don't contain alt, ctrl, or gui, you can just write out the sequence
-# in quotes. If they do contain these modifiers, you'll need to manually specify
+# Simple text-like macros can just be written out in quotes, where the following
+# characters have special meanings:
+#    ←   | left
+#    →   | right
+#    ↑   | up
+#    ↓   | down
+#    ◀   | home
+#    ▶   | end
+#    \n  | enter
+#    \t  | tab
+#    \"  | doublequote
+#    \\  | backslash
+# If the macros contain modifiers, you'll need to manually specify
 # the key and modifiers sent during each press.
 macros:
   macro_email: "me@example.com"
+
   macro_apple_save_as:
     - {key: "KEY_S", mods: ["MODIFIERKEY_GUI", "MODIFIERKEY_SHIFT"]}
 
@@ -107,9 +119,9 @@ macros:
     - {key: "KEY_S", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
 
   macro_in_paren: "()←"
-  macro_in_angle: "<>←"
   macro_in_brace: "[]←"
   macro_in_curly: "{}←"
+  macro_in_angle: "<>←"
   macro_in_quote: "''←"
   macro_in_doublequote: "\"\"←"
   macro_if_c: "if(){\n}↑▶←←"
@@ -117,6 +129,9 @@ macros:
   macro_vim_quit: ":q\n"
 
 # Add new words here!
+# Higher anagram numbers have lower priority, and must be accessed with anagram
+# modifiers or cycling commands. Chords can be manually specified, if you don't
+# want to use the default chord containing all the letters in the word.
 dictionary:
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
