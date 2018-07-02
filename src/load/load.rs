@@ -24,7 +24,6 @@ impl AllData {
         let mut all_data = AllData::new();
 
         all_data.output_directory = Some(settings.options.output_directory());
-        all_data.tutor_directory = Some(settings.options.tutor_directory());
 
         Chord::set_info(settings.options.global_chord_info()?);
 
@@ -87,7 +86,7 @@ impl AllData {
         for kmap in self.get_kmap_paths() {
             let named_chords = parse_kmap(&kmap, &options.kmap_format)
                 .with_context(|_| {
-                    format!("Failed to load kmap from file: '{}'", kmap)
+                    format!("Failed to load kmap file: '{}'", kmap)
                 })?;
             self.add_chords(&kmap, named_chords)?;
         }

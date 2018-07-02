@@ -15,10 +15,6 @@ fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
 }
 
-fn default_tutor_dir() -> PathBuf {
-    PathBuf::from("tutor")
-}
-
 validated_struct!{
     #[derive(Deserialize, Debug)]
     #[serde(deny_unknown_fields)]
@@ -51,13 +47,11 @@ validated_struct!{
         pub rgb_led_pins: Option<[Pin; 3]>,
         pub battery_level_pin: Option<Pin>,
 
+        #[serde(default = "WordSpacePosition::default")]
         pub word_space_position: WordSpacePosition,
 
         #[serde(default = "default_output_dir")]
         pub output_directory: PathBuf,
-
-        #[serde(default = "default_tutor_dir")]
-        pub tutor_directory: PathBuf,
 
         #[serde(default = "return_false")]
         pub enable_led_typing_feedback: bool,
@@ -129,10 +123,6 @@ impl OptionsConfig {
 
     pub fn output_directory(&self) -> PathBuf {
         self.output_directory.clone()
-    }
-
-    pub fn tutor_directory(&self) -> PathBuf {
-        self.tutor_directory.clone()
     }
 
     fn get_literal_ops(&self) -> Vec<CTree> {
@@ -380,6 +370,12 @@ impl ToC for WordSpacePosition {
             WordSpacePosition::After => 1,
             WordSpacePosition::None => 2,
         }.to_c()
+    }
+}
+
+impl Default for WordSpacePosition {
+    fn default() -> WordSpacePosition {
+        WordSpacePosition::Before
     }
 }
 
