@@ -326,11 +326,11 @@ macro_out_paren   macro_out_curly   macro_out_brace   macro_out_angle
   .     .          .     .            .     .          .     .
   ... .*.          ... .*.            ... .*.          ... .*.
 
-macro_in_quote  macro_in_equal   macro_in_doublequote
-....   ...*     ....   *...      *...   ....
-....   *...     ....   ...*      ...*   ....
-  .     .         .     .          .     .
-  ... .*.         ... .*.          ... .*.
+macro_in_quote  macro_in_equal   macro_in_doublequote macro_in_grave
+....   ...*     ....   *...      *...   ....          ....   ..*.
+....   *...     ....   ...*      ...*   ....          ....   ...*
+  .     .         .     .          .     .              .     .
+  ... .*.         ... .*.          ... .*.              ... .*.
 
 macro_backslash_n
 ..*.   ....
@@ -444,6 +444,13 @@ macro_aspace       macro_aspace_p      macro_cap_aspace   macro_cap_aspace_p
 *.*.   .*..        *.*.   .*..         *.*.   .*..        *.*.   .*..
   .     .            .     .             .     .            .     .
   ... .*.            ... .*.             *.. .*.            *.. .*.
+
+macro_next_comma   macro_prev_comma
+...*   ....        ...*   ....
+....   .*..        ....   *...
+  .     .            .     .
+  ... .*.            ... .*.
+
 
 macro_compile      macro_error_prev       macro_error_next   macro_eval
 ....   ....        ....   ....            ....   ....        ....   ....

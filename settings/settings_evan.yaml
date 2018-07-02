@@ -188,6 +188,7 @@ macros:
   macro_in_quote: "''←"
   macro_in_doublequote: "\"\"←"
   macro_in_equal: "==←"
+  macro_in_grave: "``←"
   macro_out_paren: "()"
   macro_out_angle: "<>"
   macro_out_brace: "[]"
@@ -233,6 +234,8 @@ macros:
     - {key: "KEY_P"}
   macro_at_at: "@@"
   macro_yank_eol: "y$"
+  macro_next_comma: "f,"
+  macro_prev_comma: "F,"
   macro_kill_ring: " ry"
   macro_comment: " cl"
   macro_org_calendar: " aooc"
@@ -250,7 +253,7 @@ macros:
   macro_for_c: "for(;;){\n}↑▶←←←←"
   macro_while_c: "while(){\n}↑▶←←"
   macro_arg_c: "(){\n}↑▶←←"
-  macro_ifdef_guard: "#ifndef H\n#define H\n\n\n#endif↑↑↑▶"
+  macro_ifdef_guard: "#ifndef H\n#define H\n\n\n#endif↑↑↑↑▶←"
   macro_printf: "printf(\"\n\");←←←←←"
   macro_print_py: "print()←"
   macro_docstr_py: "\"\"\"\"\"\"←←←"
@@ -589,6 +592,7 @@ dictionary:
   - {word: "artificial"}
   - {word: "artist", anagram: 1}
   - {word: "as"}
+  - {word: "as far as I know", chord: "afi"}
   - {word: "ASCII"}
   - {word: "Asia"}
   - {word: "aside", anagram: 1}
@@ -1063,6 +1067,8 @@ dictionary:
   - {word: "city", anagram: 1}
   - {word: "civil"}
   - {word: "claim"}
+  - {word: "clam", anagram: 2}
+  - {word: "clamp"}
   - {word: "clarity", anagram: 1}
   - {word: "class"}
   - {word: "classic", anagram: 1}
@@ -1086,6 +1092,7 @@ dictionary:
   - {word: "cloth"}
   - {word: "cloud", anagram: 2}
   - {word: "club"}
+  - {word: "clutter",, anagram: 3}
   - {word: "cluster"}
   - {word: "co"}
   - {word: "coach"}
@@ -1335,6 +1342,7 @@ dictionary:
   - {word: "daemon"}
   - {word: "daily"}
   - {word: "dairy", anagram: 1}
+  - {word: "daisy"}
   - {word: "damage"}
   - {word: "damn"}
   - {word: "d", anagram: 1}
@@ -1924,6 +1932,7 @@ dictionary:
   - {word: "flaccid"}
   - {word: "flag", anagram: 1}
   - {word: "flaky", anagram: 1}
+  - {word: "flange", anagram: 3}
   - {word: "flame", anagram: 2}
   - {word: "flap"}
   - {word: "flash"}
@@ -3468,6 +3477,7 @@ dictionary:
   - {word: "plt"}
   - {word: "plug", anagram: 1}
   - {word: "plumb"}
+  - {word: "plural"}
   - {word: "plus"}
   - {word: "PM", anagram: 1}
   - {word: "PMd"}
@@ -4241,6 +4251,7 @@ dictionary:
   - {word: "spire"}
   - {word: "spirit", anagram: 1}
   - {word: "split"}
+  - {word: "spoil"}
   - {word: "spoiler"}
   - {word: "spoke"}
   - {word: "sponge"}
@@ -4559,6 +4570,7 @@ dictionary:
   - {word: "three", anagram: 2}
   - {word: "thresh"}
   - {word: "threshold"}
+  - {word: "threw",, anagram: 1}
   - {word: "through"}
   - {word: "throw"}
   - {word: "thumb"}
@@ -4883,6 +4895,7 @@ dictionary:
   - {word: "wacom"}
   - {word: "wage"}
   - {word: "wagon"}
+  - {word: "waist"}
   - {word: "wait"}
   - {word: "waive", anagram: 1}
   - {word: "wake"}
@@ -4981,6 +4994,7 @@ dictionary:
   - {word: "wizard"}
   - {word: "wm"}
   - {word: "woah"}
+  - {word: "wobble", anagram: 1}
   - {word: "wolf", anagram: 2}
   - {word: "woman", anagram: 1}
   - {word: "women"}
@@ -5005,7 +5019,7 @@ dictionary:
   - {word: "wow", anagram: 2}
   - {word: "wrap"}
   - {word: "wrestle"}
-  - {word: "wretch", anagram: 1}
+  - {word: "wretch", anagram: 2}
   - {word: "wrist"}
   - {word: "write"}
   - {word: "written", anagram: 1}
