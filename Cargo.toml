@@ -10,16 +10,15 @@ doc = false
 
 [dependencies]
 time = "0.1"
-serde_yaml = "*"
+serde_yaml = "0.7"
 serde = "1.0"
 serde_derive = "1.0"
-itertools = "0.5"
-failure = "*"
+itertools = "0.7"
+failure = "0.1"
 cursive = "0.8"
 unicode-segmentation = "1.2"
-lazy_static = "0.2"
-natord = "*"
-svg =  "0.5"
-# svg = {git = "https://github.com/e-matteson/svg.git"}
-structopt = "*"
+lazy_static = "1.0"
+natord = "1.0"
+svg =  "0.5.10"
+structopt = "0.2"
 # cpuprofiler = "0.0.3"
