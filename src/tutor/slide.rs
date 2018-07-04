@@ -1,9 +1,9 @@
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{Chord, Name};
 use failure::Error;
 use tutor::{Label, LabeledChord, State};
+use types::{Chord, Name};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]

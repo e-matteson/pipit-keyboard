@@ -1,5 +1,5 @@
-use std::fmt;
 use std::borrow::Borrow;
+use std::fmt;
 use std::ops::AddAssign;
 
 use types::{AnagramNum, ModeName, Name, SeqType};

@@ -1,10 +1,10 @@
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::{stdin, stdout};
-use std::fs::File;
 use std::path::PathBuf;
 
-use types::errors::OutOfRangeErr;
 use failure::{Error, ResultExt};
+use types::errors::OutOfRangeErr;
 
 pub fn bools_to_bytes(v: &[bool]) -> Vec<u8> {
     let mut bytes = Vec::new();

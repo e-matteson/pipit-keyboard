@@ -1,11 +1,13 @@
+use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::BitOr;
-use itertools::Itertools;
 
-use util::usize_to_u16;
-use types::{AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name,
-            SeqType, Sequence, ToC};
 use types::errors::OutOfRangeErr;
+use types::{
+    AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name, SeqType,
+    Sequence, ToC,
+};
+use util::usize_to_u16;
 
 use failure::{Error, ResultExt};
 

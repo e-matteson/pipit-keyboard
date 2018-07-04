@@ -1,13 +1,13 @@
-use std::sync::Mutex;
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::fs::File;
-use std::io::Write;
-use std::fs::OpenOptions;
 use serde_yaml;
+use std::collections::HashMap;
+use std::fs::File;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::PathBuf;
+use std::sync::Mutex;
 
-use types::{Chord, ModeName, Name, Spelling, TutorData};
 use failure::{Error, ResultExt};
+use types::{Chord, ModeName, Name, Spelling, TutorData};
 
 lazy_static! {
     static ref STATE: Mutex<State> = Mutex::new(State::new());

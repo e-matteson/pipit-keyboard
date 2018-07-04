@@ -1,9 +1,9 @@
+use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::path::PathBuf;
-use std::collections::BTreeMap;
 
-use unicode_segmentation::UnicodeSegmentation;
 use serde_yaml;
+use unicode_segmentation::UnicodeSegmentation;
 
 use failure::{Error, ResultExt};
 use tutor::Slide;

@@ -1,15 +1,15 @@
 use std::time::Instant;
 
-use cursive::{Cursive, Printer};
-use cursive::traits::*;
-use cursive::views::{Dialog, TextView};
-use cursive::vec::Vec2;
 use cursive::event::{Callback, Event, EventResult, Key};
-use cursive::utils::lines::simple::make_lines;
 use cursive::theme::ColorStyle;
+use cursive::traits::*;
+use cursive::utils::lines::simple::make_lines;
+use cursive::vec::Vec2;
+use cursive::views::{Dialog, TextView};
+use cursive::{Cursive, Printer};
 
-use types::errors::{print_and_panic, BadValueErr};
 use failure::{Error, ResultExt};
+use types::errors::{print_and_panic, BadValueErr};
 
 use tutor::{offset, Copier, Graphic, LessonConfig, PrevCharStatus, Slide};
 
@@ -130,7 +130,8 @@ impl Lesson {
 
     fn info_bar_padding(&self) -> Vec2 {
         let x = 1;
-        let y = self.graphic_padding().y + self.graphic.size().y
+        let y = self.graphic_padding().y
+            + self.graphic.size().y
             + self.info_bar_spacing;
         Vec2::new(x, y)
     }
@@ -164,9 +165,13 @@ impl Lesson {
             .max(instruction_size.x)
             .max(info_bar_size.x);
 
-        let y = info_bar_size.y + graphic_size.y + copy_size.y
-            + instruction_size.y + self.info_bar_spacing
-            + self.graphic_spacing + self.instruction_spacing;
+        let y = info_bar_size.y
+            + graphic_size.y
+            + copy_size.y
+            + instruction_size.y
+            + self.info_bar_spacing
+            + self.graphic_spacing
+            + self.instruction_spacing;
         Vec2::new(x, y)
     }
 

@@ -1,12 +1,14 @@
-use std::ops::{Add, Div, MulAssign, Sub};
 use std::f64::consts::PI;
+use std::ops::{Add, Div, MulAssign, Sub};
 
-use svg::{node, Node};
-use svg::node::Value;
-use svg::node::element::{Circle, Definitions, Description, Group, Line, Mask,
-                         Path, Pattern, Rectangle, Text};
-use svg::node::element::path::Parameters;
 use svg::node::element::path::Data;
+use svg::node::element::path::Parameters;
+use svg::node::element::{
+    Circle, Definitions, Description, Group, Line, Mask, Path, Pattern,
+    Rectangle, Text,
+};
+use svg::node::Value;
+use svg::{node, Node};
 // use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Clone, Copy, Debug)]
@@ -51,7 +53,6 @@ pub struct Label {
     pub size: f64,
     pub font: Font,
 }
-
 
 #[derive(Clone, Debug)]
 pub struct MyDescription(String);

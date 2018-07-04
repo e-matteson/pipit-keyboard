@@ -1,7 +1,7 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{Chord, Spelling};
 use tutor::State;
+use types::{Chord, Spelling};
 
 #[derive(Clone, Debug)]
 pub struct LabeledChord {

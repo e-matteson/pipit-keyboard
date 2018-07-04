@@ -1,13 +1,12 @@
+use std::collections::BTreeMap;
 /// For parsing kmap files to get chords
-
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::collections::BTreeMap;
 
 use types::{Chord, KmapFormat, KmapPath, Name};
 
-use types::errors::*;
 use failure::{Error, ResultExt};
+use types::errors::*;
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';

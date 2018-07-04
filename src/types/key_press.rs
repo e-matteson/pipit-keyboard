@@ -1,10 +1,10 @@
-use types::{CCode, Name, Spelling, ToC, Validate};
 use failure::{Error, ResultExt};
 use types::errors::*;
+use types::{CCode, Name, Spelling, ToC, Validate};
 
-use std::string::ToString;
-use std::str::FromStr;
 use std::collections::BTreeMap;
+use std::str::FromStr;
+use std::string::ToString;
 
 // Used for when a keypress contains only modifiers and no key.
 pub const BLANK_KEY: &str = "BLANK_KEY";
@@ -364,12 +364,10 @@ impl KeyDefs {
     /// Get the c-preprocessor names of all keycodes/modifiers and their
     /// scancodes. Doesn't distinguish between keycodes and modifiers
     pub fn scancode_table() -> &'static BTreeMap<&'static CCode, u8> {
-        lazy_static!{
-        static ref SCANCODES: BTreeMap<&'static CCode, u8> =
-            TABLE
-            .iter()
-            .filter_map(|def| {
-                def.scancode.map(|scancode| {
+        lazy_static! {
+            static ref SCANCODES: BTreeMap<&'static CCode, u8> = TABLE
+                .iter()
+                .filter_map(|def| def.scancode.map(|scancode| {
                     let cdefine = match (&def.keypress.key, &def.keypress.mods)
                     {
                         (Some(key), mods) if !mods.is_empty() => panic!(
@@ -389,9 +387,8 @@ impl KeyDefs {
                         _ => panic!("bad keydef entry"),
                     };
                     (cdefine, scancode)
-                })
-            })
-            .collect();
+                }))
+                .collect();
         }
         &SCANCODES
     }

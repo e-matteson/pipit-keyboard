@@ -1,16 +1,17 @@
-use std::collections::{BTreeMap, HashSet};
-use std::clone::Clone;
-use std::path::PathBuf;
 use itertools::Itertools;
+use std::clone::Clone;
+use std::collections::{BTreeMap, HashSet};
+use std::path::PathBuf;
 
 use util::ensure_u8;
 
-use types::{AnagramNum, CTree, Chord, HuffmanTable, KeyDefs, KeyPress,
-            KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, Spelling,
-            TutorData, Word};
+use types::{
+    AnagramNum, CTree, Chord, HuffmanTable, KeyDefs, KeyPress, KmapPath,
+    ModeInfo, ModeName, Name, SeqType, Sequence, Spelling, TutorData, Word,
+};
 
-use types::errors::{BadValueErr, ConflictErr, LookupErr};
 use failure::{Error, Fail, ResultExt};
+use types::errors::{BadValueErr, ConflictErr, LookupErr};
 
 #[derive(Debug)]
 pub struct AllData {

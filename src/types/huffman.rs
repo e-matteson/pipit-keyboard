@@ -1,11 +1,11 @@
 use std;
-use std::collections::BTreeMap;
 use std::collections::binary_heap::BinaryHeap;
+use std::collections::BTreeMap;
 
-use util::{bools_to_u32, ensure_u8};
-use types::{CCode, KeyPress, ToC};
-use types::errors::{LookupErr, OutOfRangeErr};
 use failure::{Error, ResultExt};
+use types::errors::{LookupErr, OutOfRangeErr};
+use types::{CCode, KeyPress, ToC};
+use util::{bools_to_u32, ensure_u8};
 
 #[derive(Debug, Clone)]
 pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);

@@ -1,17 +1,17 @@
-pub use self::tutor_app::TutorApp;
-use self::slide::*;
-use self::label::*;
-use self::tutor_util::*;
 use self::copier::*;
 use self::graphic::*;
-use self::state::*;
+use self::label::*;
 use self::lesson::*;
+use self::slide::*;
+use self::state::*;
+pub use self::tutor_app::TutorApp;
+use self::tutor_util::*;
 
-pub mod tutor_app;
-mod graphic;
 mod copier;
-mod state;
-mod tutor_util;
-mod slide;
+mod graphic;
 mod label;
 mod lesson;
+mod slide;
+mod state;
+pub mod tutor_app;
+mod tutor_util;

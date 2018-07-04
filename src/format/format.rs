@@ -1,14 +1,14 @@
-use std::io::Write;
+use itertools::Itertools;
+use std::fmt::Display;
 use std::fs::OpenOptions;
+use std::io::Write;
 use std::ops::AddAssign;
 use std::path::Path;
 use std::path::PathBuf;
-use std::fmt::Display;
-use itertools::Itertools;
 
-use types::{CCode, CTree, Field, ToC};
-use types::errors::BadValueErr;
 use failure::{Error, Fail, ResultExt};
+use types::errors::BadValueErr;
+use types::{CCode, CTree, Field, ToC};
 
 #[derive(Debug, Default)]
 pub struct CFiles {

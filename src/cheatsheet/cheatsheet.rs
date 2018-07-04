@@ -2,20 +2,22 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use svg;
+use svg::node::element::{ClipPath, Definitions, Group};
 use svg::Document;
 use svg::Node;
-use svg::node::element::{ClipPath, Definitions, Group};
 
-use unicode_segmentation::UnicodeSegmentation;
 use serde_yaml;
+use unicode_segmentation::UnicodeSegmentation;
 
-use types::{Chord, ModeName, Name, TutorData};
-use types::errors::{LookupErr, MissingErr};
 use failure::{err_msg, Error, ResultExt};
+use types::errors::{LookupErr, MissingErr};
+use types::{Chord, ModeName, Name, TutorData};
 use util::{read_file, user_confirm, ConfirmDefault};
 
-use cheatsheet::draw::{Color, Fill, FillPattern, Font, Label, MyCircle,
-                       MyDescription, MyRect, P2, V2, Wedge};
+use cheatsheet::draw::{
+    Color, Fill, FillPattern, Font, Label, MyCircle, MyDescription, MyRect, P2,
+    V2, Wedge,
+};
 
 #[derive(Clone, Debug)]
 pub struct CheatSheet {

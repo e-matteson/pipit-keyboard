@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
-use util::usize_to_u8;
-use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, ToC};
 use failure::{Error, ResultExt};
+use std::collections::BTreeMap;
+use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, ToC};
+use util::usize_to_u8;
 
 pub struct ModeBuilder<'a> {
     pub mode_name: &'a ModeName,

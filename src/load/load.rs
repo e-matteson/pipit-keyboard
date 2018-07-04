@@ -1,10 +1,10 @@
-use std::path::PathBuf;
 use serde_yaml;
+use std::path::PathBuf;
 
+use failure::{Error, ResultExt};
 use load::{parse_kmap, OptionsConfig, Settings};
 use types::{AllData, Chord, SeqType, Validate};
 use util::read_file;
-use failure::{Error, ResultExt};
 
 impl AllData {
     pub fn load(settings_path: &PathBuf) -> Result<AllData, Error> {

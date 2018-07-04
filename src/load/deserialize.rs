@@ -1,15 +1,16 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-use std::fmt;
-use std::str::FromStr;
 use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
+use std::collections::BTreeMap;
+use std::fmt;
+use std::path::PathBuf;
+use std::str::FromStr;
 
-use types::{CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo,
-            ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
-            Validate, Word};
+use types::{
+    CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo, ModeName,
+    Name, Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
+};
 
-use types::errors::print_error;
 use failure::{Error, ResultExt};
+use types::errors::print_error;
 
 fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")

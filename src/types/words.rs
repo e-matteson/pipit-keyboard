@@ -1,10 +1,10 @@
-use std::str::FromStr;
 use std::fmt;
+use std::str::FromStr;
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{KeyPress, Name, Sequence, Spelling, Validate};
-use types::errors::*;
 use failure::Error;
+use types::errors::*;
+use types::{KeyPress, Name, Sequence, Spelling, Validate};
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]

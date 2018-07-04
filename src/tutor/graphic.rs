@@ -1,7 +1,7 @@
-use cursive::Printer;
+use cursive::theme::{Color, ColorStyle};
 use cursive::traits::*;
 use cursive::vec::Vec2;
-use cursive::theme::{Color, ColorStyle};
+use cursive::Printer;
 
 // use types::Chord;
 // use types::errors::*;

@@ -16,14 +16,14 @@ extern crate failure;
 #[macro_use]
 extern crate lazy_static;
 
-pub use types::{AllData, TutorData};
 pub use types::errors;
+pub use types::{AllData, TutorData};
 
 #[macro_use]
 mod types;
 #[macro_use]
 mod load;
-mod format;
-mod util;
-pub mod tutor;
 pub mod cheatsheet;
+mod format;
+pub mod tutor;
+mod util;

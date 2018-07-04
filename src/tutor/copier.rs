@@ -1,16 +1,18 @@
 use std::collections::HashMap;
 
-use cursive::Printer;
+use cursive::theme::ColorStyle;
 use cursive::traits::*;
 use cursive::vec::Vec2;
-use cursive::theme::ColorStyle;
+use cursive::Printer;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::errors::BadValueErr;
 use failure::Error;
-use tutor::{grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
-            SlideLine, State};
+use tutor::{
+    grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
+    SlideLine, State,
+};
+use types::errors::BadValueErr;
 
 #[derive(Debug, Clone)]
 pub struct Copier {

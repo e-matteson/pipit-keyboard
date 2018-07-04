@@ -1,18 +1,18 @@
 // A bunch of small, miscellaneous types that don't deserve their own files
 
+use std::collections::BTreeMap;
+use std::fmt::{self, Debug};
 use std::iter;
 use std::slice::Iter;
-use std::fmt::{self, Debug};
 use std::string::ToString;
-use std::collections::BTreeMap;
 
 use std::str::FromStr;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use types::{CCode, Chord, KeyPress, ToC, Validate};
-use types::errors::*;
 use failure::{Error, ResultExt};
+use types::errors::*;
+use types::{CCode, Chord, KeyPress, ToC, Validate};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]

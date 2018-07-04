@@ -1,13 +1,14 @@
 use natord;
 
-use cursive::Cursive;
-use cursive::direction::Orientation;
 use cursive::align::HAlign;
-use cursive::views::{Checkbox, Dialog, ListView, SelectView, SliderView,
-                     TextView};
+use cursive::direction::Orientation;
+use cursive::views::{
+    Checkbox, Dialog, ListView, SelectView, SliderView, TextView,
+};
+use cursive::Cursive;
 
-use types::TutorData;
 use types::errors::print_and_panic;
+use types::TutorData;
 
 use tutor::{load_lessons, Lesson, LessonConfig, State};
 

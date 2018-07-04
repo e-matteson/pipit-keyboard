@@ -1,9 +1,9 @@
 use std::fmt;
 use std::sync::Mutex;
 
-use util::bools_to_bytes;
-use types::{AnagramNum, CCode, Permutation, ToC};
 use types::errors::BadValueErr;
+use types::{AnagramNum, CCode, Permutation, ToC};
+use util::bools_to_bytes;
 
 use failure::{Error, ResultExt};
 

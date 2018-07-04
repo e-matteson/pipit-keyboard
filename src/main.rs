@@ -7,11 +7,11 @@ extern crate structopt;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-use pipit_config::AllData;
 use pipit_config::errors::*;
+use pipit_config::AllData;
 
-use pipit_config::tutor::TutorApp;
 use pipit_config::cheatsheet::CheatSheet;
+use pipit_config::tutor::TutorApp;
 
 use failure::{Error, ResultExt};
 

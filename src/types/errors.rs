@@ -26,8 +26,13 @@ pub struct ConflictErr {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "Out of range: '{}' is '{}', must be in range ({}, {})",
-       name, value, min, max)]
+#[fail(
+    display = "Out of range: '{}' is '{}', must be in range ({}, {})",
+    name,
+    value,
+    min,
+    max
+)]
 pub struct OutOfRangeErr {
     pub name: String,
     pub value: usize,
@@ -46,8 +51,10 @@ pub struct BadValueErr {
 pub enum PermuteErr {
     #[fail(display = "Unable to permute: input sequence is the wrong length")]
     Length,
-    #[fail(display = "Unable to create permutation: an element in the old \
-                      sequence is not present in the new sequence")]
+    #[fail(
+        display = "Unable to create permutation: an element in the old \
+                   sequence is not present in the new sequence"
+    )]
     WouldDrop,
 }
 

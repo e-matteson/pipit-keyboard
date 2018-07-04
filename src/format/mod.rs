@@ -5,6 +5,6 @@ use self::mode_builder::ModeBuilder;
 mod c_struct;
 
 mod format;
-mod render;
 mod kmap_builder;
 mod mode_builder;
+mod render;
