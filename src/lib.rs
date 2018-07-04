@@ -1,12 +1,3 @@
-#![allow(unused_doc_comment)]
-#![feature(entry_or_default)]
-#![feature(conservative_impl_trait)]
-#![feature(string_retain)]
-#![feature(match_default_bindings)]
-#![feature(iterator_try_fold)]
-#![feature(inclusive_range_syntax)]
-#![feature(match_default_bindings)]
-
 extern crate cursive;
 extern crate itertools;
 extern crate natord;

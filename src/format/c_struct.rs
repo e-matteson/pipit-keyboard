@@ -3,7 +3,7 @@
 // use types::CTree;
 
 macro_rules! c_struct {
-    ( struct $struct_type: ident { $( $field:ident : $field_type:ty),* }) => {
+    ( struct $struct_type: ident { $( $field:ident : $field_type:ty,)* }) => {
         #[derive(Debug)]
         struct $struct_type {
             $($field: $field_type,)*

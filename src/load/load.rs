@@ -15,8 +15,8 @@ impl AllData {
         Ok(data)
     }
 
+    /// Load stuff into AllData
     fn load_helper(settings_path: &PathBuf) -> Result<AllData, Error> {
-        /// Load stuff into AllData
         let settings: Settings =
             serde_yaml::from_str(&read_file(settings_path)?)?;
         settings.validate()?;

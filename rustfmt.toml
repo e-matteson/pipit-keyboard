@@ -1,3 +1,5 @@
 max_width = 80
-format_strings = true
 wrap_comments = true
+
+# # not available on stable:
+# format_strings = true

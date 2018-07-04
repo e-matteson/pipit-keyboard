@@ -11,14 +11,12 @@ use format::{KmapBuilder, ModeBuilder};
 use types::errors::MissingErr;
 use failure::Error;
 
-c_struct!(
-    struct HuffmanChar {
-        bits: CCode,
-        num_bits: usize,
-        key_code: CCode,
-        is_mod: bool
-    }
-);
+c_struct!(struct HuffmanChar {
+    bits: CCode,
+    num_bits: usize,
+    key_code: CCode,
+    is_mod: bool,
+});
 
 impl AllData {
     pub fn save_as(&self, file_name_base: &str) -> Result<(), Error> {

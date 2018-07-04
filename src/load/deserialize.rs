@@ -203,9 +203,9 @@ impl OptionsConfig {
         ops
     }
 
+    /// Generate the OpReq::Auto options that depend only on other
+    /// options
     fn get_auto_ops(&self) -> Result<Vec<CTree>, Error> {
-        /// Generate the OpReq::Auto options that depend only on other
-        /// options
         let has_battery = self.battery_level_pin.is_some();
 
         let enable_rgb_led = self.rgb_led_pins.is_some();

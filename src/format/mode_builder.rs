@@ -11,16 +11,14 @@ pub struct ModeBuilder<'a> {
     pub anagram_chords: Vec<Chord>,
 }
 
-c_struct!(
-    struct ModeStruct {
-        is_gaming: bool,
-        num_kmaps: u8,
-        kmaps: CCode,
-        mod_chords: CCode,
-        anagram_chords: CCode,
-        anagram_mask: CCode
-    }
-);
+c_struct!(struct ModeStruct {
+    is_gaming: bool,
+    num_kmaps: u8,
+    kmaps: CCode,
+    mod_chords: CCode,
+    anagram_chords: CCode,
+    anagram_mask: CCode,
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 

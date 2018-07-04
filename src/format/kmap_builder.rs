@@ -29,27 +29,21 @@ pub struct KmapBuilder<'a> {
     pub huffman_table: &'a HuffmanTable,
 }
 
-c_struct!(
-    struct KmapStruct {
-        lookups_by_seq_type: CCode
-    }
-);
+c_struct!(struct KmapStruct {
+    lookups_by_seq_type: CCode,
+});
 
-c_struct!(
-    struct LookupsOfSeqType {
-        num_lookups: usize,
-        lookups: CCode
-    }
-);
+c_struct!(struct LookupsOfSeqType {
+    num_lookups: usize,
+    lookups: CCode,
+});
 
-c_struct!(
-    struct LookupOfLength {
-        seq_bit_len_and_anagram: u16,
-        num_chords: u16,
-        chords: CCode,
-        sequences: CCode
-    }
-);
+c_struct!(struct LookupOfLength {
+    seq_bit_len_and_anagram: u16,
+    num_chords: u16,
+    chords: CCode,
+    sequences: CCode,
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -143,13 +137,13 @@ impl<'a> KmapBuilder<'a> {
             let seqs_name = format!("{}_seqs", struct_name).to_c();
             let chords_name = format!("{}_chords", struct_name).to_c();
 
-            let chord_bytes = names
-                .iter()
-                .map(|name| self.chord_map[name].to_c_bytes())
-                .collect::<Result<Vec<_>, Error>>()?
-                .into_iter()
-                .flatten()
-                .collect();
+            let chord_bytes = Itertools::flatten(
+                names
+                    .iter()
+                    .map(|name| self.chord_map[name].to_c_bytes())
+                    .collect::<Result<Vec<_>, Error>>()?
+                    .into_iter(),
+            ).collect();
 
             let seqs: Vec<_> = names
                 .iter()
