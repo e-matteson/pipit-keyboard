@@ -1,5 +1,5 @@
 ---
-popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, the red hints will show your last mistake, and yellow hints will show where backspace is."
+popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, and red hints will show the incorrect chord you pressed by mistake."
 slides:
   - line:
       Letters: ieoa htns aoei ieoa snth htns
