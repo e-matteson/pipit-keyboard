@@ -27,7 +27,7 @@ pub fn load_lessons(
     let mut map = BTreeMap::new();
     for entry in entries {
         let path: PathBuf = entry?.path();
-        if path.extension().map(|ext| ext != "yaml").unwrap_or(false) {
+        if path.extension().map(|ext| ext != "yaml").unwrap_or(true) {
             continue;
         }
         let name = lesson_path_to_name(&path);
