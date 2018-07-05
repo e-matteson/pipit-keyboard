@@ -102,7 +102,7 @@ impl Copier {
         let actual = character.to_string();
         let status = self.prev_char_status(&actual, &expected);
 
-        if status.is_correct() || !State::freeze_on_error() {
+        if status.is_correct() || State::allow_mistakes() {
             // make the typed char appear
             self.line.actual += &actual;
             self.line.index += 1;

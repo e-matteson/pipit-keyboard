@@ -46,7 +46,7 @@ impl TutorApp {
         let max = initial.max(10);
 
         let mut check_box = Checkbox::new();
-        check_box.set_checked(State::freeze_on_error());
+        check_box.set_checked(State::allow_mistakes());
 
         let list = ListView::new()
             .child(
@@ -66,9 +66,9 @@ impl TutorApp {
                     }),
             )
             .child(
-                "Freeze progress after an error:",
+                "Allow mistakes:",
                 check_box
-                    .on_change(|_siv, value| State::set_freeze_on_error(value)),
+                    .on_change(|_siv, value| State::set_allow_mistakes(value)),
             );
         siv.add_layer(Dialog::new().title("Options").content(list).button(
             "Back",

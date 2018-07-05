@@ -26,7 +26,7 @@ pub struct State {
 pub struct Saveable {
     initial_learn_state: usize,
     mode: ModeName,
-    freeze_on_error: bool,
+    allow_mistakes: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -41,13 +41,12 @@ impl State {
             saveable: Saveable {
                 initial_learn_state: 10,
                 mode: ModeName::default(),
-                freeze_on_error: true,
+                allow_mistakes: false,
             },
         }
     }
 
     pub fn load() -> Result<(), Error> {
-        eprintln!("load");
         let path = State::save_path();
         let saveable = read_state_file(&path)?;
         saveable.validate()?;
@@ -57,7 +56,6 @@ impl State {
 
     pub fn save(&self) -> Result<(), Error> {
         let s = serde_yaml::to_string(&self.saveable)?;
-        eprintln!("{:?}", s);
         let mut file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -138,13 +136,13 @@ impl State {
         STATE.lock().unwrap().saveable.initial_learn_state
     }
 
-    pub fn freeze_on_error() -> bool {
-        STATE.lock().unwrap().saveable.freeze_on_error
+    pub fn allow_mistakes() -> bool {
+        STATE.lock().unwrap().saveable.allow_mistakes
     }
 
-    pub fn set_freeze_on_error(value: bool) {
+    pub fn set_allow_mistakes(value: bool) {
         let mut state = STATE.lock().unwrap();
-        state.saveable.freeze_on_error = value;
+        state.saveable.allow_mistakes = value;
 
         // ignore any errors while saving
         state.save().ok();

@@ -39,7 +39,7 @@ impl LabeledChord {
 
 impl PrevCharStatus {
     pub fn backspace(&self) -> Option<LabeledChord> {
-        if State::freeze_on_error() {
+        if !State::allow_mistakes() {
             None
         } else {
             match self {
