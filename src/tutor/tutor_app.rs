@@ -29,13 +29,14 @@ impl TutorApp {
     }
 
     fn show_main_menu(siv: &mut Cursive) {
-        let items = vec!["Lessons", "Options"];
+        let items = vec!["Lessons", "Options", "Quit"];
         let select = SelectView::new()
             .h_align(HAlign::Left)
             .with_all_str(items)
             .on_submit(move |siv, item| match item {
                 "Lessons" => TutorApp::show_lesson_menu(siv),
                 "Options" => TutorApp::show_option_menu(siv),
+                "Quit" => siv.quit(),
                 _ => panic!("unknown menu item"),
             });
         siv.add_layer(Dialog::around(select).title("Pipit Typing Tutor"));

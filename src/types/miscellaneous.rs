@@ -525,7 +525,7 @@ fn test_permute_identity() {
 #[test]
 fn test_permute_lengthen() {
     let p = Permutation::from_to(&[1, 2, 3], &[5, 4, 3, 2, 1]).unwrap();
-    println!("lengthen permutation: {:?}", p);
+    // println!("lengthen permutation: {:?}", p);
     assert_eq!(vec![0, 0, 13, 12, 11], p.permute(&[11, 12, 13]).unwrap())
 }
 
