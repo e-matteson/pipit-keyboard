@@ -1,5 +1,5 @@
 ---
-popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, and red hints will show the incorrect chord you pressed by mistake."
+popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, and red hints will show the location of an incorrect letter you typed by mistake."
 slides:
   - line:
       Letters: ieoa htns aoei ieoa snth htns
