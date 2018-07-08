@@ -6,8 +6,6 @@ options:
   held_delay:                  200
   debounce_delay:              10
   debug_messages:              None
-  word_space_position:         Before
-  output_directory:            pipit-firmware
 
   board_name:                  FEATHER_M0_BLE
   rgb_led_pins:                [10, 11, 12]
@@ -23,7 +21,7 @@ options:
     - [                  [1, 18],                      [1,  6]                ]
     - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
 
-  # ######## NEWEST
+  # ######## NEWEST (MS)
   # board_name:                TEENSY_LC
   # row_pins:                  [[16, 17, 18, 19, 20, 21]]
   # column_pins:               [[11, 12, 14, 15]]
@@ -685,6 +683,7 @@ dictionary:
   - {word: "barrier"}
   - {word: "basal"}
   - {word: "base"}
+  - {word: "basil"}
   - {word: "bash"}
   - {word: "basic"}
   - {word: "basis"}

@@ -18,11 +18,14 @@ mod_gui          key_space         mod_alt
   .     .          .     .          .     .
   ... *..     	   ... .*.  	       ... ..*
 
-mod_capital      mod_nospace   mod_double     mod_shorten
-....   ....      ....   ....   ....   ....    ....   ....
-....   ....      ....   ....   ....   ....    ....   ....
-  .     .          .     .       .     .        .     .
-  *.. ...          ... ..*       ..* ...        ... *..
+
+#####  special word modifiers #####
+
+mod_capital      mod_nospace       mod_double      mod_shorten
+....   ....      ....   ....       ....   ....     ....   ....
+....   ....      ....   ....       ....   ....     ....   ....
+  .     .          .     .           .     .         .     .
+  *.. ...          ... ..*           ..* ...         ... *..
 
 mod_anagram_1     mod_anagram_2
 ....   ....       ....   ....
@@ -38,7 +41,7 @@ key_a          key_o          key_e		      key_i
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-key_h          key_t         key_n		      key_s
+key_h          key_t         	key_n		      key_s
 ....   ....		 ....   ....   	....   ....	  ....   ....
 ....   *...		 ....   .*..   	....   ..*.	  ....   ...*
   .     .        .     .        .     .       .     .
@@ -56,7 +59,7 @@ key_m          key_f           key_u         key_p
   .     .        .     .        .     .       .     .
   ... ...  	     ... ...     	  ... ...  	    ... ...
 
-######## double-switch letters
+##### double-switch letters #####
 
 key_b          key_comma      key_z
 ..**   ....    .*.*   ....    *..*   ....
@@ -82,21 +85,14 @@ key_y          key_x          key_j
   .     .        .     .        .     .
   ... ...        ... ...        ... ...
 
-# ###### alternate punctuation - double-switch plain-keys #######
+##### double-switch punctuation and special keys #####
 
-key_esc
-....   ....
-..*.   .*..
- .     .
-  ... ...
+key_esc        key_bang        key_question
+....   ....    ....   ....     ....   ....
+..*.   .*..    *..*   ....     ....   *..*
+ .     .         .     .         .     .
+  ... ...        ... ...         ... ...
 
-key_bang        key_question
-....   ....     ....   ....
-*..*   ....     ....   *..*
-  .     .         .     .
-  ... ...         ... ...
-
-# Fewer word collisions on this side, TODO update macros
 key_left_paren   key_left_curly      key_left_brace    key_left_angle
 ...*   ....		    ..*.   ....   	   .*..   ....	     *...   ....
 ....   *...		    ....   *...   	   ....   *...	     ....   *...
@@ -191,7 +187,7 @@ key_enter
   .     .
   .*. .*.
 
-######## number plain-keys ###########
+##### numbers #####
 
 key_5          key_3          key_1
 ....   ....		 ....   ....   	....   ....
@@ -211,7 +207,7 @@ key_9          key_8          key_7           key_6
   .     .        .     .        .     .         .     .
   ... ...  	     ... ...        ... ...         ... ...
 
-######## function plain-keys #########
+##### function keys #####
 
 key_f5         key_f3         key_f1
 .*..   ....		 .*..   ....   	.*..   ....
@@ -239,7 +235,7 @@ key_f9         key_f7          key_f6         key_f8
   ... .*.  	     ... .*.         ... .*.        ... .*.
 
 
-##### movement etc plain-keys  #######
+##### movement keys, etc #####
 
 key_down       key_up          key_left       key_right
 ....   ....    ....   ....		 ....   *...	  ....   .*..
@@ -259,7 +255,7 @@ key_delete    key_printscreen  key_caps_lock
   .     .       .     .          .     .
   ... .*.  	    ... .*.          ... .*.
 
-###### commands ######
+##### commands #####
 
 command_left_hand_mode  command_gaming_mode
 ****   ....             ....   ****
@@ -267,17 +263,17 @@ command_left_hand_mode  command_gaming_mode
   .     .                 .     .
   ... ...                 ... ...
 
-command_delete_word  command_pause
-....   ....          ****   ****
-....   ***.          ....   ....
-  .     .              .     .
-  ... ...              ... ...
+command_delete_word     command_cycle_word   command_cycle_capital
+....   ....             ....   ....          ....   ....
+....   ***.             .***   ....          .***   ....
+  .     .                 .     .              .     .
+  ... ...                 ... ...              *.. ...
 
-command_cycle_word   command_cycle_capital   command_cycle_nospace
-....   ....          ....   ....             ....   ....
-.***   ....          .***   ....             .***   ....
-  .     .              .     .                 .     .
-  ... ...              *.. ...                 ... ..*
+command_cycle_nospace   command_shorten_last_word
+....   ....             ....   ....
+.***   ....             .***   ....
+  .     .                 .     .
+  ... ..*                 ... *..
 
 command_left_word   command_right_word    command_left_limit   command_right_limit
 ..**   ....         ....   **..           ...*   ....         ....   *...
@@ -285,17 +281,11 @@ command_left_word   command_right_word    command_left_limit   command_right_lim
   .     .             .     .               .     .             .     .
   ... .*.             ... .*.               ... .*.             ... .*.
 
-command_shorten_last_word
-....   ....
-....   ***.
-  .     .
-  ... .*.
-
-command_led_battery command_led_colors  command_led_rainbow
-****   ....         ****   .*..         ****   ..*.
-....   *...         ....   ....         ....   ....
-  .     .             .     .             .     .
-  ... .*.             ... .*.             ... .*.
+command_pause       command_led_battery   command_led_colors  command_led_rainbow
+****   ****         ****   ....           ****   .*..         ****   ..*.
+....   ....         ....   *...           ....   ....         ....   ....
+  .     .             .     .               .     .             .     .
+  ... ...             ... .*.               ... .*.             ... .*.
 
 
 #### web browser macros ####
