@@ -21,23 +21,23 @@ Feedback::Feedback(){
 
 void Feedback::trigger(conf::seq_type_enum type){
   switch(type) {
-    case conf::PLAIN:
-      triggerAudioFeedback(PLAIN_FEEDBACK_CODE);
-      // triggerLEDFeedback(PLAIN_FEEDBACK_ROUTINE);
-      break;
-    case conf::WORD:
-      triggerAudioFeedback(WORD_FEEDBACK_CODE);
-      // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
-      break;
-    case conf::MACRO:
-      triggerAudioFeedback(MACRO_FEEDBACK_CODE);
-      // triggerLEDFeedback(MACRO_FEEDBACK_ROUTINE);
-      break;
-    case conf::COMMAND:
-      triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
-      // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
-      break;
-    default: DEBUG1_LN("seq type has no feedback routine");
+  case conf::seq_type_enum::PLAIN:
+    triggerAudioFeedback(PLAIN_FEEDBACK_CODE);
+    // triggerLEDFeedback(PLAIN_FEEDBACK_ROUTINE);
+    break;
+  case conf::seq_type_enum::WORD:
+    triggerAudioFeedback(WORD_FEEDBACK_CODE);
+    // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
+    break;
+  case conf::seq_type_enum::MACRO:
+    triggerAudioFeedback(MACRO_FEEDBACK_CODE);
+    // triggerLEDFeedback(MACRO_FEEDBACK_ROUTINE);
+    break;
+  case conf::seq_type_enum::COMMAND:
+    triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
+    // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
+    break;
+  default: DEBUG1_LN("seq type has no feedback routine");
   }
 }
 

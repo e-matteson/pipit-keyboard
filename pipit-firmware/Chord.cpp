@@ -206,11 +206,11 @@ bool Chord::extractMod(conf::mod_enum modifier){
   }
   bool isPressed = false;
   switch(conf::getModType(modifier)){
-  case conf::PLAIN_MOD:
-  case conf::WORD_MOD:
+  case conf::mod_type::PLAIN_MOD:
+  case conf::mod_type::WORD_MOD:
     isPressed = isChordMaskSet(mod_chord_bytes, chord_bytes);
     break;
-  case conf::ANAGRAM_MOD:
+  case conf::mod_type::ANAGRAM_MOD:
     isPressed = isExactAnagramPressed(mod_chord_bytes, chord_bytes);
   }
   if(!isPressed){

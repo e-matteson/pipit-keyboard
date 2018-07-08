@@ -4,7 +4,7 @@
 void Pipit::doCommand(uint8_t code){
   // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
-  if(code == conf::COMMAND_PAUSE){
+  if(code == conf::command_enum::COMMAND_PAUSE){
     // toggle temporary disabling of typing
     is_paused ^= 1;
     return;
@@ -18,85 +18,85 @@ void Pipit::doCommand(uint8_t code){
     /**** Add cases for new commands here! ****/
     /******************************************/
 
-  case conf::COMMAND_DEFAULT_MODE:
+  case conf::command_enum::COMMAND_DEFAULT_MODE:
     mode = conf::mode_enum::DEFAULT_MODE;
     break;
 
-  case conf::COMMAND_WINDOWS_MODE:
+  case conf::command_enum::COMMAND_WINDOWS_MODE:
     mode = conf::mode_enum::WINDOWS_MODE;
     break;
 
-  case conf::COMMAND_LEFT_HAND_MODE:
+  case conf::command_enum::COMMAND_LEFT_HAND_MODE:
     mode = conf::mode_enum::LEFT_HAND_MODE;
     break;
 
-  case conf::COMMAND_GAMING_MODE:
+  case conf::command_enum::COMMAND_GAMING_MODE:
     mode = conf::mode_enum::GAMING_MODE;
     break;
 
-  case conf::COMMAND_DELETE_WORD:
+  case conf::command_enum::COMMAND_DELETE_WORD:
     deleteLastWord();
     break;
 
-  case conf::COMMAND_SHORTEN_LAST_WORD:
+  case conf::command_enum::COMMAND_SHORTEN_LAST_WORD:
     move(WORD, LEFT);
     sender->sendBackspace();
     move(WORD, RIGHT);
     break;
 
-  case conf::COMMAND_LEFT_WORD:
+  case conf::command_enum::COMMAND_LEFT_WORD:
     move(WORD, LEFT);
     break;
 
-  case conf::COMMAND_LEFT_LIMIT:
+  case conf::command_enum::COMMAND_LEFT_LIMIT:
     move(LIMIT, LEFT);
     break;
 
-  case conf::COMMAND_RIGHT_WORD:
+  case conf::command_enum::COMMAND_RIGHT_WORD:
     move(WORD, RIGHT);
     break;
 
-  case conf::COMMAND_RIGHT_LIMIT:
+  case conf::command_enum::COMMAND_RIGHT_LIMIT:
     move(LIMIT, RIGHT);
     break;
 
-  case conf::COMMAND_CYCLE_WORD:
+  case conf::command_enum::COMMAND_CYCLE_WORD:
     cycleLastWordAnagram();
     break;
 
-  case conf::COMMAND_CYCLE_CAPITAL:
+  case conf::command_enum::COMMAND_CYCLE_CAPITAL:
     cycleLastWordCapital();
     break;
 
-  case conf::COMMAND_CYCLE_NOSPACE:
+  case conf::command_enum::COMMAND_CYCLE_NOSPACE:
     cycleLastWordNospace();
     break;
 
-  case conf::COMMAND_STICKY_CTRL:
+  case conf::command_enum::COMMAND_STICKY_CTRL:
     sender->setStickymod(MODIFIERKEY_CTRL&0xff);
     break;
 
-  case conf::COMMAND_STICKY_SHIFT:
+  case conf::command_enum::COMMAND_STICKY_SHIFT:
     sender->setStickymod(MODIFIERKEY_SHIFT&0xff);
     break;
 
-  case conf::COMMAND_STICKY_ALT:
+  case conf::command_enum::COMMAND_STICKY_ALT:
     sender->setStickymod(MODIFIERKEY_ALT&0xff);
     break;
 
-  case conf::COMMAND_STICKY_GUI:
+  case conf::command_enum::COMMAND_STICKY_GUI:
     sender->setStickymod(MODIFIERKEY_GUI&0xff);
     break;
 
-  case conf::COMMAND_LED_BATTERY:
+  case conf::command_enum::COMMAND_LED_BATTERY:
     feedback->startRoutine(BATTERY_ROUTINE);
     break;
 
-  case conf::COMMAND_LED_COLORS:
+  case conf::command_enum::COMMAND_LED_COLORS:
     feedback->startRoutine(ALL_COLORS_ROUTINE);
     break;
 
-  case conf::COMMAND_LED_RAINBOW:
+  case conf::command_enum::COMMAND_LED_RAINBOW:
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
@@ -189,7 +189,7 @@ void Pipit::processChord(Chord* chord){
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
-  if(sendIfFound(conf::COMMAND, chord, data)){
+  if(sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
     doCommand(data[0].key_code);
     return;
   }
@@ -199,14 +199,14 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known macro, send it and return.
-  if(sendIfFound(conf::MACRO, chord, data)){
+  if(sendIfFound(conf::seq_type_enum::MACRO, chord, data)){
     return;
   }
 
   // If chord is a known word, send it and return.
   chord->extractWordMods();
   chord->extractAnagramMods();
-  if(sendIfFound(conf::WORD, chord, data)){
+  if(sendIfFound(conf::seq_type_enum::WORD, chord, data)){
     switches->reuseMods(chord);
     return;
   }
@@ -218,7 +218,7 @@ void Pipit::processChord(Chord* chord){
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
-  if(sendIfFound(conf::PLAIN, chord, data)){
+  if(sendIfFound(conf::seq_type_enum::PLAIN, chord, data)){
     switches->reuseMods(chord);
     return;
   }
@@ -226,7 +226,7 @@ void Pipit::processChord(Chord* chord){
   if(sender->sendIfEmpty(chord)){
     // Only modifiers were pressed, send them now, and trigger plain key feedback
     switches->reuseMods(chord);
-    feedback->trigger(conf::PLAIN);
+    feedback->trigger(conf::seq_type_enum::PLAIN);
   }
   else{
     // Unknown chord, release all keys
@@ -247,7 +247,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* chord = gaming_switches+i;
-    if(sendIfFound(conf::COMMAND, chord, data)){
+    if(sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
       doCommand(data[0].key_code);
       return;
     }
@@ -256,18 +256,18 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
       return;
     }
 
-    if(sendIfFound(conf::MACRO, chord, data)){
+    if(sendIfFound(conf::seq_type_enum::MACRO, chord, data)){
       return;
     }
 
     uint8_t data_length = 0;
-    if((data_length=lookup->get(conf::PLAIN, chord, data))){
+    if((data_length=lookup->get(conf::seq_type_enum::PLAIN, chord, data))){
       if(data_length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
       report.addKey(data);
       report.addMod(chord->getModByte());
-      feedback->trigger(conf::PLAIN);
+      feedback->trigger(conf::seq_type_enum::PLAIN);
       continue;
     }
 
@@ -314,10 +314,10 @@ void Pipit::cycleLastWordCapital(){
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
   Key data[MAX_KEYS_IN_SEQUENCE];
-  if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
+  if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
     return; // Success
   }
-  if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
+  if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
     return; // Success
   }
   feedback->triggerNoAnagram();
@@ -338,10 +338,10 @@ void Pipit::cycleLastWordNospace(){
   // We need to lookup the chord again, even though only the capitalization is
   // changing, because the history doesn't store the characters in a word.
   Key data[MAX_KEYS_IN_SEQUENCE];
-  if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
+  if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
     return; // Success
   }
-  if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
+  if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
     return; // Success
   }
   feedback->triggerNoAnagram();
@@ -366,10 +366,10 @@ void Pipit::cycleLastWordAnagram(){
       feedback->triggerNoAnagram();
       return; // Fail
     }
-    if(sendIfFoundForCycling(conf::WORD, &new_chord, data)) {
+    if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
       return; // Success
     }
-    if(sendIfFoundForCycling(conf::PLAIN, &new_chord, data)) {
+    if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
       return; // Success
     }
     // Else, this anagram mod wasn't found, try the next one right away.

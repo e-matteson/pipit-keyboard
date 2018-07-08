@@ -67,13 +67,13 @@ const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
 
   const mod_type getModType(mod_enum modifier){
     if (contains(plain_mod_indices, NUM_PLAIN_MODS, modifier)){
-      return conf::PLAIN_MOD;
+      return mod_type::PLAIN_MOD;
     }
     if (contains(word_mod_indices, NUM_WORD_MODS, modifier)){
-      return conf::WORD_MOD;
+      return mod_type::WORD_MOD;
     }
     if (contains(anagram_mod_indices, NUM_ANAGRAM_MODS, modifier)){
-      return conf::ANAGRAM_MOD;
+      return mod_type::ANAGRAM_MOD;
     }
     DEBUG1_LN("ERROR: Unknown modifier type");
     exit(1);
@@ -91,19 +91,19 @@ const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
   }
 
   const mod_enum getNospaceEnum() {
-    return MOD_NOSPACE_ENUM;
+    return mod_enum::MOD_NOSPACE_ENUM;
   }
 
   const mod_enum getCapitalEnum() {
-    return MOD_CAPITAL_ENUM;
+    return mod_enum::MOD_CAPITAL_ENUM;
   }
 
   const mod_enum getDoubleEnum() {
-    return MOD_DOUBLE_ENUM;
+    return mod_enum::MOD_DOUBLE_ENUM;
   }
 
   const mod_enum getModShortenEnum() {
-    return MOD_SHORTEN_ENUM;
+    return mod_enum::MOD_SHORTEN_ENUM;
   }
 
 }

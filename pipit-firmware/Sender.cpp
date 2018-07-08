@@ -20,9 +20,9 @@ bool Sender::sendIfEmpty(const Chord* chord){
 
 void Sender::sendType(conf::seq_type_enum type, const Key* data, uint8_t data_length, Chord* chord){
   switch(type) {
-    case conf::PLAIN: sendPlain(data, data_length, chord); break;
-    case conf::WORD: sendWord(data, data_length, chord); break;
-    case conf::MACRO: sendMacro(data, data_length, chord); break;
+  case conf::seq_type_enum::PLAIN: sendPlain(data, data_length, chord); break;
+  case conf::seq_type_enum::WORD: sendWord(data, data_length, chord); break;
+  case conf::seq_type_enum::MACRO: sendMacro(data, data_length, chord); break;
     default: DEBUG1_LN("seq type cannot be sent");
   }
 
