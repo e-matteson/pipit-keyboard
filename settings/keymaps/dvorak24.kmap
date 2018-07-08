@@ -1,10 +1,9 @@
 # This file defines a keymap for a chording keyboard with 24 keys. It's based
-# on the dvorak layout, and designed to work well with vim. It also contains a
-# bunch of macros that are specific to my workflow. It has NOT been carefully
-# optimized to reduce anagram collisions.
+# on the dvorak layout, and designed to work well with vim.
 
 # Periods represent unpressed switches, and asterisks represent pressed switches.
 
+##### modifiers #####
 
 mod_shift        key_backspace     mod_ctrl
 ....   ....	     ....   ....   	   ....   ....
@@ -35,7 +34,7 @@ mod_anagram_1     mod_anagram_2
 
 ##### single-switch letters #####
 
-key_a          key_o         	key_e		      key_i
+key_a          key_o          key_e		      key_i
 ....   ....		 ....   ....   	....   ....	  ....   ....
 *...   ....		 .*..   ....   	..*.   ....	  ...*   ....
   .     .        .     .        .     .       .     .
@@ -61,11 +60,11 @@ key_m          key_f          key_u         key_p
 
 ##### double-switch letters #####
 
-key_b          key_z
-..**   ....    *..*   ....
-....   ....    ....   ....
-  .     .        .     .
-  ... ...        ... ...
+key_b          key_comma      key_z
+..**   ....    .*.*   ....    *..*   ....
+....   ....    ....   ....    ....   ....
+  .     .        .     .        .     .
+  ... ...        ... ...        ... ...
 
 key_g          key_v          key_k
 .**.   ....    *.*.   ....    **..   ....
@@ -73,11 +72,11 @@ key_g          key_v          key_k
   .     .        .     .        .     .
   ... ...        ... ...        ... ...
 
-key_w          key_q
-....   **..    ....   *..*
-....   ....    ....   ....
-  .     .        .     .
-  ... ...        ... ...
+key_w          key_period     key_q
+....   **..    ....   *.*.    ....   *..*
+....   ....    ....   ....    ....   ....
+  .     .        .     .        .     .
+  ... ...        ... ...        ... ...
 
 key_y          key_x          key_j
 ....   .**.    ....   .*.*    ....   ..**
@@ -86,12 +85,6 @@ key_y          key_x          key_j
   ... ...        ... ...        ... ...
 
 ##### double-switch punctuation and special keys #####
-
-key_comma      key_period
-.*.*   ....    ....   *.*.
-....   ....    ....   ....
-  .     .        .     .
-  ... ...        ... ...
 
 key_esc       key_bang        key_question
 ....   ....   ....   ....     ....   ....
@@ -257,35 +250,36 @@ key_delete    key_printscreen  key_caps_lock
 
 ##### commands #####
 
-command_delete_word    command_cycle_word
-....   ....            ....   ....
-....   ***.            .***   ....
-  .     .                .     .
-  ... ...                ... ...
-
-command_cycle_capital  command_cycle_nospace    command_shorten_last_word
-....   ....            ....   ....              ....   ....
-.***   ....            .***   ....              ....   ***.
-  .     .                .     .                  .     .
-  *.. ...                ... ..*                  ... .*.
-
-command_left_word      command_right_word       command_left_limit    command_right_limit
-..**   ....            ....   **..              ...*   ....           ....   *...
-....   ....            ....   ....              ..*.   ....           ....   .*..
-  .     .                .     .                  .     .               .     .
-  ... .*.                ... .*.                  ... .*.               ... .*.
-
-command_pause          command_led_battery       command_led_colors  command_led_rainbow
-****   ****            ****   ....               ****   .*..         ****   ..*.
-....   ....            ....   *...               ....   ....         ....   ....
-  .     .                .     .                   .     .             .     .
-  ... ...                ... .*.                   ... .*.             ... .*.
-
 command_left_hand_mode  command_gaming_mode  command_windows_mode
 ****   ....             ....   ****          ****   **..
 ....   ....             ....   ....          ....   ....
   .     .                 .     .              .     .
   ... ...                 ... ...              ... ...
+
+command_delete_word     command_cycle_word   command_cycle_capital
+....   ....             ....   ....          ....   ....
+....   ***.             .***   ....          .***   ....
+  .     .                 .     .              .     .
+  ... ...                 ... ...              *.. ...
+
+command_cycle_nospace   command_shorten_last_word
+....   ....             ....   ....
+.***   ....             .***   ....
+  .     .                 .     .
+  ... ..*                 ... *..
+
+command_left_word   command_right_word    command_left_limit   command_right_limit
+..**   ....         ....   **..           ...*   ....         ....   *...
+....   ....         ....   ....           ..*.   ....         ....   .*..
+  .     .             .     .               .     .             .     .
+  ... .*.             ... .*.               ... .*.             ... .*.
+
+command_pause       command_led_battery   command_led_colors  command_led_rainbow
+****   ****         ****   ....           ****   .*..         ****   ..*.
+....   ....         ....   *...           ....   ....         ....   ....
+  .     .             .     .               .     .             .     .
+  ... ...             ... .*.               ... .*.             ... .*.
+
 
 
 ##### macros #####

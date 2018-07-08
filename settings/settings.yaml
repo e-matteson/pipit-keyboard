@@ -18,10 +18,6 @@ options:
 # viewed in the Arduino serial monitor. Required. None, Some, or All.
   debug_messages:              None
 
-# Whether to automatically add space to the beginning or end of chorded words,
-# or not at all. Required. Before, After, or None.
-  word_space_position:         Before
-
 # The name of the microcontroller board. Required. TEENSY_LC or FEATHER_M0_BLE.
   board_name:                  FEATHER_M0_BLE
 
@@ -78,8 +74,8 @@ modes:
   # when you switch between computers.
   windows_mode:
     keymaps:
-      - {file: "settings/keymaps/dvorak24.kmap", use_words: true}
       - {file: "settings/keymaps/windows_shortcuts.kmap"}
+      - {file: "settings/keymaps/dvorak24.kmap", use_words: true}
 
   left_hand_mode:
     keymaps:
@@ -482,6 +478,7 @@ dictionary:
   - {word: "barrel"}
   - {word: "barrier"}
   - {word: "basal"}
+  - {word: "basil"}
   - {word: "base"}
   - {word: "bash"}
   - {word: "basic"}
