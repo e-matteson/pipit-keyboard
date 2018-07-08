@@ -1,17 +1,17 @@
 // extern crate cpuprofiler;
 extern crate failure;
-extern crate pipit_config;
+extern crate pipit_keyboard;
 #[macro_use]
 extern crate structopt;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-use pipit_config::errors::*;
-use pipit_config::AllData;
+use pipit_keyboard::errors::*;
+use pipit_keyboard::AllData;
 
-use pipit_config::cheatsheet::CheatSheet;
-use pipit_config::tutor::TutorApp;
+use pipit_keyboard::cheatsheet::CheatSheet;
+use pipit_keyboard::tutor::TutorApp;
 
 use failure::{Error, ResultExt};
 
@@ -19,7 +19,7 @@ use failure::{Error, ResultExt};
 
 /// Pipit keyboard configuration tool, typing tutor, and cheatsheet generator
 #[derive(StructOpt, Debug)]
-#[structopt(name = "pipit-config")]
+#[structopt(name = "pipit-keyboard")]
 struct Opt {
     /// Runs the typing tutor
     #[structopt(short = "t", long = "tutor")]

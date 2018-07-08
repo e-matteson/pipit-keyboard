@@ -291,7 +291,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pipit-config"
+name = "pipit-keyboard"
 version = "0.1.0"
 dependencies = [
  "cursive 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
