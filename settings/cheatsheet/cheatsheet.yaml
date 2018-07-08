@@ -1,5 +1,8 @@
+# Set page size to 8.5" by 11" in units of pixels, assuming 96 dpi.
 page_width: 816
 page_height: 1056
+
+# Display the default_mode chord for all the mappings listed below.
 mode: "default_mode"
 
 
@@ -7,7 +10,7 @@ keyboards:
   # Leave a blank space where the first keyboard would be
   - null
 
-  - keys:
+  - chord_names:
     - "key_a"
     - "key_c"
     - "key_d"
@@ -33,7 +36,7 @@ keyboards:
     - "mod_gui"
     - "mod_alt"
 
-  - keys:
+  - chord_names:
     - "key_left"
     - "key_right"
     - "key_home"
@@ -41,19 +44,20 @@ keyboards:
     - "key_esc"
     - "key_tab"
 
-  - keys:
+  - chord_names:
     - "key_b"
     - "key_k"
     - "key_1"
     - "key_5"
     - "key_enter"
+    # Skip the color that would be used next
     - ""
     - "key_w"
     - "key_j"
     - "key_0"
     - "key_4"
 
-  - keys:
+  - chord_names:
     - "key_comma"
     - "key_v"
     - "key_7"
@@ -65,7 +69,7 @@ keyboards:
     - "key_6"
     - "key_8"
 
-  - keys:
+  - chord_names:
     - "key_z"
     - "key_g"
     - "key_bang"
@@ -77,7 +81,7 @@ keyboards:
     - "key_question"
     - "key_2"
 
-  - keys:
+  - chord_names:
     - "key_caret"
     - "key_asterisk"
     - "key_tilde"
@@ -89,7 +93,7 @@ keyboards:
     - "key_grave"
     - "key_quote"
 
-  - keys:
+  - chord_names:
     - "key_backslash"
     - "key_pipe"
     - "key_plus"
@@ -100,7 +104,7 @@ keyboards:
     - "key_ampersand"
     - "key_equal"
 
-  - keys:
+  - chord_names:
     - "key_underscore"
     - "key_at"
     - "key_colon"
@@ -111,7 +115,7 @@ keyboards:
     - "key_hash"
     - "key_semicolon"
 
-  - keys:
+  - chord_names:
     - "key_right_paren"
     - "key_right_curly"
     - "key_right_brace"
@@ -123,7 +127,7 @@ keyboards:
     - "key_left_brace"
     - "key_left_angle"
 
-  - keys:
+  - chord_names:
     # - "command_pause"
     - "command_delete_word"
     - "command_cycle_word"
@@ -135,7 +139,7 @@ keyboards:
     - "command_left_word"
     - "command_right_word"
 
-  - keys:
+  - chord_names:
     - "mod_anagram_2"
     # - "command_right_limit"
     - "command_cycle_capital"

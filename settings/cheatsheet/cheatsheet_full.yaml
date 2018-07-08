@@ -1,9 +1,9 @@
 page_width: 816
 page_height: 1056
-
+mode: "default_mode"
 
 keyboards:
-  - keys:
+  - chord_names:
     - "key_a"
     - "key_c"
     - "key_d"
@@ -29,7 +29,7 @@ keyboards:
     - "mod_gui"
     - "mod_alt"
 
-  - keys:
+  - chord_names:
     - "key_left"
     - "key_right"
     - "key_home"
@@ -37,7 +37,7 @@ keyboards:
     - "key_esc"
     - "key_tab"
 
-  - keys:
+  - chord_names:
     - "key_b"
     - "key_k"
     - "key_1"
@@ -49,7 +49,7 @@ keyboards:
     - "key_0"
     - "key_4"
 
-  - keys:
+  - chord_names:
     - "key_comma"
     - "key_v"
     - "key_7"
@@ -61,7 +61,7 @@ keyboards:
     - "key_6"
     - "key_8"
 
-  - keys:
+  - chord_names:
     - "key_z"
     - "key_g"
     - "key_bang"
@@ -73,7 +73,7 @@ keyboards:
     - "key_question"
     - "key_2"
 
-  - keys:
+  - chord_names:
     - "key_caret"
     - "key_asterisk"
     - "key_tilde"
@@ -85,7 +85,7 @@ keyboards:
     - "key_grave"
     - "key_quote"
 
-  - keys:
+  - chord_names:
     - "key_backslash"
     - "key_pipe"
     - "key_plus"
@@ -96,7 +96,7 @@ keyboards:
     - "key_ampersand"
     - "key_equal"
 
-  - keys:
+  - chord_names:
     - "key_underscore"
     - "key_at"
     - "key_colon"
@@ -107,12 +107,12 @@ keyboards:
     - "key_hash"
     - "key_semicolon"
 
-  - keys:
+  - chord_names:
     - "key_delete"
     - "key_caps_lock"
     - "key_printscreen"
 
-  - keys:
+  - chord_names:
     - "key_right_paren"
     - "key_right_curly"
     - "key_right_brace"
@@ -124,13 +124,13 @@ keyboards:
     - "key_left_brace"
     - "key_left_angle"
 
-  - keys:
+  - chord_names:
     - "macro_in_paren"
     - "macro_in_curly"
     - "macro_in_brace"
     - "macro_in_angle"
 
-  - keys:
+  - chord_names:
     - "command_pause"
     - "command_delete_word"
     - "command_cycle_word"
@@ -140,7 +140,7 @@ keyboards:
     - "mod_double"
     - "mod_shorten"
 
-  - keys:
+  - chord_names:
     # "command_left_hand_mode"
     # "command_gaming_mode"
     - "mod_anagram_2"

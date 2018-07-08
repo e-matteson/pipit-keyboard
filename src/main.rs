@@ -52,7 +52,7 @@ fn run() -> Result<(), Error> {
     if let Some(ref config) = opt.cheatsheet {
         CheatSheet::from_yaml(config, &tutor_data)
             .context("Failed to make cheatsheet")?
-            .save("cheatsheet.svg")?;
+            .save(None)?;
     } else if opt.tutor {
         drop(all_data);
         TutorApp::run(tutor_data);

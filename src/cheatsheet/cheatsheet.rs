@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use svg;
 use svg::node::element::{ClipPath, Definitions, Group};
@@ -24,6 +24,7 @@ pub struct CheatSheet {
     keyboards: Vec<Keyboard>,
     page_width: f64,
     page_height: f64,
+    default_svg_filename: PathBuf,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -42,7 +43,7 @@ struct Keyboard {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct KeyboardSpec {
-    keys: Vec<Name>,
+    chord_names: Vec<Name>,
     // TODO add title?
 }
 
@@ -97,12 +98,13 @@ impl CheatSheet {
         let spec: CheatSheetSpec = serde_yaml::from_str(&file).with_context(
             |_| format!("failed to parse cheatsheet config file: {:?}", path),
         )?;
-        CheatSheet::new(spec, data)
+        CheatSheet::new(spec, data, CheatSheet::config_path_to_svg_path(path)?)
     }
 
     pub fn new(
         spec: CheatSheetSpec,
         data: &TutorData,
+        default_svg_filename: PathBuf,
     ) -> Result<CheatSheet, Error> {
         // TODO keyboards are not exactly centered
         let num_cols = 2.;
@@ -130,9 +132,12 @@ impl CheatSheet {
 
             if let Some(kb_spec) = kb_spec {
                 let mut keyboard = Keyboard::new(*pos);
-                keyboard.set_keys(&kb_spec.keys, data, &spec.mode).context(
-                    format!("Failed to create image of keyboard #{}", i),
-                )?;
+                keyboard
+                    .set(&kb_spec.chord_names, data, &spec.mode)
+                    .context(format!(
+                        "Failed to create image of keyboard #{}",
+                        i
+                    ))?;
 
                 all.push(keyboard);
             }
@@ -145,7 +150,18 @@ impl CheatSheet {
             keyboards: all,
             page_width: spec.page_width,
             page_height: spec.page_height,
+            default_svg_filename: default_svg_filename,
         })
+    }
+
+    fn config_path_to_svg_path(
+        config_path: &PathBuf,
+    ) -> Result<PathBuf, Error> {
+        Ok(config_path
+            .with_extension("svg")
+            .file_name()
+            .ok_or(format_err!("Failed to construct svg filename"))?
+            .into())
     }
 
     fn render(&self) -> Document {
@@ -179,24 +195,38 @@ impl CheatSheet {
         doc
     }
 
-    pub fn save(&self, filename: &str) -> Result<(), Error> {
-        if Path::new(filename).exists() {
-            let confirmed = user_confirm(
+    pub fn save(&self, filename: Option<&str>) -> Result<(), Error> {
+        let path = if let Some(s) = filename {
+            PathBuf::from(s)
+        } else {
+            self.default_svg_filename.clone()
+        };
+
+        // Using extra brackets because non-lexical lifetimes aren't in stable
+        // yet, and it doesn't know to stop borrowing `path` after creating
+        // `path_str`.
+        {
+            let path_str = path.to_str()
+                .to_owned()
+                .ok_or_else(|| format_err!("Invalid path: {:?}", path))?;
+
+            if path.exists() {
+                let confirmed = user_confirm(
                 &format!(
-                    "The file {} already exists, do you want to overwrite it?",
-                    filename
-                ),
+                    "The file '{}' already exists, do you want to overwrite it?",
+                    path_str),
                 ConfirmDefault::No,
             )?;
-            if !confirmed {
-                println!("Cheatsheet not saved.");
-                return Ok(());
+                if !confirmed {
+                    println!("Cheatsheet not saved.");
+                    return Ok(());
+                }
             }
-        }
 
-        println!("Saving cheatsheet as '{}'.", filename);
+            println!("Saving cheatsheet as '{}'.", path_str);
+        }
         let doc = self.render();
-        Ok(svg::save(filename, &doc).context("Failed to save cheatsheet")?)
+        Ok(svg::save(path, &doc).context("Failed to save cheatsheet")?)
     }
 }
 
@@ -210,24 +240,25 @@ impl Keyboard {
         }
     }
 
-    fn set_keys(
+    fn set(
         &mut self,
-        keys: &[Name],
+        chord_names: &[Name],
         data: &TutorData,
         mode: &ModeName,
     ) -> Result<(), Error> {
         assert_eq!(Chord::global_length(), self.switches.len());
-        let chords = keys.iter()
-            .map(|key| {
-                data.chord(key, mode).ok_or_else(|| LookupErr {
-                    key: key.into(),
+        let chords = chord_names
+            .iter()
+            .map(|name| {
+                data.chord(name, mode).ok_or_else(|| LookupErr {
+                    key: name.into(),
                     container: "tutor data chords".into(),
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;
 
         let symbols: Result<Vec<_>, Error> =
-            keys.iter().map(|key| get_symbol(key)).collect();
+            chord_names.iter().map(|name| get_symbol(name)).collect();
         let symbols = symbols?;
 
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
@@ -557,7 +588,6 @@ impl SwitchStyle {
             },
             SwitchStyle::Shared7 => Fill {
                 color: Color::Red,
-                // pattern: Some(FillPattern::Checkers),
                 pattern: Some(FillPattern::DiagStripes),
             },
             SwitchStyle::Shared8 => Fill {
@@ -597,7 +627,7 @@ impl Symbol {
     }
 }
 
-fn get_symbol(key: &Name) -> Result<Symbol, Error> {
+fn get_symbol(name: &Name) -> Result<Symbol, Error> {
     lazy_static! {
         static ref SYMBOLS: HashMap<Name, Symbol>  = vec![
             // ("mod_shift".into(), Symbol::from("shift", 0.9)),
@@ -726,9 +756,9 @@ fn get_symbol(key: &Name) -> Result<Symbol, Error> {
         ].into_iter().collect();
     }
     Ok(SYMBOLS
-        .get(key)
+        .get(name)
         .ok_or_else(|| MissingErr {
-            missing: key.into(),
+            missing: name.into(),
             container: "cheatsheet symbol lookup".into(),
         })?
         .to_owned())
