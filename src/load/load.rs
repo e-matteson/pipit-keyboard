@@ -11,7 +11,7 @@ impl AllData {
         let data = AllData::load_helper(settings_path).with_context(|_| {
             format!("Failed to load settings from file: '{:?}'", settings_path)
         })?;
-        println!("\nLoaded keyboard settings from: {:?}", settings_path);
+        println!("Loaded keyboard settings from: {:?}\n", settings_path);
         Ok(data)
     }
 

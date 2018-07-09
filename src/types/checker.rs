@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{AllData, AnagramNum, Chord, KmapPath, Name};
+use types::{AllData, AnagramNum, Chord, KmapPath, ModeInfo, ModeName, Name};
 
 /// The Checker warns about sub-optimal configuration, like conflicting chords
 /// or skipped anagram numbers. Any config issues that would break the firmware
@@ -13,6 +13,7 @@ struct Checker {
     seq_names: HashSet<Name>,
     chord_names: HashSet<Name>,
     word_mod_names: HashSet<Name>,
+    modes: BTreeMap<ModeName, ModeInfo>,
 }
 
 #[derive(Debug)]
@@ -25,6 +26,7 @@ impl AllData {
         let checker = self.checker();
         checker.check_unused();
         checker.check_conflicts();
+        checker.check_gaming_modes();
     }
 
     fn checker(&self) -> Checker {
@@ -33,6 +35,7 @@ impl AllData {
             seq_names: self.seq_names(),
             chord_names: self.chord_names(),
             word_mod_names: self.word_mods(),
+            modes: self.modes.clone(),
         }
     }
 
@@ -82,7 +85,7 @@ impl AllData {
 impl Checker {
     /// If two names have the same chord, or there's a skipped anagram
     /// number, print out that whole set of names.
-    pub fn check_conflicts(&self) {
+    fn check_conflicts(&self) {
         // TODO option to check for mode conflicts instead
         for (kmap, reversed) in &self.reverse_kmaps {
             let heading = format!(
@@ -105,7 +108,7 @@ impl Checker {
 
     /// Compare the stored chords and sequences (and word mods), and print
     /// any names that don't appear in both.
-    pub fn check_unused(&self) {
+    fn check_unused(&self) {
         let seqs_and_mods: HashSet<_> = self.seq_names
             .union(&self.word_mod_names)
             .cloned()
@@ -118,6 +121,43 @@ impl Checker {
             "Unused sequences:",
             seqs_and_mods.difference(&self.chord_names),
         );
+    }
+
+    fn check_gaming_modes(&self) {
+        for (mode_name, mode_info) in &self.modes {
+            if !mode_info.gaming {
+                continue;
+            }
+            for kmap_info in &mode_info.keymaps {
+                if kmap_info.use_words {
+                    println!(
+                        "Don't use words in a gaming mode, \
+                         multi-switch chords won't work: '{}' \n",
+                        mode_name
+                    );
+                }
+                print_iter(
+                    &format!(
+                        "Multi-switch chords won't work in gaming modes.\nIn {}'s {}:",
+                        mode_name,
+                        kmap_info.file
+                    ),
+                    self.multiswitch_chords(&kmap_info.file),
+                );
+            }
+        }
+    }
+
+    fn multiswitch_chords(
+        &self,
+        kmap: &KmapPath,
+    ) -> impl Iterator<Item = &Name> {
+        self.reverse_kmaps
+            .get(kmap)
+            .expect("checker's kmaps don't match all_data's modes")
+            .iter()
+            .filter(|(chord, _)| chord.count_pressed() > 1)
+            .flat_map(|(_, anagram_set)| anagram_set.all_names())
     }
 }
 
@@ -187,6 +227,10 @@ impl AnagramSet {
     /// String used when there is no mapping for a give anagram number.
     fn missing_symbol() -> String {
         "???".to_string()
+    }
+
+    fn all_names(&self) -> impl Iterator<Item = &Name> {
+        self.0.values().flat_map(|v| v.iter())
     }
 }
 
