@@ -173,7 +173,17 @@ void Pipit::sendIfReady(){
   if(switches->readyToRelease(is_gaming)){
     // Make sure all keys are released
     if(!is_paused){
-      sender->sendRelease();
+      // If you pressed a mix of mods and plain keys, the mod release won't be
+      // sent until all keys are up. This lets you hold `alt` and tap `tab` to
+      // cycle through windows. The only weird edge cases I'm aware of: holding
+      // `tab` and tapping `alt` has the exact same behavior as holding `alt`
+      // and tapping `tab`.
+      if(switches->anySwitchDown()) {
+        sender->sendReleaseExceptMods();
+      }
+      else {
+        sender->sendRelease();
+      }
     }
   }
 }

@@ -26,6 +26,7 @@ public:
   void sendReport(Report* report);
 
   void sendRelease();
+  void sendReleaseExceptMods();
 
   void setStickymod(uint8_t mod_byte);
 

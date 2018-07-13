@@ -190,6 +190,15 @@ void Switches::reuseMods(Chord* chord){
   }
 }
 
+bool Switches::anySwitchDown() {
+  for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
+    if(switch_status[index] != NOT_PRESSED) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void Switches::fillChord(Chord* chord){
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.

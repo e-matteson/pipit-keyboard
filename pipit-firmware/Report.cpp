@@ -69,9 +69,10 @@ bool Report::needsExtraRelease(const Report* next) const{
     return false;
   }
 
-  if (mod_byte && (mod_byte == next->mod_byte)) {
-    return true;
-  }
+  // // Wait this shouldn't be necessary! And it's bad for alt-tabbing!
+  // if (mod_byte && (mod_byte == next->mod_byte)) {
+  //   return true;
+  // }
 
   for(uint8_t i = 0; i < 6; i++) {
     if(key_codes[i] && (key_codes[i] == next->key_codes[i])) {
@@ -88,6 +89,10 @@ void Report::copy(const Report* other){
   }
   mod_byte = other->mod_byte;
   is_gaming = other->is_gaming;
+}
+
+void Report::copyMods(const Report* other){
+  mod_byte = other->mod_byte;
 }
 
 void Report::clear(){

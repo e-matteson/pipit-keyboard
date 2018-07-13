@@ -30,7 +30,9 @@ public:
   uint8_t fillGamingSwitches(Chord* chords);
   bool readyToPress(bool is_gaming);
   bool readyToRelease(bool is_gaming);
+  bool anySwitchDown();
   void reuseMods(Chord* chord);
+
   void printStatusArray();
 
   Matrix* matrix;

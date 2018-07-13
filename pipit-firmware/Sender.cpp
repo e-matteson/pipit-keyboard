@@ -9,7 +9,7 @@ Sender::Sender(Comms* comms){
 /************* Keypress sending ************/
 
 bool Sender::sendIfEmpty(const Chord* chord){
-  // If chord is all zeros, send 0 (with any modifiers) and return 0.
+  // If chord is all zeros (except modifiers), send 0 (with any modifiers) and return 0.
   // Else return 1.
   if (!chord->isEmpty()){
     return 0;
@@ -114,6 +114,12 @@ void Sender::sendRelease(){
   sendKeyAndMod(0,0);
 }
 
+void Sender::sendReleaseExceptMods(){
+  Report only_mods;
+  only_mods.copyMods(&last_report);
+  sendReport(&only_mods);
+}
+
 
 void Sender::sendBackspace(){
   sendKeyAndMod(KEY_BACKSPACE&0xff, 0);
@@ -150,8 +156,11 @@ void Sender::setStickymod(uint8_t mod_byte){
 
 void Sender::press(const Report* report){
   if(last_report.needsExtraRelease(report)){
-    Report empty;
-    this->press(&empty); //repeated press, send release first
+    // Repeated press, send release first.
+    // Mods can stay pressed / be pressed early, though. That lets alt-tabbing work.
+    Report mods_only;
+    mods_only.copyMods(report);
+    this->press(&mods_only);
   }
   if(report->isEmpty() && last_report.isEmpty()){
     return; //repeated release, don't send anything

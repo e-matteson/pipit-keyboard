@@ -15,6 +15,7 @@ public:
   bool isFull() const;
   bool needsExtraRelease(const Report* next) const;
   void copy(const Report* other);
+  void copyMods(const Report* other);
   uint8_t get(uint8_t index) const;
   uint8_t getMod() const;
   uint8_t numKeys() const;
