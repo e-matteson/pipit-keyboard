@@ -18,9 +18,8 @@ void Chord::setMode(conf::mode_enum _mode){
   mode = _mode;
 }
 
-bool Chord::isEmpty() const{
+bool Chord::isEmptyExceptMods() const{
   // Doesn't check the mods, just the current chord bytes.
-  // This is important because sendIfEmpty should send mods.
   return allZeroes(chord_bytes);
 }
 

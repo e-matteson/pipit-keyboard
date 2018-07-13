@@ -8,10 +8,10 @@ Sender::Sender(Comms* comms){
 
 /************* Keypress sending ************/
 
-bool Sender::sendIfEmpty(const Chord* chord){
-  // If chord is all zeros (except modifiers), send 0 (with any modifiers) and return 0.
+bool Sender::sendIfEmptyExceptMods(const Chord* chord){
+  // If chord is all zeros (ignoring modifiers), send 0 (with any modifiers) and return 0.
   // Else return 1.
-  if (!chord->isEmpty()){
+  if (!chord->isEmptyExceptMods()){
     return 0;
   }
   sendKeyAndMod(0, chord->getModByte());
@@ -50,7 +50,7 @@ void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord)
     sendKey(&key);
     comms->proportionalDelay(data_length, 2);
   }
-  sendRelease();
+  releaseAll();
 }
 
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
@@ -106,15 +106,15 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
     }
   }
 
-  sendRelease();
+  releaseAll();
 }
 
 
-void Sender::sendRelease(){
+void Sender::releaseAll(){
   sendKeyAndMod(0,0);
 }
 
-void Sender::sendReleaseExceptMods(){
+void Sender::releaseNonMods(){
   Report only_mods;
   only_mods.copyMods(&last_report);
   sendReport(&only_mods);
@@ -127,6 +127,14 @@ void Sender::sendBackspace(){
 
 void Sender::sendSpace() {
   sendKeyAndMod(KEY_SPACE&0xff, 0);
+}
+
+void Sender::sendLeftArrow() {
+  sendKeyAndMod(KEY_LEFT&0xff, 0);
+}
+
+void Sender::sendRightArrow() {
+  sendKeyAndMod(KEY_RIGHT&0xff, 0);
 }
 
 void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
@@ -150,10 +158,6 @@ void Sender::sendReport(Report* report){
   history->save(report);
 }
 
-void Sender::setStickymod(uint8_t mod_byte){
-  stickymod = stickymod | mod_byte;
-}
-
 void Sender::press(const Report* report){
   if(last_report.needsExtraRelease(report)){
     // Repeated press, send release first.
@@ -174,3 +178,6 @@ void Sender::press(const Report* report){
 }
 
 
+void Sender::setStickymod(uint8_t mod_byte){
+  stickymod = stickymod | mod_byte;
+}

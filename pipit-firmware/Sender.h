@@ -13,20 +13,22 @@ class Sender{
 public:
   Sender(Comms* comms);
 
-  bool sendIfEmpty(const Chord* chord);
+  bool sendIfEmptyExceptMods(const Chord* chord);
   void sendType(conf::seq_type_enum type, const Key* data, uint8_t data_length, Chord* chord);
   void sendPlain(const Key* data, uint8_t data_length, const Chord* chord);
   void sendMacro(const Key* data, uint8_t data_length, const Chord* chord);
   void sendWord(const Key* data, uint8_t data_length, Chord* chord);
   // void sendGaming(const Key* data, uint8_t data_length, Chord* chord);
   void sendBackspace();
+  void sendLeftArrow();
+  void sendRightArrow();
 
   void sendKey(const Key* key);
   void sendKeyAndMod(uint8_t key_code, uint8_t mod_byte);
   void sendReport(Report* report);
 
-  void sendRelease();
-  void sendReleaseExceptMods();
+  void releaseAll();
+  void releaseNonMods();
 
   void setStickymod(uint8_t mod_byte);
 

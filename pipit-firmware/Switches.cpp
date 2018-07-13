@@ -172,7 +172,6 @@ void Switches::reuseHeldSwitches(){
 
 void Switches::reuseMods(Chord* chord){
   // Let modifiers be immediately re-used in future chords.
-  // TODO document this special case
   for(uint8_t m = 0; m < NUM_MODIFIERS; m++){
     if(!chord->hasMod((conf::mod_enum) m)){
       continue;
@@ -224,6 +223,7 @@ void Switches::fillChord(Chord* chord){
   }
 }
 
+// Fill up an array of chords, one for each pressed switch, instead of combining them all into 1 chord like fillChord()
 uint8_t Switches::fillGamingSwitches(Chord* chords){
   uint8_t switch_index = 0;
   uint8_t num_chords = 0;

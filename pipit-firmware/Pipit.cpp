@@ -143,7 +143,7 @@ void Pipit::shutdownIfSquished(){
   DEBUG1_LN("         Please reboot.");
   // TODO disable other things? like bluetooth?
   switches->matrix->shutdown();
-  sender->sendRelease();
+  sender->releaseAll();
   delay(1000);
   exit(0); // Exit the firmware! Must reboot to use keyboard again.
 }
@@ -179,10 +179,10 @@ void Pipit::sendIfReady(){
       // `tab` and tapping `alt` has the exact same behavior as holding `alt`
       // and tapping `tab`.
       if(switches->anySwitchDown()) {
-        sender->sendReleaseExceptMods();
+        sender->releaseNonMods();
       }
       else {
-        sender->sendRelease();
+        sender->releaseAll();
       }
     }
   }
@@ -192,7 +192,8 @@ void Pipit::processChord(Chord* chord){
   // Lookup the chord in the lookup arrays and perform the corresponding action.
 
   // If no switch is pressed, just send zero and be done with it.
-  if(sender->sendIfEmpty(chord)){
+  // (there can't be mods because we haven't extracted them yet)
+  if(sender->sendIfEmptyExceptMods(chord)){
     return;
   };
 
@@ -223,8 +224,6 @@ void Pipit::processChord(Chord* chord){
 
   chord->restoreAnagramMods();
   chord->restoreWordMods();
-
-  // extract out all modifier switches.
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
@@ -233,17 +232,18 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
-  if(sender->sendIfEmpty(chord)){
-    // Only modifiers were pressed, send them now, and trigger plain key feedback
+  if(sender->sendIfEmptyExceptMods(chord)){
+    // Only modifiers were pressed, send them now. (We know that because if the
+    // chord was totally empty, it would have been sent earlier)
     switches->reuseMods(chord);
     feedback->trigger(conf::seq_type_enum::PLAIN);
   }
   else{
     // Unknown chord, release all keys
-    sender->sendRelease();
+    sender->releaseAll();
     feedback->triggerUnknown();
+    DEBUG1_LN("chord not found");
  }
-  DEBUG1_LN("chord not found");
 }
 
 void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
@@ -292,9 +292,14 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
 
 void Pipit::move(Motion motion, Direction direction){
   uint16_t count = sender->history->calcDistance(motion, direction);
-  uint8_t key = (direction == LEFT) ? KEY_LEFT&0xff : KEY_RIGHT&0xff;
+
   for(int16_t i = 0; i < count; i++){
-    sender->sendKeyAndMod(key, 0);
+    if(direction == LEFT) {
+      sender->sendLeftArrow();
+    }
+    else{
+      sender->sendRightArrow();
+    }
     comms->proportionalDelay(count, 6);
   }
 }

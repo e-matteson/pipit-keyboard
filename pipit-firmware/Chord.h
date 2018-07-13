@@ -31,7 +31,7 @@ public:
   void cycleNospace();
 
   bool matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const;
-  bool isEmpty() const;
+  bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
   conf::mode_enum getMode() const;
 
