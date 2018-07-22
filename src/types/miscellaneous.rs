@@ -167,7 +167,7 @@ impl fmt::Display for SwitchPos {
 //////////////////////////////
 
 impl KmapFormat {
-    pub fn chord_length(&self) -> usize {
+    pub fn num_switches(&self) -> usize {
         let mut count = 0;
         for row in self.0.iter() {
             for _ in row.iter() {
@@ -177,7 +177,9 @@ impl KmapFormat {
         count
     }
 
-    pub fn flat_order(&self) -> Vec<SwitchPos> {
+    /// The order of switches in a chord, as written in a kmap file. This will
+    /// need to be converted to firmware order later.
+    pub fn kmap_order(&self) -> Vec<SwitchPos> {
         let mut flat: Vec<SwitchPos> = Vec::new();
         for row in self.0.iter() {
             flat.extend_from_slice(row);

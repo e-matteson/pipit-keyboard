@@ -65,6 +65,7 @@ impl<'a> KmapBuilder<'a> {
             g.push(tree);
             seq_type_names.push(struct_name);
         }
+
         let (tree, kmap_struct_name) = self.make_kmap(seq_type_names);
         g.push(tree);
         Ok((CTree::Group(g), kmap_struct_name))
@@ -206,6 +207,7 @@ impl<'a> KmapBuilder<'a> {
                 .or_insert_with(Vec::new)
                 .push(name.to_owned());
         }
+
         Ok(grouped_names)
     }
 }

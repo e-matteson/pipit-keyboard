@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use types::{
-    CCode, CTree, GlobalChordInfo, KeyPress, KmapFormat, ModeInfo, ModeName,
-    Name, Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
+    CCode, CTree, KeyPress, KmapFormat, ModeInfo, ModeName, Name, Permutation,
+    Pin, Sequence, StaticChordInfo, SwitchPos, ToC, Validate, Word,
 };
 
 use failure::{Error, ResultExt};
@@ -99,29 +99,34 @@ pub struct Delay(u16);
 ////////////////////////////////////////////////////////////////////////////////
 
 impl OptionsConfig {
+    /// Get all the options that can be directly written into to output files.
+    /// These were either literally given in the settings file, or could be
+    /// easily computed from things given in the settings file, and their
+    /// values won't need to be used elsewhere in the rust config code.
     pub fn to_vec(&self) -> Result<Vec<CTree>, Error> {
         let mut ops = self.get_literal_ops();
         ops.extend(self.get_auto_ops()?);
         Ok(ops)
     }
 
-    pub fn global_chord_info(&self) -> Result<GlobalChordInfo, Error> {
+    /// Info about the chord length etc. that the Chord struct needs to know.
+    pub fn static_chord_info(&self) -> Result<StaticChordInfo, Error> {
         let permutation = Permutation::from_to(
-            &self.kmap_format.flat_order(),
+            &self.kmap_format.kmap_order(),
             &self.firmware_order()?,
         ).context(
             "'kmap_format' contains pin numbers not present in 'row_pins' or \
              'column_pins'",
         )?;
 
-        Ok(GlobalChordInfo {
-            num_bytes: self.num_bytes_in_chord()?,
-            num_switches: self.kmap_format.chord_length(),
-            num_matrix_positions: self.num_matrix_positions()?,
+        Ok(StaticChordInfo {
+            num_switches: self.kmap_format.num_switches(),
             to_firmware_order: permutation,
         })
     }
 
+    /// Where the output files containing firmware configuration should
+    /// eventually be written.
     pub fn output_directory(&self) -> PathBuf {
         self.output_directory.clone()
     }
@@ -231,10 +236,6 @@ impl OptionsConfig {
                 value: self.num_matrix_positions()?.to_c(),
             },
             CTree::Define {
-                name: "NUM_BYTES_IN_CHORD".to_c(),
-                value: self.num_bytes_in_chord()?.to_c(),
-            },
-            CTree::Define {
                 name: "NUM_RGB_LED_PINS".to_c(),
                 value: num_rgb_led_pins.to_c(),
             },
@@ -280,12 +281,16 @@ impl OptionsConfig {
         Ok(self.num_hands()? * self.num_rows()? * self.num_columns()?)
     }
 
-    fn num_bytes_in_chord(&self) -> Result<usize, Error> {
-        Ok(round_up_to_num_bytes(self.num_matrix_positions()?))
-    }
-
+    /// The order in which the firmware will scan matrix positions while
+    /// checking for pressed switches. It must match the algorithm used
+    /// in the firmware's `scanMatrix()`!
+    ///
+    /// Chords will need to be converted from kmap order to firmware after
+    /// being read from a kmap file.
+    ///
+    /// Note that there might be more matrix positions than there are physical
+    /// switches installed in the keyboard.
     fn firmware_order(&self) -> Result<Vec<SwitchPos>, Error> {
-        // must match the algorithm used in the firmware's scanMatrix()!
         let mut order: Vec<SwitchPos> = Vec::new();
         for h in 0..self.num_hands()? {
             for c in &self.column_pins[h] {
@@ -404,8 +409,4 @@ fn return_false() -> bool {
 
 fn return_true() -> bool {
     true
-}
-
-fn round_up_to_num_bytes(num_bits: usize) -> usize {
-    (num_bits as f64 / 8.0).ceil() as usize
 }

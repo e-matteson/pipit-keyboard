@@ -35,8 +35,8 @@ pub fn bools_to_u32(v: &[bool]) -> Result<u32, Error> {
     Ok(num)
 }
 
+/// If v is shorter than 8, the missing most-significant digits will be zero
 fn bools_to_u8(v: &[bool]) -> Result<u8, Error> {
-    // If v is shorter than 8, the missing most-significant digits will be zero
     let max = 8;
     if v.len() > max {
         Err(OutOfRangeErr {

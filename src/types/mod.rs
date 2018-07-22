@@ -1,6 +1,6 @@
 pub use self::all_data::AllData;
 pub use self::c_code::{CCode, CTree, Field, ToC};
-pub use self::chord::{Chord, GlobalChordInfo};
+pub use self::chord::{Chord, StaticChordInfo};
 pub use self::huffman::HuffmanTable;
 pub use self::key_press::{KeyDefs, KeyPress};
 pub use self::miscellaneous::{

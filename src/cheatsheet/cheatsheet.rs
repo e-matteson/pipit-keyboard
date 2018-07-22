@@ -246,7 +246,7 @@ impl Keyboard {
         data: &TutorData,
         mode: &ModeName,
     ) -> Result<(), Error> {
-        assert_eq!(Chord::global_length(), self.switches.len());
+        assert_eq!(Chord::static_length(), self.switches.len());
         let chords = chord_names
             .iter()
             .map(|name| {

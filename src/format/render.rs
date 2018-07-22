@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use time::*;
 
 use types::{
-    AllData, CCode, CTree, Field, HuffmanTable, KeyDefs, KeyPress, KmapPath,
-    Name, SeqType, Sequence, ToC,
+    AllData, CCode, CTree, Chord, Field, HuffmanTable, KeyDefs, KeyPress,
+    KmapPath, Name, SeqType, Sequence, ToC,
 };
 use util::bools_to_bytes;
 
@@ -45,6 +45,13 @@ impl AllData {
 
         let mut group = Vec::new();
         group.push(self.render_options());
+
+        // TODO put in function somewhere?
+        group.push(CTree::Define {
+            name: "NUM_BYTES_IN_CHORD".to_c(),
+            value: Chord::num_bytes_in_chord()?.to_c(),
+        });
+
         group.push(self.huffman_table().render()?);
         group.push(self.render_modifiers()?);
         group.push(self.render_command_enum());
