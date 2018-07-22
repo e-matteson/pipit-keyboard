@@ -201,9 +201,14 @@ macros:
   macro_println_ino: "Serial.println();←←"
   macro_gmail: "e.r.matteson@gmail.com"
   macro_bmail: "evan_matteson@brown.edu"
-  macro_compile: " mozc"
+  macro_compile: " cr"
   macro_helm_mini: " bb"
-  macro_helm_imenu: " ozi"
+  macro_helm_imenu:
+    - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_I"}
+  macro_helm_imenu_all:
+    - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_I", mods: ["MODIFIERKEY_SHIFT"]}
   macro_find_file: " ff"
   macro_proj_find_file: " pf"
   macro_recentf: " fr"
@@ -243,7 +248,7 @@ macros:
   macro_open_planner: " opp"
   macro_open_active: " opu"
   macro_open_settings: " ops"
-  macro_open_dvorak: " opd"
+  macro_open_kmap: " opd"
   macro_self_dot: "self."
   macro_include_c: "#include "
   macro_if_c: "if(){\n}↑▶←←"
@@ -273,7 +278,9 @@ macros:
   macro_increment:
     - {key: "KEY_A", mods: ["MODIFIERKEY_CTRL"]}
   macro_decrement:
+    # hack to make it work in both vim and spacemacs
     - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_ESC"}
     - {key: "KEY_ESC"}
   macro_nohlsearch:
     - {key: "KEY_SLASH"}
@@ -294,7 +301,10 @@ macros:
   macro_org_tree: " mTt"
   macro_org_archive: " mor"
   macro_org_someday: " mos"
+  macro_org_insert: " moi"
   macro_anagram_1: ", anagram: 1"
+  # macro_fake_alt_tab:
+  #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
 
 
 word_modifiers:
@@ -4165,6 +4175,7 @@ dictionary:
   - {word: "slurp"}
   - {word: "small"}
   - {word: "smart"}
+  - {word: "SMD"}
   - {word: "smell"}
   - {word: "smile"}
   - {word: "Smith"}
