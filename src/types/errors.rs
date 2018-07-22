@@ -62,6 +62,13 @@ pub enum PermuteErr {
 #[fail(display = "Syntax error in kmap file near line {}.", _0)]
 pub struct KmapSyntaxErr(pub usize);
 
+pub fn pretty_unwrap<T>(result: Result<T, Error>) -> T
+where
+    T: Sized,
+{
+    result.unwrap_or_else(|e| print_and_panic(e))
+}
+
 pub fn print_and_panic(e: Error) -> ! {
     print_error(e);
     panic!("returned error")

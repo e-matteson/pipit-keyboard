@@ -21,8 +21,29 @@ c_struct!(struct HuffmanChar {
 });
 
 impl AllData {
+    /// Generate and save the c code containing the keyboard firmware
+    /// configuration. `file_name_base` should have no extension. `.h` and
+    /// `.cpp` will be added to it as needed.
     pub fn save_as(&self, file_name_base: &str) -> Result<(), Error> {
-        let c_tree = self.render(file_name_base)?;
+        self.save_helper(file_name_base, true)
+    }
+
+    /// Used for testing. The message contains a timestamp that would make the
+    /// same output files look different if they're only generated at different
+    /// times.
+    pub fn save_without_message_as(
+        &self,
+        file_name_base: &str,
+    ) -> Result<(), Error> {
+        self.save_helper(file_name_base, false)
+    }
+
+    fn save_helper(
+        &self,
+        file_name_base: &str,
+        with_message: bool,
+    ) -> Result<(), Error> {
+        let c_tree = self.render(file_name_base, with_message)?;
         let f = c_tree.format()?;
 
         let dir = self.output_directory.as_ref().ok_or_else(|| MissingErr {
@@ -40,7 +61,11 @@ impl AllData {
         Ok(())
     }
 
-    pub fn render(&self, file_name_base: &str) -> Result<CTree, Error> {
+    pub fn render(
+        &self,
+        file_name_base: &str,
+        with_message: bool,
+    ) -> Result<CTree, Error> {
         let h_file_name = format!("{}.h", file_name_base);
 
         let mut group = Vec::new();
@@ -58,7 +83,7 @@ impl AllData {
         group.push(self.render_seq_type_enum());
         group.push(self.render_mode_enum());
         group.push(self.render_modes()?);
-        wrap_intro(&h_file_name, CTree::Group(group))
+        wrap_intro(&h_file_name, CTree::Group(group), with_message)
     }
 
     fn render_modes(&self) -> Result<CTree, Error> {
@@ -355,6 +380,7 @@ impl Sequence {
 pub fn wrap_intro(
     h_file_name: &str,
     namespace_tree: CTree,
+    with_message: bool,
 ) -> Result<CTree, Error> {
     // format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
     let mut guard_group = Vec::new();
@@ -383,9 +409,11 @@ pub fn wrap_intro(
     };
 
     let mut outer_group = Vec::new();
-    let msg = autogen_message();
-    outer_group.push(CTree::LiteralC(msg.clone()));
-    outer_group.push(CTree::LiteralH(msg));
+    if with_message {
+        let msg = autogen_message();
+        outer_group.push(CTree::LiteralC(msg.clone()));
+        outer_group.push(CTree::LiteralH(msg));
+    }
     outer_group.push(guard);
 
     Ok(CTree::Group(outer_group))
