@@ -12399,18 +12399,6 @@ const uint8_t* default_mode_mod_chord[] = {
  default_mode_mod_chord_8, default_mode_mod_chord_9, 
 };
 
-const uint8_t default_mode_anagram_chord_0[] = {
- 8, 0, 0, 
-};
-
-const uint8_t default_mode_anagram_chord_1[] = {
- 8, 128, 0, 
-};
-
-const uint8_t* default_mode_anagram_chord[] = {
- default_mode_anagram_chord_0, default_mode_anagram_chord_1, 
-};
-
 const uint8_t default_mode_anagram_mask[] = {
  8, 128, 0, 
 };
@@ -12420,7 +12408,6 @@ const ModeStruct default_mode_struct = {
   1, // num_kmaps
   default_mode_kmaps_array, // kmaps
   default_mode_mod_chord, // mod_chords
-  default_mode_anagram_chord, // anagram_chords
   default_mode_anagram_mask, // anagram_mask
 };
 
@@ -12474,18 +12461,6 @@ const uint8_t* gaming_mode_mod_chord[] = {
  gaming_mode_mod_chord_8, gaming_mode_mod_chord_9, 
 };
 
-const uint8_t gaming_mode_anagram_chord_0[] = {
- 0, 0, 0, 
-};
-
-const uint8_t gaming_mode_anagram_chord_1[] = {
- 0, 0, 0, 
-};
-
-const uint8_t* gaming_mode_anagram_chord[] = {
- gaming_mode_anagram_chord_0, gaming_mode_anagram_chord_1, 
-};
-
 const uint8_t gaming_mode_anagram_mask[] = {
  0, 0, 0, 
 };
@@ -12495,7 +12470,6 @@ const ModeStruct gaming_mode_struct = {
   1, // num_kmaps
   gaming_mode_kmaps_array, // kmaps
   gaming_mode_mod_chord, // mod_chords
-  gaming_mode_anagram_chord, // anagram_chords
   gaming_mode_anagram_mask, // anagram_mask
 };
 
@@ -12549,18 +12523,6 @@ const uint8_t* left_hand_mode_mod_chord[] = {
  left_hand_mode_mod_chord_8, left_hand_mode_mod_chord_9, 
 };
 
-const uint8_t left_hand_mode_anagram_chord_0[] = {
- 0, 0, 0, 
-};
-
-const uint8_t left_hand_mode_anagram_chord_1[] = {
- 0, 0, 0, 
-};
-
-const uint8_t* left_hand_mode_anagram_chord[] = {
- left_hand_mode_anagram_chord_0, left_hand_mode_anagram_chord_1, 
-};
-
 const uint8_t left_hand_mode_anagram_mask[] = {
  0, 0, 0, 
 };
@@ -12570,7 +12532,6 @@ const ModeStruct left_hand_mode_struct = {
   1, // num_kmaps
   left_hand_mode_kmaps_array, // kmaps
   left_hand_mode_mod_chord, // mod_chords
-  left_hand_mode_anagram_chord, // anagram_chords
   left_hand_mode_anagram_mask, // anagram_mask
 };
 
@@ -12624,18 +12585,6 @@ const uint8_t* windows_mode_mod_chord[] = {
  windows_mode_mod_chord_8, windows_mode_mod_chord_9, 
 };
 
-const uint8_t windows_mode_anagram_chord_0[] = {
- 8, 0, 0, 
-};
-
-const uint8_t windows_mode_anagram_chord_1[] = {
- 8, 128, 0, 
-};
-
-const uint8_t* windows_mode_anagram_chord[] = {
- windows_mode_anagram_chord_0, windows_mode_anagram_chord_1, 
-};
-
 const uint8_t windows_mode_anagram_mask[] = {
  8, 128, 0, 
 };
@@ -12645,7 +12594,6 @@ const ModeStruct windows_mode_struct = {
   2, // num_kmaps
   windows_mode_kmaps_array, // kmaps
   windows_mode_mod_chord, // mod_chords
-  windows_mode_anagram_chord, // anagram_chords
   windows_mode_anagram_mask, // anagram_mask
 };
 
