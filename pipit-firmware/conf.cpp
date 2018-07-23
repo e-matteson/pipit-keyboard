@@ -30,10 +30,10 @@ const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
     return getMode(mode)->num_kmaps;
   }
 
-  const LookupsOfSeqType* getLookupsOfSeqType(mode_enum mode,
-                      seq_type_enum seq_type,
-                      uint8_t kmap_num){
-    return getMode(mode)->kmaps[kmap_num]->lookups_by_seq_type[seq_type];
+  const LookupKmapType* getLookupForKmapAndType(mode_enum mode,
+                                                seq_type_enum seq_type,
+                                                uint8_t kmap_num){
+    return getMode(mode)->kmaps[kmap_num]->lookups_for_kmap[seq_type];
   }
 
   const uint8_t* getAnagramMask(mode_enum mode) {

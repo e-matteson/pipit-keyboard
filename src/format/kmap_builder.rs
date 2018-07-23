@@ -33,15 +33,15 @@ pub struct KmapBuilder<'a> {
 }
 
 c_struct!(struct KmapStruct {
-    lookups_by_seq_type: CCode,
+    lookups_for_kmap: CCode,
 });
 
-c_struct!(struct LookupsOfSeqType {
+c_struct!(struct LookupKmapType {
     num_lookups: usize,
     lookups: CCode,
 });
 
-c_struct!(struct LookupOfLength {
+c_struct!(struct LookupKmapTypeLenAnagram {
     seq_bit_len_and_anagram: u16,
     num_chords: u16,
     chords: CCode,
@@ -84,12 +84,12 @@ impl<'a> KmapBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &seq_type_names),
-            c_type: "LookupsOfSeqType*".to_c(),
+            c_type: "LookupKmapType*".to_c(),
             is_extern: false,
         });
         g.push(
             KmapStruct {
-                lookups_by_seq_type: array_name,
+                lookups_for_kmap: array_name,
             }.render(kmap_struct_name.clone()),
         );
         (CTree::Group(g), kmap_struct_name)
@@ -110,12 +110,12 @@ impl<'a> KmapBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &lookups_of_length),
-            c_type: "LookupOfLength*".to_c(),
+            c_type: "LookupKmapTypeLenAnagram*".to_c(),
             is_extern: false,
         });
 
         g.push(
-            LookupsOfSeqType {
+            LookupKmapType {
                 num_lookups: num_lookups,
                 lookups: array_name,
             }.render(struct_name.clone()),
@@ -164,7 +164,7 @@ impl<'a> KmapBuilder<'a> {
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
-            let lookup_struct = LookupOfLength::new(
+            let lookup_struct = LookupKmapTypeLenAnagram::new(
                 chords_name.clone(),
                 seqs_name.clone(),
                 names.len(),
@@ -221,7 +221,7 @@ impl<'a> KmapBuilder<'a> {
     }
 }
 
-impl LookupOfLength {
+impl LookupKmapTypeLenAnagram {
     // TODO use a builder pattern instead of taking so many unnamed arguments?
     fn new(
         chords: CCode,
@@ -229,13 +229,13 @@ impl LookupOfLength {
         num_chords: usize,
         anagram: AnagramNum,
         seq_bit_len: usize,
-    ) -> Result<LookupOfLength, Error> {
-        Ok(LookupOfLength {
+    ) -> Result<LookupKmapTypeLenAnagram, Error> {
+        Ok(LookupKmapTypeLenAnagram {
             num_chords: usize_to_u16(num_chords)
                 .context("Too many chords in lookup struct")?,
             chords: chords,
             sequences: sequences,
-            seq_bit_len_and_anagram: LookupOfLength::pack(
+            seq_bit_len_and_anagram: LookupKmapTypeLenAnagram::pack(
                 seq_bit_len,
                 anagram,
             )?,

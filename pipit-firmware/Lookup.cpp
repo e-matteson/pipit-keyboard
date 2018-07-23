@@ -8,7 +8,7 @@ uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys_out)
   conf::mode_enum mode = chord->getMode();
   for (uint8_t i = 0; i < conf::getNumKmaps(mode); i++){
     uint8_t length = lookupChord(chord,
-                                 conf::getLookupsOfSeqType(mode, type, i),
+                                 conf::getLookupForKmapAndType(mode, type, i),
                                  keys_out);
     if (length > 0) {
       return length; // Success!
@@ -17,11 +17,11 @@ uint8_t Lookup::get(conf::seq_type_enum type, const Chord* chord, Key* keys_out)
   return 0; // Fail!
 }
 
-uint8_t Lookup::lookupChord(const Chord* chord, const LookupsOfSeqType* table, Key* keys_out){
+uint8_t Lookup::lookupChord(const Chord* chord, const LookupKmapType* table, Key* keys_out){
   // If chord is found in lookup, store data and return its length.
   // Otherwise, return 0.
   for(uint32_t lookup_index = 0; lookup_index < table->num_lookups; lookup_index++){
-    const LookupOfLength* lookup =  table->lookups[lookup_index];
+    const LookupKmapTypeLenAnagram* lookup =  table->lookups[lookup_index];
 
     for(uint16_t chord_index = 0; chord_index < lookup->num_chords; chord_index++){
       // for each entry/chunk:

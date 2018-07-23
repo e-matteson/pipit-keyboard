@@ -16,7 +16,7 @@ public:
 
 private:
 
-  uint8_t lookupChord(const Chord* chord, const LookupsOfSeqType* table, Key* keys_out);
+  uint8_t lookupChord(const Chord* chord, const LookupKmapType* table, Key* keys_out);
 
   uint8_t readSequence(const uint8_t* seq_lookup,
                        uint16_t seq_length_in_bits,

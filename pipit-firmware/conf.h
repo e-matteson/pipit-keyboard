@@ -15,7 +15,7 @@ namespace conf {
 
   const HuffmanChar* decodeHuffman(uint32_t code, uint8_t length);
   const ModeStruct* getMode(mode_enum mode);
-  const LookupsOfSeqType* getLookupsOfSeqType(mode_enum mode, seq_type_enum seq_type, uint8_t kmap_num);
+  const LookupKmapType* getLookupForKmapAndType(mode_enum mode, seq_type_enum seq_type, uint8_t kmap_num);
   uint8_t getNumKmaps(mode_enum mode);
 
   const uint8_t* getAnagramMask(mode_enum mode);
