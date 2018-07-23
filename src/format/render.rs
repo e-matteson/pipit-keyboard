@@ -73,7 +73,7 @@ impl AllData {
 
         group.push(self.huffman_table().render()?);
         group.push(self.render_modifiers()?);
-        group.push(self.render_command_enum());
+        group.push(self.render_command_enum()?);
         group.push(self.render_seq_type_enum());
         group.push(self.render_mode_enum());
         group.push(self.render_modes()?);
@@ -87,7 +87,7 @@ impl AllData {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
             // We should have already checked whether any sequences are too
             // long for the firmware to handle when they were first added.
-            value: self.get_max_uncompressed_seq_length().to_c(),
+            value: self.sequences.max_seq_length.to_c(),
         });
 
         let (tree, kmap_struct_names) = self.render_kmaps()?;
@@ -201,7 +201,7 @@ impl AllData {
 
         group.push(CTree::Define {
             name: "NUM_ANAGRAMS".to_c(),
-            value: self.get_num_anagrams().to_c(),
+            value: self.chords.num_anagrams().to_c(),
         });
 
         group.push(CTree::Define {
@@ -244,31 +244,37 @@ impl AllData {
         self.plain_mods
             .iter()
             .map(|name| {
-                Ok(self.get_sequence(name)?.lone_keypress()?.format_mods())
+                Ok(self.sequences
+                    .get_seq_of_any_type(name)?
+                    .lone_keypress()?
+                    .format_mods())
             })
             .collect()
     }
 
-    fn render_command_enum(&self) -> CTree {
-        let command_list: Vec<_> = self.sequences[&SeqType::Command]
-            .keys()
+    fn render_command_enum(&self) -> Result<CTree, Error> {
+        let command_list: Vec<_> = self.sequences
+            .get_seq_map(SeqType::Command)?
+            .names()
             .map(|x: &Name| x.to_owned().to_c().to_uppercase())
             .collect();
-        CTree::EnumDecl {
+
+        Ok(CTree::EnumDecl {
             name: "command_enum".to_c(),
             variants: command_list,
             size: Some("uint8_t".to_c()),
-        }
+        })
     }
 
     fn render_seq_type_enum(&self) -> CTree {
-        let v: Vec<_> = self.get_seq_types()
-            .into_iter()
+        let variant_names: Vec<_> = self.sequences
+            .seq_types()
             .map(|s| s.to_c().to_uppercase())
             .collect();
+
         CTree::EnumDecl {
             name: "seq_type_enum".to_c(),
-            variants: v,
+            variants: variant_names,
             size: Some("uint8_t".to_c()),
         }
     }

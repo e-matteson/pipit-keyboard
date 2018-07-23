@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use failure::{Error, ResultExt};
 use load::{OptionsConfig, Settings};
-use types::{AllData, AnagramNum, SeqType, Validate};
+use types::{AllChordMaps, AllData, AllSeqMaps, SeqType, Validate};
 use util::read_file;
 
 impl AllData {
@@ -27,14 +27,13 @@ impl AllData {
             output_directory: settings.options.output_directory.clone(),
             options: settings.options.to_vec()?,
 
-            chords: BTreeMap::new(),
-            sequences: BTreeMap::new(),
+            chords: AllChordMaps::new(),
+            sequences: AllSeqMaps::new(),
             word_mods: Vec::new(),
             plain_mods: Vec::new(),
             anagram_mods: Vec::new(),
             modes: BTreeMap::new(),
             huffman_table: None,
-            highest_anagram_num: AnagramNum::default(),
             spellings: BTreeMap::new(),
         };
 
@@ -77,56 +76,62 @@ impl AllData {
 
     fn load_modes(&mut self, settings: &Settings) -> Result<(), Error> {
         for (name, info) in &settings.modes {
-            self.add_mode(name, info)
+            self.add_mode(name.to_owned(), info.to_owned())
                 .with_context(|_| format!("Failed to load mode: '{}'", name))?;
         }
         Ok(())
     }
 
     fn load_chords(&mut self, options: &OptionsConfig) -> Result<(), Error> {
-        for kmap in self.get_kmap_paths() {
+        let kmaps: Vec<_> = self.chords.kmap_paths().cloned().collect();
+
+        for kmap in kmaps {
             let named_chords = kmap.read(&options.kmap_format).with_context(
                 |_| format!("Failed to load kmap file: '{}'", kmap),
             )?;
-            self.add_chords(&kmap, named_chords)?;
+
+            self.chords.insert_map(named_chords, &kmap)?;
         }
         Ok(())
     }
 
     fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self.add_sequences(SeqType::Macro, &settings.macros)
+        Ok(self.sequences
+            .insert_map(settings.macros.clone(), SeqType::Macro)
             .context("Failed to load macros")?)
     }
 
     fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self.add_sequences(SeqType::Plain, &settings.plain_keys)
+        Ok(self.sequences
+            .insert_map(settings.plain_keys.clone(), SeqType::Plain)
             .context("Failed to load plain keys")?)
     }
 
     fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {
-        for (name, seq) in &settings.plain_modifiers {
-            self.add_plain_mod(name, seq).with_context(|_| {
-                format!("Failed to add plain_mod '{}'", name)
-            })?;
+        for (name, keypress) in &settings.plain_modifiers {
+            self.add_plain_mod(name.to_owned(), keypress.to_owned())
+                .with_context(|_| {
+                    format!("Failed to add plain_mod '{}'", name)
+                })?;
         }
         Ok(())
     }
 
     fn load_word_mods(&mut self, settings: &Settings) {
         for name in &settings.word_modifiers {
-            self.add_word_mod(name);
+            self.add_word_mod(name.to_owned());
         }
     }
 
     fn load_anagram_mods(&mut self, settings: &Settings) {
         for name in &settings.anagram_modifiers {
-            self.add_anagram_mod(name);
+            self.add_anagram_mod(name.to_owned());
         }
     }
 
     fn load_commands(&mut self, settings: &Settings) -> Result<(), Error> {
         for name in &settings.commands {
-            self.add_command(name).with_context(|_| {
+            self.add_command(name.to_owned()).with_context(|_| {
                 format!("Failed to load command: '{}'", name)
             })?;
         }

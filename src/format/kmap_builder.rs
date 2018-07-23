@@ -4,14 +4,14 @@ use std::ops::BitOr;
 
 use types::errors::OutOfRangeErr;
 use types::{
-    AnagramNum, CCode, CTree, Chord, ChordSpec, Field, HuffmanTable, Name,
-    SeqType, Sequence, ToC,
+    AllSeqMaps, AnagramNum, CCode, CTree, ChordMap, ChordSpec, Field,
+    HuffmanTable, Name, SeqType, Sequence, ToC,
 };
 use util::usize_to_u16;
 
 use failure::{Error, ResultExt};
 
-type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
+// type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
 // type ChordMap = BTreeMap<Name, Chord>;
 type LenMap = BTreeMap<LenAndAnagram, Vec<Name>>;
 
@@ -26,8 +26,8 @@ struct LenAndAnagram {
 
 pub struct KmapBuilder<'a> {
     pub kmap_nickname: String,
-    pub chord_map: &'a BTreeMap<Name, Chord>,
-    pub seq_maps: &'a SeqMap,
+    pub chord_map: &'a ChordMap,
+    pub seq_maps: &'a AllSeqMaps,
     pub huffman_table: &'a HuffmanTable,
     pub chord_spec: ChordSpec,
 }
@@ -55,14 +55,18 @@ impl<'a> KmapBuilder<'a> {
         let mut g = Vec::new();
         let mut seq_type_names = Vec::new();
 
-        for &seq_type in self.seq_maps.keys() {
-            let grouped_names = self.group_names(seq_type)?;
+        for &seq_type in self.seq_maps.seq_types() {
+            let grouped_names =
+                self.group_names(seq_type).context("failed to group names")?;
+
             let (tree, struct_names) =
                 self.make_lookups_of_length(seq_type, &grouped_names)?;
+
             g.push(tree);
 
             let (tree, struct_name) =
                 self.make_lookups_of_seq_type(seq_type, struct_names);
+
             g.push(tree);
             seq_type_names.push(struct_name);
         }
@@ -145,16 +149,17 @@ impl<'a> KmapBuilder<'a> {
                 names
                     .iter()
                     .map(|name| {
-                        self.chord_spec.to_c_bytes(&self.chord_map[name])
+                        Ok(self.chord_spec
+                            .to_c_bytes(self.chord_map.get_result(name)?)?)
                     })
                     .collect::<Result<Vec<_>, Error>>()?
                     .into_iter(),
             ).collect();
 
-            let seqs: Vec<_> = names
+            let seqs = names
                 .iter()
-                .map(|name| &self.seq_maps[&seq_type][name])
-                .collect();
+                .map(|name| self.seq_maps.get(name, seq_type))
+                .collect::<Result<Vec<_>, Error>>()?;
 
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
@@ -189,20 +194,21 @@ impl<'a> KmapBuilder<'a> {
         Ok((CTree::Group(g), struct_names))
     }
 
+    // Group names by the lengths of their sequences and their anagram
+    // numbers.
     fn group_names(&self, seq_type: SeqType) -> Result<LenMap, Error> {
-        // Group names by the lengths of their sequences and their anagram
-        // numbers.
         let mut grouped_names = BTreeMap::new();
 
-        let names_in_kmap: BTreeSet<_> = self.chord_map.keys().collect();
+        let names_in_kmap: BTreeSet<_> = self.chord_map.names().collect();
         let names_of_type: BTreeSet<_> =
-            self.seq_maps[&seq_type].keys().collect();
+            self.seq_maps.get_seq_map(seq_type)?.names().collect();
 
         for &name in names_in_kmap.intersection(&names_of_type) {
             let info = LenAndAnagram {
-                length: self.seq_maps[&seq_type][name]
+                length: self.seq_maps
+                    .get(name, seq_type)?
                     .formatted_length_in_bits(&self.huffman_table)?,
-                anagram: self.chord_map[name].anagram_num,
+                anagram: self.chord_map.get(name).unwrap().anagram_num,
             };
 
             grouped_names
@@ -264,6 +270,7 @@ impl LookupOfLength {
         Ok(packed)
     }
 }
+
 fn max_val(num_bits: u32) -> u32 {
     2u32.pow(num_bits) - 1
 }

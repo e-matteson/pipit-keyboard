@@ -1,4 +1,4 @@
-pub use self::all_data::AllData;
+pub use self::all_data::{AllChordMaps, AllData, AllSeqMaps, ChordMap};
 pub use self::c_code::{CCode, CTree, Field, ToC};
 pub use self::chord::{Chord, ChordSpec};
 pub use self::huffman::HuffmanTable;

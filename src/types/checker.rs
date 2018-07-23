@@ -32,8 +32,8 @@ impl AllData {
     fn checker(&self) -> Checker {
         Checker {
             reverse_kmaps: self.reverse_chords(),
-            seq_names: self.seq_names(),
-            chord_names: self.chord_names(),
+            seq_names: self.sequences.names().cloned().collect(),
+            chord_names: self.chords.names().cloned().collect(),
             word_mod_names: self.word_mods(),
             modes: self.modes.clone(),
         }
@@ -41,8 +41,8 @@ impl AllData {
 
     fn reverse_chords(&self) -> HashMap<KmapPath, HashMap<Chord, AnagramSet>> {
         let mut reversed = HashMap::new();
-        for (kmap, chord_map) in &self.chords {
-            for (name, chord) in chord_map {
+        for (kmap, chord_map) in self.chords.iter() {
+            for (name, chord) in chord_map.iter() {
                 let mut base_chord = chord.to_owned();
                 base_chord.anagram_num = AnagramNum::default();
 
@@ -55,22 +55,6 @@ impl AllData {
             }
         }
         reversed
-    }
-
-    fn seq_names(&self) -> HashSet<Name> {
-        self.sequences
-            .iter()
-            .flat_map(|(_, seq_type)| seq_type.keys())
-            .cloned()
-            .collect()
-    }
-
-    fn chord_names(&self) -> HashSet<Name> {
-        self.chords
-            .iter()
-            .flat_map(|(_, kmap)| kmap.keys())
-            .cloned()
-            .collect()
     }
 
     fn word_mods(&self) -> HashSet<Name> {

@@ -261,6 +261,18 @@ impl Into<String> for KmapPath {
     }
 }
 
+impl<'a> Into<String> for &'a KmapPath {
+    fn into(self) -> String {
+        self.to_owned().into()
+    }
+}
+
+impl<'a> Into<KmapPath> for &'a KmapPath {
+    fn into(self) -> KmapPath {
+        self.to_owned()
+    }
+}
+
 impl fmt::Display for KmapPath {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
@@ -301,6 +313,7 @@ impl From<String> for ModeName {
 }
 
 //////////////////////////////
+
 impl ModeName {
     pub fn as_str(&self) -> &str {
         self.0.as_str()

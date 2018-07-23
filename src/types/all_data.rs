@@ -15,9 +15,27 @@ use failure::{Error, Fail, ResultExt};
 use types::errors::{BadValueErr, ConflictErr, LookupErr};
 
 #[derive(Debug)]
+pub struct ChordMap(BTreeMap<Name, Chord>);
+
+#[derive(Debug)]
+pub struct SeqMap(BTreeMap<Name, Sequence>);
+
+#[derive(Debug)]
+pub struct AllSeqMaps {
+    maps: BTreeMap<SeqType, SeqMap>,
+    pub max_seq_length: usize,
+}
+
+#[derive(Debug)]
+pub struct AllChordMaps {
+    maps: BTreeMap<KmapPath, ChordMap>,
+    max_anagram_num: AnagramNum,
+}
+
+#[derive(Debug)]
 pub struct AllData {
-    pub chords: BTreeMap<KmapPath, BTreeMap<Name, Chord>>,
-    pub sequences: BTreeMap<SeqType, BTreeMap<Name, Sequence>>,
+    pub chords: AllChordMaps,
+    pub sequences: AllSeqMaps,
     pub word_mods: Vec<Name>,
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
@@ -25,56 +43,22 @@ pub struct AllData {
     pub huffman_table: Option<HuffmanTable>,
     pub spellings: BTreeMap<Spelling, Name>,
 
-    pub highest_anagram_num: AnagramNum,
     pub options: Vec<CTree>,
     pub output_directory: PathBuf,
     pub chord_spec: ChordSpec,
 }
 
 impl AllData {
-    pub fn add_chords(
-        &mut self,
-        kmap: &KmapPath,
-        named_chords: BTreeMap<Name, Chord>,
-    ) -> Result<(), Error> {
-        for (name, chord) in &named_chords {
-            self.add_chord(name, chord, kmap)?;
-        }
-        Ok(())
-    }
-
-    fn add_chord(
-        &mut self,
-        name: &Name,
-        chord: &Chord,
-        kmap: &KmapPath,
-    ) -> Result<(), Error> {
-        self.chords
-            .get_mut(kmap)
-            .ok_or_else(|| {
-                BadValueErr {
-                    thing: "kmap".into(),
-                    value: kmap.to_owned().into(),
-                }.context("Failed to add chord to kmap")
-            })?
-            .insert(name.to_owned(), chord.to_owned());
-
-        if chord.anagram_num > self.highest_anagram_num {
-            self.highest_anagram_num = chord.anagram_num;
-        }
-
-        Ok(())
-    }
-
-    pub fn add_command(&mut self, entry: &Name) -> Result<(), Error> {
+    pub fn add_command(&mut self, command_name: Name) -> Result<(), Error> {
         // Commands are a single byte code, not an actual key sequence.
-        // But we'll store each one as a KeyPress for convenience.
-        let mut fake_seq_with_command_code = Sequence::new();
+        // But we'll store each one as a "fake" KeyPress for convenience.
+        let fake_keypress = KeyPress::new_fake(&command_name.to_uppercase());
 
-        fake_seq_with_command_code
-            .push(KeyPress::new_fake(&entry.to_uppercase()));
-
-        self.add_sequence(SeqType::Command, entry, &fake_seq_with_command_code)
+        self.sequences.insert(
+            command_name,
+            fake_keypress.into(),
+            SeqType::Command,
+        )
     }
 
     pub fn add_word(
@@ -83,7 +67,9 @@ impl AllData {
         kmap: &KmapPath,
     ) -> Result<(), Error> {
         let name = word.name();
-        self.add_sequence(SeqType::Word, &name, &word.sequence()?)?;
+
+        self.sequences
+            .insert(name.clone(), word.sequence()?, SeqType::Word)?;
 
         // Get chords for each letter in the word and combine them.
         let mut chord: Chord = word.chord_spellings()?
@@ -103,138 +89,59 @@ impl AllData {
             .ok_or_else(|| format_err!("no chords to intersect"))??;
 
         chord.anagram_num = word.anagram_num();
-        self.add_chord(&name, &chord, kmap)
+        self.chords.insert(name, chord, kmap)
     }
 
-    pub fn add_plain_mod<T>(
+    pub fn add_plain_mod(
         &mut self,
-        name: &Name,
-        seq: &T,
-    ) -> Result<(), Error>
-    where
-        T: Into<Sequence> + Clone,
-    {
-        let keypress = seq.to_owned()
-            .into()
-            .lone_keypress()
-            .context("plain_mod sequence is too long")?;
-
-        KeyDefs::ensure_plain_mod(&keypress)?;
-        self.plain_mods.push(name.to_owned());
-        self.add_sequence(SeqType::Plain, name, &keypress)
+        name: Name,
+        key_press: KeyPress,
+    ) -> Result<(), Error> {
+        KeyDefs::ensure_plain_mod(&key_press)?;
+        self.plain_mods.push(name.clone());
+        self.sequences
+            .insert(name, key_press.into(), SeqType::Plain)
     }
 
-    pub fn add_word_mod(&mut self, name: &Name) {
-        self.word_mods.push(name.to_owned());
+    pub fn add_word_mod(&mut self, name: Name) {
+        self.word_mods.push(name);
     }
 
-    pub fn add_anagram_mod(&mut self, name: &Name) {
-        self.anagram_mods.push(name.to_owned());
+    pub fn add_anagram_mod(&mut self, name: Name) {
+        self.anagram_mods.push(name);
     }
 
     pub fn add_mode(
         &mut self,
-        name: &ModeName,
-        info: &ModeInfo,
+        mode_name: ModeName,
+        info: ModeInfo,
     ) -> Result<(), Error> {
         // Check if a mode with this name has been added already
-        if self.modes.contains_key(name) {
+        if self.modes.contains_key(&mode_name) {
             Err(ConflictErr {
-                key: name.to_string(),
+                key: mode_name.to_string(),
                 container: "modes".into(),
             }).context("Mode has already been added")?;
         }
-        // Store the kmaps that are included in this mode
+
+        // Initialize the kmaps that are included in this mode
         for kmap_info in &info.keymaps {
-            let kmap_path = &kmap_info.file;
-            if !self.chords.contains_key(kmap_path) {
-                // Initialize new chord map
-                self.chords.insert(kmap_path.clone(), BTreeMap::new());
-            }
-            // Otherwise, kmap was already added by another mode, do nothing.
+            self.chords.init_kmap(&kmap_info.file);
         }
-        self.modes.insert(name.to_owned(), info.to_owned());
+
+        self.modes.insert(mode_name, info);
         Ok(())
     }
 
-    fn add_sequence<T>(
-        &mut self,
-        seq_type: SeqType,
-        name: &Name,
-        seq: &T,
-    ) -> Result<(), Error>
-    where
-        T: Into<Sequence> + Clone,
-    {
-        let seq = seq.to_owned().into();
-        ensure_u8(seq.len()).with_context(|_| {
-            format!("Sequence contains too many keypresses: '{}'", name)
-        })?;
-        self.sequences
-            .entry(seq_type)
-            .or_insert_with(BTreeMap::new)
-            .insert(name.to_owned(), seq);
-        Ok(())
-    }
-
-    pub fn add_sequences<T>(
-        &mut self,
-        seq_type: SeqType,
-        seqs: &BTreeMap<Name, T>,
-    ) -> Result<(), Error>
-    where
-        T: Into<Sequence> + Clone,
-    {
-        for (name, seq) in seqs {
-            self.add_sequence(seq_type, name, seq)?;
-        }
-        Ok(())
-    }
-
-    fn get_sequences(
-        &self,
-        seq_type: &SeqType,
-    ) -> Result<&BTreeMap<Name, Sequence>, Error> {
-        self.sequences.get(seq_type).ok_or_else(|| {
-            LookupErr {
-                key: format!("{:?}", seq_type),
-                container: "sequences".into(),
-            }.context("sequence type was not initialized")
-                .into()
-        })
-    }
-
-    pub fn get_sequence(&self, name: &Name) -> Result<&Sequence, Error> {
-        for seq_type in self.sequences.keys() {
-            if let Some(s) = self.get_sequences(seq_type)?.get(name) {
-                return Ok(s);
-            }
-        }
-        Ok(Err(LookupErr {
-            key: name.into(),
-            container: "sequences".into(),
-        })?)
-    }
-
-    pub fn get_chord(
-        &self,
-        chord_name: &Name,
-        kmap: &KmapPath,
-    ) -> Option<Chord> {
-        // TODO be consistent about argument order
-        self.chords[kmap]
-            .get(chord_name)
-            .and_then(|x| Some(x.clone()))
-    }
-
-    // TODO handle missing mods better - here or firmware?
+    /// Return the first chord found for the given name in any of this mode's
+    /// kmaps.
     pub fn get_chord_in_mode(
         &self,
         chord_name: &Name,
         mode: &ModeName,
     ) -> Option<Chord> {
         for kmap_info in &self.modes.get(mode).expect("unknown mode").keymaps {
-            if let Some(chord) = self.get_chord(chord_name, &kmap_info.file) {
+            if let Ok(chord) = self.chords.get(chord_name, &kmap_info.file) {
                 return Some(chord);
             }
         }
@@ -242,16 +149,15 @@ impl AllData {
     }
 
     pub fn get_anagram_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
-        let mut out = Vec::new();
-        for name in &self.anagram_mods {
-            // Missing mod chords are represented in the firmware config as a
-            // blank chord.
-            out.push(
+        // Missing mod chords are represented in the firmware config as a
+        // blank chord.
+        self.anagram_mods
+            .iter()
+            .map(|name| {
                 self.get_chord_in_mode(name, mode)
-                    .unwrap_or_else(|| self.chord_spec.new_chord()),
-            );
-        }
-        out
+                    .unwrap_or_else(|| self.chord_spec.new_chord())
+            })
+            .collect()
     }
 
     pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
@@ -287,10 +193,6 @@ impl AllData {
         names
     }
 
-    pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
-        self.chords.keys().cloned().collect()
-    }
-
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
         let mut out = HashSet::new();
         for mode_info in self.modes.values() {
@@ -303,21 +205,12 @@ impl AllData {
         out.into_iter().collect()
     }
 
-    pub fn get_seq_types(&self) -> Vec<SeqType> {
-        let v: Vec<_> = self.sequences.keys().cloned().collect();
-        v
-    }
-
-    pub fn get_num_anagrams(&self) -> u8 {
-        self.highest_anagram_num.unwrap() + 1
-    }
-
     pub fn set_huffman_table(&mut self) -> Result<(), Error> {
         if self.huffman_table.is_some() {
             panic!("huffman table was already set once");
         }
         self.huffman_table =
-            Some(HuffmanTable::new(self.get_all_keypresses())?);
+            Some(HuffmanTable::new(self.sequences.dump_all_keypresses())?);
         Ok(())
     }
 
@@ -327,36 +220,13 @@ impl AllData {
             .expect("huffman table was never set")
     }
 
-    pub fn get_all_keypresses(&self) -> Vec<KeyPress> {
-        let mut v = Vec::new();
-        for seq_type in self.sequences.keys() {
-            for (_, seq) in self.get_sequences(&seq_type).expect("bad SeqType")
-            {
-                v.extend(seq.keypresses().cloned())
-            }
-        }
-        v
-    }
-
-    pub fn get_max_uncompressed_seq_length(&self) -> usize {
-        let mut max_length = 0;
-        for seq_type in self.sequences.keys() {
-            for (_, seq) in self.get_sequences(&seq_type).expect("bad SeqType")
-            {
-                max_length = max_length.max(seq.len())
-            }
-        }
-        max_length
-    }
-
     fn get_all_names(&self) -> Vec<Name> {
         self.sequences
-            .iter()
-            .flat_map(|(_seq_type, inner)| inner.keys())
+            .names()
+            .chain(self.anagram_mods.iter())
+            .chain(self.word_mods.iter())
+            .chain(self.plain_mods.iter())
             .cloned()
-            .chain(self.anagram_mods.clone())
-            .chain(self.word_mods.clone())
-            .chain(self.plain_mods.clone())
             .collect()
     }
 
@@ -409,10 +279,7 @@ impl AllData {
         kmap: &KmapPath,
     ) -> Result<Chord, Error> {
         let name = self.name_from_spelling(spelling)?;
-        Ok(self.get_chord(&name, kmap).ok_or_else(|| LookupErr {
-            key: name.to_string(),
-            container: "chords".into(),
-        })?)
+        self.chords.get(&name, kmap)
     }
 
     fn name_from_spelling(&self, spelling: &Spelling) -> Result<Name, Error> {
@@ -428,11 +295,14 @@ impl AllData {
     pub fn make_spelling_table(&mut self) -> Result<(), Error> {
         let mut map = BTreeMap::new();
         {
-            let plain_names = self.get_sequences(&SeqType::Plain)?
-                .keys()
+            let plain_names = self.sequences
+                .get_seq_map(SeqType::Plain)?
+                .names()
                 .chain(self.plain_mods.iter());
+
             for name in plain_names {
-                let keypress = self.get_sequence(name)?.lone_keypress()?;
+                let keypress =
+                    self.sequences.get_seq_of_any_type(name)?.lone_keypress()?;
                 if let Some(spelling) =
                     KeyDefs::spelling_from_keypress(&keypress)?
                 {
@@ -440,7 +310,268 @@ impl AllData {
                 }
             }
         }
+
         self.spellings = map;
+        Ok(())
+    }
+}
+
+impl AllChordMaps {
+    pub fn new() -> AllChordMaps {
+        AllChordMaps {
+            maps: BTreeMap::new(),
+            max_anagram_num: AnagramNum::default(),
+        }
+    }
+
+    pub fn get(
+        &self,
+        chord_name: &Name,
+        kmap: &KmapPath,
+    ) -> Result<Chord, Error> {
+        // TODO be consistent about argument order
+        Ok(self.get_kmap(kmap)?
+            .get(chord_name)
+            .and_then(|x| Some(x.clone()))
+            .ok_or_else(|| LookupErr {
+                key: chord_name.into(),
+                container: format!("{} chord map", kmap),
+            })?)
+    }
+
+    pub fn get_kmap(&self, kmap: &KmapPath) -> Result<&ChordMap, Error> {
+        Ok(self.maps.get(kmap).ok_or_else(|| LookupErr {
+            key: kmap.into(),
+            container: "chord maps".into(),
+        })?)
+    }
+
+    pub fn kmap_paths(&self) -> impl Iterator<Item = &KmapPath> {
+        self.maps.keys()
+    }
+
+    pub fn names(&self) -> impl Iterator<Item = &Name> {
+        self.maps.values().flat_map(|chord_map| chord_map.names())
+    }
+
+    pub fn num_anagrams(&self) -> u8 {
+        self.max_anagram_num.unwrap() + 1
+    }
+
+    /// If this kmap was not already present, initialize its chord map and
+    /// return true. Otherwise return false.
+    fn init_kmap(&mut self, kmap: &KmapPath) -> bool {
+        if self.maps.contains_key(kmap) {
+            return false;
+        }
+
+        self.maps.insert(kmap.to_owned(), ChordMap::new());
+        true
+    }
+
+    fn insert(
+        &mut self,
+        name: Name,
+        chord: Chord,
+        kmap: &KmapPath,
+    ) -> Result<(), Error> {
+        let anagram_num = chord.anagram_num;
+
+        self.maps
+            .get_mut(kmap)
+            .ok_or_else(|| {
+                BadValueErr {
+                    thing: "kmap".into(),
+                    value: kmap.to_owned().into(),
+                }.context("tried to add chord to uninitialized kmap")
+            })?
+            .insert(name, chord)?;
+
+        if anagram_num > self.max_anagram_num {
+            self.max_anagram_num = anagram_num;
+        }
+
+        Ok(())
+    }
+
+    pub fn insert_map(
+        &mut self,
+        named_chords: BTreeMap<Name, Chord>,
+        kmap: &KmapPath,
+    ) -> Result<(), Error> {
+        for (name, chord) in named_chords {
+            self.insert(name, chord, kmap)?;
+        }
+        Ok(())
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&KmapPath, &ChordMap)> {
+        self.maps.iter()
+    }
+}
+
+impl AllSeqMaps {
+    pub fn new() -> AllSeqMaps {
+        AllSeqMaps {
+            maps: BTreeMap::new(),
+            max_seq_length: 0,
+        }
+    }
+
+    pub fn get_seq_map(&self, seq_type: SeqType) -> Result<&SeqMap, Error> {
+        Ok(self.maps.get(&seq_type).ok_or_else(|| LookupErr {
+            key: format!("{:?}", seq_type),
+            container: "sequence maps".into(),
+        })?)
+    }
+
+    pub fn get(
+        &self,
+        name: &Name,
+        seq_type: SeqType,
+    ) -> Result<&Sequence, Error> {
+        Ok(self.get_seq_map(seq_type)?
+            .get(name)
+            .ok_or_else(|| LookupErr {
+                key: name.into(),
+                container: format!("{} sequence map", seq_type),
+            })?)
+    }
+
+    pub fn get_seq_of_any_type(&self, name: &Name) -> Result<&Sequence, Error> {
+        let hits: Vec<&Sequence> = self.maps
+            .values()
+            .filter_map(|seq_map| seq_map.get(name))
+            .collect();
+
+        if hits.is_empty() {
+            Err(LookupErr {
+                key: name.into(),
+                container: "sequences".into(),
+            }.into())
+        } else if hits.len() == 1 {
+            Ok(hits[0])
+        } else {
+            bail!("Found multiple sequences with the same name: {}", name)
+        }
+    }
+
+    pub fn seq_types(&self) -> impl Iterator<Item = &SeqType> {
+        self.maps.keys()
+    }
+
+    pub fn names(&self) -> impl Iterator<Item = &Name> {
+        self.maps.values().flat_map(|seq_map| seq_map.names())
+    }
+
+    pub fn insert_map<T>(
+        &mut self,
+        seqs: BTreeMap<Name, T>,
+        seq_type: SeqType,
+    ) -> Result<(), Error>
+    where
+        T: Into<Sequence>,
+    {
+        for (name, seq) in seqs {
+            self.insert(name, seq.into(), seq_type)?;
+        }
+        Ok(())
+    }
+
+    fn insert(
+        &mut self,
+        name: Name,
+        seq: Sequence,
+        seq_type: SeqType,
+    ) -> Result<(), Error> {
+        let length = seq.len();
+
+        self.maps
+            .entry(seq_type)
+            .or_insert_with(SeqMap::new)
+            .insert(name.to_owned(), seq)?;
+
+        if length > self.max_seq_length {
+            self.max_seq_length = length;
+        }
+        Ok(())
+    }
+
+    pub fn dump_all_keypresses(&self) -> Vec<KeyPress> {
+        let mut v = Vec::new();
+        for seq_map in self.maps.values() {
+            for seq in seq_map.0.values() {
+                v.extend(seq.keypresses().cloned())
+            }
+        }
+        v
+    }
+}
+
+impl ChordMap {
+    fn new() -> ChordMap {
+        ChordMap(BTreeMap::new())
+    }
+
+    pub fn get(&self, name: &Name) -> Option<&Chord> {
+        self.0.get(name)
+    }
+
+    pub fn get_result(&self, name: &Name) -> Result<&Chord, Error> {
+        // TODO merge with get?
+        Ok(self.0.get(name).ok_or_else(|| LookupErr {
+            key: format!("{:?}", name),
+            container: "chord map".into(),
+        })?)
+    }
+
+    fn insert(&mut self, name: Name, chord: Chord) -> Result<(), Error> {
+        if self.0.contains_key(&name) {
+            Err(ConflictErr {
+                key: name.clone().into(),
+                container: "chord map".into(),
+            })?
+        }
+
+        self.0.insert(name, chord);
+        Ok(())
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&Name, &Chord)> {
+        self.0.iter()
+    }
+
+    pub fn names(&self) -> impl Iterator<Item = &Name> {
+        self.0.keys()
+    }
+}
+
+impl SeqMap {
+    fn new() -> SeqMap {
+        SeqMap(BTreeMap::new())
+    }
+
+    fn get(&self, name: &Name) -> Option<&Sequence> {
+        // TODO return result?
+        self.0.get(name)
+    }
+
+    pub fn names(&self) -> impl Iterator<Item = &Name> {
+        self.0.keys()
+    }
+
+    fn insert(&mut self, name: Name, seq: Sequence) -> Result<(), Error> {
+        ensure_u8(seq.len()).with_context(|_| {
+            format!("Sequence contains too many keypresses: '{}'", name)
+        })?;
+
+        if self.0.insert(name.to_owned(), seq).is_some() {
+            Err(ConflictErr {
+                key: name.into(),
+                container: "seq map".into(),
+            })?;
+        }
+
         Ok(())
     }
 }
