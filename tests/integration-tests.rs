@@ -10,22 +10,45 @@ use failure::{Error, ResultExt};
 use pipit_keyboard::errors::pretty_unwrap;
 use pipit_keyboard::AllData;
 
+fn expected_dir() -> PathBuf {
+    PathBuf::from("tests/expected-outputs/")
+}
+
+fn actual_dir() -> PathBuf {
+    PathBuf::from("tests/actual-outputs/")
+}
+
 #[test]
 fn big_settings_output() {
-    let settings_path = PathBuf::from("tests/settings/big-test.yaml");
-
-    let all_data = AllData::load(&settings_path).expect("failed to load");
-    all_data.check();
+    let all_data = AllData::load(&PathBuf::from(
+        "tests/settings/big-test.yaml",
+    )).expect("failed to load");
 
     let name_base = "auto_config-big_test";
-
     all_data
-        // .save_as(&name_base)
         .save_without_message_as(&name_base)
         .expect("Failed to save configuration");
 
-    let expected_dir = PathBuf::from("tests/expected-outputs/");
-    let actual_dir = PathBuf::from("tests/actual-outputs/");
+    assert_firmware_config_eq(name_base);
+}
+
+#[test]
+fn chord22_output() {
+    let all_data = AllData::load(&PathBuf::from("tests/settings/test22.yaml"))
+        .expect("failed to load");
+
+    let name_base = "auto_config-22";
+    all_data
+        .save_without_message_as(&name_base)
+        .expect("Failed to save configuration");
+
+    assert_firmware_config_eq(name_base);
+}
+
+fn assert_firmware_config_eq(name_base: &str) {
+    let expected_dir = expected_dir();
+    let actual_dir = actual_dir();
+
     assert_files_eq(
         &expected_dir.join(name_base).with_extension("cpp"),
         &actual_dir.join(name_base).with_extension("cpp"),

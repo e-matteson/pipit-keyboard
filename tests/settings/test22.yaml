@@ -1,0 +1,127 @@
+options:
+
+  chord_delay:                 30
+  held_delay:                  200
+  debounce_delay:              10
+  debug_messages:              Some
+
+  board_name:                  FEATHER_M0_BLE
+  rgb_led_pins:                [10, 11, 12]
+  enable_led_typing_feedback:  true
+  battery_level_pin:           9
+  row_pins:                    [[1, 0, 19]]
+  column_pins:                 [[15,16,17,18, 20,21,5,6]]
+  output_directory:            tests/actual-outputs
+
+  kmap_format:
+    - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
+    - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
+    - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
+
+modes:
+  default_mode:
+    keymaps:
+      - {file: "tests/settings/keymaps/test22.kmap", use_words: true}
+
+  left_hand_mode:
+    keymaps:
+      - {file: "tests/settings/keymaps/test22.kmap"}
+
+  gaming_mode:
+    keymaps:
+      - {file: "tests/settings/keymaps/test22.kmap"}
+
+  windows_mode:
+    keymaps:
+      - {file: "tests/settings/keymaps/test22.kmap"}
+
+
+plain_modifiers:
+  mod_shift:          {mods: ["MODIFIERKEY_SHIFT"]}
+  mod_ctrl:           {mods: ["MODIFIERKEY_CTRL"]}
+  mod_alt:            {mods: ["MODIFIERKEY_ALT"]}
+  mod_gui:            {mods: ["MODIFIERKEY_GUI"]}
+
+
+plain_keys:
+  key_a:              {key: "KEY_A"}
+  key_b:              {key: "KEY_B"}
+  key_c:              {key: "KEY_C"}
+  key_d:              {key: "KEY_D"}
+  key_e:              {key: "KEY_E"}
+  key_f:              {key: "KEY_F"}
+  key_g:              {key: "KEY_G"}
+  key_h:              {key: "KEY_H"}
+  key_i:              {key: "KEY_I"}
+  key_j:              {key: "KEY_J"}
+  key_k:              {key: "KEY_K"}
+  key_l:              {key: "KEY_L"}
+  key_m:              {key: "KEY_M"}
+  key_n:              {key: "KEY_N"}
+  key_o:              {key: "KEY_O"}
+  key_p:              {key: "KEY_P"}
+  key_q:              {key: "KEY_Q"}
+  key_r:              {key: "KEY_R"}
+  key_s:              {key: "KEY_S"}
+  key_t:              {key: "KEY_T"}
+  key_u:              {key: "KEY_U"}
+  key_v:              {key: "KEY_V"}
+  key_w:              {key: "KEY_W"}
+  key_x:              {key: "KEY_X"}
+  key_y:              {key: "KEY_Y"}
+  key_z:              {key: "KEY_Z"}
+  key_1:              {key: "KEY_1"}
+  key_2:              {key: "KEY_2"}
+  key_3:              {key: "KEY_3"}
+  key_4:              {key: "KEY_4"}
+  key_5:              {key: "KEY_5"}
+  key_6:              {key: "KEY_6"}
+  key_7:              {key: "KEY_7"}
+  key_8:              {key: "KEY_8"}
+  key_9:              {key: "KEY_9"}
+  key_0:              {key: "KEY_0"}
+  key_backspace:      {key: "KEY_BACKSPACE"}
+  key_tab:            {key: "KEY_TAB"}
+  key_space:          {key: "KEY_SPACE"}
+
+macros:
+  macro_ls: "ls\n"
+
+word_modifiers:
+  - mod_capital
+  - mod_nospace
+  - mod_double
+  - mod_shorten
+
+anagram_modifiers:
+  - mod_anagram_1
+  - mod_anagram_2
+
+commands:
+  - command_windows_mode
+  - command_delete_word
+  - command_shorten_last_word
+  - command_left_word
+  - command_left_limit
+  - command_right_word
+  - command_right_limit
+  # TODO rename to cycle_anagram
+  - command_cycle_word
+  - command_cycle_capital
+  - command_cycle_nospace
+  - command_pause
+  - command_sticky_ctrl
+  - command_sticky_alt
+  - command_sticky_shift
+  - command_sticky_gui
+  - command_led_battery
+  - command_led_colors
+  - command_led_rainbow
+  - command_left_hand_mode
+  - command_default_mode
+  - command_gaming_mode
+
+dictionary:
+  - {word: "the"}
+  - {word: "teeth", anagram: 1}
+  - {word: "1337"}
