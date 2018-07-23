@@ -148,16 +148,12 @@ impl AllData {
         None
     }
 
-    pub fn get_anagram_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
-        // Missing mod chords are represented in the firmware config as a
-        // blank chord.
+    pub fn get_anagram_mask(&self, mode: &ModeName) -> Chord {
         self.anagram_mods
             .iter()
-            .map(|name| {
-                self.get_chord_in_mode(name, mode)
-                    .unwrap_or_else(|| self.chord_spec.new_chord())
-            })
-            .collect()
+            .filter_map(|name| self.get_chord_in_mode(name, mode))
+            .fold1(|a, b| a.intersect(&b))
+            .unwrap_or_else(|| self.chord_spec.new_chord())
     }
 
     pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {

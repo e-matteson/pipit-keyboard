@@ -27,7 +27,6 @@
 //   2, // num_kmaps
 //   {kmap0_lookups, kmap3_lookups} // kmaps
 //   default_mode_mod_chords, // mod_chords
-//   default_mode_anagram_chords, // anagram_chords
 //   default_mode_anagram_mask, // anagram_mask
 //   0, // is_gaming
 // };
@@ -58,7 +57,6 @@ struct ModeStruct {
   const uint8_t num_kmaps;
   const KmapStruct** kmaps;
   const uint8_t** mod_chords;
-  const uint8_t** anagram_chords;
   const uint8_t* anagram_mask;
 };
 

@@ -1,5 +1,4 @@
 use failure::{Error, ResultExt};
-use itertools::Itertools;
 use std::collections::BTreeMap;
 
 use types::{
@@ -12,7 +11,7 @@ pub struct ModeBuilder<'a> {
     pub info: &'a ModeInfo,
     pub kmap_struct_names: &'a BTreeMap<KmapPath, CCode>,
     pub mod_chords: Vec<Chord>,
-    pub anagram_chords: Vec<Chord>,
+    pub anagram_mask: Chord,
     pub chord_spec: ChordSpec,
 }
 
@@ -21,7 +20,6 @@ c_struct!(struct ModeStruct {
     num_kmaps: u8,
     kmaps: CCode,
     mod_chords: CCode,
-    anagram_chords: CCode,
     anagram_mask: CCode,
 });
 
@@ -36,9 +34,6 @@ impl<'a> ModeBuilder<'a> {
         let (tree, mod_array_name) = self.render_modifier_array()?;
         g.push(tree);
 
-        let (tree, anagram_array_name) = self.render_anagram_array()?;
-        g.push(tree);
-
         let (tree, anagram_mask_name) = self.render_anagram_mask()?;
         g.push(tree);
 
@@ -47,7 +42,6 @@ impl<'a> ModeBuilder<'a> {
                 .context("too many kmaps in mode")?,
             kmaps: kmap_array_name,
             mod_chords: mod_array_name,
-            anagram_chords: anagram_array_name,
             anagram_mask: anagram_mask_name,
             is_gaming: self.info.gaming,
         };
@@ -83,27 +77,14 @@ impl<'a> ModeBuilder<'a> {
     }
 
     fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
-        let anagram_mask = self.anagram_chords
-            .clone()
-            .into_iter()
-            .fold1(|a, b| a.intersect(&b))
-            .ok_or_else(|| format_err!("no anagram chords"))?;
-
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
         let tree = CTree::Array {
             name: array_name_out.clone(),
-            values: self.chord_spec.to_c_bytes(&anagram_mask)?,
+            values: self.chord_spec.to_c_bytes(&self.anagram_mask)?,
             c_type: "uint8_t".to_c(),
             is_extern: false,
         };
         Ok((tree, array_name_out))
-    }
-
-    fn render_anagram_array(&self) -> Result<(CTree, CCode), Error> {
-        self.render_chord_array_helper(
-            &self.anagram_chords,
-            &"anagram_chord".to_c(),
-        )
     }
 
     fn render_modifier_array(&self) -> Result<(CTree, CCode), Error> {

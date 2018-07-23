@@ -100,7 +100,7 @@ impl AllData {
                 info: info,
                 kmap_struct_names: &kmap_struct_names,
                 mod_chords: self.get_mod_chords(mode),
-                anagram_chords: self.get_anagram_mod_chords(mode),
+                anagram_mask: self.get_anagram_mask(mode),
                 chord_spec: self.chord_spec.clone(),
             };
             let (tree, name) = m.render()?;
