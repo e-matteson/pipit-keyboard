@@ -22,11 +22,12 @@ struct Section {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-pub fn parse_kmap(
-    path: &KmapPath,
-    format: &KmapFormat,
-) -> Result<BTreeMap<Name, Chord>, Error> {
-    let lines = load_lines(path)?.into_iter()
+impl KmapPath {
+    pub fn read(
+        &self,
+        format: &KmapFormat,
+    ) -> Result<BTreeMap<Name, Chord>, Error> {
+        let lines = self.load_lines()?.into_iter()
             .enumerate()                    // track line numbers
             .map(|(i, l)|                   // trim whitespace
                  (i, l.trim().to_owned()))
@@ -35,12 +36,23 @@ pub fn parse_kmap(
             .map(|(i, l)| check_ascii(i,l))
             .collect::<Result<Vec<_>, Error>>()?;
 
-    let mut mappings: Vec<(Name, Chord)> = Vec::new();
-    for chunk in lines.chunks(format.block_length()) {
-        let section = Section::new(chunk, format)?;
-        mappings.extend(section.mappings()?);
+        let mut mappings = Vec::new();
+        for chunk in lines.chunks(format.block_length()) {
+            let section = Section::new(chunk, format)?;
+            mappings.extend(section.mappings()?);
+        }
+        to_chord_map(mappings)
     }
-    to_chord_map(mappings)
+
+    fn load_lines(&self) -> Result<Vec<String>, Error> {
+        let buf = BufReader::new(File::open(&self.0)?);
+        let mut lines: Vec<_> = buf.lines().map(|w| w.unwrap()).collect();
+        if lines.is_empty() {
+            bail!("file is empty");
+        }
+        lines.insert(0, "".into()); // to make 0-indexed line numbering work
+        Ok(lines)
+    }
 }
 
 impl Section {
@@ -170,16 +182,6 @@ impl Section {
                 .into())
         }
     }
-}
-
-fn load_lines(path: &KmapPath) -> Result<Vec<String>, Error> {
-    let buf = BufReader::new(File::open(&path.0)?);
-    let mut lines: Vec<_> = buf.lines().map(|w| w.unwrap()).collect();
-    if lines.is_empty() {
-        bail!("file is empty");
-    }
-    lines.insert(0, "".into()); // to make 0-indexed line numbering work
-    Ok(lines)
 }
 
 fn to_chord_map(

@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use failure::{Error, ResultExt};
-use load::{parse_kmap, OptionsConfig, Settings};
+use load::{OptionsConfig, Settings};
 use types::{AllData, AnagramNum, SeqType, Validate};
 use util::read_file;
 
@@ -85,10 +85,9 @@ impl AllData {
 
     fn load_chords(&mut self, options: &OptionsConfig) -> Result<(), Error> {
         for kmap in self.get_kmap_paths() {
-            let named_chords = parse_kmap(&kmap, &options.kmap_format)
-                .with_context(|_| {
-                    format!("Failed to load kmap file: '{}'", kmap)
-                })?;
+            let named_chords = kmap.read(&options.kmap_format).with_context(
+                |_| format!("Failed to load kmap file: '{}'", kmap),
+            )?;
             self.add_chords(&kmap, named_chords)?;
         }
         Ok(())
