@@ -1,9 +1,10 @@
 use serde_yaml;
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use failure::{Error, ResultExt};
 use load::{parse_kmap, OptionsConfig, Settings};
-use types::{AllData, Chord, SeqType, Validate};
+use types::{AllData, AnagramNum, SeqType, Validate};
 use util::read_file;
 
 impl AllData {
@@ -21,31 +22,31 @@ impl AllData {
             serde_yaml::from_str(&read_file(settings_path)?)?;
         settings.validate()?;
 
-        let mut all_data = AllData::new();
+        let mut all_data = AllData {
+            chord_spec: settings.options.chord_spec()?,
+            output_directory: settings.options.output_directory.clone(),
+            options: settings.options.to_vec()?,
 
-        all_data.output_directory = Some(settings.options.output_directory());
+            chords: BTreeMap::new(),
+            sequences: BTreeMap::new(),
+            word_mods: Vec::new(),
+            plain_mods: Vec::new(),
+            anagram_mods: Vec::new(),
+            modes: BTreeMap::new(),
+            huffman_table: None,
+            highest_anagram_num: AnagramNum::default(),
+            spellings: BTreeMap::new(),
+        };
 
-        Chord::set_info(settings.options.static_chord_info()?);
-
-        all_data
-            .load_modes(&settings)
-            .context("Failed to load modes")?;
-
-        all_data
-            .load_options(&settings.options)
-            .context("Failed to load options")?;
+        all_data.load_modes(&settings)?;
 
         all_data
             .load_chords(&settings.options)
             .context("Failed to load chords")?;
 
-        all_data
-            .load_plains(&settings)
-            .context("Failed to load plain keys")?;
+        all_data.load_plains(&settings)?;
 
-        all_data
-            .load_macros(&settings)
-            .context("Failed to load macros")?;
+        all_data.load_macros(&settings)?;
 
         all_data
             .load_plain_mods(&settings)
@@ -93,17 +94,14 @@ impl AllData {
         Ok(())
     }
 
-    fn load_options(&mut self, options: &OptionsConfig) -> Result<(), Error> {
-        self.options = options.to_vec()?;
-        Ok(())
-    }
-
     fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
-        self.add_sequences(SeqType::Macro, &settings.macros)
+        Ok(self.add_sequences(SeqType::Macro, &settings.macros)
+            .context("Failed to load macros")?)
     }
 
     fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
-        self.add_sequences(SeqType::Plain, &settings.plain_keys)
+        Ok(self.add_sequences(SeqType::Plain, &settings.plain_keys)
+            .context("Failed to load plain keys")?)
     }
 
     fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {

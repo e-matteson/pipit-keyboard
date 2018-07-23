@@ -11,7 +11,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use failure::{err_msg, Error, ResultExt};
 use types::errors::{LookupErr, MissingErr};
-use types::{Chord, ModeName, Name, TutorData};
+use types::{ModeName, Name, TutorData};
 use util::{read_file, user_confirm, ConfirmDefault};
 
 use cheatsheet::draw::{
@@ -246,7 +246,7 @@ impl Keyboard {
         data: &TutorData,
         mode: &ModeName,
     ) -> Result<(), Error> {
-        assert_eq!(Chord::static_length(), self.switches.len());
+        assert_eq!(data.chord_spec.num_switches, self.switches.len());
         let chords = chord_names
             .iter()
             .map(|name| {

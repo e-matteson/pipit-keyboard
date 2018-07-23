@@ -4,8 +4,8 @@ use std::ops::BitOr;
 
 use types::errors::OutOfRangeErr;
 use types::{
-    AnagramNum, CCode, CTree, Chord, Field, HuffmanTable, Name, SeqType,
-    Sequence, ToC,
+    AnagramNum, CCode, CTree, Chord, ChordSpec, Field, HuffmanTable, Name,
+    SeqType, Sequence, ToC,
 };
 use util::usize_to_u16;
 
@@ -29,6 +29,7 @@ pub struct KmapBuilder<'a> {
     pub chord_map: &'a BTreeMap<Name, Chord>,
     pub seq_maps: &'a SeqMap,
     pub huffman_table: &'a HuffmanTable,
+    pub chord_spec: ChordSpec,
 }
 
 c_struct!(struct KmapStruct {
@@ -143,7 +144,9 @@ impl<'a> KmapBuilder<'a> {
             let chord_bytes = Itertools::flatten(
                 names
                     .iter()
-                    .map(|name| self.chord_map[name].to_c_bytes())
+                    .map(|name| {
+                        self.chord_spec.to_c_bytes(&self.chord_map[name])
+                    })
                     .collect::<Result<Vec<_>, Error>>()?
                     .into_iter(),
             ).collect();

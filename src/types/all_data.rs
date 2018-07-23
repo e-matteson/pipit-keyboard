@@ -6,8 +6,9 @@ use std::path::PathBuf;
 use util::ensure_u8;
 
 use types::{
-    AnagramNum, CTree, Chord, HuffmanTable, KeyDefs, KeyPress, KmapPath,
-    ModeInfo, ModeName, Name, SeqType, Sequence, Spelling, TutorData, Word,
+    AnagramNum, CTree, Chord, ChordSpec, HuffmanTable, KeyDefs, KeyPress,
+    KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, Spelling, TutorData,
+    Word,
 };
 
 use failure::{Error, Fail, ResultExt};
@@ -21,30 +22,16 @@ pub struct AllData {
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
-    pub options: Vec<CTree>,
-    pub output_directory: Option<PathBuf>,
     pub huffman_table: Option<HuffmanTable>,
-    spellings: BTreeMap<Spelling, Name>,
-    highest_anagram_num: AnagramNum,
+    pub spellings: BTreeMap<Spelling, Name>,
+
+    pub highest_anagram_num: AnagramNum,
+    pub options: Vec<CTree>,
+    pub output_directory: PathBuf,
+    pub chord_spec: ChordSpec,
 }
 
 impl AllData {
-    pub fn new() -> AllData {
-        AllData {
-            chords: BTreeMap::new(),
-            sequences: BTreeMap::new(),
-            word_mods: Vec::new(),
-            plain_mods: Vec::new(),
-            anagram_mods: Vec::new(),
-            modes: BTreeMap::new(),
-            options: Vec::new(),
-            output_directory: None,
-            huffman_table: None,
-            highest_anagram_num: AnagramNum::default(),
-            spellings: BTreeMap::new(),
-        }
-    }
-
     pub fn add_chords(
         &mut self,
         kmap: &KmapPath,
@@ -71,6 +58,11 @@ impl AllData {
                 }.context("Failed to add chord to kmap")
             })?
             .insert(name.to_owned(), chord.to_owned());
+
+        if chord.anagram_num > self.highest_anagram_num {
+            self.highest_anagram_num = chord.anagram_num;
+        }
+
         Ok(())
     }
 
@@ -93,24 +85,25 @@ impl AllData {
         let name = word.name();
         self.add_sequence(SeqType::Word, &name, &word.sequence()?)?;
 
-        // Get a chord for each letter in the word, and combine them.
-        let chord: Chord = word.chord_spellings()?
+        // Get chords for each letter in the word and combine them.
+        let mut chord: Chord = word.chord_spellings()?
             .iter()
             .map(|s| self.chord_from_spelling(s, kmap))
-            .fold_results(
-                Chord::with_anagram(word.anagram_num()),
-                |mut accumulator, ref chord| {
-                    accumulator.intersect(chord);
-                    accumulator
-                },
-            )?;
+        // This is messy and doesn't short-circuit on the first error,
+        // but there's no fold1_result(), so whatever.
+            .fold1(|a, b| {
+                if a.is_err() {
+                    a
+                } else if b.is_err() {
+                    b
+                } else {
+                    Ok(a.unwrap().intersect(&b.unwrap()))
+                }
+            })
+            .ok_or_else(|| format_err!("no chords to intersect"))??;
 
-        self.add_chord(&name, &chord, kmap)?;
-
-        if chord.anagram_num > self.highest_anagram_num {
-            self.highest_anagram_num = chord.anagram_num;
-        }
-        Ok(())
+        chord.anagram_num = word.anagram_num();
+        self.add_chord(&name, &chord, kmap)
     }
 
     pub fn add_plain_mod<T>(
@@ -248,13 +241,41 @@ impl AllData {
         None
     }
 
-    pub fn get_anagram_chords(&self, mode: &ModeName) -> Vec<Chord> {
+    pub fn get_anagram_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut out = Vec::new();
         for name in &self.anagram_mods {
-            // TODO why default? Shouldn't that be an error?
-            out.push(self.get_chord_in_mode(name, mode).unwrap_or_default());
+            // Missing mod chords are represented in the firmware config as a
+            // blank chord.
+            out.push(
+                self.get_chord_in_mode(name, mode)
+                    .unwrap_or_else(|| self.chord_spec.new_chord()),
+            );
         }
         out
+    }
+
+    pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
+        // Order must match get_mod_names()!
+        let mut chords = Vec::new();
+        for name in self.get_mod_names() {
+            // Missing mod chords are represented in the firmware config as a
+            // blank chord.
+            chords.push(
+                self.get_chord_in_mode(&name, mode)
+                    .unwrap_or_else(|| self.chord_spec.new_chord()),
+            );
+        }
+        chords
+    }
+
+    /// The number of bytes required to represent a chord in the firmware.
+    pub fn num_bytes_in_chord(&self) -> Result<usize, Error> {
+        // The best way to be sure we're calculating num_bytes_in_chord
+        // correctly is to just create a chord, turn it to bytes like we will
+        // during rendering, and check how many bytes are in it.
+        Ok(self.chord_spec
+            .to_bytes(&self.chord_spec.new_chord())?
+            .len())
     }
 
     pub fn get_mod_names(&self) -> Vec<Name> {
@@ -264,16 +285,6 @@ impl AllData {
         names.extend(self.anagram_mods.clone());
         names.sort();
         names
-    }
-
-    pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
-        // Order must match get_mod_names()!
-        let mut chords = Vec::new();
-        for name in self.get_mod_names() {
-            chords
-                .push(self.get_chord_in_mode(&name, mode).unwrap_or_default());
-        }
-        chords
     }
 
     pub fn get_kmap_paths(&self) -> Vec<KmapPath> {
@@ -358,7 +369,7 @@ impl AllData {
         if num > 0 {
             let mod_chord =
                 self.get_chord_in_mode(self.anagram_mods.get(num - 1)?, mode)?;
-            chord.intersect(&mod_chord);
+            chord.intersect_mut(&mod_chord);
             chord.anagram_num = AnagramNum::default();
         };
         Some(chord)
@@ -388,6 +399,7 @@ impl AllData {
         Ok(TutorData {
             chords: chords,
             spellings: self.spellings.clone(),
+            chord_spec: self.chord_spec.clone(),
         })
     }
 

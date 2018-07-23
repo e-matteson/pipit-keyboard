@@ -169,10 +169,6 @@ impl CFiles {
         write_to_file(cpp_path.clone(), &self.c)?;
         Ok(vec![h_path, cpp_path])
     }
-
-    // pub fn join(v: &[CFiles]) -> CFiles {
-    //     v.iter().fold(CFiles::new(), |acc, f| acc + f)
-    // }
 }
 
 impl AddAssign<CFiles> for CFiles {

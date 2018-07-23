@@ -93,10 +93,9 @@ impl SlideEntry {
 
         let chord = match chords {
             None => bail!("failed to create chords for word"),
-            Some(v) => v.into_iter().fold(Chord::default(), |acc, mut c| {
-                c.intersect(&acc);
-                c
-            }),
+            Some(v) => v.into_iter()
+                .fold1(|a, b| a.intersect(&b))
+                .ok_or_else(|| format_err!("no chords to intersect for word"))?,
         };
 
         Ok(SlideEntry {

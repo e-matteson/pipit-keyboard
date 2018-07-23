@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use types::{
-    CCode, CTree, KeyPress, KmapFormat, ModeInfo, ModeName, Name, Permutation,
-    Pin, Sequence, StaticChordInfo, SwitchPos, ToC, Validate, Word,
+    CCode, CTree, ChordSpec, KeyPress, KmapFormat, ModeInfo, ModeName, Name,
+    Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
 };
 
 use failure::{Error, ResultExt};
@@ -110,7 +110,7 @@ impl OptionsConfig {
     }
 
     /// Info about the chord length etc. that the Chord struct needs to know.
-    pub fn static_chord_info(&self) -> Result<StaticChordInfo, Error> {
+    pub fn chord_spec(&self) -> Result<ChordSpec, Error> {
         let permutation = Permutation::from_to(
             &self.kmap_format.kmap_order(),
             &self.firmware_order()?,
@@ -119,16 +119,10 @@ impl OptionsConfig {
              'column_pins'",
         )?;
 
-        Ok(StaticChordInfo {
+        Ok(ChordSpec {
             num_switches: self.kmap_format.num_switches(),
             to_firmware_order: permutation,
         })
-    }
-
-    /// Where the output files containing firmware configuration should
-    /// eventually be written.
-    pub fn output_directory(&self) -> PathBuf {
-        self.output_directory.clone()
     }
 
     fn get_literal_ops(&self) -> Vec<CTree> {

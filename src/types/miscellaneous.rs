@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use failure::{Error, ResultExt};
 use types::errors::*;
-use types::{CCode, Chord, KeyPress, ToC, Validate};
+use types::{CCode, Chord, ChordSpec, KeyPress, ToC, Validate};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -82,6 +82,7 @@ pub struct Permutation {
 pub struct TutorData {
     pub chords: BTreeMap<ModeName, BTreeMap<Name, Chord>>,
     pub spellings: BTreeMap<Spelling, Name>,
+    pub chord_spec: ChordSpec,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]

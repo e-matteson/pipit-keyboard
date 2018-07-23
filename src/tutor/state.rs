@@ -82,14 +82,9 @@ impl State {
     }
 
     pub fn chord(name: &Name) -> Option<Chord> {
-        if name == &Name(String::new()) {
-            // Used for skipping colors in the cheatsheet config
-            return Some(Chord::default());
-        }
-
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.chords.get(&state.saveable.mode)?.get(name).cloned()
+            data.chord(name, &state.saveable.mode)
         } else {
             panic!("tutor data was not set")
         }
@@ -99,7 +94,7 @@ impl State {
         let name = State::name(&spelling)?;
         let mut chord = State::chord(&name)?;
         if spelling.is_uppercase() {
-            chord.intersect(&State::chord(&Name("mod_shift".into()))?)
+            chord.intersect_mut(&State::chord(&Name("mod_shift".into()))?)
         }
         Some(chord)
     }
@@ -219,7 +214,7 @@ impl TutorData {
     pub fn chord(&self, name: &Name, mode: &ModeName) -> Option<Chord> {
         if name == &Name(String::new()) {
             // Used for skipping colors in the cheatsheet config
-            return Some(Chord::default());
+            return Some(self.chord_spec.new_chord());
         }
         self.chords.get(mode)?.get(name).cloned()
     }

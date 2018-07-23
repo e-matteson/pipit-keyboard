@@ -1,6 +1,10 @@
 use failure::{Error, ResultExt};
+use itertools::Itertools;
 use std::collections::BTreeMap;
-use types::{CCode, CTree, Chord, Field, KmapPath, ModeInfo, ModeName, ToC};
+
+use types::{
+    CCode, CTree, Chord, ChordSpec, Field, KmapPath, ModeInfo, ModeName, ToC,
+};
 use util::usize_to_u8;
 
 pub struct ModeBuilder<'a> {
@@ -9,6 +13,7 @@ pub struct ModeBuilder<'a> {
     pub kmap_struct_names: &'a BTreeMap<KmapPath, CCode>,
     pub mod_chords: Vec<Chord>,
     pub anagram_chords: Vec<Chord>,
+    pub chord_spec: ChordSpec,
 }
 
 c_struct!(struct ModeStruct {
@@ -78,14 +83,16 @@ impl<'a> ModeBuilder<'a> {
     }
 
     fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
-        let mut anagram_mask = Chord::new();
-        for c in &self.anagram_chords {
-            anagram_mask.intersect(c);
-        }
+        let anagram_mask = self.anagram_chords
+            .clone()
+            .into_iter()
+            .fold1(|a, b| a.intersect(&b))
+            .ok_or_else(|| format_err!("no anagram chords"))?;
+
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
         let tree = CTree::Array {
             name: array_name_out.clone(),
-            values: anagram_mask.to_c_bytes()?,
+            values: self.chord_spec.to_c_bytes(&anagram_mask)?,
             c_type: "uint8_t".to_c(),
             is_extern: false,
         };
@@ -113,7 +120,7 @@ impl<'a> ModeBuilder<'a> {
             name: array_name_out.clone(),
             values: chords
                 .iter()
-                .map(|c| c.to_c_bytes())
+                .map(|c| self.chord_spec.to_c_bytes(c))
                 .collect::<Result<Vec<_>, _>>()?,
             subarray_type: "uint8_t".to_c(),
             is_extern: false,

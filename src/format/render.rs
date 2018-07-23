@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use time::*;
 
 use types::{
-    AllData, CCode, CTree, Chord, Field, HuffmanTable, KeyDefs, KeyPress,
-    KmapPath, Name, SeqType, Sequence, ToC,
+    AllData, CCode, CTree, Field, HuffmanTable, KeyDefs, KeyPress, KmapPath,
+    Name, SeqType, Sequence, ToC,
 };
 use util::bools_to_bytes;
 
@@ -11,7 +11,6 @@ use format::{KmapBuilder, ModeBuilder};
 // use format::KmapBuilder;
 
 use failure::Error;
-use types::errors::MissingErr;
 
 c_struct!(struct HuffmanChar {
     bits: CCode,
@@ -46,12 +45,7 @@ impl AllData {
         let c_tree = self.render(file_name_base, with_message)?;
         let f = c_tree.format()?;
 
-        let dir = self.output_directory.as_ref().ok_or_else(|| MissingErr {
-            missing: "output directory".into(),
-            container: "settings".into(),
-        })?;
-
-        let file_names = f.save(dir, file_name_base)?
+        let file_names = f.save(&self.output_directory, file_name_base)?
             .iter()
             .map(|path| format!("{:?}", path))
             .collect::<Vec<_>>()
@@ -74,7 +68,7 @@ impl AllData {
         // TODO put in function somewhere?
         group.push(CTree::Define {
             name: "NUM_BYTES_IN_CHORD".to_c(),
-            value: Chord::num_bytes_in_chord()?.to_c(),
+            value: self.num_bytes_in_chord()?.to_c(),
         });
 
         group.push(self.huffman_table().render()?);
@@ -106,7 +100,8 @@ impl AllData {
                 info: info,
                 kmap_struct_names: &kmap_struct_names,
                 mod_chords: self.get_mod_chords(mode),
-                anagram_chords: self.get_anagram_chords(mode),
+                anagram_chords: self.get_anagram_mod_chords(mode),
+                chord_spec: self.chord_spec.clone(),
             };
             let (tree, name) = m.render()?;
             g.push(tree);
@@ -134,6 +129,7 @@ impl AllData {
                 chord_map: chords,
                 seq_maps: &self.sequences,
                 huffman_table: self.huffman_table(),
+                chord_spec: self.chord_spec.clone(),
             };
             let (tree, kmap_struct_name) = builder.render()?;
             g.push(tree);
