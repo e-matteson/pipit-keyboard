@@ -38,9 +38,12 @@ conf::mode_enum Chord::getMode() const{
   return mode;
 }
 
-bool Chord::matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const{
-  // Use this for checking whether a lookup table entry matches this chord.
-  return isEqual(chord_bytes, lookup_chord_bytes) && (anagram_num == anagram);
+bool Chord::hasAnagramNum(uint8_t other_anagram) const{
+  return (anagram_num == other_anagram);
+}
+
+bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const{
+  return isEqual(chord_bytes, other_chord_bytes);
 }
 
 void Chord::copy(const Chord* other){

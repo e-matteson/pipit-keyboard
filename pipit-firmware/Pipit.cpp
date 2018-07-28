@@ -109,7 +109,6 @@ void Pipit::doCommand(uint8_t code){
 
 Pipit::Pipit(){
   switches = new Switches();
-  lookup = new Lookup();
   comms = new Comms();
   sender = new Sender(comms);
   feedback = new Feedback();
@@ -151,7 +150,7 @@ void Pipit::shutdownIfSquished(){
 
 void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
-  bool is_gaming = conf::getMode(mode)->is_gaming;
+  bool is_gaming = conf::isGaming(mode);
   if(switches->readyToPress(is_gaming)){
     // Lookup the chord and send the corresponding key sequence.
     if(is_gaming){
@@ -271,7 +270,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     }
 
     uint8_t data_length = 0;
-    if((data_length=lookup->get(conf::seq_type_enum::PLAIN, chord, data))){
+    if((data_length=conf::lookup(chord, conf::seq_type_enum::PLAIN, data))){
       if(data_length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
@@ -400,7 +399,8 @@ uint8_t Pipit::sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key
 }
 
 uint8_t Pipit::sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first) {
-  uint8_t data_length = lookup->get(type, chord, data);
+  // TODO renam data -> keys
+  uint8_t data_length = conf::lookup(chord, type, data);
   if(data_length){
     if(delete_first) {
       deleteLastWord();

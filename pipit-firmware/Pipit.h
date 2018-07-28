@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "auto_config.h"
-#include "structs.h"
+/* #include "structs.h" */
 #include "Chord.h"
 #include "Key.h"
 
@@ -25,7 +25,7 @@
 
 
 #include "Switches.h"
-#include "Lookup.h"
+#include "lookup.h"
 #include "Sender.h"
 #include "Feedback.h"
 
@@ -62,7 +62,6 @@ private:
   uint8_t sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data);
 
   Switches* switches;
-  Lookup* lookup;
   Feedback* feedback;
   Sender* sender;
   Comms* comms;

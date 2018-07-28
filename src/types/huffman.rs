@@ -30,7 +30,7 @@ enum HuffmanNode {
 }
 
 impl HuffmanEntry {
-    pub fn len(&self) -> usize {
+    pub fn num_bits(&self) -> usize {
         self.bits.len()
     }
 
@@ -60,6 +60,14 @@ impl HuffmanTable {
             key: key.into(),
             container: "huffman code table".into(),
         })?)
+    }
+
+    pub fn min_bit_length(&self) -> usize {
+        self.0
+            .values()
+            .map(|entry| entry.num_bits())
+            .min()
+            .unwrap_or(1)
     }
 }
 

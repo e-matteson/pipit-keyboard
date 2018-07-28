@@ -293,13 +293,18 @@ impl HuffmanTable {
             value: self.0.len().to_c(),
         });
 
+        group.push(CTree::Define {
+            name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
+            value: self.min_bit_length().to_c(),
+        });
+
         let mut initializers = Vec::new();
         for key in self.0.keys() {
             // TODO Don't repeatedly look up key
             let entry = self.get(key)?;
             let init = HuffmanChar {
                 bits: entry.as_uint32()?,
-                num_bits: entry.len(),
+                num_bits: entry.num_bits(),
                 key_code: KeyPress::truncate(key),
                 is_mod: entry.is_mod,
             }.render(CCode::new())

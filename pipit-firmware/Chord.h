@@ -30,7 +30,8 @@ public:
   void cycleCapital();
   void cycleNospace();
 
-  bool matches(const uint8_t* lookup_chord_bytes, uint8_t anagram) const;
+  bool hasAnagramNum(uint8_t other_anagram) const;
+  bool hasChordBytes(const uint8_t* other_chord_bytes) const;
   bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
   conf::mode_enum getMode() const;

@@ -13,28 +13,25 @@ namespace conf {
     ANAGRAM_MOD
   };
 
-  const HuffmanChar* decodeHuffman(uint32_t code, uint8_t length);
+  /* TODO why are these all const? */
+
+  const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length);
   const ModeStruct* getMode(mode_enum mode);
-  const LookupKmapType* getLookupForKmapAndType(mode_enum mode, seq_type_enum seq_type, uint8_t kmap_num);
-  uint8_t getNumKmaps(mode_enum mode);
+  bool isGaming(mode_enum mode);
+  const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, seq_type_enum seq_type);
 
   const uint8_t* getAnagramMask(mode_enum mode);
-
   const uint8_t* getModChord(mode_enum mode, mod_enum modifier);
-  const uint8_t getPlainModByte(uint8_t index);
-  const mod_enum getPlainModEnum(uint8_t index);
-  const mod_enum getWordModEnum(uint8_t index);
-  const mod_enum getAnagramModEnum(uint8_t index);
-  const mod_type getModType(mod_enum modifier);
+  uint8_t getPlainModByte(uint8_t index);
+  mod_enum getPlainModEnum(uint8_t index);
+  mod_enum getWordModEnum(uint8_t index);
+  mod_enum getAnagramModEnum(uint8_t index);
+  mod_type getModType(mod_enum modifier);
 
-  const bool contains(const mod_enum* mod_array,
-                      const uint8_t len,
-                      const mod_enum modifier);
-  const mod_enum getNospaceEnum();
-  const mod_enum getCapitalEnum();
-  const mod_enum getDoubleEnum();
-  const mod_enum getModShortenEnum();
-
+  mod_enum getNospaceEnum();
+  mod_enum getCapitalEnum();
+  mod_enum getDoubleEnum();
+  mod_enum getModShortenEnum();
 }
 
 #endif

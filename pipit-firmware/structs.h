@@ -10,8 +10,12 @@ struct LookupKmapTypeLenAnagram {
   const uint8_t* chords;
   const uint8_t* sequences;
 
-  uint16_t  seq_bit_len() const ;
-  uint8_t  anagram() const;
+  uint16_t seq_bit_length() const;
+  uint8_t anagram() const;
+  const uint8_t* chord(uint16_t chord_num, uint8_t num_bytes_in_chord) const;
+  uint32_t sequence_code_bits(uint16_t seq_num,
+                              uint32_t code_bit_offset,
+                              uint8_t code_bit_length) const;
 };
 
 struct LookupKmapType {
@@ -22,7 +26,6 @@ struct LookupKmapType {
 
 struct KmapStruct {
   const LookupKmapType** lookups_for_kmap;
-  // const uint32_t length; // not needed, only indexing by seq_type_enum
 };
 
 struct ModeStruct {
