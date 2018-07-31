@@ -151,6 +151,7 @@ extern const uint8_t battery_level_pin;
 #define NUM_BYTES_IN_CHORD 3
 #define BLANK_KEY 0
 #define NUM_HUFFMAN_CODES 98
+#define MIN_HUFFMAN_CODE_BIT_LEN 3
 extern const HuffmanChar huffman_lookup[];
 enum mod_enum : uint8_t {
   MOD_ALT_ENUM = 0,
