@@ -241,7 +241,7 @@ fn format_include_guard(
         c: format!("#include \"{}\"\n", header_name).to_c(),
     };
     f += contents.format()?;
-    f += CFiles::with_h(&format!("#endif // {}", id));
+    f += CFiles::with_h(&format!("#endif // {}\n", id));
     Ok(f)
 }
 
