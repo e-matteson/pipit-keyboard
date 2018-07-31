@@ -84,8 +84,7 @@ impl Checker {
                     .iter()
                     .filter(|&(_chord, set)| {
                         set.is_invalid(&self.word_mod_names)
-                    })
-                    .map(|(_chord, set)| set),
+                    }).map(|(_chord, set)| set),
             );
         }
     }
@@ -93,7 +92,8 @@ impl Checker {
     /// Compare the stored chords and sequences (and word mods), and print
     /// any names that don't appear in both.
     fn check_unused(&self) {
-        let seqs_and_mods: HashSet<_> = self.seq_names
+        let seqs_and_mods: HashSet<_> = self
+            .seq_names
             .union(&self.word_mod_names)
             .cloned()
             .collect();

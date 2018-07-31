@@ -14,8 +14,18 @@ pub struct Word {
     pub chord: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Copy, Eq, PartialEq, Ord,
-         PartialOrd, Hash)]
+#[derive(
+    Deserialize,
+    Serialize,
+    Debug,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+)]
 #[serde(deny_unknown_fields)]
 pub struct AnagramNum(u8);
 

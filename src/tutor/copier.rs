@@ -61,7 +61,8 @@ impl Copier {
             return Ok(None);
         }
 
-        let next_letter = self.expected_next()
+        let next_letter = self
+            .expected_next()
             .expect("failed to get next char, did we check for end of line?");
 
         let letter_hint = if self.needs_hint(&next_letter) {
@@ -165,7 +166,8 @@ impl Copier {
             - self.extra_spaces()) as f64;
 
         // this will ignore anything typed past the end of the line
-        let wrong_chars: f64 = self.line
+        let wrong_chars: f64 = self
+            .line
             .actual
             .graphemes(true)
             .zip(self.line.expected.graphemes(true))
@@ -177,7 +179,8 @@ impl Copier {
     }
 
     fn actual_at_offset(&self, offset: usize) -> Result<String, Error> {
-        Ok(self.char_at_offset(&self.line.actual, offset)
+        Ok(self
+            .char_at_offset(&self.line.actual, offset)
             .ok_or_else(|| BadValueErr {
                 thing: "character offset".into(),
                 value: offset.to_string(),

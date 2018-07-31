@@ -20,9 +20,9 @@ fn actual_dir() -> PathBuf {
 
 #[test]
 fn big_settings_output() {
-    let all_data = AllData::load(&PathBuf::from(
-        "tests/settings/big-test.yaml",
-    )).expect("failed to load");
+    let all_data =
+        AllData::load(&PathBuf::from("tests/settings/big-test.yaml"))
+            .expect("failed to load");
 
     let name_base = "auto_config-big_test";
     all_data
@@ -71,7 +71,7 @@ fn assert_files_eq(left_file: &PathBuf, right_file: &PathBuf) {
 
 fn read(path: &PathBuf) -> Result<String, Error> {
     let mut reader = BufReader::new(
-        File::open(path).context(format!("failed to open: {:?}", path))?
+        File::open(path).context(format!("failed to open: {:?}", path))?,
     );
     let mut string = String::new();
     reader.read_to_string(&mut string)?;

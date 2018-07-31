@@ -27,7 +27,8 @@ impl KmapPath {
         &self,
         format: &KmapFormat,
     ) -> Result<BTreeMap<Name, Chord>, Error> {
-        let lines = self.load_lines()?.into_iter()
+        let lines =
+            self.load_lines()?.into_iter()
             .enumerate()                    // track line numbers
             .map(|(i, l)|                   // trim whitespace
                  (i, l.trim().to_owned()))
@@ -116,7 +117,8 @@ impl Section {
             line.retain(|c| !char::is_whitespace(c));
 
             // Convert from characters to bools, meaning pressed or unpressed.
-            let switch_line = line.chars()
+            let switch_line = line
+                .chars()
                 .map(|c| self.char_to_switch(c, i + 1))
                 .collect::<Result<Vec<_>, Error>>()?;
 
@@ -174,12 +176,12 @@ impl Section {
         } else if c == UNPRESSED_CHAR {
             Ok(false)
         } else {
-            Err(self.error_at(line_index)
+            Err(self
+                .error_at(line_index)
                 .context(format!(
                     "Expected '{}', '{}', or whitespace. Found '{}'",
                     UNPRESSED_CHAR, PRESSED_CHAR, c
-                ))
-                .into())
+                )).into())
         }
     }
 }

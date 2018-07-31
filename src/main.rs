@@ -41,7 +41,8 @@ fn run() -> Result<(), Error> {
     println!("");
     let opt = Opt::from_args();
 
-    let settings_path = opt.settings
+    let settings_path = opt
+        .settings
         .unwrap_or_else(|| PathBuf::from("settings/settings.yaml"));
 
     let all_data = AllData::load(&settings_path)?;

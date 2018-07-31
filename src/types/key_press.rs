@@ -250,9 +250,7 @@ impl KeyPress {
             Ok(Err(BadValueErr {
                 value: "(empty)".into(),
                 thing: "KeyPress".into(),
-            }).context(
-                "KeyPress must contain at least one key or modifier",
-            )?)
+            }).context("KeyPress must contain at least one key or modifier")?)
         } else {
             Ok(())
         }
@@ -336,8 +334,7 @@ impl KeyDefs {
                     keypress
                 ),
                 container: "key definition table".into(),
-            })?
-            .spelling
+            })?.spelling
             .clone())
     }
 

@@ -175,7 +175,8 @@ impl AllData {
         // The best way to be sure we're calculating num_bytes_in_chord
         // correctly is to just create a chord, turn it to bytes like we will
         // during rendering, and check how many bytes are in it.
-        Ok(self.chord_spec
+        Ok(self
+            .chord_spec
             .to_bytes(&self.chord_spec.new_chord())?
             .len())
     }
@@ -279,26 +280,29 @@ impl AllData {
     }
 
     fn name_from_spelling(&self, spelling: &Spelling) -> Result<Name, Error> {
-        Ok(self.spellings
+        Ok(self
+            .spellings
             .get(spelling)
             .ok_or_else(|| LookupErr {
                 key: format!("name for '{}'", spelling),
                 container: "spelling table".into(),
-            })?
-            .to_owned())
+            })?.to_owned())
     }
 
     pub fn make_spelling_table(&mut self) -> Result<(), Error> {
         let mut map = BTreeMap::new();
         {
-            let plain_names = self.sequences
+            let plain_names = self
+                .sequences
                 .get_seq_map(SeqType::Plain)?
                 .names()
                 .chain(self.plain_mods.iter());
 
             for name in plain_names {
-                let keypress =
-                    self.sequences.get_seq_of_any_type(name)?.lone_keypress()?;
+                let keypress = self
+                    .sequences
+                    .get_seq_of_any_type(name)?
+                    .lone_keypress()?;
                 if let Some(spelling) =
                     KeyDefs::spelling_from_keypress(&keypress)?
                 {
@@ -326,7 +330,8 @@ impl AllChordMaps {
         kmap: &KmapPath,
     ) -> Result<Chord, Error> {
         // TODO be consistent about argument order
-        Ok(self.get_kmap(kmap)?
+        Ok(self
+            .get_kmap(kmap)?
             .get(chord_name)
             .and_then(|x| Some(x.clone()))
             .ok_or_else(|| LookupErr {
@@ -380,8 +385,7 @@ impl AllChordMaps {
                     thing: "kmap".into(),
                     value: kmap.to_owned().into(),
                 }.context("tried to add chord to uninitialized kmap")
-            })?
-            .insert(name, chord)?;
+            })?.insert(name, chord)?;
 
         if anagram_num > self.max_anagram_num {
             self.max_anagram_num = anagram_num;
@@ -426,7 +430,8 @@ impl AllSeqMaps {
         name: &Name,
         seq_type: SeqType,
     ) -> Result<&Sequence, Error> {
-        Ok(self.get_seq_map(seq_type)?
+        Ok(self
+            .get_seq_map(seq_type)?
             .get(name)
             .ok_or_else(|| LookupErr {
                 key: name.into(),
@@ -435,7 +440,8 @@ impl AllSeqMaps {
     }
 
     pub fn get_seq_of_any_type(&self, name: &Name) -> Result<&Sequence, Error> {
-        let hits: Vec<&Sequence> = self.maps
+        let hits: Vec<&Sequence> = self
+            .maps
             .values()
             .filter_map(|seq_map| seq_map.get(name))
             .collect();

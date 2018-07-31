@@ -56,8 +56,9 @@ impl<'a> KmapBuilder<'a> {
         let mut seq_type_names = Vec::new();
 
         for &seq_type in self.seq_maps.seq_types() {
-            let grouped_names =
-                self.group_names(seq_type).context("failed to group names")?;
+            let grouped_names = self
+                .group_names(seq_type)
+                .context("failed to group names")?;
 
             let (tree, struct_names) =
                 self.make_lookups_of_length(seq_type, &grouped_names)?;
@@ -149,10 +150,10 @@ impl<'a> KmapBuilder<'a> {
                 names
                     .iter()
                     .map(|name| {
-                        Ok(self.chord_spec
+                        Ok(self
+                            .chord_spec
                             .to_c_bytes(self.chord_map.get_result(name)?)?)
-                    })
-                    .collect::<Result<Vec<_>, Error>>()?
+                    }).collect::<Result<Vec<_>, Error>>()?
                     .into_iter(),
             ).collect();
 
@@ -205,7 +206,8 @@ impl<'a> KmapBuilder<'a> {
 
         for &name in names_in_kmap.intersection(&names_of_type) {
             let info = LenAndAnagram {
-                length: self.seq_maps
+                length: self
+                    .seq_maps
                     .get(name, seq_type)?
                     .formatted_length_in_bits(&self.huffman_table)?,
                 anagram: self.chord_map.get(name).unwrap().anagram_num,

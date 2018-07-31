@@ -86,9 +86,10 @@ impl AllData {
         let kmaps: Vec<_> = self.chords.kmap_paths().cloned().collect();
 
         for kmap in kmaps {
-            let named_chords = kmap.read(&options.kmap_format).with_context(
-                |_| format!("Failed to load kmap file: '{}'", kmap),
-            )?;
+            let named_chords =
+                kmap.read(&options.kmap_format).with_context(|_| {
+                    format!("Failed to load kmap file: '{}'", kmap)
+                })?;
 
             self.chords.insert_map(named_chords, &kmap)?;
         }
@@ -96,13 +97,15 @@ impl AllData {
     }
 
     fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self.sequences
+        Ok(self
+            .sequences
             .insert_map(settings.macros.clone(), SeqType::Macro)
             .context("Failed to load macros")?)
     }
 
     fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self.sequences
+        Ok(self
+            .sequences
             .insert_map(settings.plain_keys.clone(), SeqType::Plain)
             .context("Failed to load plain keys")?)
     }

@@ -24,7 +24,9 @@ pub struct ChordSpec {
 /// chords, the anagram number will be stored separately, instead of literally
 /// including the anagram modifier's switches in the word chord.
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[derive(
+    Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 pub struct Chord {
     /// Invariant: the length of this vec must always equal
     /// ChordSpec::num_switches.
@@ -53,7 +55,8 @@ impl ChordSpec {
     /// Convert the chord into CCode strings containing the byte representation
     /// used in the firmware.
     pub fn to_c_bytes(&self, chord: &Chord) -> Result<Vec<CCode>, Error> {
-        Ok(self.to_bytes(chord)?
+        Ok(self
+            .to_bytes(chord)?
             .into_iter()
             .map(|x| x.to_c())
             .collect())
@@ -124,7 +127,8 @@ impl Chord {
 
     /// Meant only for human-friendly debug printing
     fn bit_string(&self) -> String {
-        let tmp: Vec<_> = self.switches
+        let tmp: Vec<_> = self
+            .switches
             .iter()
             .map(|&b| if b { "1" } else { "0" })
             .collect();

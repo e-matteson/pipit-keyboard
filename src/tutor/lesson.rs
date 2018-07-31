@@ -74,7 +74,8 @@ impl Lesson {
     }
 
     fn update_chord(&mut self, status: PrevCharStatus) -> Result<(), Error> {
-        let next_char = self.copier.next_hint().context("failed to get hint")?;
+        let next_char =
+            self.copier.next_hint().context("failed to get hint")?;
         self.graphic.update(next_char, status);
         Ok(())
     }
@@ -143,10 +144,12 @@ impl Lesson {
     }
 
     fn minutes(&self) -> f64 {
-        let mins = (self.start_time
+        let mins = (self
+            .start_time
             .expect("timer was not started")
             .elapsed()
-            .as_secs() as f64) / 60.;
+            .as_secs() as f64)
+            / 60.;
         mins
     }
 

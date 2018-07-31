@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use types::{
     CCode, CTree, Chord, ChordSpec, Field, KmapPath, ModeInfo, ModeName, ToC,
 };
+
 use util::usize_to_u8;
 
 pub struct ModeBuilder<'a> {
@@ -55,7 +56,8 @@ impl<'a> ModeBuilder<'a> {
 
         let array_name = format!("{}_kmaps_array", self.mode_name).to_c();
 
-        let contents: Vec<_> = self.info
+        let contents: Vec<_> = self
+            .info
             .keymaps
             .iter()
             .map(|info| {
@@ -63,8 +65,7 @@ impl<'a> ModeBuilder<'a> {
                     .get(&info.file)
                     .expect("no struct name was found for kmap")
                     .to_owned()
-            })
-            .collect();
+            }).collect();
 
         g.push(CTree::Array {
             name: array_name.clone(),

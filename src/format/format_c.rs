@@ -395,8 +395,7 @@ fn make_guard_id(h_file_name: &str) -> Result<CCode, Error> {
         .file_name()
         .ok_or_else(|| {
             header_error().context("unable to extract file name from path")
-        })?
-        .to_str()
+        })?.to_str()
         .expect("failed to get file name as str?")
         .to_string()
         .to_uppercase()

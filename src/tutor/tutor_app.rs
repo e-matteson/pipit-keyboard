@@ -57,16 +57,14 @@ impl TutorApp {
                     .with_all_str(State::mode_string_list())
                     .selected(State::current_mode_index())
                     .on_submit(|_siv, mode| State::set_mode(mode)),
-            )
-            .child(
+            ).child(
                 "Hint difficulty:",
                 SliderView::new(Orientation::Horizontal, max)
                     .value(max - initial)
                     .on_change(move |_siv, value| {
                         State::set_initial_learn_state(max - value)
                     }),
-            )
-            .child(
+            ).child(
                 "Allow mistakes:",
                 check_box
                     .on_change(|_siv, value| State::set_allow_mistakes(value)),

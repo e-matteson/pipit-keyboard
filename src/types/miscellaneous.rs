@@ -57,13 +57,16 @@ pub struct ModeInfo {
 #[serde(deny_unknown_fields)]
 pub struct KmapPath(pub String);
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize,
-         Serialize)]
+#[derive(
+    Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
+)]
 #[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 pub struct ModeName(pub String);
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize)]
+#[derive(
+    Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
+)]
 #[serde(deny_unknown_fields)]
 #[serde(from = "String")]
 // #[serde(finalize = "Name::sanitize")]

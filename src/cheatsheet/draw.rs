@@ -276,11 +276,10 @@ impl Wedge {
     }
 
     fn arc_end(&self) -> P2 {
-        self.tip_pos
-            + polar_vec(
-                self.radius,
-                self.rotation_radians() + self.width_radians(),
-            ).reflect_xy()
+        self.tip_pos + polar_vec(
+            self.radius,
+            self.rotation_radians() + self.width_radians(),
+        ).reflect_xy()
     }
 
     fn rotation_radians(&self) -> f64 {
@@ -313,16 +312,14 @@ impl Wedge {
                     sweep_flag: false,
                     end: self.arc_end(),
                 }.finalize(),
-            )
-            .close()
+            ).close()
     }
 
     pub fn label_pos(&self) -> P2 {
-        self.tip_pos
-            + polar_vec(
-                self.radius / 3.,
-                self.rotation_radians() + self.width_radians() / 2.,
-            ).reflect_xy()
+        self.tip_pos + polar_vec(
+            self.radius / 3.,
+            self.rotation_radians() + self.width_radians() / 2.,
+        ).reflect_xy()
     }
 }
 

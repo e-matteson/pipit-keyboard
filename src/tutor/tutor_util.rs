@@ -37,7 +37,8 @@ pub fn load_lessons(
 }
 
 fn lesson_path_to_name(path: &PathBuf) -> String {
-    let s = path.file_stem()
+    let s = path
+        .file_stem()
         .expect("invalid lesson file name")
         .to_str()
         .expect("lesson path is not valid unicode");

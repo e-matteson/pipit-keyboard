@@ -45,7 +45,8 @@ impl AllData {
         let c_tree = self.render(file_name_base, with_message)?;
         let f = c_tree.format()?;
 
-        let file_names = f.save(&self.output_directory, file_name_base)?
+        let file_names = f
+            .save(&self.output_directory, file_name_base)?
             .iter()
             .map(|path| format!("{:?}", path))
             .collect::<Vec<_>>()
@@ -244,16 +245,17 @@ impl AllData {
         self.plain_mods
             .iter()
             .map(|name| {
-                Ok(self.sequences
+                Ok(self
+                    .sequences
                     .get_seq_of_any_type(name)?
                     .lone_keypress()?
                     .format_mods())
-            })
-            .collect()
+            }).collect()
     }
 
     fn render_command_enum(&self) -> Result<CTree, Error> {
-        let command_list: Vec<_> = self.sequences
+        let command_list: Vec<_> = self
+            .sequences
             .get_seq_map(SeqType::Command)?
             .names()
             .map(|x: &Name| x.to_owned().to_c().to_uppercase())
@@ -267,7 +269,8 @@ impl AllData {
     }
 
     fn render_seq_type_enum(&self) -> CTree {
-        let variant_names: Vec<_> = self.sequences
+        let variant_names: Vec<_> = self
+            .sequences
             .seq_types()
             .map(|s| s.to_c().to_uppercase())
             .collect();
@@ -308,7 +311,7 @@ impl HuffmanTable {
                 key_code: KeyPress::truncate(key),
                 is_mod: entry.is_mod,
             }.render(CCode::new())
-                .initializer();
+            .initializer();
 
             initializers.push(init);
         }
@@ -479,8 +482,7 @@ fn render_keycode_definitions() -> CTree {
             .map(|(&name, &value)| CTree::Define {
                 name: name.to_owned(),
                 value: value.to_c(),
-            })
-            .collect(),
+            }).collect(),
     );
 
     CTree::Ifndef {

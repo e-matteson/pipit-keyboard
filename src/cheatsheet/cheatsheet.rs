@@ -95,9 +95,10 @@ impl CheatSheet {
         let file = read_file(path).with_context(|_| {
             format!("failed to read cheatsheet config file: {:?}", path)
         })?;
-        let spec: CheatSheetSpec = serde_yaml::from_str(&file).with_context(
-            |_| format!("failed to parse cheatsheet config file: {:?}", path),
-        )?;
+        let spec: CheatSheetSpec =
+            serde_yaml::from_str(&file).with_context(|_| {
+                format!("failed to parse cheatsheet config file: {:?}", path)
+            })?;
         CheatSheet::new(spec, data, CheatSheet::config_path_to_svg_path(path)?)
     }
 
@@ -119,8 +120,7 @@ impl CheatSheet {
             .map(|c| {
                 let c = c as f64;
                 P2::new((c + 1.) * x_padding + c * Keyboard::width(), y_padding)
-            })
-            .collect();
+            }).collect();
 
         let height = V2::new(0., Keyboard::height() + y_padding);
 
@@ -206,7 +206,8 @@ impl CheatSheet {
         // yet, and it doesn't know to stop borrowing `path` after creating
         // `path_str`.
         {
-            let path_str = path.to_str()
+            let path_str = path
+                .to_str()
                 .to_owned()
                 .ok_or_else(|| format_err!("Invalid path: {:?}", path))?;
 
@@ -254,8 +255,7 @@ impl Keyboard {
                     key: name.into(),
                     container: "tutor data chords".into(),
                 })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+            }).collect::<Result<Vec<_>, _>>()?;
 
         let symbols: Result<Vec<_>, Error> =
             chord_names.iter().map(|name| get_symbol(name)).collect();
@@ -760,6 +760,5 @@ fn get_symbol(name: &Name) -> Result<Symbol, Error> {
         .ok_or_else(|| MissingErr {
             missing: name.into(),
             container: "cheatsheet symbol lookup".into(),
-        })?
-        .to_owned())
+        })?.to_owned())
 }

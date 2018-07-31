@@ -4,8 +4,9 @@ use std::ops::AddAssign;
 
 use types::{AnagramNum, ModeName, Name, SeqType};
 
-#[derive(Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd,
-         Deserialize)]
+#[derive(
+    Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize,
+)]
 #[serde(deny_unknown_fields)]
 pub struct CCode(pub String);
 

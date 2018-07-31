@@ -153,7 +153,8 @@ impl OptionsConfig {
             },
             CTree::CompoundArray {
                 name: "row_pins".to_c(),
-                values: self.row_pins
+                values: self
+                    .row_pins
                     .iter()
                     .map(|hand| Pin::to_c_vec(hand))
                     .collect(),
@@ -162,7 +163,8 @@ impl OptionsConfig {
             },
             CTree::CompoundArray {
                 name: "column_pins".to_c(),
-                values: self.column_pins
+                values: self
+                    .column_pins
                     .iter()
                     .map(|hand| Pin::to_c_vec(hand))
                     .collect(),
@@ -253,7 +255,8 @@ impl OptionsConfig {
     }
 
     fn num_columns(&self) -> Result<usize, Error> {
-        let len = self.column_pins
+        let len = self
+            .column_pins
             .get(0)
             .expect("column_pins was empty")
             .len();

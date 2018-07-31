@@ -19,7 +19,11 @@ pub struct LookupErr {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "Conflict: '{}' already exists in '{}'", key, container)]
+#[fail(
+    display = "Conflict: '{}' already exists in '{}'",
+    key,
+    container
+)]
 pub struct ConflictErr {
     pub key: String,
     pub container: String,
