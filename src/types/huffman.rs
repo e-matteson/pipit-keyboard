@@ -40,7 +40,7 @@ impl HuffmanEntry {
 }
 
 impl HuffmanTable {
-    pub fn new(keys: Vec<KeyPress>) -> Result<HuffmanTable, Error> {
+    pub fn new(keys: Vec<KeyPress>) -> Result<Self, Error> {
         assert!(!keys.is_empty());
         let counts = count(keys);
         let tree = make_tree(counts).expect("failed to make huffman tree");
@@ -93,7 +93,7 @@ impl PartialOrd for HuffmanNode {
 }
 
 impl HuffmanEntry {
-    fn new(bits: Vec<bool>, is_mod: bool) -> Result<HuffmanEntry, Error> {
+    fn new(bits: Vec<bool>, is_mod: bool) -> Result<Self, Error> {
         // When each huffman code is stored as a uint32_t, this check will
         // matter
         const MAX_LEN: usize = 32;
@@ -107,10 +107,7 @@ impl HuffmanEntry {
                 max: MAX_LEN,
             })?;
         }
-        Ok(HuffmanEntry {
-            bits: bits,
-            is_mod: is_mod,
-        })
+        Ok(Self { bits, is_mod })
     }
 }
 
@@ -149,11 +146,7 @@ fn make_codes(
 fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
     let mut queue = BinaryHeap::new();
     for (key, (count, is_mod)) in counts {
-        queue.push(HuffmanNode::Leaf {
-            key: key,
-            is_mod: is_mod,
-            count: count,
-        });
+        queue.push(HuffmanNode::Leaf { key, is_mod, count });
     }
     while queue.len() >= 2 {
         let left = queue.pop().unwrap();

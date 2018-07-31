@@ -33,8 +33,8 @@ pub struct Saveable {
 pub struct LearnState(pub usize);
 
 impl State {
-    fn new() -> State {
-        State {
+    fn new() -> Self {
+        Self {
             tutor_data: None,
             learning_map: HashMap::new(),
             save_path: PathBuf::from("settings/tutor/saved_options.yaml"),
@@ -47,7 +47,7 @@ impl State {
     }
 
     pub fn load() -> Result<(), Error> {
-        let path = State::save_path();
+        let path = Self::save_path();
         let saveable = read_state_file(&path)?;
         saveable.validate()?;
         STATE.lock().unwrap().saveable = saveable;
@@ -90,19 +90,19 @@ impl State {
         }
     }
 
-    pub fn chord_from_spelling(spelling: &Spelling) -> Option<Chord> {
-        let name = State::name(&spelling)?;
-        let mut chord = State::chord(&name)?;
+    pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord> {
+        let name = Self::name(spelling)?;
+        let mut chord = Self::chord(&name)?;
         if spelling.is_uppercase() {
-            chord.intersect_mut(&State::chord(&Name("mod_shift".into()))?)
+            chord.intersect_mut(&Self::chord(&Name("mod_shift".into()))?)
         }
         Some(chord)
     }
 
-    fn name(spelling: &Spelling) -> Option<Name> {
+    fn name(spelling: Spelling) -> Option<Name> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.spellings.get(spelling).map(|name| name.clone())
+            data.spellings.get(&spelling).cloned()
         } else {
             panic!("tutor data was not set")
         }
@@ -145,7 +145,7 @@ impl State {
 
     pub fn set_initial_learn_state(initial: usize) {
         let mut state = STATE.lock().unwrap();
-        for (_, learn_state) in state.learning_map.iter_mut() {
+        for learn_state in state.learning_map.values_mut() {
             learn_state.reset(initial);
         }
         state.saveable.initial_learn_state = initial;
@@ -164,19 +164,19 @@ impl State {
     }
 
     pub fn mode_string_list() -> Vec<String> {
-        State::mode_list()
+        Self::mode_list()
             .into_iter()
             .map(|mode| mode.0.clone())
             .collect()
     }
 
     fn mode_index(mode: &ModeName) -> Option<usize> {
-        State::mode_list().into_iter().position(|m| &m == mode)
+        Self::mode_list().into_iter().position(|m| &m == mode)
     }
 
     pub fn current_mode_index() -> usize {
         let mode = STATE.lock().unwrap().saveable.mode.clone();
-        State::mode_index(&mode).expect("current mode not found in list")
+        Self::mode_index(&mode).expect("current mode not found in list")
     }
 
     pub fn set_mode(mode_str: &str) {
@@ -195,7 +195,7 @@ impl State {
         // Reset the learning state for each letter, since the chords could be
         // totally different now.
         let initial = state.saveable.initial_learn_state;
-        for (_, learn_state) in state.learning_map.iter_mut() {
+        for learn_state in state.learning_map.values_mut() {
             learn_state.reset(initial);
         }
         // ignore any errors while saving
@@ -205,7 +205,7 @@ impl State {
 impl Saveable {
     pub fn validate(&self) -> Result<(), Error> {
         State::mode_index(&self.mode)
-            .ok_or(format_err!("Unknown ModeName: {}", &self.mode))?;
+            .ok_or_else(|| format_err!("Unknown ModeName: {}", &self.mode))?;
         Ok(())
     }
 }

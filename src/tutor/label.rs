@@ -21,16 +21,16 @@ pub enum PrevCharStatus {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl LabeledChord {
-    pub fn from_letter(letter: &str) -> Option<LabeledChord> {
+    pub fn from_letter(letter: &str) -> Option<Self> {
         let spelling = Spelling::new(letter).ok()?;
-        Some(LabeledChord {
-            chord: State::chord_from_spelling(&spelling)?,
+        Some(Self {
+            chord: State::chord_from_spelling(spelling)?,
             label: Label::from_char(&letter),
         })
     }
 
-    fn backspace() -> Option<LabeledChord> {
-        Some(LabeledChord {
+    fn backspace() -> Option<Self> {
+        Some(Self {
             chord: backspace_chord()?,
             label: "bak".into(),
         })
@@ -39,13 +39,13 @@ impl LabeledChord {
 
 impl PrevCharStatus {
     pub fn backspace(&self) -> Option<LabeledChord> {
-        if !State::allow_mistakes() {
-            None
-        } else {
+        if State::allow_mistakes() {
             match self {
                 PrevCharStatus::Correct => None,
                 PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
             }
+        } else {
+            None
         }
     }
 
@@ -65,7 +65,7 @@ impl PrevCharStatus {
 }
 
 impl Label {
-    pub fn from_char(character: &str) -> Label {
+    pub fn from_char(character: &str) -> Self {
         match character {
             "\n" => "ret".into(), // "⏎"
             "\t" => "tab".into(),
@@ -85,7 +85,7 @@ impl Label {
 }
 
 impl Default for Label {
-    fn default() -> Label {
+    fn default() -> Self {
         Label(String::new())
     }
 }

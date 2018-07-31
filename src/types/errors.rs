@@ -70,15 +70,15 @@ pub fn pretty_unwrap<T>(result: Result<T, Error>) -> T
 where
     T: Sized,
 {
-    result.unwrap_or_else(|e| print_and_panic(e))
+    result.unwrap_or_else(|e| print_and_panic(&e))
 }
 
-pub fn print_and_panic(e: Error) -> ! {
+pub fn print_and_panic(e: &Error) -> ! {
     print_error(e);
     panic!("returned error")
 }
 
-pub fn print_error(e: Error) {
+pub fn print_error(e: &Error) {
     let mut causes = e.causes();
     if let Some(first) = causes.next() {
         println!("error: {}", first);

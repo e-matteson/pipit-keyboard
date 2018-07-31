@@ -69,7 +69,7 @@ fn run() -> Result<(), Error> {
 fn main() {
     // PROFILER.lock().unwrap().start("./my-prof.profile").unwrap();
     if let Err(error) = run() {
-        print_error(error);
+        print_error(&error);
         ::std::process::exit(1);
     } else {
         println!("Done.");

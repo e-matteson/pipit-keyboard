@@ -24,7 +24,7 @@ impl TutorApp {
         siv.load_theme_file("settings/tutor/color_theme.toml")
             .expect("failed to load theme");
 
-        TutorApp::show_main_menu(&mut siv);
+        Self::show_main_menu(&mut siv);
         siv.run();
     }
 
@@ -34,8 +34,8 @@ impl TutorApp {
             .h_align(HAlign::Left)
             .with_all_str(items)
             .on_submit(move |siv, item| match item {
-                "Lessons" => TutorApp::show_lesson_menu(siv),
-                "Options" => TutorApp::show_option_menu(siv),
+                "Lessons" => Self::show_lesson_menu(siv),
+                "Options" => Self::show_option_menu(siv),
                 "Quit" => siv.quit(),
                 _ => panic!("unknown menu item"),
             });
@@ -86,7 +86,7 @@ impl TutorApp {
         select.add_all_str(names);
         select.set_on_submit(move |siv, name| {
             let lesson = lessons.get(name).cloned().expect("lesson not found");
-            TutorApp::show_lesson(siv, name, lesson)
+            Self::show_lesson(siv, name, lesson)
         });
 
         siv.add_layer(
@@ -103,7 +103,7 @@ impl TutorApp {
     ) {
         let lesson = match Lesson::new(lesson_config) {
             Ok(lesson) => lesson,
-            Err(error) => print_and_panic(error),
+            Err(error) => print_and_panic(&error),
         };
         let popup = lesson.popup.clone();
         siv.add_layer(lesson);

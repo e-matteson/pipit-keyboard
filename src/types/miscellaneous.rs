@@ -72,7 +72,7 @@ pub struct ModeName(pub String);
 // #[serde(finalize = "Name::sanitize")]
 pub struct Name(pub String);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Sequence(pub Vec<KeyPress>);
 
 #[derive(Debug, Clone)]
@@ -90,17 +90,15 @@ pub struct TutorData {
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
 /// How a key would be represented in text. The Spelling for `key_a` would be
-/// "a", and for `
+/// "a".
+/// TODO this can't be a single char once we do internationalization, it might
+/// be unicode. Wait, some spellings are already unicode! why does that work?
 pub struct Spelling(pub char);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Pin {
-    pub fn to_usize(pin_vec: &[Pin]) -> Vec<usize> {
-        pin_vec.iter().map(|pin| usize::from(*pin)).collect()
-    }
-
-    pub fn to_c_vec(pin_vec: &[Pin]) -> Vec<CCode> {
+    pub fn c_vec(pin_vec: &[Self]) -> Vec<CCode> {
         pin_vec.iter().map(|pin| pin.to_c()).collect()
     }
 }
@@ -144,12 +142,12 @@ impl ToC for Pin {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl SwitchPos {
-    pub fn new(row: Pin, col: Pin) -> SwitchPos {
-        SwitchPos {
+    pub fn new(row: Pin, col: Pin) -> Self {
+        Self {
             // row: row as usize,
             // col: col as usize,
-            row: row,
-            col: col,
+            row,
+            col,
         }
     }
 }
@@ -173,8 +171,8 @@ impl fmt::Display for SwitchPos {
 impl KmapFormat {
     pub fn num_switches(&self) -> usize {
         let mut count = 0;
-        for row in self.0.iter() {
-            for _ in row.iter() {
+        for row in &self.0 {
+            for _ in row {
                 count += 1;
             }
         }
@@ -185,7 +183,7 @@ impl KmapFormat {
     /// need to be converted to firmware order later.
     pub fn kmap_order(&self) -> Vec<SwitchPos> {
         let mut flat: Vec<SwitchPos> = Vec::new();
-        for row in self.0.iter() {
+        for row in &self.0 {
             flat.extend_from_slice(row);
         }
         flat
@@ -203,7 +201,7 @@ impl KmapFormat {
 
 impl Validate for KmapFormat {
     fn validate(&self) -> Result<(), Error> {
-        for row in self.0.iter() {
+        for row in &self.0 {
             for switch_pos in row.iter() {
                 switch_pos.validate()?;
             }
@@ -304,13 +302,13 @@ impl fmt::Display for ModeName {
 }
 
 impl<'a> From<&'a str> for ModeName {
-    fn from(s: &str) -> ModeName {
+    fn from(s: &str) -> Self {
         ModeName(s.to_owned())
     }
 }
 
 impl From<String> for ModeName {
-    fn from(s: String) -> ModeName {
+    fn from(s: String) -> Self {
         ModeName(s)
     }
 }
@@ -327,7 +325,7 @@ impl ModeName {
 
 // TODO: sanitize name?
 impl Name {
-    pub fn to_uppercase(&self) -> Name {
+    pub fn to_uppercase(&self) -> Self {
         // TODO remove?
         Name(self.0.to_uppercase())
     }
@@ -379,7 +377,7 @@ impl fmt::Debug for Name {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Spelling {
-    pub fn new(s: &str) -> Result<Spelling, Error> {
+    pub fn new(s: &str) -> Result<Self, Error> {
         let mut chars = s.chars();
         Ok(match (chars.next(), chars.next()) {
             (Some(first), None) => Spelling(first),
@@ -390,11 +388,11 @@ impl Spelling {
         })
     }
 
-    pub fn is_uppercase(&self) -> bool {
+    pub fn is_uppercase(self) -> bool {
         self.0.is_uppercase()
     }
 
-    pub fn to_lowercase(&self) -> Spelling {
+    pub fn to_lowercase(self) -> Self {
         Spelling(
             self.0
                 .to_lowercase()
@@ -413,13 +411,9 @@ impl fmt::Display for Spelling {
 
 ////////////////////////////////////////////////////////////////////////////////
 impl Sequence {
-    pub fn new() -> Sequence {
-        Sequence(Vec::new())
-    }
-
     /// Flatten a list of sequences into a single sequence containing all of
     /// their keypresses.
-    pub fn flatten(seqs: &[&Sequence]) -> Sequence {
+    pub fn flatten(seqs: &[&Self]) -> Self {
         Sequence(
             seqs.into_iter()
                 .flat_map(|seq| seq.keypresses().cloned())
@@ -472,7 +466,7 @@ impl Validate for Sequence {
 
 impl From<KeyPress> for Sequence {
     fn from(single: KeyPress) -> Self {
-        let mut s = Sequence::new();
+        let mut s = Sequence::default();
         s.push(single);
         s
     }
@@ -488,7 +482,7 @@ impl Permutation {
     pub fn from_to<T>(
         old_template: &[T],
         new_template: &[T],
-    ) -> Result<Permutation, PermuteErr>
+    ) -> Result<Self, PermuteErr>
     where
         T: Clone + Eq + ToString + Debug,
     {
@@ -501,8 +495,8 @@ impl Permutation {
             order.push(pos_in_new)
         }
 
-        Ok(Permutation {
-            order: order,
+        Ok(Self {
+            order,
             new_length: new_template.len(),
         })
     }

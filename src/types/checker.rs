@@ -146,7 +146,7 @@ impl Checker {
 }
 
 impl AnagramSet {
-    fn new() -> AnagramSet {
+    fn new() -> Self {
         AnagramSet(HashMap::new())
     }
 
@@ -196,7 +196,7 @@ impl AnagramSet {
 
     fn anagram_to_string(&self, anagram_num: AnagramNum) -> String {
         match self.0.get(&anagram_num) {
-            None => AnagramSet::missing_symbol(),
+            None => Self::missing_symbol(),
             Some(v) => {
                 let strings: Vec<_> = v.iter().map(|x| x.to_string()).collect();
                 if strings.len() == 1 {
@@ -239,24 +239,24 @@ where
     <T as Iterator>::Item: Display,
 {
     let mut iter = iter.peekable();
-    if !iter.peek().is_some() {
+    if iter.peek().is_none() {
         return;
     }
     println!("{}", heading);
     for thing in iter {
         println!("  {}", thing);
     }
-    println!("");
+    println!();
 }
 
-/// Return true if one is a word_mod or anagram_mod, and the other cannot be
+/// Return true if one is a `word_mod` or `anagram_mod`, and the other cannot be
 /// used in a word chord (letters, mostly). This lets us map
-/// word_mods/anagram_mods to chords that do something different when pressed
-/// separately from a word (like mod_shift and mod_capital). It doesn't catch
-/// all bad mappings, though! If a word_mod/anagram_mod shares even a single
-/// switch with a multi-switch letter, that will mess up the word lookup
-/// process. We don't check for that yet, because it's unlikely to happen
-/// accidentally and it's annoying to implement.
+/// `word_mods`/`anagram_mods` to chords that do something different when
+/// pressed separately from a word (like `mod_shift` and `mod_capital`). It
+/// doesn't catch all bad mappings, though! If a `word_mod`/`anagram_mod`
+/// shares even a single switch with a multi-switch letter, that will mess up
+/// the word lookup process. We don't check for that yet, because it's unlikely
+/// to happen accidentally and it's annoying to implement.
 // TODO make sure the above warning is easily findable
 fn is_pair_legal(
     name1: &Name,

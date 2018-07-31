@@ -8,8 +8,8 @@ use types::{AllChordMaps, AllData, AllSeqMaps, SeqType, Validate};
 use util::read_file;
 
 impl AllData {
-    pub fn load(settings_path: &PathBuf) -> Result<AllData, Error> {
-        let data = AllData::load_helper(settings_path).with_context(|_| {
+    pub fn load(settings_path: &PathBuf) -> Result<Self, Error> {
+        let data = Self::load_helper(settings_path).with_context(|_| {
             format!("Failed to load settings from file: '{:?}'", settings_path)
         })?;
         println!("Loaded keyboard settings from: {:?}\n", settings_path);
@@ -17,18 +17,18 @@ impl AllData {
     }
 
     /// Load stuff into AllData
-    fn load_helper(settings_path: &PathBuf) -> Result<AllData, Error> {
+    fn load_helper(settings_path: &PathBuf) -> Result<Self, Error> {
         let settings: Settings =
             serde_yaml::from_str(&read_file(settings_path)?)?;
         settings.validate()?;
 
-        let mut all_data = AllData {
+        let mut all_data = Self {
             chord_spec: settings.options.chord_spec()?,
             output_directory: settings.options.output_directory.clone(),
             options: settings.options.to_vec()?,
 
-            chords: AllChordMaps::new(),
-            sequences: AllSeqMaps::new(),
+            chords: AllChordMaps::default(),
+            sequences: AllSeqMaps::default(),
             word_mods: Vec::new(),
             plain_mods: Vec::new(),
             anagram_mods: Vec::new(),
@@ -97,17 +97,17 @@ impl AllData {
     }
 
     fn load_macros(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self
-            .sequences
+        self.sequences
             .insert_map(settings.macros.clone(), SeqType::Macro)
-            .context("Failed to load macros")?)
+            .context("Failed to load macros")?;
+        Ok(())
     }
 
     fn load_plains(&mut self, settings: &Settings) -> Result<(), Error> {
-        Ok(self
-            .sequences
+        self.sequences
             .insert_map(settings.plain_keys.clone(), SeqType::Plain)
-            .context("Failed to load plain keys")?)
+            .context("Failed to load plain keys")?;
+        Ok(())
     }
 
     fn load_plain_mods(&mut self, settings: &Settings) -> Result<(), Error> {
@@ -144,7 +144,7 @@ impl AllData {
     fn load_dictionary(&mut self, settings: &Settings) -> Result<(), Error> {
         for kmap in &self.get_kmaps_with_words() {
             for info in &settings.dictionary {
-                self.add_word(info.to_owned(), kmap).with_context(|_| {
+                self.add_word(info, kmap).with_context(|_| {
                     format!("Failed to add word: {}", info.word)
                 })?
             }

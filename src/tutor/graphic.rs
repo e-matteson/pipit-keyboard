@@ -32,16 +32,16 @@ struct Switch {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Graphic {
-    pub fn new() -> Graphic {
+    pub fn new() -> Self {
         let switches: Vec<_> = get_switch_positions()
             .into_iter()
-            .map(|pos| Switch::new(pos))
+            .map(Switch::new)
             .collect();
-        Graphic {
+        Self {
             next: None,
             error: None,
             backspace: None,
-            switches: switches,
+            switches,
         }
     }
 
@@ -56,7 +56,11 @@ impl Graphic {
         Vec2::new(78, 12)
     }
 
-    pub fn update(&mut self, next: Option<LabeledChord>, prev: PrevCharStatus) {
+    pub fn update(
+        &mut self,
+        next: Option<LabeledChord>,
+        prev: &PrevCharStatus,
+    ) {
         self.next = next;
         self.error = prev.error();
         self.backspace = prev.backspace();
@@ -82,7 +86,7 @@ impl Graphic {
     }
 
     fn clear_switches(&mut self) {
-        for switch in self.switches.iter_mut() {
+        for switch in &mut self.switches {
             switch.clear()
         }
     }
@@ -109,12 +113,12 @@ impl View for Graphic {
 }
 
 impl Switch {
-    fn new(position: (usize, usize)) -> Switch {
-        Switch {
+    fn new(position: (usize, usize)) -> Self {
+        Self {
             next: None,
             error: None,
             backspace: None,
-            position: position,
+            position,
         }
     }
 
@@ -155,21 +159,21 @@ impl Switch {
     fn styles(&self) -> (ColorStyle, ColorStyle) {
         match (&self.next, &self.error, &self.backspace) {
             (&Some(_), &None, &None) => {
-                (Switch::next_style(), Switch::next_style())
+                (Self::next_style(), Self::next_style())
             }
             (&None, &Some(_), &None) => {
-                (Switch::error_style(), Switch::error_style())
+                (Self::error_style(), Self::error_style())
             }
             (&None, &None, &Some(_)) => {
-                (Switch::backspace_style(), Switch::backspace_style())
+                (Self::backspace_style(), Self::backspace_style())
             }
             (&Some(_), &Some(_), &None) => {
-                (Switch::next_style(), Switch::error_style())
+                (Self::next_style(), Self::error_style())
             }
             (&Some(_), &None, &Some(_)) => {
-                (Switch::next_style(), Switch::backspace_style())
+                (Self::next_style(), Self::backspace_style())
             }
-            _ => (Switch::default_style(), Switch::default_style()),
+            _ => (Self::default_style(), Self::default_style()),
         }
     }
 

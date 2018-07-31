@@ -68,15 +68,15 @@ impl Chord {
     /// where true means pressed. Invariant: the length of `switches` must match
     /// AllData.chord_spec.num_switches! Unfortunately this method can't check
     /// whether it does.
-    pub fn from_vec(switches: Vec<bool>) -> Result<Chord, Error> {
-        Ok(Chord {
-            switches: switches,
+    pub fn from_vec(switches: Vec<bool>) -> Result<Self, Error> {
+        Ok(Self {
+            switches,
             anagram_num: AnagramNum::default(),
         })
     }
 
-    fn new_with_length(len: usize) -> Chord {
-        Chord {
+    fn new_with_length(len: usize) -> Self {
+        Self {
             switches: vec![false; len],
             anagram_num: AnagramNum::default(),
         }
@@ -93,7 +93,7 @@ impl Chord {
     /// something wrong, and might lose information by discarding the
     /// anagram number. Usually we'll just be intersecting plain_keys
     /// and/or plain_mods.
-    pub fn intersect_mut(&mut self, other: &Chord) {
+    pub fn intersect_mut(&mut self, other: &Self) {
         assert_eq!(self.len(), other.len());
 
         if other.anagram_num != AnagramNum::default() {
@@ -109,8 +109,8 @@ impl Chord {
         }
     }
 
-    pub fn intersect(&self, other: &Chord) -> Chord {
-        let mut new = Chord::new_with_length(self.len());
+    pub fn intersect(&self, other: &Self) -> Self {
+        let mut new = Self::new_with_length(self.len());
         new.intersect_mut(self);
         new.intersect_mut(other);
         new

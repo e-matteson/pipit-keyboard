@@ -88,26 +88,26 @@ pub struct Field {
 }
 
 impl CCode {
-    pub fn new() -> CCode {
+    pub fn new() -> Self {
         CCode(String::new())
     }
 
-    pub fn to_uppercase(&self) -> CCode {
+    pub fn to_uppercase(&self) -> Self {
         CCode(self.0.to_uppercase())
     }
 
-    pub fn join(v: &[CCode], separator: &str) -> CCode {
+    pub fn join(v: &[Self], separator: &str) -> Self {
         CCode(v.join(separator))
     }
 
-    pub fn vec<T>(v: &[T]) -> Vec<CCode>
+    pub fn vec<T>(v: &[T]) -> Vec<Self>
     where
         T: ToC + Clone,
     {
         v.iter().map(|ref item| item.to_c()).collect()
     }
 
-    pub fn map_prepend<T>(prefix: T, v: &[CCode]) -> Vec<CCode>
+    pub fn map_prepend<T>(prefix: T, v: &[Self]) -> Vec<Self>
     where
         T: ToC + Clone,
     {

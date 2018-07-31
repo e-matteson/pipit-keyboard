@@ -29,18 +29,18 @@ pub struct Lesson {
 }
 
 impl Lesson {
-    pub fn new(config: LessonConfig) -> Result<Lesson, Error> {
+    pub fn new(config: LessonConfig) -> Result<Self, Error> {
         let copier = Copier::new(79);
         let slides: Vec<_> = config.slides.into_iter().rev().collect();
-        let mut lesson = Lesson {
+        let mut lesson = Self {
             // reverse slide order so we can pop them off the end of a vec
             total_slides: slides.len(),
-            slides: slides,
+            slides,
             popup: config.popup,
             graphic: Graphic::new(),
             graphic_spacing: 1,
             instruction_spacing: 3,
-            copier: copier,
+            copier,
             start_time: None,
             net_words: 0.,
             instruction: String::new(),
@@ -48,7 +48,7 @@ impl Lesson {
             info_bar_spacing: 1,
         };
         let status = lesson.next_slide().unwrap();
-        lesson.update_chord(status)?;
+        lesson.update_chord(&status)?;
         Ok(lesson)
     }
 
@@ -73,7 +73,7 @@ impl Lesson {
         format!("{}/{}", current_num, self.total_slides)
     }
 
-    fn update_chord(&mut self, status: PrevCharStatus) -> Result<(), Error> {
+    fn update_chord(&mut self, status: &PrevCharStatus) -> Result<(), Error> {
         let next_char =
             self.copier.next_hint().context("failed to get hint")?;
         self.graphic.update(next_char, status);
@@ -83,15 +83,10 @@ impl Lesson {
     fn instruction_size(&self) -> Vec2 {
         let max_width = 80;
         let rows = make_lines(&self.instruction, max_width);
-        if rows.len() > 1 {
-            panic!("instruction is too long!")
-        }
-        if rows.len() == 0 {
-            Vec2::new(0, 1)
-        } else {
-            let row = rows[0];
-            Vec2::new(row.width, 1)
-            // Vec2::new(max_width, 1)
+        match rows.len() {
+            0 => Vec2::new(0, 1),
+            1 => Vec2::new(rows[0].width, 1),
+            _ => panic!("instruction is too long!"),
         }
     }
 
@@ -144,13 +139,12 @@ impl Lesson {
     }
 
     fn minutes(&self) -> f64 {
-        let mins = (self
+        (self
             .start_time
             .expect("timer was not started")
             .elapsed()
             .as_secs() as f64)
-            / 60.;
-        mins
+            / 60.
     }
 
     fn words_per_minute(&self) -> usize {
@@ -255,8 +249,8 @@ impl View for Lesson {
             _ => return EventResult::Ignored,
         };
 
-        if let Err(error) = self.update_chord(status) {
-            print_and_panic(error);
+        if let Err(error) = self.update_chord(&status) {
+            print_and_panic(&error);
         }
 
         EventResult::Consumed(None)

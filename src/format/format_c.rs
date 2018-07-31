@@ -103,45 +103,45 @@ impl CTree {
 }
 
 impl CFiles {
-    pub fn new() -> CFiles {
-        CFiles {
+    pub fn new() -> Self {
+        Self {
             h: CCode::new(),
             c: CCode::new(),
         }
     }
 
-    pub fn with_c<T>(contents: T) -> CFiles
+    pub fn with_c<T>(contents: T) -> Self
     where
         T: ToC,
     {
-        CFiles {
+        Self {
             h: CCode::new(),
             c: contents.to_c(),
         }
     }
 
-    pub fn with_h<T>(contents: T) -> CFiles
+    pub fn with_h<T>(contents: T) -> Self
     where
         T: ToC,
     {
-        CFiles {
+        Self {
             h: contents.to_c(),
             c: CCode::new(),
         }
     }
 
-    pub fn with<T>(contents: T) -> CFiles
+    pub fn with<T>(contents: T) -> Self
     where
         T: ToC,
     {
         let contents = contents.to_c();
-        CFiles {
+        Self {
             h: contents.clone(),
             c: contents,
         }
     }
 
-    pub fn append(&mut self, other: &CFiles) {
+    pub fn append(&mut self, other: &Self) {
         self.h += &other.h;
         self.c += &other.c;
     }
@@ -222,7 +222,7 @@ fn format_include(path: &CCode) -> CFiles {
 
 fn format_ifndef(
     conditional: &CCode,
-    contents: &Box<CTree>,
+    contents: &CTree,
 ) -> Result<CFiles, Error> {
     let mut f = CFiles::new();
     f += CFiles::with_h(&format!("\n#ifndef {}\n", conditional));
@@ -233,7 +233,7 @@ fn format_ifndef(
 
 fn format_include_guard(
     header_name: &str,
-    contents: &Box<CTree>,
+    contents: &CTree,
 ) -> Result<CFiles, Error> {
     let id = make_guard_id(header_name)?;
     let mut f = CFiles {
@@ -287,7 +287,7 @@ fn format_compound_array(
         name: name.to_owned(),
         values: subarray_names,
         c_type: format!("{}*", subarray_type).to_c(),
-        is_extern: is_extern,
+        is_extern,
     });
     CTree::Group(g).format()
 }
@@ -304,7 +304,7 @@ fn format_var(
         CCode::new()
     };
     CFiles {
-        h: h,
+        h,
         c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
     }
 }
@@ -341,7 +341,7 @@ fn format_array(
     };
 
     CFiles {
-        h: h,
+        h,
         c: CCode(format!(
             "const {} {}[] = {};\n\n",
             c_type,

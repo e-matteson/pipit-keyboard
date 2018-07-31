@@ -98,7 +98,7 @@ impl AllData {
         for (mode, info) in &self.modes {
             let m = ModeBuilder {
                 mode_name: mode,
-                info: info,
+                info,
                 kmap_struct_names: &kmap_struct_names,
                 mod_chords: self.get_mod_chords(mode),
                 anagram_mask: self.get_anagram_mask(mode),
@@ -335,9 +335,9 @@ impl KeyPress {
     fn format_mods(&self) -> CCode {
         // TODO think about this
         if self.mods.is_empty() {
-            KeyPress::empty_code()
+            Self::empty_code()
         } else {
-            KeyPress::truncate(&CCode::join(&self.mods, "|"))
+            Self::truncate(&CCode::join(&self.mods, "|"))
         }
     }
 

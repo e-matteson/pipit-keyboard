@@ -42,7 +42,7 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
         .expect("invalid lesson file name")
         .to_str()
         .expect("lesson path is not valid unicode");
-    let mut sections = s.split("_");
+    let mut sections = s.split('_');
     let number = sections.next().expect("invalid lesson file name");
     let words: Vec<_> = sections.collect();
     format!("{}) {}", number, words.join(" "))

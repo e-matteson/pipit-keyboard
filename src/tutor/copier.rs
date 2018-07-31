@@ -33,11 +33,11 @@ struct CopierLine {
 }
 
 impl Copier {
-    pub fn new(num_chars: usize) -> Copier {
+    pub fn new(num_chars: usize) -> Self {
         let point_offset = (num_chars + 1) / 2. as usize;
-        Copier {
-            num_chars: num_chars,
-            point_offset: point_offset,
+        Self {
+            num_chars,
+            point_offset,
             point_marker: "▼".into(),
             line: CopierLine::default(),
         }
@@ -119,7 +119,7 @@ impl Copier {
         actual: &str,
         expected: &Option<String>,
     ) -> PrevCharStatus {
-        let correct = expected.as_ref().map(|e| e == &actual).unwrap_or(false);
+        let correct = expected.as_ref().map(|e| e == actual).unwrap_or(false);
         if correct || !self.line.show_errors {
             PrevCharStatus::Correct
         } else {
@@ -241,19 +241,16 @@ impl View for Copier {
 }
 
 impl CopierLine {
-    fn from(
-        line: &SlideLine,
-        extra_spaces: usize,
-    ) -> Result<CopierLine, Error> {
+    fn from(line: &SlideLine, extra_spaces: usize) -> Result<Self, Error> {
         let (entries, text) = line.to_entries()?;
 
         let pad = " ".repeat(extra_spaces);
         let expected = pad.clone() + &text;
-        let mut actual = String::from(pad);
+        let mut actual = pad;
         actual.reserve(expected.len());
-        Ok(CopierLine {
-            expected: expected,
-            actual: actual,
+        Ok(Self {
+            expected,
+            actual,
             index: 0,
             show_errors: line.show_errors(),
             hint_map: make_hint_map(&entries),
@@ -263,8 +260,8 @@ impl CopierLine {
 }
 
 impl Default for CopierLine {
-    fn default() -> CopierLine {
-        CopierLine {
+    fn default() -> Self {
+        Self {
             expected: String::new(),
             actual: String::new(),
             index: 0,

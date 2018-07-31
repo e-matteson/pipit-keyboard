@@ -6,6 +6,14 @@ use std::path::PathBuf;
 use failure::{Error, ResultExt};
 use types::errors::OutOfRangeErr;
 
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub enum ConfirmDefault {
+    Yes,
+    No,
+    None,
+}
+
 pub fn bools_to_bytes(v: &[bool]) -> Vec<u8> {
     let mut bytes = Vec::new();
     for chunk in v.chunks(8) {
@@ -22,7 +30,7 @@ pub fn bools_to_u32(v: &[bool]) -> Result<u32, Error> {
             name: "number of bits to convert to a u32".into(),
             value: v.len(),
             min: 0,
-            max: max,
+            max,
         })?;
     }
 
@@ -43,7 +51,7 @@ fn bools_to_u8(v: &[bool]) -> Result<u8, Error> {
             name: "number of bits to convert to a u8".into(),
             value: v.len(),
             min: 0,
-            max: max,
+            max,
         })?;
     }
     let mut num: u8 = 0;
@@ -97,13 +105,6 @@ pub fn read_file(path: &PathBuf) -> Result<String, Error> {
     let mut buffer = String::new();
     f.read_to_string(&mut buffer)?;
     Ok(buffer)
-}
-
-#[allow(dead_code)]
-pub enum ConfirmDefault {
-    Yes,
-    No,
-    None,
 }
 
 fn get_input() -> Result<String, Error> {

@@ -59,7 +59,7 @@ where
 {
     fn validate(&self) -> Result<(), Error> {
         // A None value is always valid.
-        if let &Some(ref contents) = self {
+        if let Some(ref contents) = self {
             contents.validate()?;
         }
         Ok(())

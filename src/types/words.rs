@@ -37,7 +37,7 @@ impl Word {
     }
 
     fn chord_spelling(&self) -> String {
-        self.chord.clone().unwrap_or(self.word.clone())
+        self.chord.clone().unwrap_or_else(|| self.word.clone())
     }
 
     pub fn chord_spellings(&self) -> Result<Vec<Spelling>, Error> {
@@ -66,7 +66,7 @@ impl Word {
     }
 
     pub fn sequence(&self) -> Result<Sequence, Error> {
-        let mut seq = Sequence::new();
+        let mut seq = Sequence::default();
         for letter in self.seq_spelling().graphemes(true) {
             let keypress = KeyPress::from_str(&letter.to_string())?;
             seq.push(keypress);
@@ -82,13 +82,13 @@ impl Validate for Word {
 }
 
 impl AnagramNum {
-    pub fn new(num: u8) -> Result<AnagramNum, Error> {
+    pub fn new(num: u8) -> Result<Self, Error> {
         let a = AnagramNum(num);
         a.validate()?;
         Ok(a)
     }
 
-    pub fn unwrap(&self) -> u8 {
+    pub fn unwrap(self) -> u8 {
         self.0
     }
 
@@ -99,20 +99,20 @@ impl AnagramNum {
 
     /// Return an iterator over all the anagram numbers from zero to self,
     /// in order.
-    pub fn up_to(&self) -> Box<Iterator<Item = AnagramNum>> {
-        Box::new((0..=self.0).map(|i| AnagramNum(i)))
+    pub fn up_to(self) -> Box<Iterator<Item = Self>> {
+        Box::new((0..=self.0).map(AnagramNum))
     }
 }
 
 impl Default for AnagramNum {
-    fn default() -> AnagramNum {
+    fn default() -> Self {
         AnagramNum(0)
     }
 }
 
 impl Validate for AnagramNum {
     fn validate(&self) -> Result<(), Error> {
-        let max = AnagramNum::max_allowable();
+        let max = Self::max_allowable();
         if self.0 > max {
             Err(OutOfRangeErr {
                 name: "anagram number".into(),

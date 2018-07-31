@@ -156,7 +156,7 @@ impl OptionsConfig {
                 values: self
                     .row_pins
                     .iter()
-                    .map(|hand| Pin::to_c_vec(hand))
+                    .map(|hand| Pin::c_vec(hand))
                     .collect(),
                 subarray_type: "uint8_t".to_c(),
                 is_extern: true,
@@ -166,7 +166,7 @@ impl OptionsConfig {
                 values: self
                     .column_pins
                     .iter()
-                    .map(|hand| Pin::to_c_vec(hand))
+                    .map(|hand| Pin::c_vec(hand))
                     .collect(),
                 subarray_type: "uint8_t".to_c(),
                 is_extern: true,
@@ -188,7 +188,7 @@ impl OptionsConfig {
         if let Some(ref pins) = self.rgb_led_pins {
             ops.push(CTree::Array {
                 name: "rgb_led_pins".to_c(),
-                values: Pin::to_c_vec(&[pins[0], pins[1], pins[2]]),
+                values: Pin::c_vec(pins),
                 c_type: "uint8_t".to_c(),
                 is_extern: true,
             });
@@ -301,7 +301,7 @@ impl OptionsConfig {
 }
 
 impl<'de> Deserialize<'de> for Sequence {
-    fn deserialize<D>(deserializer: D) -> Result<Sequence, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -325,7 +325,7 @@ impl<'de> Deserialize<'de> for Sequence {
                 Sequence::from_str(value).map_err(|error| {
                     // TODO figure out a proper way to get failure's error info
                     // into de::Error
-                    print_error(error);
+                    print_error(&error);
                     de::Error::custom("invalid sequence string")
                 })
             }
@@ -377,7 +377,7 @@ impl ToC for WordSpacePosition {
 }
 
 impl Default for WordSpacePosition {
-    fn default() -> WordSpacePosition {
+    fn default() -> Self {
         WordSpacePosition::Before
     }
 }

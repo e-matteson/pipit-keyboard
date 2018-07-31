@@ -87,7 +87,7 @@ impl SlideEntry {
     //     })
     // }
 
-    fn from_word(word: &SlideWord) -> Result<SlideEntry, Error> {
+    fn from_word(word: &SlideWord) -> Result<Self, Error> {
         let chords: Option<Vec<_>> =
             word.names.iter().map(|name| State::chord(name)).collect();
 
@@ -98,8 +98,8 @@ impl SlideEntry {
             )?,
         };
 
-        Ok(SlideEntry {
-            chord: chord,
+        Ok(Self {
+            chord,
             length: word
                 .length_override
                 .unwrap_or_else(|| word.text.graphemes(true).count()),

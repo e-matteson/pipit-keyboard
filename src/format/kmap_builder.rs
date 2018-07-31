@@ -66,18 +66,18 @@ impl<'a> KmapBuilder<'a> {
             g.push(tree);
 
             let (tree, struct_name) =
-                self.make_lookups_of_seq_type(seq_type, struct_names);
+                self.make_lookups_of_seq_type(seq_type, &struct_names);
 
             g.push(tree);
             seq_type_names.push(struct_name);
         }
 
-        let (tree, kmap_struct_name) = self.make_kmap(seq_type_names);
+        let (tree, kmap_struct_name) = self.make_kmap(&seq_type_names);
         g.push(tree);
         Ok((CTree::Group(g), kmap_struct_name))
     }
 
-    fn make_kmap(&self, seq_type_names: Vec<CCode>) -> (CTree, CCode) {
+    fn make_kmap(&self, seq_type_names: &[CCode]) -> (CTree, CCode) {
         let kmap_struct_name = format!("{}_lookups", self.kmap_nickname).to_c();
         let array_name = format!("{}_array", kmap_struct_name).to_c();
 
@@ -99,7 +99,7 @@ impl<'a> KmapBuilder<'a> {
     fn make_lookups_of_seq_type(
         &self,
         seq_type: SeqType,
-        lookups_of_length: Vec<CCode>,
+        lookups_of_length: &[CCode],
     ) -> (CTree, CCode) {
         let mut g = Vec::new();
 
@@ -117,7 +117,7 @@ impl<'a> KmapBuilder<'a> {
 
         g.push(
             LookupKmapType {
-                num_lookups: num_lookups,
+                num_lookups,
                 lookups: array_name,
             }.render(struct_name.clone()),
         );
@@ -231,16 +231,13 @@ impl LookupKmapTypeLenAnagram {
         num_chords: usize,
         anagram: AnagramNum,
         seq_bit_len: usize,
-    ) -> Result<LookupKmapTypeLenAnagram, Error> {
-        Ok(LookupKmapTypeLenAnagram {
+    ) -> Result<Self, Error> {
+        Ok(Self {
             num_chords: usize_to_u16(num_chords)
                 .context("Too many chords in lookup struct")?,
-            chords: chords,
-            sequences: sequences,
-            seq_bit_len_and_anagram: LookupKmapTypeLenAnagram::pack(
-                seq_bit_len,
-                anagram,
-            )?,
+            chords,
+            sequences,
+            seq_bit_len_and_anagram: Self::pack(seq_bit_len, anagram)?,
         })
     }
 
@@ -250,7 +247,7 @@ impl LookupKmapTypeLenAnagram {
 
         assert!(16 == bits_for_anagram + bits_for_len);
         assert!(
-            AnagramNum::max_allowable() as u32 == max_val(bits_for_anagram)
+            u32::from(AnagramNum::max_allowable()) == max_val(bits_for_anagram)
         );
 
         let max_len = max_val(bits_for_len) as usize;
@@ -263,7 +260,7 @@ impl LookupKmapTypeLenAnagram {
             })?;
         }
 
-        let packed = (anagram.unwrap() as u16).bitor(
+        let packed = u16::from(anagram.unwrap()).bitor(
             usize_to_u16(seq_bit_len)
                 .unwrap()
                 .checked_shl(bits_for_anagram)
@@ -274,5 +271,5 @@ impl LookupKmapTypeLenAnagram {
 }
 
 fn max_val(num_bits: u32) -> u32 {
-    2u32.pow(num_bits) - 1
+    2_u32.pow(num_bits) - 1
 }

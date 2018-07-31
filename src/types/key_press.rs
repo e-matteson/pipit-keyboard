@@ -177,7 +177,7 @@ lazy_static!{
     ].into_iter()
         .map(|x| KeyDef {
             keypress: x.0,
-            spelling: x.1.map(|s| Spelling::new(s.into()).expect("bad keydef spelling")),
+            spelling: x.1.map(|s| Spelling::new(s).expect("bad keydef spelling")),
             scancode: x.2,
         })
         .collect();
@@ -186,39 +186,39 @@ lazy_static!{
 ////////////////////////////////////////////////////////////////////////////////
 
 impl KeyPress {
-    fn new_key<T>(keycode: T) -> KeyPress
+    fn new_key<T>(keycode: T) -> Self
     where
         T: ToC,
     {
-        KeyPress {
+        Self {
             key: Some(keycode.to_c()),
             mods: Vec::new(),
         }
     }
 
-    fn new_cap<T>(keycode: T) -> KeyPress
+    fn new_cap<T>(keycode: T) -> Self
     where
         T: ToC,
     {
-        KeyPress {
+        Self {
             key: Some(keycode.to_c()),
             mods: vec!["MODIFIERKEY_SHIFT".to_c()],
         }
     }
 
-    fn new_mod<T>(modifier: T) -> KeyPress
+    fn new_mod<T>(modifier: T) -> Self
     where
         T: ToC,
     {
-        KeyPress {
+        Self {
             key: None,
             mods: vec![modifier.to_c()],
         }
     }
 
-    pub fn new_fake(command_code: &Name) -> KeyPress {
+    pub fn new_fake(command_code: &Name) -> Self {
         // We also use KeyPresses to store command codes
-        KeyPress {
+        Self {
             key: Some(command_code.to_c()),
             mods: Vec::new(),
         }
@@ -228,7 +228,7 @@ impl KeyPress {
         if let Some(key_code) = &self.key {
             key_code.to_owned()
         } else {
-            KeyPress::blank()
+            Self::blank()
         }
     }
 
@@ -247,10 +247,10 @@ impl KeyPress {
 
     pub fn ensure_non_empty(&self) -> Result<(), Error> {
         if self.key.is_none() && self.mods.is_empty() {
-            Ok(Err(BadValueErr {
+            Err(BadValueErr {
                 value: "(empty)".into(),
                 thing: "KeyPress".into(),
-            }).context("KeyPress must contain at least one key or modifier")?)
+            }).context("KeyPress must contain at least one key or modifier")?
         } else {
             Ok(())
         }
@@ -269,8 +269,8 @@ impl KeyPress {
 }
 
 impl Default for KeyPress {
-    fn default() -> KeyPress {
-        KeyPress {
+    fn default() -> Self {
+        Self {
             key: None,
             mods: Vec::new(),
         }
@@ -283,7 +283,7 @@ impl Validate for KeyPress {
         if let Some(ref s) = self.key {
             KeyDefs::ensure_defined_key_or_mod(s)?;
         }
-        for modifier in self.mods.iter() {
+        for modifier in &self.mods {
             KeyDefs::ensure_defined_key_or_mod(modifier)?;
         }
         Ok(())
@@ -294,8 +294,8 @@ impl FromStr for KeyPress {
     type Err = Error;
 
     fn from_str(character_string: &str) -> Result<Self, Self::Err> {
-        let spelling = Spelling::new(character_string.into())?;
-        let keypress = KeyDefs::keypress_from_spelling(&spelling)?;
+        let spelling = Spelling::new(character_string)?;
+        let keypress = KeyDefs::keypress_from_spelling(spelling)?;
         Ok(keypress.ok_or_else(|| BadValueErr {
             thing: "character".into(),
             value: character_string.into(),
@@ -304,8 +304,8 @@ impl FromStr for KeyPress {
 }
 
 impl KeyDef {
-    fn has_spelling(&self, spelling: &Spelling) -> bool {
-        self.spelling.as_ref().map_or(false, |x| x == spelling)
+    fn has_spelling(&self, spelling: Spelling) -> bool {
+        self.spelling.map_or(false, |x| x == spelling)
     }
 
     fn has_mod(&self, modifier: &CCode) -> bool {
@@ -334,17 +334,16 @@ impl KeyDefs {
                     keypress
                 ),
                 container: "key definition table".into(),
-            })?.spelling
-            .clone())
+            })?.spelling)
     }
 
     fn keypress_from_spelling(
-        spelling: &Spelling,
+        spelling: Spelling,
     ) -> Result<Option<KeyPress>, Error> {
         let is_capitalized = spelling.is_uppercase();
 
-        let keypress = KeyDefs::def_from_spelling(&spelling.to_lowercase())
-            .map(|def| {
+        let keypress =
+            Self::def_from_spelling(spelling.to_lowercase()).map(|def| {
                 let mut k = def.keypress.clone();
                 if is_capitalized {
                     k.capitalize()
@@ -354,7 +353,7 @@ impl KeyDefs {
         Ok(keypress)
     }
 
-    fn def_from_spelling(spelling: &Spelling) -> Option<&'static KeyDef> {
+    fn def_from_spelling(spelling: Spelling) -> Option<&'static KeyDef> {
         TABLE.iter().find(|def| def.has_spelling(spelling))
     }
 
@@ -365,6 +364,7 @@ impl KeyDefs {
             static ref SCANCODES: BTreeMap<&'static CCode, u8> = TABLE
                 .iter()
                 .filter_map(|def| def.scancode.map(|scancode| {
+                    // TODO clean up?
                     let cdefine = match (&def.keypress.key, &def.keypress.mods)
                     {
                         (Some(key), mods) if !mods.is_empty() => panic!(
@@ -378,9 +378,7 @@ impl KeyDefs {
                             panic!("bad keydef entry, no keycode or mod")
                         }
                         (Some(ref key), _) => key,
-                        (_, mods) if mods.len() == 1 => {
-                            mods.get(0).unwrap()
-                        },
+                        (_, mods) if mods.len() == 1 => &mods[0],
                         _ => panic!("bad keydef entry"),
                     };
                     (cdefine, scancode)

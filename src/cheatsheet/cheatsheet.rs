@@ -88,10 +88,7 @@ struct Switch {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CheatSheet {
-    pub fn from_yaml(
-        path: &PathBuf,
-        data: &TutorData,
-    ) -> Result<CheatSheet, Error> {
+    pub fn from_yaml(path: &PathBuf, data: &TutorData) -> Result<Self, Error> {
         let file = read_file(path).with_context(|_| {
             format!("failed to read cheatsheet config file: {:?}", path)
         })?;
@@ -99,14 +96,14 @@ impl CheatSheet {
             serde_yaml::from_str(&file).with_context(|_| {
                 format!("failed to parse cheatsheet config file: {:?}", path)
             })?;
-        CheatSheet::new(spec, data, CheatSheet::config_path_to_svg_path(path)?)
+        Self::new(&spec, data, Self::config_path_to_svg_path(path)?)
     }
 
     pub fn new(
-        spec: CheatSheetSpec,
+        spec: &CheatSheetSpec,
         data: &TutorData,
         default_svg_filename: PathBuf,
-    ) -> Result<CheatSheet, Error> {
+    ) -> Result<Self, Error> {
         // TODO keyboards are not exactly centered
         let num_cols = 2.;
         let num_rows = (spec.keyboards.len() as f64 / num_cols).ceil();
@@ -146,11 +143,11 @@ impl CheatSheet {
 
             *pos = *pos + height;
         }
-        Ok(CheatSheet {
+        Ok(Self {
             keyboards: all,
             page_width: spec.page_width,
             page_height: spec.page_height,
-            default_svg_filename: default_svg_filename,
+            default_svg_filename,
         })
     }
 
@@ -160,7 +157,7 @@ impl CheatSheet {
         Ok(config_path
             .with_extension("svg")
             .file_name()
-            .ok_or(format_err!("Failed to construct svg filename"))?
+            .ok_or_else(|| format_err!("Failed to construct svg filename"))?
             .into())
     }
 
@@ -227,16 +224,17 @@ impl CheatSheet {
             println!("Saving cheatsheet as '{}'.", path_str);
         }
         let doc = self.render();
-        Ok(svg::save(path, &doc).context("Failed to save cheatsheet")?)
+        svg::save(path, &doc).context("Failed to save cheatsheet")?;
+        Ok(())
     }
 }
 
 impl Keyboard {
-    fn new(pos: P2) -> Keyboard {
-        Keyboard {
-            switches: Keyboard::positions(pos)
+    fn new(pos: P2) -> Self {
+        Self {
+            switches: Self::positions(pos)
                 .into_iter()
-                .map(|pos| Switch::new(pos))
+                .map(Switch::new)
                 .collect(),
         }
     }
@@ -264,7 +262,9 @@ impl Keyboard {
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
         for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
-            let style = if chord.count_pressed() != 1 {
+            let style = if chord.count_pressed() == 1 {
+                SwitchStyle::Single
+            } else {
                 // Usually this means there's a multi-switch chord.
                 // We should also consume a chord style if 0 switches are
                 // pressed, meaning this is a blank chord named "", used for
@@ -272,13 +272,11 @@ impl Keyboard {
                 chord_style_iter.next().ok_or_else(|| {
                     err_msg("ran out of unique switch fill styles")
                 })?
-            } else {
-                SwitchStyle::Single
             };
 
             let content = Content {
                 symbol: symbol.clone(),
-                style: style,
+                style,
             };
             for (index, &bit) in chord.iter().enumerate() {
                 if bit {
@@ -295,14 +293,14 @@ impl Keyboard {
             switch.add_frame_to(
                 &mut frame_group,
                 Color::Black,
-                Keyboard::outer_frame_scale(),
+                Self::outer_frame_scale(),
             );
         }
         for switch in &self.switches {
             switch.add_frame_to(
                 &mut frame_group,
                 Color::White,
-                Keyboard::inner_frame_scale(),
+                Self::inner_frame_scale(),
             );
         }
         group.append(frame_group);
@@ -322,20 +320,20 @@ impl Keyboard {
     fn height() -> f64 {
         // TODO this could fail if the switch alignment changes! Those 2
         // switches won't always be highest and lowest.
-        let positions = Keyboard::positions(P2::origin());
+        let positions = Self::positions(P2::origin());
         let err_msg = "failed to calc keyboard height";
         let highest = 2;
         let lowest = 20;
         let height = positions.get(lowest).expect(err_msg).y
             - positions.get(highest).expect(err_msg).y
-            + Switch::side_length() * Keyboard::outer_frame_scale();
+            + Switch::side_length() * Self::outer_frame_scale();
         height * 1.1
     }
 
     fn width() -> f64 {
         // TODO this could fail if the switch alignment changes! Those 2
         // switches won't always be highest and lowest.
-        let positions = Keyboard::positions(P2::origin());
+        let positions = Self::positions(P2::origin());
         let err_msg = "failed to calc keyboard width";
         let highest = 7;
         let lowest = 0;
@@ -361,7 +359,7 @@ impl Keyboard {
         let x_col_hand_gap = len * 2.7;
 
         let frame_width =
-            (Keyboard::outer_frame_scale() - 1.) * Switch::side_length() / 2.;
+            (Self::outer_frame_scale() - 1.) * Switch::side_length() / 2.;
         let frame = V2::new(frame_width, frame_width);
 
         let offset =
@@ -419,9 +417,9 @@ impl Keyboard {
 }
 
 impl Switch {
-    fn new(pos: P2) -> Switch {
-        Switch {
-            pos: pos,
+    fn new(pos: P2) -> Self {
+        Self {
+            pos,
             contents: Vec::new(),
         }
     }
@@ -438,28 +436,28 @@ impl Switch {
     }
 
     fn size() -> V2 {
-        let len = Switch::side_length();
+        let len = Self::side_length();
         V2::new(len, len)
     }
 
     fn font_size(&self) -> f64 {
-        Switch::side_length() * 3. / 5.
+        Self::side_length() * 3. / 5.
     }
 
     fn outline(pos: P2) -> MyRect {
-        MyRect::new(P2::new(pos.x, pos.y), Switch::size())
+        MyRect::new(P2::new(pos.x, pos.y), Self::size())
             .stroke(Color::Black, 1.)
             .fillet(5.)
     }
 
     fn add_clip_definition(defs: &mut Definitions) {
-        let clip = Switch::outline(P2::origin()).finalize();
-        let clip_path = ClipPath::new().set("id", Switch::clip_id()).add(clip);
+        let clip = Self::outline(P2::origin()).finalize();
+        let clip_path = ClipPath::new().set("id", Self::clip_id()).add(clip);
         defs.append(clip_path);
     }
 
     fn radius(&self) -> f64 {
-        Switch::side_length() / 2. * 2_f64.sqrt()
+        Self::side_length() / 2. * 2_f64.sqrt()
     }
 
     // fn center(&self) -> P2 {
@@ -468,12 +466,12 @@ impl Switch {
     // }
 
     fn relative_center(&self) -> P2 {
-        let half_len = Switch::side_length() / 2.;
+        let half_len = Self::side_length() / 2.;
         P2::new(half_len, half_len)
     }
 
     fn add_blank_switch(group: &mut Group) {
-        let rect = Switch::outline(P2::origin())
+        let rect = Self::outline(P2::origin())
             .fill(SwitchStyle::Blank.fill())
             .finalize();
         group.append(rect);
@@ -500,7 +498,7 @@ impl Switch {
                 );
             }
         }
-        group.append(Switch::outline(P2::origin()).finalize());
+        group.append(Self::outline(P2::origin()).finalize());
     }
 
     fn add_single_circle(&self, group: &mut Group) {
@@ -519,11 +517,11 @@ impl Switch {
                 font: Font::default(),
             }.finalize(),
         );
-        group.append(Switch::outline(P2::origin()).finalize());
+        group.append(Self::outline(P2::origin()).finalize());
     }
 
     fn clip_and_translate(&self, group: &mut Group) {
-        group.assign("clip-path", format!("url(#{})", Switch::clip_id()));
+        group.assign("clip-path", format!("url(#{})", Self::clip_id()));
         group.assign(
             "transform",
             format!("translate({},{})", self.pos.x, self.pos.y),
@@ -532,7 +530,7 @@ impl Switch {
 
     fn add_frame_to(&self, group: &mut Group, color: Color, scale: f64) {
         let frame_fill = Fill::new_solid(color);
-        let frame = Switch::outline(self.pos)
+        let frame = Self::outline(self.pos)
             .fill(frame_fill)
             .reset_stroke()
             .scale(scale)
@@ -545,7 +543,7 @@ impl Switch {
         let num_wedges = self.contents.len();
 
         match num_wedges {
-            0 => Switch::add_blank_switch(&mut inner_group),
+            0 => Self::add_blank_switch(&mut inner_group),
             1 => self.add_single_circle(&mut inner_group),
             _ => self.add_chord_pie(num_wedges, &mut inner_group),
         }
@@ -572,8 +570,8 @@ impl SwitchStyle {
         ].into_iter()
     }
 
-    pub fn fill(&self) -> Fill {
-        match *self {
+    pub fn fill(self) -> Fill {
+        match self {
             SwitchStyle::Blank => Fill::new_solid(Color::LightGrey),
             SwitchStyle::Single => Fill::new_solid(Color::DarkGrey),
             SwitchStyle::Shared0 => Fill::new_solid(Color::Blue),
@@ -611,14 +609,14 @@ impl SwitchStyle {
 }
 
 impl Symbol {
-    fn from(line: &str, scale: f64) -> Symbol {
-        Symbol::from_lines(&[line], scale)
+    fn from(line: &str, scale: f64) -> Self {
+        Self::from_lines(&[line], scale)
     }
 
-    fn from_lines(lines: &[&str], scale: f64) -> Symbol {
-        Symbol {
+    fn from_lines(lines: &[&str], scale: f64) -> Self {
+        Self {
             lines: lines.into_iter().map(|s| s.to_string()).collect(),
-            scale: scale,
+            scale,
         }
     }
 

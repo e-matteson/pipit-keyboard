@@ -144,8 +144,8 @@ pub struct V2 {
 impl MyRect {
     pub fn new(pos: P2, size: V2) -> Self {
         Self {
-            pos: pos,
-            size: size,
+            pos,
+            size,
             stroke: None,
             fill: None,
             fillet: None,
@@ -153,10 +153,7 @@ impl MyRect {
     }
 
     pub fn stroke(mut self, color: Color, width: f64) -> Self {
-        self.stroke = Some(Stroke {
-            color: color,
-            width: width,
-        });
+        self.stroke = Some(Stroke { color, width });
         self
     }
 
@@ -228,18 +225,15 @@ impl MyRect {
 impl MyCircle {
     pub fn new(pos: P2, radius: f64) -> Self {
         Self {
-            pos: pos,
-            radius: radius,
+            pos,
+            radius,
             stroke: None,
             fill: None,
         }
     }
 
     pub fn _stroke(mut self, color: Color, width: f64) -> Self {
-        self.stroke = Some(Stroke {
-            color: color,
-            width: width,
-        });
+        self.stroke = Some(Stroke { color, width });
         self
     }
 
@@ -372,7 +366,7 @@ impl Label {
 }
 
 impl MyDescription {
-    pub fn new(text: &str) -> MyDescription {
+    pub fn new(text: &str) -> Self {
         MyDescription(text.to_owned())
     }
 
@@ -382,14 +376,14 @@ impl MyDescription {
 }
 
 impl Fill {
-    pub fn new_solid(color: Color) -> Fill {
-        Fill {
-            color: color,
+    pub fn new_solid(color: Color) -> Self {
+        Self {
+            color,
             pattern: None,
         }
     }
 
-    pub fn assign_to<T>(&self, node: &mut T)
+    pub fn assign_to<T>(self, node: &mut T)
     where
         T: Node,
     {
@@ -401,23 +395,23 @@ impl Fill {
 }
 
 impl FillPattern {
-    fn mask_url(&self) -> String {
+    fn mask_url(self) -> String {
         format!("url(#{})", self.mask_id())
     }
 
-    fn pattern_url(&self) -> String {
+    fn pattern_url(self) -> String {
         format!("url(#{})", self.pattern_id())
     }
 
-    fn pattern_id(&self) -> String {
+    fn pattern_id(self) -> String {
         format!("Pattern{}", self.id_base())
     }
 
-    fn mask_id(&self) -> String {
+    fn mask_id(self) -> String {
         format!("Mask{}", self.id_base())
     }
-    fn id_base(&self) -> String {
-        match *self {
+    fn id_base(self) -> String {
+        match self {
             FillPattern::Checkers => "Checkers".into(),
             FillPattern::VertStripes => "VertStripes".into(),
             FillPattern::HorizStripes => "HorizStripes".into(),
@@ -434,13 +428,13 @@ impl FillPattern {
         FillPattern::Dots.add_definition(background, defs);
     }
 
-    pub fn add_definition(&self, background: MyRect, defs: &mut Definitions) {
-        let pattern = match *self {
-            FillPattern::Checkers => FillPattern::checkers_pattern(),
-            FillPattern::VertStripes => FillPattern::vert_stripes_pattern(),
-            FillPattern::HorizStripes => FillPattern::horiz_stripes_pattern(),
-            FillPattern::DiagStripes => FillPattern::diag_stripes_pattern(),
-            FillPattern::Dots => FillPattern::dots_pattern(),
+    pub fn add_definition(self, background: MyRect, defs: &mut Definitions) {
+        let pattern = match self {
+            FillPattern::Checkers => Self::checkers_pattern(),
+            FillPattern::VertStripes => Self::vert_stripes_pattern(),
+            FillPattern::HorizStripes => Self::horiz_stripes_pattern(),
+            FillPattern::DiagStripes => Self::diag_stripes_pattern(),
+            FillPattern::Dots => Self::dots_pattern(),
         }.set("id", self.pattern_id());
 
         let rect = background.finalize().set("fill", self.pattern_url());
@@ -473,7 +467,7 @@ impl FillPattern {
             .set("fill", "white")
             .set("fill-opacity", "0.3");
 
-        let pattern = Pattern::new()
+        Pattern::new()
             .set("x", 0)
             .set("y", 0)
             .set("width", size * 2.)
@@ -481,8 +475,7 @@ impl FillPattern {
             .set("patternUnits", "userSpaceOnUse")
             .add(rect1)
             .add(rect2)
-            .add(rect3);
-        pattern
+            .add(rect3)
     }
 
     fn vert_stripes_pattern() -> Pattern {
@@ -501,15 +494,14 @@ impl FillPattern {
             .set("height", 2. * size)
             .set("fill", "white");
 
-        let pattern = Pattern::new()
+        Pattern::new()
             .set("x", 0)
             .set("y", 0)
             .set("width", size * 2.)
             .set("height", size * 2.)
             .set("patternUnits", "userSpaceOnUse")
             .add(rect1)
-            .add(rect2);
-        pattern
+            .add(rect2)
     }
 
     fn horiz_stripes_pattern() -> Pattern {
@@ -528,15 +520,14 @@ impl FillPattern {
             .set("height", size)
             .set("fill", "white");
 
-        let pattern = Pattern::new()
+        Pattern::new()
             .set("x", 0)
             .set("y", 0)
             .set("width", size * 2.)
             .set("height", size * 2.)
             .set("patternUnits", "userSpaceOnUse")
             .add(rect1)
-            .add(rect2);
-        pattern
+            .add(rect2)
     }
 
     fn diag_stripes_pattern() -> Pattern {
@@ -606,8 +597,8 @@ impl Into<Value> for Color {
 }
 
 impl Default for Font {
-    fn default() -> Font {
-        Font {
+    fn default() -> Self {
+        Self {
             family: "sans-serif".into(),
             // weight: FontWeight::Normal,
             weight: FontWeight::Bolder,
@@ -648,21 +639,21 @@ impl Into<Value> for TextAnchor {
 }
 
 impl P2 {
-    pub fn new(x: f64, y: f64) -> P2 {
-        P2 { x: x, y: y }
+    pub fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
     }
-    pub fn origin() -> P2 {
-        P2::new(0., 0.)
+    pub fn origin() -> Self {
+        Self::new(0., 0.)
     }
 }
 
 impl V2 {
-    pub fn new(x: f64, y: f64) -> V2 {
-        V2 { x: x, y: y }
+    pub fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
     }
 
-    pub fn reflect_xy(&self) -> V2 {
-        V2::new(self.y, self.x)
+    pub fn reflect_xy(&self) -> Self {
+        Self::new(self.y, self.x)
     }
 }
 

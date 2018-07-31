@@ -20,13 +20,13 @@ pub struct ChordMap(BTreeMap<Name, Chord>);
 #[derive(Debug)]
 pub struct SeqMap(BTreeMap<Name, Sequence>);
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AllSeqMaps {
     maps: BTreeMap<SeqType, SeqMap>,
     pub max_seq_length: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AllChordMaps {
     maps: BTreeMap<KmapPath, ChordMap>,
     max_anagram_num: AnagramNum,
@@ -63,7 +63,7 @@ impl AllData {
 
     pub fn add_word(
         &mut self,
-        word: Word,
+        word: &Word,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
         let name = word.name();
@@ -74,7 +74,7 @@ impl AllData {
         // Get chords for each letter in the word and combine them.
         let mut chord: Chord = word.chord_spellings()?
             .iter()
-            .map(|s| self.chord_from_spelling(s, kmap))
+            .map(|&s| self.chord_from_spelling(s, kmap))
         // This is messy and doesn't short-circuit on the first error,
         // but there's no fold1_result(), so whatever.
             .fold1(|a, b| {
@@ -264,7 +264,7 @@ impl AllData {
         }
         // TODO use references instead of cloning spellings
         Ok(TutorData {
-            chords: chords,
+            chords,
             spellings: self.spellings.clone(),
             chord_spec: self.chord_spec.clone(),
         })
@@ -272,17 +272,17 @@ impl AllData {
 
     pub fn chord_from_spelling(
         &self,
-        spelling: &Spelling,
+        spelling: Spelling,
         kmap: &KmapPath,
     ) -> Result<Chord, Error> {
         let name = self.name_from_spelling(spelling)?;
         self.chords.get(&name, kmap)
     }
 
-    fn name_from_spelling(&self, spelling: &Spelling) -> Result<Name, Error> {
+    fn name_from_spelling(&self, spelling: Spelling) -> Result<Name, Error> {
         Ok(self
             .spellings
-            .get(spelling)
+            .get(&spelling)
             .ok_or_else(|| LookupErr {
                 key: format!("name for '{}'", spelling),
                 container: "spelling table".into(),
@@ -317,13 +317,6 @@ impl AllData {
 }
 
 impl AllChordMaps {
-    pub fn new() -> AllChordMaps {
-        AllChordMaps {
-            maps: BTreeMap::new(),
-            max_anagram_num: AnagramNum::default(),
-        }
-    }
-
     pub fn get(
         &self,
         chord_name: &Name,
@@ -411,13 +404,6 @@ impl AllChordMaps {
 }
 
 impl AllSeqMaps {
-    pub fn new() -> AllSeqMaps {
-        AllSeqMaps {
-            maps: BTreeMap::new(),
-            max_seq_length: 0,
-        }
-    }
-
     pub fn get_seq_map(&self, seq_type: SeqType) -> Result<&SeqMap, Error> {
         Ok(self.maps.get(&seq_type).ok_or_else(|| LookupErr {
             key: format!("{:?}", seq_type),
@@ -491,7 +477,7 @@ impl AllSeqMaps {
         self.maps
             .entry(seq_type)
             .or_insert_with(SeqMap::new)
-            .insert(name.to_owned(), seq)?;
+            .insert(name, seq)?;
 
         if length > self.max_seq_length {
             self.max_seq_length = length;
@@ -511,7 +497,7 @@ impl AllSeqMaps {
 }
 
 impl ChordMap {
-    fn new() -> ChordMap {
+    fn new() -> Self {
         ChordMap(BTreeMap::new())
     }
 
@@ -549,7 +535,7 @@ impl ChordMap {
 }
 
 impl SeqMap {
-    fn new() -> SeqMap {
+    fn new() -> Self {
         SeqMap(BTreeMap::new())
     }
 

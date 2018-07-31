@@ -73,7 +73,7 @@ impl Section {
             ))?
         }
 
-        Ok(Section {
+        Ok(Self {
             names: all_lines[0].split_whitespace().map(|s| s.into()).collect(),
             lines: all_lines.into_iter().skip(1).collect(),
             line_num: line_nums[0],
@@ -95,7 +95,7 @@ impl Section {
 
         for _ in 0..self.num_blocks() {
             let mut chord = Vec::new();
-            for line in switch_chunks.iter_mut() {
+            for line in &mut switch_chunks {
                 chord.extend(
                     line.pop().expect("wrong line length, check failed"),
                 );
@@ -111,7 +111,7 @@ impl Section {
     fn switch_chunks(&self) -> Result<Vec<Vec<Vec<bool>>>, Error> {
         let mut switch_chunks = Vec::new();
         for i in 0..self.lines.len() {
-            let mut line = self.lines.get(i).unwrap().to_owned();
+            let mut line = self.lines[i].to_owned();
 
             // Remove meaningless whitespace between switch characters
             line.retain(|c| !char::is_whitespace(c));
