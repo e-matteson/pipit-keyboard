@@ -34,7 +34,7 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
     code_bit_length = MIN_HUFFMAN_CODE_BIT_LEN;
   }
 
-  if (code_bit_length > 1) {
+  if (code_bit_length > MIN_HUFFMAN_CODE_BIT_LEN) {
     DEBUG1_LN("WARNING: ignored bits at end of huffman encoded sequence");
   }
 
