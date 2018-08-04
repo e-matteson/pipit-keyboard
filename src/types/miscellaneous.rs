@@ -84,7 +84,7 @@ pub struct Permutation {
 #[derive(Debug, Clone)]
 pub struct TutorData {
     pub chords: BTreeMap<ModeName, BTreeMap<Name, Chord>>,
-    pub spellings: BTreeMap<Spelling, Name>,
+    pub spellings: SpellingTable,
     pub chord_spec: ChordSpec,
 }
 
@@ -94,6 +94,9 @@ pub struct TutorData {
 /// TODO this can't be a single char once we do internationalization, it might
 /// be unicode. Wait, some spellings are already unicode! why does that work?
 pub struct Spelling(pub char);
+
+#[derive(Clone, Debug)]
+pub struct SpellingTable(pub BTreeMap<Spelling, Name>);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -315,14 +318,6 @@ impl From<String> for ModeName {
 
 //////////////////////////////
 
-impl ModeName {
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-}
-
-//////////////////////////////
-
 // TODO: sanitize name?
 impl Name {
     pub fn to_uppercase(&self) -> Self {
@@ -406,6 +401,22 @@ impl fmt::Display for Spelling {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = self.0.to_string();
         fmt::Display::fmt(&s, f)
+    }
+}
+
+impl SpellingTable {
+    /// Return None if not found.
+    pub fn get(&self, spelling: &Spelling) -> Option<&Name> {
+        self.0.get(spelling)
+    }
+
+    /// Return a LookupErr if not found.
+    /// TODO is this a good name?
+    pub fn get_checked(&self, spelling: &Spelling) -> Result<&Name, Error> {
+        Ok(self.get(spelling).ok_or_else(|| LookupErr {
+            key: format!("name for '{}'", spelling),
+            container: "spelling table".into(),
+        })?)
     }
 }
 

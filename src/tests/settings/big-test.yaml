@@ -4,7 +4,7 @@ options:
   held_delay:                  200
   debounce_delay:              10
   debug_messages:              None
-  output_directory:            tests/actual-outputs
+  output_directory:            src/tests/actual-outputs
 
   board_name:                  FEATHER_M0_BLE
   rgb_led_pins:                [10, 11, 12]
@@ -23,20 +23,20 @@ options:
 modes:
   default_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test-dvorak.kmap", use_words: true}
+      - {file: "src/tests/settings/keymaps/test-dvorak.kmap", use_words: true}
 
   windows_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test-override.kmap"}
-      - {file: "tests/settings/keymaps/test-dvorak.kmap", use_words: true}
+      - {file: "src/tests/settings/keymaps/test-override.kmap"}
+      - {file: "src/tests/settings/keymaps/test-dvorak.kmap", use_words: true}
 
   left_hand_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test-left.kmap"}
+      - {file: "src/tests/settings/keymaps/test-left.kmap"}
 
   gaming_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test-game.kmap"}
+      - {file: "src/tests/settings/keymaps/test-game.kmap"}
     gaming: true
 
 

@@ -146,11 +146,6 @@ impl CFiles {
         self.c += &other.c;
     }
 
-    pub fn append_newline(&mut self) {
-        self.h += "\n";
-        self.c += "\n";
-    }
-
     pub fn save(
         &self,
         directory: &PathBuf,

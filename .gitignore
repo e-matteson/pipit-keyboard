@@ -1,7 +1,7 @@
 target
 /pipit-firmware/auto_config.cpp
 /pipit-firmware/auto_config.h
-/tests/actual-outputs/*
+/src/tests/actual-outputs/*
 *.svg
 *.pdf
 *.png

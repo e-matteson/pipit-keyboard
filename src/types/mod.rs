@@ -5,7 +5,7 @@ pub use self::huffman::HuffmanTable;
 pub use self::key_press::{KeyDefs, KeyPress};
 pub use self::miscellaneous::{
     KmapFormat, KmapInfo, KmapPath, ModeInfo, ModeName, Name, Permutation, Pin,
-    SeqType, Sequence, Spelling, SwitchPos, TutorData,
+    SeqType, Sequence, Spelling, SpellingTable, SwitchPos, TutorData,
 };
 pub use self::words::{AnagramNum, Word};
 

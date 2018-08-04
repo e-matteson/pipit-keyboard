@@ -11,7 +11,7 @@ options:
   battery_level_pin:           9
   row_pins:                    [[1, 0, 19]]
   column_pins:                 [[15,16,17,18, 20,21,5,6]]
-  output_directory:            tests/actual-outputs
+  output_directory:            src/tests/actual-outputs
 
   kmap_format:
     - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
@@ -21,19 +21,19 @@ options:
 modes:
   default_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test22.kmap", use_words: true}
+      - {file: "src/tests/settings/keymaps/test22.kmap", use_words: true}
 
   left_hand_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test22.kmap"}
+      - {file: "src/tests/settings/keymaps/test22.kmap"}
 
   gaming_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test22.kmap"}
+      - {file: "src/tests/settings/keymaps/test22.kmap"}
 
   windows_mode:
     keymaps:
-      - {file: "tests/settings/keymaps/test22.kmap"}
+      - {file: "src/tests/settings/keymaps/test22.kmap"}
 
 
 plain_modifiers:

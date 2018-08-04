@@ -1,10 +1,6 @@
 use failure::Error;
 
 #[derive(Debug, Fail)]
-#[fail(display = "Invalid ratio: {}", _0)]
-pub struct RatioError(pub f32);
-
-#[derive(Debug, Fail)]
 #[fail(display = "Missing '{}' from '{}'", missing, container)]
 pub struct MissingErr {
     pub missing: String,
@@ -66,6 +62,7 @@ pub enum PermuteErr {
 #[fail(display = "Syntax error in kmap file near line {}.", _0)]
 pub struct KmapSyntaxErr(pub usize);
 
+#[allow(dead_code)]
 pub fn pretty_unwrap<T>(result: Result<T, Error>) -> T
 where
     T: Sized,

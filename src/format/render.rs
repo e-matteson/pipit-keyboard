@@ -30,6 +30,7 @@ impl AllData {
     /// Used for testing. The message contains a timestamp that would make the
     /// same output files look different if they're only generated at different
     /// times.
+    #[allow(dead_code)]
     pub fn save_without_message_as(
         &self,
         file_name_base: &str,
@@ -72,7 +73,7 @@ impl AllData {
             value: self.num_bytes_in_chord()?.to_c(),
         });
 
-        group.push(self.huffman_table().render()?);
+        group.push(self.huffman_table.render()?);
         group.push(self.render_modifiers()?);
         group.push(self.render_command_enum()?);
         group.push(self.render_seq_type_enum());
@@ -129,7 +130,7 @@ impl AllData {
                 kmap_nickname: format!("kmap{}", i),
                 chord_map: chords,
                 seq_maps: &self.sequences,
-                huffman_table: self.huffman_table(),
+                huffman_table: &self.huffman_table,
                 chord_spec: self.chord_spec.clone(),
             };
             let (tree, kmap_struct_name) = builder.render()?;

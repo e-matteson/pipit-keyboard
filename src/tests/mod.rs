@@ -1,5 +1,4 @@
 extern crate failure;
-extern crate pipit_keyboard;
 
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -7,22 +6,24 @@ use std::path::PathBuf;
 
 use failure::{Error, ResultExt};
 
-use pipit_keyboard::errors::pretty_unwrap;
-use pipit_keyboard::AllData;
+use load::AllDataBuilder;
+use types::errors::pretty_unwrap;
 
 fn expected_dir() -> PathBuf {
-    PathBuf::from("tests/expected-outputs/")
+    PathBuf::from("src/tests/expected-outputs/")
 }
 
 fn actual_dir() -> PathBuf {
-    PathBuf::from("tests/actual-outputs/")
+    PathBuf::from("src/tests/actual-outputs/")
 }
 
 #[test]
 fn big_settings_output() {
-    let all_data =
-        AllData::load(&PathBuf::from("tests/settings/big-test.yaml"))
-            .expect("failed to load");
+    let all_data = AllDataBuilder::load(&PathBuf::from(
+        "src/tests/settings/big-test.yaml",
+    )).unwrap()
+    .finalize()
+    .unwrap();
 
     let name_base = "auto_config-big_test";
     all_data
@@ -34,8 +35,11 @@ fn big_settings_output() {
 
 #[test]
 fn chord22_output() {
-    let all_data = AllData::load(&PathBuf::from("tests/settings/test22.yaml"))
-        .expect("failed to load");
+    let all_data =
+        AllDataBuilder::load(&PathBuf::from("src/tests/settings/test22.yaml"))
+            .unwrap()
+            .finalize()
+            .unwrap();
 
     let name_base = "auto_config-22";
     all_data

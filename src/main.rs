@@ -1,21 +1,40 @@
-// extern crate cpuprofiler;
+extern crate cursive;
+extern crate itertools;
+extern crate natord;
+extern crate serde;
+extern crate serde_yaml;
+extern crate svg;
+extern crate time;
+extern crate unicode_segmentation;
+#[macro_use]
 extern crate failure;
-extern crate pipit_keyboard;
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate serde_derive;
 #[macro_use]
 extern crate structopt;
+
+#[macro_use]
+mod types;
+#[macro_use]
+mod load;
+mod cheatsheet;
+mod format;
+#[cfg(test)]
+mod tests;
+mod tutor;
+mod util;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-use pipit_keyboard::errors::*;
-use pipit_keyboard::AllData;
-
-use pipit_keyboard::cheatsheet::CheatSheet;
-use pipit_keyboard::tutor::TutorApp;
+use cheatsheet::CheatSheet;
+use load::AllDataBuilder;
+use tutor::TutorApp;
+use types::errors::print_error;
 
 use failure::{Error, ResultExt};
-
-// use cpuprofiler::PROFILER;
 
 /// Pipit keyboard configuration tool, typing tutor, and cheatsheet generator
 #[derive(StructOpt, Debug)]
@@ -38,14 +57,14 @@ struct Opt {
 }
 
 fn run() -> Result<(), Error> {
-    println!("");
+    println!();
     let opt = Opt::from_args();
 
     let settings_path = opt
         .settings
         .unwrap_or_else(|| PathBuf::from("settings/settings.yaml"));
 
-    let all_data = AllData::load(&settings_path)?;
+    let all_data = AllDataBuilder::load(&settings_path)?.finalize()?;
     all_data.check();
 
     let tutor_data = all_data.get_tutor_data()?;

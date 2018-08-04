@@ -167,19 +167,9 @@ impl MyRect {
         self
     }
 
-    pub fn reset_fill(mut self) -> Self {
-        self.fill = None;
-        self
-    }
-
     pub fn fillet(mut self, radius: f64) -> Self {
         assert!(radius >= 0.);
         self.fillet = Some(V2::new(radius, radius));
-        self
-    }
-
-    pub fn reset_fillet(mut self) -> Self {
-        self.fillet = None;
         self
     }
 
@@ -232,7 +222,8 @@ impl MyCircle {
         }
     }
 
-    pub fn _stroke(mut self, color: Color, width: f64) -> Self {
+    #[allow(dead_code)]
+    pub fn stroke(mut self, color: Color, width: f64) -> Self {
         self.stroke = Some(Stroke { color, width });
         self
     }

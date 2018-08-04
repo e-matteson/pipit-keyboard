@@ -1,5 +1,5 @@
+///! For parsing kmap files to get chords
 use std::collections::BTreeMap;
-/// For parsing kmap files to get chords
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 

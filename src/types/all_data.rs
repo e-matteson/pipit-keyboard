@@ -1,14 +1,13 @@
 use itertools::Itertools;
 use std::clone::Clone;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use util::ensure_u8;
 
 use types::{
-    AnagramNum, CTree, Chord, ChordSpec, HuffmanTable, KeyDefs, KeyPress,
-    KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, Spelling, TutorData,
-    Word,
+    AnagramNum, CTree, Chord, ChordSpec, HuffmanTable, KeyPress, KmapPath,
+    ModeInfo, ModeName, Name, SeqType, Sequence, SpellingTable, TutorData,
 };
 
 use failure::{Error, Fail, ResultExt};
@@ -40,8 +39,8 @@ pub struct AllData {
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
-    pub huffman_table: Option<HuffmanTable>,
-    pub spellings: BTreeMap<Spelling, Name>,
+    pub huffman_table: HuffmanTable,
+    pub spellings: SpellingTable,
 
     pub options: Vec<CTree>,
     pub output_directory: PathBuf,
@@ -49,90 +48,6 @@ pub struct AllData {
 }
 
 impl AllData {
-    pub fn add_command(&mut self, command_name: Name) -> Result<(), Error> {
-        // Commands are a single byte code, not an actual key sequence.
-        // But we'll store each one as a "fake" KeyPress for convenience.
-        let fake_keypress = KeyPress::new_fake(&command_name.to_uppercase());
-
-        self.sequences.insert(
-            command_name,
-            fake_keypress.into(),
-            SeqType::Command,
-        )
-    }
-
-    pub fn add_word(
-        &mut self,
-        word: &Word,
-        kmap: &KmapPath,
-    ) -> Result<(), Error> {
-        let name = word.name();
-
-        self.sequences
-            .insert(name.clone(), word.sequence()?, SeqType::Word)?;
-
-        // Get chords for each letter in the word and combine them.
-        let mut chord: Chord = word.chord_spellings()?
-            .iter()
-            .map(|&s| self.chord_from_spelling(s, kmap))
-        // This is messy and doesn't short-circuit on the first error,
-        // but there's no fold1_result(), so whatever.
-            .fold1(|a, b| {
-                if a.is_err() {
-                    a
-                } else if b.is_err() {
-                    b
-                } else {
-                    Ok(a.unwrap().intersect(&b.unwrap()))
-                }
-            })
-            .ok_or_else(|| format_err!("no chords to intersect"))??;
-
-        chord.anagram_num = word.anagram_num();
-        self.chords.insert(name, chord, kmap)
-    }
-
-    pub fn add_plain_mod(
-        &mut self,
-        name: Name,
-        key_press: KeyPress,
-    ) -> Result<(), Error> {
-        KeyDefs::ensure_plain_mod(&key_press)?;
-        self.plain_mods.push(name.clone());
-        self.sequences
-            .insert(name, key_press.into(), SeqType::Plain)
-    }
-
-    pub fn add_word_mod(&mut self, name: Name) {
-        self.word_mods.push(name);
-    }
-
-    pub fn add_anagram_mod(&mut self, name: Name) {
-        self.anagram_mods.push(name);
-    }
-
-    pub fn add_mode(
-        &mut self,
-        mode_name: ModeName,
-        info: ModeInfo,
-    ) -> Result<(), Error> {
-        // Check if a mode with this name has been added already
-        if self.modes.contains_key(&mode_name) {
-            Err(ConflictErr {
-                key: mode_name.to_string(),
-                container: "modes".into(),
-            }).context("Mode has already been added")?;
-        }
-
-        // Initialize the kmaps that are included in this mode
-        for kmap_info in &info.keymaps {
-            self.chords.init_kmap(&kmap_info.file);
-        }
-
-        self.modes.insert(mode_name, info);
-        Ok(())
-    }
-
     /// Return the first chord found for the given name in any of this mode's
     /// kmaps.
     pub fn get_chord_in_mode(
@@ -190,33 +105,6 @@ impl AllData {
         names
     }
 
-    pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
-        let mut out = HashSet::new();
-        for mode_info in self.modes.values() {
-            for kmap_info in &mode_info.keymaps {
-                if kmap_info.use_words {
-                    out.insert(kmap_info.file.clone());
-                }
-            }
-        }
-        out.into_iter().collect()
-    }
-
-    pub fn set_huffman_table(&mut self) -> Result<(), Error> {
-        if self.huffman_table.is_some() {
-            panic!("huffman table was already set once");
-        }
-        self.huffman_table =
-            Some(HuffmanTable::new(self.sequences.dump_all_keypresses())?);
-        Ok(())
-    }
-
-    pub fn huffman_table(&self) -> &HuffmanTable {
-        self.huffman_table
-            .as_ref()
-            .expect("huffman table was never set")
-    }
-
     fn get_all_names(&self) -> Vec<Name> {
         self.sequences
             .names()
@@ -269,51 +157,6 @@ impl AllData {
             chord_spec: self.chord_spec.clone(),
         })
     }
-
-    pub fn chord_from_spelling(
-        &self,
-        spelling: Spelling,
-        kmap: &KmapPath,
-    ) -> Result<Chord, Error> {
-        let name = self.name_from_spelling(spelling)?;
-        self.chords.get(&name, kmap)
-    }
-
-    fn name_from_spelling(&self, spelling: Spelling) -> Result<Name, Error> {
-        Ok(self
-            .spellings
-            .get(&spelling)
-            .ok_or_else(|| LookupErr {
-                key: format!("name for '{}'", spelling),
-                container: "spelling table".into(),
-            })?.to_owned())
-    }
-
-    pub fn make_spelling_table(&mut self) -> Result<(), Error> {
-        let mut map = BTreeMap::new();
-        {
-            let plain_names = self
-                .sequences
-                .get_seq_map(SeqType::Plain)?
-                .names()
-                .chain(self.plain_mods.iter());
-
-            for name in plain_names {
-                let keypress = self
-                    .sequences
-                    .get_seq_of_any_type(name)?
-                    .lone_keypress()?;
-                if let Some(spelling) =
-                    KeyDefs::spelling_from_keypress(&keypress)?
-                {
-                    map.insert(spelling, name.to_owned());
-                }
-            }
-        }
-
-        self.spellings = map;
-        Ok(())
-    }
 }
 
 impl AllChordMaps {
@@ -354,7 +197,7 @@ impl AllChordMaps {
 
     /// If this kmap was not already present, initialize its chord map and
     /// return true. Otherwise return false.
-    fn init_kmap(&mut self, kmap: &KmapPath) -> bool {
+    pub fn init_kmap(&mut self, kmap: &KmapPath) -> bool {
         if self.maps.contains_key(kmap) {
             return false;
         }
@@ -363,7 +206,7 @@ impl AllChordMaps {
         true
     }
 
-    fn insert(
+    pub fn insert(
         &mut self,
         name: Name,
         chord: Chord,
@@ -466,7 +309,7 @@ impl AllSeqMaps {
         Ok(())
     }
 
-    fn insert(
+    pub fn insert(
         &mut self,
         name: Name,
         seq: Sequence,
@@ -556,7 +399,7 @@ impl SeqMap {
         if self.0.insert(name.to_owned(), seq).is_some() {
             Err(ConflictErr {
                 key: name.into(),
-                container: "seq map".into(),
+                container: "sequence map".into(),
             })?;
         }
 
