@@ -61,8 +61,8 @@ modes:
 
   windows_mode:
     keymaps:
-      - {file: "settings/keymaps/dvorak24_evan.kmap", use_words: true}
       - {file: "settings/keymaps/windows_shortcuts.kmap"}
+      - {file: "settings/keymaps/dvorak24_evan.kmap", use_words: true}
 
 
 plain_modifiers:
@@ -203,21 +203,27 @@ macros:
   macro_gmail: "e.r.matteson@gmail.com"
   macro_bmail: "evan_matteson@brown.edu"
   macro_compile: " cr"
-  macro_helm_mini: " bb"
+  macro_helm_mini:
+    - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_B" }
   macro_helm_imenu:
     - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_I"}
   macro_helm_imenu_all:
     - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_I", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_find_file: " ff"
+  macro_find_file:
+    - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_F", mods: ["MODIFIERKEY_CTRL"]}
+  macro_find_other_file: " of"
   macro_proj_find_file: " pf"
   macro_recentf: " fr"
-  macro_find_other_file: " of"
   macro_close_other_wins:
     - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_1"}
-  macro_other_win: " ww"
+  macro_other_win:
+    - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
+    - {key: "KEY_O"}
   macro_aspace:
     - {key: "KEY_A"}
     - {key: "KEY_SPACE"}
@@ -303,10 +309,10 @@ macros:
   macro_org_archive: " mor"
   macro_org_someday: " mos"
   macro_org_insert: " moi"
+  macro_org_to_md: " mom"
   macro_anagram_1: ", anagram: 1"
   # macro_fake_alt_tab:
   #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
-
 
 word_modifiers:
   - mod_capital
@@ -1615,7 +1621,7 @@ dictionary:
   - {word: "duo"}
   - {word: "duplicate"}
   - {word: "dur"}
-  - {word: "dura"}
+  - {word: "dura", anagram: 1}
   - {word: "during"}
   - {word: "dust"}
   - {word: "Dutch"}
@@ -3705,6 +3711,7 @@ dictionary:
   - {word: "racial", anagram: 1}
   - {word: "rack"}
   - {word: "radar"}
+  - {word: "Radu"}
   - {word: "radial"}
   - {word: "radiate"}
   - {word: "radical", anagram: 1}

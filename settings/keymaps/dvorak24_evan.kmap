@@ -526,8 +526,8 @@ macro_org_calendar    macro_org_tree   macro_org_archive  macro_org_someday
   .     .               .     .          .     .            .     .
   ... .*.               ... .*.          ... .*.            ... .*.
 
-macro_org_insert
-....   ....
-.*..   ....
-  .     .
-  ... .*.
+macro_org_insert      macro_org_to_md
+....   ....           *...   ....
+.*..   ....           .*..   ....
+  .     .               .     .
+  ... .*.               ... .*.
