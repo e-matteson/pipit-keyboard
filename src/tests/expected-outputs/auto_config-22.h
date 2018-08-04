@@ -169,7 +169,7 @@ enum mod_enum : uint8_t {
 #define NUM_MODIFIERS 10
 #define NUM_WORD_MODS 4
 #define NUM_ANAGRAM_MODS 2
-#define NUM_ANAGRAMS 2
+#define MAX_ANAGRAM_NUM 1
 #define NUM_PLAIN_MODS 4
 extern const mod_enum word_mod_indices[];
 extern const mod_enum plain_mod_indices[];

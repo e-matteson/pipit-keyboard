@@ -264,7 +264,7 @@ uint8_t Chord::cycleAnagram(){
   prepareToCycle();
   // Unset old mod flag
   setAnagramModFlag(anagram_num, 0);
-  anagram_num = (anagram_num + 1) % NUM_ANAGRAMS;
+  anagram_num = (anagram_num + 1) % (MAX_ANAGRAM_NUM + 1);
   // Set new mod flag
   setAnagramModFlag(anagram_num, 1);
   return anagram_num;

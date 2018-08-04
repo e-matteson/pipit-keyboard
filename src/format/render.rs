@@ -89,7 +89,7 @@ impl AllData {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
             // We should have already checked whether any sequences are too
             // long for the firmware to handle when they were first added.
-            value: self.sequences.max_seq_length.to_c(),
+            value: self.sequences.max_seq_length().to_c(),
         });
 
         let (tree, kmap_struct_names) = self.render_kmaps()?;
@@ -202,8 +202,8 @@ impl AllData {
         });
 
         group.push(CTree::Define {
-            name: "NUM_ANAGRAMS".to_c(),
-            value: self.chords.num_anagrams().to_c(),
+            name: "MAX_ANAGRAM_NUM".to_c(),
+            value: self.chords.max_anagram_num().to_c(),
         });
 
         group.push(CTree::Define {

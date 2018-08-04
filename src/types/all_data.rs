@@ -22,13 +22,11 @@ pub struct SeqMap(BTreeMap<Name, Sequence>);
 #[derive(Debug, Default)]
 pub struct AllSeqMaps {
     maps: BTreeMap<SeqType, SeqMap>,
-    pub max_seq_length: usize,
 }
 
 #[derive(Debug, Default)]
 pub struct AllChordMaps {
     maps: BTreeMap<KmapPath, ChordMap>,
-    max_anagram_num: AnagramNum,
 }
 
 #[derive(Debug)]
@@ -191,8 +189,12 @@ impl AllChordMaps {
         self.maps.values().flat_map(|chord_map| chord_map.names())
     }
 
-    pub fn num_anagrams(&self) -> u8 {
-        self.max_anagram_num.unwrap() + 1
+    pub fn max_anagram_num(&self) -> AnagramNum {
+        self.maps
+            .values()
+            .map(|chord_map| chord_map.max_anagram_num())
+            .max()
+            .unwrap_or_default()
     }
 
     /// If this kmap was not already present, initialize its chord map and
@@ -212,8 +214,6 @@ impl AllChordMaps {
         chord: Chord,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
-        let anagram_num = chord.anagram_num;
-
         self.maps
             .get_mut(kmap)
             .ok_or_else(|| {
@@ -222,10 +222,6 @@ impl AllChordMaps {
                     value: kmap.to_owned().into(),
                 }.context("tried to add chord to uninitialized kmap")
             })?.insert(name, chord)?;
-
-        if anagram_num > self.max_anagram_num {
-            self.max_anagram_num = anagram_num;
-        }
 
         Ok(())
     }
@@ -315,17 +311,20 @@ impl AllSeqMaps {
         seq: Sequence,
         seq_type: SeqType,
     ) -> Result<(), Error> {
-        let length = seq.len();
-
         self.maps
             .entry(seq_type)
             .or_insert_with(SeqMap::new)
             .insert(name, seq)?;
-
-        if length > self.max_seq_length {
-            self.max_seq_length = length;
-        }
         Ok(())
+    }
+
+    /// The length of the longest sequence contained anywhere in this map.
+    pub fn max_seq_length(&self) -> usize {
+        self.maps
+            .values()
+            .map(|seq_map| seq_map.max_seq_length())
+            .max()
+            .unwrap_or(0)
     }
 
     pub fn dump_all_keypresses(&self) -> Vec<KeyPress> {
@@ -375,6 +374,14 @@ impl ChordMap {
     pub fn names(&self) -> impl Iterator<Item = &Name> {
         self.0.keys()
     }
+
+    fn max_anagram_num(&self) -> AnagramNum {
+        self.0
+            .values()
+            .map(|chord| chord.anagram_num)
+            .max()
+            .unwrap_or_default()
+    }
 }
 
 impl SeqMap {
@@ -389,6 +396,10 @@ impl SeqMap {
 
     pub fn names(&self) -> impl Iterator<Item = &Name> {
         self.0.keys()
+    }
+
+    fn max_seq_length(&self) -> usize {
+        self.0.values().map(|seq| seq.len()).max().unwrap_or(0)
     }
 
     fn insert(&mut self, name: Name, seq: Sequence) -> Result<(), Error> {

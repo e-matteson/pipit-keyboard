@@ -381,11 +381,11 @@ void Pipit::cycleLastWordAnagram(){
   uint8_t original_num = new_chord.getAnagramNum();
 
   Key data[MAX_KEYS_IN_SEQUENCE];
-  for(uint8_t i = 0; i <= NUM_ANAGRAMS; i++) {
+
+  while(1) {
     new_chord.cycleAnagram();
     if(new_chord.getAnagramNum() == original_num){
       // We've tried all the anagram modifiers, stop.
-      // (The for loop should stop us too, just in case)
       feedback->triggerNoAnagram();
       return; // Fail
     }
