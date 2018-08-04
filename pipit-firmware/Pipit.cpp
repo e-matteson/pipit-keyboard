@@ -108,8 +108,13 @@ void Pipit::doCommand(uint8_t code){
 }
 
 Pipit::Pipit(){
+#ifdef FEATHER_M0_BLE
+  comms = new FeatherComms();
+#elif defined(TEENSY_LC)
+  comms = new TeensyComms();
+#endif
+
   switches = new Switches();
-  comms = new Comms();
   sender = new Sender(comms);
   feedback = new Feedback();
 

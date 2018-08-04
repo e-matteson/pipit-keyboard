@@ -6,17 +6,22 @@
 /* #include "structs.h" */
 #include "Chord.h"
 #include "Key.h"
+#include "Comms.h"
 
 // Verify that the user settings match the board we're compiling for
 
 #if defined (TEENSY_LC)
 #if !defined (TEENSYDUINO) || !defined(__MKL26Z64__)
 #error "Wrong board_name, the arduino IDE did not expect a teensy_lc"
+#else
+#include "TeensyComms.h"
 #endif
 
-#elif defined(FEATHER_M0_BLE)
+#elif defined(FEATHER_M0_BLE) || defined(FEATHER_M0_USB)
 #ifndef ARDUINO_SAMD_FEATHER_M0
-#error "Wrong board_name, the arduino IDE did not expect a feather_m0_ble"
+#error "Wrong board_name, the arduino IDE did not expect a feather_m0"
+#else
+#include "FeatherComms.h"
 #endif
 
 #else
@@ -28,8 +33,6 @@
 #include "lookup.h"
 #include "Sender.h"
 #include "Feedback.h"
-
-#include "Comms.h"
 
 #define MAX_PREFIX_LENGTH 3
 
