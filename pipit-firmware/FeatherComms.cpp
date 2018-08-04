@@ -7,9 +7,9 @@
 // // Used for USB sending on the feather, only.
 // // It includes redefinitons of some KEY_*, with incorrect scancodes. So make
 // // sure we don't include this somewhere it can clobber the correct scancodes!
-// #ifdef ENABLE_WIRED_FEATHER_HACK
-// #include <Keyboard.h>
-// #endif
+#ifdef ENABLE_WIRED_FEATHER_HACK
+#include <Keyboard.h>
+#endif
 
 FeatherComms::FeatherComms(){
   this->bluetooth = new Adafruit_BluefruitLE_SPI(8, 7, 4);
@@ -18,9 +18,9 @@ FeatherComms::FeatherComms(){
 void FeatherComms::setup(){
   setupBluetooth();
 
-// #ifdef ENABLE_WIRED_FEATHER_HACK
-//   Keyboard.begin();
-// #endif
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  Keyboard.begin();
+#endif
 }
 
 void FeatherComms::setupBluetooth(){
@@ -56,30 +56,30 @@ void FeatherComms::setupBluetooth(){
 }
 
 void FeatherComms::press(const Report* report){
-// #ifdef ENABLE_WIRED_FEATHER_HACK
-//   if (use_wired) {
-//     pressWired(report);
-//   } else {
-//     pressWireless(report);
-//   }
-//   return;
-// #endif
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  if (use_wired) {
+    pressWired(report);
+  } else {
+    pressWireless(report);
+  }
+  return;
+#endif
 
   pressWireless(report);
 }
 
-// void FeatherComms::pressWired(const Report* report){
-// #ifdef ENABLE_WIRED_FEATHER_HACK
-//   Keyboard.set_key1(report->get(0));
-//   Keyboard.set_key2(report->get(1));
-//   Keyboard.set_key3(report->get(2));
-//   Keyboard.set_key4(report->get(3));
-//   Keyboard.set_key5(report->get(4));
-//   Keyboard.set_key6(report->get(5));
-//   Keyboard.set_modifier(report->getMod());
-//   Keyboard.send_now();
-// #endif
-// }
+void FeatherComms::pressWired(const Report* report){
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  Keyboard.set_key1(report->get(0));
+  Keyboard.set_key2(report->get(1));
+  Keyboard.set_key3(report->get(2));
+  Keyboard.set_key4(report->get(3));
+  Keyboard.set_key5(report->get(4));
+  Keyboard.set_key6(report->get(5));
+  Keyboard.set_modifier(report->getMod());
+  Keyboard.send_now();
+#endif
+}
 
 void FeatherComms::pressWireless(const Report* report){
   static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-%02x-%02x-%02x-%02x-%02x";
@@ -100,10 +100,10 @@ void FeatherComms::proportionalDelay(uint8_t data_length, uint8_t multiplier){
 }
 
 uint8_t FeatherComms::getDelay(uint8_t data_length){
-  // if(use_wired){
-  //   // Little or no delay is needed between presses over USB
-  //   return 0;
-  // }
+  if(use_wired){
+    // Little or no delay is needed between presses over USB
+    return 0;
+  }
 
   // When sending long words/macros over bluetooth, some letters in the middle
   // get lost unless there's a delay between presses. This seems to help, without
@@ -114,9 +114,9 @@ uint8_t FeatherComms::getDelay(uint8_t data_length){
   return 1;
 }
 
-// void FeatherComms::toggleWireless(){
-//   use_wired ^= 1;
-// }
+void FeatherComms::toggleWireless(){
+  use_wired ^= 1;
+}
 
 #endif
 

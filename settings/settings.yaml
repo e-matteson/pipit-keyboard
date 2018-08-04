@@ -4878,6 +4878,7 @@ commands:
   - command_led_battery
   - command_led_colors
   - command_led_rainbow
+  - command_toggle_wireless
 
 # Add up to 7 anagram mods here.
 anagram_modifiers:

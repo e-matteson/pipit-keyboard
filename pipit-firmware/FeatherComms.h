@@ -12,19 +12,19 @@ class FeatherComms: public Comms {
   void setup();
   void press(const Report* report);
   void proportionalDelay(uint8_t data_length, uint8_t multiplier);
-  // void toggleWireless();
+  void toggleWireless();
 
  private:
   uint8_t getDelay(uint8_t data_length);
   void setupBluetooth();
   void disableBluetooth();
-  // void pressWired(const Report* report);
+  void pressWired(const Report* report);
   void pressWireless(const Report* report);
 
   // Construct bluetooth controller.
   Adafruit_BluefruitLE_SPI* bluetooth;
 
-  // bool use_wired = 0;
+  bool use_wired = 0;
 };
 
 

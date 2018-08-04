@@ -11,7 +11,7 @@ class TeensyComms: public Comms {
   void setup();
   void press(const Report* report);
   void proportionalDelay(uint8_t data_length, uint8_t multiplier);
-  // void toggleWireless();
+  void toggleWireless();
 };
 
 

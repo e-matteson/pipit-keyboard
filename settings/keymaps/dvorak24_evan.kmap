@@ -287,6 +287,11 @@ command_pause       command_led_battery   command_led_colors  command_led_rainbo
   .     .             .     .               .     .             .     .
   ... ...             ... .*.               ... .*.             ... .*.
 
+command_toggle_wireless
+....   ***.
+..**   ....
+  .     .
+  ... .*.
 
 #### web browser macros ####
 

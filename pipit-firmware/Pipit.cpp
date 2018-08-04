@@ -100,6 +100,10 @@ void Pipit::doCommand(uint8_t code){
     feedback->startRoutine(RAINBOW_ROUTINE);
     break;
 
+  case conf::command_enum::COMMAND_TOGGLE_WIRELESS:
+    comms->toggleWireless();
+    break;
+
   default:
     DEBUG1("WARNING: Unknown command: ");
     DEBUG1_LN(code);

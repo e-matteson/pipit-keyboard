@@ -14,7 +14,7 @@ public:
   virtual void setup();
   virtual void press(const Report* report);
   virtual void proportionalDelay(uint8_t data_length, uint8_t multiplier);
-  // virtual void toggleWireless();
+  virtual void toggleWireless();
 };
 
 
