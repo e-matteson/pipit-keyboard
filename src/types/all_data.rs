@@ -1,13 +1,14 @@
 use itertools::Itertools;
 use std::clone::Clone;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use util::ensure_u8;
 
 use types::{
-    AnagramNum, CTree, Chord, ChordSpec, HuffmanTable, KeyPress, KmapPath,
-    ModeInfo, ModeName, Name, SeqType, Sequence, SpellingTable, TutorData,
+    AnagramNum, CCode, CTree, Chord, ChordSpec, HuffmanTable, KeyPress,
+    KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, SpellingTable,
+    TutorData,
 };
 
 use failure::{Error, Fail, ResultExt};
@@ -39,6 +40,7 @@ pub struct AllData {
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub huffman_table: HuffmanTable,
     pub spellings: SpellingTable,
+    pub command_enum_variants: BTreeSet<CCode>,
 
     pub options: Vec<CTree>,
     pub output_directory: PathBuf,

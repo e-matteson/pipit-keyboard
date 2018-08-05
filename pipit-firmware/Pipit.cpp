@@ -1,10 +1,17 @@
 #include "Pipit.h"
 
 
-void Pipit::doCommand(uint8_t code){
+void Pipit::doCommand(const Key* data, uint8_t length){
+  if(length == 0 || data == 0) {
+    DEBUG1_LN("WARNING: invalid command");
+    return;
+  }
+
+  conf::command_enum command = (conf::command_enum) data[0].key_code;
+
   // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
-  if(code == conf::command_enum::COMMAND_PAUSE){
+  if(command == conf::command_enum::COMMAND_PAUSE){
     // toggle temporary disabling of typing
     is_paused ^= 1;
     return;
@@ -13,26 +20,10 @@ void Pipit::doCommand(uint8_t code){
     // if paused, don't do any of the following functions
     return;
   }
-  switch(code){
+  switch(command){
     /******************************************/
     /**** Add cases for new commands here! ****/
     /******************************************/
-
-  case conf::command_enum::COMMAND_DEFAULT_MODE:
-    mode = conf::mode_enum::DEFAULT_MODE;
-    break;
-
-  case conf::command_enum::COMMAND_WINDOWS_MODE:
-    mode = conf::mode_enum::WINDOWS_MODE;
-    break;
-
-  case conf::command_enum::COMMAND_LEFT_HAND_MODE:
-    mode = conf::mode_enum::LEFT_HAND_MODE;
-    break;
-
-  case conf::command_enum::COMMAND_GAMING_MODE:
-    mode = conf::mode_enum::GAMING_MODE;
-    break;
 
   case conf::command_enum::COMMAND_DELETE_WORD:
     deleteLastWord();
@@ -104,9 +95,16 @@ void Pipit::doCommand(uint8_t code){
     comms->toggleWireless();
     break;
 
+  case conf::command_enum::SWITCH_TO:
+    if(length != 2) {
+      DEBUG1_LN("WARNING: wrong num of args for switch_to");
+      return;
+    }
+    mode = (conf::mode_enum) data[1].key_code;
+    break;
   default:
     DEBUG1("WARNING: Unknown command: ");
-    DEBUG1_LN(code);
+    DEBUG1_LN(command);
     break;
   }
 }
@@ -208,8 +206,8 @@ void Pipit::processChord(Chord* chord){
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
-  if(sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
-    doCommand(data[0].key_code);
+  if(uint8_t len = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
+    doCommand(data, len);
     return;
   }
 
@@ -265,8 +263,8 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* chord = gaming_switches+i;
-    if(sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
-      doCommand(data[0].key_code);
+    if(uint8_t len = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
+      doCommand(data, len);
       return;
     }
 
@@ -278,6 +276,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
       return;
     }
 
+    // TODO why can't we use normal sendIfFound() here? Because we're adding to the report, not sending, right.
     uint8_t data_length = 0;
     if((data_length=conf::lookup(chord, conf::seq_type_enum::PLAIN, data))){
       if(data_length > 1){

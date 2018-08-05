@@ -3,9 +3,9 @@ use time::*;
 
 use types::{
     AllData, CCode, CTree, Field, HuffmanTable, KeyDefs, KeyPress, KmapPath,
-    Name, SeqType, Sequence, ToC,
+    ModeName, Name, Sequence, ToC,
 };
-use util::bools_to_bytes;
+use util::{bools_to_bytes, usize_to_u8};
 
 use output::{KmapBuilder, ModeBuilder};
 // use format::KmapBuilder;
@@ -87,9 +87,7 @@ impl AllData {
 
         g.push(CTree::Define {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
-            // We should have already checked whether any sequences are too
-            // long for the firmware to handle when they were first added.
-            value: self.sequences.max_seq_length().to_c(),
+            value: usize_to_u8(self.sequences.max_seq_length())?.to_c(),
         });
 
         let (tree, kmap_struct_names) = self.render_kmaps()?;
@@ -145,10 +143,13 @@ impl AllData {
     }
 
     fn render_mode_enum(&self) -> CTree {
-        let modes_list: Vec<_> =
-            self.modes.keys().map(|x| x.to_c().to_uppercase()).collect();
+        let modes_list: Vec<_> = self
+            .modes
+            .keys()
+            .map(|mode_name| mode_name.enum_variant())
+            .collect();
         CTree::EnumDecl {
-            name: "mode_enum".to_c(),
+            name: ModeName::enum_type(),
             variants: modes_list,
             size: Some("uint8_t".to_c()),
         }
@@ -255,17 +256,10 @@ impl AllData {
     }
 
     fn render_command_enum(&self) -> Result<CTree, Error> {
-        let command_list: Vec<_> = self
-            .sequences
-            .get_seq_map(SeqType::Command)?
-            .names()
-            .map(|x: &Name| x.to_owned().to_c().to_uppercase())
-            .collect();
-
         Ok(CTree::EnumDecl {
             name: "command_enum".to_c(),
-            variants: command_list,
             size: Some("uint8_t".to_c()),
+            variants: self.command_enum_variants.iter().cloned().collect(),
         })
     }
 

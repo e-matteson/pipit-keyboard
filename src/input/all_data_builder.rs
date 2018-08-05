@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use itertools::Itertools;
@@ -9,8 +9,9 @@ use input::Settings;
 use types::errors::ConflictErr;
 
 use types::{
-    AllChordMaps, AllData, AllSeqMaps, Chord, HuffmanTable, KeyDefs, KeyPress,
-    KmapPath, ModeInfo, ModeName, Name, SeqType, SpellingTable, Validate, Word,
+    AllChordMaps, AllData, AllSeqMaps, CCode, Chord, HuffmanTable, KeyDefs,
+    KeyPress, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+    SpellingTable, ToC, Validate, Word,
 };
 use util::read_file;
 
@@ -42,6 +43,8 @@ impl AllDataBuilder {
     }
 
     pub fn finalize(mut self) -> Result<AllData, Error> {
+        // The order of these calls matters! Some depend on data loaded in
+        // previous ones.
         self.load_modes()?;
 
         self.load_chords().context("Failed to load chords")?;
@@ -65,7 +68,8 @@ impl AllDataBuilder {
         self.load_dictionary(&spellings)
             .context("Failed to load dictionary")?;
 
-        self.load_commands().context("Failed to load commands")?;
+        let command_enum_variants =
+            self.load_commands().context("Failed to load commands")?;
 
         Ok(AllData {
             huffman_table: self.make_huffman_table()?,
@@ -80,6 +84,7 @@ impl AllDataBuilder {
             anagram_mods: self.anagram_mods,
             modes: self.modes,
             spellings,
+            command_enum_variants,
         })
     }
 
@@ -144,12 +149,32 @@ impl AllDataBuilder {
         }
     }
 
-    fn load_commands(&mut self) -> Result<(), Error> {
-        let commands = self.settings.commands.clone();
-        for name in commands {
-            self.add_command(name).context("Failed to load command")?;
+    fn load_commands(&mut self) -> Result<BTreeSet<CCode>, Error> {
+        // TODO reorganize this, as part of intl refactor?
+        let qualify = |s: &CCode| format!("command_enum::{}", s).to_c();
+
+        let mut command_enum_variants = BTreeSet::new();
+
+        let normal_commands = self.settings.commands.clone();
+        for name in normal_commands {
+            let enum_variant = name.clone().to_c().to_uppercase();
+            self.add_command(name, qualify(&enum_variant), &[])
+                .context("Failed to add command")?;
+            command_enum_variants.insert(enum_variant);
         }
-        Ok(())
+
+        let modes = { self.modes.keys().cloned().collect::<Vec<ModeName>>() };
+        for mode in modes {
+            let enum_variant = "SWITCH_TO".to_c();
+            self.add_command(
+                Name::from(format!("switch_to_{}", mode)),
+                qualify(&enum_variant),
+                &[mode.qualified_enum_variant()],
+            ).context("Failed to add mode-switching command")?;
+            command_enum_variants.insert(enum_variant);
+        }
+
+        Ok(command_enum_variants)
     }
 
     fn load_dictionary(
@@ -229,16 +254,23 @@ impl AllDataBuilder {
             .insert(name, key_press.into(), SeqType::Plain)
     }
 
-    pub fn add_command(&mut self, command_name: Name) -> Result<(), Error> {
-        // Commands are a single byte code, not an actual key sequence.
-        // But we'll store each one as a "fake" KeyPress for convenience.
-        let fake_keypress = KeyPress::new_fake(&command_name.to_uppercase());
-
-        self.sequences.insert(
-            command_name,
-            fake_keypress.into(),
-            SeqType::Command,
-        )
+    pub fn add_command(
+        &mut self,
+        command_name: Name,
+        command_enum: CCode,
+        args: &[CCode],
+    ) -> Result<(), Error> {
+        // TODO this is messy, unclear what's qualified!
+        //
+        // Commands don't have actual key sequences, just a byte containing an
+        // enum value, and maybe some extra bytes as argument. But we'll
+        // store them as Sequences for convenience.
+        let mut fake_seq: Sequence = KeyPress::new_fake(command_enum).into();
+        for arg in args {
+            fake_seq.push(KeyPress::new_fake(arg.to_owned()))
+        }
+        self.sequences
+            .insert(command_name, fake_seq, SeqType::Command)
     }
 
     pub fn add_word(
@@ -285,7 +317,7 @@ impl AllDataBuilder {
     }
 
     pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
-        let mut out = HashSet::new();
+        let mut out = BTreeSet::new();
         for mode_info in self.settings.modes.values() {
             for kmap_info in &mode_info.keymaps {
                 if kmap_info.use_words {

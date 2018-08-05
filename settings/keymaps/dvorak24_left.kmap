@@ -4,7 +4,7 @@
 # right hand. The modifiers are sticky - press and release them one at a time,
 # then press the letter you want to be modified.
 
-command_default_mode
+switch_to_default_mode
 ....   ....
 ..*.   .*..
   .     .

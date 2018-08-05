@@ -1,6 +1,6 @@
 use failure::{Error, ResultExt};
 use types::errors::*;
-use types::{CCode, Name, Spelling, ToC, Validate};
+use types::{CCode, Spelling, ToC, Validate};
 
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -216,12 +216,9 @@ impl KeyPress {
         }
     }
 
-    pub fn new_fake(command_code: &Name) -> Self {
-        // We also use KeyPresses to store command codes
-        Self {
-            key: Some(command_code.to_c()),
-            mods: Vec::new(),
-        }
+    pub fn new_fake(non_key_data: CCode) -> Self {
+        // We also use KeyPresses to store command codes and args
+        KeyPress::new_key(non_key_data)
     }
 
     pub fn key_or_blank(&self) -> CCode {

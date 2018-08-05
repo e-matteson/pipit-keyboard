@@ -250,7 +250,7 @@ key_delete    key_printscreen  key_caps_lock
 
 ##### commands #####
 
-command_left_hand_mode  command_gaming_mode  command_windows_mode
+switch_to_left_hand_mode  switch_to_gaming_mode  switch_to_windows_mode
 ****   ....             ....   ****          ****   **..
 ....   ....             ....   ....          ....   ....
   .     .                 .     .              .     .

@@ -52,7 +52,7 @@ private:
   void processChord(Chord* new_chord);
   void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
 
-  void doCommand(uint8_t code);
+  void doCommand(const Key* data, uint8_t length);
 
   void cycleLastWordAnagram();
   void cycleLastWordCapital();

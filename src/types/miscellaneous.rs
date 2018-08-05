@@ -285,6 +285,20 @@ impl fmt::Display for KmapPath {
 
 //////////////////////////////
 
+impl ModeName {
+    pub fn enum_type() -> CCode {
+        "mode_enum".to_c()
+    }
+
+    pub fn enum_variant(&self) -> CCode {
+        self.to_c().to_uppercase()
+    }
+
+    pub fn qualified_enum_variant(&self) -> CCode {
+        format!("{}::{}", ModeName::enum_type(), self.enum_variant()).to_c()
+    }
+}
+
 impl Validate for ModeName {
     fn validate(&self) -> Result<(), Error> {
         // TODO check if contains chars other than a-zA-Z_
@@ -317,14 +331,6 @@ impl From<String> for ModeName {
 }
 
 //////////////////////////////
-
-// TODO: sanitize name?
-impl Name {
-    pub fn to_uppercase(&self) -> Self {
-        // TODO remove?
-        Name(self.0.to_uppercase())
-    }
-}
 
 impl Validate for Name {
     fn validate(&self) -> Result<(), Error> {

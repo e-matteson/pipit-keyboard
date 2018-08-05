@@ -325,7 +325,6 @@ anagram_modifiers:
   - mod_anagram_2
 
 commands:
-  - command_windows_mode
   - command_delete_word
   - command_shorten_last_word
   - command_left_word
@@ -344,9 +343,6 @@ commands:
   - command_led_battery
   - command_led_colors
   - command_led_rainbow
-  - command_left_hand_mode
-  - command_default_mode
-  - command_gaming_mode
   - command_toggle_wireless
 
 dictionary:
