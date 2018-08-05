@@ -459,6 +459,8 @@ impl Sequence {
 impl FromStr for Sequence {
     type Err = Error;
 
+    /// Construct a Sequence from the letters in a string, using each letter as
+    /// the Spelling of a KeyPress.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let presses: Result<Vec<_>, Self::Err> =
             s.graphemes(true).map(|c| KeyPress::from_str(c)).collect();

@@ -18,9 +18,9 @@ extern crate structopt;
 #[macro_use]
 mod types;
 #[macro_use]
-mod load;
+mod input;
 mod cheatsheet;
-mod format;
+mod output;
 #[cfg(test)]
 mod tests;
 mod tutor;
@@ -30,7 +30,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 use cheatsheet::CheatSheet;
-use load::AllDataBuilder;
+use input::AllDataBuilder;
 use tutor::TutorApp;
 use types::errors::print_error;
 
@@ -51,7 +51,7 @@ struct Opt {
     // #[structopt(short = "o", long = "output", parse(from_os_str))]
     // output: Option<PathBuf>
     //
-    /// Settings file that includes the keymaps, dictionary, etc
+    /// Settings file that specifies the keymaps, dictionary, etc
     #[structopt(parse(from_os_str))]
     settings: Option<PathBuf>,
 }
@@ -86,12 +86,10 @@ fn run() -> Result<(), Error> {
 }
 
 fn main() {
-    // PROFILER.lock().unwrap().start("./my-prof.profile").unwrap();
     if let Err(error) = run() {
         print_error(&error);
         ::std::process::exit(1);
     } else {
         println!("Done.");
     }
-    // PROFILER.lock().unwrap().stop().unwrap();
 }

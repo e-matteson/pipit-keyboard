@@ -1,51 +1,14 @@
+use failure::Error;
 use std::collections::HashMap;
-use std::path::PathBuf;
-
-use svg;
 use svg::node::element::{ClipPath, Definitions, Group};
-use svg::Document;
 use svg::Node;
-
-use serde_yaml;
 use unicode_segmentation::UnicodeSegmentation;
 
-use failure::{err_msg, Error, ResultExt};
-use types::errors::{LookupErr, MissingErr};
-use types::{ModeName, Name, TutorData};
-use util::{read_file, user_confirm, ConfirmDefault};
-
 use cheatsheet::draw::{
-    Color, Fill, FillPattern, Font, Label, MyCircle, MyDescription, MyRect, P2,
-    V2, Wedge,
+    Color, Fill, FillPattern, Font, Label, MyCircle, MyRect, P2, V2, Wedge,
 };
-
-#[derive(Clone, Debug)]
-pub struct CheatSheet {
-    keyboards: Vec<Keyboard>,
-    page_width: f64,
-    page_height: f64,
-    default_svg_filename: PathBuf,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct CheatSheetSpec {
-    keyboards: Vec<Option<KeyboardSpec>>,
-    page_width: f64,
-    page_height: f64,
-    mode: ModeName,
-    // TODO add title?
-}
-
-#[derive(Clone, Debug)]
-struct Keyboard {
-    switches: Vec<Switch>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct KeyboardSpec {
-    chord_names: Vec<Name>,
-    // TODO add title?
-}
+use types::errors::MissingErr;
+use types::Name;
 
 #[derive(Clone, Copy, Debug)]
 #[allow(dead_code)]
@@ -68,367 +31,36 @@ pub enum SwitchStyle {
 }
 
 #[derive(Clone, Debug)]
-struct Content {
-    symbol: Symbol,
-    style: SwitchStyle,
+pub struct Content {
+    pub symbol: Symbol,
+    pub style: SwitchStyle,
 }
 
 #[derive(Clone, Debug)]
-struct Symbol {
+pub struct Symbol {
     lines: Vec<String>,
     scale: f64,
 }
 
 #[derive(Clone, Debug)]
-struct Switch {
+pub struct Switch {
     pos: P2,
     contents: Vec<Content>,
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-impl CheatSheet {
-    pub fn from_yaml(path: &PathBuf, data: &TutorData) -> Result<Self, Error> {
-        let file = read_file(path).with_context(|_| {
-            format!("failed to read cheatsheet config file: {:?}", path)
-        })?;
-        let spec: CheatSheetSpec =
-            serde_yaml::from_str(&file).with_context(|_| {
-                format!("failed to parse cheatsheet config file: {:?}", path)
-            })?;
-        Self::new(&spec, data, Self::config_path_to_svg_path(path)?)
-    }
-
-    pub fn new(
-        spec: &CheatSheetSpec,
-        data: &TutorData,
-        default_svg_filename: PathBuf,
-    ) -> Result<Self, Error> {
-        // TODO keyboards are not exactly centered
-        let num_cols = 2.;
-        let num_rows = (spec.keyboards.len() as f64 / num_cols).ceil();
-
-        let x_padding =
-            (spec.page_width - num_cols * Keyboard::width()) / (num_cols + 1.);
-        let y_padding = (spec.page_height - num_rows * Keyboard::height())
-            / (num_rows + 1.);
-
-        let mut col_positions: Vec<_> = (0..num_cols as usize)
-            .map(|c| {
-                let c = c as f64;
-                P2::new((c + 1.) * x_padding + c * Keyboard::width(), y_padding)
-            }).collect();
-
-        let height = V2::new(0., Keyboard::height() + y_padding);
-
-        let mut all = Vec::new();
-        for (i, kb_spec) in spec.keyboards.iter().enumerate() {
-            let mut pos = col_positions
-                .get_mut(i % (num_cols as usize))
-                .expect("bug in CheatSheet::new()");
-
-            if let Some(kb_spec) = kb_spec {
-                let mut keyboard = Keyboard::new(*pos);
-                keyboard
-                    .set(&kb_spec.chord_names, data, &spec.mode)
-                    .context(format!(
-                        "Failed to create image of keyboard #{}",
-                        i
-                    ))?;
-
-                all.push(keyboard);
-            }
-            // Otherwise, the config told us to just leave a blank space where
-            // this keyboard would be.
-
-            *pos = *pos + height;
-        }
-        Ok(Self {
-            keyboards: all,
-            page_width: spec.page_width,
-            page_height: spec.page_height,
-            default_svg_filename,
-        })
-    }
-
-    fn config_path_to_svg_path(
-        config_path: &PathBuf,
-    ) -> Result<PathBuf, Error> {
-        Ok(config_path
-            .with_extension("svg")
-            .file_name()
-            .ok_or_else(|| format_err!("Failed to construct svg filename"))?
-            .into())
-    }
-
-    fn render(&self) -> Document {
-        // TODO add metadata
-        let mut group = Group::new();
-
-        for kb in &self.keyboards {
-            kb.add_to(&mut group);
-        }
-
-        let mut defs = Definitions::new();
-
-        let background = MyRect::new(
-            P2::origin(),
-            V2::new(self.page_width, self.page_height),
-        );
-        FillPattern::add_all_definitions(background, &mut defs);
-        Switch::add_clip_definition(&mut defs);
-
-        let desc = MyDescription::new(
-            "Cheatsheet reference for a layout of a pipit keyboard. \
-             https://github.com/e-matteson/pipit-keyboard",
-        ).finalize();
-
-        let mut doc = Document::new()
-            .set("viewBox", (0, 0, self.page_width, self.page_height));
-
-        doc.append(desc);
-        doc.append(defs);
-        doc.append(group);
-        doc
-    }
-
-    pub fn save(&self, filename: Option<&str>) -> Result<(), Error> {
-        let path = if let Some(s) = filename {
-            PathBuf::from(s)
-        } else {
-            self.default_svg_filename.clone()
-        };
-
-        // Using extra brackets because non-lexical lifetimes aren't in stable
-        // yet, and it doesn't know to stop borrowing `path` after creating
-        // `path_str`.
-        {
-            let path_str = path
-                .to_str()
-                .to_owned()
-                .ok_or_else(|| format_err!("Invalid path: {:?}", path))?;
-
-            if path.exists() {
-                let confirmed = user_confirm(
-                &format!(
-                    "The file '{}' already exists, do you want to overwrite it?",
-                    path_str),
-                ConfirmDefault::No,
-            )?;
-                if !confirmed {
-                    println!("Cheatsheet not saved.");
-                    return Ok(());
-                }
-            }
-
-            println!("Saving cheatsheet as '{}'.", path_str);
-        }
-        let doc = self.render();
-        svg::save(path, &doc).context("Failed to save cheatsheet")?;
-        Ok(())
-    }
-}
-
-impl Keyboard {
-    fn new(pos: P2) -> Self {
-        Self {
-            switches: Self::positions(pos)
-                .into_iter()
-                .map(Switch::new)
-                .collect(),
-        }
-    }
-
-    fn set(
-        &mut self,
-        chord_names: &[Name],
-        data: &TutorData,
-        mode: &ModeName,
-    ) -> Result<(), Error> {
-        assert_eq!(data.chord_spec.num_switches, self.switches.len());
-        let chords = chord_names
-            .iter()
-            .map(|name| {
-                data.chord(name, mode).ok_or_else(|| LookupErr {
-                    key: name.into(),
-                    container: "tutor data chords".into(),
-                })
-            }).collect::<Result<Vec<_>, _>>()?;
-
-        let symbols: Result<Vec<_>, Error> =
-            chord_names.iter().map(|name| get_symbol(name)).collect();
-        let symbols = symbols?;
-
-        let mut chord_style_iter = SwitchStyle::chord_style_iter();
-
-        for (chord, symbol) in chords.into_iter().zip(symbols.into_iter()) {
-            let style = if chord.count_pressed() == 1 {
-                SwitchStyle::Single
-            } else {
-                // Usually this means there's a multi-switch chord.
-                // We should also consume a chord style if 0 switches are
-                // pressed, meaning this is a blank chord named "", used for
-                // skipping colors.
-                chord_style_iter.next().ok_or_else(|| {
-                    err_msg("ran out of unique switch fill styles")
-                })?
-            };
-
-            let content = Content {
-                symbol: symbol.clone(),
-                style,
-            };
-            for (index, &bit) in chord.iter().enumerate() {
-                if bit {
-                    self.switches[index].push_content(content.clone());
-                }
-            }
-        }
-        Ok(())
-    }
-
-    fn add_to(&self, group: &mut Group) {
-        let mut frame_group = Group::new();
-        for switch in &self.switches {
-            switch.add_frame_to(
-                &mut frame_group,
-                Color::Black,
-                Self::outer_frame_scale(),
-            );
-        }
-        for switch in &self.switches {
-            switch.add_frame_to(
-                &mut frame_group,
-                Color::White,
-                Self::inner_frame_scale(),
-            );
-        }
-        group.append(frame_group);
-        for switch in &self.switches {
-            switch.add_to(group);
-        }
-    }
-
-    fn outer_frame_scale() -> f64 {
-        1.6
-    }
-
-    fn inner_frame_scale() -> f64 {
-        1.57
-    }
-
-    fn height() -> f64 {
-        // TODO this could fail if the switch alignment changes! Those 2
-        // switches won't always be highest and lowest.
-        let positions = Self::positions(P2::origin());
-        let err_msg = "failed to calc keyboard height";
-        let highest = 2;
-        let lowest = 20;
-        let height = positions.get(lowest).expect(err_msg).y
-            - positions.get(highest).expect(err_msg).y
-            + Switch::side_length() * Self::outer_frame_scale();
-        height * 1.1
-    }
-
-    fn width() -> f64 {
-        // TODO this could fail if the switch alignment changes! Those 2
-        // switches won't always be highest and lowest.
-        let positions = Self::positions(P2::origin());
-        let err_msg = "failed to calc keyboard width";
-        let highest = 7;
-        let lowest = 0;
-        let width = positions.get(highest).expect(err_msg).x
-            - positions.get(lowest).expect(err_msg).x
-            + Switch::side_length();
-        width * 1.1
-    }
-
-    fn positions(origin: P2) -> Vec<P2> {
-        // Order must match tutor's graphical switch order, since we're using
-        // the same chord lookup.
-        let len = Switch::side_length();
-        let y_pinky = len * 0.75;
-        let y_ring = len * 0.25;
-        let x_col = len * 1.1;
-        let y_col = len * 1.1;
-        let y_tower = len * 1.2;
-        let thumb_from_tower = (len * 1.2, len * 0.5);
-        let x_thumb = x_col;
-        let y_thumb_medial = len * 0.;
-        let y_thumb_radial = len * 0.5;
-        let x_col_hand_gap = len * 2.7;
-
-        let frame_width =
-            (Self::outer_frame_scale() - 1.) * Switch::side_length() / 2.;
-        let frame = V2::new(frame_width, frame_width);
-
-        let offset =
-            |positions: &mut Vec<P2>, index: usize, offset: (f64, f64)| {
-                let new_pos = positions[index] + offset;
-                positions.push(new_pos)
-            };
-
-        let mut p = Vec::new();
-
-        // top left row
-        p.push(origin + (0., y_pinky) + frame); // 0
-        p.push(origin + (x_col, y_ring) + frame); // 1
-        p.push(origin + (x_col * 2., 0.) + frame); // 2
-        offset(&mut p, 2, (x_col, 0.)); // 3
-
-        let reflect = |positions: &mut Vec<P2>, index: usize| {
-            let x_mirror = positions[3].x + len / 2. + x_col_hand_gap;
-            let old_pos = positions[index];
-            let new_x = x_mirror + (x_mirror - old_pos.x);
-            positions.push(P2::new(new_x, old_pos.y))
-        };
-
-        // top right row
-        for i in (0..4).rev() {
-            reflect(&mut p, i); // 4-7
-        }
-
-        // bottom left row
-        offset(&mut p, 0, (0., y_col)); // 8
-        offset(&mut p, 1, (0., y_col)); // 9
-        offset(&mut p, 2, (0., y_col)); // 10
-        offset(&mut p, 3, (0., y_col)); // 11
-
-        // bottom right row
-        for i in (8..12).rev() {
-            reflect(&mut p, i); // 12-15
-        }
-
-        // left and right towers
-        offset(&mut p, 10, (0., y_tower)); // 16
-        reflect(&mut p, 16); // 17
-
-        // left thumb
-        offset(&mut p, 16, thumb_from_tower); // 18
-        offset(&mut p, 18, (x_thumb, y_thumb_medial)); // 19
-        offset(&mut p, 19, (x_thumb, y_thumb_radial)); // 20
-
-        // right thumb
-        for i in (18..21).rev() {
-            reflect(&mut p, i); // 21-23
-        }
-        p
-    }
-}
-
 impl Switch {
-    fn new(pos: P2) -> Self {
+    pub fn new(pos: P2) -> Self {
         Self {
             pos,
             contents: Vec::new(),
         }
     }
 
-    fn push_content(&mut self, content: Content) {
+    pub fn push_content(&mut self, content: Content) {
         self.contents.push(content);
     }
 
-    fn side_length() -> f64 {
+    pub fn side_length() -> f64 {
         25.
     }
     fn clip_id() -> String {
@@ -450,7 +82,7 @@ impl Switch {
             .fillet(5.)
     }
 
-    fn add_clip_definition(defs: &mut Definitions) {
+    pub fn add_clip_definition(defs: &mut Definitions) {
         let clip = Self::outline(P2::origin()).finalize();
         let clip_path = ClipPath::new().set("id", Self::clip_id()).add(clip);
         defs.append(clip_path);
@@ -528,7 +160,7 @@ impl Switch {
         );
     }
 
-    fn add_frame_to(&self, group: &mut Group, color: Color, scale: f64) {
+    pub fn add_frame_to(&self, group: &mut Group, color: Color, scale: f64) {
         let frame_fill = Fill::new_solid(color);
         let frame = Self::outline(self.pos)
             .fill(frame_fill)
@@ -538,7 +170,7 @@ impl Switch {
         group.append(frame);
     }
 
-    fn add_to(&self, outer_group: &mut Group) {
+    pub fn add_to(&self, outer_group: &mut Group) {
         let mut inner_group = Group::new();
         let num_wedges = self.contents.len();
 
@@ -553,7 +185,7 @@ impl Switch {
 }
 
 impl SwitchStyle {
-    fn chord_style_iter() -> impl Iterator<Item = SwitchStyle> {
+    pub fn chord_style_iter() -> impl Iterator<Item = SwitchStyle> {
         vec![
             SwitchStyle::Shared0,
             SwitchStyle::Shared1,
@@ -618,6 +250,10 @@ impl Symbol {
             lines: lines.into_iter().map(|s| s.to_string()).collect(),
             scale,
         }
+    }
+
+    pub fn from_name(name: &Name) -> Result<Self, Error> {
+        get_symbol(name)
     }
 
     fn is_single_grapheme(&self) -> bool {

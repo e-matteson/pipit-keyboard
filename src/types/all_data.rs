@@ -61,6 +61,7 @@ impl AllData {
         None
     }
 
+    /// Get a Chord containing all the switches used in any anagram mod.
     pub fn get_anagram_mask(&self, mode: &ModeName) -> Chord {
         self.anagram_mods
             .iter()
@@ -69,8 +70,21 @@ impl AllData {
             .unwrap_or_else(|| self.chord_spec.new_chord())
     }
 
+    /// Get names of all modifiers, including `plain_mod`s, `word_mod`s, and
+    /// `anagram_mods`
+    pub fn get_mod_names(&self) -> Vec<Name> {
+        let mut names = Vec::new();
+        names.extend(self.plain_mods.clone());
+        names.extend(self.word_mods.clone());
+        names.extend(self.anagram_mods.clone());
+        names.sort();
+        names
+    }
+
+    /// Get chords the for all modifiers in the given mode, in the same order
+    /// as `get_mod_names()`. If any modifier was not assigned a chord in this
+    /// mode, give it a blank chord instead.
     pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
-        // Order must match get_mod_names()!
         let mut chords = Vec::new();
         for name in self.get_mod_names() {
             // Missing mod chords are represented in the firmware config as a
@@ -94,15 +108,6 @@ impl AllData {
             .len())
     }
 
-    pub fn get_mod_names(&self) -> Vec<Name> {
-        let mut names = Vec::new();
-        names.extend(self.plain_mods.clone());
-        names.extend(self.word_mods.clone());
-        names.extend(self.anagram_mods.clone());
-        names.sort();
-        names
-    }
-
     fn get_all_names(&self) -> Vec<Name> {
         self.sequences
             .names()
@@ -113,6 +118,13 @@ impl AllData {
             .collect()
     }
 
+    /// Incorporate the anagram mod chord directly into this chord.
+    //
+    /// Lookup the anagram_mod chord that corresponds to the given chord's
+    /// anagram number, and return the union of the 2 chords. If the given
+    /// chord's anagram number is zero, return the given chord without
+    /// modifications. If its anagram number has no corresponding anagram_mod
+    /// in this mode, return None.
     pub fn incorporate_anagram(
         &self,
         mut chord: Chord,
@@ -128,6 +140,8 @@ impl AllData {
         Some(chord)
     }
 
+    /// Get the subset of the data needed for the typing tutor and/or the
+    /// cheatsheet.
     pub fn get_tutor_data(&self) -> Result<TutorData, Error> {
         // TODO clean up, reorganize AllData to make this less bad?
         // TODO think about borrowck

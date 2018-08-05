@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use failure::{Error, ResultExt};
 
-use load::AllDataBuilder;
+use input::AllDataBuilder;
 use types::errors::pretty_unwrap;
 
 fn expected_dir() -> PathBuf {

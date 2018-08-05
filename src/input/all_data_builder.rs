@@ -5,7 +5,7 @@ use itertools::Itertools;
 use serde_yaml;
 
 use failure::{Error, ResultExt};
-use load::Settings;
+use input::Settings;
 use types::errors::ConflictErr;
 
 use types::{

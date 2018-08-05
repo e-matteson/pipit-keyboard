@@ -7,7 +7,7 @@ use types::{
 };
 use util::bools_to_bytes;
 
-use format::{KmapBuilder, ModeBuilder};
+use output::{KmapBuilder, ModeBuilder};
 // use format::KmapBuilder;
 
 use failure::Error;
