@@ -7,7 +7,6 @@
 
 class TeensyComms: public Comms {
  public:
-  TeensyComms();
   void setup();
   void press(const Report* report);
   void proportionalDelay(uint8_t data_length, uint8_t multiplier);

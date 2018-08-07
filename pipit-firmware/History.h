@@ -27,7 +27,6 @@ enum Motion{
 class History{
 
 public:
-  History();
   void save(Report* report);
   void startEntry(const Chord* new_chord, bool is_anagrammable);
 
@@ -61,10 +60,11 @@ private:
     uint8_t word = 0;
     uint8_t letter = 0;
   };
-  Cursor cursor;
 
-  Entry* stack[HISTORY_SIZE+PADDING] = {0};
+  Cursor cursor;
+  Entry stack[HISTORY_SIZE+PADDING];
   Entry new_entry;
+
   bool has_new_entry_been_pushed = 1;
 };
 

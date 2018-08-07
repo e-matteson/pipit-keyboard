@@ -1,17 +1,21 @@
 #include "Chord.h"
 #include "util.h"
 
-Chord::Chord(conf::mode_enum mode) : mode(mode){
-}
-
-Chord::Chord(){
-}
+#define FLAG_BIT 15
 
 
-void Chord::setChordArray(const uint8_t* new_chord_bytes){
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    chord_bytes[i] = new_chord_bytes[i];
+Chord::Chord(){}
+
+Chord::Chord(conf::mode_enum mode) : mode(mode){}
+
+void Chord::setSwitch(uint8_t switch_index){
+  if(switch_index >= NUM_MATRIX_POSITIONS) {
+    DEBUG1_LN("WARNING: invalid chord switch index");
+    return;
   }
+  uint8_t byte = switch_index / 8;
+  uint8_t bit = switch_index % 8;
+  chord_bytes[byte] |= (0x01 << bit);
 }
 
 void Chord::setMode(conf::mode_enum _mode){
@@ -65,22 +69,26 @@ void Chord::clear(){
 }
 
 void Chord::editCaps(Key* data, uint8_t length) const {
-  CapBehaviorEnum behavior = decideCapBehavior(data, length);
-  if(behavior == CAP_FIRST) {
-    data[0].setShift(1);
-  }
-  else if (behavior == CAP_NONE) {
-    data[0].setShift(0);
-  }
+  switch(decideCapBehavior(data, length)) {
+  case CapBehaviorEnum::CAP_DEFAULT:
+    break;
 
-  for(uint8_t i = 1; i<length; i++){
-    if (behavior == CAP_NONE) {
+  case CapBehaviorEnum::CAP_FIRST:
+    data[0].setShift(1);
+    break;
+
+  case CapBehaviorEnum::CAP_NONE:
+    for(uint8_t i = 0; i<length; i++){
       data[i].setShift(0);
     }
+    break;
+
+  default:
+    DEBUG1_LN("WARNING: unknown cap behavior");
   }
 }
 
-CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
+Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
   bool has_cap_mod = hasMod(conf::getCapitalEnum());
 
   if(!getFlagCycleCapital()) {
@@ -90,11 +98,12 @@ CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const 
     }
     return CAP_DEFAULT;
   }
+
   // The complicated case, where we might force capitalized dictionary words to
   // be lowercase.
   bool has_literal_shift = 0;
   for(uint8_t i = 0; i < length; i++) {
-    if(data[i].hasShift()) {
+    if(data[i].containsShift()) {
       has_literal_shift = 1;
       break;
     }
@@ -146,11 +155,11 @@ void Chord::toggleMod(conf::mod_enum mod){
 }
 
 bool Chord::getFlagCycleCapital() const {
-  return 1 & (mods_and_flags >> 15);
+  return 1 & (mods_and_flags >> FLAG_BIT);
 }
 
 void Chord::toggleFlagCycleCapital() {
-  mods_and_flags ^= (1 << 15);
+  mods_and_flags ^= (1 << FLAG_BIT);
 }
 
 void Chord::extractPlainMods(){
@@ -245,6 +254,25 @@ void Chord::prepareToCycle(){
   // cycle this chord.
   unsetMod(conf::getModShortenEnum());
   unsetMod(conf::getDoubleEnum());
+}
+
+void Chord::cycle(CycleType operation){
+  switch(operation) {
+  case CycleType::CYCLE_CAPITAL:
+    cycleCapital();
+    break;
+
+  case CycleType::CYCLE_NOSPACE:
+    cycleNospace();
+    break;
+
+  case CycleType::CYCLE_ANAGRAM:
+    cycleAnagram();
+    break;
+
+  default:
+    DEBUG1_LN("WARNING: unknown cycle type");
+  }
 }
 
 void Chord::cycleCapital(){

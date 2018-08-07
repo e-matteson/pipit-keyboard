@@ -24,14 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Pipit.h"
 
 
-Pipit* pipit = new Pipit();
+Pipit pipit;
 
 void setup() {
   Serial.begin(115200); // for sending feedback codes and debug messages
-  pipit->setup();
+  pipit.setup();
 }
 
 void loop() {
-  pipit->loop();
+  pipit.loop();
 
 }

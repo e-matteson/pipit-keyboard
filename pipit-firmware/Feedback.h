@@ -8,7 +8,7 @@
 #include "Timer.h"
 
 // Possible routines for the rgb led:
-enum led_routine_enum{
+enum LEDRoutineEnum{
   NO_ROUTINE = 0,
   BATTERY_ROUTINE,
   BOOT_ROUTINE,
@@ -31,51 +31,46 @@ enum led_routine_enum{
   RAINBOW_ROUTINE,
 };
 
-// Pre-defined colors for the rgb led
-// TODO make private?
-// The all_colors_routine relies on the fact that these are numbered in order starting at zero, and BLACK is the last color.
-enum led_color_enum{
-  RED = 0,
-  ORANGE,
-  YELLOW,
-  GREEN,
-  TEAL,
-  BLUE,
-  DIM_BLUE,
-  PURPLE,
-  MAGENTA,
-  WHITE,
-  BLACK,
-};
-
-
-
 class Feedback{
 
 public:
-
-  Feedback();
-
+  void setup();
   void trigger(conf::seq_type_enum type);
   void triggerUnknown();
   void triggerNoAnagram();
   void updateLED();
-  void startRoutine(led_routine_enum routine);
+  void startRoutine(LEDRoutineEnum routine);
   void endRoutine();
-  void setLEDColor(led_color_enum color);
 
 private:
+  // Pre-defined colors for the rgb led
+  // TODO make private?
+  // The all_colors_routine relies on the fact that these are numbered in order starting at zero, and BLACK is the last color.
+  enum LEDColorEnum{
+                    RED = 0,
+                    ORANGE,
+                    YELLOW,
+                    GREEN,
+                    TEAL,
+                    BLUE,
+                    DIM_BLUE,
+                    PURPLE,
+                    MAGENTA,
+                    WHITE,
+                    BLACK,
+  };
+
   void triggerFeedback(char feedback_code);
   void triggerAudioFeedback(char feedback_code);
-  void triggerLEDFeedback(led_routine_enum routine);
+  void triggerLEDFeedback(LEDRoutineEnum routine);
+  void setLEDColor(LEDColorEnum color);
   void setLEDRGB(uint8_t red, uint8_t green, uint8_t blue);
 
-  Battery* battery;
-  Timer* led_timer;
-  // Timer led_timer(1000, 0);
-  led_routine_enum led_routine = NO_ROUTINE; // The active LED routine
+  Battery battery;
+  Timer led_timer;
+
+  LEDRoutineEnum led_routine = NO_ROUTINE; // The active LED routine
   uint16_t led_subroutine = 0; // The active LED subroutine
-  uint8_t battery_pin;
 
 };
 

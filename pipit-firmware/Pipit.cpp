@@ -26,73 +26,73 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     /******************************************/
 
   case conf::command_enum::COMMAND_DELETE_WORD:
-    deleteLastWord();
+    sender.deleteLastWord();
     break;
 
   case conf::command_enum::COMMAND_SHORTEN_LAST_WORD:
-    move(WORD, LEFT);
-    sender->sendBackspace();
-    move(WORD, RIGHT);
+    sender.move(Motion::WORD, Direction::LEFT);
+    sender.backspace();
+    sender.move(Motion::WORD, Direction::RIGHT);
     break;
 
   case conf::command_enum::COMMAND_LEFT_WORD:
-    move(WORD, LEFT);
+    sender.move(Motion::WORD, Direction::LEFT);
     break;
 
   case conf::command_enum::COMMAND_LEFT_LIMIT:
-    move(LIMIT, LEFT);
+    sender.move(Motion::LIMIT, Direction::LEFT);
     break;
 
   case conf::command_enum::COMMAND_RIGHT_WORD:
-    move(WORD, RIGHT);
+    sender.move(Motion::WORD, Direction::RIGHT);
     break;
 
   case conf::command_enum::COMMAND_RIGHT_LIMIT:
-    move(LIMIT, RIGHT);
+    sender.move(Motion::LIMIT, Direction::RIGHT);
     break;
 
   case conf::command_enum::COMMAND_CYCLE_WORD:
-    cycleLastWordAnagram();
+    cycleLastWord(CycleType::CYCLE_ANAGRAM);
     break;
 
   case conf::command_enum::COMMAND_CYCLE_CAPITAL:
-    cycleLastWordCapital();
+    cycleLastWord(CycleType::CYCLE_CAPITAL);
     break;
 
   case conf::command_enum::COMMAND_CYCLE_NOSPACE:
-    cycleLastWordNospace();
+    cycleLastWord(CycleType::CYCLE_NOSPACE);
     break;
 
   case conf::command_enum::COMMAND_STICKY_CTRL:
-    sender->setStickymod(MODIFIERKEY_CTRL&0xff);
+    sender.setStickymod(MODIFIERKEY_CTRL&0xff);
     break;
 
   case conf::command_enum::COMMAND_STICKY_SHIFT:
-    sender->setStickymod(MODIFIERKEY_SHIFT&0xff);
+    sender.setStickymod(MODIFIERKEY_SHIFT&0xff);
     break;
 
   case conf::command_enum::COMMAND_STICKY_ALT:
-    sender->setStickymod(MODIFIERKEY_ALT&0xff);
+    sender.setStickymod(MODIFIERKEY_ALT&0xff);
     break;
 
   case conf::command_enum::COMMAND_STICKY_GUI:
-    sender->setStickymod(MODIFIERKEY_GUI&0xff);
+    sender.setStickymod(MODIFIERKEY_GUI&0xff);
     break;
 
   case conf::command_enum::COMMAND_LED_BATTERY:
-    feedback->startRoutine(BATTERY_ROUTINE);
+    feedback.startRoutine(BATTERY_ROUTINE);
     break;
 
   case conf::command_enum::COMMAND_LED_COLORS:
-    feedback->startRoutine(ALL_COLORS_ROUTINE);
+    feedback.startRoutine(ALL_COLORS_ROUTINE);
     break;
 
   case conf::command_enum::COMMAND_LED_RAINBOW:
-    feedback->startRoutine(RAINBOW_ROUTINE);
+    feedback.startRoutine(RAINBOW_ROUTINE);
     break;
 
   case conf::command_enum::COMMAND_TOGGLE_WIRELESS:
-    comms->toggleWireless();
+    sender.comms.toggleWireless();
     break;
 
   case conf::command_enum::SWITCH_TO:
@@ -109,47 +109,32 @@ void Pipit::doCommand(const Key* data, uint8_t length){
   }
 }
 
-Pipit::Pipit(){
-#ifdef FEATHER_M0_BLE
-  comms = new FeatherComms();
-#elif defined(TEENSY_LC)
-  comms = new TeensyComms();
-#endif
-
-  switches = new Switches();
-  sender = new Sender(comms);
-  feedback = new Feedback();
-
-  // loop_timer = new Timer(loop_delay_micros, 1, Timer::MICROSECONDS);
-}
 
 void Pipit::setup(){
-  switches->setup();
-  feedback->startRoutine(BATTERY_ROUTINE);
-  // feedback->startRoutine(BOOT_ROUTINE);
-  feedback->updateLED();
-  comms->setup();
+  switches.setup();
+  sender.setup();
+  feedback.setup();
+  feedback.startRoutine(BATTERY_ROUTINE);
+  feedback.updateLED();
 }
 
 void Pipit::loop(){
-  switches->update();
+  switches.update();
   sendIfReady();
-  feedback->updateLED();
+  feedback.updateLED();
   shutdownIfSquished();
-  // delay(loop_timer->remaining());
-  // loop_timer->start();
   delayMicroseconds(100);
 }
 
 void Pipit::shutdownIfSquished(){
-  if(!switches->matrix->isSquishedInBackpack()){
+  if(!switches.matrix.isSquishedInBackpack()){
     return;
   }
   DEBUG1_LN("WARNING: Switches have been held down too long, you might be inside a backpack.");
   DEBUG1_LN("         Please reboot.");
   // TODO disable other things? like bluetooth?
-  switches->matrix->shutdown();
-  sender->releaseAll();
+  switches.matrix.shutdown();
+  sender.releaseAll();
   delay(1000);
   exit(0); // Exit the firmware! Must reboot to use keyboard again.
 }
@@ -158,37 +143,37 @@ void Pipit::shutdownIfSquished(){
 void Pipit::sendIfReady(){
   // Lookup and send a press or release, if necessary
   bool is_gaming = conf::isGaming(mode);
-  if(switches->readyToPress(is_gaming)){
+  if(switches.readyToPress(is_gaming)){
     // Lookup the chord and send the corresponding key sequence.
     if(is_gaming){
       Chord gaming_switches[NUM_MATRIX_POSITIONS];
       for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
         gaming_switches[i].setMode(mode);
       }
-      uint8_t num_switches = switches->fillGamingSwitches(gaming_switches);
+      uint8_t num_switches = switches.fillGamingSwitches(gaming_switches);
       processGamingSwitches(gaming_switches, num_switches);
       return;
     }
 
     Chord chord(mode);
-    switches->fillChord(&chord);
+    switches.fillChord(&chord);
     processChord(&chord);
     return;
   }
 
-  if(switches->readyToRelease(is_gaming)){
+  if(switches.readyToRelease(is_gaming)){
     // Make sure all keys are released
     if(!is_paused){
-      // If you pressed a mix of mods and plain keys, the mod release won't be
-      // sent until all keys are up. This lets you hold `alt` and tap `tab` to
-      // cycle through windows. The only weird edge cases I'm aware of: holding
-      // `tab` and tapping `alt` has the exact same behavior as holding `alt`
-      // and tapping `tab`.
-      if(switches->anySwitchDown()) {
-        sender->releaseNonMods();
+      // If you pressed a mix of plain mods and plain keys, the mod release
+      // won't be sent until all keys are up. This lets you hold `alt` and tap
+      // `tab` to cycle through windows. The only weird edge case I'm aware of
+      // is that holding `tab` and tapping `alt` has the exact same behavior as
+      // holding `alt` and tapping `tab`.
+      if(switches.anySwitchDown()) {
+        sender.releaseNonMods();
       }
       else {
-        sender->releaseAll();
+        sender.releaseAll();
       }
     }
   }
@@ -199,7 +184,7 @@ void Pipit::processChord(Chord* chord){
 
   // If no switch is pressed, just send zero and be done with it.
   // (there can't be mods because we haven't extracted them yet)
-  if(sender->sendIfEmptyExceptMods(chord)){
+  if(sender.sendIfEmptyExceptMods(chord)){
     return;
   };
 
@@ -224,7 +209,7 @@ void Pipit::processChord(Chord* chord){
   chord->extractWordMods();
   chord->extractAnagramMods();
   if(sendIfFound(conf::seq_type_enum::WORD, chord, data)){
-    switches->reuseMods(chord);
+    switches.reuseMods(chord);
     return;
   }
 
@@ -234,20 +219,20 @@ void Pipit::processChord(Chord* chord){
 
   // If chord is a known plain key, send it and return.
   if(sendIfFound(conf::seq_type_enum::PLAIN, chord, data)){
-    switches->reuseMods(chord);
+    switches.reuseMods(chord);
     return;
   }
 
-  if(sender->sendIfEmptyExceptMods(chord)){
+  if(sender.sendIfEmptyExceptMods(chord)){
     // Only modifiers were pressed, send them now. (We know that because if the
     // chord was totally empty, it would have been sent earlier)
-    switches->reuseMods(chord);
-    feedback->trigger(conf::seq_type_enum::PLAIN);
+    switches.reuseMods(chord);
+    feedback.trigger(conf::seq_type_enum::PLAIN);
   }
   else{
     // Unknown chord, release all keys
-    sender->releaseAll();
-    feedback->triggerUnknown();
+    sender.releaseAll();
+    feedback.triggerUnknown();
     DEBUG1_LN("chord not found");
  }
 }
@@ -263,8 +248,8 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* chord = gaming_switches+i;
-    if(uint8_t len = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
-      doCommand(data, len);
+    if(uint8_t length = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
+      doCommand(data, length);
       return;
     }
 
@@ -277,125 +262,55 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     }
 
     // TODO why can't we use normal sendIfFound() here? Because we're adding to the report, not sending, right.
-    uint8_t data_length = 0;
-    if((data_length=conf::lookup(chord, conf::seq_type_enum::PLAIN, data))){
-      if(data_length > 1){
+    if(uint8_t length=conf::lookup(chord, conf::seq_type_enum::PLAIN, data)){
+      if(length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
       report.addKey(data);
       report.addMod(chord->getModByte());
-      feedback->trigger(conf::seq_type_enum::PLAIN);
+      feedback.trigger(conf::seq_type_enum::PLAIN);
       continue;
     }
 
-    feedback->triggerUnknown();
+    feedback.triggerUnknown();
   }
-  sender->sendReport(&report);
+  sender.sendReport(&report);
 }
 
 
-
-/********** High-level editing commands **********/
-
-void Pipit::move(Motion motion, Direction direction){
-  uint16_t count = sender->history->calcDistance(motion, direction);
-
-  for(int16_t i = 0; i < count; i++){
-    if(direction == LEFT) {
-      sender->sendLeftArrow();
-    }
-    else{
-      sender->sendRightArrow();
-    }
-    comms->proportionalDelay(count, 6);
-  }
-}
-
-void Pipit::deleteLastWord(){
-  // Delete the last sent key sequence by sending the correct number of backspaces.
-  move(WORD_EDGE, RIGHT);
-  int16_t count = sender->history->calcDistance(WORD, LEFT);
-  for(int16_t i = 0; i < count; i++){
-    sender->sendBackspace();
-    // For some reason the backspaces get dropped more easily then word letters
-    //  so add a longer delay between sends.
-    comms->proportionalDelay(count, 6);
-  }
-}
-
-void Pipit::cycleLastWordCapital(){
-  Entry* entry = sender->history->getEntryAtCursor();
+void Pipit::cycleLastWord(CycleType cycle_type){
+  Entry* entry = sender.history.getEntryAtCursor();
   if(!entry->isAnagrammable()){
-    feedback->triggerNoAnagram();
+    feedback.triggerNoAnagram();
     return;
   }
   Chord new_chord;
   new_chord.copy(entry->getChord());
-  new_chord.cycleCapital();
-
-  // We need to lookup the chord again, even though only the capitalization is
-  // changing, because the history doesn't store the characters in a word.
-  Key data[MAX_KEYS_IN_SEQUENCE];
-  if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
-    return; // Success
-  }
-  if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
-    return; // Success
-  }
-  feedback->triggerNoAnagram();
-}
-
-void Pipit::cycleLastWordNospace(){
-  // TODO share code with cycleLastWordCapital
-  Entry* entry = sender->history->getEntryAtCursor();
-  if(!entry->isAnagrammable()){
-    feedback->triggerNoAnagram();
-    return;
-  }
-
-  Chord new_chord;
-  new_chord.copy(entry->getChord());
-  new_chord.cycleNospace();
-
-  // We need to lookup the chord again, even though only the capitalization is
-  // changing, because the history doesn't store the characters in a word.
-  Key data[MAX_KEYS_IN_SEQUENCE];
-  if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
-    return; // Success
-  }
-  if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
-    return; // Success
-  }
-  feedback->triggerNoAnagram();
-}
-
-void Pipit::cycleLastWordAnagram(){
-  Entry* entry = sender->history->getEntryAtCursor();
-  if(!entry->isAnagrammable()){
-    feedback->triggerNoAnagram();
-    return;
-  }
-  Chord new_chord;
-  new_chord.copy(entry->getChord());
-  uint8_t original_num = new_chord.getAnagramNum();
-
   Key data[MAX_KEYS_IN_SEQUENCE];
 
-  while(1) {
-    new_chord.cycleAnagram();
-    if(new_chord.getAnagramNum() == original_num){
-      // We've tried all the anagram modifiers, stop.
-      feedback->triggerNoAnagram();
-      return; // Fail
-    }
+  static const uint8_t num_anagrams = MAX_ANAGRAM_NUM+1;
+  for(uint8_t i = 0; i <= num_anagrams; i++) {
+    new_chord.cycle(cycle_type);
+
     if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
       return; // Success
     }
     if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
       return; // Success
     }
+
+    if(cycle_type != CycleType::CYCLE_ANAGRAM) {
+      // Give up after we failed the first time, if we're not cycling anagrams.
+      // The loop is here just to look for all the anagrams, but is useless for
+      // the other cycling types.
+      feedback.triggerNoAnagram();
+      return;
+    }
     // Else, this anagram mod wasn't found, try the next one right away.
   }
+
+  // We've tried all the anagram modifiers and failed!
+  feedback.triggerNoAnagram();
 }
 
 uint8_t Pipit::sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data) {
@@ -408,14 +323,14 @@ uint8_t Pipit::sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key
 
 uint8_t Pipit::sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first) {
   // TODO renam data -> keys
-  uint8_t data_length = conf::lookup(chord, type, data);
-  if(data_length){
+
+  if(uint8_t length = conf::lookup(chord, type, data)){
     if(delete_first) {
-      deleteLastWord();
+      sender.deleteLastWord();
     }
-    sender->sendType(type, data, data_length, chord);
-    feedback->trigger(type);
-    return data_length; // Success
+    sender.sendType(type, data, length, chord);
+    feedback.trigger(type);
+    return length; // Success
   }
   return 0; // Fail
 }

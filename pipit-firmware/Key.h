@@ -12,7 +12,7 @@ public:
   void setKey(uint8_t _key_code);
   void set(uint8_t _key_code, uint8_t _mod_byte);
   void setShift(bool is_upper);
-  bool hasShift() const;
+  bool containsShift() const;
   void addMod(uint8_t new_mod_byte);
   void removeMod(uint8_t new_mod_byte);
   void copy(const Key* other);

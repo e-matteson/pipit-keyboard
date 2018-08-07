@@ -6,18 +6,19 @@
 #include "conf.h"
 #include "Key.h"
 
-enum CapBehaviorEnum {
-  CAP_DEFAULT,
-  CAP_FIRST,
-  CAP_NONE,
+enum CycleType {
+                CYCLE_ANAGRAM,
+                CYCLE_NOSPACE,
+                CYCLE_CAPITAL,
 };
 
 class Chord{
 public:
   Chord();
   Chord(conf::mode_enum mode);
+
   void clear();
-  void setChordArray(const uint8_t* chord_bytes);
+  void setSwitch(uint8_t switch_index);
   void copy(const Chord* chord);
   void setMode(conf::mode_enum _mode);
   void extractPlainMods();
@@ -25,10 +26,7 @@ public:
   void extractAnagramMods();
   void restoreWordMods();
   void restoreAnagramMods();
-  uint8_t getAnagramNum();
-  uint8_t cycleAnagram();
-  void cycleCapital();
-  void cycleNospace();
+  void cycle(CycleType operation);
 
   bool hasAnagramNum(uint8_t other_anagram) const;
   bool hasChordBytes(const uint8_t* other_chord_bytes) const;
@@ -46,6 +44,12 @@ public:
   void printDebug() const;
 
 private:
+  enum CapBehaviorEnum {
+                        CAP_DEFAULT,
+                        CAP_FIRST,
+                        CAP_NONE,
+  };
+
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
   void setMod(conf::mod_enum mod);
@@ -54,11 +58,15 @@ private:
   bool extractMod(conf::mod_enum modifier);
   bool restoreMod(conf::mod_enum modifier);
 
+  uint8_t cycleAnagram();
+  void cycleCapital();
+  void cycleNospace();
+  uint8_t getAnagramNum();
+  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
+  void prepareToCycle();
   bool getFlagCycleCapital() const;
   void toggleFlagCycleCapital();
 
-  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
-  void prepareToCycle();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool doesAnagramHaveMod(uint8_t anagram_num);

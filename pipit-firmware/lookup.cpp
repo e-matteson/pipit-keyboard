@@ -1,6 +1,7 @@
 #include "lookup.h"
 
 uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num, Key* keys_out) {
+  // Return the number of keys in the decoded sequence, or zero if decoding failed.
   uint16_t seq_bit_length = lookup->seq_bit_length();
 
   // The config-tool should enforce a maximum code bit length of 32

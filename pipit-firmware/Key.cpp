@@ -25,7 +25,7 @@ void Key::setShift(bool is_upper){
   }
 }
 
-bool Key::hasShift() const{
+bool Key::containsShift() const{
   return mod_byte & (MODIFIERKEY_SHIFT&0xff);
 }
 

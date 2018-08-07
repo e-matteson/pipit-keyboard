@@ -11,8 +11,8 @@
 #include <Keyboard.h>
 #endif
 
-FeatherComms::FeatherComms(){
-  this->bluetooth = new Adafruit_BluefruitLE_SPI(8, 7, 4);
+// TODO look up and document the magic bluetooth args
+FeatherComms::FeatherComms() : bluetooth(8, 7, 4)  {
 }
 
 void FeatherComms::setup(){
@@ -26,27 +26,28 @@ void FeatherComms::setup(){
 void FeatherComms::setupBluetooth(){
   // if we're not using the feather, do nothing
   bool success = 1;
-  success |= bluetooth->begin(0); // arg is verbosity
+  success |= bluetooth.begin(0); // arg is verbosity
 
   // Delete all stored data, or it won't reconnect to paired hosts?!
-  // success |= bluetooth->factoryReset();
+  // success |= bluetooth.factoryReset();
 
-  bluetooth->echo(false); // Disable command echo
+  bluetooth.echo(false); // Disable command echo
   // TODO does the F() macro do anything?
-  // Change name
-  success |= bluetooth->sendCommandCheckOK(F( "AT+GAPDEVNAME=pipit" ));
+  success |= bluetooth.sendCommandCheckOK(F("AT+GAPDEVNAME=pipit"));
 
-  success |= bluetooth->sendCommandCheckOK(F("AT+BLEPOWERLEVEL=0"));
-  success |= bluetooth->sendCommandCheckOK(F("AT+GAPCONNECTABLE=1"));
+  success |= bluetooth.sendCommandCheckOK(F("AT+BLEPOWERLEVEL=0"));
+  success |= bluetooth.sendCommandCheckOK(F("AT+GAPCONNECTABLE=1"));
 
   // Enable keyboard service
-  success |= bluetooth->sendCommandCheckOK(F("AT+BleHIDEn=On"));
+  success |= bluetooth.sendCommandCheckOK(F("AT+BleHIDEn=On"));
+
   // Must perform software reset after enabling a service
-  success |= bluetooth->reset();
+  success |= bluetooth.reset();
 
   // int32_t* reply;
-  // success = bluetooth->sendCommandWithIntReply(F("AT+BLEPOWERLEVEL"), reply);
+  // success = bluetooth.sendCommandWithIntReply(F("AT+BLEPOWERLEVEL"), reply);
   // Serial.println(*reply);
+
   if(success){
     DEBUG1_LN("bluetooth setup done");
   }
@@ -92,7 +93,7 @@ void FeatherComms::pressWireless(const Report* report){
           report->get(3),
           report->get(4),
           report->get(5));
-  bluetooth->println(cmd);
+  bluetooth.println(cmd);
 }
 
 void FeatherComms::proportionalDelay(uint8_t data_length, uint8_t multiplier){

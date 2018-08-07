@@ -7,7 +7,6 @@
 
 class Battery{
 public:
-  Battery();
   int8_t getLevel();
 
 private:

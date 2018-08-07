@@ -1,10 +1,6 @@
 #include "Report.h"
 
 
-Report::Report(){
-  clear();
-}
-
 void Report::addKey(const Key* key){
   // We can always add to the mod_byte, but we can only fit 6 key_codes
   addMod(key->mod_byte);
@@ -91,14 +87,6 @@ void Report::copy(const Report* other){
 
 void Report::copyMods(const Report* other){
   mod_byte = other->mod_byte;
-}
-
-void Report::clear(){
-  for(uint8_t i = 0; i < 6; i++) {
-    key_codes[i] = 0;
-  }
-  mod_byte = 0;
-  num_keys = 0;
 }
 
 // TODO are debug macros broken?

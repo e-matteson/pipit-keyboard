@@ -7,7 +7,8 @@
 class Timer{
 public:
   Timer();
-  Timer(uint32_t new_default_value, bool start_now);
+  Timer(uint32_t new_default_value);
+  void setDefaultValue(int32_t new_default_value);
   void start();
   void start(uint32_t new_value);
   void disable();
@@ -16,7 +17,6 @@ public:
   bool peekDone();
   bool isRunning();
   void forceDone();
-  void setDefaultValue(int32_t new_default_value);
   uint32_t elapsed();
   uint32_t remaining();
   void jumpAhead(uint32_t units_ahead);

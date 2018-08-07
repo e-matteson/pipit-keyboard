@@ -1,17 +1,18 @@
 #include "Matrix.h"
 
-VolatileFlag* change_flag = new VolatileFlag(0);
+VolatileFlag change_flag(0);
 
 Matrix::Matrix(){
-  // milliseconds to wait after the last keypress before entering standby:
-  standby_timer = new Timer(100, 0);
-  squished_switch_timer = new Timer(squished_delay, 0);
+  // milliseconds to wait since the last keypress before entering standby:
+  standby_timer.setDefaultValue(100);
+  // milliseconds to wait before deciding that a switch is probably squished down inside a backpack:
+  squished_switch_timer.setDefaultValue(60000);
 }
 
 void Matrix::setup(){
   // Initialize pin modes for rows and columns of keyboard matrix. The pin modes
-  //  shouldn't be set in the constructor, that's might be too early and they
-  //  might fail.
+  // shouldn't be set in the constructor, that might be too early and they
+  // might fail.
   setRowsInput(); // rows should always stay in input mode
   setColumnsHiZ(); // columns will change, during scanning and during standby
 
@@ -20,34 +21,84 @@ void Matrix::setup(){
 #endif
 }
 
+bool Matrix::scanIfChanged(){
+  // Return true if we scan. Handle entering and exiting standby.
 
-bool Matrix::get(uint8_t index) const{
-  return 1 & (pressed >> index);
-}
-
-void Matrix::set(uint8_t index, bool value) {
-  if(value) {
-    pressed |= (1 << index);
+#ifdef USE_STANDBY_INTERRUPTS
+  if(standby_timer.isDone()){
+    // A bunch of time has passed since a switch was pressed
+    enterStandby();
+    return false;
   }
-  else {
-    pressed &= ~(1 << index);
+  if(isInStandby()){
+    if(!change_flag.get()){
+      // Nothing happened, don't scan
+      return false;
+    }
+    // A pin-change interrupt happened since the last scan!
+    exitStandby();
   }
+#endif
+
+  // If not using standby interrupts, we don't know when there was a change, so
+  // always scan.
+  scan();
+  return true;
 }
 
+void Matrix::scan(){
+  // Scan the matrix for pressed switches.
+  switch_states = 0;
+  bool is_any_switch_down = false;
+  uint8_t switch_index = 0;
+  for(uint8_t h = 0; h != NUM_HANDS; h++){
+    for (uint8_t c = 0; c != NUM_COLUMNS; c++){
+      selectColumn(h, c);
+      for(uint8_t r = 0; r != NUM_ROWS; r++){
+        if(isRowPressed(h, r)){
+          setSwitch(switch_index);
+          is_any_switch_down = true;
+          printPressedSwitch(h, c, r);
+        }
+        switch_index++;
+      }
+      unselectColumn(h,c);
+    }
+  }
 
-void Matrix::pinChangeISR(){
-  change_flag->unsafeSet();
+#ifdef USE_STANDBY_INTERRUPTS
+  if (is_any_switch_down) {
+    standby_timer.start();
+  }
+#endif
 }
 
-void Matrix::enablePinChangeInterrupt(){
-  setColumnsLow();
-  attachRowPinInterrupts(pinChangeISR);
+bool Matrix::isRowPressed(uint8_t hand, uint8_t row){
+  // Reading is low if the switch is pressed.
+  return (digitalRead(conf::row_pins[hand][row]) == LOW);
 }
 
-void Matrix::disablePinChangeInterrupt(){
-  detachRowPinInterrupts();
-  setColumnsHiZ();
+void Matrix::selectColumn(uint8_t hand, uint8_t column){
+  pinMode(conf::column_pins[hand][column], OUTPUT);
+  digitalWrite(conf::column_pins[hand][column], LOW);
+
+  // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
+  // The required length can depend on the properties of the ethernet cable.
+  delayMicroseconds(10);
 }
+
+void Matrix::unselectColumn(uint8_t hand, uint8_t column){
+  pinMode(conf::column_pins[hand][column], HI_Z);
+}
+
+bool Matrix::getSwitch(uint8_t index) const{
+  return 0x1 & (switch_states >> index);
+}
+
+void Matrix::setSwitch(uint8_t index) {
+  switch_states |= (0x1 << index);
+}
+
 
 void Matrix::setRowsInput(){
   for(uint8_t h = 0; h != NUM_HANDS; h++){
@@ -61,8 +112,7 @@ void Matrix::setColumnsLow(){
   // To prepare for setting pin interrupts, to wake from standby
   for(uint8_t h = 0; h != NUM_HANDS; h++){
     for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-      pinMode(conf::column_pins[h][c], OUTPUT);
-      digitalWrite(conf::column_pins[h][c], LOW);
+      selectColumn(h,c);
     }
   }
 }
@@ -71,14 +121,13 @@ void Matrix::setColumnsHiZ(){
   // To prepare for scanning, after waking from standby
   for(uint8_t h = 0; h != NUM_HANDS; h++){
     for(uint8_t c = 0; c != NUM_COLUMNS; c++){
-      pinMode(conf::column_pins[h][c], HI_Z);
+      unselectColumn(h, c);
     }
   }
 
 }
 
 void Matrix::attachRowPinInterrupts(voidFuncPtr isr){
-  // uint32_t wakeup_pins = 0;
   for(uint8_t h = 0; h != NUM_HANDS; h++){
     for(uint8_t r = 0; r != NUM_ROWS; r++){
       // Triggering on FALLING/RISING/CHANGE requires some clocks, which could be a problem in deep sleep.
@@ -97,102 +146,56 @@ void Matrix::detachRowPinInterrupts(){
   }
 }
 
+void Matrix::pinChangeISR(){
+  change_flag.unsafeSet();
+}
+
+void Matrix::enablePinChangeInterrupt(){
+  setColumnsLow();
+  attachRowPinInterrupts(pinChangeISR);
+}
+
+void Matrix::disablePinChangeInterrupt(){
+  detachRowPinInterrupts();
+  setColumnsHiZ();
+}
 
 void Matrix::enterStandby(){
-  squished_switch_timer->disable();
+  squished_switch_timer.disable();
   enablePinChangeInterrupt();
 }
 
 void Matrix::exitStandby(){
   disablePinChangeInterrupt();
-  change_flag->unsafeUnset();
-  standby_timer->start();
-  squished_switch_timer->start();
+  change_flag.unsafeUnset();
+  standby_timer.start();
+  squished_switch_timer.start();
 }
 
 bool Matrix::isInStandby(){
 #ifdef USE_STANDBY_INTERRUPTS
-  return standby_timer->isDisabled();
+  return standby_timer.isDisabled();
 #endif
 
-  // Don't use standby at all if we're not using interrupts.
-  // Always scan the matrix.
-  return 0;
+  return false;
 }
 
 bool Matrix::isSquishedInBackpack(){
-  return squished_switch_timer->isDone();
+  return squished_switch_timer.isDone();
 }
 
 void Matrix::shutdown(){
   setColumnsHiZ();
 }
 
-bool Matrix::scanIfChanged(){
-  // Return true if we scan. Handle entering and exiting standby.
-
-#ifdef USE_STANDBY_INTERRUPTS
-  if(standby_timer->isDone()){
-    // A bunch of time has passed since a switch was pressed
-    enterStandby();
-    return 0;
-  }
-  if(isInStandby()){
-    if(!change_flag->get()){
-      // Nothing happened, don't scan
-      return 0;
-    }
-    // A pin-change interrupt happened since the last scan!
-    exitStandby();
-  }
-#endif
-
-  scan();
-  return 1;
-}
-
-void Matrix::scan(){
-  // Scan the matrix for pressed switches.
-  bool is_any_switch_down = 0;
-  int i = 0;
-  for(uint8_t h = 0; h != NUM_HANDS; h++){
-    for (uint8_t c = 0; c != NUM_COLUMNS; c++){
-      pinMode(conf::column_pins[h][c], OUTPUT);
-      digitalWrite(conf::column_pins[h][c], LOW);
-      // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
-      // The required length can depend on the properties of the ethernet cable.
-      delayMicroseconds(10);
-      for(uint8_t r = 0; r != NUM_ROWS; r++){
-        // Reading is low if the switch is pressed.
-        bool state = (digitalRead(conf::row_pins[h][r]) == LOW);
-        set(i, state);
-        is_any_switch_down |= state;
-
-        if(state){
-          printPressedSwitch(h, c,r);
-        }
-        i++;
-      }
-      pinMode(conf::column_pins[h][c], HI_Z);
-    }
-  }
-
-#ifdef USE_STANDBY_INTERRUPTS
-  if (is_any_switch_down) {
-    standby_timer->start();
-  }
-#endif
-
-}
-
-void Matrix::printPressedSwitch(uint8_t h, uint8_t c, uint8_t r){
+void Matrix::printPressedSwitch(uint8_t hand, uint8_t column, uint8_t row){
   DEBUG2("pressed: pins (");
-  DEBUG2(conf::column_pins[h][c]);
+  DEBUG2(conf::column_pins[hand][column]);
   DEBUG2(", ");
-  DEBUG2(conf::row_pins[h][r]);
+  DEBUG2(conf::row_pins[hand][row]);
   DEBUG2("), \tindices (");
-  DEBUG2(c);
+  DEBUG2(column);
   DEBUG2(", ");
-  DEBUG2(r);
+  DEBUG2(row);
   DEBUG2_LN(")");
 }

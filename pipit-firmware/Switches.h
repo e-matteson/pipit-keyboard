@@ -16,13 +16,6 @@
 class Switches{
 public:
 
-  enum switch_status_enum{
-    NOT_PRESSED = 0, // not currently pressed
-    PRESSED,         // pressed and not sent yet
-    ALREADY_SENT,    // already sent, don't resend in future chords
-    HELD             // already sent, but ok to resend in future chords
-  };
-
   Switches();
   void setup();
   void update();
@@ -35,9 +28,16 @@ public:
 
   void printStatusArray();
 
-  Matrix* matrix;
+  Matrix matrix;
 
 private:
+  enum SwitchStatusEnum{
+                        NOT_PRESSED = 0, // not currently pressed
+                        PRESSED,         // pressed and not sent yet
+                        ALREADY_SENT,    // already sent, don't resend in future chords
+                        HELD             // already sent, but ok to resend in future chords
+  };
+
   void checkForHeldSwitches();
   void updateSwitchStatuses();
   bool debouncePress(uint8_t switch_index);
@@ -45,24 +45,21 @@ private:
   void stopDebouncing(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-  // bool isAnySwitchStillBouncing();
 
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);
 
 
-  Timer* chord_timer;
-  Timer* release_timer;
-  Timer* held_timer;
+  Timer chord_timer;
+  Timer release_timer;
+  Timer held_timer;
 
   // We're now using the same timers for both press and release.
   // Will that always work? Why did we decide to have separate ones before?
-  Timer* debounce_timers[NUM_MATRIX_POSITIONS];
-
-  switch_status_enum switch_status[NUM_MATRIX_POSITIONS] = {(switch_status_enum)0};
+  Timer debounce_timers[NUM_MATRIX_POSITIONS];
+  SwitchStatusEnum switch_status[NUM_MATRIX_POSITIONS] = {Switches::NOT_PRESSED};
   bool was_switch_double_tapped = 0;
   int16_t last_released_switch = NO_SWITCH; // Index of last released switch, or NO_SWITCH
-  bool is_any_switch_down = 0;
 
 };
 

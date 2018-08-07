@@ -21,8 +21,7 @@ class FeatherComms: public Comms {
   void pressWired(const Report* report);
   void pressWireless(const Report* report);
 
-  // Construct bluetooth controller.
-  Adafruit_BluefruitLE_SPI* bluetooth;
+  Adafruit_BluefruitLE_SPI bluetooth;
 
   bool use_wired = 0;
 };

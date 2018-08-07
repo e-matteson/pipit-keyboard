@@ -14,13 +14,13 @@ bool VolatileFlag::get(){
 
 void VolatileFlag::set(){
   noInterrupts();
-  value = 1;
+  value = true;
   interrupts();
 }
 
 void VolatileFlag::unset(){
   noInterrupts();
-  value = 0;
+  value = false;
   interrupts();
 }
 
@@ -29,9 +29,9 @@ bool VolatileFlag::unsafeGet(){
 }
 
 void VolatileFlag::unsafeSet(){
-  value = 1;
+  value = true;
 }
 
 void VolatileFlag::unsafeUnset(){
-  value = 0;
+  value = false;
 }

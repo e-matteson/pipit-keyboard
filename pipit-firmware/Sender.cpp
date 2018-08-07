@@ -1,9 +1,37 @@
 #include "Sender.h"
 
 
-Sender::Sender(Comms* comms){
-  this->history = new History();
-  this->comms = comms;
+void Sender::setup(){
+  comms.setup();
+}
+
+/************* Editing Commands *********/
+
+void Sender::move(Motion motion, Direction direction){
+  uint16_t count = history.calcDistance(motion, direction);
+
+  for(int16_t i = 0; i < count; i++){
+    if(direction == Direction::LEFT) {
+      leftArrow();
+    }
+    else{
+      rightArrow();
+    }
+    comms.proportionalDelay(count, 6);
+  }
+}
+
+void Sender::deleteLastWord(){
+  // Delete the last sent key sequence by sending the correct number of backspaces.
+  move(Motion::WORD_EDGE, Direction::RIGHT);
+  int16_t count = history.calcDistance(Motion::WORD, Direction::LEFT);
+  for(int16_t i = 0; i < count; i++){
+    backspace();
+
+    // For some reason the backspaces get dropped more easily then word letters
+    //  so add a longer delay between sends.
+    comms.proportionalDelay(count, 6);
+  }
 }
 
 /************* Keypress sending ************/
@@ -29,7 +57,7 @@ void Sender::sendType(conf::seq_type_enum type, const Key* data, uint8_t data_le
 }
 
 void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord){
-  history->startEntry(chord, 1);
+  history.startEntry(chord, 1);
   Key key;
   for(uint8_t i = 0; i<data_length; i++){
     // Get the key, followed by the modifier.
@@ -42,19 +70,18 @@ void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord)
 }
 
 void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord){
-  history->startEntry(chord, 0);
+  history.startEntry(chord, 0);
   Key key;
   for(uint8_t i = 0; i<data_length; i++){
     //  get the key, followed by the modifier.
     key.copy(data+i);
     sendKey(&key);
-    comms->proportionalDelay(data_length, 2);
+    comms.proportionalDelay(data_length, 2);
   }
   releaseAll();
 }
 
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
-
   if (WORD_SPACE_POSITION == 0) {
     // doubleMod and shortenMod would be kinda useless with a space here...
     // So they should prevent us from ever prepending a space.
@@ -66,43 +93,44 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
   }
 
   if(chord->hasModShorten()) {
-    sendBackspace();
-    comms->proportionalDelay(data_length, 1);
+    backspace();
+    comms.proportionalDelay(data_length, 1);
   }
 
-  Key key;
+  Key doubled_key;
   if(chord->hasModDouble()) {
     // First, get the letter we want to double from the old history entry.
-    history->getLastLetterAtCursor(&key);
+    history.getLastLetterAtCursor(&doubled_key);
   }
 
   // Then, send the letter we want to double, as part of the new history entry.
-  history->startEntry(chord, 1);
+  history.startEntry(chord, 1);
   if(chord->hasModDouble()) {
-    sendKey(&key);
-    comms->proportionalDelay(data_length, 1);
+    sendKey(&doubled_key);
+    comms.proportionalDelay(data_length, 1);
   }
 
   if (WORD_SPACE_POSITION == 0) {
     if(!chord->hasModNospace()){
-      sendSpace();
-      comms->proportionalDelay(data_length, 1);
+      space();
+      comms.proportionalDelay(data_length, 1);
     }
   }
 
+  // TODO we only need to copy it if the capitalization is actually changing...
   Key new_data[data_length];
   memcpy(new_data, data, data_length*sizeof(Key));
   chord->editCaps(new_data, data_length);
 
   for(uint8_t i = 0; i<data_length; i++){
     sendKey(new_data+i);
-    comms->proportionalDelay(data_length, 1);
+    comms.proportionalDelay(data_length, 1);
   }
 
   if (WORD_SPACE_POSITION == 1){
     if(!chord->hasModNospace()){
-      sendSpace();
-      comms->proportionalDelay(data_length, 1);
+      space();
+      comms.proportionalDelay(data_length, 1);
     }
   }
 
@@ -121,19 +149,19 @@ void Sender::releaseNonMods(){
 }
 
 
-void Sender::sendBackspace(){
+void Sender::backspace(){
   sendKeyAndMod(KEY_BACKSPACE&0xff, 0);
 }
 
-void Sender::sendSpace() {
+void Sender::space() {
   sendKeyAndMod(KEY_SPACE&0xff, 0);
 }
 
-void Sender::sendLeftArrow() {
+void Sender::leftArrow() {
   sendKeyAndMod(KEY_LEFT&0xff, 0);
 }
 
-void Sender::sendRightArrow() {
+void Sender::rightArrow() {
   sendKeyAndMod(KEY_RIGHT&0xff, 0);
 }
 
@@ -155,7 +183,7 @@ void Sender::sendReport(Report* report){
     stickymod = 0; // reset stickymod after 1 use
   }
   this->press(report);
-  history->save(report);
+  history.save(report);
 }
 
 void Sender::press(const Report* report){
@@ -174,7 +202,7 @@ void Sender::press(const Report* report){
   report->printDebug();
 
   // Actually send the keypress, over USB or bluetooth:
-  this->comms->press(report);
+  this->comms.press(report);
 }
 
 

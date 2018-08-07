@@ -2,8 +2,6 @@
 
 #ifdef TEENSY_LC
 
-TeensyComms::TeensyComms(){}
-
 void TeensyComms::setup(){
   // nothing to setup
 }

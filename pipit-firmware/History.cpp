@@ -1,16 +1,6 @@
 #include "History.h"
 
 
-History::History(){
-  // Fill up the stack with new entries. We'll copy their member values around,
-  //  instead of creating or destroying Entry objects.
-  // Add two extra Entries to the end, that will always stay clear and be ignored
-  //  insert and remove. This makes it easier to detect when we're at the end
-  //  of the history.
-  for(uint8_t i = 0; i < HISTORY_SIZE+PADDING; i++){
-    stack[i] = new Entry();
-  }
-}
 
 void History::startEntry(const Chord* new_chord, bool is_anagrammable){
   // Store the chord we're sending, and whether we're allowed to try anagramming
@@ -45,9 +35,9 @@ void History::insertAtCursor(Entry* entry){
   // Insert the entry into the stack.
   uint8_t position = cursor.word;
   for(uint8_t i = HISTORY_SIZE-1; i > position; i--){
-    stack[i]->copy(stack[i-1]);
+    stack[i].copy(stack + (i-1));
   }
-  stack[position]->copy(entry);
+  stack[position].copy(entry);
 }
 
 void History::remove(uint16_t word_position){
@@ -74,7 +64,7 @@ void History::clear(){
   cursor.letter = 0;
   // Set all history entries to zero.
   for(uint8_t i = 0; i != HISTORY_SIZE; i++){
-    stack[i]->clear();
+    stack[i].clear();
   }
 }
 
@@ -267,7 +257,7 @@ Entry* History::getEntryAt(uint8_t cursor_word){
     DEBUG1_LN(cursor_word);
     cursor_word = max;
   }
-  return stack[cursor_word];
+  return stack + cursor_word;
 }
 
 bool History::atEdge(Direction direction){
@@ -306,15 +296,15 @@ void History::printStack(){
   Serial.print(cursor.letter);
   Serial.print("\t hist: ");
   for(int i = 0; i < HISTORY_SIZE+PADDING; i++){
-    stack[i]->getLastLetter(&last_key);
+    stack[i].getLastLetter(&last_key);
 
-    Serial.print(stack[i]->getLength());
+    Serial.print(stack[i].getLength());
     // Serial.print(" ");
     // Serial.print(last_key.key_code);
     // Serial.print(" ");
     // Serial.print(last_key.mod_byte);
     // Serial.print(":");
-    // Serial.print(stack[i]->isAnagrammable());
+    // Serial.print(stack[i].isAnagrammable());
     Serial.print(", ");
   }
   Serial.println("");

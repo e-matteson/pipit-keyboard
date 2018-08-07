@@ -1,24 +1,20 @@
 #include "Battery.h"
 
 
-Battery::Battery(){
-}
-
-
 int8_t Battery::getLevel(){
-#ifndef HAS_BATTERY
-  return -1;
-#endif
+#ifdef HAS_BATTERY
   // Return battery level, in the range (0, full_level)
   uint16_t reading = readBattery();
   return readingToLevel(reading);
+#endif
+
+  return -1;
 }
 
 uint16_t Battery::readingToLevel(uint16_t reading){
   DEBUG1("battery reading: ");
   DEBUG1_LN(reading);
 
-  // return map(reading, empty_reading, full_reading, empty_level, full_level);
   if (reading > 676) {
     return 4;  // plugged in, battery disconnected
   }
@@ -35,18 +31,9 @@ uint16_t Battery::readingToLevel(uint16_t reading){
 }
 
 uint16_t Battery::readBattery(){
-#ifndef HAS_BATTERY
-  return 0;
-#else
+#ifdef HAS_BATTERY
   return analogRead(conf::battery_level_pin);
 #endif
+
+  return 0;
 }
-
-// float Battery::readingToVoltage(uint16_t reading){
-//   // multiply by 2 because of the built-in voltage divider
-//   return reading * 2.0 * ref_voltage / 1024.0;
-// }
-
-// uint16_t Battery::voltageToReading(float voltage){
-//   return (voltage * 1024.0) / (2.0 * ref_voltage);
-// }

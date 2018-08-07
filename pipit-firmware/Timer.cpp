@@ -2,21 +2,18 @@
 
 Timer::Timer(){
   // For making arrays of Timers.
-  // If you use this, you must manually set the default value!
-  disable();
+  // If you use this, you must manually set the default value later!
 }
 
-
-Timer::Timer(uint32_t _default_value, bool start_now){
+Timer::Timer(uint32_t _default_value){
   setDefaultValue(_default_value);
-  disable();
-  if(start_now){
-    start();
-  }
 }
 
 
 void Timer::start(){
+  if(!default_value) {
+    DEBUG1_LN("WARNING: starting timer with default value of 0");
+  }
   start(default_value);
 }
 

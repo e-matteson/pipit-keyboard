@@ -16,7 +16,7 @@ public:
   void unsafeUnset();
 
 private:
-  bool value;
+  volatile bool value = false;
 };
 
 #endif
