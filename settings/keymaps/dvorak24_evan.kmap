@@ -293,6 +293,12 @@ command_toggle_wireless
   .     .
   ... .*.
 
+command_scroll_down   command_scroll_up   command_pan_left   command_pan_right
+....   *...           ....   *...         ....   *...        ....   *...
+..*.   ....           .*..   ....         *...   ....        ...*   ....
+  .     .               .     .             .     .            .     .
+  ... .*.               ... .*.             ... .*.            ... .*.
+
 #### web browser macros ####
 
 macro_next_tab  macro_prev_tab

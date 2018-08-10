@@ -95,6 +95,22 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     sender.comms.toggleWireless();
     break;
 
+  case conf::command_enum::COMMAND_SCROLL_DOWN:
+    sender.comms.moveMouse(0,0,-1,0);
+    break;
+
+  case conf::command_enum::COMMAND_SCROLL_UP:
+    sender.comms.moveMouse(0,0,1,0);
+    break;
+
+  case conf::command_enum::COMMAND_PAN_LEFT:
+    sender.comms.moveMouse(0,0,0,-1);
+    break;
+
+  case conf::command_enum::COMMAND_PAN_RIGHT:
+    sender.comms.moveMouse(0,0,0,1);
+    break;
+
   case conf::command_enum::SWITCH_TO:
     if(length != 2) {
       DEBUG1_LN("WARNING: wrong num of args for switch_to");

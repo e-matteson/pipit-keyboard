@@ -60,10 +60,8 @@ void FeatherComms::press(const Report* report){
 #ifdef ENABLE_WIRED_FEATHER_HACK
   if (use_wired) {
     pressWired(report);
-  } else {
-    pressWireless(report);
+    return;
   }
-  return;
 #endif
 
   pressWireless(report);
@@ -93,6 +91,24 @@ void FeatherComms::pressWireless(const Report* report){
           report->get(3),
           report->get(4),
           report->get(5));
+  bluetooth.println(cmd);
+}
+
+void FeatherComms::moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan){
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  if (use_wired) {
+    DEBUG1_LN("wired scrolling not implemented");
+    return;
+  }
+#endif
+
+  moveMouseWireless(x,y,scroll,pan);
+}
+
+void FeatherComms::moveMouseWireless(int8_t x, int8_t y, int8_t scroll, int8_t pan) {
+  static const char cmd_template[] = "AT+BleHidMouseMove=%d,%d,%d,%d";
+  char cmd[40] = {0};
+  sprintf(cmd, cmd_template, x, y, scroll, pan);
   bluetooth.println(cmd);
 }
 
