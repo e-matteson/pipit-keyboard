@@ -173,8 +173,8 @@ macros:
   macro_vim_save: ":w\n"
   macro_vim_quit: ":q\n"
   macro_ls: "ls\n"
-  macro_mx:
-    - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
+  macro_mx: "  "
+    # - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
   macro_other_buffer1: " \t"
   macro_other_buffer2: " ozb2"
   macro_other_buffer3: " ozb3"
