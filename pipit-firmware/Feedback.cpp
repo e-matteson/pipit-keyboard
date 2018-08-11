@@ -249,7 +249,7 @@ void Feedback::updateLED(){
     }
     break;
 
-  case SHUTDOWN_ROUTINE:
+  case TOGGLE_WIRELESS_ROUTINE:
     if(led_subroutine == 6){
       endRoutine();
     }

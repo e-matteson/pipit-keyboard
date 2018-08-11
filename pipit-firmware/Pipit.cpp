@@ -93,6 +93,7 @@ void Pipit::doCommand(const Key* data, uint8_t length){
 
   case conf::command_enum::COMMAND_TOGGLE_WIRELESS:
     sender.comms.toggleWireless();
+    feedback.startRoutine(TOGGLE_WIRELESS_ROUTINE);
     break;
 
   case conf::command_enum::COMMAND_SCROLL_DOWN:
