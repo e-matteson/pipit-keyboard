@@ -25,4 +25,15 @@ void TeensyComms::press(const Report* report){
     Keyboard.send_now();
 }
 
+void TeensyComms::moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan){
+  if (scroll != 0) {
+    Mouse.scroll(scroll);
+  }
+  if (x != 0 || y != 0) {
+    Mouse.move(x,y);
+  }
+  if (pan != 0) {
+    DEBUG1_LN("WARNING: mouse panning is not implemented");
+  }
+}
 #endif
