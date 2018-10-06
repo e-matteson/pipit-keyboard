@@ -209,7 +209,7 @@ impl AllDataBuilder {
         Ok(())
     }
 
-    pub fn make_spelling_table(&mut self) -> Result<SpellingTable, Error> {
+    fn make_spelling_table(&mut self) -> Result<SpellingTable, Error> {
         let mut table = BTreeMap::new();
         {
             let plain_names = self
@@ -233,12 +233,12 @@ impl AllDataBuilder {
         Ok(SpellingTable(table))
     }
 
-    pub fn make_huffman_table(&mut self) -> Result<HuffmanTable, Error> {
+    fn make_huffman_table(&mut self) -> Result<HuffmanTable, Error> {
         Ok(HuffmanTable::new(self.sequences.dump_all_keypresses())
             .context("Failed to make table of huffman encodings")?)
     }
 
-    pub fn add_mode(
+    fn add_mode(
         &mut self,
         mode_name: ModeName,
         info: ModeInfo,
@@ -260,7 +260,7 @@ impl AllDataBuilder {
         Ok(())
     }
 
-    pub fn add_plain_mod(
+    fn add_plain_mod(
         &mut self,
         name: Name,
         key_press: KeyPress,
@@ -271,7 +271,7 @@ impl AllDataBuilder {
             .insert(name, key_press.into(), SeqType::Plain)
     }
 
-    pub fn add_command(
+    fn add_command(
         &mut self,
         command_name: Name,
         command_enum: CCode,
@@ -290,7 +290,7 @@ impl AllDataBuilder {
             .insert(command_name, fake_seq, SeqType::Command)
     }
 
-    pub fn add_word(
+    fn add_word(
         &mut self,
         word: &Word,
         kmap: &KmapPath,
@@ -325,15 +325,15 @@ impl AllDataBuilder {
         self.chords.insert(name, chord, kmap)
     }
 
-    pub fn add_word_mod(&mut self, name: Name) {
+    fn add_word_mod(&mut self, name: Name) {
         self.word_mods.push(name);
     }
 
-    pub fn add_anagram_mod(&mut self, name: Name) {
+    fn add_anagram_mod(&mut self, name: Name) {
         self.anagram_mods.push(name);
     }
 
-    pub fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
+    fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
         let mut out = BTreeSet::new();
         for mode_info in self.settings.modes.values() {
             for kmap_info in &mode_info.keymaps {
