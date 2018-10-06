@@ -257,11 +257,11 @@ key_delete    key_printscreen  key_caps_lock
 
 ##### commands #####
 
-switch_to_left_hand_mode  switch_to_gaming_mode
-****   ....             ....   ****
-....   ....             ....   ....
-  .     .                 .     .
-  ... ...                 ... ...
+command_switch_to_left_hand_mode  command_switch_to_gaming_mode
+****   ....                       ....   ****
+....   ....                       ....   ....
+  .     .                           .     .
+  ... ...                           ... ...
 
 command_delete_word     command_cycle_word   command_cycle_capital
 ....   ....             ....   ....          ....   ....

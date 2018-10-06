@@ -112,13 +112,15 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     sender.comms.moveMouse(0,0,0,1);
     break;
 
-  case conf::command_enum::SWITCH_TO:
+  case conf::command_enum::COMMAND_SWITCH_TO:
+    // This takes an argument specifying which mode to switch to.
     if(length != 2) {
-      DEBUG1_LN("WARNING: wrong num of args for switch_to");
+      DEBUG1_LN("WARNING: Wrong number of args for command_switch_to");
       return;
     }
     mode = (conf::mode_enum) data[1].key_code;
     break;
+
   default:
     DEBUG1("WARNING: Unknown command: ");
     DEBUG1_LN(command);

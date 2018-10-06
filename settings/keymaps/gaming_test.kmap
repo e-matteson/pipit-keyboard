@@ -1,6 +1,6 @@
 # Chords won't work in gaming modes. Everything must be mapped to a single switch.
 
-switch_to_default_mode
+command_switch_to_default_mode
 ....   ....
 ....   .*..
   .     .

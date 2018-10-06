@@ -4,7 +4,7 @@
 # "macro_apple_save_as" with "macro_windows_save_as".
 
 
-macro_windows_save_as      switch_to_default_mode
+macro_windows_save_as      command_switch_to_default_mode
 ....   ....                ****   ....
 ....   ...*                ....   ....
   .     .                    .     .

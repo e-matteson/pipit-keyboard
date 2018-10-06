@@ -163,11 +163,20 @@ impl AllDataBuilder {
             command_enum_variants.insert(enum_variant);
         }
 
+        // Automatically create command bindings for switching to every mode.
+        // Ex. "command_switch_to_default_mode"
+        // This means you don't need to manually list those commands in the
+        // settings file, or more importantly, in the firmware's `Command` enum
+        // or `Pipit::doCommand()`. Otherwise, deleting modes in the settings
+        // file would cause a firmware compilation error, because `doCommand()`
+        // would reference an unknown `Command` variant. Instead, we store
+        // mode-switching commands in the lookup using a single
+        // `Command::COMMAND_SWITCH_TO` variant, followed by a mode argument.
         let modes = { self.modes.keys().cloned().collect::<Vec<ModeName>>() };
         for mode in modes {
-            let enum_variant = "SWITCH_TO".to_c();
+            let enum_variant = "COMMAND_SWITCH_TO".to_c();
             self.add_command(
-                Name::from(format!("switch_to_{}", mode)),
+                Name::from(format!("command_switch_to_{}", mode)),
                 qualify(&enum_variant),
                 &[mode.qualified_enum_variant()],
             ).context("Failed to add mode-switching command")?;
