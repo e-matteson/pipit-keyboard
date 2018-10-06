@@ -301,11 +301,17 @@ command_scroll_down   command_scroll_up   command_pan_left   command_pan_right
 
 #### web browser macros ####
 
-macro_next_tab  macro_prev_tab
-....   ....     ....   ....
-....   ...*     ....   ..*.
-  .     .         .     .
-  ... .*.         ... .*.
+macro_next_tab  macro_prev_tab    macro_move_tab_forward  macro_move_tab_back
+....   ....     ....   ....       ....   ....             ....   ....
+....   ...*     ....   ..*.       ....   ...*             ....   ..*.
+  .     .         .     .           .     .                 .     .
+  ... .*.         ... .*.           *.. .*.                 *.. .*.
+
+macro_new_tab
+....   ....
+....   .*..
+  .     .
+  ... .*.
 
 #### general text-like macros ####
 
@@ -341,11 +347,11 @@ macro_backslash_n
 
 #### python macros ####
 
-macro_print_py   macro_exit_py     macro_self_dot    macro_docstr_py
-...*   .**.      ....   .*.*       .*..   ...*       ...*   .**.
-....   ....      ..**   .*..       ..*.   ...*       *...   ...*
-  .     .          .     .           .     .           .     .
-  ... .*.          ... .*.           ... .*.           ... .*.
+macro_print_py   macro_exit_py     macro_docstr_py
+...*   .**.      ....   .*.*       ...*   .**.
+....   ....      ..**   .*..       *...   ...*
+  .     .          .     .           .     .
+  ... .*.          ... .*.           ... .*.
 
 #### bash macros ####
 
@@ -453,11 +459,17 @@ macro_next_comma   macro_prev_comma
   ... .*.            ... .*.
 
 
-macro_compile      macro_error_prev       macro_error_next   macro_eval
-....   ....        ....   ....            ....   ....        ....   ....
-....   **..        ..*.   ..*.            ..*.   ..*.        ....   .*..
-  .     .            .     .                .     .            .     .
-  ... .*.            *.. .*.                ... .*.            ... .*.
+macro_compile      macro_error_prev       macro_error_next   
+....   ....        ....   ....            ....   ....        
+....   **..        ..*.   ..*.            ..*.   ..*.        
+  .     .            .     .                .     .          
+  ... .*.            *.. .*.                ... .*.          
+
+# macro_eval
+# ....   ....
+# ....   .*..
+#   .     .
+#   ... .*.
 
 macro_decrement     macro_increment    macro_prev_search   macro_blackhole
 ....   .*.*         ....   ....        ....   .*..         **..   ....
@@ -476,7 +488,6 @@ macro_find_file    macro_mx
 ....   .*..        ....   *...
   .     .            .     .
   ... ...            ... ...
-
 
 macro_find_other_file  macro_proj_find_file   macro_recentf      macro_kill_buffer
 .*..   ....            ....   .*..            ..*.   ....        ..**   *...
@@ -520,20 +531,20 @@ macro_open_scratch
   .     .
   ... .*.
 
-macro_org_capture     macro_org_clock
-....   .*..           ....   ...*
-.*..   ....           .*..   ....
-  .     .               .     .
-  ... .*.               ... .*.
+macro_org_capture macro_org_calendar
+....   .*..       ....   ...*
+.*..   ....       .*..   ....
+  .     .           .     .
+  ... .*.           ... .*.
 
-macro_org_calendar    macro_org_tree   macro_org_archive  macro_org_someday
-....   .*..           ....   ....      ....   ..*.        ....   ....
-**..   ....           **..   .*..      **..   ....        **..   ...*
-  .     .               .     .          .     .            .     .
-  ... .*.               ... .*.          ... .*.            ... .*.
+macro_org_tree   macro_org_archive  macro_org_someday   macro_org_refile
+....   ....      ....   *...        ....   ....         ....   ..*.
+**..   .*..      **..   ....        **..   ...*         **..   ....
+  .     .          .     .            .     .             .     .
+  ... .*.          ... .*.            ... .*.             ... .*.
 
 macro_org_insert      macro_org_to_md
-....   ....           *...   ....
-.*..   ....           .*..   ....
+....   ....           ....   .**.
+.*..   ....           **..   ....
   .     .               .     .
   ... .*.               ... .*.
