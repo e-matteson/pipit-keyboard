@@ -15,6 +15,9 @@ use types::{
 };
 use util::read_file;
 
+/// This handles all the details of building an AllData struct from
+/// configuration files. It loads sequences and chords, generates word chords,
+/// generates huffman encodings, and so on.
 pub struct AllDataBuilder {
     settings: Settings,
     chords: AllChordMaps,
@@ -26,6 +29,8 @@ pub struct AllDataBuilder {
 }
 
 impl AllDataBuilder {
+    /// Read the contents of the given settings file, and return a
+    /// AllDataBuilder that's prepared to build an AllData struct.
     pub fn load(settings_path: &PathBuf) -> Result<Self, Error> {
         let settings: Settings =
             serde_yaml::from_str(&read_file(settings_path)?)?;
@@ -42,6 +47,8 @@ impl AllDataBuilder {
         })
     }
 
+    /// Attempt to build an AllData struct, using the settings file that was
+    /// passed to `load()`.
     pub fn finalize(mut self) -> Result<AllData, Error> {
         // The order of these calls matters! Some depend on data loaded in
         // previous ones.
@@ -97,6 +104,8 @@ impl AllDataBuilder {
     }
 
     fn load_chords(&mut self) -> Result<(), Error> {
+        // Get the names of all the kmap files we found when calling
+        // `load_modes()`
         let kmaps: Vec<_> = self.chords.kmap_paths().cloned().collect();
         let kmap_format = self.settings.options.kmap_format.clone();
 
@@ -150,11 +159,10 @@ impl AllDataBuilder {
     }
 
     fn load_commands(&mut self) -> Result<BTreeSet<CCode>, Error> {
-        // TODO reorganize this, as part of intl refactor?
+        // TODO reorganize this, as part of international refactor?
         let qualify = |s: &CCode| format!("command_enum::{}", s).to_c();
 
         let mut command_enum_variants = BTreeSet::new();
-
         let normal_commands = self.settings.commands.clone();
         for name in normal_commands {
             let enum_variant = name.clone().to_c().to_uppercase();

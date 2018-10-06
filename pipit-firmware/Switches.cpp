@@ -236,6 +236,8 @@ void Switches::printStatusArray(){
 void Switches::printStatusChange(uint8_t index){
   // Print the new status of a particular key every time it changes
   // static SwitchStatusEnum old_val = Switches::NOT_PRESSED;
+
+  // TODO avoid implicit casts between enum and uint8_t?
   static uint8_t old_vals[NUM_MATRIX_POSITIONS] = {0};
 
   SwitchStatusEnum val = switch_status[index];

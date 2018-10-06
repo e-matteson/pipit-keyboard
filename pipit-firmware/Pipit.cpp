@@ -17,9 +17,9 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     return;
   }
   if(is_paused){
-    // if paused, don't do any of the following functions
     return;
   }
+
   switch(command){
     /******************************************/
     /**** Add cases for new commands here! ****/
@@ -128,7 +128,6 @@ void Pipit::doCommand(const Key* data, uint8_t length){
   }
 }
 
-
 void Pipit::setup(){
   switches.setup();
   sender.setup();
@@ -145,6 +144,10 @@ void Pipit::loop(){
   delayMicroseconds(100);
 }
 
+/// Shutdown to save power if a switch has been held down for a very long time,
+/// since that probably means the keyboard is squished against something. This
+/// mostly happens with battery-powered models that are left on inside a
+/// backpack.
 void Pipit::shutdownIfSquished(){
   if(!switches.matrix.isSquishedInBackpack()){
     return;
@@ -159,8 +162,8 @@ void Pipit::shutdownIfSquished(){
 }
 
 
+/// Lookup and send a press or release, if necessary
 void Pipit::sendIfReady(){
-  // Lookup and send a press or release, if necessary
   bool is_gaming = conf::isGaming(mode);
   if(switches.readyToPress(is_gaming)){
     // Lookup the chord and send the corresponding key sequence.
@@ -186,8 +189,8 @@ void Pipit::sendIfReady(){
       // If you pressed a mix of plain mods and plain keys, the mod release
       // won't be sent until all keys are up. This lets you hold `alt` and tap
       // `tab` to cycle through windows. The only weird edge case I'm aware of
-      // is that holding `tab` and tapping `alt` has the exact same behavior as
-      // holding `alt` and tapping `tab`.
+      // is that after pressing `alt+tab', holding `tab` and tapping `alt` has
+      // the exact same behavior as holding `alt` and tapping `tab`.
       if(switches.anySwitchDown()) {
         sender.releaseNonMods();
       }
