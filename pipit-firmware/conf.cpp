@@ -14,6 +14,20 @@ const bool contains(const conf::Mod* mod_array,
 
 
 namespace conf {
+  // Cast the enum to its underlying type
+  std::underlying_type<Mod>::type to_index(Mod variant) {
+    return static_cast<std::underlying_type<Mod>::type>(variant);
+  }
+
+  // Cast the enum to its underlying type
+  std::underlying_type<SeqType>::type to_index(SeqType variant) {
+    return static_cast<std::underlying_type<SeqType>::type>(variant);
+  }
+
+  // Cast the enum to its underlying type
+  std::underlying_type<Mode>::type to_index(Mode variant) {
+    return static_cast<std::underlying_type<Mode>::type>(variant);
+  }
 
   const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
     uint32_t mask = makeMask32(length);
@@ -33,11 +47,11 @@ namespace conf {
   }
 
   const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, SeqType seq_type) {
-    return mode->kmaps[kmap_num]->lookups_for_kmap[static_cast<uint8_t>(seq_type)];
+    return mode->kmaps[kmap_num]->lookups_for_kmap[to_index(seq_type)];
   }
 
   const ModeStruct* getMode(Mode mode){
-    return mode_structs[static_cast<uint8_t>(mode)];
+    return mode_structs[to_index(mode)];
   }
 
   bool isGaming(Mode mode) {
@@ -49,7 +63,7 @@ namespace conf {
   }
 
   const uint8_t* getModChord(Mode mode, Mod modifier) {
-    return getMode(mode)->mod_chords[modifier];
+    return getMode(mode)->mod_chords[to_index(modifier)];
   }
 
   uint8_t getPlainModByte(uint8_t index) {

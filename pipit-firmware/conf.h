@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "structs.h"
 #include "auto_config.h"
+#include <type_traits>
 
 namespace conf {
 
@@ -13,7 +14,11 @@ namespace conf {
     Anagram
   };
 
-  /* TODO why are these all const? */
+
+  // TODO use template for these?
+  std::underlying_type<Mod>::type to_index(Mod variant);
+  std::underlying_type<SeqType>::type to_index(SeqType variant);
+  std::underlying_type<Mode>::type to_index(Mode variant);
 
   const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length);
   const ModeStruct* getMode(Mode mode);

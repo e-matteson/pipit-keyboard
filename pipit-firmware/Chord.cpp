@@ -1,12 +1,8 @@
 #include "Chord.h"
 #include "util.h"
+#include <type_traits>
 
 #define FLAG_BIT 15
-
-
-static uint8_t index(conf::Mod modifier){
-  return static_cast<uint8_t>(modifier);
-}
 
 Chord::Chord(){}
 
@@ -143,19 +139,19 @@ void Chord::setModNospace() {
 }
 
 bool Chord::hasMod(conf::Mod mod) const{
-  return (mods_and_flags >> index(mod)) & 1;
+  return (mods_and_flags >> conf::to_index(mod)) & 1;
 }
 
 void Chord::setMod(conf::Mod mod) {
-  mods_and_flags |= (1 << index(mod));
+  mods_and_flags |= (1 << conf::to_index(mod));
 }
 
 void Chord::unsetMod(conf::Mod mod) {
-  mods_and_flags &= ~(1 << index(mod));
+  mods_and_flags &= ~(1 << conf::to_index(mod));
 }
 
 void Chord::toggleMod(conf::Mod mod){
-  mods_and_flags ^= (1 << index(mod));
+  mods_and_flags ^= (1 << conf::to_index(mod));
 }
 
 bool Chord::getFlagCycleCapital() const {
