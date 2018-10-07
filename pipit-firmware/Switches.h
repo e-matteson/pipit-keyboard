@@ -31,11 +31,11 @@ public:
   Matrix matrix;
 
 private:
-  enum SwitchStatusEnum{
-                        NOT_PRESSED = 0, // not currently pressed
-                        PRESSED,         // pressed and not sent yet
-                        ALREADY_SENT,    // already sent, don't resend in future chords
-                        HELD             // already sent, but ok to resend in future chords
+  enum class SwitchStatus{
+    NotPressed = 0, // not currently pressed
+    Pressed,         // pressed and not sent yet
+    AlreadySent,    // already sent, don't resend in future chords
+    Held             // already sent, but ok to resend in future chords
   };
 
   void checkForHeldSwitches();
@@ -57,7 +57,7 @@ private:
   // We're now using the same timers for both press and release.
   // Will that always work? Why did we decide to have separate ones before?
   Timer debounce_timers[NUM_MATRIX_POSITIONS];
-  SwitchStatusEnum switch_status[NUM_MATRIX_POSITIONS] = {Switches::NOT_PRESSED};
+  SwitchStatus switch_status[NUM_MATRIX_POSITIONS] = {SwitchStatus::NotPressed};
   bool was_switch_double_tapped = 0;
   int16_t last_released_switch = NO_SWITCH; // Index of last released switch, or NO_SWITCH
 

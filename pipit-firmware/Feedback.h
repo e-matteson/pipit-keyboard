@@ -8,68 +8,69 @@
 #include "Timer.h"
 
 // Possible routines for the rgb led:
-enum LEDRoutineEnum{
-  NO_ROUTINE = 0,
-  BATTERY_ROUTINE,
-  BOOT_ROUTINE,
-  BLE_NO_CONNECTION_ROUTINE,
-  BLE_TXPOWER_ROUTINE,
-  BLE_RSSI_ROUTINE,
-  FLYMACRO_ROUTINE,
-  FLASH_GREEN_ROUTINE,
-  FLASH_RED_ROUTINE,
-  PLAIN_FEEDBACK_ROUTINE,
-  MACRO_FEEDBACK_ROUTINE,
-  WORD_FEEDBACK_ROUTINE,
-  UNKNOWN_FEEDBACK_ROUTINE,
-  NO_ANAGRAM_FEEDBACK_ROUTINE,
-  COMMAND_FEEDBACK_ROUTINE,
-  WARNING_ROUTINE,
-  TOGGLE_WIRELESS_ROUTINE,
-  TEST_ROUTINE,
-  ALL_COLORS_ROUTINE,
-  RAINBOW_ROUTINE,
+enum class LEDRoutine{
+  None = 0,
+  Battery,
+  Boot,
+  BleNoConnection,
+  BleTxpower,
+  BleRssi,
+  Flymacro,
+  FlashGreen,
+  FlashRed,
+  PlainFeedback,
+  MacroFeedback,
+  WordFeedback,
+  UnknownFeedback,
+  NoAnagramFeedback,
+  CommandFeedback,
+  Warning,
+  ToggleWireless,
+  Test,
+  AllColors,
+  Rainbow,
 };
 
 class Feedback{
 
 public:
   void setup();
-  void trigger(conf::seq_type_enum type);
+  void trigger(conf::SeqType type);
   void triggerUnknown();
   void triggerNoAnagram();
   void updateLED();
-  void startRoutine(LEDRoutineEnum routine);
+  void startRoutine(LEDRoutine routine);
   void endRoutine();
 
 private:
   // Pre-defined colors for the rgb led
   // TODO make private?
   // The all_colors_routine relies on the fact that these are numbered in order starting at zero, and BLACK is the last color.
-  enum LEDColorEnum{
-                    RED = 0,
-                    ORANGE,
-                    YELLOW,
-                    GREEN,
-                    TEAL,
-                    BLUE,
-                    DIM_BLUE,
-                    PURPLE,
-                    MAGENTA,
-                    WHITE,
-                    BLACK,
+  enum class LEDColor {
+    Red = 0,
+    Orange,
+    Yellow,
+    Green,
+    Teal,
+    Blue,
+    DimBlue,
+    Purple,
+    Magenta,
+    White,
+    Black,
+    NumColors, // this should always come last
   };
 
   void triggerFeedback(char feedback_code);
   void triggerAudioFeedback(char feedback_code);
-  void triggerLEDFeedback(LEDRoutineEnum routine);
-  void setLEDColor(LEDColorEnum color);
+  void triggerLEDFeedback(LEDRoutine routine);
+  void setLEDColor(LEDColor color);
   void setLEDRGB(uint8_t red, uint8_t green, uint8_t blue);
 
   Battery battery;
   Timer led_timer;
 
-  LEDRoutineEnum led_routine = NO_ROUTINE; // The active LED routine
+  LEDRoutine led_routine = LEDRoutine::None; // The active LED routine
   uint16_t led_subroutine = 0; // The active LED subroutine
 
 };

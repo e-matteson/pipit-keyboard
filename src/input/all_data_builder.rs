@@ -9,9 +9,9 @@ use input::Settings;
 use types::errors::ConflictErr;
 
 use types::{
-    AllChordMaps, AllData, AllSeqMaps, CCode, Chord, HuffmanTable, KeyDefs,
-    KeyPress, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
-    SpellingTable, ToC, Validate, Word,
+    AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
+    HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeInfo, ModeName, Name,
+    SeqType, Sequence, SpellingTable, Validate, Word,
 };
 use util::read_file;
 
@@ -75,7 +75,7 @@ impl AllDataBuilder {
         self.load_dictionary(&spellings)
             .context("Failed to load dictionary")?;
 
-        let command_enum_variants =
+        let command_variants =
             self.load_commands().context("Failed to load commands")?;
 
         Ok(AllData {
@@ -90,8 +90,8 @@ impl AllDataBuilder {
             plain_mods: self.plain_mods,
             anagram_mods: self.anagram_mods,
             modes: self.modes,
+            commands: command_variants.into_iter().collect(),
             spellings,
-            command_enum_variants,
         })
     }
 
@@ -158,40 +158,41 @@ impl AllDataBuilder {
         }
     }
 
-    fn load_commands(&mut self) -> Result<BTreeSet<CCode>, Error> {
-        // TODO reorganize this, as part of international refactor?
-        let qualify = |s: &CCode| format!("command_enum::{}", s).to_c();
-
-        let mut command_enum_variants = BTreeSet::new();
-        let normal_commands = self.settings.commands.clone();
-        for name in normal_commands {
-            let enum_variant = name.clone().to_c().to_uppercase();
-            self.add_command(name, qualify(&enum_variant), &[])
-                .context("Failed to add command")?;
-            command_enum_variants.insert(enum_variant);
+    /// In addition to loading commands from the settings file, automatically
+    /// create command bindings for switching to every mode (eg.
+    /// "command_switch_to_default_mode"). This means you don't need to manually
+    /// list mode-switching commands in the settings file, or more importantly,
+    /// in the firmware's `Command` enum or `Pipit::doCommand()`. Otherwise,
+    /// deleting modes in the settings file would cause a firmware compilation
+    /// error, because `doCommand()` would reference an unknown `Command`
+    /// variant. Instead, we store mode-switching commands in the lookup using a
+    /// single `Command::command_switch_to` variant, followed by a mode
+    /// argument.
+    fn load_commands(&mut self) -> Result<BTreeSet<Command>, Error> {
+        let mut variants = BTreeSet::new();
+        for normal_command in self.settings.commands.clone() {
+            variants.insert(normal_command.clone());
+            self.add_command(
+                normal_command.name().to_owned(),
+                normal_command,
+                &[],
+            ).context("Failed to add command")?;
         }
 
-        // Automatically create command bindings for switching to every mode.
-        // Ex. "command_switch_to_default_mode"
-        // This means you don't need to manually list those commands in the
-        // settings file, or more importantly, in the firmware's `Command` enum
-        // or `Pipit::doCommand()`. Otherwise, deleting modes in the settings
-        // file would cause a firmware compilation error, because `doCommand()`
-        // would reference an unknown `Command` variant. Instead, we store
-        // mode-switching commands in the lookup using a single
-        // `Command::COMMAND_SWITCH_TO` variant, followed by a mode argument.
         let modes = { self.modes.keys().cloned().collect::<Vec<ModeName>>() };
+        let base_name = "command_switch_to";
+        let variant = Command(base_name.into());
+        variants.insert(variant.clone());
         for mode in modes {
-            let enum_variant = "COMMAND_SWITCH_TO".to_c();
+            let name = Name::from(format!("{}_{}", base_name, mode));
             self.add_command(
-                Name::from(format!("command_switch_to_{}", mode)),
-                qualify(&enum_variant),
+                name,
+                variant.clone(),
                 &[mode.qualified_enum_variant()],
             ).context("Failed to add mode-switching command")?;
-            command_enum_variants.insert(enum_variant);
         }
 
-        Ok(command_enum_variants)
+        Ok(variants)
     }
 
     fn load_dictionary(
@@ -271,23 +272,24 @@ impl AllDataBuilder {
             .insert(name, key_press.into(), SeqType::Plain)
     }
 
+    /// Create a sequence for this command. The command variants will be
+    /// collected separately.
     fn add_command(
         &mut self,
-        command_name: Name,
-        command_enum: CCode,
+        name: Name,
+        variant: Command,
         args: &[CCode],
     ) -> Result<(), Error> {
-        // TODO this is messy, unclear what's qualified!
-        //
         // Commands don't have actual key sequences, just a byte containing an
         // enum value, and maybe some extra bytes as argument. But we'll
         // store them as Sequences for convenience.
-        let mut fake_seq: Sequence = KeyPress::new_fake(command_enum).into();
+        let mut fake_seq: Sequence =
+            KeyPress::new_fake(variant.qualified_enum_variant()).into();
         for arg in args {
             fake_seq.push(KeyPress::new_fake(arg.to_owned()))
         }
-        self.sequences
-            .insert(command_name, fake_seq, SeqType::Command)
+
+        self.sequences.insert(name, fake_seq, SeqType::Command)
     }
 
     fn add_word(

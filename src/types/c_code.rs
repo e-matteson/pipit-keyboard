@@ -14,10 +14,36 @@ pub trait ToC {
     fn to_c(self) -> CCode;
 }
 
-// pub trait RenderCTree {
-//     fn definitions(self) -> CTree;
-//     fn name(self) -> CTree;
-// }
+pub trait CEnumVariant: Sized {
+    /// The type name of C++ enum
+    fn enum_type() -> CCode;
+
+    /// The unqualified name of this variant in the C++ enum
+    fn enum_variant(&self) -> CCode;
+
+    /// The qualified name of this variant in the C++ enum
+    fn qualified_enum_variant(&self) -> CCode {
+        format!("{}::{}", Self::enum_type(), self.enum_variant()).to_c()
+    }
+
+    /// The underlying type determining the size of the C++ enum
+    fn underlying_type() -> Option<CCode> {
+        None
+    }
+
+    /// Declare a c enum using the given variants.
+    fn render_c_enum<'a, T>(variants: T) -> CTree
+    where
+        T: Iterator<Item = &'a Self>,
+        Self: 'a,
+    {
+        CTree::EnumDecl {
+            name: Self::enum_type(),
+            size: Self::underlying_type(),
+            variants: variants.map(|x| x.enum_variant()).collect(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum CTree {

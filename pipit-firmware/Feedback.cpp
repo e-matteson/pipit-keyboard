@@ -16,23 +16,19 @@ void Feedback::setup(){
 #endif
 }
 
-void Feedback::trigger(conf::seq_type_enum type){
+void Feedback::trigger(conf::SeqType type){
   switch(type) {
-  case conf::seq_type_enum::PLAIN:
+  case conf::SeqType::Plain:
     triggerAudioFeedback(PLAIN_FEEDBACK_CODE);
-    // triggerLEDFeedback(PLAIN_FEEDBACK_ROUTINE);
     break;
-  case conf::seq_type_enum::WORD:
+  case conf::SeqType::Word:
     triggerAudioFeedback(WORD_FEEDBACK_CODE);
-    // triggerLEDFeedback(WORD_FEEDBACK_ROUTINE);
     break;
-  case conf::seq_type_enum::MACRO:
+  case conf::SeqType::Macro:
     triggerAudioFeedback(MACRO_FEEDBACK_CODE);
-    // triggerLEDFeedback(MACRO_FEEDBACK_ROUTINE);
     break;
-  case conf::seq_type_enum::COMMAND:
+  case conf::SeqType::Command:
     triggerAudioFeedback(COMMAND_FEEDBACK_CODE);
-    // triggerLEDFeedback(COMMAND_FEEDBACK_ROUTINE);
     break;
   default: DEBUG1_LN("seq type has no feedback routine");
   }
@@ -40,11 +36,11 @@ void Feedback::trigger(conf::seq_type_enum type){
 
 void Feedback::triggerUnknown(){
   triggerAudioFeedback(UNKNOWN_FEEDBACK_CODE);
-  triggerLEDFeedback(UNKNOWN_FEEDBACK_ROUTINE);
+  triggerLEDFeedback(LEDRoutine::UnknownFeedback);
 }
 
 void Feedback::triggerNoAnagram(){
-  triggerLEDFeedback(NO_ANAGRAM_FEEDBACK_ROUTINE);
+  triggerLEDFeedback(LEDRoutine::NoAnagramFeedback);
 }
 
 void Feedback::triggerAudioFeedback(char feedback_code){
@@ -54,7 +50,7 @@ void Feedback::triggerAudioFeedback(char feedback_code){
   Serial.print(feedback_code);
 }
 
-void Feedback::triggerLEDFeedback(LEDRoutineEnum routine){
+void Feedback::triggerLEDFeedback(LEDRoutine routine){
 #ifndef ENABLE_LED_TYPING_FEEDBACK
   return;
 #endif
@@ -66,7 +62,7 @@ void Feedback::triggerLEDFeedback(LEDRoutineEnum routine){
 
 void Feedback::updateLED(){
   // State machine for handling LED routines
-  // TODO consider replacing NO_ROUTINE with disabled led_timer
+  // TODO consider replacing LEDRoutine::None with disabled led_timer
 #ifndef ENABLE_RGB_LED
   return;
 #endif
@@ -77,13 +73,13 @@ void Feedback::updateLED(){
   }
 
   switch(led_routine){
-  case NO_ROUTINE:
+  case LEDRoutine::None:
     return;
-  case BOOT_ROUTINE:
+  case LEDRoutine::Boot:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(WHITE);
+      setLEDColor(LEDColor::White);
       led_subroutine++;
       break;
     default:
@@ -91,30 +87,30 @@ void Feedback::updateLED(){
     }
     break;
 
-  case BATTERY_ROUTINE:
+  case LEDRoutine::Battery:
     switch(led_subroutine){
     case 0:
       led_timer.start(2000);
       led_subroutine++;
       switch(battery.getLevel()){
       case 0:
-        setLEDColor(RED);
+        setLEDColor(LEDColor::Red);
         break;
       case 1:
-        setLEDColor(ORANGE);
+        setLEDColor(LEDColor::Orange);
         break;
       case 2:
-        setLEDColor(YELLOW);
+        setLEDColor(LEDColor::Yellow);
         break;
       case 3:
-        setLEDColor(GREEN);
+        setLEDColor(LEDColor::Green);
         break;
       case 4:
-        setLEDColor(TEAL);
+        setLEDColor(LEDColor::Teal);
         break;
       default:
         // Battery not present, or bad level
-        setLEDColor(WHITE);
+        setLEDColor(LEDColor::White);
         break;
       }
       break;
@@ -124,11 +120,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case BLE_NO_CONNECTION_ROUTINE:
+  case LEDRoutine::BleNoConnection:
     switch(led_subroutine){
     case 0:
       led_timer.start(100);
-      setLEDColor(DIM_BLUE);
+      setLEDColor(LEDColor::DimBlue);
       led_subroutine++;
       break;
     default:
@@ -137,39 +133,39 @@ void Feedback::updateLED(){
     }
     break;
 
-  case FLASH_GREEN_ROUTINE:
+  case LEDRoutine::FlashGreen:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(GREEN);
+      setLEDColor(LEDColor::Green);
       led_subroutine++;
       break;
     default:
       led_timer.start(500);
-      setLEDColor(BLACK);
+      setLEDColor(LEDColor::Black);
       led_subroutine = 0;
     }
     break;
 
-  case FLASH_RED_ROUTINE:
+  case LEDRoutine::FlashRed:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(RED);
+      setLEDColor(LEDColor::Red);
       led_subroutine++;
       break;
     default:
       led_timer.start(500);
-      setLEDColor(BLACK);
+      setLEDColor(LEDColor::Black);
       led_subroutine = 0;
     }
     break;
 
-  case PLAIN_FEEDBACK_ROUTINE:
+  case LEDRoutine::PlainFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(BLUE);
+      setLEDColor(LEDColor::Blue);
       led_subroutine++;
       break;
     default:
@@ -177,11 +173,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case MACRO_FEEDBACK_ROUTINE:
+  case LEDRoutine::MacroFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(YELLOW);
+      setLEDColor(LEDColor::Yellow);
       led_subroutine++;
       break;
     default:
@@ -189,11 +185,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case WORD_FEEDBACK_ROUTINE:
+  case LEDRoutine::WordFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start(500);
-      setLEDColor(GREEN);
+      setLEDColor(LEDColor::Green);
       led_subroutine++;
       break;
     default:
@@ -201,11 +197,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case UNKNOWN_FEEDBACK_ROUTINE:
+  case LEDRoutine::UnknownFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start(100);
-      setLEDColor(RED);
+      setLEDColor(LEDColor::Red);
       led_subroutine++;
       break;
     default:
@@ -213,11 +209,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case NO_ANAGRAM_FEEDBACK_ROUTINE:
+  case LEDRoutine::NoAnagramFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start(100);
-      setLEDColor(MAGENTA);
+      setLEDColor(LEDColor::Magenta);
       led_subroutine++;
       break;
     default:
@@ -225,11 +221,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case COMMAND_FEEDBACK_ROUTINE:
+  case LEDRoutine::CommandFeedback:
     switch(led_subroutine){
     case 0:
       led_timer.start( 500);
-      setLEDColor(ORANGE);
+      setLEDColor(LEDColor::Orange);
       led_subroutine++;
       break;
     default:
@@ -237,11 +233,11 @@ void Feedback::updateLED(){
     }
     break;
 
-  case WARNING_ROUTINE:
+  case LEDRoutine::Warning:
     switch(led_subroutine){
     case 0:
       led_timer.start( 700);
-      setLEDColor(ORANGE);
+      setLEDColor(LEDColor::Orange);
       led_subroutine++;
       break;
     default:
@@ -249,33 +245,34 @@ void Feedback::updateLED(){
     }
     break;
 
-  case TOGGLE_WIRELESS_ROUTINE:
+  case LEDRoutine::ToggleWireless:
     if(led_subroutine == 6){
       endRoutine();
     }
     else if(led_subroutine % 2 == 0){
       led_timer.start(500);
-      setLEDColor(PURPLE);
+      setLEDColor(LEDColor::Purple);
     }
     else{
       led_timer.start(500);
-      setLEDColor(BLACK);
+      setLEDColor(LEDColor::Black);
     }
     led_subroutine++;
     break;
 
-  case ALL_COLORS_ROUTINE:
-    if(led_subroutine == BLACK){
+  case LEDRoutine::AllColors:
+    // Use subroutine counter to iterate through colors
+    if(led_subroutine >= static_cast<uint16_t>(LEDColor::NumColors)){
       endRoutine();
     }
     else{
       led_timer.start(500);
-      setLEDColor((LEDColorEnum) led_subroutine);
+      setLEDColor(static_cast<LEDColor>(led_subroutine));
       led_subroutine++;
     }
     break;
 
-  case RAINBOW_ROUTINE:
+  case LEDRoutine::Rainbow:
     if(led_subroutine < 256){
       // yellow->green
       setLEDRGB(255 - led_subroutine, 255, 0);
@@ -315,54 +312,54 @@ void Feedback::updateLED(){
 }
 
 
-void Feedback::startRoutine(LEDRoutineEnum routine){
+void Feedback::startRoutine(LEDRoutine routine){
 #ifndef ENABLE_RGB_LED
   return;
 #endif
   led_routine = routine;
   led_subroutine = 0;
   led_timer.disable();
-  setLEDColor(BLACK);
+  setLEDColor(LEDColor::Black);
 }
 
 void Feedback::endRoutine(){
-  startRoutine(NO_ROUTINE);
+  startRoutine(LEDRoutine::None);
 }
 
 
-void Feedback::setLEDColor(LEDColorEnum color){
+void Feedback::setLEDColor(LEDColor color){
   switch(color){
-  case BLACK:
+  case LEDColor::Black:
     setLEDRGB(0, 0, 0);
     break;
-  case WHITE:
+  case LEDColor::White:
     setLEDRGB(255, 255, 255);
     break;
-  case RED:
+  case LEDColor::Red:
     setLEDRGB(255, 0, 0);
     break;
-  case ORANGE:
+  case LEDColor::Orange:
     setLEDRGB(255, 170, 0);
     break;
-  case YELLOW:
+  case LEDColor::Yellow:
     setLEDRGB(255, 255,  0);
     break;
-  case GREEN:
+  case LEDColor::Green:
     setLEDRGB(0, 255, 0);
     break;
-  case TEAL:
+  case LEDColor::Teal:
     setLEDRGB(0, 255, 170);
     break;
-  case BLUE:
+  case LEDColor::Blue:
     setLEDRGB(0, 0, 255);
     break;
-  case DIM_BLUE:
+  case LEDColor::DimBlue:
     setLEDRGB(0, 0, 170);
     break;
-  case PURPLE:
+  case LEDColor::Purple:
     setLEDRGB(160, 0, 255);
     break;
-  case MAGENTA:
+  case LEDColor::Magenta:
     setLEDRGB(220, 0, 255);
     break;
   default:

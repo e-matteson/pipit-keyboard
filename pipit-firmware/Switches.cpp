@@ -47,13 +47,13 @@ void Switches::updateSwitchStatuses(){
   for(uint8_t i=0; i!=NUM_MATRIX_POSITIONS; i++){
     if(matrix.getSwitch(i)){ // Switch is physically down now.
       switch(switch_status[i]){ // Old status is:
-      case Switches::PRESSED:
-      case Switches::ALREADY_SENT:
-      case Switches::HELD:
+      case SwitchStatus::Pressed:
+      case SwitchStatus::AlreadySent:
+      case SwitchStatus::Held:
         // If we were debouncing a release, stop, it wasn't real.
         stopDebouncing(i);
         break;
-      case Switches::NOT_PRESSED:
+      case SwitchStatus::NotPressed:
         // Might be a new press, debounce it first
         debouncePress(i);
         break;
@@ -61,21 +61,21 @@ void Switches::updateSwitchStatuses(){
     }
     else{ // Switch is physically up now.
       switch(switch_status[i]){ //Old status is:
-      case Switches::ALREADY_SENT:
-      case Switches::HELD:
+      case SwitchStatus::AlreadySent:
+      case SwitchStatus::Held:
         // Might be a new release, debounce it first
         debounceRelease(i);
         break;
-      case Switches::NOT_PRESSED:
+      case SwitchStatus::NotPressed:
         // If we were debouncing a press, stop, it wasn't real.
         stopDebouncing(i);
         break;
-      case Switches::PRESSED:
+      case SwitchStatus::Pressed:
         if(debounceRelease(i)){
           // Switch was quickly tapped and released, before the chord timer even ran out.
-          // Change status back to PRESSED, after debounceRelease set it to NOT_PRESSED.
+          // Change status back to Pressed, after debounceRelease set it to NotPressed.
           // TODO how might this interact with the bouncy-switch grace period?
-          switch_status[i] = Switches::PRESSED;
+          switch_status[i] = SwitchStatus::Pressed;
           // Force a send during this loop iteration.
           chord_timer.forceDone();
         }
@@ -95,7 +95,7 @@ bool Switches::debouncePress(uint8_t switch_index){
   }
   else if(debounce_timers[switch_index].isDone()){
     // Debounce done, it's a real press!
-    switch_status[switch_index] = Switches::PRESSED;
+    switch_status[switch_index] = SwitchStatus::Pressed;
     debounce_timers[switch_index].disable();
 
     chord_timer.start();
@@ -122,7 +122,7 @@ bool Switches::debounceRelease(uint8_t switch_index){
   else if(debounce_timers[switch_index].isDone()){
     // Debouncing done, it's a real release.
     debounce_timers[switch_index].disable();
-    switch_status[switch_index] = Switches::NOT_PRESSED;
+    switch_status[switch_index] = SwitchStatus::NotPressed;
     last_released_switch = switch_index;
     release_timer.start();
     held_timer.start();
@@ -157,8 +157,8 @@ void Switches::reuseHeldSwitches(){
   // If any switches have been held down for a while, let them be re-used
   //  in future chords.
   for(uint8_t i = 0; i!= NUM_MATRIX_POSITIONS; i++){
-    if(switch_status[i] == Switches::ALREADY_SENT){
-      switch_status[i] = Switches::HELD;
+    if(switch_status[i] == SwitchStatus::AlreadySent){
+      switch_status[i] = SwitchStatus::Held;
     }
   }
 }
@@ -166,16 +166,16 @@ void Switches::reuseHeldSwitches(){
 void Switches::reuseMods(Chord* chord){
   // Let modifiers be immediately re-used in future chords.
   for(uint8_t m = 0; m < NUM_MODIFIERS; m++){
-    if(!chord->hasMod((conf::mod_enum) m)){
+    if(!chord->hasMod((conf::Mod) m)){
       continue;
     }
-    const uint8_t* mod_chord = conf::getModChord(chord->getMode(), (conf::mod_enum) m);
+    const uint8_t* mod_chord = conf::getModChord(chord->getMode(), (conf::Mod) m);
     uint8_t i = 0;
     for(uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++){
       for(uint8_t bit_num = 0; bit_num < 8; bit_num++){
         if(1<<bit_num & mod_chord[byte_num]){
           // This switch was included in the modifier chord, let it be re-used.
-          switch_status[i] = Switches::HELD;
+          switch_status[i] = SwitchStatus::Held;
         }
         i++;
       }
@@ -185,7 +185,7 @@ void Switches::reuseMods(Chord* chord){
 
 bool Switches::anySwitchDown() {
   for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
-    if(switch_status[index] != NOT_PRESSED) {
+    if(switch_status[index] != SwitchStatus::NotPressed) {
       return true;
     }
   }
@@ -195,15 +195,15 @@ bool Switches::anySwitchDown() {
 void Switches::fillChord(Chord* chord){
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.
-  // Also, update switch_status values from PRESSED -> ALREADY_SENT.
+  // Also, update switch_status values from Pressed -> AlreadySent.
   for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
-    if (switch_status[index] == Switches::PRESSED || switch_status[index] == Switches::HELD){
+    if (switch_status[index] == SwitchStatus::Pressed || switch_status[index] == SwitchStatus::Held){
       // Switch is pressed! Record it in the chord.
       chord->setSwitch(index);
     }
     // Modify the status array to record that the switches have been processed.
-    if(switch_status[index] == Switches::PRESSED){
-      switch_status[index] = Switches::ALREADY_SENT;
+    if(switch_status[index] == SwitchStatus::Pressed){
+      switch_status[index] = SwitchStatus::AlreadySent;
     }
   }
 }
@@ -212,11 +212,11 @@ void Switches::fillChord(Chord* chord){
 uint8_t Switches::fillGamingSwitches(Chord* chords){
   uint8_t num_chords = 0;
   for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
-    if (switch_status[index] != Switches::NOT_PRESSED){
+    if (switch_status[index] != SwitchStatus::NotPressed){
       // Switch is basically pressed! Other states don't matter in gaming modes.
       chords[num_chords].setSwitch(index);
       num_chords++;
-      switch_status[index] = Switches::ALREADY_SENT;
+      switch_status[index] = SwitchStatus::AlreadySent;
     }
   }
   return num_chords;
@@ -226,7 +226,7 @@ void Switches::printStatusArray(){
   //for debugging
   Serial.print("status: ");
   for(uint8_t i = 0; i != NUM_MATRIX_POSITIONS; i++){
-    Serial.print(switch_status[i]);
+    Serial.print(static_cast<uint8_t>(switch_status[i]));
     Serial.print(" ");
   }
   Serial.println("");
@@ -235,18 +235,17 @@ void Switches::printStatusArray(){
 
 void Switches::printStatusChange(uint8_t index){
   // Print the new status of a particular key every time it changes
-  // static SwitchStatusEnum old_val = Switches::NOT_PRESSED;
-
   // TODO avoid implicit casts between enum and uint8_t?
-  static uint8_t old_vals[NUM_MATRIX_POSITIONS] = {0};
+  static SwitchStatus old_vals[NUM_MATRIX_POSITIONS] = {SwitchStatus::NotPressed};
 
-  SwitchStatusEnum val = switch_status[index];
-    if (val != old_vals[index]){
-      Serial.print(index);
-      Serial.print(": ");
-      Serial.println(val);
-      old_vals[index] = val;
-    }
+  SwitchStatus val = switch_status[index];
+
+  if (val != old_vals[index]){
+    Serial.print(index);
+    Serial.print(": ");
+    Serial.println(static_cast<uint8_t>(val));
+    old_vals[index] = val;
+  }
 }
 
 void Switches::printMatrixChange(uint8_t index){

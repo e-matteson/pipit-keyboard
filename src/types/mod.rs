@@ -1,23 +1,19 @@
-pub use self::all_data::{AllChordMaps, AllData, AllSeqMaps, ChordMap};
-pub use self::c_code::{CCode, CTree, Field, ToC};
-pub use self::chord::{Chord, ChordSpec};
-pub use self::huffman::HuffmanTable;
-pub use self::key_press::{KeyDefs, KeyPress};
-pub use self::miscellaneous::{
-    KmapFormat, KmapInfo, KmapPath, ModeInfo, ModeName, Name, Permutation, Pin,
-    SeqType, Sequence, Spelling, SpellingTable, SwitchPos, TutorData,
-};
-pub use self::words::{AnagramNum, Word};
-
-pub use self::validate::Validate;
-// pub use self::errors::*;
-// pub use self::other_error::*;
+pub(crate) use self::all_data::*;
+pub(crate) use self::c_code::*;
+pub(crate) use self::c_enums::*;
+pub(crate) use self::chord::*;
+pub(crate) use self::huffman::*;
+pub(crate) use self::key_press::*;
+pub(crate) use self::miscellaneous::*;
+pub(crate) use self::validate::*;
+pub(crate) use self::words::*;
 
 #[macro_use]
 mod validate;
 
 mod all_data;
 mod c_code;
+mod c_enums;
 mod checker;
 mod chord;
 pub mod errors;

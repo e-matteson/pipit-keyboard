@@ -1,9 +1,9 @@
 #include "conf.h"
 #include "util.h"
 
-const bool contains(const conf::mod_enum* mod_array,
+const bool contains(const conf::Mod* mod_array,
                     const uint8_t len,
-                    const conf::mod_enum modifier){
+                    const conf::Mod modifier){
   for(uint8_t i = 0; i < len; i++){
     if(mod_array[i] == modifier){
       return true;
@@ -32,23 +32,23 @@ namespace conf {
     return 0;
   }
 
-  const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, seq_type_enum seq_type) {
-    return mode->kmaps[kmap_num]->lookups_for_kmap[seq_type];
+  const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, SeqType seq_type) {
+    return mode->kmaps[kmap_num]->lookups_for_kmap[static_cast<uint8_t>(seq_type)];
   }
 
-  const ModeStruct* getMode(mode_enum mode){
-    return mode_structs[mode];
+  const ModeStruct* getMode(Mode mode){
+    return mode_structs[static_cast<uint8_t>(mode)];
   }
 
-  bool isGaming(mode_enum mode) {
+  bool isGaming(Mode mode) {
     return getMode(mode)->is_gaming;
   }
 
-  const uint8_t* getAnagramMask(mode_enum mode) {
+  const uint8_t* getAnagramMask(Mode mode) {
     return getMode(mode)->anagram_mask;
   }
 
-  const uint8_t* getModChord(mode_enum mode, mod_enum modifier) {
+  const uint8_t* getModChord(Mode mode, Mod modifier) {
     return getMode(mode)->mod_chords[modifier];
   }
 
@@ -57,45 +57,45 @@ namespace conf {
     return plain_mod_keys[index];
   }
 
-  mod_enum getPlainModEnum(uint8_t index) {
-    return (mod_enum) plain_mod_indices[index];
+  Mod getPlainModEnum(uint8_t index) {
+    return (Mod) plain_mod_indices[index];
   }
 
-  mod_enum getWordModEnum(uint8_t index) {
-    return (mod_enum) word_mod_indices[index];
+  Mod getWordModEnum(uint8_t index) {
+    return (Mod) word_mod_indices[index];
   }
 
-  mod_enum getAnagramModEnum(uint8_t index) {
-    return (mod_enum) anagram_mod_indices[index];
+  Mod getAnagramModEnum(uint8_t index) {
+    return (Mod) anagram_mod_indices[index];
   }
 
-  mod_type getModType(mod_enum modifier){
+  ModType getModType(Mod modifier){
     if (contains(plain_mod_indices, NUM_PLAIN_MODS, modifier)){
-      return mod_type::PLAIN_MOD;
+      return ModType::Plain;
     }
     if (contains(word_mod_indices, NUM_WORD_MODS, modifier)){
-      return mod_type::WORD_MOD;
+      return ModType::Word;
     }
     if (contains(anagram_mod_indices, NUM_ANAGRAM_MODS, modifier)){
-      return mod_type::ANAGRAM_MOD;
+      return ModType::Anagram;
     }
     DEBUG1_LN("ERROR: Unknown modifier type");
     exit(1);
   }
 
-  mod_enum getNospaceEnum() {
-    return mod_enum::MOD_NOSPACE_ENUM;
+  Mod getNospaceEnum() {
+    return Mod::mod_nospace;
   }
 
-  mod_enum getCapitalEnum() {
-    return mod_enum::MOD_CAPITAL_ENUM;
+  Mod getCapitalEnum() {
+    return Mod::mod_capital;
   }
 
-  mod_enum getDoubleEnum() {
-    return mod_enum::MOD_DOUBLE_ENUM;
+  Mod getDoubleEnum() {
+    return Mod::mod_double;
   }
 
-  mod_enum getModShortenEnum() {
-    return mod_enum::MOD_SHORTEN_ENUM;
+  Mod getModShortenEnum() {
+    return Mod::mod_shorten;
   }
 }

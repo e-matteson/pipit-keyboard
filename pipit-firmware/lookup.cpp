@@ -76,7 +76,7 @@ uint8_t lookupInKmapAndType(const Chord* chord, const LookupKmapType* table, Key
 }
 
 namespace conf {
-  uint8_t lookup(const Chord* chord, seq_type_enum type, Key* keys_out){
+  uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out){
     const ModeStruct* mode = conf::getMode(chord->getMode());
     for (uint8_t i = 0; i < mode->num_kmaps; i++){
       const LookupKmapType* table = conf::getLookupKmapType(mode, i, type);

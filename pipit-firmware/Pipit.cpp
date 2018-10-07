@@ -7,11 +7,11 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     return;
   }
 
-  conf::command_enum command = (conf::command_enum) data[0].key_code;
+  conf::Command command = static_cast<conf::Command>(data[0].key_code);
 
   // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
-  if(command == conf::command_enum::COMMAND_PAUSE){
+  if(command == conf::Command::command_pause){
     // toggle temporary disabling of typing
     is_paused ^= 1;
     return;
@@ -25,100 +25,100 @@ void Pipit::doCommand(const Key* data, uint8_t length){
     /**** Add cases for new commands here! ****/
     /******************************************/
 
-  case conf::command_enum::COMMAND_DELETE_WORD:
+  case conf::Command::command_delete_word:
     sender.deleteLastWord();
     break;
 
-  case conf::command_enum::COMMAND_SHORTEN_LAST_WORD:
-    sender.move(Motion::WORD, Direction::LEFT);
+  case conf::Command::command_shorten_last_word:
+    sender.move(Motion::Word, Direction::Left);
     sender.backspace();
-    sender.move(Motion::WORD, Direction::RIGHT);
+    sender.move(Motion::Word, Direction::Right);
     break;
 
-  case conf::command_enum::COMMAND_LEFT_WORD:
-    sender.move(Motion::WORD, Direction::LEFT);
+  case conf::Command::command_left_word:
+    sender.move(Motion::Word, Direction::Left);
     break;
 
-  case conf::command_enum::COMMAND_LEFT_LIMIT:
-    sender.move(Motion::LIMIT, Direction::LEFT);
+  case conf::Command::command_left_limit:
+    sender.move(Motion::Limit, Direction::Left);
     break;
 
-  case conf::command_enum::COMMAND_RIGHT_WORD:
-    sender.move(Motion::WORD, Direction::RIGHT);
+  case conf::Command::command_right_word:
+    sender.move(Motion::Word, Direction::Right);
     break;
 
-  case conf::command_enum::COMMAND_RIGHT_LIMIT:
-    sender.move(Motion::LIMIT, Direction::RIGHT);
+  case conf::Command::command_right_limit:
+    sender.move(Motion::Limit, Direction::Right);
     break;
 
-  case conf::command_enum::COMMAND_CYCLE_WORD:
-    cycleLastWord(CycleType::CYCLE_ANAGRAM);
+  case conf::Command::command_cycle_word:
+    cycleLastWord(CycleType::Anagram);
     break;
 
-  case conf::command_enum::COMMAND_CYCLE_CAPITAL:
-    cycleLastWord(CycleType::CYCLE_CAPITAL);
+  case conf::Command::command_cycle_capital:
+    cycleLastWord(CycleType::Capital);
     break;
 
-  case conf::command_enum::COMMAND_CYCLE_NOSPACE:
-    cycleLastWord(CycleType::CYCLE_NOSPACE);
+  case conf::Command::command_cycle_nospace:
+    cycleLastWord(CycleType::Nospace);
     break;
 
-  case conf::command_enum::COMMAND_STICKY_CTRL:
+  case conf::Command::command_sticky_ctrl:
     sender.setStickymod(MODIFIERKEY_CTRL&0xff);
     break;
 
-  case conf::command_enum::COMMAND_STICKY_SHIFT:
+  case conf::Command::command_sticky_shift:
     sender.setStickymod(MODIFIERKEY_SHIFT&0xff);
     break;
 
-  case conf::command_enum::COMMAND_STICKY_ALT:
+  case conf::Command::command_sticky_alt:
     sender.setStickymod(MODIFIERKEY_ALT&0xff);
     break;
 
-  case conf::command_enum::COMMAND_STICKY_GUI:
+  case conf::Command::command_sticky_gui:
     sender.setStickymod(MODIFIERKEY_GUI&0xff);
     break;
 
-  case conf::command_enum::COMMAND_LED_BATTERY:
-    feedback.startRoutine(BATTERY_ROUTINE);
+  case conf::Command::command_led_battery:
+    feedback.startRoutine(LEDRoutine::Battery);
     break;
 
-  case conf::command_enum::COMMAND_LED_COLORS:
-    feedback.startRoutine(ALL_COLORS_ROUTINE);
+  case conf::Command::command_led_colors:
+    feedback.startRoutine(LEDRoutine::AllColors);
     break;
 
-  case conf::command_enum::COMMAND_LED_RAINBOW:
-    feedback.startRoutine(RAINBOW_ROUTINE);
+  case conf::Command::command_led_rainbow:
+    feedback.startRoutine(LEDRoutine::Rainbow);
     break;
 
-  case conf::command_enum::COMMAND_TOGGLE_WIRELESS:
+  case conf::Command::command_toggle_wireless:
     sender.comms.toggleWireless();
-    feedback.startRoutine(TOGGLE_WIRELESS_ROUTINE);
+    feedback.startRoutine(LEDRoutine::ToggleWireless);
     break;
 
-  case conf::command_enum::COMMAND_SCROLL_DOWN:
+  case conf::Command::command_scroll_down:
     sender.comms.moveMouse(0,0,-1,0);
     break;
 
-  case conf::command_enum::COMMAND_SCROLL_UP:
+  case conf::Command::command_scroll_up:
     sender.comms.moveMouse(0,0,1,0);
     break;
 
-  case conf::command_enum::COMMAND_PAN_LEFT:
+  case conf::Command::command_pan_left:
     sender.comms.moveMouse(0,0,0,-1);
     break;
 
-  case conf::command_enum::COMMAND_PAN_RIGHT:
+  case conf::Command::command_pan_right:
     sender.comms.moveMouse(0,0,0,1);
     break;
 
-  case conf::command_enum::COMMAND_SWITCH_TO:
+  case conf::Command::command_switch_to:
     // This takes an argument specifying which mode to switch to.
     if(length != 2) {
       DEBUG1_LN("WARNING: Wrong number of args for command_switch_to");
       return;
     }
-    mode = (conf::mode_enum) data[1].key_code;
+    mode = static_cast<conf::Mode>(data[1].key_code);
     break;
 
   default:
@@ -132,7 +132,7 @@ void Pipit::setup(){
   switches.setup();
   sender.setup();
   feedback.setup();
-  feedback.startRoutine(BATTERY_ROUTINE);
+  feedback.startRoutine(LEDRoutine::Battery);
   feedback.updateLED();
 }
 
@@ -213,7 +213,7 @@ void Pipit::processChord(Chord* chord){
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
-  if(uint8_t len = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
+  if(uint8_t len = sendIfFound(conf::SeqType::Command, chord, data)){
     doCommand(data, len);
     return;
   }
@@ -223,14 +223,14 @@ void Pipit::processChord(Chord* chord){
   }
 
   // If chord is a known macro, send it and return.
-  if(sendIfFound(conf::seq_type_enum::MACRO, chord, data)){
+  if(sendIfFound(conf::SeqType::Macro, chord, data)){
     return;
   }
 
   // If chord is a known word, send it and return.
   chord->extractWordMods();
   chord->extractAnagramMods();
-  if(sendIfFound(conf::seq_type_enum::WORD, chord, data)){
+  if(sendIfFound(conf::SeqType::Word, chord, data)){
     switches.reuseMods(chord);
     return;
   }
@@ -240,7 +240,7 @@ void Pipit::processChord(Chord* chord){
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
-  if(sendIfFound(conf::seq_type_enum::PLAIN, chord, data)){
+  if(sendIfFound(conf::SeqType::Plain, chord, data)){
     switches.reuseMods(chord);
     return;
   }
@@ -249,7 +249,7 @@ void Pipit::processChord(Chord* chord){
     // Only modifiers were pressed, send them now. (We know that because if the
     // chord was totally empty, it would have been sent earlier)
     switches.reuseMods(chord);
-    feedback.trigger(conf::seq_type_enum::PLAIN);
+    feedback.trigger(conf::SeqType::Plain);
   }
   else{
     // Unknown chord, release all keys
@@ -270,7 +270,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
     Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* chord = gaming_switches+i;
-    if(uint8_t length = sendIfFound(conf::seq_type_enum::COMMAND, chord, data)){
+    if(uint8_t length = sendIfFound(conf::SeqType::Command, chord, data)){
       doCommand(data, length);
       return;
     }
@@ -279,18 +279,18 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
       return;
     }
 
-    if(sendIfFound(conf::seq_type_enum::MACRO, chord, data)){
+    if(sendIfFound(conf::SeqType::Macro, chord, data)){
       return;
     }
 
     // TODO why can't we use normal sendIfFound() here? Because we're adding to the report, not sending, right.
-    if(uint8_t length=conf::lookup(chord, conf::seq_type_enum::PLAIN, data)){
+    if(uint8_t length=conf::lookup(chord, conf::SeqType::Plain, data)){
       if(length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
       report.addKey(data);
       report.addMod(chord->getModByte());
-      feedback.trigger(conf::seq_type_enum::PLAIN);
+      feedback.trigger(conf::SeqType::Plain);
       continue;
     }
 
@@ -314,14 +314,14 @@ void Pipit::cycleLastWord(CycleType cycle_type){
   for(uint8_t i = 0; i <= num_anagrams; i++) {
     new_chord.cycle(cycle_type);
 
-    if(sendIfFoundForCycling(conf::seq_type_enum::WORD, &new_chord, data)) {
+    if(sendIfFoundForCycling(conf::SeqType::Word, &new_chord, data)) {
       return; // Success
     }
-    if(sendIfFoundForCycling(conf::seq_type_enum::PLAIN, &new_chord, data)) {
+    if(sendIfFoundForCycling(conf::SeqType::Plain, &new_chord, data)) {
       return; // Success
     }
 
-    if(cycle_type != CycleType::CYCLE_ANAGRAM) {
+    if(cycle_type != CycleType::Anagram) {
       // Give up after we failed the first time, if we're not cycling anagrams.
       // The loop is here just to look for all the anagrams, but is useless for
       // the other cycling types.
@@ -335,15 +335,15 @@ void Pipit::cycleLastWord(CycleType cycle_type){
   feedback.triggerNoAnagram();
 }
 
-uint8_t Pipit::sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data) {
+uint8_t Pipit::sendIfFound(conf::SeqType type, Chord* chord, Key* data) {
   return sendIfFoundHelper(type, chord, data, 0);
 }
 
-uint8_t Pipit::sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key* data) {
+uint8_t Pipit::sendIfFoundForCycling(conf::SeqType type, Chord* chord, Key* data) {
   return sendIfFoundHelper(type, chord, data, 1);
 }
 
-uint8_t Pipit::sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first) {
+uint8_t Pipit::sendIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_first) {
   // TODO renam data -> keys
 
   if(uint8_t length = conf::lookup(chord, type, data)){

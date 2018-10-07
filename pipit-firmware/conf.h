@@ -7,31 +7,31 @@
 
 namespace conf {
 
-  enum mod_type {
-    PLAIN_MOD = 0,
-    WORD_MOD,
-    ANAGRAM_MOD
+  enum class ModType {
+    Plain = 0,
+    Word,
+    Anagram
   };
 
   /* TODO why are these all const? */
 
   const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length);
-  const ModeStruct* getMode(mode_enum mode);
-  bool isGaming(mode_enum mode);
-  const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, seq_type_enum seq_type);
+  const ModeStruct* getMode(Mode mode);
+  bool isGaming(Mode mode);
+  const LookupKmapType* getLookupKmapType(const ModeStruct* mode, uint8_t kmap_num, SeqType seq_type);
 
-  const uint8_t* getAnagramMask(mode_enum mode);
-  const uint8_t* getModChord(mode_enum mode, mod_enum modifier);
+  const uint8_t* getAnagramMask(Mode mode);
+  const uint8_t* getModChord(Mode mode, Mod modifier);
   uint8_t getPlainModByte(uint8_t index);
-  mod_enum getPlainModEnum(uint8_t index);
-  mod_enum getWordModEnum(uint8_t index);
-  mod_enum getAnagramModEnum(uint8_t index);
-  mod_type getModType(mod_enum modifier);
+  Mod getPlainModEnum(uint8_t index);
+  Mod getWordModEnum(uint8_t index);
+  Mod getAnagramModEnum(uint8_t index);
+  ModType getModType(Mod modifier);
 
-  mod_enum getNospaceEnum();
-  mod_enum getCapitalEnum();
-  mod_enum getDoubleEnum();
-  mod_enum getModShortenEnum();
+  Mod getNospaceEnum();
+  Mod getCapitalEnum();
+  Mod getDoubleEnum();
+  Mod getModShortenEnum();
 }
 
 #endif

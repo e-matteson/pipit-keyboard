@@ -46,15 +46,15 @@ private:
   void doCommand(const Key* data, uint8_t length);
   void cycleLastWord(CycleType cycle_type);
 
-  uint8_t sendIfFoundHelper(conf::seq_type_enum type, Chord* chord, Key* data, bool delete_first);
-  uint8_t sendIfFoundForCycling(conf::seq_type_enum type, Chord* chord, Key* data);
-  uint8_t sendIfFound(conf::seq_type_enum type, Chord* chord, Key* data);
+  uint8_t sendIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_first);
+  uint8_t sendIfFoundForCycling(conf::SeqType type, Chord* chord, Key* data);
+  uint8_t sendIfFound(conf::SeqType type, Chord* chord, Key* data);
 
   Switches switches;
   Feedback feedback;
   Sender sender;
 
-  conf::mode_enum mode = conf::mode_enum::DEFAULT_MODE;
+  conf::Mode mode = conf::Mode::default_mode;
   bool is_paused = 0;
 };
 

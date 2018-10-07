@@ -19,7 +19,7 @@ public:
   void backspace();
 
   bool sendIfEmptyExceptMods(const Chord* chord);
-  void sendType(conf::seq_type_enum type, const Key* data, uint8_t data_length, Chord* chord);
+  void sendType(conf::SeqType type, const Key* data, uint8_t data_length, Chord* chord);
 
   void sendReport(Report* report);
 

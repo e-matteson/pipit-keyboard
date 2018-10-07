@@ -150,7 +150,7 @@ extern const uint8_t battery_level_pin;
 #define HAS_BATTERY 
 #define NUM_BYTES_IN_CHORD 3
 #define BLANK_KEY 0
-#define NUM_HUFFMAN_CODES 98
+#define NUM_HUFFMAN_CODES 103
 #define MIN_HUFFMAN_CODE_BIT_LEN 3
 extern const HuffmanChar huffman_lookup[];
 enum mod_enum : uint8_t {
@@ -195,8 +195,8 @@ enum command_enum : uint8_t {
   COMMAND_STICKY_ALT = 16,
   COMMAND_STICKY_CTRL = 17,
   COMMAND_STICKY_GUI = 18,
-  COMMAND_STICKY_SHIFT = 19,
-  COMMAND_WINDOWS_MODE = 20,
+  COMMAND_SWITCH_TO = 20,
+  COMMAND_WINDOWS_MODE = 21,
 };
 
 enum seq_type_enum : uint8_t {

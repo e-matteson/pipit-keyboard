@@ -1,12 +1,12 @@
 use itertools::Itertools;
 use std::clone::Clone;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use util::ensure_u8;
 
 use types::{
-    AnagramNum, CCode, CTree, Chord, ChordSpec, HuffmanTable, KeyPress,
+    AnagramNum, CTree, Chord, ChordSpec, Command, HuffmanTable, KeyPress,
     KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, SpellingTable,
     TutorData,
 };
@@ -34,13 +34,16 @@ pub struct AllChordMaps {
 pub struct AllData {
     pub chords: AllChordMaps,
     pub sequences: AllSeqMaps,
+    // pub word_mods: Vec<Name>,
+    // pub plain_mods: Vec<Name>,
+    // pub anagram_mods: Vec<Name>,
     pub word_mods: Vec<Name>,
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub huffman_table: HuffmanTable,
     pub spellings: SpellingTable,
-    pub command_enum_variants: BTreeSet<CCode>,
+    pub commands: Vec<Command>,
 
     pub options: Vec<CTree>,
     pub output_directory: PathBuf,
@@ -74,21 +77,22 @@ impl AllData {
 
     /// Get names of all modifiers, including `plain_mod`s, `word_mod`s, and
     /// `anagram_mods`
-    pub fn get_mod_names(&self) -> Vec<Name> {
+    pub fn modifier_names(&self) -> Vec<&Name> {
+        // TODO sorting works on the references, right?
         let mut names = Vec::new();
-        names.extend(self.plain_mods.clone());
-        names.extend(self.word_mods.clone());
-        names.extend(self.anagram_mods.clone());
+        names.extend(self.plain_mods.iter());
+        names.extend(self.word_mods.iter());
+        names.extend(self.anagram_mods.iter());
         names.sort();
         names
     }
 
     /// Get chords the for all modifiers in the given mode, in the same order
-    /// as `get_mod_names()`. If any modifier was not assigned a chord in this
+    /// as `modifier_names()`. If any modifier was not assigned a chord in this
     /// mode, give it a blank chord instead.
-    pub fn get_mod_chords(&self, mode: &ModeName) -> Vec<Chord> {
+    pub fn modifier_chords(&self, mode: &ModeName) -> Vec<Chord> {
         let mut chords = Vec::new();
-        for name in self.get_mod_names() {
+        for name in self.modifier_names() {
             // Missing mod chords are represented in the firmware config as a
             // blank chord.
             chords.push(

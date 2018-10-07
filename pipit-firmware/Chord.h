@@ -6,21 +6,21 @@
 #include "conf.h"
 #include "Key.h"
 
-enum CycleType {
-                CYCLE_ANAGRAM,
-                CYCLE_NOSPACE,
-                CYCLE_CAPITAL,
+enum class CycleType {
+  Anagram,
+  Nospace,
+  Capital,
 };
 
 class Chord{
 public:
   Chord();
-  Chord(conf::mode_enum mode);
+  Chord(conf::Mode mode);
 
   void clear();
   void setSwitch(uint8_t switch_index);
   void copy(const Chord* chord);
-  void setMode(conf::mode_enum _mode);
+  void setMode(conf::Mode _mode);
   void extractPlainMods();
   void extractWordMods();
   void extractAnagramMods();
@@ -32,9 +32,9 @@ public:
   bool hasChordBytes(const uint8_t* other_chord_bytes) const;
   bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
-  conf::mode_enum getMode() const;
+  conf::Mode getMode() const;
 
-  bool hasMod(conf::mod_enum mod) const;
+  bool hasMod(conf::Mod mod) const;
   void editCaps( Key* data, uint8_t length) const;
   bool hasModNospace() const;
   bool hasModDouble() const;
@@ -52,11 +52,11 @@ private:
 
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
-  void setMod(conf::mod_enum mod);
-  void unsetMod(conf::mod_enum mod);
-  void toggleMod(conf::mod_enum modifier);
-  bool extractMod(conf::mod_enum modifier);
-  bool restoreMod(conf::mod_enum modifier);
+  void setMod(conf::Mod mod);
+  void unsetMod(conf::Mod mod);
+  void toggleMod(conf::Mod modifier);
+  bool extractMod(conf::Mod modifier);
+  bool restoreMod(conf::Mod modifier);
 
   uint8_t cycleAnagram();
   void cycleCapital();
@@ -99,9 +99,9 @@ private:
   uint16_t mods_and_flags = 0;
 
   uint8_t anagram_num = 0;
-  // TODO can we control enum size?
-  conf::mode_enum mode = (conf::mode_enum) 0;
-  // bool flag_cycle_capital = 0;
+
+  // TODO what happens if there are no modes, so this cast is invalid?
+  conf::Mode mode = static_cast<conf::Mode>(0);
 };
 
 #endif

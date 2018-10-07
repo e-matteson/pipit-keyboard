@@ -9,7 +9,7 @@
 
 namespace conf{
 
-  uint8_t lookup(const Chord* chord, seq_type_enum type, Key* keys_out);
+  uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out);
 
 };
 

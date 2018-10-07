@@ -196,7 +196,7 @@ fn format_enum_decl(
     };
     CFiles {
         h: CCode(format!(
-            "enum {}{}{{\n{}}};\n\n",
+            "enum class {}{}{{\n{}}};\n\n",
             name, inheritance, contents
         )),
         c: CCode::new(),

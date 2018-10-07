@@ -12,19 +12,19 @@
 #define HISTORY_SIZE 5
 #define PADDING 2
 
-enum Direction{
-  LEFT,
-  RIGHT,
+enum class Direction {
+  Left,
+  Right,
 };
 
-enum Motion{
-  WORD,
-  WORD_EDGE,
-  CHAR,
-  LIMIT,
+enum class Motion {
+  Word,
+  WordEdge,
+  Char,
+  Limit,
 };
 
-class History{
+class History {
 
 public:
   void save(Report* report);

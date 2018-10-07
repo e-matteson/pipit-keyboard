@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use types::{
-    CCode, CTree, ChordSpec, KeyPress, KmapFormat, ModeInfo, ModeName, Name,
-    Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
+    CCode, CTree, ChordSpec, Command, KeyPress, KmapFormat, ModeInfo, ModeName,
+    Name, Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
 };
 
 use failure::{Error, ResultExt};
@@ -27,7 +27,7 @@ validated_struct!{
         pub macros: BTreeMap<Name, Sequence>,
         pub word_modifiers: Vec<Name>,
         pub anagram_modifiers: Vec<Name>,
-        pub commands: Vec<Name>,
+        pub commands: Vec<Command>,
         pub dictionary: Vec<Word>,
     }
 }

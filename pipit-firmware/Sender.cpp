@@ -11,7 +11,7 @@ void Sender::move(Motion motion, Direction direction){
   uint16_t count = history.calcDistance(motion, direction);
 
   for(int16_t i = 0; i < count; i++){
-    if(direction == Direction::LEFT) {
+    if(direction == Direction::Left) {
       leftArrow();
     }
     else{
@@ -23,8 +23,8 @@ void Sender::move(Motion motion, Direction direction){
 
 void Sender::deleteLastWord(){
   // Delete the last sent key sequence by sending the correct number of backspaces.
-  move(Motion::WORD_EDGE, Direction::RIGHT);
-  int16_t count = history.calcDistance(Motion::WORD, Direction::LEFT);
+  move(Motion::WordEdge, Direction::Right);
+  int16_t count = history.calcDistance(Motion::Word, Direction::Left);
   for(int16_t i = 0; i < count; i++){
     backspace();
 
@@ -46,11 +46,11 @@ bool Sender::sendIfEmptyExceptMods(const Chord* chord){
   return 1;
 }
 
-void Sender::sendType(conf::seq_type_enum type, const Key* data, uint8_t data_length, Chord* chord){
+void Sender::sendType(conf::SeqType type, const Key* data, uint8_t data_length, Chord* chord){
   switch(type) {
-  case conf::seq_type_enum::PLAIN: sendPlain(data, data_length, chord); break;
-  case conf::seq_type_enum::WORD: sendWord(data, data_length, chord); break;
-  case conf::seq_type_enum::MACRO: sendMacro(data, data_length, chord); break;
+  case conf::SeqType::Plain: sendPlain(data, data_length, chord); break;
+  case conf::SeqType::Word: sendWord(data, data_length, chord); break;
+  case conf::SeqType::Macro: sendMacro(data, data_length, chord); break;
     default: DEBUG1_LN("seq type cannot be sent");
   }
 

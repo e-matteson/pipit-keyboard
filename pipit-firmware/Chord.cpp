@@ -4,9 +4,13 @@
 #define FLAG_BIT 15
 
 
+static uint8_t index(conf::Mod modifier){
+  return static_cast<uint8_t>(modifier);
+}
+
 Chord::Chord(){}
 
-Chord::Chord(conf::mode_enum mode) : mode(mode){}
+Chord::Chord(conf::Mode mode) : mode(mode){}
 
 void Chord::setSwitch(uint8_t switch_index){
   if(switch_index >= NUM_MATRIX_POSITIONS) {
@@ -18,7 +22,7 @@ void Chord::setSwitch(uint8_t switch_index){
   chord_bytes[byte] |= (0x01 << bit);
 }
 
-void Chord::setMode(conf::mode_enum _mode){
+void Chord::setMode(conf::Mode _mode){
   mode = _mode;
 }
 
@@ -32,13 +36,13 @@ uint8_t Chord::getModByte() const{
   // Used for HID keyboard protocol.
   uint8_t mod_byte = 0;
   for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
-    conf::mod_enum mod = conf::getPlainModEnum(i);
+    conf::Mod mod = conf::getPlainModEnum(i);
     mod_byte |= hasMod(mod) ? conf::getPlainModByte(i) : 0;
   }
   return mod_byte;
 }
 
-conf::mode_enum Chord::getMode() const{
+conf::Mode Chord::getMode() const{
   return mode;
 }
 
@@ -60,7 +64,7 @@ void Chord::copy(const Chord* other){
 }
 
 void Chord::clear(){
-  mode = (conf::mode_enum) 0;
+  mode = (conf::Mode) 0;
   mods_and_flags = 0;
   for(uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++){
     chord_bytes[i] = 0;
@@ -138,20 +142,20 @@ void Chord::setModNospace() {
   setMod(conf::getNospaceEnum());
 }
 
-bool Chord::hasMod(conf::mod_enum mod) const{
-  return (mods_and_flags >> mod) & 1;
+bool Chord::hasMod(conf::Mod mod) const{
+  return (mods_and_flags >> index(mod)) & 1;
 }
 
-void Chord::setMod(conf::mod_enum mod) {
-  mods_and_flags |= (1 << mod);
+void Chord::setMod(conf::Mod mod) {
+  mods_and_flags |= (1 << index(mod));
 }
 
-void Chord::unsetMod(conf::mod_enum mod) {
-  mods_and_flags &= ~(1 << mod);
+void Chord::unsetMod(conf::Mod mod) {
+  mods_and_flags &= ~(1 << index(mod));
 }
 
-void Chord::toggleMod(conf::mod_enum mod){
-  mods_and_flags ^= (1 << mod);
+void Chord::toggleMod(conf::Mod mod){
+  mods_and_flags ^= (1 << index(mod));
 }
 
 bool Chord::getFlagCycleCapital() const {
@@ -205,7 +209,7 @@ void Chord::restoreWordMods(){
   }
 }
 
-bool Chord::extractMod(conf::mod_enum modifier){
+bool Chord::extractMod(conf::Mod modifier){
   // If mod is pressed in the chord:
   // - remove the mod bits from the chord
   // - set a flag saying it's present
@@ -217,11 +221,11 @@ bool Chord::extractMod(conf::mod_enum modifier){
   }
   bool isPressed = false;
   switch(conf::getModType(modifier)){
-  case conf::mod_type::PLAIN_MOD:
-  case conf::mod_type::WORD_MOD:
+  case conf::ModType::Plain:
+  case conf::ModType::Word:
     isPressed = isChordMaskSet(mod_chord_bytes, chord_bytes);
     break;
-  case conf::mod_type::ANAGRAM_MOD:
+  case conf::ModType::Anagram:
     isPressed = isExactAnagramPressed(mod_chord_bytes, chord_bytes);
   }
   if(!isPressed){
@@ -235,7 +239,7 @@ bool Chord::extractMod(conf::mod_enum modifier){
   return true;
 }
 
-bool Chord::restoreMod(conf::mod_enum modifier){
+bool Chord::restoreMod(conf::Mod modifier){
   // If mod flag is set:
   // - add the mod bits to the chord
   // - unset the flag
@@ -258,15 +262,15 @@ void Chord::prepareToCycle(){
 
 void Chord::cycle(CycleType operation){
   switch(operation) {
-  case CycleType::CYCLE_CAPITAL:
+  case CycleType::Capital:
     cycleCapital();
     break;
 
-  case CycleType::CYCLE_NOSPACE:
+  case CycleType::Nospace:
     cycleNospace();
     break;
 
-  case CycleType::CYCLE_ANAGRAM:
+  case CycleType::Anagram:
     cycleAnagram();
     break;
 
@@ -328,7 +332,7 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value){
     return;
   }
   // TODO why subtract 1? Can we avoid that...
-  conf::mod_enum mod = conf::getAnagramModEnum(anagram_num-1);
+  conf::Mod mod = conf::getAnagramModEnum(anagram_num-1);
 
   if (value) {
     setMod(mod);
@@ -388,7 +392,7 @@ bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
 
 void Chord::printMod() const{
   for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
-    Serial.print(hasMod((conf::mod_enum) i));
+    Serial.print(hasMod((conf::Mod) i));
     Serial.print(" ");
   }
   Serial.println();

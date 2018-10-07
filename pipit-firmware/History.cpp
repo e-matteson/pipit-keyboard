@@ -22,11 +22,11 @@ void History::splitAtCursor(){
   right_entry.setLength(right_length);
 
   insertAtCursor(&right_entry);
-  repositionCursor(LEFT, 1);
+  repositionCursor(Direction::Left, 1);
 }
 
 void History::insertAtCursor(Entry* entry){
-  if(isCursorAtLimit(LEFT)) {
+  if(isCursorAtLimit(Direction::Left)) {
     // There won't be space to add a new entry here, past the end of the stack.
     // Pop the front of the stack to make space.
     remove(0);
@@ -44,7 +44,7 @@ void History::remove(uint16_t word_position){
   // Update cursor coordinates:
   if(cursor.word == word_position){
     // We're in this word now! Move cursor out of it.
-    repositionCursor(LEFT, calcDistance(WORD, LEFT));
+    repositionCursor(Direction::Left, calcDistance(Motion::Word, Direction::Left));
   }
   else if(cursor.word > word_position){
     // We're left of the removed entry, update cursor's word index
@@ -70,10 +70,10 @@ void History::clear(){
 
 void History::backspace(){
   uint16_t word_position = cursor.word;
-  if(atEdge(LEFT)){
+  if(atEdge(Direction::Left)){
     // About to delete the first letter of a word.
     // Cursor will now be inside the previous word.
-    repositionCursor(LEFT, 1);
+    repositionCursor(Direction::Left, 1);
   }
   Entry* old_entry = getEntryAt(word_position);
   old_entry->decrement();
@@ -96,10 +96,10 @@ void History::saveKeyCode(uint8_t key_code, uint8_t mod_byte){
     backspace();
   }
   else if(key_code == (KEY_LEFT&0xff)){
-    repositionCursor(LEFT, 1);
+    repositionCursor(Direction::Left, 1);
   }
   else if(key_code == (KEY_RIGHT&0xff)){
-    repositionCursor(RIGHT, 1);
+    repositionCursor(Direction::Right, 1);
   }
   else if(shouldKeyClearHistory(key_code, mod_byte)){
     // If certain keys (movement etc) are sent, clear the entire history
@@ -125,7 +125,7 @@ void History::pushNewEntryIfNeeded() {
     return;
   }
 
-  if(!atEdge(RIGHT)){
+  if(!atEdge(Direction::Right)){
     // Split current entry in two, so new entry will be added in the middle.
     splitAtCursor();
   }
@@ -171,30 +171,30 @@ uint16_t History::calcDistance(Motion motion, Direction direction){
     return 0;
   }
   switch(motion){
-  case CHAR:
+  case Motion::Char:
     return 1;
-  case WORD:
-    if(direction == LEFT){
+  case Motion::Word:
+    if(direction == Direction::Left){
       return getLengthAtCursor() - cursor.letter;
     }
-    else{ // RIGHT
-      if(atEdge(RIGHT)){
+    else{ // Direction::Right
+      if(atEdge(Direction::Right)){
         return getEntryAt(cursor.word - 1)->getLength();
       }
       return cursor.letter;
     }
-  case WORD_EDGE:
+  case Motion::WordEdge:
     if(atEdge(direction)){
       return 0;
     }
-    return calcDistance(WORD, direction);
-  case LIMIT:
+    return calcDistance(Motion::Word, direction);
+  case Motion::Limit:
     {
       // First, get dist to nearest word boundary.
-      uint16_t distance = calcDistance(WORD_EDGE, direction);
+      uint16_t distance = calcDistance(Motion::WordEdge, direction);
       // Then, get all the word lengths from there to the end of stack.
-      uint8_t start = (direction == LEFT) ? cursor.word+1  : 0;
-      uint8_t end = (direction == LEFT)   ? HISTORY_SIZE-1 : cursor.word-1;
+      uint8_t start = (direction == Direction::Left) ? cursor.word+1  : 0;
+      uint8_t end = (direction == Direction::Left)   ? HISTORY_SIZE-1 : cursor.word-1;
       for(uint8_t i = start; i <= end; i++){
         distance += getEntryAt(i)->getLength();
       }
@@ -214,8 +214,8 @@ uint16_t History::repositionCursor(Direction direction, uint16_t distance){
       clear(); // Erase the history, we don't know what's back there.
       break;
     }
-    if(direction == LEFT){
-      if(atEdge(LEFT)){
+    if(direction == Direction::Left){
+      if(atEdge(Direction::Left)){
         cursor.word += 1;
         cursor.letter = 0;
       }
@@ -223,8 +223,8 @@ uint16_t History::repositionCursor(Direction direction, uint16_t distance){
         cursor.letter++;
       }
     }
-    else{ // RIGHT
-      if(atEdge(RIGHT)){
+    else{ // Direction::Right
+      if(atEdge(Direction::Right)){
         cursor.word--;
         cursor.letter = getLengthAtCursor() - 1;
       }
@@ -262,11 +262,11 @@ Entry* History::getEntryAt(uint8_t cursor_word){
 
 bool History::atEdge(Direction direction){
   bool out;
-  if(direction == LEFT){
+  if(direction == Direction::Left){
     out = (getEntryAtCursor()->isClear()
            || cursor.letter >= (getLengthAtCursor() - 1));
   }
-  else{ // RIGHT
+  else{ // Direction::Right
     out = (cursor.letter == 0);
   }
   return out;
@@ -274,13 +274,13 @@ bool History::atEdge(Direction direction){
 
 
 bool History::isCursorAtLimit(Direction direction){
-  if(direction == LEFT){
+  if(direction == Direction::Left){
     // TODO if we're ever on an empty entry, is that good enough? Could get rid of the 2nd padding.
     // But what if we have an empty entry in the middle we haven't deleted yet.
     return getEntryAtCursor()->isClear() && getEntryAt(cursor.word+1)->isClear();
   }
-  else if(direction == RIGHT){
-    return atEdge(RIGHT) && (cursor.word == 0);
+  else if(direction == Direction::Right){
+    return atEdge(Direction::Right) && (cursor.word == 0);
   }
   else{
     DEBUG1_LN("WARNING: invalid direction");

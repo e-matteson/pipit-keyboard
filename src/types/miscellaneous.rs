@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use failure::{Error, ResultExt};
 use types::errors::*;
-use types::{CCode, Chord, ChordSpec, KeyPress, ToC, Validate};
+use types::{CCode, Chord, ChordSpec, KeyPress, ModeName, ToC, Validate};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -37,14 +37,6 @@ pub struct KmapInfo {
     pub use_words: bool,
 }
 
-#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
-pub enum SeqType {
-    Plain,
-    Macro,
-    Command,
-    Word,
-}
-
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ModeInfo {
@@ -56,13 +48,6 @@ pub struct ModeInfo {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct KmapPath(pub String);
-
-#[derive(
-    Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
-)]
-#[serde(deny_unknown_fields)]
-#[serde(from = "String")]
-pub struct ModeName(pub String);
 
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
@@ -215,20 +200,6 @@ impl Validate for KmapFormat {
 
 //////////////////////////////
 
-impl fmt::Display for SeqType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match *self {
-            SeqType::Plain => "plain",
-            SeqType::Macro => "macro",
-            SeqType::Command => "command",
-            SeqType::Word => "word",
-        };
-        fmt::Display::fmt(s, f)
-    }
-}
-
-//////////////////////////////
-
 impl Validate for KmapInfo {
     fn validate(&self) -> Result<(), Error> {
         self.file.validate()
@@ -280,53 +251,6 @@ impl<'a> Into<KmapPath> for &'a KmapPath {
 impl fmt::Display for KmapPath {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
-    }
-}
-
-//////////////////////////////
-
-impl ModeName {
-    pub fn enum_type() -> CCode {
-        "mode_enum".to_c()
-    }
-
-    pub fn enum_variant(&self) -> CCode {
-        self.to_c().to_uppercase()
-    }
-
-    pub fn qualified_enum_variant(&self) -> CCode {
-        format!("{}::{}", ModeName::enum_type(), self.enum_variant()).to_c()
-    }
-}
-
-impl Validate for ModeName {
-    fn validate(&self) -> Result<(), Error> {
-        // TODO check if contains chars other than a-zA-Z_
-        Ok(())
-    }
-}
-
-impl Default for ModeName {
-    fn default() -> Self {
-        ModeName("default_mode".into())
-    }
-}
-
-impl fmt::Display for ModeName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl<'a> From<&'a str> for ModeName {
-    fn from(s: &str) -> Self {
-        ModeName(s.to_owned())
-    }
-}
-
-impl From<String> for ModeName {
-    fn from(s: String) -> Self {
-        ModeName(s)
     }
 }
 

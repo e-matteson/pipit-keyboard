@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use time::*;
 
 use types::{
-    AllData, CCode, CTree, Field, HuffmanTable, KeyDefs, KeyPress, KmapPath,
-    ModeName, Name, Sequence, ToC,
+    AllData, CCode, CEnumVariant, CTree, Command, Field, HuffmanTable, KeyDefs,
+    KeyPress, KmapPath, ModeName, Modifier, Name, SeqType, Sequence, ToC,
 };
 use util::{bools_to_bytes, usize_to_u8};
 
@@ -75,9 +75,11 @@ impl AllData {
 
         group.push(self.huffman_table.render()?);
         group.push(self.render_modifiers()?);
-        group.push(self.render_command_enum()?);
-        group.push(self.render_seq_type_enum());
-        group.push(self.render_mode_enum());
+
+        group.push(Command::render_c_enum(self.commands.iter()));
+
+        group.push(SeqType::render_c_enum(self.sequences.seq_types()));
+        group.push(ModeName::render_c_enum(self.modes.keys()));
         group.push(self.render_modes()?);
         wrap_intro(&h_file_name, CTree::Group(group), with_message)
     }
@@ -99,7 +101,7 @@ impl AllData {
                 mode_name: mode,
                 info,
                 kmap_struct_names: &kmap_struct_names,
-                mod_chords: self.get_mod_chords(mode),
+                mod_chords: self.modifier_chords(mode),
                 anagram_mask: self.get_anagram_mask(mode),
                 chord_spec: self.chord_spec.clone(),
             };
@@ -142,54 +144,27 @@ impl AllData {
         CTree::Group(self.options.clone())
     }
 
-    fn render_mode_enum(&self) -> CTree {
-        let modes_list: Vec<_> = self
-            .modes
-            .keys()
-            .map(|mode_name| mode_name.enum_variant())
-            .collect();
-        CTree::EnumDecl {
-            name: ModeName::enum_type(),
-            variants: modes_list,
-            size: Some("uint8_t".to_c()),
-        }
-    }
-
-    fn make_mod_index_variants(&self) -> BTreeMap<Name, CCode> {
-        // TODO rename?
-        let mut all_index_variants = BTreeMap::new();
-        for name in &self.get_mod_names() {
-            all_index_variants.insert(
-                name.to_owned(),
-                format!("{}_ENUM", name).to_c().to_uppercase(),
-            );
-        }
-        all_index_variants
-    }
-
-    fn get_variants(
-        &self,
-        mod_names: &[Name],
-        all_mod_indices: &BTreeMap<Name, CCode>,
-    ) -> Vec<CCode> {
-        mod_names
-            .iter()
-            .map(|x| all_mod_indices[x].clone())
-            .collect()
-    }
-
     fn render_modifiers(&self) -> Result<CTree, Error> {
-        let all_index_variants = self.make_mod_index_variants();
+        fn to_variants(mod_names: &[Name]) -> Vec<CCode> {
+            mod_names
+                .iter()
+                .map(|name| Modifier::new(name).qualified_enum_variant())
+                .collect()
+        }
+
         let mut group = Vec::new();
-        group.push(CTree::EnumDecl {
-            name: "mod_enum".to_c(),
-            variants: all_index_variants.values().cloned().collect(),
-            size: Some("uint8_t".to_c()),
-        });
+
+        let all_mods: Vec<_> = self
+            .modifier_names()
+            .into_iter()
+            .map(|name| Modifier::new(name))
+            .collect();
+
+        group.push(Modifier::render_c_enum(all_mods.iter()));
 
         group.push(CTree::Define {
             name: "NUM_MODIFIERS".to_c(),
-            value: all_index_variants.len().to_c(),
+            value: all_mods.len().to_c(),
         });
 
         group.push(CTree::Define {
@@ -214,22 +189,25 @@ impl AllData {
 
         group.push(CTree::Array {
             name: "word_mod_indices".to_c(),
-            values: self.get_variants(&self.word_mods, &all_index_variants),
-            c_type: "mod_enum".to_c(),
+            values: to_variants(&self.word_mods),
+            // get_variants(&self.word_mods, &all_index_variants),
+            c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
         group.push(CTree::Array {
             name: "plain_mod_indices".to_c(),
-            values: self.get_variants(&self.plain_mods, &all_index_variants),
-            c_type: "mod_enum".to_c(),
+            values: to_variants(&self.plain_mods),
+            // get_variants(&self.plain_mods, &all_index_variants),
+            c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
         group.push(CTree::Array {
             name: "anagram_mod_indices".to_c(),
-            values: self.get_variants(&self.anagram_mods, &all_index_variants),
-            c_type: "mod_enum".to_c(),
+            values: to_variants(&self.anagram_mods),
+            // values: get_variants(&self.anagram_mods, &all_index_variants),
+            c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
@@ -244,6 +222,7 @@ impl AllData {
     }
 
     fn get_plain_mod_codes(&self) -> Result<Vec<CCode>, Error> {
+        // TODO this should be easier...
         self.plain_mods
             .iter()
             .map(|name| {
@@ -253,28 +232,6 @@ impl AllData {
                     .lone_keypress()?
                     .format_mods())
             }).collect()
-    }
-
-    fn render_command_enum(&self) -> Result<CTree, Error> {
-        Ok(CTree::EnumDecl {
-            name: "command_enum".to_c(),
-            size: Some("uint8_t".to_c()),
-            variants: self.command_enum_variants.iter().cloned().collect(),
-        })
-    }
-
-    fn render_seq_type_enum(&self) -> CTree {
-        let variant_names: Vec<_> = self
-            .sequences
-            .seq_types()
-            .map(|s| s.to_c().to_uppercase())
-            .collect();
-
-        CTree::EnumDecl {
-            name: "seq_type_enum".to_c(),
-            variants: variant_names,
-            size: Some("uint8_t".to_c()),
-        }
     }
 }
 
@@ -324,7 +281,9 @@ impl HuffmanTable {
 
 impl KeyPress {
     fn truncate(contents: &CCode) -> CCode {
-        CCode(format!("({})&0xff", contents))
+        // CCode(format!("({})&0xff", contents))
+        // TODO don't cast everything? Just enums.
+        CCode(format!("static_cast<uint8_t>({})", contents))
     }
 
     fn format_mods(&self) -> CCode {
