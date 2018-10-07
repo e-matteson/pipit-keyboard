@@ -39,7 +39,7 @@ void Feedback::triggerUnknown(){
   triggerLEDFeedback(LEDRoutine::UnknownFeedback);
 }
 
-void Feedback::triggerNoAnagram(){
+void Feedback::triggerCyclingFailed(){
   triggerLEDFeedback(LEDRoutine::NoAnagramFeedback);
 }
 

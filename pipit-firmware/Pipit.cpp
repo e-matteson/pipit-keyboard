@@ -1,8 +1,24 @@
 #include "Pipit.h"
 
+void Pipit::setup(){
+  switches.setup();
+  sender.setup();
+  feedback.setup();
+  feedback.startRoutine(LEDRoutine::Battery);
+  feedback.updateLED();
+}
 
+void Pipit::loop(){
+  switches.update();
+  sendIfReady();
+  feedback.updateLED();
+  shutdownIfSquished();
+  delayMicroseconds(100);
+}
+
+/// If you define a new command in the settings file, you must add a case for it here!
 void Pipit::doCommand(const Key* data, uint8_t length){
-  if(length == 0 || data == 0) {
+  if(length == 0 || data == NULL) {
     DEBUG1_LN("WARNING: invalid command");
     return;
   }
@@ -128,38 +144,6 @@ void Pipit::doCommand(const Key* data, uint8_t length){
   }
 }
 
-void Pipit::setup(){
-  switches.setup();
-  sender.setup();
-  feedback.setup();
-  feedback.startRoutine(LEDRoutine::Battery);
-  feedback.updateLED();
-}
-
-void Pipit::loop(){
-  switches.update();
-  sendIfReady();
-  feedback.updateLED();
-  shutdownIfSquished();
-  delayMicroseconds(100);
-}
-
-/// Shutdown to save power if a switch has been held down for a very long time,
-/// since that probably means the keyboard is squished against something. This
-/// mostly happens with battery-powered models that are left on inside a
-/// backpack.
-void Pipit::shutdownIfSquished(){
-  if(!switches.matrix.isSquishedInBackpack()){
-    return;
-  }
-  DEBUG1_LN("WARNING: Switches have been held down too long, you might be inside a backpack.");
-  DEBUG1_LN("         Please reboot.");
-  // TODO disable other things? like bluetooth?
-  switches.matrix.shutdown();
-  sender.releaseAll();
-  delay(1000);
-  exit(0); // Exit the firmware! Must reboot to use keyboard again.
-}
 
 
 /// Lookup and send a press or release, if necessary
@@ -201,15 +185,17 @@ void Pipit::sendIfReady(){
   }
 }
 
-void Pipit::processChord(Chord* chord){
-  // Lookup the chord in the lookup arrays and perform the corresponding action.
-
+/// Search for the chord in all of the lookup arrays of every sequence type, and
+/// perform the appropriate action if it's found. For non-gaming modes only -
+/// see `processGamingChords()` instead.
+void Pipit::processChord(Chord* chord) {
   // If no switch is pressed, just send zero and be done with it.
-  // (there can't be mods because we haven't extracted them yet)
+  // (There can't be mods because we haven't extracted them yet)
   if(sender.sendIfEmptyExceptMods(chord)){
     return;
   };
 
+  // Prepare to store data from the lookup table
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
@@ -227,14 +213,19 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
-  // If chord is a known word, send it and return.
+  // Remove word modifiers from the explicit representation of the chord before
+  // looking for matching words.
   chord->extractWordMods();
   chord->extractAnagramMods();
+
+  // If chord is a known word, send it and return.
   if(sendIfFound(conf::SeqType::Word, chord, data)){
     switches.reuseMods(chord);
     return;
   }
 
+  // It wasn't a word, so put the word modifiers back into the explicit representation.
+  // Remove the plain modifiers instead, before looking for matching plain_keys.
   chord->restoreAnagramMods();
   chord->restoreWordMods();
   chord->extractPlainMods();
@@ -245,9 +236,10 @@ void Pipit::processChord(Chord* chord){
     return;
   }
 
-  if(sender.sendIfEmptyExceptMods(chord)){
+  if(sender.sendIfEmptyExceptMods(chord)) {
     // Only modifiers were pressed, send them now. (We know that because if the
-    // chord was totally empty, it would have been sent earlier)
+    // chord was totally empty, it would have been sent at the top of this
+    // function.)
     switches.reuseMods(chord);
     feedback.trigger(conf::SeqType::Plain);
   }
@@ -259,18 +251,19 @@ void Pipit::processChord(Chord* chord){
  }
 }
 
-void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
-  // For gaming modes. Only commands, plain_keys, and plain_mods are
-  //  supported. Lookup each individual switch, and if they're plain_keys, send
-  //  them all together at the end. If any switch is a command or macro, handle it
-  //  immediately and ignore the rest of the switches.
+// For gaming modes, which act like a normal keyboard and don't recognize
+// chords. Only commands, plain_keys, and plain_mods are supported. Lookup each
+// individual switch, and if they're all plain_keys, send them all together at
+// the end. If any switch is a command or macro, handle it immediately and
+// ignore the rest of the switches.
+void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches) {
   Report report;
   report.is_gaming = true;
   for(uint8_t i = 0; i < num_switches; i++){
     Key data[MAX_KEYS_IN_SEQUENCE];
 
-    Chord* chord = gaming_switches+i;
-    if(uint8_t length = sendIfFound(conf::SeqType::Command, chord, data)){
+    Chord* single_switch = gaming_switches+i;
+    if(uint8_t length = sendIfFound(conf::SeqType::Command, single_switch, data)){
       doCommand(data, length);
       return;
     }
@@ -279,35 +272,39 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches){
       return;
     }
 
-    if(sendIfFound(conf::SeqType::Macro, chord, data)){
+    if(sendIfFound(conf::SeqType::Macro, single_switch, data)){
       return;
     }
 
-    // TODO why can't we use normal sendIfFound() here? Because we're adding to the report, not sending, right.
-    if(uint8_t length=conf::lookup(chord, conf::SeqType::Plain, data)){
+    // We can't use sendIfFound() here for plain_keys, because we're adding all
+    // plain_keys to the report instead of sending each one immediately.
+    if(uint8_t length=conf::lookup(single_switch, conf::SeqType::Plain, data)){
       if(length > 1){
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
       report.addKey(data);
-      report.addMod(chord->getModByte());
+      report.addMod(single_switch->getModByte());
       feedback.trigger(conf::SeqType::Plain);
       continue;
     }
 
+    // Failed to find the chord anywhere
     feedback.triggerUnknown();
   }
   sender.sendReport(&report);
 }
 
-
+// Delete the last word (or more precisely, the output of the last chord), and
+// replace it with a modified version. The `cycle_type` argument determines
+// whether to modify capitalization, spacing, or the anagram number. If the last
+// chord can't be cycled, don't send anything.
 void Pipit::cycleLastWord(CycleType cycle_type){
   Entry* entry = sender.history.getEntryAtCursor();
   if(!entry->isAnagrammable()){
-    feedback.triggerNoAnagram();
+    feedback.triggerCyclingFailed();
     return;
   }
-  Chord new_chord;
-  new_chord.copy(entry->getChord());
+  Chord new_chord(*entry->getChord());
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   static const uint8_t num_anagrams = MAX_ANAGRAM_NUM+1;
@@ -322,17 +319,15 @@ void Pipit::cycleLastWord(CycleType cycle_type){
     }
 
     if(cycle_type != CycleType::Anagram) {
-      // Give up after we failed the first time, if we're not cycling anagrams.
+      // If we're not cycling anagrams, give up after we failed the first time.
       // The loop is here just to look for all the anagrams, but is useless for
       // the other cycling types.
-      feedback.triggerNoAnagram();
-      return;
+      break;
     }
     // Else, this anagram mod wasn't found, try the next one right away.
   }
 
-  // We've tried all the anagram modifiers and failed!
-  feedback.triggerNoAnagram();
+  feedback.triggerCyclingFailed();
 }
 
 uint8_t Pipit::sendIfFound(conf::SeqType type, Chord* chord, Key* data) {
@@ -355,4 +350,25 @@ uint8_t Pipit::sendIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bo
     return length; // Success
   }
   return 0; // Fail
+}
+
+/// Shutdown to save power if a switch has been held down for a very long time,
+/// since that probably means the keyboard is squished against something. This
+/// mostly happens with battery-powered models that are left on inside a
+/// backpack.
+void Pipit::shutdownIfSquished(){
+  if(!switches.matrix.isSquishedInBackpack()){
+    return;
+  }
+  DEBUG1_LN("WARNING: Switches have been held down too long, you might be inside a backpack.");
+  DEBUG1_LN("         Please reboot.");
+
+  // TODO disable bluetooth as well
+  switches.matrix.shutdown();
+  sender.releaseAll();
+  delay(1000);
+
+  // TODO enter deep sleep instead of looping forever.
+  noInterrupts();
+  while(1);
 }

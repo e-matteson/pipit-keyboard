@@ -12,8 +12,7 @@ public:
   bool isEmpty() const;
   bool isFull() const;
   bool needsExtraRelease(const Report* next) const;
-  void copy(const Report* other);
-  void copyMods(const Report* other);
+  void copyModsFrom(const Report* other);
   uint8_t get(uint8_t index) const;
   uint8_t getMod() const;
   uint8_t numKeys() const;
@@ -23,7 +22,8 @@ public:
   bool is_gaming = 0;
 
 private:
-  uint8_t key_codes[6] = {0};
+  static const uint8_t report_length = 6; // Standard length of USB HID report
+  uint8_t key_codes[report_length] = {0};
   uint8_t mod_byte = 0;
   uint8_t num_keys = 0;
 };

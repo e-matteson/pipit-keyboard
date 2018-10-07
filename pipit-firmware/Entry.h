@@ -8,29 +8,25 @@
 
 class Entry{
 public:
-  // Entry(Chord* chord, bool is_anagrammable);
-  Entry();
+  Entry(const Chord* _chord, bool _is_anagrammable);
+  Entry() = default;
 
-  void init(const Chord* _chord, bool _is_anagrammable);
-  void copy(const Entry* other);
-  void clear();
-  Chord* getChord();
+  const Chord* getChord();
   uint8_t getLength();
   void setLength(uint8_t value);
   void increment();
   void decrement();
   void setLastLetter(uint8_t key_code, uint8_t mod_byte);
-  void getLastLetter(Key* key);
+  Key* getLastLetter();
 
   bool isClear();
   bool isAnagrammable();
   void setAnagrammable(bool value);
 
 private:
-  //  gotta shrink chord to make it smaller
   Chord chord;
-  uint8_t length = 0;
   Key last_key;
+  uint8_t length = 0;
   bool is_anagrammable = 0;
 };
 

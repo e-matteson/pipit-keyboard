@@ -36,27 +36,24 @@ public:
   void backspace();
 
   Entry* getEntryAtCursor();
-  void getLastLetterAtCursor(Key* key);
+  Key* getLastLetterAtCursor();
 
   bool atEdge(Direction direction);
-  void printStack();
-  void printCursor();
-
 
 private:
 
-  void saveKeyCode(uint8_t key_code, uint8_t mod_byte);
+  uint8_t saveKeyCode(uint8_t key_code, uint8_t mod_byte);
   bool isCursorAtLimit(Direction direction);
   Entry* getEntryAt(uint8_t cursor_word);
   uint16_t getLengthAtCursor();
   void remove(uint16_t word_position);
-  void insertAtCursor(Entry* entry);
+  void insertAtCursor(const Entry* entry);
   void splitAtCursor();
   bool shouldKeyClearHistory(uint8_t key_code, uint8_t mod_byte);
   void clear();
   void pushNewEntryIfNeeded();
 
-  struct Cursor{
+  struct Cursor {
     uint8_t word = 0;
     uint8_t letter = 0;
   };

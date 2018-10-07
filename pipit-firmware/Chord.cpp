@@ -4,7 +4,6 @@
 
 #define FLAG_BIT 15
 
-Chord::Chord(){}
 
 Chord::Chord(conf::Mode mode) : mode(mode){}
 
@@ -48,24 +47,6 @@ bool Chord::hasAnagramNum(uint8_t other_anagram) const{
 
 bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const{
   return isEqual(chord_bytes, other_chord_bytes);
-}
-
-void Chord::copy(const Chord* other){
-  mode = other->mode;
-  mods_and_flags = other->mods_and_flags;
-  for(int i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    chord_bytes[i] = other->chord_bytes[i];
-  }
-  anagram_num = other->anagram_num;
-}
-
-void Chord::clear(){
-  mode = (conf::Mode) 0;
-  mods_and_flags = 0;
-  for(uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++){
-    chord_bytes[i] = 0;
-  }
-  anagram_num = 0;
 }
 
 void Chord::editCaps(Key* data, uint8_t length) const {

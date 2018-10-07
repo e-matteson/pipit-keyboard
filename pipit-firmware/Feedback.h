@@ -37,7 +37,7 @@ public:
   void setup();
   void trigger(conf::SeqType type);
   void triggerUnknown();
-  void triggerNoAnagram();
+  void triggerCyclingFailed();
   void updateLED();
   void startRoutine(LEDRoutine routine);
   void endRoutine();

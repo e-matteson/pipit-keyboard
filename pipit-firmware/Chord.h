@@ -6,20 +6,23 @@
 #include "conf.h"
 #include "Key.h"
 
+/// How to modify cycled words
 enum class CycleType {
-  Anagram,
-  Nospace,
-  Capital,
+  Anagram, /// Replace word with the next anagram of the same chord
+  Nospace, /// Toggle whether a space is automatically inserted.
+  Capital, /// Toggle the capitalization of the word.
 };
 
-class Chord{
+/// The Chord class stores which switches are pressed in a chord. It can check
+/// whether the chord contains modifiers, extract modifiers out of the explicit
+/// representation to be stored as flags, insert them back into the explicit
+/// representation, and edit modifiers when cycling words.
+class Chord {
 public:
-  Chord();
+  Chord() = default;
   Chord(conf::Mode mode);
 
-  void clear();
   void setSwitch(uint8_t switch_index);
-  void copy(const Chord* chord);
   void setMode(conf::Mode _mode);
   void extractPlainMods();
   void extractWordMods();
@@ -83,11 +86,6 @@ private:
   void printChord(const uint8_t* c) const;
   void printMod() const;
 
-  uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
-
-  // TODO use bits, not bools?
-  // bool mods[NUM_MODIFIERS] = {0};
-
   // Make sure the modifiers will fit in the bits of a uint16_t. The least
   // significants bits will each represent one modifier, and the most
   // significant bit will store the flag_cycle_capital. It's important to keep
@@ -100,7 +98,9 @@ private:
 
   uint8_t anagram_num = 0;
 
-  // TODO what happens if there are no modes, so this cast is invalid?
+  uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
+
+  // TODO what happens if there are no modes, so no variant with value 0, and this cast is invalid?
   conf::Mode mode = static_cast<conf::Mode>(0);
 };
 

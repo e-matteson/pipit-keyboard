@@ -10,7 +10,7 @@ void Sender::setup(){
 void Sender::move(Motion motion, Direction direction){
   uint16_t count = history.calcDistance(motion, direction);
 
-  for(int16_t i = 0; i < count; i++){
+  for(uint16_t i = 0; i < count; i++){
     if(direction == Direction::Left) {
       leftArrow();
     }
@@ -24,12 +24,12 @@ void Sender::move(Motion motion, Direction direction){
 void Sender::deleteLastWord(){
   // Delete the last sent key sequence by sending the correct number of backspaces.
   move(Motion::WordEdge, Direction::Right);
-  int16_t count = history.calcDistance(Motion::Word, Direction::Left);
-  for(int16_t i = 0; i < count; i++){
+  uint16_t count = history.calcDistance(Motion::Word, Direction::Left);
+  for(uint16_t i = 0; i < count; i++){
     backspace();
 
-    // For some reason the backspaces get dropped more easily then word letters
-    //  so add a longer delay between sends.
+    // For some reason the backspaces get dropped more easily then word letters,
+    // so add a longer delay between sends.
     comms.proportionalDelay(count, 6);
   }
 }
@@ -58,10 +58,10 @@ void Sender::sendType(conf::SeqType type, const Key* data, uint8_t data_length, 
 
 void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord){
   history.startEntry(chord, 1);
+  // TODO should we modify the input Keys instead of copying to the temporary value?
   Key key;
   for(uint8_t i = 0; i<data_length; i++){
-    // Get the key, followed by the modifier.
-    key.copy(data+i);
+    key = data[i];
     key.addMod(chord->getModByte());
     // Let the chord change the key's capitalization, like if cycle_capital was pressed.
     chord->editCaps(&key, 1);
@@ -71,16 +71,14 @@ void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord)
 
 void Sender::sendMacro(const Key* data, uint8_t data_length, const Chord* chord){
   history.startEntry(chord, 0);
-  Key key;
   for(uint8_t i = 0; i<data_length; i++){
-    //  get the key, followed by the modifier.
-    key.copy(data+i);
-    sendKey(&key);
+    sendKey(data + i);
     comms.proportionalDelay(data_length, 2);
   }
   releaseAll();
 }
 
+// Send the word. May modify the chord - don't use it again after calling this.
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
   if (WORD_SPACE_POSITION == 0) {
     // doubleMod and shortenMod would be kinda useless with a space here...
@@ -97,17 +95,16 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord){
     comms.proportionalDelay(data_length, 1);
   }
 
-  Key doubled_key;
   if(chord->hasModDouble()) {
     // First, get the letter we want to double from the old history entry.
-    history.getLastLetterAtCursor(&doubled_key);
-  }
-
-  // Then, send the letter we want to double, as part of the new history entry.
-  history.startEntry(chord, 1);
-  if(chord->hasModDouble()) {
-    sendKey(&doubled_key);
+    // Then, send it as part of the new history entry.
+    Key* doubled_key = history.getLastLetterAtCursor();
+    history.startEntry(chord, 1);
+    sendKey(doubled_key);
     comms.proportionalDelay(data_length, 1);
+  } else {
+    // Just start the new history entry as usual
+    history.startEntry(chord, 1);
   }
 
   if (WORD_SPACE_POSITION == 0) {
@@ -143,9 +140,9 @@ void Sender::releaseAll(){
 }
 
 void Sender::releaseNonMods(){
-  Report only_mods;
-  only_mods.copyMods(&last_report);
-  sendReport(&only_mods);
+  Report mods_only;
+  mods_only.copyModsFrom(&last_report);
+  sendReport(&mods_only);
 }
 
 
@@ -166,8 +163,7 @@ void Sender::rightArrow() {
 }
 
 void Sender::sendKeyAndMod(uint8_t key_code, uint8_t mod_byte){
-  Key key;
-  key.set(key_code, mod_byte);
+  Key key(key_code, mod_byte);
   sendKey(&key);
 }
 
@@ -188,16 +184,16 @@ void Sender::sendReport(Report* report){
 
 void Sender::press(const Report* report){
   if(last_report.needsExtraRelease(report)){
-    // Repeated press, send release first.
+    // The same press was repeated twice, so send a release to separate them.
     // Mods can stay pressed / be pressed early, though. That lets alt-tabbing work.
     Report mods_only;
-    mods_only.copyMods(report);
+    mods_only.copyModsFrom(report);
     this->press(&mods_only);
   }
   if(report->isEmpty() && last_report.isEmpty()){
     return; //repeated release, don't send anything
   }
-  last_report.copy(report);
+  last_report = *report;
 
   report->printDebug();
 
@@ -207,5 +203,5 @@ void Sender::press(const Report* report){
 
 
 void Sender::setStickymod(uint8_t mod_byte){
-  stickymod = stickymod | mod_byte;
+  stickymod |= mod_byte;
 }

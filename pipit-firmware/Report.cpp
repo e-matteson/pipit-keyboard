@@ -20,7 +20,7 @@ void Report::addMod(uint8_t _mod_byte){
 }
 
 uint8_t Report::get(uint8_t index) const{
-  if(index >= 6){
+  if(index >= report_length){
     DEBUG1_LN("WARNING: Report index out of range");
   }
   return key_codes[index];
@@ -31,7 +31,7 @@ uint8_t Report::getMod() const{
 }
 
 bool Report::isFull() const{
-  return num_keys >= 6;
+  return num_keys >= report_length;
 }
 
 uint8_t Report::numKeys() const{
@@ -42,7 +42,7 @@ bool Report::isEmpty() const{
   if(mod_byte != 0){
     return false;
   }
-  for(uint8_t i = 0; i < 6; i++) {
+  for(uint8_t i = 0; i < report_length; i++) {
     if(key_codes[i] != 0){
       return false;
     }
@@ -65,7 +65,7 @@ bool Report::needsExtraRelease(const Report* next) const{
     return false;
   }
 
-  for(uint8_t i = 0; i < 6; i++) {
+  for(uint8_t i = 0; i < report_length; i++) {
     if(key_codes[i] && (key_codes[i] == next->key_codes[i])) {
       return true;
     }
@@ -77,22 +77,14 @@ bool Report::needsExtraRelease(const Report* next) const{
   return false;
 }
 
-void Report::copy(const Report* other){
-  for(uint8_t i = 0; i < 6; i++) {
-    key_codes[i] = other->key_codes[i];
-  }
-  mod_byte = other->mod_byte;
-  is_gaming = other->is_gaming;
-}
-
-void Report::copyMods(const Report* other){
+// Copy the other Report's mod_byte to this Report, changing nothing else.
+void Report::copyModsFrom(const Report* other){
   mod_byte = other->mod_byte;
 }
 
-// TODO are debug macros broken?
 void Report::printDebug() const{
   DEBUG1("sending keys: ");
-  for(uint8_t i = 0; i < 6; i++){
+  for(uint8_t i = 0; i < report_length; i++){
     DEBUG1(key_codes[i]);
     DEBUG1(" ");
   }
