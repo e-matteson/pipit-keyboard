@@ -13,12 +13,13 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
-extern crate structopt;
+extern crate clap;
 
 #[macro_use]
 mod types;
 #[macro_use]
 mod input;
+mod arduino;
 mod cheatsheet;
 mod output;
 #[cfg(test)]
@@ -27,8 +28,8 @@ mod tutor;
 mod util;
 
 use std::path::PathBuf;
-use structopt::StructOpt;
 
+use arduino::ArduinoIDE;
 use cheatsheet::CheatSheet;
 use input::AllDataBuilder;
 use tutor::TutorApp;
@@ -36,52 +37,92 @@ use types::errors::print_error;
 
 use failure::{Error, ResultExt};
 
-/// Pipit keyboard configuration tool, typing tutor, and cheatsheet generator
-#[derive(StructOpt, Debug)]
-#[structopt(name = "pipit-keyboard")]
-struct Opt {
-    /// Runs the typing tutor
-    #[structopt(short = "t", long = "tutor")]
-    tutor: bool,
-
-    /// Generates a cheatsheet, according to the given config file
-    #[structopt(short = "c", long = "cheatsheet", parse(from_os_str))]
-    cheatsheet: Option<PathBuf>,
-
-    // #[structopt(short = "o", long = "output", parse(from_os_str))]
-    // output: Option<PathBuf>
-    //
-    /// Settings file that specifies the keymaps, dictionary, etc
-    #[structopt(parse(from_os_str))]
-    settings: Option<PathBuf>,
-}
+use clap::{Arg, ArgGroup};
 
 fn run() -> Result<(), Error> {
-    println!();
-    let opt = Opt::from_args();
+    // Parse command-line arguments
+    let args = app_from_crate!()
+        .arg(
+            Arg::with_name("cheatsheet")
+                .short("c")
+                .long("cheatsheet")
+                .takes_value(true)
+                .value_name("cheatsheet_config_file")
+                .help("Generate a cheatsheet, according to given cheatsheet config file"),
+        ).arg(
+            Arg::with_name("tutor")
+                .short("t")
+                .long("tutor")
+                .help("Run the typing tutor"),
+        ).arg(
+            Arg::with_name("verify")
+                .short("v")
+                .long("verify")
+                .help("Verify the updated firmware, using the Arduino IDE"),
+        ).arg(
+            Arg::with_name("upload")
+                .short("u")
+                .long("upload")
+                // .requires("port")
+                .help("Upload the updated firmware to the keyboard, using the Arduino IDE"),
+        ).arg(
+            Arg::with_name("port")
+                .short("p")
+                .long("port")
+                .takes_value(true)
+                .value_name("port_name")
+                .help("Select the serial port over which to upload the updated firmware"),
+        ).group(
+            ArgGroup::with_name("commands").args(&["cheatsheet", "tutor", "verify","upload"]).multiple(false)
+        ).arg(
+            Arg::with_name("settings")
+                .takes_value(true)
+                .value_name("settings_file")
+                .default_value("settings/settings.yaml")
+                .help("Settings file that specifies the keymaps, dictionary, etc"),
+        ).get_matches();
 
-    let settings_path = opt
-        .settings
-        .unwrap_or_else(|| PathBuf::from("settings/settings.yaml"));
+    println!();
+
+    let settings_path = PathBuf::from(
+        args.value_of("settings")
+            .expect("settings file not specified"),
+    );
 
     let all_data = AllDataBuilder::load(&settings_path)?.finalize()?;
     all_data.check();
 
-    let tutor_data = all_data.get_tutor_data()?;
-
-    if let Some(ref config) = opt.cheatsheet {
-        CheatSheet::from_yaml(config, &tutor_data)
+    if let Some(config_path) = args.value_of_os("cheatsheet") {
+        let tutor_data = all_data.get_tutor_data()?;
+        let path = PathBuf::from(config_path);
+        CheatSheet::from_yaml(&path, &tutor_data)
             .context("Failed to make cheatsheet")?
             .save(None)?;
-    } else if opt.tutor {
-        drop(all_data);
-        TutorApp::run(tutor_data);
-    } else {
-        all_data
-            .save_as("auto_config")
-            .context("Failed to save configuration")?;
+        return Ok(());
     }
 
+    if args.is_present("tutor") {
+        let tutor_data = all_data.get_tutor_data()?;
+        drop(all_data);
+        TutorApp::run(tutor_data);
+        return Ok(());
+    }
+
+    all_data
+        .save_as("auto_config")
+        .context("Failed to save updated firmware")?;
+
+    if args.is_present("verify") {
+        let ide = ArduinoIDE::new(all_data.board());
+        ide.verify()?;
+        return Ok(());
+    }
+
+    if args.is_present("upload") {
+        let ide = ArduinoIDE::new(all_data.board());
+        ide.upload(args.value_of("port"))?;
+        return Ok(());
+    }
     Ok(())
 }
 

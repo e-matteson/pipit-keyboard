@@ -83,14 +83,15 @@ impl AllDataBuilder {
             chord_spec: self.settings.options.chord_spec()?,
             options: self.settings.options.to_vec()?,
             output_directory: self.settings.options.output_directory,
+            commands: command_variants.into_iter().collect(),
 
+            board: self.settings.options.board_name,
             chords: self.chords,
             sequences: self.sequences,
             word_mods: self.word_mods,
             plain_mods: self.plain_mods,
             anagram_mods: self.anagram_mods,
             modes: self.modes,
-            commands: command_variants.into_iter().collect(),
             spellings,
         })
     }

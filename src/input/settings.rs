@@ -5,8 +5,9 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use types::{
-    CCode, CTree, ChordSpec, Command, KeyPress, KmapFormat, ModeInfo, ModeName,
-    Name, Permutation, Pin, Sequence, SwitchPos, ToC, Validate, Word,
+    BoardName, CCode, CTree, ChordSpec, Command, KeyPress, KmapFormat,
+    ModeInfo, ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
+    Validate, Word,
 };
 
 use failure::{Error, ResultExt};
@@ -74,15 +75,6 @@ always_valid_enum!{
         None,
         Some,
         All,
-    }
-}
-
-always_valid_enum!{
-    #[derive(Deserialize, Debug, Clone, Copy)]
-    #[allow(non_camel_case_types)]
-    pub enum BoardName {
-        FEATHER_M0_BLE,
-        TEENSY_LC,
     }
 }
 
@@ -351,15 +343,6 @@ impl<'de> Deserialize<'de> for Sequence {
             }
         }
         deserializer.deserialize_seq(SequenceVisitor)
-    }
-}
-
-impl ToC for BoardName {
-    fn to_c(self) -> CCode {
-        match self {
-            BoardName::FEATHER_M0_BLE => "FEATHER_M0_BLE".to_c(),
-            BoardName::TEENSY_LC => "TEENSY_LC".to_c(),
-        }
     }
 }
 

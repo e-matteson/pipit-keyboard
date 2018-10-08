@@ -49,6 +49,14 @@ pub struct ModeInfo {
 #[serde(deny_unknown_fields)]
 pub struct KmapPath(pub String);
 
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub enum BoardName {
+    #[serde(rename = "FEATHER_M0_BLE")]
+    FeatherM0BLE,
+    #[serde(rename = "TEENSY_LC")]
+    TeensyLC,
+}
+
 #[derive(
     Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
 )]
@@ -254,6 +262,21 @@ impl fmt::Display for KmapPath {
     }
 }
 
+//////////////////////////////
+impl ToC for BoardName {
+    fn to_c(self) -> CCode {
+        match self {
+            BoardName::FeatherM0BLE => "FEATHER_M0_BLE".to_c(),
+            BoardName::TeensyLC => "TEENSY_LC".to_c(),
+        }
+    }
+}
+
+impl Validate for BoardName {
+    fn validate(&self) -> Result<(), Error> {
+        Ok(())
+    }
+}
 //////////////////////////////
 
 impl Validate for Name {

@@ -6,9 +6,9 @@ use std::path::PathBuf;
 use util::ensure_u8;
 
 use types::{
-    AnagramNum, CTree, Chord, ChordSpec, Command, HuffmanTable, KeyPress,
-    KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence, SpellingTable,
-    TutorData,
+    AnagramNum, BoardName, CTree, Chord, ChordSpec, Command, HuffmanTable,
+    KeyPress, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+    SpellingTable, TutorData,
 };
 
 use failure::{Error, Fail, ResultExt};
@@ -48,6 +48,7 @@ pub struct AllData {
     pub options: Vec<CTree>,
     pub output_directory: PathBuf,
     pub chord_spec: ChordSpec,
+    pub board: BoardName,
 }
 
 impl AllData {
@@ -174,6 +175,10 @@ impl AllData {
             spellings: self.spellings.clone(),
             chord_spec: self.chord_spec.clone(),
         })
+    }
+
+    pub fn board(&self) -> BoardName {
+        self.board
     }
 }
 

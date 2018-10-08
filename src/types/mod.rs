@@ -4,6 +4,7 @@ pub(crate) use self::c_enums::*;
 pub(crate) use self::chord::*;
 pub(crate) use self::huffman::*;
 pub(crate) use self::key_press::*;
+pub use self::miscellaneous::BoardName;
 pub(crate) use self::miscellaneous::*;
 pub(crate) use self::validate::*;
 pub(crate) use self::words::*;
