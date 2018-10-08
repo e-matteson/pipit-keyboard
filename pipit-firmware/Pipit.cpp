@@ -294,8 +294,7 @@ void Pipit::cycleLastWord(CycleType cycle_type){
   Chord new_chord(*entry->getChord());
   Key data[MAX_KEYS_IN_SEQUENCE];
 
-  static const uint8_t num_anagrams = MAX_ANAGRAM_NUM+1;
-  for(uint8_t i = 0; i <= num_anagrams; i++) {
+  for(uint8_t i = 0; i < MAX_ANAGRAM_NUM; i++) {
     new_chord.cycle(cycle_type);
 
     if(replaceLastIfFound(conf::SeqType::Word, &new_chord, data)) {
