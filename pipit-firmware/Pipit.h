@@ -38,7 +38,7 @@ public:
   void setup();
 
 private:
-  void sendIfReady();
+  void processIfReady();
   void shutdownIfSquished();
   void processChord(Chord* new_chord);
   void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
@@ -46,9 +46,9 @@ private:
   void doCommand(const Key* data, uint8_t length);
   void cycleLastWord(CycleType cycle_type);
 
-  uint8_t sendIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_first);
-  uint8_t sendIfFoundForCycling(conf::SeqType type, Chord* chord, Key* data);
-  uint8_t sendIfFound(conf::SeqType type, Chord* chord, Key* data);
+  uint8_t doIfFound(conf::SeqType type, Chord* chord, Key* data);
+  uint8_t replaceLastIfFound(conf::SeqType type, Chord* chord, Key* data);
+  uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_before_sending);
 
   Switches switches;
   Feedback feedback;

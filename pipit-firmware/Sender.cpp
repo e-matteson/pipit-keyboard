@@ -46,16 +46,6 @@ bool Sender::sendIfEmptyExceptMods(const Chord* chord){
   return 1;
 }
 
-void Sender::sendType(conf::SeqType type, const Key* data, uint8_t data_length, Chord* chord){
-  switch(type) {
-  case conf::SeqType::Plain: sendPlain(data, data_length, chord); break;
-  case conf::SeqType::Word: sendWord(data, data_length, chord); break;
-  case conf::SeqType::Macro: sendMacro(data, data_length, chord); break;
-    default: DEBUG1_LN("seq type cannot be sent");
-  }
-
-}
-
 void Sender::sendPlain(const Key* data, uint8_t data_length, const Chord* chord){
   history.startEntry(chord, 1);
   // TODO should we modify the input Keys instead of copying to the temporary value?

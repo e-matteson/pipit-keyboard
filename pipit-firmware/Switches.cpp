@@ -36,10 +36,8 @@ bool Switches::readyToPress(bool is_gaming){
   return false; // No change.
 }
 
-bool Switches::readyToRelease(bool is_gaming){
-  if(is_gaming){
-    return false; // Gaming mode only uses readyToPress()
-  }
+bool Switches::readyToRelease(){
+  // Gaming modes never needs to call this, they don't respond to releases.
   return release_timer.isDone();
 }
 
@@ -183,7 +181,7 @@ void Switches::reuseMods(Chord* chord){
   }
 }
 
-bool Switches::anySwitchDown() {
+bool Switches::anyDown() {
   for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
     if(switch_status[index] != SwitchStatus::NotPressed) {
       return true;
@@ -209,17 +207,17 @@ void Switches::fillChord(Chord* chord){
 }
 
 // Fill up an array of chords, one for each pressed switch, instead of combining them all into 1 chord like fillChord()
-uint8_t Switches::fillGamingSwitches(Chord* chords){
-  uint8_t num_chords = 0;
+uint8_t Switches::fillGamingSwitches(Chord* chords) {
+  uint8_t num_pressed = 0;
   for(uint8_t index = 0; index < NUM_MATRIX_POSITIONS; index++){
-    if (switch_status[index] != SwitchStatus::NotPressed){
+    if (switch_status[index] != SwitchStatus::NotPressed) {
       // Switch is basically pressed! Other states don't matter in gaming modes.
-      chords[num_chords].setSwitch(index);
-      num_chords++;
+      chords[num_pressed].setSwitch(index);
+      num_pressed++;
       switch_status[index] = SwitchStatus::AlreadySent;
     }
   }
-  return num_chords;
+  return num_pressed;
 }
 
 void Switches::printStatusArray(){

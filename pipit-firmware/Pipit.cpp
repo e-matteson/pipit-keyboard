@@ -10,7 +10,7 @@ void Pipit::setup(){
 
 void Pipit::loop(){
   switches.update();
-  sendIfReady();
+  processIfReady();
   feedback.updateLED();
   shutdownIfSquished();
   delayMicroseconds(100);
@@ -145,49 +145,39 @@ void Pipit::doCommand(const Key* data, uint8_t length){
 }
 
 
-
-/// Lookup and send a press or release, if necessary
-void Pipit::sendIfReady(){
-  bool is_gaming = conf::isGaming(mode);
-  if(switches.readyToPress(is_gaming)){
-    // Lookup the chord and send the corresponding key sequence.
-    if(is_gaming){
-      Chord gaming_switches[NUM_MATRIX_POSITIONS];
-      for(uint8_t i = 0; i < NUM_MATRIX_POSITIONS; i++){
-        gaming_switches[i].setMode(mode);
-      }
+void Pipit::processIfReady() {
+  bool is_gaming_mode = conf::isGaming(mode);
+  if(switches.readyToPress(is_gaming_mode)) {
+    if(is_gaming_mode) {
+      Chord gaming_switches[NUM_MATRIX_POSITIONS] = { Chord(mode) };
       uint8_t num_switches = switches.fillGamingSwitches(gaming_switches);
       processGamingSwitches(gaming_switches, num_switches);
-      return;
+    } else {
+      Chord chord(mode);
+      switches.fillChord(&chord);
+      processChord(&chord);
     }
-
-    Chord chord(mode);
-    switches.fillChord(&chord);
-    processChord(&chord);
     return;
   }
 
-  if(switches.readyToRelease(is_gaming)){
-    // Make sure all keys are released
-    if(!is_paused){
+  if(switches.readyToRelease()) {
+    if(switches.anyDown()) {
       // If you pressed a mix of plain mods and plain keys, the mod release
       // won't be sent until all keys are up. This lets you hold `alt` and tap
       // `tab` to cycle through windows. The only weird edge case I'm aware of
       // is that after pressing `alt+tab', holding `tab` and tapping `alt` has
       // the exact same behavior as holding `alt` and tapping `tab`.
-      if(switches.anySwitchDown()) {
-        sender.releaseNonMods();
-      }
-      else {
-        sender.releaseAll();
-      }
+      sender.releaseNonMods();
+    }
+    else {
+      sender.releaseAll();
     }
   }
 }
 
+
 /// Search for the chord in all of the lookup arrays of every sequence type, and
-/// perform the appropriate action if it's found. For non-gaming modes only -
-/// see `processGamingChords()` instead.
+/// perform the appropriate action if it's found. For non-gaming modes only.
 void Pipit::processChord(Chord* chord) {
   // If no switch is pressed, just send zero and be done with it.
   // (There can't be mods because we haven't extracted them yet)
@@ -199,8 +189,7 @@ void Pipit::processChord(Chord* chord) {
   Key data[MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
-  if(uint8_t len = sendIfFound(conf::SeqType::Command, chord, data)){
-    doCommand(data, len);
+  if(doIfFound(conf::SeqType::Command, chord, data)){
     return;
   }
 
@@ -209,7 +198,7 @@ void Pipit::processChord(Chord* chord) {
   }
 
   // If chord is a known macro, send it and return.
-  if(sendIfFound(conf::SeqType::Macro, chord, data)){
+  if(doIfFound(conf::SeqType::Macro, chord, data)){
     return;
   }
 
@@ -219,7 +208,7 @@ void Pipit::processChord(Chord* chord) {
   chord->extractAnagramMods();
 
   // If chord is a known word, send it and return.
-  if(sendIfFound(conf::SeqType::Word, chord, data)){
+  if(doIfFound(conf::SeqType::Word, chord, data)){
     switches.reuseMods(chord);
     return;
   }
@@ -231,24 +220,23 @@ void Pipit::processChord(Chord* chord) {
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
-  if(sendIfFound(conf::SeqType::Plain, chord, data)){
+  if(doIfFound(conf::SeqType::Plain, chord, data)){
     switches.reuseMods(chord);
     return;
   }
 
+  // If only modifiers were pressed, send them now. (We know it's not totally
+  // empty, since we checked at the top of this function)
   if(sender.sendIfEmptyExceptMods(chord)) {
-    // Only modifiers were pressed, send them now. (We know that because if the
-    // chord was totally empty, it would have been sent at the top of this
-    // function.)
     switches.reuseMods(chord);
     feedback.trigger(conf::SeqType::Plain);
+    return;
   }
-  else{
-    // Unknown chord, release all keys
-    sender.releaseAll();
-    feedback.triggerUnknown();
-    DEBUG1_LN("chord not found");
- }
+
+  // Unknown chord, release all keys just to be careful
+  sender.releaseAll();
+  feedback.triggerUnknown();
+  DEBUG1_LN("chord not found");
 }
 
 // For gaming modes, which act like a normal keyboard and don't recognize
@@ -263,8 +251,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches) 
     Key data[MAX_KEYS_IN_SEQUENCE];
 
     Chord* single_switch = gaming_switches+i;
-    if(uint8_t length = sendIfFound(conf::SeqType::Command, single_switch, data)){
-      doCommand(data, length);
+    if(doIfFound(conf::SeqType::Command, single_switch, data)){
       return;
     }
 
@@ -272,11 +259,11 @@ void Pipit::processGamingSwitches(Chord* gaming_switches, uint8_t num_switches) 
       return;
     }
 
-    if(sendIfFound(conf::SeqType::Macro, single_switch, data)){
+    if(doIfFound(conf::SeqType::Macro, single_switch, data)){
       return;
     }
 
-    // We can't use sendIfFound() here for plain_keys, because we're adding all
+    // We can't use doIfFound() here, because we're adding all
     // plain_keys to the report instead of sending each one immediately.
     if(uint8_t length=conf::lookup(single_switch, conf::SeqType::Plain, data)){
       if(length > 1){
@@ -311,10 +298,10 @@ void Pipit::cycleLastWord(CycleType cycle_type){
   for(uint8_t i = 0; i <= num_anagrams; i++) {
     new_chord.cycle(cycle_type);
 
-    if(sendIfFoundForCycling(conf::SeqType::Word, &new_chord, data)) {
+    if(replaceLastIfFound(conf::SeqType::Word, &new_chord, data)) {
       return; // Success
     }
-    if(sendIfFoundForCycling(conf::SeqType::Plain, &new_chord, data)) {
+    if(replaceLastIfFound(conf::SeqType::Plain, &new_chord, data)) {
       return; // Success
     }
 
@@ -324,32 +311,53 @@ void Pipit::cycleLastWord(CycleType cycle_type){
       // the other cycling types.
       break;
     }
-    // Else, this anagram mod wasn't found, try the next one right away.
+    // Else, a word with this anagram number wasn't found, try the next one right away.
   }
-
   feedback.triggerCyclingFailed();
 }
 
-uint8_t Pipit::sendIfFound(conf::SeqType type, Chord* chord, Key* data) {
-  return sendIfFoundHelper(type, chord, data, 0);
+uint8_t Pipit::doIfFound(conf::SeqType type, Chord* chord, Key* data) {
+  return doIfFoundHelper(type, chord, data, false);
 }
 
-uint8_t Pipit::sendIfFoundForCycling(conf::SeqType type, Chord* chord, Key* data) {
-  return sendIfFoundHelper(type, chord, data, 1);
+uint8_t Pipit::replaceLastIfFound(conf::SeqType type, Chord* chord, Key* data) {
+  return doIfFoundHelper(type, chord, data, true);
 }
 
-uint8_t Pipit::sendIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_first) {
-  // TODO renam data -> keys
-
-  if(uint8_t length = conf::lookup(chord, type, data)){
-    if(delete_first) {
-      sender.deleteLastWord();
-    }
-    sender.sendType(type, data, length, chord);
-    feedback.trigger(type);
-    return length; // Success
+// Search for the chord in lookups of the given sequence type. If it's found,
+// send it (if it's a key sequence) or do it (if it's a command). Set
+// `delete_before_sending` you're using this to cycle a word. Return the
+// length of the data found in the lookup, or 0 if not found.
+uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_before_sending) {
+  uint8_t data_length = conf::lookup(chord, type, data);
+  if(data_length == 0){
+    return 0; // Fail, chord not found.
   }
-  return 0; // Fail
+
+  if(delete_before_sending) {
+    sender.deleteLastWord();
+  }
+
+  switch(type) {
+  case conf::SeqType::Plain:
+    sender.sendPlain(data, data_length, chord);
+    break;
+  case conf::SeqType::Word:
+    sender.sendWord(data, data_length, chord);
+    break;
+  case conf::SeqType::Macro:
+    sender.sendMacro(data, data_length, chord);
+    break;
+  case conf::SeqType::Command:
+    doCommand(data, data_length);
+    break;
+  default:
+    DEBUG1_LN("unknown seq type");
+    return 0; // Error
+  }
+
+  feedback.trigger(type);
+  return data_length; // Success
 }
 
 /// Shutdown to save power if a switch has been held down for a very long time,

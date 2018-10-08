@@ -22,8 +22,8 @@ public:
   void fillChord(Chord* chord);
   uint8_t fillGamingSwitches(Chord* chords);
   bool readyToPress(bool is_gaming);
-  bool readyToRelease(bool is_gaming);
-  bool anySwitchDown();
+  bool readyToRelease();
+  bool anyDown();
   void reuseMods(Chord* chord);
 
   void printStatusArray();
