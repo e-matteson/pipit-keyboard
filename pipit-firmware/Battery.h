@@ -4,12 +4,11 @@
 #include <Arduino.h>
 #include "auto_config.h"
 
-
-class Battery{
-public:
+class Battery {
+ public:
   int8_t getLevel();
 
-private:
+ private:
   uint16_t readingToLevel(uint16_t reading);
   uint16_t readBattery();
 

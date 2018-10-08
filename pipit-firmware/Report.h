@@ -6,7 +6,7 @@
 #include "auto_config.h"
 
 class Report {
-public:
+ public:
   void addKey(const Key* key);
   void addMod(uint8_t _mod_byte);
   bool isEmpty() const;
@@ -21,8 +21,8 @@ public:
 
   bool is_gaming = 0;
 
-private:
-  static const uint8_t report_length = 6; // Standard length of USB HID report
+ private:
+  static const uint8_t report_length = 6;  // Standard length of USB HID report
   uint8_t key_codes[report_length] = {0};
   uint8_t mod_byte = 0;
   uint8_t num_keys = 0;

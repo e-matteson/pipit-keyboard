@@ -5,8 +5,8 @@
 #include "auto_config.h"
 
 // Verify that the user settings match the board we're compiling for
-#if defined (TEENSY_LC)
-#if !defined (TEENSYDUINO) || !defined(__MKL26Z64__)
+#if defined(TEENSY_LC)
+#if !defined(TEENSYDUINO) || !defined(__MKL26Z64__)
 #error "Wrong board_name, the arduino IDE did not expect a teensy_lc"
 #endif
 
@@ -19,25 +19,21 @@
 #error "Unknown board_name"
 #endif
 
-
 #include "Chord.h"
+#include "Feedback.h"
 #include "Key.h"
+#include "Sender.h"
 #include "Switches.h"
 #include "lookup.h"
-#include "Sender.h"
-#include "Feedback.h"
 
 #define MAX_PREFIX_LENGTH 3
 
-
-class Pipit{
-
-public:
-
+class Pipit {
+ public:
   void loop();
   void setup();
 
-private:
+ private:
   void processIfReady();
   void shutdownIfSquished();
   void processChord(Chord* new_chord);
@@ -48,7 +44,8 @@ private:
 
   uint8_t doIfFound(conf::SeqType type, Chord* chord, Key* data);
   uint8_t replaceLastIfFound(conf::SeqType type, Chord* chord, Key* data);
-  uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data, bool delete_before_sending);
+  uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data,
+                          bool delete_before_sending);
 
   Switches switches;
   Feedback feedback;

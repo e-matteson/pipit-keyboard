@@ -4,8 +4,7 @@
 #ifndef TEENSYCOMMS_H
 #define TEENSYCOMMS_H
 
-
-class TeensyComms: public Comms {
+class TeensyComms : public Comms {
  public:
   void setup();
   void press(const Report* report);
@@ -13,7 +12,6 @@ class TeensyComms: public Comms {
   void toggleWireless();
   void moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan);
 };
-
 
 #endif
 #endif

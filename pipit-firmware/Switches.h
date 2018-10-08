@@ -1,11 +1,11 @@
 #ifndef SWITCHES_H
 #define SWITCHES_H
 
-#include "auto_config.h"
 #include <Arduino.h>
-#include "Timer.h"
 #include "Chord.h"
 #include "Matrix.h"
+#include "Timer.h"
+#include "auto_config.h"
 
 // Possible value of last_released_switch:
 // (also all positive values up to NUM_MATRIX_POSITIONS)
@@ -13,9 +13,8 @@
 
 // Possible statuses for the switch_status array:
 
-class Switches{
-public:
-
+class Switches {
+ public:
   Switches();
   void setup();
   void update();
@@ -30,11 +29,11 @@ public:
 
   Matrix matrix;
 
-private:
-  enum class SwitchStatus{
-    NotPressed = 0, // not currently pressed
+ private:
+  enum class SwitchStatus {
+    NotPressed = 0,  // not currently pressed
     Pressed,         // pressed and not sent yet
-    AlreadySent,    // already sent, don't resend in future chords
+    AlreadySent,     // already sent, don't resend in future chords
     Held             // already sent, but ok to resend in future chords
   };
 
@@ -49,7 +48,6 @@ private:
   void printStatusChange(uint8_t index);
   void printMatrixChange(uint8_t index);
 
-
   Timer chord_timer;
   Timer release_timer;
   Timer held_timer;
@@ -59,8 +57,8 @@ private:
   Timer debounce_timers[NUM_MATRIX_POSITIONS];
   SwitchStatus switch_status[NUM_MATRIX_POSITIONS] = {SwitchStatus::NotPressed};
   bool was_switch_double_tapped = 0;
-  int16_t last_released_switch = NO_SWITCH; // Index of last released switch, or NO_SWITCH
-
+  int16_t last_released_switch =
+      NO_SWITCH;  // Index of last released switch, or NO_SWITCH
 };
 
 #endif

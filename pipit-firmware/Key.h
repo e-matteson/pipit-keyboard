@@ -4,9 +4,8 @@
 #include "Arduino.h"
 #include "auto_config.h"
 
-
 class Key {
-public:
+ public:
   Key() = default;
   Key(uint8_t _key_code, uint8_t _mod_byte);
   void setKey(uint8_t _key_code);

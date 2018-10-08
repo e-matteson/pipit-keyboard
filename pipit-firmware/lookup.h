@@ -7,9 +7,9 @@
 #include "Chord.h"
 #include "Key.h"
 
-namespace conf{
+namespace conf {
 
-  uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out);
+uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out);
 
 };
 

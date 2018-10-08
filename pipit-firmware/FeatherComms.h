@@ -6,7 +6,7 @@
 
 #include <Adafruit_BluefruitLE_SPI.h>
 
-class FeatherComms: public Comms {
+class FeatherComms : public Comms {
  public:
   FeatherComms();
   void setup();
@@ -23,12 +23,10 @@ class FeatherComms: public Comms {
   void pressWireless(const Report* report);
   void moveMouseWireless(int8_t x, int8_t y, int8_t scroll, int8_t pan);
 
-
   Adafruit_BluefruitLE_SPI bluetooth;
 
   bool use_wired = 0;
 };
-
 
 #endif
 #endif

@@ -2,15 +2,15 @@
 #define CHORD_H_
 
 #include <Arduino.h>
+#include "Key.h"
 #include "auto_config.h"
 #include "conf.h"
-#include "Key.h"
 
 /// How to modify cycled words
 enum class CycleType {
-  Anagram, /// Replace word with the next anagram of the same chord
-  Nospace, /// Toggle whether a space is automatically inserted.
-  Capital, /// Toggle the capitalization of the word.
+  Anagram,  /// Replace word with the next anagram of the same chord
+  Nospace,  /// Toggle whether a space is automatically inserted.
+  Capital,  /// Toggle the capitalization of the word.
 };
 
 /// The Chord class stores which switches are pressed in a chord. It can check
@@ -18,7 +18,7 @@ enum class CycleType {
 /// representation to be stored as flags, insert them back into the explicit
 /// representation, and edit modifiers when cycling words.
 class Chord {
-public:
+ public:
   Chord() = default;
   Chord(conf::Mode mode);
 
@@ -38,7 +38,7 @@ public:
   conf::Mode getMode() const;
 
   bool hasMod(conf::Mod mod) const;
-  void editCaps( Key* data, uint8_t length) const;
+  void editCaps(Key* data, uint8_t length) const;
   bool hasModNospace() const;
   bool hasModDouble() const;
   bool hasModShorten() const;
@@ -46,11 +46,11 @@ public:
 
   void printDebug() const;
 
-private:
+ private:
   enum CapBehaviorEnum {
-                        CAP_DEFAULT,
-                        CAP_FIRST,
-                        CAP_NONE,
+    CAP_DEFAULT,
+    CAP_FIRST,
+    CAP_NONE,
   };
 
   bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
@@ -70,12 +70,10 @@ private:
   bool getFlagCycleCapital() const;
   void toggleFlagCycleCapital();
 
-
   void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool doesAnagramHaveMod(uint8_t anagram_num);
   bool isAnagramMaskBlank();
-  bool isExactAnagramPressed(const uint8_t* mod_chord,
-                             const uint8_t* _chord);
+  bool isExactAnagramPressed(const uint8_t* mod_chord, const uint8_t* _chord);
 
   void setMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
   void unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
@@ -100,7 +98,8 @@ private:
 
   uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
 
-  // TODO what happens if there are no modes, so no variant with value 0, and this cast is invalid?
+  // TODO what happens if there are no modes, so no variant with value 0, and
+  // this cast is invalid?
   conf::Mode mode = static_cast<conf::Mode>(0);
 };
 

@@ -12,10 +12,9 @@
 #endif
 
 // TODO look up and document the magic bluetooth args
-FeatherComms::FeatherComms() : bluetooth(8, 7, 4)  {
-}
+FeatherComms::FeatherComms() : bluetooth(8, 7, 4) {}
 
-void FeatherComms::setup(){
+void FeatherComms::setup() {
   setupBluetooth();
 
 #ifdef ENABLE_WIRED_FEATHER_HACK
@@ -23,15 +22,15 @@ void FeatherComms::setup(){
 #endif
 }
 
-void FeatherComms::setupBluetooth(){
+void FeatherComms::setupBluetooth() {
   // if we're not using the feather, do nothing
   bool success = 1;
-  success |= bluetooth.begin(0); // arg is verbosity
+  success |= bluetooth.begin(0);  // arg is verbosity
 
   // Delete all stored data, or it won't reconnect to paired hosts?!
   // success |= bluetooth.factoryReset();
 
-  bluetooth.echo(false); // Disable command echo
+  bluetooth.echo(false);  // Disable command echo
   // TODO does the F() macro do anything?
   success |= bluetooth.sendCommandCheckOK(F("AT+GAPDEVNAME=pipit"));
 
@@ -48,15 +47,14 @@ void FeatherComms::setupBluetooth(){
   // success = bluetooth.sendCommandWithIntReply(F("AT+BLEPOWERLEVEL"), reply);
   // Serial.println(*reply);
 
-  if(success){
+  if (success) {
     DEBUG1_LN("bluetooth setup done");
-  }
-  else{
+  } else {
     DEBUG1_LN("WARNING: bluetooth setup may have failed");
   }
 }
 
-void FeatherComms::press(const Report* report){
+void FeatherComms::press(const Report* report) {
 #ifdef ENABLE_WIRED_FEATHER_HACK
   if (use_wired) {
     pressWired(report);
@@ -67,7 +65,7 @@ void FeatherComms::press(const Report* report){
   pressWireless(report);
 }
 
-void FeatherComms::pressWired(const Report* report){
+void FeatherComms::pressWired(const Report* report) {
 #ifdef ENABLE_WIRED_FEATHER_HACK
   Keyboard.set_key1(report->get(0));
   Keyboard.set_key2(report->get(1));
@@ -80,21 +78,16 @@ void FeatherComms::pressWired(const Report* report){
 #endif
 }
 
-void FeatherComms::pressWireless(const Report* report){
-  static const char cmd_template[] = "AT+BleKeyboardCode=%02x-00-%02x-%02x-%02x-%02x-%02x-%02x";
+void FeatherComms::pressWireless(const Report* report) {
+  static const char cmd_template[] =
+      "AT+BleKeyboardCode=%02x-00-%02x-%02x-%02x-%02x-%02x-%02x";
   char cmd[45] = {0};
-  sprintf(cmd, cmd_template,
-          report->getMod(),
-          report->get(0),
-          report->get(1),
-          report->get(2),
-          report->get(3),
-          report->get(4),
-          report->get(5));
+  sprintf(cmd, cmd_template, report->getMod(), report->get(0), report->get(1),
+          report->get(2), report->get(3), report->get(4), report->get(5));
   bluetooth.println(cmd);
 }
 
-void FeatherComms::moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan){
+void FeatherComms::moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan) {
 #ifdef ENABLE_WIRED_FEATHER_HACK
   if (use_wired) {
     DEBUG1_LN("wired scrolling not implemented");
@@ -102,38 +95,36 @@ void FeatherComms::moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan){
   }
 #endif
 
-  moveMouseWireless(x,y,scroll,pan);
+  moveMouseWireless(x, y, scroll, pan);
 }
 
-void FeatherComms::moveMouseWireless(int8_t x, int8_t y, int8_t scroll, int8_t pan) {
+void FeatherComms::moveMouseWireless(int8_t x, int8_t y, int8_t scroll,
+                                     int8_t pan) {
   static const char cmd_template[] = "AT+BleHidMouseMove=%d,%d,%d,%d";
   char cmd[40] = {0};
   sprintf(cmd, cmd_template, x, y, scroll, pan);
   bluetooth.println(cmd);
 }
 
-void FeatherComms::proportionalDelay(uint8_t data_length, uint8_t multiplier){
+void FeatherComms::proportionalDelay(uint8_t data_length, uint8_t multiplier) {
   delay(multiplier * getDelay(data_length));
 }
 
-uint8_t FeatherComms::getDelay(uint8_t data_length){
-  if(use_wired){
+uint8_t FeatherComms::getDelay(uint8_t data_length) {
+  if (use_wired) {
     // Little or no delay is needed between presses over USB
     return 0;
   }
 
   // When sending long words/macros over bluetooth, some letters in the middle
-  // get lost unless there's a delay between presses. This seems to help, without
-  // slowing down short words too much.
-  if(data_length > 10){
+  // get lost unless there's a delay between presses. This seems to help,
+  // without slowing down short words too much.
+  if (data_length > 10) {
     return 2;
   }
   return 1;
 }
 
-void FeatherComms::toggleWireless(){
-  use_wired ^= 1;
-}
+void FeatherComms::toggleWireless() { use_wired ^= 1; }
 
 #endif
-

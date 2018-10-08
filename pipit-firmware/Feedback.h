@@ -8,7 +8,7 @@
 #include "Timer.h"
 
 // Possible routines for the rgb led:
-enum class LEDRoutine{
+enum class LEDRoutine {
   None = 0,
   Battery,
   Boot,
@@ -31,9 +31,8 @@ enum class LEDRoutine{
   Rainbow,
 };
 
-class Feedback{
-
-public:
+class Feedback {
+ public:
   void setup();
   void trigger(conf::SeqType type);
   void triggerUnknown();
@@ -42,10 +41,11 @@ public:
   void startRoutine(LEDRoutine routine);
   void endRoutine();
 
-private:
+ private:
   // Pre-defined colors for the rgb led
   // TODO make private?
-  // The all_colors_routine relies on the fact that these are numbered in order starting at zero, and BLACK is the last color.
+  // The all_colors_routine relies on the fact that these are numbered in order
+  // starting at zero, and BLACK is the last color.
   enum class LEDColor {
     Red = 0,
     Orange,
@@ -58,7 +58,7 @@ private:
     Magenta,
     White,
     Black,
-    NumColors, // this should always come last
+    NumColors,  // this should always come last
   };
 
   void triggerFeedback(char feedback_code);
@@ -70,9 +70,8 @@ private:
   Battery battery;
   Timer led_timer;
 
-  LEDRoutine led_routine = LEDRoutine::None; // The active LED routine
-  uint16_t led_subroutine = 0; // The active LED subroutine
-
+  LEDRoutine led_routine = LEDRoutine::None;  // The active LED routine
+  uint16_t led_subroutine = 0;                // The active LED subroutine
 };
 
 #endif

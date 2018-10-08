@@ -1,14 +1,13 @@
 #include "Chord.h"
-#include "util.h"
 #include <type_traits>
+#include "util.h"
 
 #define FLAG_BIT 15
 
+Chord::Chord(conf::Mode mode) : mode(mode) {}
 
-Chord::Chord(conf::Mode mode) : mode(mode){}
-
-void Chord::setSwitch(uint8_t switch_index){
-  if(switch_index >= NUM_MATRIX_POSITIONS) {
+void Chord::setSwitch(uint8_t switch_index) {
+  if (switch_index >= NUM_MATRIX_POSITIONS) {
     DEBUG1_LN("WARNING: invalid chord switch index");
     return;
   }
@@ -17,64 +16,61 @@ void Chord::setSwitch(uint8_t switch_index){
   chord_bytes[byte] |= (0x01 << bit);
 }
 
-void Chord::setMode(conf::Mode _mode){
-  mode = _mode;
-}
+void Chord::setMode(conf::Mode _mode) { mode = _mode; }
 
-bool Chord::isEmptyExceptMods() const{
+bool Chord::isEmptyExceptMods() const {
   // Doesn't check the mods, just the current chord bytes.
   return allZeroes(chord_bytes);
 }
 
-uint8_t Chord::getModByte() const{
+uint8_t Chord::getModByte() const {
   // Get the byte containing ctrl, shift, alt, and/or gui.
   // Used for HID keyboard protocol.
   uint8_t mod_byte = 0;
-  for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
+  for (uint8_t i = 0; i < NUM_PLAIN_MODS; i++) {
     conf::Mod mod = conf::getPlainModEnum(i);
     mod_byte |= hasMod(mod) ? conf::getPlainModByte(i) : 0;
   }
   return mod_byte;
 }
 
-conf::Mode Chord::getMode() const{
-  return mode;
-}
+conf::Mode Chord::getMode() const { return mode; }
 
-bool Chord::hasAnagramNum(uint8_t other_anagram) const{
+bool Chord::hasAnagramNum(uint8_t other_anagram) const {
   return (anagram_num == other_anagram);
 }
 
-bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const{
+bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const {
   return isEqual(chord_bytes, other_chord_bytes);
 }
 
 void Chord::editCaps(Key* data, uint8_t length) const {
-  switch(decideCapBehavior(data, length)) {
-  case CapBehaviorEnum::CAP_DEFAULT:
-    break;
+  switch (decideCapBehavior(data, length)) {
+    case CapBehaviorEnum::CAP_DEFAULT:
+      break;
 
-  case CapBehaviorEnum::CAP_FIRST:
-    data[0].setShift(1);
-    break;
+    case CapBehaviorEnum::CAP_FIRST:
+      data[0].setShift(1);
+      break;
 
-  case CapBehaviorEnum::CAP_NONE:
-    for(uint8_t i = 0; i<length; i++){
-      data[i].setShift(0);
-    }
-    break;
+    case CapBehaviorEnum::CAP_NONE:
+      for (uint8_t i = 0; i < length; i++) {
+        data[i].setShift(0);
+      }
+      break;
 
-  default:
-    DEBUG1_LN("WARNING: unknown cap behavior");
+    default:
+      DEBUG1_LN("WARNING: unknown cap behavior");
   }
 }
 
-Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length) const {
+Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
+                                                uint8_t length) const {
   bool has_cap_mod = hasMod(conf::getCapitalEnum());
 
-  if(!getFlagCycleCapital()) {
+  if (!getFlagCycleCapital()) {
     // The simple case, without cap cycling.
-    if(has_cap_mod) {
+    if (has_cap_mod) {
       return CAP_FIRST;
     }
     return CAP_DEFAULT;
@@ -83,43 +79,34 @@ Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data, uint8_t length)
   // The complicated case, where we might force capitalized dictionary words to
   // be lowercase.
   bool has_literal_shift = 0;
-  for(uint8_t i = 0; i < length; i++) {
-    if(data[i].containsShift()) {
+  for (uint8_t i = 0; i < length; i++) {
+    if (data[i].containsShift()) {
       has_literal_shift = 1;
       break;
     }
   }
 
-  if(has_literal_shift) {
+  if (has_literal_shift) {
     // If the word already contained capitalization, force it all to lowercase.
     return CAP_NONE;
   }
 
   // Otherwise, invert the cap mod.
-  if(has_cap_mod) {
+  if (has_cap_mod) {
     return CAP_DEFAULT;
   }
   return CAP_FIRST;
 }
 
+bool Chord::hasModNospace() const { return hasMod(conf::getNospaceEnum()); }
 
-bool Chord::hasModNospace() const{
-  return hasMod(conf::getNospaceEnum());
-}
+bool Chord::hasModDouble() const { return hasMod(conf::getDoubleEnum()); }
 
-bool Chord::hasModDouble() const{
-  return hasMod(conf::getDoubleEnum());
-}
+bool Chord::hasModShorten() const { return hasMod(conf::getModShortenEnum()); }
 
-bool Chord::hasModShorten() const{
-  return hasMod(conf::getModShortenEnum());
-}
+void Chord::setModNospace() { setMod(conf::getNospaceEnum()); }
 
-void Chord::setModNospace() {
-  setMod(conf::getNospaceEnum());
-}
-
-bool Chord::hasMod(conf::Mod mod) const{
+bool Chord::hasMod(conf::Mod mod) const {
   return (mods_and_flags >> conf::to_index(mod)) & 1;
 }
 
@@ -131,7 +118,7 @@ void Chord::unsetMod(conf::Mod mod) {
   mods_and_flags &= ~(1 << conf::to_index(mod));
 }
 
-void Chord::toggleMod(conf::Mod mod){
+void Chord::toggleMod(conf::Mod mod) {
   mods_and_flags ^= (1 << conf::to_index(mod));
 }
 
@@ -139,32 +126,30 @@ bool Chord::getFlagCycleCapital() const {
   return 1 & (mods_and_flags >> FLAG_BIT);
 }
 
-void Chord::toggleFlagCycleCapital() {
-  mods_and_flags ^= (1 << FLAG_BIT);
-}
+void Chord::toggleFlagCycleCapital() { mods_and_flags ^= (1 << FLAG_BIT); }
 
-void Chord::extractPlainMods(){
-  for(uint8_t i = 0; i < NUM_PLAIN_MODS; i++){
+void Chord::extractPlainMods() {
+  for (uint8_t i = 0; i < NUM_PLAIN_MODS; i++) {
     extractMod(conf::getPlainModEnum(i));
   }
 }
 
-void Chord::extractWordMods(){
-  for(uint8_t i = 0; i < NUM_WORD_MODS; i++){
+void Chord::extractWordMods() {
+  for (uint8_t i = 0; i < NUM_WORD_MODS; i++) {
     extractMod(conf::getWordModEnum(i));
   }
 }
 
-void Chord::extractAnagramMods(){
+void Chord::extractAnagramMods() {
   // TODO how does blank anagram0 work? Other blank mods are ignored...
   // Switch to null?
-  if(!isAnagramMaskBlank()){
+  if (!isAnagramMaskBlank()) {
     // At least one switch in an anagram is pressed, check to see if it's an
     //  actual mod chord.
-    for(uint8_t i = 0; i < NUM_ANAGRAM_MODS; i++){
-      if(extractMod(conf::getAnagramModEnum(i))){
+    for (uint8_t i = 0; i < NUM_ANAGRAM_MODS; i++) {
+      if (extractMod(conf::getAnagramModEnum(i))) {
         // Found mod!
-        anagram_num = i+1; // 0 is reserved for no mod
+        anagram_num = i + 1;  // 0 is reserved for no mod
         return;
       }
     }
@@ -173,39 +158,39 @@ void Chord::extractAnagramMods(){
   anagram_num = 0;
 }
 
-void Chord::restoreAnagramMods(){
-  if(doesAnagramHaveMod(anagram_num)){
-    restoreMod(conf::getAnagramModEnum(anagram_num-1));
+void Chord::restoreAnagramMods() {
+  if (doesAnagramHaveMod(anagram_num)) {
+    restoreMod(conf::getAnagramModEnum(anagram_num - 1));
   }
   anagram_num = 0;
 }
 
-void Chord::restoreWordMods(){
-  for(uint8_t i = 0; i < NUM_WORD_MODS; i++){
+void Chord::restoreWordMods() {
+  for (uint8_t i = 0; i < NUM_WORD_MODS; i++) {
     restoreMod(conf::getWordModEnum(i));
   }
 }
 
-bool Chord::extractMod(conf::Mod modifier){
+bool Chord::extractMod(conf::Mod modifier) {
   // If mod is pressed in the chord:
   // - remove the mod bits from the chord
   // - set a flag saying it's present
   // - return true
   const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
-  if(allZeroes(mod_chord_bytes)){
+  if (allZeroes(mod_chord_bytes)) {
     // Mod is all zeroes - that's how we represent a missing mod chord. Ignore.
     return false;
   }
   bool isPressed = false;
-  switch(conf::getModType(modifier)){
-  case conf::ModType::Plain:
-  case conf::ModType::Word:
-    isPressed = isChordMaskSet(mod_chord_bytes, chord_bytes);
-    break;
-  case conf::ModType::Anagram:
-    isPressed = isExactAnagramPressed(mod_chord_bytes, chord_bytes);
+  switch (conf::getModType(modifier)) {
+    case conf::ModType::Plain:
+    case conf::ModType::Word:
+      isPressed = isChordMaskSet(mod_chord_bytes, chord_bytes);
+      break;
+    case conf::ModType::Anagram:
+      isPressed = isExactAnagramPressed(mod_chord_bytes, chord_bytes);
   }
-  if(!isPressed){
+  if (!isPressed) {
     // Mod is not pressed
     return false;
   }
@@ -216,20 +201,20 @@ bool Chord::extractMod(conf::Mod modifier){
   return true;
 }
 
-bool Chord::restoreMod(conf::Mod modifier){
+bool Chord::restoreMod(conf::Mod modifier) {
   // If mod flag is set:
   // - add the mod bits to the chord
   // - unset the flag
   // - return true
   bool was_set = hasMod(modifier);
-  if(was_set){
+  if (was_set) {
     unsetMod(modifier);
     setMask(conf::getModChord(mode, modifier), chord_bytes);
   }
   return was_set;
 }
 
-void Chord::prepareToCycle(){
+void Chord::prepareToCycle() {
   // Unset mods that affect the word before this one, like by backspacing or
   // doubling its letters. We don't want to repeat those effects every time we
   // cycle this chord.
@@ -237,39 +222,38 @@ void Chord::prepareToCycle(){
   unsetMod(conf::getDoubleEnum());
 }
 
-void Chord::cycle(CycleType operation){
-  switch(operation) {
-  case CycleType::Capital:
-    cycleCapital();
-    break;
+void Chord::cycle(CycleType operation) {
+  switch (operation) {
+    case CycleType::Capital:
+      cycleCapital();
+      break;
 
-  case CycleType::Nospace:
-    cycleNospace();
-    break;
+    case CycleType::Nospace:
+      cycleNospace();
+      break;
 
-  case CycleType::Anagram:
-    cycleAnagram();
-    break;
+    case CycleType::Anagram:
+      cycleAnagram();
+      break;
 
-  default:
-    DEBUG1_LN("WARNING: unknown cycle type");
+    default:
+      DEBUG1_LN("WARNING: unknown cycle type");
   }
 }
 
-void Chord::cycleCapital(){
+void Chord::cycleCapital() {
   prepareToCycle();
   toggleFlagCycleCapital();
 }
 
-void Chord::cycleNospace(){
+void Chord::cycleNospace() {
   prepareToCycle();
   toggleMod(conf::getNospaceEnum());
 }
 
-
 /********** Anagram manipulation ***********/
 
-uint8_t Chord::cycleAnagram(){
+uint8_t Chord::cycleAnagram() {
   prepareToCycle();
   // Unset old mod flag
   setAnagramModFlag(anagram_num, 0);
@@ -279,7 +263,7 @@ uint8_t Chord::cycleAnagram(){
   return anagram_num;
 }
 
-bool Chord::isAnagramMaskBlank(){
+bool Chord::isAnagramMaskBlank() {
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
   andMask(conf::getAnagramMask(mode), anagram_bytes);
@@ -287,8 +271,7 @@ bool Chord::isAnagramMaskBlank(){
 }
 
 bool Chord::isExactAnagramPressed(const uint8_t* mod_chord,
-                                  const uint8_t* _chord)
-{
+                                  const uint8_t* _chord) {
   // TODO inefficient! recomputes mask for every ana mod
   uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
   memcpy(anagram_bytes, _chord, NUM_BYTES_IN_CHORD);
@@ -296,67 +279,65 @@ bool Chord::isExactAnagramPressed(const uint8_t* mod_chord,
   return isEqual(mod_chord, anagram_bytes);
 }
 
-uint8_t Chord::getAnagramNum(){
-  return anagram_num;
-}
+uint8_t Chord::getAnagramNum() { return anagram_num; }
 
-bool Chord::doesAnagramHaveMod(uint8_t anagram_num){
+bool Chord::doesAnagramHaveMod(uint8_t anagram_num) {
   return (anagram_num >= 1) && (anagram_num <= NUM_ANAGRAM_MODS);
 }
 
-void Chord::setAnagramModFlag(uint8_t anagram_num, bool value){
-  if(!doesAnagramHaveMod(anagram_num)){
+void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
+  if (!doesAnagramHaveMod(anagram_num)) {
     return;
   }
   // TODO why subtract 1? Can we avoid that...
-  conf::Mod mod = conf::getAnagramModEnum(anagram_num-1);
+  conf::Mod mod = conf::getAnagramModEnum(anagram_num - 1);
 
   if (value) {
     setMod(mod);
-  }
-  else {
+  } else {
     unsetMod(mod);
   }
 }
 
 /************* Chord int array operations ********/
 
-void Chord::setMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
+void Chord::setMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
+  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
     _chord_bytes[byte] |= mask[byte];
   }
 }
 
-void Chord::unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
+void Chord::unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
+  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
     _chord_bytes[byte] &= ~mask[byte];
   }
 }
 
-void Chord::andMask(const uint8_t* mask, uint8_t* _chord_bytes) const{
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
+void Chord::andMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
+  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
     _chord_bytes[byte] &= mask[byte];
   }
 }
 
-bool Chord::isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) const{
+bool Chord::isChordMaskSet(const uint8_t* mask,
+                           const uint8_t* _chord_bytes) const {
   bool return_val = 1;
-  for (uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++){
+  for (uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++) {
     return_val &= isByteMaskSet(mask[byte_num], _chord_bytes[byte_num]);
   }
   return return_val;
 }
 
-bool Chord::allZeroes(const uint8_t* _chord_bytes) const{
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++){
-    if(_chord_bytes[byte]) {
+bool Chord::allZeroes(const uint8_t* _chord_bytes) const {
+  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
+    if (_chord_bytes[byte]) {
       return 0;
     }
   }
   return 1;
 }
 
-bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
+bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const {
   for (uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++) {
     if (chord1[k] != chord2[k]) {
       return 0;
@@ -367,15 +348,15 @@ bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const{
 
 ///// debug
 
-void Chord::printMod() const{
+void Chord::printMod() const {
   for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
-    Serial.print(hasMod((conf::Mod) i));
+    Serial.print(hasMod((conf::Mod)i));
     Serial.print(" ");
   }
   Serial.println();
 }
 
-void Chord::printChord(const uint8_t* c) const{
+void Chord::printChord(const uint8_t* c) const {
   for (uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++) {
     Serial.print(c[i]);
     Serial.print(", ");
@@ -383,7 +364,7 @@ void Chord::printChord(const uint8_t* c) const{
   Serial.println();
 }
 
-void Chord::printDebug() const{
+void Chord::printDebug() const {
   Serial.print("chord: ");
   printChord(chord_bytes);
   Serial.print("mod: ");

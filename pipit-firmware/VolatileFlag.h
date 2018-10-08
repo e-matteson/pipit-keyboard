@@ -1,11 +1,11 @@
 #ifndef VOLATILEFLAG_H
 #define VOLATILEFLAG_H
 
-#include "auto_config.h"
 #include <Arduino.h>
+#include "auto_config.h"
 
-class VolatileFlag{
-public:
+class VolatileFlag {
+ public:
   VolatileFlag(bool initial_value);
 
   bool get();
@@ -15,7 +15,7 @@ public:
   void unset();
   void unsafeUnset();
 
-private:
+ private:
   volatile bool value = false;
 };
 

@@ -1,7 +1,6 @@
 #include "Battery.h"
 
-
-int8_t Battery::getLevel(){
+int8_t Battery::getLevel() {
 #ifdef HAS_BATTERY
   // Return battery level, in the range (0, full_level)
   uint16_t reading = readBattery();
@@ -11,7 +10,7 @@ int8_t Battery::getLevel(){
   return -1;
 }
 
-uint16_t Battery::readingToLevel(uint16_t reading){
+uint16_t Battery::readingToLevel(uint16_t reading) {
   DEBUG1("battery reading: ");
   DEBUG1_LN(reading);
 
@@ -27,10 +26,10 @@ uint16_t Battery::readingToLevel(uint16_t reading){
   if (reading > 574) {
     return 1;
   }
-  return 0; // nearly dead
+  return 0;  // nearly dead
 }
 
-uint16_t Battery::readBattery(){
+uint16_t Battery::readBattery() {
 #ifdef HAS_BATTERY
   return analogRead(conf::battery_level_pin);
 #endif

@@ -2,12 +2,12 @@
 #define ENTRY_H_
 
 #include <Arduino.h>
-#include "auto_config.h"
 #include "Chord.h"
 #include "Key.h"
+#include "auto_config.h"
 
-class Entry{
-public:
+class Entry {
+ public:
   Entry(const Chord* _chord, bool _is_anagrammable);
   Entry() = default;
 
@@ -23,7 +23,7 @@ public:
   bool isAnagrammable();
   void setAnagrammable(bool value);
 
-private:
+ private:
   Chord chord;
   Key last_key;
   uint8_t length = 0;

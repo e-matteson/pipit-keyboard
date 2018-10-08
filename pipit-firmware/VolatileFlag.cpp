@@ -1,10 +1,8 @@
 #include "VolatileFlag.h"
 
-VolatileFlag::VolatileFlag(bool initial_value){
-  value = initial_value;
-}
+VolatileFlag::VolatileFlag(bool initial_value) { value = initial_value; }
 
-bool VolatileFlag::get(){
+bool VolatileFlag::get() {
   bool tmp;
   noInterrupts();
   tmp = value;
@@ -12,26 +10,20 @@ bool VolatileFlag::get(){
   return tmp;
 }
 
-void VolatileFlag::set(){
+void VolatileFlag::set() {
   noInterrupts();
   value = true;
   interrupts();
 }
 
-void VolatileFlag::unset(){
+void VolatileFlag::unset() {
   noInterrupts();
   value = false;
   interrupts();
 }
 
-bool VolatileFlag::unsafeGet(){
-  return value;
-}
+bool VolatileFlag::unsafeGet() { return value; }
 
-void VolatileFlag::unsafeSet(){
-  value = true;
-}
+void VolatileFlag::unsafeSet() { value = true; }
 
-void VolatileFlag::unsafeUnset(){
-  value = false;
-}
+void VolatileFlag::unsafeUnset() { value = false; }

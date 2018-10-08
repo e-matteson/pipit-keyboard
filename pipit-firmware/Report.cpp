@@ -1,13 +1,12 @@
 #include "Report.h"
 
-
-void Report::addKey(const Key* key){
+void Report::addKey(const Key* key) {
   // We can always add to the mod_byte, but we can only fit 6 key_codes
   addMod(key->mod_byte);
-  if(key->key_code == 0){
+  if (key->key_code == 0) {
     return;
   }
-  if(isFull()){
+  if (isFull()) {
     DEBUG1_LN("WARNING: Report is full, key dropped.");
     return;
   }
@@ -15,42 +14,34 @@ void Report::addKey(const Key* key){
   num_keys++;
 }
 
-void Report::addMod(uint8_t _mod_byte){
-  mod_byte = mod_byte | _mod_byte;
-}
+void Report::addMod(uint8_t _mod_byte) { mod_byte = mod_byte | _mod_byte; }
 
-uint8_t Report::get(uint8_t index) const{
-  if(index >= report_length){
+uint8_t Report::get(uint8_t index) const {
+  if (index >= report_length) {
     DEBUG1_LN("WARNING: Report index out of range");
   }
   return key_codes[index];
 }
 
-uint8_t Report::getMod() const{
-  return mod_byte;
-}
+uint8_t Report::getMod() const { return mod_byte; }
 
-bool Report::isFull() const{
-  return num_keys >= report_length;
-}
+bool Report::isFull() const { return num_keys >= report_length; }
 
-uint8_t Report::numKeys() const{
-  return num_keys;
-}
+uint8_t Report::numKeys() const { return num_keys; }
 
-bool Report::isEmpty() const{
-  if(mod_byte != 0){
+bool Report::isEmpty() const {
+  if (mod_byte != 0) {
     return false;
   }
-  for(uint8_t i = 0; i < report_length; i++) {
-    if(key_codes[i] != 0){
+  for (uint8_t i = 0; i < report_length; i++) {
+    if (key_codes[i] != 0) {
       return false;
     }
   }
   return true;
 }
 
-bool Report::needsExtraRelease(const Report* next) const{
+bool Report::needsExtraRelease(const Report* next) const {
   // Check whether we need to send an extra report between these two, to
   // explicitly release all keys. Usually we don't bother, because if the old
   // key is not included in the new report, it will be released. But if we send
@@ -65,8 +56,8 @@ bool Report::needsExtraRelease(const Report* next) const{
     return false;
   }
 
-  for(uint8_t i = 0; i < report_length; i++) {
-    if(key_codes[i] && (key_codes[i] == next->key_codes[i])) {
+  for (uint8_t i = 0; i < report_length; i++) {
+    if (key_codes[i] && (key_codes[i] == next->key_codes[i])) {
       return true;
     }
   }
@@ -78,13 +69,11 @@ bool Report::needsExtraRelease(const Report* next) const{
 }
 
 // Copy the other Report's mod_byte to this Report, changing nothing else.
-void Report::copyModsFrom(const Report* other){
-  mod_byte = other->mod_byte;
-}
+void Report::copyModsFrom(const Report* other) { mod_byte = other->mod_byte; }
 
-void Report::printDebug() const{
+void Report::printDebug() const {
   DEBUG1("sending keys: ");
-  for(uint8_t i = 0; i < report_length; i++){
+  for (uint8_t i = 0; i < report_length; i++) {
     DEBUG1(key_codes[i]);
     DEBUG1(" ");
   }

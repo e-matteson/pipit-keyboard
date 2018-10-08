@@ -2,16 +2,15 @@
 #define SENDER_H_
 
 #include <Arduino.h>
-#include "auto_config.h"
-#include "History.h"
-#include "Feedback.h"
 #include "Chord.h"
 #include "FeatherComms.h"
+#include "Feedback.h"
+#include "History.h"
 #include "TeensyComms.h"
+#include "auto_config.h"
 
-
-class Sender{
-public:
+class Sender {
+ public:
   void setup();
 
   void deleteLastWord();
@@ -37,8 +36,7 @@ public:
   TeensyComms comms;
 #endif
 
-private:
-
+ private:
   void leftArrow();
   void rightArrow();
   void space();
@@ -46,7 +44,6 @@ private:
   void sendKey(const Key* key);
   void sendKeyAndMod(uint8_t key_code, uint8_t mod_byte);
   void press(const Report* report);
-
 
   Report last_report;
 

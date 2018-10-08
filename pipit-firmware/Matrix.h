@@ -2,17 +2,15 @@
 #define SCANNER_H_
 
 #include <Arduino.h>
-#include "auto_config.h"
-#include "VolatileFlag.h"
 #include "Timer.h"
-
+#include "VolatileFlag.h"
+#include "auto_config.h"
 
 // Use input without pullup as high-impedance state
 #define HI_Z INPUT
 
-
-class Matrix{
-public:
+class Matrix {
+ public:
   Matrix();
   void setup();
 
@@ -22,7 +20,7 @@ public:
   bool isSquishedInBackpack();
   void shutdown();
 
-private:
+ private:
   void setSwitch(uint8_t index);
 
   void scan();
@@ -33,7 +31,6 @@ private:
   bool isInStandby();
   void enterStandby();
   void exitStandby();
-
 
   void enablePinChangeInterrupt();
   void disablePinChangeInterrupt();
@@ -57,7 +54,6 @@ private:
 #error "Too many rows and columns, increase `pressed` storage size in Matrix.h"
 #endif
   uint32_t switch_states = 0;
-
 };
 
 #endif

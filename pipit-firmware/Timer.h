@@ -1,11 +1,11 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include "auto_config.h"
 #include <Arduino.h>
+#include "auto_config.h"
 
-class Timer{
-public:
+class Timer {
+ public:
   Timer();
   Timer(uint32_t new_default_value);
   void setDefaultValue(int32_t new_default_value);
@@ -21,7 +21,7 @@ public:
   uint32_t remaining();
   void jumpAhead(uint32_t units_ahead);
 
-private:
+ private:
   uint32_t getSystemTime();
 
   bool is_disabled = 1;
@@ -29,9 +29,5 @@ private:
   uint32_t value = 0;
   uint32_t default_value = 0;
 };
-
-
-
-
 
 #endif

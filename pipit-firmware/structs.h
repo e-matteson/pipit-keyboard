@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 
-
 struct LookupKmapTypeLenAnagram {
   const uint16_t seq_bit_len_and_anagram;
   const uint16_t num_chords;
@@ -13,8 +12,7 @@ struct LookupKmapTypeLenAnagram {
   uint16_t seq_bit_length() const;
   uint8_t anagram() const;
   const uint8_t* chord(uint16_t chord_num, uint8_t num_bytes_in_chord) const;
-  uint32_t sequence_code_bits(uint16_t seq_num,
-                              uint32_t code_bit_offset,
+  uint32_t sequence_code_bits(uint16_t seq_num, uint32_t code_bit_offset,
                               uint8_t code_bit_length) const;
 };
 
@@ -38,10 +36,9 @@ struct ModeStruct {
 
 struct HuffmanChar {
   const uint32_t bits;
-  const uint8_t num_bits; // actual max is 32, not 255
+  const uint8_t num_bits;  // actual max is 32, not 255
   const uint8_t key_code;
   const bool is_mod;
 };
-
 
 #endif

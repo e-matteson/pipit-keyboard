@@ -2,10 +2,10 @@
 #define HISTORY_H_
 
 #include <Arduino.h>
-#include "auto_config.h"
 #include "Chord.h"
 #include "Entry.h"
 #include "Report.h"
+#include "auto_config.h"
 
 // The number of recent words/sends that can be deleted
 
@@ -25,8 +25,7 @@ enum class Motion {
 };
 
 class History {
-
-public:
+ public:
   void save(Report* report);
   void startEntry(const Chord* new_chord, bool is_anagrammable);
 
@@ -40,8 +39,7 @@ public:
 
   bool atEdge(Direction direction);
 
-private:
-
+ private:
   uint8_t saveKeyCode(uint8_t key_code, uint8_t mod_byte);
   bool isCursorAtLimit(Direction direction);
   Entry* getEntryAt(uint8_t cursor_word);
@@ -59,11 +57,10 @@ private:
   };
 
   Cursor cursor;
-  Entry stack[HISTORY_SIZE+PADDING];
+  Entry stack[HISTORY_SIZE + PADDING];
   Entry new_entry;
 
   bool has_new_entry_been_pushed = 1;
 };
-
 
 #endif
