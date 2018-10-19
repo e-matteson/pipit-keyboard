@@ -1,7 +1,8 @@
 #ifndef COMMS_H
 #define COMMS_H
 
-#include <Arduino.h>
+#include <stdint.h>
+
 #include "Report.h"
 #include "auto_config.h"
 

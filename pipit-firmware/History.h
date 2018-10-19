@@ -1,7 +1,7 @@
 #ifndef HISTORY_H_
 #define HISTORY_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 #include "Chord.h"
 #include "Entry.h"
 #include "Report.h"

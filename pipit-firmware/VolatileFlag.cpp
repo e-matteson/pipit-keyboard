@@ -1,4 +1,5 @@
 #include "VolatileFlag.h"
+#include <Arduino.h>
 
 VolatileFlag::VolatileFlag(bool initial_value) { value = initial_value; }
 

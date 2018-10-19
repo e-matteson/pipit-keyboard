@@ -1,9 +1,9 @@
 #ifndef CHORD_H_
 #define CHORD_H_
 
-#include <Arduino.h>
-#include "Key.h"
+#include <stdint.h>
 #include "auto_config.h"
+#include "Key.h"
 #include "conf.h"
 
 /// How to modify cycled words

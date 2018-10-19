@@ -346,10 +346,9 @@ pub fn wrap_intro(
     namespace_tree: CTree,
     with_message: bool,
 ) -> Result<CTree, Error> {
-    // format!("#ifndef {}\n#define {}\n\n", guard_name, guard_name);
     let mut guard_group = Vec::new();
     guard_group.push(CTree::Include {
-        path: "<Arduino.h>".to_c(),
+        path: "<stdint.h>".to_c(),
     });
     guard_group.push(CTree::Include {
         path: "\"structs.h\"".to_c(),

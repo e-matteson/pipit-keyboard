@@ -1,7 +1,7 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 #include "auto_config.h"
 
 class Timer {

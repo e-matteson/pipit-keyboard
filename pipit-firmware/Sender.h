@@ -1,7 +1,7 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 #include "Chord.h"
 #include "FeatherComms.h"
 #include "Feedback.h"

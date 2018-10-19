@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include <Arduino.h>
 
 VolatileFlag change_flag(0);
 
@@ -49,6 +50,7 @@ bool Matrix::scanIfChanged() {
 
 void Matrix::scan() {
   // Scan the matrix for pressed switches.
+  // TODO is it more efficient to set LSB then <<=1 on every iteration?
   switch_states = 0;
   bool is_any_switch_down = false;
   uint8_t switch_index = 0;

@@ -1,7 +1,7 @@
 #ifndef VOLATILEFLAG_H
 #define VOLATILEFLAG_H
 
-#include <Arduino.h>
+
 #include "auto_config.h"
 
 class VolatileFlag {

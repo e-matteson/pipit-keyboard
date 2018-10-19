@@ -1,7 +1,8 @@
 #ifndef REPORT_H_
 #define REPORT_H_
 
-#include "Arduino.h"
+#include <stdint.h>
+
 #include "Key.h"
 #include "auto_config.h"
 

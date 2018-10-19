@@ -1,7 +1,8 @@
 #ifndef SCANNER_H_
 #define SCANNER_H_
 
-#include <Arduino.h>
+#include <stdint.h>
+
 #include "Timer.h"
 #include "VolatileFlag.h"
 #include "auto_config.h"
@@ -50,8 +51,9 @@ class Matrix {
 
   // Each bit stores whether one switch is pressed. Make sure 32 bits is enough
   // for all the scanned matrix positions.
+  // TODO automatically use uint64_t when necessary? what are the implications for a 32bit mcu?
 #if NUM_MATRIX_POSITIONS > 32
-#error "Too many rows and columns, increase `pressed` storage size in Matrix.h"
+#error "Too many rows and columns, increase `switch_states` storage size in Matrix.h"
 #endif
   uint32_t switch_states = 0;
 };

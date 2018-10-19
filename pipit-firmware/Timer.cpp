@@ -1,4 +1,6 @@
 #include "Timer.h"
+#include <Arduino.h>
+
 
 Timer::Timer() {
   // For making arrays of Timers.

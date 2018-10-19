@@ -1,9 +1,9 @@
 #ifndef LOOKUP_H_
 #define LOOKUP_H_
 
-#include <Arduino.h>
+#include <stdint.h>
+
 #include "auto_config.h"
-/* #include "conf.h" */
 #include "Chord.h"
 #include "Key.h"
 

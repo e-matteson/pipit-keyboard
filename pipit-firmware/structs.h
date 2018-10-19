@@ -1,7 +1,7 @@
 #ifndef STRUCTS_H_
 #define STRUCTS_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 
 struct LookupKmapTypeLenAnagram {
   const uint16_t seq_bit_len_and_anagram;

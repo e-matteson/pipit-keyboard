@@ -1,7 +1,8 @@
 #ifndef FEEDBACK_H_
 #define FEEDBACK_H_
 
-#include <Arduino.h>
+#include <stdint.h>
+
 #include "auto_config.h"
 
 #include "Battery.h"

@@ -19,7 +19,7 @@ void Pipit::loop() {
 /// If you define a new command in the settings file, you must add a case for it
 /// here!
 void Pipit::doCommand(const Key* data, uint8_t length) {
-  if (length == 0 || data == NULL) {
+  if (length == 0 || data == nullptr) {
     DEBUG1_LN("WARNING: invalid command");
     return;
   }

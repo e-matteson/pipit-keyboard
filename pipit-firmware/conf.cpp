@@ -1,8 +1,9 @@
 #include "conf.h"
 #include "util.h"
+#include <Arduino.h>
 
-const bool contains(const conf::Mod* mod_array, const uint8_t len,
-                    const conf::Mod modifier) {
+
+bool contains(const conf::Mod* mod_array, uint8_t len, conf::Mod modifier) {
   for (uint8_t i = 0; i < len; i++) {
     if (mod_array[i] == modifier) {
       return true;
@@ -12,6 +13,7 @@ const bool contains(const conf::Mod* mod_array, const uint8_t len,
 }
 
 namespace conf {
+
 // Cast the enum to its underlying type
 std::underlying_type<Mod>::type to_index(Mod variant) {
   return static_cast<std::underlying_type<Mod>::type>(variant);
@@ -27,7 +29,7 @@ std::underlying_type<Mode>::type to_index(Mode variant) {
   return static_cast<std::underlying_type<Mode>::type>(variant);
 }
 
-const HuffmanChar* decodeHuffman(const uint32_t bits, uint8_t length) {
+const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
   uint32_t mask = makeMask32(length);
   for (uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
     if (length != huffman_lookup[i].num_bits) {

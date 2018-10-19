@@ -1,7 +1,7 @@
 #ifndef PIPIT_H_
 #define PIPIT_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 #include "auto_config.h"
 
 // Verify that the user settings match the board we're compiling for

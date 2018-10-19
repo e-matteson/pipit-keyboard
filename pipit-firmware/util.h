@@ -1,7 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <Arduino.h>
+#include <stdint.h>
+
 #include "auto_config.h"
 
 uint32_t makeMask32(uint8_t length);

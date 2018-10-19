@@ -1,7 +1,7 @@
 #ifndef ENTRY_H_
 #define ENTRY_H_
 
-#include <Arduino.h>
+#include <stdint.h>
 #include "Chord.h"
 #include "Key.h"
 #include "auto_config.h"

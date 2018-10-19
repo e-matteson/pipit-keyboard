@@ -29,6 +29,7 @@ uint8_t Chord::getModByte() const {
   uint8_t mod_byte = 0;
   for (uint8_t i = 0; i < NUM_PLAIN_MODS; i++) {
     conf::Mod mod = conf::getPlainModEnum(i);
+    // TODO why ternary? just use if with no else
     mod_byte |= hasMod(mod) ? conf::getPlainModByte(i) : 0;
   }
   return mod_byte;
@@ -44,6 +45,9 @@ bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const {
   return isEqual(chord_bytes, other_chord_bytes);
 }
 
+/// Edit the capitalization of the given Keys, depending on a bunch of factors
+/// like what mod flags are set for this Chord, what literal modifiers are
+/// included in the Keys, etc.
 void Chord::editCaps(Key* data, uint8_t length) const {
   switch (decideCapBehavior(data, length)) {
     case CapBehaviorEnum::CAP_DEFAULT:
@@ -106,27 +110,47 @@ bool Chord::hasModShorten() const { return hasMod(conf::getModShortenEnum()); }
 
 void Chord::setModNospace() { setMod(conf::getNospaceEnum()); }
 
+
+/// Return a mask where only the bit corresponding to the given modifier is set.
+/// For use with mods_and_flags.
+// TODO constexpr?
+uint16_t getModMask(conf::Mod modifier) {
+  // Mask must be the same size as mods_and_flags member.
+  return (0x1 << conf::to_index(modifier));
+}
+
 bool Chord::hasMod(conf::Mod mod) const {
-  return (mods_and_flags >> conf::to_index(mod)) & 1;
+  return mods_and_flags & getModMask(mod);
 }
 
 void Chord::setMod(conf::Mod mod) {
-  mods_and_flags |= (1 << conf::to_index(mod));
+  mods_and_flags |= getModMask(mod);
 }
 
 void Chord::unsetMod(conf::Mod mod) {
-  mods_and_flags &= ~(1 << conf::to_index(mod));
+  mods_and_flags &= ~getModMask(mod);
 }
 
 void Chord::toggleMod(conf::Mod mod) {
-  mods_and_flags ^= (1 << conf::to_index(mod));
+  mods_and_flags ^= getModMask(mod);
 }
+
+/// Return a mask where only the bit corresponding to flag_cycle_capital is set.
+/// For use with mods_and_flags.
+// TODO just make this a const instead?
+uint16_t getFlagCycleCapitalMask() {
+  // Mask must be the same size as mods_and_flags member.
+  return (0x1 << FLAG_BIT);
+}
+
 
 bool Chord::getFlagCycleCapital() const {
-  return 1 & (mods_and_flags >> FLAG_BIT);
+  return mods_and_flags & getFlagCycleCapitalMask();
 }
 
-void Chord::toggleFlagCycleCapital() { mods_and_flags ^= (1 << FLAG_BIT); }
+void Chord::toggleFlagCycleCapital() {
+  mods_and_flags ^= getFlagCycleCapitalMask();
+}
 
 void Chord::extractPlainMods() {
   for (uint8_t i = 0; i < NUM_PLAIN_MODS; i++) {

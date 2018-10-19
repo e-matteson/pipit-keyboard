@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // // The Adafruit_BLE.h library has warnings, though.
 // #pragma GCC diagnostic error "-Werror"
 
-#include <Arduino.h>
-
 #include "Pipit.h"
 
 Pipit pipit;
