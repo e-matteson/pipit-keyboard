@@ -1,5 +1,4 @@
-#ifndef SENDER_H_
-#define SENDER_H_
+#pragma once
 
 #include <stdint.h>
 #include "Chord.h"
@@ -54,5 +53,3 @@ class Sender {
   uint8_t last_sent_keycode = 0;
   uint8_t last_sent_mod_byte = 0;
 };
-
-#endif

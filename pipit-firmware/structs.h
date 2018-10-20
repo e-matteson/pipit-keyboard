@@ -1,5 +1,4 @@
-#ifndef STRUCTS_H_
-#define STRUCTS_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -49,5 +48,3 @@ struct HuffmanChar {
   uint8_t key_code;
   bool is_mod;
 };
-
-#endif

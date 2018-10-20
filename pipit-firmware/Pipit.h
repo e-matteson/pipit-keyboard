@@ -1,5 +1,4 @@
-#ifndef PIPIT_H_
-#define PIPIT_H_
+#pragma once
 
 #include <stdint.h>
 #include "auto_config.h"
@@ -54,5 +53,3 @@ class Pipit {
   conf::Mode mode = conf::Mode::default_mode;
   bool is_paused = 0;
 };
-
-#endif

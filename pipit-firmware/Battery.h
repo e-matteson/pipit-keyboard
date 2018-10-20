@@ -1,7 +1,5 @@
-#ifndef BATTERY_H
-#define BATTERY_H
+#pragma once
 
-#include <Arduino.h>
 #include "auto_config.h"
 
 class Battery {
@@ -14,5 +12,3 @@ class Battery {
 
   // const float ref_voltage = 3.3; // reference for analogRead
 };
-
-#endif

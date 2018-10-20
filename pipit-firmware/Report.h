@@ -1,5 +1,4 @@
-#ifndef REPORT_H_
-#define REPORT_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -28,5 +27,3 @@ class Report {
   uint8_t mod_byte = 0;
   uint8_t num_keys = 0;
 };
-
-#endif

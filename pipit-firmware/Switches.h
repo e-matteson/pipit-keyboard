@@ -1,5 +1,4 @@
-#ifndef SWITCHES_H
-#define SWITCHES_H
+#pragma once
 
 #include <stdint.h>
 #include "Chord.h"
@@ -62,5 +61,3 @@ class Switches {
   // Index of last released switch, or NO_SWITCH
   int16_t last_released_switch = NO_SWITCH;
 };
-
-#endif

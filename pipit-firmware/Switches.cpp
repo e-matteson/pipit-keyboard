@@ -1,4 +1,5 @@
 #include "Switches.h"
+#include <Arduino.h>
 
 Switches::Switches() {
   chord_timer.setDefaultValue(CHORD_DELAY);

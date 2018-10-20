@@ -1,5 +1,4 @@
-#ifndef CHORD_H_
-#define CHORD_H_
+#pragma once
 
 #include <stdint.h>
 #include "auto_config.h"
@@ -94,5 +93,3 @@ class Chord {
   // this cast is invalid?
   conf::Mode mode = static_cast<conf::Mode>(0);
 };
-
-#endif

@@ -47,19 +47,23 @@ pub trait CEnumVariant: Sized {
 
 #[derive(Debug, Clone)]
 pub enum CTree {
+    /// Define a preprocessor macro with the given name and value.
     Define {
         name: CCode,
         value: CCode,
     },
+    /// Define a preprocessor macro (with no value) if `is_defined` is true.
     DefineIf {
         name: CCode,
-        value: bool,
+        is_defined: bool,
     },
+    /// Wrap the contents in a preprocessor ifndef block.
     Ifndef {
         conditional: CCode,
         contents: Box<CTree>,
     },
-    Var {
+    // Declare and initialize a const variable.
+    ConstVar {
         name: CCode,
         value: CCode,
         c_type: CCode,
@@ -88,23 +92,21 @@ pub enum CTree {
         c_type: CCode,
         is_extern: bool,
     },
+    /// Wrap the given CTree in a namespace block.
     Namespace {
         name: CCode,
         contents: Box<CTree>,
     },
-    Include {
+    /// Include the given file (with quotes or angle brackets included) in the
+    /// header file.
+    IncludeH {
         path: CCode,
     },
-    IncludeGuard {
-        header_name: String,
-        contents: Box<CTree>,
-    },
-    // Typedef { name: CCode, value: CCode },
+    /// Include the name of this header file in this cpp file.
+    IncludeSelf,
     LiteralH(CCode),
     LiteralC(CCode),
     Group(Vec<CTree>),
-    /* CommentC(CCode),
-     * CommentH(CCode), */
 }
 
 #[derive(Debug, Clone)]

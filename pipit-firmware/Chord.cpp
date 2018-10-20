@@ -1,6 +1,7 @@
 #include "Chord.h"
 #include <type_traits>
 #include "util.h"
+#include <Arduino.h>
 
 #define FLAG_BIT 15
 

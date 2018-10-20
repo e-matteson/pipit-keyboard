@@ -1,4 +1,5 @@
 #include "Feedback.h"
+#include <Arduino.h>
 
 // Codes to send over serial, trigger audio feedback.
 #define PLAIN_FEEDBACK_CODE 'A'

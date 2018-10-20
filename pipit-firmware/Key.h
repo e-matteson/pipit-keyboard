@@ -1,7 +1,6 @@
-#ifndef KEY_H_
-#define KEY_H_
+#pragma once
 
-#include "Arduino.h"
+#include "stdint.h"
 #include "auto_config.h"
 
 class Key {
@@ -18,5 +17,3 @@ class Key {
   uint8_t key_code = 0;
   uint8_t mod_byte = 0;
 };
-
-#endif

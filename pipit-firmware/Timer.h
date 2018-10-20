@@ -1,5 +1,4 @@
-#ifndef TIMER_H_
-#define TIMER_H_
+#pragma once
 
 #include <stdint.h>
 #include "auto_config.h"
@@ -29,5 +28,3 @@ class Timer {
   uint32_t value = 0;
   uint32_t default_value = 0;
 };
-
-#endif

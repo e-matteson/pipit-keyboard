@@ -1,8 +1,8 @@
+#pragma once
+
 #include "Comms.h"
 
 #if defined(FEATHER_M0_BLE)
-#ifndef FEATHERCOMMS_H
-#define FEATHERCOMMS_H
 
 #include <Adafruit_BluefruitLE_SPI.h>
 
@@ -28,5 +28,4 @@ class FeatherComms : public Comms {
   bool use_wired = 0;
 };
 
-#endif
 #endif

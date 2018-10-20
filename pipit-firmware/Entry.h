@@ -1,5 +1,4 @@
-#ifndef ENTRY_H_
-#define ENTRY_H_
+#pragma once
 
 #include <stdint.h>
 #include "Chord.h"
@@ -29,5 +28,3 @@ class Entry {
   uint8_t length = 0;
   bool is_anagrammable = 0;
 };
-
-#endif

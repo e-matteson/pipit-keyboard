@@ -79,7 +79,7 @@ impl<'a> ModeBuilder<'a> {
 
     fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
-        let tree = CTree::Var {
+        let tree = CTree::ConstVar {
             name: array_name_out.clone(),
             value: self.chord_spec.to_c_initializer(&self.anagram_mask)?,
             c_type: "ChordData".to_c(),

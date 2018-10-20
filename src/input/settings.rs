@@ -144,7 +144,7 @@ impl OptionsConfig {
             },
             CTree::DefineIf {
                 name: self.board_name.to_c(),
-                value: true,
+                is_defined: true,
             },
             CTree::CompoundArray {
                 name: "row_pins".to_c(),
@@ -168,19 +168,19 @@ impl OptionsConfig {
             },
             CTree::DefineIf {
                 name: "ENABLE_LED_TYPING_FEEDBACK".to_c(),
-                value: self.enable_led_typing_feedback,
+                is_defined: self.enable_led_typing_feedback,
             },
             CTree::DefineIf {
                 name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
-                value: self.enable_audio_typing_feedback,
+                is_defined: self.enable_audio_typing_feedback,
             },
             CTree::DefineIf {
                 name: "ENABLE_WIRED_FEATHER_HACK".to_c(),
-                value: self.enable_wired_feather_hack,
+                is_defined: self.enable_wired_feather_hack,
             },
             CTree::DefineIf {
                 name: "USE_STANDBY_INTERRUPTS".to_c(),
-                value: self.use_standby_interrupts,
+                is_defined: self.use_standby_interrupts,
             },
         ];
 
@@ -194,7 +194,7 @@ impl OptionsConfig {
         }
 
         if let Some(pin) = self.battery_level_pin {
-            ops.push(CTree::Var {
+            ops.push(CTree::ConstVar {
                 name: "battery_level_pin".to_c(),
                 value: pin.to_c(),
                 c_type: "uint8_t".to_c(),
@@ -236,11 +236,11 @@ impl OptionsConfig {
             },
             CTree::DefineIf {
                 name: "ENABLE_RGB_LED".to_c(),
-                value: enable_rgb_led,
+                is_defined: enable_rgb_led,
             },
             CTree::DefineIf {
                 name: "HAS_BATTERY".to_c(),
-                value: has_battery,
+                is_defined: has_battery,
             },
         ])
     }

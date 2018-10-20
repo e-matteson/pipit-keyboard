@@ -1,5 +1,4 @@
-#ifndef COMMS_H
-#define COMMS_H
+#pragma once
 
 #include <stdint.h>
 
@@ -17,5 +16,3 @@ class Comms {
   virtual void toggleWireless();
   virtual void moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan);
 };
-
-#endif

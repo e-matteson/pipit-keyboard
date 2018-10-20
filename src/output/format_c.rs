@@ -3,15 +3,13 @@ use std::fmt::Display;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::ops::AddAssign;
-use std::path::Path;
 use std::path::PathBuf;
 
-use failure::{Error, Fail, ResultExt};
-use types::errors::BadValueErr;
+use failure::{Error, ResultExt};
 use types::{CCode, CTree, Field, ToC};
 
 #[derive(Debug, Default)]
-pub struct CFiles {
+pub struct CFilePair {
     pub h: CCode, // for header file
     pub c: CCode, // for cpp file
 }
@@ -19,31 +17,35 @@ pub struct CFiles {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl CTree {
-    pub fn format(&self) -> Result<CFiles, Error> {
+    pub fn format(&self, file_name_base: &str) -> Result<CFilePair, Error> {
         Ok(match *self {
-            CTree::Include { ref path } => format_include(path),
-            CTree::LiteralH(ref text) => CFiles::with_h(text),
-            CTree::LiteralC(ref text) => CFiles::with_c(text),
-            CTree::Group(ref vec) => format_group(vec)?,
+            CTree::IncludeH { ref path } => format_include_h(path),
+            CTree::IncludeSelf => format_include_self(file_name_base),
+            CTree::LiteralH(ref text) => CFilePair::with_h(text),
+            CTree::LiteralC(ref text) => CFilePair::with_c(text),
+            CTree::Group(ref vec) => format_group(vec, file_name_base)?,
             CTree::Define {
                 ref name,
                 ref value,
             } => format_define(name, value),
-            CTree::DefineIf { ref name, value } => if value {
+            CTree::DefineIf {
+                ref name,
+                is_defined,
+            } => if is_defined {
                 format_define(name, &CCode::new())
             } else {
-                CFiles::new()
+                CFilePair::new()
             },
             CTree::Ifndef {
                 ref conditional,
                 ref contents,
-            } => format_ifndef(conditional, contents)?,
-            CTree::Var {
+            } => format_ifndef(conditional, contents, file_name_base)?,
+            CTree::ConstVar {
                 ref name,
                 ref value,
                 ref c_type,
                 is_extern,
-            } => format_var(name, value, c_type, is_extern),
+            } => format_const_var(name, value, c_type, is_extern),
             CTree::Array {
                 ref name,
                 ref values,
@@ -55,7 +57,13 @@ impl CTree {
                 ref values,
                 ref subarray_type,
                 is_extern,
-            } => format_compound_array(name, values, subarray_type, is_extern)?,
+            } => format_compound_array(
+                name,
+                values,
+                subarray_type,
+                is_extern,
+                file_name_base,
+            )?,
             CTree::EnumDecl {
                 ref name,
                 ref variants,
@@ -70,11 +78,7 @@ impl CTree {
             CTree::Namespace {
                 ref name,
                 ref contents,
-            } => format_namespace(name, contents)?,
-            CTree::IncludeGuard {
-                ref header_name,
-                ref contents,
-            } => format_include_guard(header_name, contents)?,
+            } => format_namespace(name, contents, file_name_base)?,
         })
     }
 
@@ -85,24 +89,24 @@ impl CTree {
             CTree::StructInstance { ref fields, .. } => {
                 format_struct_initializer(fields)
             }
-            CTree::Include { .. }
+            CTree::IncludeH { .. }
+            | CTree::IncludeSelf
             | CTree::LiteralH(..)
             | CTree::LiteralC(..)
             | CTree::Group(..)
             | CTree::Define { .. }
             | CTree::DefineIf { .. }
             | CTree::Ifndef { .. }
-            | CTree::Var { .. }
+            | CTree::ConstVar { .. }
             | CTree::Array { .. }
             | CTree::CompoundArray { .. }
             | CTree::EnumDecl { .. }
-            | CTree::Namespace { .. }
-            | CTree::IncludeGuard { .. } => unimplemented!(),
+            | CTree::Namespace { .. } => unimplemented!(),
         }
     }
 }
 
-impl CFiles {
+impl CFilePair {
     pub fn new() -> Self {
         Self {
             h: CCode::new(),
@@ -177,14 +181,14 @@ impl CFiles {
     }
 }
 
-impl AddAssign<CFiles> for CFiles {
-    fn add_assign(&mut self, rhs: CFiles) {
+impl AddAssign<CFilePair> for CFilePair {
+    fn add_assign(&mut self, rhs: CFilePair) {
         self.append(&rhs)
     }
 }
 
-impl<'a> AddAssign<&'a CFiles> for CFiles {
-    fn add_assign(&mut self, rhs: &'a CFiles) {
+impl<'a> AddAssign<&'a CFilePair> for CFilePair {
+    fn add_assign(&mut self, rhs: &'a CFilePair) {
         self.append(rhs)
     }
 }
@@ -193,7 +197,7 @@ fn format_enum_decl(
     name: &CCode,
     variants: &[CCode],
     size: &Option<CCode>,
-) -> CFiles {
+) -> CFilePair {
     let contents = variants
         .into_iter()
         .enumerate()
@@ -205,7 +209,7 @@ fn format_enum_decl(
     } else {
         String::new()
     };
-    CFiles {
+    CFilePair {
         h: CCode(format!(
             "enum class {}{}{{\n{}}};\n\n",
             name, inheritance, contents
@@ -214,56 +218,51 @@ fn format_enum_decl(
     }
 }
 
-fn format_define(name: &CCode, value: &CCode) -> CFiles {
+fn format_define(name: &CCode, value: &CCode) -> CFilePair {
     // Name will be written in all-caps.
-    CFiles {
+    CFilePair {
         h: CCode(format!("#define {} {}\n", name.to_uppercase(), value)),
         c: CCode::new(),
     }
 }
 
-fn format_include(path: &CCode) -> CFiles {
-    CFiles::with_h(&format!("#include {}\n", path).to_c())
+fn format_include_h(path: &CCode) -> CFilePair {
+    CFilePair::with_h(&format!("#include {}\n", path).to_c())
+}
+
+fn format_include_self(file_name_base: &str) -> CFilePair {
+    CFilePair::with_c(&format!("#include \"{}.h\"\n", file_name_base).to_c())
 }
 
 fn format_ifndef(
     conditional: &CCode,
     contents: &CTree,
-) -> Result<CFiles, Error> {
-    let mut f = CFiles::new();
-    f += CFiles::with_h(&format!("\n#ifndef {}\n", conditional));
-    f += contents.format()?;
-    f += CFiles::with_h(&format!("#endif // ifndef {}\n\n", conditional));
+    file_name_base: &str,
+) -> Result<CFilePair, Error> {
+    let mut f = CFilePair::new();
+    f += CFilePair::with_h(&format!("\n#ifndef {}\n", conditional));
+    f += contents.format(file_name_base)?;
+    f += CFilePair::with_h(&format!("#endif // ifndef {}\n\n", conditional));
     Ok(f)
 }
 
-fn format_include_guard(
-    header_name: &str,
+fn format_namespace(
+    name: &CCode,
     contents: &CTree,
-) -> Result<CFiles, Error> {
-    let id = make_guard_id(header_name)?;
-    let mut f = CFiles {
-        h: format!("#ifndef {}\n#define {}\n", id, id).to_c(),
-        c: format!("#include \"{}\"\n", header_name).to_c(),
-    };
-    f += contents.format()?;
-    f += CFiles::with_h(&format!("#endif // {}\n", id));
-    Ok(f)
-}
-
-fn format_namespace(name: &CCode, contents: &CTree) -> Result<CFiles, Error> {
+    file_name_base: &str,
+) -> Result<CFilePair, Error> {
     let open = format!("namespace {} {{\n", name).to_c();
     let close = format!("\n}} // end namespace {}\n", name).to_c();
-    let mut f = CFiles::with(&open);
-    f += contents.format()?;
-    f += CFiles::with(&close);
+    let mut f = CFilePair::with(&open);
+    f += contents.format(file_name_base)?;
+    f += CFilePair::with(&close);
     Ok(f)
 }
 
-fn format_group(v: &[CTree]) -> Result<CFiles, Error> {
-    let mut f = CFiles::new();
+fn format_group(v: &[CTree], file_name_base: &str) -> Result<CFilePair, Error> {
+    let mut f = CFilePair::new();
     for node in v {
-        f += node.format()?
+        f += node.format(file_name_base)?
     }
     Ok(f)
 }
@@ -273,7 +272,8 @@ fn format_compound_array(
     values: &[Vec<CCode>],
     subarray_type: &CCode,
     is_extern: bool,
-) -> Result<CFiles, Error> {
+    file_name_base: &str,
+) -> Result<CFilePair, Error> {
     // TODO prepend underscore? special meaning?
     let subarray_names: Vec<_> = (0..values.len())
         .map(|x| CCode(format!("{}_{}", name, x)))
@@ -295,21 +295,21 @@ fn format_compound_array(
         c_type: format!("{}*", subarray_type).to_c(),
         is_extern,
     });
-    CTree::Group(g).format()
+    CTree::Group(g).format(file_name_base)
 }
 
-fn format_var(
+fn format_const_var(
     name: &CCode,
     value: &CCode,
     c_type: &CCode,
     is_extern: bool,
-) -> CFiles {
+) -> CFilePair {
     let h = if is_extern {
         format!("extern const {} {};\n", c_type, name).to_c()
     } else {
         CCode::new()
     };
-    CFiles {
+    CFilePair {
         h,
         c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
     }
@@ -320,8 +320,13 @@ fn format_struct_instance(
     c_type: &CCode,
     fields: &[Field],
     is_extern: bool,
-) -> CFiles {
-    format_var(name, &format_struct_initializer(fields), c_type, is_extern)
+) -> CFilePair {
+    format_const_var(
+        name,
+        &format_struct_initializer(fields),
+        c_type,
+        is_extern,
+    )
 }
 
 fn format_struct_initializer(fields: &[Field]) -> CCode {
@@ -339,14 +344,14 @@ fn format_array(
     values: &[CCode],
     c_type: &CCode,
     is_extern: bool,
-) -> CFiles {
+) -> CFilePair {
     let h = if is_extern {
         CCode(format!("extern const {} {}[];\n", c_type, name))
     } else {
         CCode::new()
     };
 
-    CFiles {
+    CFilePair {
         h,
         c: CCode(format!(
             "const {} {}[] = {};\n\n",
@@ -388,36 +393,6 @@ where
     }
     let code_lines: Vec<_> = lines.into_iter().map(CCode).collect();
     code_lines
-}
-
-fn make_guard_id(h_file_name: &str) -> Result<CCode, Error> {
-    // TODO remove unsafe characters, like the python version
-    let header_error = || BadValueErr {
-        thing: "header file path".into(),
-        value: h_file_name.into(),
-    };
-
-    let p: String = Path::new(h_file_name)
-        .file_name()
-        .ok_or_else(|| {
-            header_error().context("unable to extract file name from path")
-        })?.to_str()
-        .expect("failed to get file name as str?")
-        .to_string()
-        .to_uppercase()
-        .chars()
-        .map(|c| if c.is_alphanumeric() { c } else { '_' })
-        .collect();
-
-    let first = p.chars().nth(0).ok_or_else(|| {
-        header_error().context("unable to get first character of file name")
-    })?;
-    if !first.is_alphabetic() && first != '_' {
-        Err(header_error()).context(
-            "file name must begin with an alphabet letter or underscore",
-        )?;
-    }
-    Ok(CCode(p + "_"))
 }
 
 pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<(), Error> {

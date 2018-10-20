@@ -1,5 +1,4 @@
-#ifndef FEEDBACK_H_
-#define FEEDBACK_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -74,5 +73,3 @@ class Feedback {
   LEDRoutine led_routine = LEDRoutine::None;  // The active LED routine
   uint16_t led_subroutine = 0;                // The active LED subroutine
 };
-
-#endif

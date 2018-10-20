@@ -13,7 +13,6 @@ bool contains(const conf::Mod* mod_array, uint8_t len, conf::Mod modifier) {
 }
 
 namespace conf {
-
 // Cast the enum to its underlying type
 std::underlying_type<Mod>::type to_index(Mod variant) {
   return static_cast<std::underlying_type<Mod>::type>(variant);

@@ -1,4 +1,5 @@
 #include "Battery.h"
+#include <Arduino.h>
 
 int8_t Battery::getLevel() {
 #ifdef HAS_BATTERY

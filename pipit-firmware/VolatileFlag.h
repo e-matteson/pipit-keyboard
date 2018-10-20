@@ -1,5 +1,4 @@
-#ifndef VOLATILEFLAG_H
-#define VOLATILEFLAG_H
+#pragma once
 
 
 #include "auto_config.h"
@@ -18,5 +17,3 @@ class VolatileFlag {
  private:
   volatile bool value = false;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CONF_H_
-#define CONF_H_
+#pragma once
 
 #include <stdint.h>
 #include <type_traits>
@@ -34,5 +33,3 @@ Mod getCapitalEnum();
 Mod getDoubleEnum();
 Mod getModShortenEnum();
 }  // namespace conf
-
-#endif

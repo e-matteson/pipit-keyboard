@@ -1,8 +1,8 @@
+#pragma once
+
 #include "Comms.h"
 
 #if defined(TEENSY_LC)
-#ifndef TEENSYCOMMS_H
-#define TEENSYCOMMS_H
 
 class TeensyComms : public Comms {
  public:
@@ -13,5 +13,4 @@ class TeensyComms : public Comms {
   void moveMouse(int8_t x, int8_t y, int8_t scroll, int8_t pan);
 };
 
-#endif
 #endif

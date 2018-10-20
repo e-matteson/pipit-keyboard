@@ -1,5 +1,4 @@
-#ifndef HISTORY_H_
-#define HISTORY_H_
+#pragma once
 
 #include <stdint.h>
 #include "Chord.h"
@@ -62,5 +61,3 @@ class History {
 
   bool has_new_entry_been_pushed = 1;
 };
-
-#endif

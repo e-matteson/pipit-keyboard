@@ -1,5 +1,4 @@
-#ifndef SCANNER_H_
-#define SCANNER_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -57,5 +56,3 @@ class Matrix {
 #endif
   uint32_t switch_states = 0;
 };
-
-#endif
