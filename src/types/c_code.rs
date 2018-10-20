@@ -118,6 +118,10 @@ impl CCode {
         CCode(String::new())
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     pub fn to_uppercase(&self) -> Self {
         CCode(self.0.to_uppercase())
     }

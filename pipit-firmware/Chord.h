@@ -32,7 +32,7 @@ class Chord {
   void cycle(CycleType operation);
 
   bool hasAnagramNum(uint8_t other_anagram) const;
-  bool hasChordBytes(const uint8_t* other_chord_bytes) const;
+  const ChordData* getChordData() const;
   bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
   conf::Mode getMode() const;
@@ -53,7 +53,6 @@ class Chord {
     CAP_NONE,
   };
 
-  bool isEqual(const uint8_t* chord1, const uint8_t* chord2) const;
 
   void setMod(conf::Mod mod);
   void unsetMod(conf::Mod mod);
@@ -71,17 +70,10 @@ class Chord {
   void toggleFlagCycleCapital();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);
-  bool doesAnagramHaveMod(uint8_t anagram_num);
   bool isAnagramMaskBlank();
-  bool isExactAnagramPressed(const uint8_t* mod_chord, const uint8_t* _chord);
+  bool isExactAnagramPressed(const ChordData* mod_chord);
 
-  void setMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
-  void unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
-  void andMask(const uint8_t* mask, uint8_t* _chord_bytes) const;
-  bool isChordMaskSet(const uint8_t* mask, const uint8_t* _chord_bytes) const;
-  bool allZeroes(const uint8_t* _chord_bytes) const;
-
-  void printChord(const uint8_t* c) const;
+  void printChord(const ChordData& c) const;
   void printMod() const;
 
   // Make sure the modifiers will fit in the bits of a uint16_t. The least
@@ -96,7 +88,7 @@ class Chord {
 
   uint8_t anagram_num = 0;
 
-  uint8_t chord_bytes[NUM_BYTES_IN_CHORD] = {0};
+  ChordData chord_bytes = {{0}};
 
   // TODO what happens if there are no modes, so no variant with value 0, and
   // this cast is invalid?

@@ -79,10 +79,10 @@ impl<'a> ModeBuilder<'a> {
 
     fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
-        let tree = CTree::Array {
+        let tree = CTree::Var {
             name: array_name_out.clone(),
-            values: self.chord_spec.to_c_bytes(&self.anagram_mask)?,
-            c_type: "uint8_t".to_c(),
+            value: self.chord_spec.to_c_initializer(&self.anagram_mask)?,
+            c_type: "ChordData".to_c(),
             is_extern: false,
         };
         Ok((tree, array_name_out))
@@ -97,14 +97,15 @@ impl<'a> ModeBuilder<'a> {
         chords: &[Chord],
         label: &CCode,
     ) -> Result<(CTree, CCode), Error> {
+        // TODO share code with stuff in kmap_builder? get rid of this helper?
         let array_name_out = format!("{}_{}", self.mode_name, label).to_c();
-        let tree = CTree::CompoundArray {
+        let tree = CTree::Array {
             name: array_name_out.clone(),
             values: chords
                 .iter()
-                .map(|c| self.chord_spec.to_c_bytes(c))
+                .map(|c| self.chord_spec.to_c_initializer(c))
                 .collect::<Result<Vec<_>, _>>()?,
-            subarray_type: "uint8_t".to_c(),
+            c_type: "ChordData".to_c(),
             is_extern: false,
         };
         Ok((tree, array_name_out))

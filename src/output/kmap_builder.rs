@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::BitOr;
 
@@ -146,16 +145,13 @@ impl<'a> KmapBuilder<'a> {
             let seqs_name = format!("{}_seqs", struct_name).to_c();
             let chords_name = format!("{}_chords", struct_name).to_c();
 
-            let chord_bytes = Itertools::flatten(
-                names
-                    .iter()
-                    .map(|name| {
-                        Ok(self
-                            .chord_spec
-                            .to_c_bytes(self.chord_map.get_result(name)?)?)
-                    }).collect::<Result<Vec<_>, Error>>()?
-                    .into_iter(),
-            ).collect();
+            let chord_bytes = names
+                .iter()
+                .map(|name| {
+                    Ok(self
+                        .chord_spec
+                        .to_c_initializer(self.chord_map.get_result(name)?)?)
+                }).collect::<Result<Vec<_>, Error>>()?;
 
             let seqs = names
                 .iter()
@@ -178,7 +174,7 @@ impl<'a> KmapBuilder<'a> {
             g.push(CTree::Array {
                 name: chords_name,
                 values: chord_bytes,
-                c_type: "uint8_t".to_c(),
+                c_type: "ChordData".to_c(),
                 is_extern: false,
             });
 

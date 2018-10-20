@@ -50,8 +50,10 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
 uint8_t lookupInKmapTypeLenAndAnagram(const Chord* chord,
                                       const LookupKmapTypeLenAnagram* lookup,
                                       Key* keys_out) {
+  // TODO use for-range?
+  const ChordData* chord_data = chord->getChordData();
   for (uint16_t i = 0; i < lookup->num_chords; i++) {
-    if (chord->hasChordBytes(lookup->chord(i, NUM_BYTES_IN_CHORD))) {
+    if (*chord_data == lookup->chords[i]) {
       // Found match!
       return decodeSequence(lookup, i, keys_out);
     }

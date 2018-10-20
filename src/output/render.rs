@@ -43,21 +43,50 @@ impl AllData {
         file_name_base: &str,
         with_message: bool,
     ) -> Result<(), Error> {
-        let c_tree = self.render(file_name_base, with_message)?;
-        let f = c_tree.format()?;
+        let main_files =
+            self.render_main(file_name_base, with_message)?.format()?;
 
-        let file_names = f
-            .save(&self.output_directory, file_name_base)?
-            .iter()
+        let constants_files = self.render_constants(with_message)?.format()?;
+
+        let constants_name_base = format!("{}_constants", file_name_base);
+
+        let mut file_names =
+            main_files.save(&self.output_directory, file_name_base)?;
+
+        file_names.extend(
+            constants_files
+                .save(&self.output_directory, &constants_name_base)?,
+        );
+
+        let file_name_list = file_names
+            .into_iter()
             .map(|path| format!("{:?}", path))
             .collect::<Vec<_>>()
             .join(", ");
 
-        println!("Saved keyboard configuration to: {}", file_names);
+        println!("Saved keyboard configuration to: {}", file_name_list);
         Ok(())
     }
 
-    pub fn render(
+    /// Render c code defining any constants etc. that need to be included
+    /// before / separately from the main auto_config.h file.
+    fn render_constants(&self, with_message: bool) -> Result<CTree, Error> {
+        // The number of bytes in a chord is needed for declaring ChordData,
+        // which is then used in auto_config.h - so we can't define this in
+        // auto_config.h too!
+
+        let mut group = Vec::new();
+        if with_message {
+            group.push(CTree::LiteralH(autogen_message()));
+        }
+        group.push(CTree::Define {
+            name: "NUM_BYTES_IN_CHORD".to_c(),
+            value: self.num_bytes_in_chord()?.to_c(),
+        });
+        Ok(CTree::Group(group))
+    }
+
+    fn render_main(
         &self,
         file_name_base: &str,
         with_message: bool,
@@ -66,12 +95,6 @@ impl AllData {
 
         let mut group = Vec::new();
         group.push(self.render_options());
-
-        // TODO put in function somewhere?
-        group.push(CTree::Define {
-            name: "NUM_BYTES_IN_CHORD".to_c(),
-            value: self.num_bytes_in_chord()?.to_c(),
-        });
 
         group.push(self.huffman_table.render()?);
         group.push(self.render_modifiers()?);
@@ -353,6 +376,7 @@ pub fn wrap_intro(
     guard_group.push(CTree::Include {
         path: "\"structs.h\"".to_c(),
     });
+
     guard_group.push(CTree::LiteralH(
         "typedef void (*voidFuncPtr)(void);\n".to_c(),
     ));

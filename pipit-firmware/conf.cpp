@@ -57,10 +57,10 @@ const ModeStruct* getMode(Mode mode) { return mode_structs[to_index(mode)]; }
 
 bool isGaming(Mode mode) { return getMode(mode)->is_gaming; }
 
-const uint8_t* getAnagramMask(Mode mode) { return getMode(mode)->anagram_mask; }
+const ChordData* getAnagramMask(Mode mode) { return &getMode(mode)->anagram_mask; }
 
-const uint8_t* getModChord(Mode mode, Mod modifier) {
-  return getMode(mode)->mod_chords[to_index(modifier)];
+const ChordData* getModChord(Mode mode, Mod modifier) {
+  return &(getMode(mode)->mod_chords[to_index(modifier)]);
 }
 
 uint8_t getPlainModByte(uint8_t index) {

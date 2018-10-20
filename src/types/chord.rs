@@ -61,6 +61,11 @@ impl ChordSpec {
             .map(|x| x.to_c())
             .collect())
     }
+
+    // TODO put this in output  module?
+    pub fn to_c_initializer(&self, chord: &Chord) -> Result<CCode, Error> {
+        Ok(format!("{{{}}}", self.to_c_bytes(chord)?.join(", ")).to_c())
+    }
 }
 
 impl Chord {

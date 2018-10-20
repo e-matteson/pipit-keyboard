@@ -162,12 +162,11 @@ void Switches::reuseMods(Chord* chord) {
     if (!chord->hasMod((conf::Mod)m)) {
       continue;
     }
-    const uint8_t* mod_chord =
-        conf::getModChord(chord->getMode(), (conf::Mod)m);
+    const ChordData* mod_chord = conf::getModChord(chord->getMode(), (conf::Mod)m);
     uint8_t i = 0;
-    for (uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++) {
+    for (uint8_t byte : *mod_chord) {
       for (uint8_t bit_num = 0; bit_num < 8; bit_num++) {
-        if (1 << bit_num & mod_chord[byte_num]) {
+        if (1 << bit_num & byte) {
           // This switch was included in the modifier chord, let it be re-used.
           switch_status[i] = SwitchStatus::Held;
         }

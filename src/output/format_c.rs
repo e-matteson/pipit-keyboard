@@ -151,18 +151,29 @@ impl CFiles {
         directory: &PathBuf,
         name_base: &str,
     ) -> Result<Vec<PathBuf>, Error> {
-        let mut base = directory.to_owned();
-        base.push(name_base);
+        let mut path_base = directory.to_owned();
+        path_base.push(name_base);
 
-        let mut h_path = base.clone();
-        h_path.set_extension("h");
+        let mut saved_paths = Vec::new();
 
-        let mut cpp_path = base;
-        cpp_path.set_extension("cpp");
+        // TODO if the c file tries to include an empty h file, it will fail to
+        // compile...
+        // TODO share code between c and h?
+        if !self.h.is_empty() {
+            let mut path = path_base.clone();
+            path.set_extension("h");
+            write_to_file(path.clone(), &self.h)?;
+            saved_paths.push(path);
+        }
 
-        write_to_file(h_path.clone(), &self.h)?;
-        write_to_file(cpp_path.clone(), &self.c)?;
-        Ok(vec![h_path, cpp_path])
+        if !self.c.is_empty() {
+            let mut path = path_base.clone();
+            path.set_extension("cpp");
+            write_to_file(path.clone(), &self.c)?;
+            saved_paths.push(path);
+        }
+
+        Ok(saved_paths)
     }
 }
 

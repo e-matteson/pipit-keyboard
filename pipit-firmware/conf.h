@@ -21,8 +21,8 @@ bool isGaming(Mode mode);
 const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
                                         uint8_t kmap_num, SeqType seq_type);
 
-const uint8_t* getAnagramMask(Mode mode);
-const uint8_t* getModChord(Mode mode, Mod modifier);
+const ChordData* getAnagramMask(Mode mode);
+const ChordData* getModChord(Mode mode, Mod modifier);
 uint8_t getPlainModByte(uint8_t index);
 Mod getPlainModEnum(uint8_t index);
 Mod getWordModEnum(uint8_t index);

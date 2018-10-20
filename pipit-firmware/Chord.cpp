@@ -4,9 +4,53 @@
 
 #define FLAG_BIT 15
 
+void setMask(const ChordData* mask, ChordData* bytes)  {
+  for (uint8_t i = 0; i < mask->size(); i++) {
+    (*bytes)[i] |= (*mask)[i];
+  }
+}
+
+void unsetMask(const ChordData* mask, ChordData* bytes) {
+  for (uint8_t i = 0; i < mask->size(); i++) {
+    (*bytes)[i] &= ~(*mask)[i];
+  }
+}
+
+void andMask(const ChordData* mask, ChordData* bytes) {
+  for (uint8_t i = 0; i < mask->size(); i++) {
+    (*bytes)[i] &= (*mask)[i];
+  }
+}
+
+bool isChordMaskSet(const ChordData* mask, const ChordData* bytes) {
+  bool return_val = 1;
+  for (uint8_t i = 0; i < mask->size(); i++) {
+    return_val &= isByteMaskSet((*mask)[i], (*bytes)[i]);
+  }
+  return return_val;
+}
+
+bool allZeroes(const ChordData* bytes) {
+  for(uint8_t byte : *bytes) {
+    if(byte) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+
+constexpr bool doesAnagramHaveMod(uint8_t anagram_num) {
+  return (anagram_num >= 1) && (anagram_num <= NUM_ANAGRAM_MODS);
+}
+
+
+//////////////////////////////////////////////////
+
 Chord::Chord(conf::Mode mode) : mode(mode) {}
 
 void Chord::setSwitch(uint8_t switch_index) {
+  // TODO this seems inefficient to call for every index...
   if (switch_index >= NUM_MATRIX_POSITIONS) {
     DEBUG1_LN("WARNING: invalid chord switch index");
     return;
@@ -20,7 +64,7 @@ void Chord::setMode(conf::Mode _mode) { mode = _mode; }
 
 bool Chord::isEmptyExceptMods() const {
   // Doesn't check the mods, just the current chord bytes.
-  return allZeroes(chord_bytes);
+  return allZeroes(&chord_bytes);
 }
 
 uint8_t Chord::getModByte() const {
@@ -41,8 +85,8 @@ bool Chord::hasAnagramNum(uint8_t other_anagram) const {
   return (anagram_num == other_anagram);
 }
 
-bool Chord::hasChordBytes(const uint8_t* other_chord_bytes) const {
-  return isEqual(chord_bytes, other_chord_bytes);
+const ChordData* Chord::getChordData() const {
+  return &chord_bytes;
 }
 
 /// Edit the capitalization of the given Keys, depending on a bunch of factors
@@ -200,7 +244,7 @@ bool Chord::extractMod(conf::Mod modifier) {
   // - remove the mod bits from the chord
   // - set a flag saying it's present
   // - return true
-  const uint8_t* mod_chord_bytes = conf::getModChord(mode, modifier);
+  const ChordData* mod_chord_bytes = conf::getModChord(mode, modifier);
   if (allZeroes(mod_chord_bytes)) {
     // Mod is all zeroes - that's how we represent a missing mod chord. Ignore.
     return false;
@@ -209,10 +253,10 @@ bool Chord::extractMod(conf::Mod modifier) {
   switch (conf::getModType(modifier)) {
     case conf::ModType::Plain:
     case conf::ModType::Word:
-      isPressed = isChordMaskSet(mod_chord_bytes, chord_bytes);
+      isPressed = isChordMaskSet(mod_chord_bytes, &chord_bytes);
       break;
     case conf::ModType::Anagram:
-      isPressed = isExactAnagramPressed(mod_chord_bytes, chord_bytes);
+      isPressed = isExactAnagramPressed(mod_chord_bytes);
   }
   if (!isPressed) {
     // Mod is not pressed
@@ -221,7 +265,7 @@ bool Chord::extractMod(conf::Mod modifier) {
 
   // Mod is pressed
   setMod(modifier);
-  unsetMask(mod_chord_bytes, chord_bytes);
+  unsetMask(mod_chord_bytes, &chord_bytes);
   return true;
 }
 
@@ -233,7 +277,7 @@ bool Chord::restoreMod(conf::Mod modifier) {
   bool was_set = hasMod(modifier);
   if (was_set) {
     unsetMod(modifier);
-    setMask(conf::getModChord(mode, modifier), chord_bytes);
+    setMask(conf::getModChord(mode, modifier), &chord_bytes);
   }
   return was_set;
 }
@@ -288,26 +332,19 @@ uint8_t Chord::cycleAnagram() {
 }
 
 bool Chord::isAnagramMaskBlank() {
-  uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
-  memcpy(anagram_bytes, chord_bytes, NUM_BYTES_IN_CHORD);
-  andMask(conf::getAnagramMask(mode), anagram_bytes);
-  return allZeroes(anagram_bytes);
+  ChordData anagram_bytes = chord_bytes;
+  andMask(conf::getAnagramMask(mode), &anagram_bytes);
+  return allZeroes(&anagram_bytes);
 }
 
-bool Chord::isExactAnagramPressed(const uint8_t* mod_chord,
-                                  const uint8_t* _chord) {
-  // TODO inefficient! recomputes mask for every ana mod
-  uint8_t anagram_bytes[NUM_BYTES_IN_CHORD] = {0};
-  memcpy(anagram_bytes, _chord, NUM_BYTES_IN_CHORD);
-  andMask(conf::getAnagramMask(mode), anagram_bytes);
-  return isEqual(mod_chord, anagram_bytes);
+bool Chord::isExactAnagramPressed(const ChordData* mod_chord) {
+  // TODO share code with isAnagramMaskBlank()
+  ChordData anagram_bytes = chord_bytes;
+  andMask(conf::getAnagramMask(mode), &anagram_bytes);
+  return *mod_chord == anagram_bytes;
 }
 
 uint8_t Chord::getAnagramNum() { return anagram_num; }
-
-bool Chord::doesAnagramHaveMod(uint8_t anagram_num) {
-  return (anagram_num >= 1) && (anagram_num <= NUM_ANAGRAM_MODS);
-}
 
 void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
   if (!doesAnagramHaveMod(anagram_num)) {
@@ -323,52 +360,6 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
   }
 }
 
-/************* Chord int array operations ********/
-
-void Chord::setMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
-    _chord_bytes[byte] |= mask[byte];
-  }
-}
-
-void Chord::unsetMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
-    _chord_bytes[byte] &= ~mask[byte];
-  }
-}
-
-void Chord::andMask(const uint8_t* mask, uint8_t* _chord_bytes) const {
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
-    _chord_bytes[byte] &= mask[byte];
-  }
-}
-
-bool Chord::isChordMaskSet(const uint8_t* mask,
-                           const uint8_t* _chord_bytes) const {
-  bool return_val = 1;
-  for (uint8_t byte_num = 0; byte_num < NUM_BYTES_IN_CHORD; byte_num++) {
-    return_val &= isByteMaskSet(mask[byte_num], _chord_bytes[byte_num]);
-  }
-  return return_val;
-}
-
-bool Chord::allZeroes(const uint8_t* _chord_bytes) const {
-  for (uint8_t byte = 0; byte < NUM_BYTES_IN_CHORD; byte++) {
-    if (_chord_bytes[byte]) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-bool Chord::isEqual(const uint8_t* chord1, const uint8_t* chord2) const {
-  for (uint8_t k = 0; k != NUM_BYTES_IN_CHORD; k++) {
-    if (chord1[k] != chord2[k]) {
-      return 0;
-    }
-  }
-  return 1;
-}
 
 ///// debug
 
@@ -380,9 +371,9 @@ void Chord::printMod() const {
   Serial.println();
 }
 
-void Chord::printChord(const uint8_t* c) const {
-  for (uint8_t i = 0; i < NUM_BYTES_IN_CHORD; i++) {
-    Serial.print(c[i]);
+void Chord::printChord(const ChordData& c) const {
+  for (uint8_t byte : c) {
+    Serial.print(byte);
     Serial.print(", ");
   }
   Serial.println();
