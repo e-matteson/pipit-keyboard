@@ -24,8 +24,6 @@ class Switches {
   bool anyDown();
   void reuseMods(Chord* chord);
 
-  void printStatusArray();
-
   Matrix matrix;
 
  private:
@@ -43,9 +41,6 @@ class Switches {
   void stopDebouncing(uint8_t i);
   void resetInactivityTimers();
   void reuseHeldSwitches();
-
-  void printStatusChange(uint8_t index);
-  void printMatrixChange(uint8_t index);
 
   Timer chord_timer;
   Timer release_timer;

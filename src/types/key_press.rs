@@ -7,7 +7,8 @@ use std::str::FromStr;
 use std::string::ToString;
 
 // Used for when a keypress contains only modifiers and no key.
-pub const BLANK_KEY: &str = "BLANK_KEY";
+pub const BLANK_KEY: &str =
+    "0 /* blank key, when a keypress contains only modifiers and no key */";
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
 // Rename?

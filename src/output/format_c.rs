@@ -345,8 +345,9 @@ fn format_array(
     c_type: &CCode,
     is_extern: bool,
 ) -> CFilePair {
+    let length = values.len();
     let h = if is_extern {
-        CCode(format!("extern const {} {}[];\n", c_type, name))
+        CCode(format!("extern const {} {}[{}];\n", c_type, name, length))
     } else {
         CCode::new()
     };
@@ -354,9 +355,10 @@ fn format_array(
     CFilePair {
         h,
         c: CCode(format!(
-            "const {} {}[] = {};\n\n",
+            "const {} {}[{}] = {};\n\n",
             c_type,
             name,
+            length,
             make_c_array_contents(values)
         )),
     }

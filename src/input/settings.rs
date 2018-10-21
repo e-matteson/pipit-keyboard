@@ -5,9 +5,9 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use types::{
-    BoardName, CCode, CTree, ChordSpec, Command, KeyPress, KmapFormat,
-    ModeInfo, ModeName, Name, Permutation, Pin, Sequence, SwitchPos, ToC,
-    Validate, Word,
+    BoardName, CCode, CEnumVariant, CTree, ChordSpec, Command, KeyPress,
+    KmapFormat, ModeInfo, ModeName, Name, Permutation, Pin, Sequence,
+    SwitchPos, ToC, Validate, Word,
 };
 
 use failure::{Error, ResultExt};
@@ -122,25 +122,33 @@ impl OptionsConfig {
 
     fn get_literal_ops(&self) -> Vec<CTree> {
         let mut ops = vec![
-            CTree::Define {
+            CTree::ConstVar {
                 name: "CHORD_DELAY".to_c(),
                 value: self.chord_delay.to_c(),
+                c_type: "uint32_t".to_c(),
+                is_extern: true,
             },
-            CTree::Define {
+            CTree::ConstVar {
                 name: "HELD_DELAY".to_c(),
                 value: self.held_delay.to_c(),
+                c_type: "uint32_t".to_c(),
+                is_extern: true,
             },
-            CTree::Define {
+            CTree::ConstVar {
                 name: "DEBOUNCE_DELAY".to_c(),
                 value: self.debounce_delay.to_c(),
+                c_type: "uint32_t".to_c(),
+                is_extern: true,
             },
             CTree::Define {
                 name: "DEBUG_MESSAGES".to_c(),
                 value: self.debug_messages.to_c(),
             },
-            CTree::Define {
-                name: "WORD_SPACE_POSITION".to_c(),
-                value: self.word_space_position.to_c(),
+            CTree::ConstVar {
+                name: "SPACE_POS".to_c(),
+                value: self.word_space_position.qualified_enum_variant(),
+                c_type: WordSpacePosition::enum_type(),
+                is_extern: true,
             },
             CTree::DefineIf {
                 name: self.board_name.to_c(),
@@ -210,8 +218,6 @@ impl OptionsConfig {
         let has_battery = self.battery_level_pin.is_some();
 
         let enable_rgb_led = self.rgb_led_pins.is_some();
-        let num_rgb_led_pins =
-            self.rgb_led_pins.as_ref().map_or(0, |v| v.len());
 
         Ok(vec![
             CTree::Define {
@@ -229,10 +235,6 @@ impl OptionsConfig {
             CTree::Define {
                 name: "NUM_MATRIX_POSITIONS".to_c(),
                 value: self.num_matrix_positions()?.to_c(),
-            },
-            CTree::Define {
-                name: "NUM_RGB_LED_PINS".to_c(),
-                value: num_rgb_led_pins.to_c(),
             },
             CTree::DefineIf {
                 name: "ENABLE_RGB_LED".to_c(),
@@ -356,13 +358,24 @@ impl ToC for Verbosity {
     }
 }
 
-impl ToC for WordSpacePosition {
-    fn to_c(self) -> CCode {
+impl CEnumVariant for WordSpacePosition {
+    /// The type name of C++ enum
+    fn enum_type() -> CCode {
+        "WordSpacePosition".to_c()
+    }
+
+    /// The variant name of this SeqType in the C++ enum
+    fn enum_variant(&self) -> CCode {
         match self {
-            WordSpacePosition::Before => 0,
-            WordSpacePosition::After => 1,
-            WordSpacePosition::None => 2,
+            WordSpacePosition::Before => "Before",
+            WordSpacePosition::After => "After",
+            WordSpacePosition::None => "None",
         }.to_c()
+    }
+
+    /// The underlying type determining the size of the C++ enum
+    fn underlying_type() -> Option<CCode> {
+        None
     }
 }
 

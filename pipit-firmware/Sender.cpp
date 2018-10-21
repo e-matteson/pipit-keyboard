@@ -1,4 +1,5 @@
 #include "Sender.h"
+#include "util.h"
 
 void Sender::setup() { comms.setup(); }
 
@@ -71,7 +72,7 @@ void Sender::sendMacro(const Key* data, uint8_t data_length,
 
 // Send the word. May modify the chord - don't use it again after calling this.
 void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
-  if (WORD_SPACE_POSITION == 0) {
+  if (conf::SPACE_POS == WordSpacePosition::Before) {
     // doubleMod and shortenMod would be kinda useless with a space here...
     // So they should prevent us from ever prepending a space.
     // The chord is edited before being stored in the history, so that the
@@ -98,7 +99,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
     history.startEntry(chord, 1);
   }
 
-  if (WORD_SPACE_POSITION == 0) {
+  if (conf::SPACE_POS == WordSpacePosition::Before) {
     if (!chord->hasModNospace()) {
       space();
       comms.proportionalDelay(data_length, 1);
@@ -115,7 +116,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
     comms.proportionalDelay(data_length, 1);
   }
 
-  if (WORD_SPACE_POSITION == 1) {
+  if (conf::SPACE_POS == WordSpacePosition::After) {
     if (!chord->hasModNospace()) {
       space();
       comms.proportionalDelay(data_length, 1);

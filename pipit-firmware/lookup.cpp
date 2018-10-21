@@ -7,7 +7,7 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
   uint16_t seq_bit_length = lookup->seq_bit_length();
 
   // The config-tool should enforce a maximum code bit length of 32
-  uint8_t code_bit_length = MIN_HUFFMAN_CODE_BIT_LEN;
+  uint8_t code_bit_length = conf::MIN_HUFFMAN_CODE_BIT_LEN;
   uint32_t code_bit_offset = 0;
   uint32_t key_index = 0;
 
@@ -16,7 +16,7 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
         lookup->sequence_code_bits(seq_num, code_bit_offset, code_bit_length);
 
     const HuffmanChar* huffman = conf::decodeHuffman(code, code_bit_length);
-    if (huffman == 0) {
+    if (huffman == nullptr) {
       // Not found! Try with a longer code next time.
       code_bit_length++;
       continue;
@@ -35,10 +35,10 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
 
     // Move on to the next code (of unknown bit length)
     code_bit_offset += code_bit_length;
-    code_bit_length = MIN_HUFFMAN_CODE_BIT_LEN;
+    code_bit_length = conf::MIN_HUFFMAN_CODE_BIT_LEN;
   }
 
-  if (code_bit_length > MIN_HUFFMAN_CODE_BIT_LEN) {
+  if (code_bit_length > conf::MIN_HUFFMAN_CODE_BIT_LEN) {
     DEBUG1_LN("WARNING: ignored bits at end of huffman encoded sequence");
   }
 

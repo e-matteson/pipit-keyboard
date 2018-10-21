@@ -184,7 +184,7 @@ void Pipit::processChord(Chord* chord) {
   };
 
   // Prepare to store data from the lookup table
-  Key data[MAX_KEYS_IN_SEQUENCE];
+  Key data[conf::MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
   if (doIfFound(conf::SeqType::Command, chord, data)) {
@@ -248,7 +248,7 @@ void Pipit::processGamingSwitches(Chord* gaming_switches,
   Report report;
   report.is_gaming = true;
   for (uint8_t i = 0; i < num_switches; i++) {
-    Key data[MAX_KEYS_IN_SEQUENCE];
+    Key data[conf::MAX_KEYS_IN_SEQUENCE];
 
     Chord* single_switch = gaming_switches + i;
     if (doIfFound(conf::SeqType::Command, single_switch, data)) {
@@ -293,9 +293,9 @@ void Pipit::cycleLastWord(CycleType cycle_type) {
     return;
   }
   Chord new_chord(*entry->getChord());
-  Key data[MAX_KEYS_IN_SEQUENCE];
-
-  for (uint8_t i = 0; i < MAX_ANAGRAM_NUM; i++) {
+  Key data[conf::MAX_KEYS_IN_SEQUENCE];
+  // TODO loop until anagram num == original anagram num, instead?
+  for (uint8_t i = 0; i < conf::MAX_ANAGRAM_NUM; i++) {
     new_chord.cycle(cycle_type);
 
     if (replaceLastIfFound(conf::SeqType::Word, &new_chord, data)) {

@@ -43,8 +43,6 @@ class Chord {
   bool hasModShorten() const;
   void setModNospace();
 
-  void printDebug() const;
-
  private:
   enum CapBehaviorEnum {
     CAP_DEFAULT,
@@ -71,9 +69,6 @@ class Chord {
   void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool isAnagramMaskBlank();
   bool isExactAnagramPressed(const ChordData* mod_chord);
-
-  void printChord(const ChordData& c) const;
-  void printMod() const;
 
   // Make sure the modifiers will fit in the bits of a uint16_t. The least
   // significants bits will each represent one modifier, and the most

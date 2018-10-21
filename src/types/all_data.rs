@@ -76,6 +76,17 @@ impl AllData {
             .unwrap_or_else(|| self.chord_spec.new_chord())
     }
 
+    /// Return the anagram num corresponding to each anagram mod, in the same
+    /// order as the `anagram_mods` vector.
+    pub fn get_anagram_mod_numbers(&self) -> Result<Vec<AnagramNum>, Error> {
+        // For now, just assume the first anagram mod is 1, and the rest count
+        // up from there. In the future we could do something fancier, like
+        // extract the number from the end of the Name.
+        (0..self.anagram_mods.len())
+            .map(|i| AnagramNum::new((i as u8) + 1))
+            .collect()
+    }
+
     /// Get names of all modifiers, including `plain_mod`s, `word_mod`s, and
     /// `anagram_mods`
     pub fn modifier_names(&self) -> Vec<&Name> {

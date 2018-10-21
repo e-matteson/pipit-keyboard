@@ -110,9 +110,11 @@ impl AllData {
     fn render_modes(&self) -> Result<CTree, Error> {
         let mut g = Vec::new();
 
-        g.push(CTree::Define {
+        g.push(CTree::ConstVar {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
             value: usize_to_u8(self.sequences.max_seq_length())?.to_c(),
+            c_type: "uint8_t".to_c(),
+            is_extern: true,
         });
 
         let (tree, kmap_struct_names) = self.render_kmaps()?;
@@ -190,30 +192,16 @@ impl AllData {
             value: all_mods.len().to_c(),
         });
 
-        group.push(CTree::Define {
-            name: "NUM_WORD_MODS".to_c(),
-            value: self.word_mods.len().to_c(),
-        });
-
-        group.push(CTree::Define {
-            name: "NUM_ANAGRAM_MODS".to_c(),
-            value: self.anagram_mods.len().to_c(),
-        });
-
-        group.push(CTree::Define {
+        group.push(CTree::ConstVar {
             name: "MAX_ANAGRAM_NUM".to_c(),
             value: self.chords.max_anagram_num().to_c(),
-        });
-
-        group.push(CTree::Define {
-            name: "NUM_PLAIN_MODS".to_c(),
-            value: self.plain_mods.len().to_c(),
+            c_type: "uint8_t".to_c(),
+            is_extern: true,
         });
 
         group.push(CTree::Array {
             name: "word_mod_indices".to_c(),
             values: to_variants(&self.word_mods),
-            // get_variants(&self.word_mods, &all_index_variants),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
@@ -221,7 +209,6 @@ impl AllData {
         group.push(CTree::Array {
             name: "plain_mod_indices".to_c(),
             values: to_variants(&self.plain_mods),
-            // get_variants(&self.plain_mods, &all_index_variants),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
@@ -229,8 +216,18 @@ impl AllData {
         group.push(CTree::Array {
             name: "anagram_mod_indices".to_c(),
             values: to_variants(&self.anagram_mods),
-            // values: get_variants(&self.anagram_mods, &all_index_variants),
             c_type: Modifier::enum_type(),
+            is_extern: true,
+        });
+
+        group.push(CTree::Array {
+            name: "anagram_mod_numbers".to_c(),
+            values: self
+                .get_anagram_mod_numbers()?
+                .iter()
+                .map(|num| num.to_c())
+                .collect(),
+            c_type: "uint8_t".to_c(),
             is_extern: true,
         });
 
@@ -262,18 +259,11 @@ impl HuffmanTable {
     fn render(&self) -> Result<CTree, Error> {
         let mut group = Vec::new();
 
-        group.push(CTree::Define {
-            name: KeyPress::blank(),
-            value: 0.to_c(),
-        });
-        group.push(CTree::Define {
-            name: "NUM_HUFFMAN_CODES".to_c(),
-            value: self.0.len().to_c(),
-        });
-
-        group.push(CTree::Define {
+        group.push(CTree::ConstVar {
             name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
             value: self.min_bit_length().to_c(),
+            c_type: "uint8_t".to_c(),
+            is_extern: true,
         });
 
         let mut initializers = Vec::new();
@@ -380,7 +370,7 @@ fn intro(with_message: bool) -> Result<CTree, Error> {
         path: "<stdint.h>".to_c(),
     });
     group.push(CTree::IncludeH {
-        path: "\"structs.h\"".to_c(),
+        path: "\"util.h\"".to_c(),
     });
 
     group.push(CTree::LiteralH(

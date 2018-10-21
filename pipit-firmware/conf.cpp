@@ -3,13 +3,8 @@
 #include <Arduino.h>
 
 
-bool contains(const conf::Mod* mod_array, uint8_t len, conf::Mod modifier) {
-  for (uint8_t i = 0; i < len; i++) {
-    if (mod_array[i] == modifier) {
-      return true;
-    }
-  }
-  return false;
+bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
+  return (a & mask) == (b & mask);
 }
 
 namespace conf {
@@ -30,21 +25,19 @@ std::underlying_type<Mode>::type to_index(Mode variant) {
 
 const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
   uint32_t mask = makeMask32(length);
-  for (uint8_t i = 0; i < NUM_HUFFMAN_CODES; i++) {
-    if (length != huffman_lookup[i].num_bits) {
+  for (const HuffmanChar& entry : huffman_lookup) {
+    if (length != entry.num_bits) {
       // Can't be a match, wrong length.
       continue;
     }
-    if (areBitsEqual(huffman_lookup[i].bits, bits, mask)) {
+    if (areBitsEqual(entry.bits, bits, mask)) {
       // Success!
-      return huffman_lookup + i;
+      return &entry;
     }
   }
   // Fail!
-  DEBUG2_LN(
-      "WARNING: Failed to find huffman code in lookup, try again with a longer "
-      "code");
-  return 0;
+  DEBUG2_LN("WARNING: Failed to find huffman code, try again with a longer code");
+  return nullptr;
 }
 
 const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
@@ -74,14 +67,14 @@ Mod getWordModEnum(uint8_t index) { return (Mod)word_mod_indices[index]; }
 Mod getAnagramModEnum(uint8_t index) { return (Mod)anagram_mod_indices[index]; }
 
 ModType getModType(Mod modifier) {
-  if (contains(plain_mod_indices, NUM_PLAIN_MODS, modifier)) {
-    return ModType::Plain;
+  for(Mod m : plain_mod_indices) {
+    if (m == modifier) { return ModType::Plain; }
   }
-  if (contains(word_mod_indices, NUM_WORD_MODS, modifier)) {
-    return ModType::Word;
+  for(Mod m : word_mod_indices) {
+    if (m == modifier) { return ModType::Word; }
   }
-  if (contains(anagram_mod_indices, NUM_ANAGRAM_MODS, modifier)) {
-    return ModType::Anagram;
+  for(Mod m : anagram_mod_indices) {
+    if (m == modifier) { return ModType::Anagram; }
   }
   DEBUG1_LN("ERROR: Unknown modifier type");
   exit(1);

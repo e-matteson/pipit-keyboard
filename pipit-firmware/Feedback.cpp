@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 // Codes to send over serial, trigger audio feedback.
+// TODO use enum
 #define PLAIN_FEEDBACK_CODE 'A'
 #define WORD_FEEDBACK_CODE 'W'
 #define MACRO_FEEDBACK_CODE 'M'
@@ -10,8 +11,8 @@
 
 void Feedback::setup() {
 #ifdef ENABLE_RGB_LED
-  for (uint8_t p = 0; p != NUM_RGB_LED_PINS; p++) {
-    pinMode(conf::rgb_led_pins[p], OUTPUT);
+  for (uint8_t pin : conf::rgb_led_pins) {
+    pinMode(pin, OUTPUT);
   }
 #endif
 }

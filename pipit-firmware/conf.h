@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <type_traits>
 #include "auto_config.h"
-#include "structs.h"
 
 namespace conf {
 
