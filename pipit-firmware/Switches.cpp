@@ -40,9 +40,9 @@ bool Switches::readyToRelease() {
 }
 
 void Switches::updateSwitchStatuses() {
-  uint8_t i = 0;
+  uint8_t i = 0; // the index of the current switch
   for (SwitchStatus status : switch_status) {
-    if (matrix.getSwitch(i)) {     // Switch is physically down now.
+    if (matrix.isDown(i)) {     // Switch is physically down now.
       switch (status) {  // Old status is:
         case SwitchStatus::Pressed:
         case SwitchStatus::AlreadySent:
@@ -55,7 +55,7 @@ void Switches::updateSwitchStatuses() {
           debouncePress(i);
           break;
       }
-    } else {                       // Switch is physically up now.
+    } else {  // Switch is physically up now.
       switch (status) {  // Old status is:
         case SwitchStatus::AlreadySent:
         case SwitchStatus::Held:
@@ -87,11 +87,11 @@ bool Switches::debouncePress(uint8_t switch_index) {
   // Maybe it's a new press, debounce it first.
   // Count down from DEBOUNCE_DELAY to 0.
   bool is_debounce_done = 0;
-  if (debounce_timers[switch_index].isDisabled()) {
-    // Start debouncing, don't change status.
-    debounce_timers[switch_index].start();
-  } else if (debounce_timers[switch_index].isDone()) {
-    // Debounce done, it's a real press!
+  /* if (debounce_timers[switch_index].isDisabled()) { */
+  /*   // Start debouncing, don't change status. */
+  /*   debounce_timers[switch_index].start(); */
+  /* } else if (debounce_timers[switch_index].isDone()) { */
+  /*   // Debounce done, it's a real press! */
     switch_status[switch_index] = SwitchStatus::Pressed;
     debounce_timers[switch_index].disable();
 
@@ -99,11 +99,12 @@ bool Switches::debouncePress(uint8_t switch_index) {
     held_timer.start();
 
     // Check if the switch was double tapped.
+    // TODO why `|=` and not `=`?
     was_switch_double_tapped |= (switch_index == last_released_switch);
     last_released_switch = NO_SWITCH;
 
     is_debounce_done = 1;
-  }
+  /* } */
   // Else, keep debouncing, don't change status.
   return is_debounce_done;
 }

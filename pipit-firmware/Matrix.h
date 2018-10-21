@@ -14,7 +14,7 @@ class Matrix {
   Matrix();
   void setup();
 
-  bool getSwitch(uint8_t index) const;
+  bool isDown(uint8_t index) const;
 
   bool scanIfChanged();
   bool isSquishedInBackpack();

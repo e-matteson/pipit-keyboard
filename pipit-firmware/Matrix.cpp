@@ -89,7 +89,7 @@ void Matrix::unselectColumn(uint8_t column_pin) {
   pinMode(column_pin, HI_Z);
 }
 
-bool Matrix::getSwitch(uint8_t index) const {
+bool Matrix::isDown(uint8_t index) const {
   return 0x1 & (switch_states >> index);
 }
 
