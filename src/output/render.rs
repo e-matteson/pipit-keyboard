@@ -200,21 +200,21 @@ impl AllData {
         });
 
         group.push(CTree::Array {
-            name: "word_mod_indices".to_c(),
+            name: "word_mods".to_c(),
             values: to_variants(&self.word_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
         group.push(CTree::Array {
-            name: "plain_mod_indices".to_c(),
+            name: "plain_mods".to_c(),
             values: to_variants(&self.plain_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
         group.push(CTree::Array {
-            name: "anagram_mod_indices".to_c(),
+            name: "anagram_mods".to_c(),
             values: to_variants(&self.anagram_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,

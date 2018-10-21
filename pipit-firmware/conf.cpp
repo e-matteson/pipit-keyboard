@@ -55,25 +55,16 @@ const ChordData* getModChord(Mode mode, Mod modifier) {
   return &(getMode(mode)->mod_chords[to_index(modifier)]);
 }
 
-uint8_t getPlainModByte(uint8_t index) {
-  // TODO be consistent about mod terminology
-  return plain_mod_keys[index];
-}
 
-Mod getPlainModEnum(uint8_t index) { return (Mod)plain_mod_indices[index]; }
-
-Mod getWordModEnum(uint8_t index) { return (Mod)word_mod_indices[index]; }
-
-Mod getAnagramModEnum(uint8_t index) { return (Mod)anagram_mod_indices[index]; }
 
 ModType getModType(Mod modifier) {
-  for(Mod m : plain_mod_indices) {
+  for(Mod m : plain_mods) {
     if (m == modifier) { return ModType::Plain; }
   }
-  for(Mod m : word_mod_indices) {
+  for(Mod m : word_mods) {
     if (m == modifier) { return ModType::Word; }
   }
-  for(Mod m : anagram_mod_indices) {
+  for(Mod m : anagram_mods) {
     if (m == modifier) { return ModType::Anagram; }
   }
   DEBUG1_LN("ERROR: Unknown modifier type");

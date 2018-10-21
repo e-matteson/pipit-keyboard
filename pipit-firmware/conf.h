@@ -21,10 +21,6 @@ const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
 
 const ChordData* getAnagramMask(Mode mode);
 const ChordData* getModChord(Mode mode, Mod modifier);
-uint8_t getPlainModByte(uint8_t index);
-Mod getPlainModEnum(uint8_t index);
-Mod getWordModEnum(uint8_t index);
-Mod getAnagramModEnum(uint8_t index);
 ModType getModType(Mod modifier);
 
 Mod getNospaceEnum();

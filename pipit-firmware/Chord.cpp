@@ -50,7 +50,7 @@ const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
   uint8_t index = 0;
   for (uint8_t num : conf::anagram_mod_numbers) {
     if (num == anagram_num) {
-      return conf::anagram_mod_indices + index;
+      return conf::anagram_mods + index;
     }
     index++;
   }
@@ -84,9 +84,9 @@ bool Chord::isEmptyExceptMods() const {
 uint8_t Chord::getModByte() const {
   uint8_t mod_byte = 0;
   uint8_t index = 0;
-  for (conf::Mod mod : conf::plain_mod_indices) {
+  for (conf::Mod mod : conf::plain_mods) {
     if (hasMod(mod)) {
-      mod_byte |=  conf::getPlainModByte(index);
+      mod_byte |= conf::plain_mod_keys[index];
     }
     index++;
   }
@@ -211,13 +211,13 @@ void Chord::toggleFlagCycleCapital() {
 }
 
 void Chord::extractPlainMods() {
-  for (conf::Mod plain_mod : conf::plain_mod_indices) {
+  for (conf::Mod plain_mod : conf::plain_mods) {
     extractMod(plain_mod);
   }
 }
 
 void Chord::extractWordMods() {
-  for (conf::Mod word_mod : conf::word_mod_indices) {
+  for (conf::Mod word_mod : conf::word_mods) {
     extractMod(word_mod);
   }
 }
@@ -229,7 +229,7 @@ void Chord::extractAnagramMods() {
     // At least one switch in an anagram is pressed, check to see if it's an
     //  actual mod chord.
     uint8_t index = 0;
-    for (conf::Mod mod : conf::anagram_mod_indices) {
+    for (conf::Mod mod : conf::anagram_mods) {
       if (extractMod(mod)) {
         // Found mod!
         anagram_num = index + 1;  // 0 is reserved for no mod
@@ -252,7 +252,7 @@ void Chord::restoreAnagramMods() {
 }
 
 void Chord::restoreWordMods() {
-  for (conf::Mod word_mod : conf::word_mod_indices) {
+  for (conf::Mod word_mod : conf::word_mods) {
       restoreMod(word_mod);
   }
 }
