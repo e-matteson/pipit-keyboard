@@ -24,9 +24,9 @@ class Matrix {
   void setSwitch(uint8_t index);
 
   void scan();
-  void selectColumn(uint8_t hand, uint8_t column);
-  void unselectColumn(uint8_t hand, uint8_t column);
-  bool isRowPressed(uint8_t hand, uint8_t row);
+  void selectColumn(uint8_t column_pin);
+  void unselectColumn(uint8_t column_pin);
+  bool isRowPressed(uint8_t row_pin);
 
   bool isInStandby();
   void enterStandby();
@@ -42,8 +42,6 @@ class Matrix {
   void detachRowPinInterrupts();
 
   static void pinChangeISR();
-
-  void printPressedSwitch(uint8_t h, uint8_t c, uint8_t r);
 
   Timer standby_timer;
   Timer squished_switch_timer;

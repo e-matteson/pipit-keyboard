@@ -13,8 +13,8 @@ options:
   enable_wired_feather_hack:   true
   # enable_audio_typing_feedback: true
   battery_level_pin:           9
-  row_pins:                    [[1, 0, 19]]
-  column_pins:                 [[15,16,17,18, 20,21,5,6]]
+  row_pins:                    [1, 0, 19]
+  column_pins:                 [15,16,17,18, 20,21,5,6]
 
   kmap_format:
     - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
@@ -24,8 +24,8 @@ options:
 
   # ######## NEWEST (MS)
   # board_name:                TEENSY_LC
-  # row_pins:                  [[16, 17, 18, 19, 20, 21]]
-  # column_pins:               [[11, 12, 14, 15]]
+  # row_pins:                  [16, 17, 18, 19, 20, 21]
+  # column_pins:               [11, 12, 14, 15]
   # use_standby_interrupts:    false
   # kmap_format:
   #     - [[16,15],[16,14],[16,12],[16,11],   [19,11],[19,12],[19,14],[19,15]]
@@ -36,8 +36,8 @@ options:
 
   # ######## JS, swapped left rows, 2.1 PCBs
   # board_name:                TEENSY_LC
-  # row_pins:                  [[11, 12, 14, 15, 20, 21]]
-  # column_pins:               [[16, 17, 18, 19]]
+  # row_pins:                  [11, 12, 14, 15, 20, 21]
+  # column_pins:               [16, 17, 18, 19]
   # use_standby_interrupts:    false
   # kmap_format:
   #     - [[12,19],[14,18],[12,17],[12,16],   [21,16],[21,17],[21,18],[21,19]]

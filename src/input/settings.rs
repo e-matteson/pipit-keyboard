@@ -42,8 +42,8 @@ validated_struct!{
         pub debounce_delay: Delay,
         pub debug_messages: Verbosity,
         pub board_name: BoardName,
-        pub row_pins: Vec<Vec<Pin>>,
-        pub column_pins: Vec<Vec<Pin>>,
+        pub row_pins: Vec<Pin>,
+        pub column_pins: Vec<Pin>,
         pub kmap_format: KmapFormat,
 
         pub rgb_led_pins: Option<[Pin; 3]>,
@@ -154,24 +154,16 @@ impl OptionsConfig {
                 name: self.board_name.to_c(),
                 is_defined: true,
             },
-            CTree::CompoundArray {
+            CTree::Array {
                 name: "row_pins".to_c(),
-                values: self
-                    .row_pins
-                    .iter()
-                    .map(|hand| Pin::c_vec(hand))
-                    .collect(),
-                subarray_type: "uint8_t".to_c(),
+                values: Pin::c_vec(&self.row_pins),
+                c_type: "uint8_t".to_c(),
                 is_extern: true,
             },
-            CTree::CompoundArray {
+            CTree::Array {
                 name: "column_pins".to_c(),
-                values: self
-                    .column_pins
-                    .iter()
-                    .map(|hand| Pin::c_vec(hand))
-                    .collect(),
-                subarray_type: "uint8_t".to_c(),
+                values: Pin::c_vec(&self.column_pins),
+                c_type: "uint8_t".to_c(),
                 is_extern: true,
             },
             CTree::DefineIf {
@@ -221,18 +213,6 @@ impl OptionsConfig {
 
         Ok(vec![
             CTree::Define {
-                name: "NUM_ROWS".to_c(),
-                value: self.num_rows()?.to_c(),
-            },
-            CTree::Define {
-                name: "NUM_COLUMNS".to_c(),
-                value: self.num_columns()?.to_c(),
-            },
-            CTree::Define {
-                name: "NUM_HANDS".to_c(),
-                value: self.num_hands()?.to_c(),
-            },
-            CTree::Define {
                 name: "NUM_MATRIX_POSITIONS".to_c(),
                 value: self.num_matrix_positions()?.to_c(),
             },
@@ -248,35 +228,23 @@ impl OptionsConfig {
     }
 
     fn num_rows(&self) -> Result<usize, Error> {
-        let len = self.row_pins.get(0).expect("row_pins was empty").len();
-        if !self.row_pins.iter().all(|hand| len == hand.len()) {
-            bail!("Each hand must have the same number of rows")
+        let len = self.row_pins.len();
+        if len == 0 {
+            bail!("row_pins cannot be empty");
         }
         Ok(len)
     }
 
     fn num_columns(&self) -> Result<usize, Error> {
-        let len = self
-            .column_pins
-            .get(0)
-            .expect("column_pins was empty")
-            .len();
-        if !self.column_pins.iter().all(|hand| len == hand.len()) {
-            bail!("Each hand must have the same number of columns")
-        }
-        Ok(len)
-    }
-
-    fn num_hands(&self) -> Result<usize, Error> {
-        let len = self.row_pins.len();
-        if len != self.column_pins.len() {
-            bail!("Row and column pins disagree about the number of hands")
+        let len = self.column_pins.len();
+        if len == 0 {
+            bail!("row_pins cannot be empty");
         }
         Ok(len)
     }
 
     fn num_matrix_positions(&self) -> Result<usize, Error> {
-        Ok(self.num_hands()? * self.num_rows()? * self.num_columns()?)
+        Ok(self.num_rows()? * self.num_columns()?)
     }
 
     /// The order in which the firmware will scan matrix positions while
@@ -290,11 +258,9 @@ impl OptionsConfig {
     /// switches installed in the keyboard.
     fn firmware_order(&self) -> Result<Vec<SwitchPos>, Error> {
         let mut order: Vec<SwitchPos> = Vec::new();
-        for h in 0..self.num_hands()? {
-            for c in &self.column_pins[h] {
-                for r in &self.row_pins[h] {
-                    order.push(SwitchPos::new(*r, *c));
-                }
+        for c in &self.column_pins {
+            for r in &self.row_pins {
+                order.push(SwitchPos::new(*r, *c));
             }
         }
         Ok(order)
