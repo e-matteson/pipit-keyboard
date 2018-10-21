@@ -18,29 +18,29 @@ void Matrix::setup() {
   setRowsInput();   // rows should always stay in input mode
   setColumnsHiZ();  // columns will change, during scanning and during standby
 
-#ifdef USE_STANDBY_INTERRUPTS
-  enterStandby();
-#endif
+  if (conf::USE_STANDBY_INTERRUPTS){
+    enterStandby();
+  }
 }
 
 bool Matrix::scanIfChanged() {
   // Return true if we scan. Handle entering and exiting standby.
 
-#ifdef USE_STANDBY_INTERRUPTS
-  if (standby_timer.isDone()) {
-    // A bunch of time has passed since a switch was pressed
-    enterStandby();
-    return false;
-  }
-  if (isInStandby()) {
-    if (!change_flag.get()) {
-      // Nothing happened, don't scan
+  if (conf::USE_STANDBY_INTERRUPTS){
+    if (standby_timer.isDone()) {
+      // A bunch of time has passed since a switch was pressed
+      enterStandby();
       return false;
     }
-    // A pin-change interrupt happened since the last scan!
-    exitStandby();
+    if (isInStandby()) {
+      if (!change_flag.get()) {
+        // Nothing happened, don't scan
+        return false;
+      }
+      // A pin-change interrupt happened since the last scan!
+      exitStandby();
+    }
   }
-#endif
 
   // If not using standby interrupts, we don't know when there was a change, so
   // always scan.
@@ -66,11 +66,9 @@ void Matrix::scan() {
     unselectColumn(col_pin);
   }
 
-#ifdef USE_STANDBY_INTERRUPTS
-  if (is_any_switch_down) {
+  if (conf::USE_STANDBY_INTERRUPTS && is_any_switch_down) {
     standby_timer.start();
   }
-#endif
 }
 
 bool Matrix::isRowPressed(uint8_t row_pin) {
@@ -157,10 +155,9 @@ void Matrix::exitStandby() {
 }
 
 bool Matrix::isInStandby() {
-#ifdef USE_STANDBY_INTERRUPTS
-  return standby_timer.isDisabled();
-#endif
-
+  if (conf::USE_STANDBY_INTERRUPTS) {
+    return standby_timer.isDisabled();
+  }
   return false;
 }
 

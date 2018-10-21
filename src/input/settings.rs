@@ -178,9 +178,11 @@ impl OptionsConfig {
                 name: "ENABLE_WIRED_FEATHER_HACK".to_c(),
                 is_defined: self.enable_wired_feather_hack,
             },
-            CTree::DefineIf {
+            CTree::ConstVar {
                 name: "USE_STANDBY_INTERRUPTS".to_c(),
-                is_defined: self.use_standby_interrupts,
+                value: self.use_standby_interrupts.to_c(),
+                c_type: "bool".to_c(),
+                is_extern: true,
             },
         ];
 
