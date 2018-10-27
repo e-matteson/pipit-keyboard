@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use time::*;
 
+use error::Error;
 use types::{
     AllData, CCode, CEnumVariant, CTree, Command, Field, HuffmanTable, KeyDefs,
     KeyPress, KmapPath, ModeName, Modifier, Name, SeqType, Sequence, ToC,
@@ -8,9 +9,6 @@ use types::{
 use util::{bools_to_bytes, usize_to_u8};
 
 use output::{KmapBuilder, ModeBuilder};
-// use format::KmapBuilder;
-
-use failure::Error;
 
 c_struct!(struct HuffmanChar {
     bits: CCode,

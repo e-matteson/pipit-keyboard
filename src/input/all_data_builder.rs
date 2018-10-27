@@ -4,10 +4,9 @@ use std::path::PathBuf;
 use itertools::Itertools;
 use serde_yaml;
 
-use failure::{Error, ResultExt};
 use input::Settings;
-use types::errors::ConflictErr;
 
+use error::{Error, ResultExt};
 use types::{
     AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
     HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeInfo, ModeName, Name,
@@ -111,7 +110,7 @@ impl AllDataBuilder {
         let kmap_format = self.settings.options.kmap_format.clone();
 
         for kmap in kmaps {
-            let named_chords = kmap.read(&kmap_format).with_context(|_| {
+            let named_chords = kmap.read(&kmap_format).with_context(|| {
                 format!("Failed to load kmap file: '{}'", kmap)
             })?;
 
@@ -203,7 +202,7 @@ impl AllDataBuilder {
         let dictionary = self.settings.dictionary.clone();
         for kmap in &self.get_kmaps_with_words() {
             for info in &dictionary {
-                self.add_word(info, kmap, spellings).with_context(|_| {
+                self.add_word(info, kmap, spellings).with_context(|| {
                     format!("Failed to add word: {}", info.word)
                 })?
             }
@@ -247,10 +246,10 @@ impl AllDataBuilder {
     ) -> Result<(), Error> {
         // Check if a mode with this name has been added already
         if self.modes.contains_key(&mode_name) {
-            Err(ConflictErr {
-                key: mode_name.to_string(),
-                container: "modes".into(),
-            }).context("Mode has already been added")?;
+            return Err(Error::ConflictErr {
+                key: mode_name.into(),
+                container: "modes".to_owned(),
+            }).context("Mode has already been added");
         }
 
         // Initialize the kmaps that are included in this mode
@@ -322,7 +321,8 @@ impl AllDataBuilder {
                 } else {
                     Ok(a.unwrap().intersect(&b.unwrap()))
                 }
-            }).ok_or_else(|| format_err!("no chords to intersect"))??;
+            }).expect("no chords spellings to intersect")?;
+        // TODO see if that expect is triggered by an empty word chord
 
         chord.anagram_num = word.anagram_num();
         self.chords.insert(name, chord, kmap)

@@ -4,14 +4,12 @@ use std::fmt;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use error::{Error, ResultExt};
 use types::{
     BoardName, CCode, CEnumVariant, CTree, ChordSpec, Command, KeyPress,
     KmapFormat, ModeInfo, ModeName, Name, Permutation, Pin, Sequence,
     SwitchPos, ToC, Validate, Word,
 };
-
-use failure::{Error, ResultExt};
-use types::errors::print_error;
 
 fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
@@ -232,17 +230,19 @@ impl OptionsConfig {
     fn num_rows(&self) -> Result<usize, Error> {
         let len = self.row_pins.len();
         if len == 0 {
-            bail!("row_pins cannot be empty");
+            Err(Error::Empty("row_pins".to_owned()))
+        } else {
+            Ok(len)
         }
-        Ok(len)
     }
 
     fn num_columns(&self) -> Result<usize, Error> {
         let len = self.column_pins.len();
         if len == 0 {
-            bail!("row_pins cannot be empty");
+            Err(Error::Empty("column_pins".to_owned()))
+        } else {
+            Ok(len)
         }
-        Ok(len)
     }
 
     fn num_matrix_positions(&self) -> Result<usize, Error> {
@@ -294,7 +294,7 @@ impl<'de> Deserialize<'de> for Sequence {
                 Sequence::from_str(value).map_err(|error| {
                     // TODO figure out a proper way to get failure's error info
                     // into de::Error
-                    print_error(&error);
+                    println!("{}", error);
                     de::Error::custom("invalid sequence string")
                 })
             }

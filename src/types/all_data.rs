@@ -3,16 +3,13 @@ use std::clone::Clone;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use util::ensure_u8;
-
+use error::{Error, ResultExt};
 use types::{
     AnagramNum, BoardName, CTree, Chord, ChordSpec, Command, HuffmanTable,
     KeyPress, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
     SpellingTable, TutorData,
 };
-
-use failure::{Error, Fail, ResultExt};
-use types::errors::{BadValueErr, ConflictErr, LookupErr};
+use util::ensure_u8;
 
 #[derive(Debug)]
 pub struct ChordMap(BTreeMap<Name, Chord>);
@@ -204,17 +201,17 @@ impl AllChordMaps {
             .get_kmap(kmap)?
             .get(chord_name)
             .and_then(|x| Some(x.clone()))
-            .ok_or_else(|| LookupErr {
+            .ok_or_else(|| Error::LookupErr {
                 key: chord_name.into(),
                 container: format!("{} chord map", kmap),
             })?)
     }
 
     pub fn get_kmap(&self, kmap: &KmapPath) -> Result<&ChordMap, Error> {
-        Ok(self.maps.get(kmap).ok_or_else(|| LookupErr {
+        self.maps.get(kmap).ok_or_else(|| Error::LookupErr {
             key: kmap.into(),
             container: "chord maps".into(),
-        })?)
+        })
     }
 
     pub fn kmap_paths(&self) -> impl Iterator<Item = &KmapPath> {
@@ -253,13 +250,11 @@ impl AllChordMaps {
         self.maps
             .get_mut(kmap)
             .ok_or_else(|| {
-                BadValueErr {
+                Error::BadValueErr {
                     thing: "kmap".into(),
                     value: kmap.to_owned().into(),
                 }.context("tried to add chord to uninitialized kmap")
-            })?.insert(name, chord)?;
-
-        Ok(())
+            })?.insert(name, chord)
     }
 
     pub fn insert_map(
@@ -280,10 +275,10 @@ impl AllChordMaps {
 
 impl AllSeqMaps {
     pub fn get_seq_map(&self, seq_type: SeqType) -> Result<&SeqMap, Error> {
-        Ok(self.maps.get(&seq_type).ok_or_else(|| LookupErr {
+        self.maps.get(&seq_type).ok_or_else(|| Error::LookupErr {
             key: format!("{:?}", seq_type),
             container: "sequence maps".into(),
-        })?)
+        })
     }
 
     pub fn get(
@@ -291,13 +286,12 @@ impl AllSeqMaps {
         name: &Name,
         seq_type: SeqType,
     ) -> Result<&Sequence, Error> {
-        Ok(self
-            .get_seq_map(seq_type)?
+        self.get_seq_map(seq_type)?
             .get(name)
-            .ok_or_else(|| LookupErr {
+            .ok_or_else(|| Error::LookupErr {
                 key: name.into(),
                 container: format!("{} sequence map", seq_type),
-            })?)
+            })
     }
 
     pub fn get_seq_of_any_type(&self, name: &Name) -> Result<&Sequence, Error> {
@@ -308,14 +302,17 @@ impl AllSeqMaps {
             .collect();
 
         if hits.is_empty() {
-            Err(LookupErr {
+            Err(Error::LookupErr {
                 key: name.into(),
                 container: "sequences".into(),
-            }.into())
+            })
         } else if hits.len() == 1 {
             Ok(hits[0])
         } else {
-            bail!("Found multiple sequences with the same name: {}", name)
+            Err(Error::ConflictErr {
+                key: name.into(),
+                container: "sequences".to_owned(),
+            }.context("Found multiple sequences with the same name"))
         }
     }
 
@@ -385,18 +382,18 @@ impl ChordMap {
 
     pub fn get_result(&self, name: &Name) -> Result<&Chord, Error> {
         // TODO merge with get?
-        Ok(self.0.get(name).ok_or_else(|| LookupErr {
-            key: format!("{:?}", name),
-            container: "chord map".into(),
-        })?)
+        self.0.get(name).ok_or_else(|| Error::LookupErr {
+            key: name.into(),
+            container: "chord map".to_owned(),
+        })
     }
 
     fn insert(&mut self, name: Name, chord: Chord) -> Result<(), Error> {
         if self.0.contains_key(&name) {
-            Err(ConflictErr {
+            return Err(Error::ConflictErr {
                 key: name.clone().into(),
                 container: "chord map".into(),
-            })?
+            });
         }
 
         self.0.insert(name, chord);
@@ -439,17 +436,17 @@ impl SeqMap {
     }
 
     fn insert(&mut self, name: Name, seq: Sequence) -> Result<(), Error> {
-        ensure_u8(seq.len()).with_context(|_| {
+        ensure_u8(seq.len()).with_context(|| {
             format!("Sequence contains too many keypresses: '{}'", name)
         })?;
 
         if self.0.insert(name.to_owned(), seq).is_some() {
-            Err(ConflictErr {
+            Err(Error::ConflictErr {
                 key: name.into(),
                 container: "sequence map".into(),
-            })?;
+            })
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 }

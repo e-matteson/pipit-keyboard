@@ -17,7 +17,6 @@ mod c_code;
 mod c_enums;
 mod checker;
 mod chord;
-pub mod errors;
 mod huffman;
 mod key_press;
 mod miscellaneous;

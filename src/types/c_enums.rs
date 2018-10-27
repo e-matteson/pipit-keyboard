@@ -1,6 +1,6 @@
 use std::fmt;
 
-use failure::Error;
+use error::Error;
 use types::{CCode, CEnumVariant, Name, ToC, Validate};
 
 #[derive(
@@ -71,6 +71,12 @@ impl<'a> From<&'a str> for ModeName {
 impl From<String> for ModeName {
     fn from(s: String) -> Self {
         ModeName(s)
+    }
+}
+
+impl From<ModeName> for String {
+    fn from(m: ModeName) -> Self {
+        m.0
     }
 }
 

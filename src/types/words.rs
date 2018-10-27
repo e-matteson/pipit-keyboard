@@ -2,8 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 use unicode_segmentation::UnicodeSegmentation;
 
-use failure::Error;
-use types::errors::*;
+use error::Error;
 use types::{KeyPress, Name, Sequence, Spelling, Validate};
 
 #[derive(Deserialize, Debug, Clone)]
@@ -113,15 +112,16 @@ impl Default for AnagramNum {
 impl Validate for AnagramNum {
     fn validate(&self) -> Result<(), Error> {
         let max = Self::max_allowable();
-        if self.0 > max {
-            Err(OutOfRangeErr {
+        if self.0 <= max {
+            Ok(())
+        } else {
+            Err(Error::OutOfRangeErr {
                 name: "anagram number".into(),
                 value: self.0 as usize,
                 min: 0,
                 max: max as usize,
-            })?
+            })
         }
-        Ok(())
     }
 }
 

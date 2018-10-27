@@ -5,14 +5,12 @@ use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::Printer;
 
-use unicode_segmentation::UnicodeSegmentation;
-
-use failure::Error;
+use error::Error;
 use tutor::{
     grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
     SlideLine, State,
 };
-use types::errors::BadValueErr;
+use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Clone)]
 pub struct Copier {
@@ -179,12 +177,11 @@ impl Copier {
     }
 
     fn actual_at_offset(&self, offset: usize) -> Result<String, Error> {
-        Ok(self
-            .char_at_offset(&self.line.actual, offset)
-            .ok_or_else(|| BadValueErr {
-                thing: "character offset".into(),
+        self.char_at_offset(&self.line.actual, offset)
+            .ok_or_else(|| Error::BadValueErr {
+                thing: "character offset".to_owned(),
                 value: offset.to_string(),
-            })?)
+            })
     }
 
     fn expected_at_offset(&self, offset: usize) -> Option<String> {

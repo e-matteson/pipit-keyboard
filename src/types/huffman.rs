@@ -2,8 +2,7 @@ use std;
 use std::collections::binary_heap::BinaryHeap;
 use std::collections::BTreeMap;
 
-use failure::{Error, ResultExt};
-use types::errors::{LookupErr, OutOfRangeErr};
+use error::{Error, ResultExt};
 use types::{CCode, KeyPress, ToC};
 use util::{bools_to_u32, ensure_u8};
 
@@ -51,15 +50,15 @@ impl HuffmanTable {
         Ok(HuffmanTable(map))
     }
 
-    pub fn bits(&self, key: &CCode) -> Result<Vec<bool>, LookupErr> {
+    pub fn bits(&self, key: &CCode) -> Result<Vec<bool>, Error> {
         Ok(self.get(key)?.to_owned().bits)
     }
 
-    pub fn get(&self, key: &CCode) -> Result<&HuffmanEntry, LookupErr> {
-        Ok(self.0.get(key).ok_or_else(|| LookupErr {
+    pub fn get(&self, key: &CCode) -> Result<&HuffmanEntry, Error> {
+        self.0.get(key).ok_or_else(|| Error::LookupErr {
             key: key.into(),
             container: "huffman code table".into(),
-        })?)
+        })
     }
 
     pub fn min_bit_length(&self) -> usize {
@@ -100,14 +99,15 @@ impl HuffmanEntry {
         let len = bits.len();
 
         if len > MAX_LEN {
-            Err(OutOfRangeErr {
+            Err(Error::OutOfRangeErr {
                 name: "huffman encoding length".into(),
                 value: len,
                 min: 0,
                 max: MAX_LEN,
-            })?;
+            })
+        } else {
+            Ok(Self { bits, is_mod })
         }
-        Ok(Self { bits, is_mod })
     }
 }
 
@@ -134,7 +134,7 @@ fn make_codes(
         } => {
             out.insert(
                 key.to_owned(),
-                HuffmanEntry::new(prefix, *is_mod).with_context(|_| {
+                HuffmanEntry::new(prefix, *is_mod).with_context(|| {
                     format!("Failed to make huffman encoding for: '{}'", key)
                 })?,
             );

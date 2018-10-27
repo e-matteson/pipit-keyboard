@@ -5,7 +5,7 @@ use std::io::Write;
 use std::ops::AddAssign;
 use std::path::PathBuf;
 
-use failure::{Error, ResultExt};
+use error::{Error, ResultExt};
 use types::{CCode, CTree, Field, ToC};
 
 #[derive(Debug, Default)]

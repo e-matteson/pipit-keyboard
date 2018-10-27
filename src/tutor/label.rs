@@ -103,5 +103,5 @@ impl<'a> Into<Label> for &'a str {
 }
 
 fn backspace_chord() -> Option<Chord> {
-    State::chord(&"key_backspace".into())
+    State::chord(&"key_backspace".into()).ok()
 }

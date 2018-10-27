@@ -8,8 +8,7 @@ use cursive::vec::Vec2;
 use cursive::views::{Dialog, TextView};
 use cursive::{Cursive, Printer};
 
-use failure::{Error, ResultExt};
-use types::errors::{print_and_panic, BadValueErr};
+use error::{Error, ResultExt};
 
 use tutor::{offset, Copier, Graphic, LessonConfig, PrevCharStatus, Slide};
 
@@ -56,14 +55,14 @@ impl Lesson {
         // TODO check for empty lessons when loading from file, instead.
         // We should panic here instead if we failed to end the lesson after
         // going through all the slides.
-        let slide = self.slides.pop().ok_or_else(|| BadValueErr {
-            thing: "lesson contents".into(),
-            value: "(empty)".into(),
+        let slide = self.slides.pop().ok_or_else(|| Error::BadValueErr {
+            thing: "lesson contents".to_owned(),
+            value: "(empty)".to_owned(),
         })?;
         self.copier.start_line(&slide.line)?;
         self.instruction = slide.instruction;
         self.info_bar =
-            format!("Line {}.  Press `esc` to exit.", self.slide_counter());
+            format!("Line {}.  Press 'esc' to exit.", self.slide_counter());
         // TODO otherwise... other transition?
         Ok(PrevCharStatus::Correct)
     }
@@ -75,7 +74,7 @@ impl Lesson {
 
     fn update_chord(&mut self, status: &PrevCharStatus) -> Result<(), Error> {
         let next_char =
-            self.copier.next_hint().context("failed to get hint")?;
+            self.copier.next_hint().context("Failed to get hint")?;
         self.graphic.update(next_char, status);
         Ok(())
     }
@@ -249,9 +248,8 @@ impl View for Lesson {
             _ => return EventResult::Ignored,
         };
 
-        if let Err(error) = self.update_chord(&status) {
-            print_and_panic(&error);
-        }
+        // TODO does this print nicely?
+        self.update_chord(&status).unwrap();
 
         EventResult::Consumed(None)
     }

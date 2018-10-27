@@ -1,5 +1,4 @@
-use failure::{Error, ResultExt};
-use types::errors::*;
+use error::{Error, ResultExt};
 use types::{CCode, Spelling, ToC, Validate};
 
 use std::collections::BTreeMap;
@@ -245,24 +244,24 @@ impl KeyPress {
 
     pub fn ensure_non_empty(&self) -> Result<(), Error> {
         if self.key.is_none() && self.mods.is_empty() {
-            Err(BadValueErr {
+            Err(Error::BadValueErr {
                 value: "(empty)".into(),
                 thing: "KeyPress".into(),
-            }).context("KeyPress must contain at least one key or modifier")?
+            }).context("KeyPress must contain at least one key or modifier")
         } else {
             Ok(())
         }
     }
 
     fn lone_mod(&self) -> Result<CCode, Error> {
-        Ok(if self.mods.len() == 1 {
-            self.mods[0].clone()
+        if self.mods.len() == 1 {
+            Ok(self.mods[0].clone())
         } else {
-            Err(BadValueErr {
+            Err(Error::BadValueErr {
                 thing: "number of modifiers".into(),
                 value: self.mods.len().to_string(),
-            }).context("Expected KeyPress to contain exactly one modifier")?
-        })
+            }).context("Expected KeyPress to contain exactly one modifier")
+        }
     }
 }
 
@@ -294,10 +293,10 @@ impl FromStr for KeyPress {
     fn from_str(character_string: &str) -> Result<Self, Self::Err> {
         let spelling = Spelling::new(character_string)?;
         let keypress = KeyDefs::keypress_from_spelling(spelling)?;
-        Ok(keypress.ok_or_else(|| BadValueErr {
-            thing: "character".into(),
-            value: character_string.into(),
-        })?)
+        keypress.ok_or_else(|| Error::BadValueErr {
+            thing: "character".to_owned(),
+            value: character_string.to_owned(),
+        })
     }
 }
 
@@ -323,10 +322,11 @@ impl KeyDefs {
     pub fn spelling_from_keypress(
         keypress: &KeyPress,
     ) -> Result<Option<Spelling>, Error> {
+        // TODO map ok?
         Ok(TABLE
             .iter()
             .find(|ref def| &def.keypress == keypress)
-            .ok_or_else(|| MissingErr {
+            .ok_or_else(|| Error::Missing {
                 missing: format!(
                     "entry for plain_key/plain_mod '{:?}'",
                     keypress
@@ -390,10 +390,10 @@ impl KeyDefs {
         if TABLE.iter().any(|def| def.has_keycode_or_mod(keycode)) {
             Ok(())
         } else {
-            Err(BadValueErr {
-                thing: "keycode or mod".into(),
-                value: keycode.to_string(),
-            }).context("Not defined in the firmware")?
+            Err(Error::BadValueErr {
+                thing: "keycode or mod".to_owned(),
+                value: keycode.into(),
+            }).context("Not defined in the firmware")
         }
     }
 
@@ -402,10 +402,10 @@ impl KeyDefs {
         if TABLE.iter().any(|def| def.has_mod(&modifier)) {
             Ok(())
         } else {
-            Err(BadValueErr {
+            Err(Error::BadValueErr {
                 thing: "modifier".into(),
                 value: modifier.to_string(),
-            }).context("Not defined in the firmware")?
+            }).context("Not defined in the firmware")
         }
     }
 }

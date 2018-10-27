@@ -1,6 +1,6 @@
-use failure::{Error, ResultExt};
 use std::collections::BTreeMap;
 
+use error::{Error, ResultExt};
 use types::{
     CCode, CTree, Chord, ChordSpec, Field, KmapPath, ModeInfo, ModeName, ToC,
 };

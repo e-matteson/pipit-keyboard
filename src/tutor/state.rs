@@ -6,7 +6,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-use failure::{Error, ResultExt};
+use error::{Error, ResultExt};
 use types::{Chord, ModeName, Name, Spelling, TutorData};
 
 lazy_static! {
@@ -81,7 +81,7 @@ impl State {
         }
     }
 
-    pub fn chord(name: &Name) -> Option<Chord> {
+    pub fn chord(name: &Name) -> Result<Chord, Error> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
             data.chord(name, &state.saveable.mode)
@@ -92,9 +92,9 @@ impl State {
 
     pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord> {
         let name = Self::name(spelling)?;
-        let mut chord = Self::chord(&name)?;
+        let mut chord = Self::chord(&name).ok()?;
         if spelling.is_uppercase() {
-            chord.intersect_mut(&Self::chord(&Name("mod_shift".into()))?)
+            chord.intersect_mut(&Self::chord(&Name("mod_shift".into())).ok()?);
         }
         Some(chord)
     }
@@ -204,19 +204,31 @@ impl State {
 }
 impl Saveable {
     pub fn validate(&self) -> Result<(), Error> {
-        State::mode_index(&self.mode)
-            .ok_or_else(|| format_err!("Unknown ModeName: {}", &self.mode))?;
+        State::mode_index(&self.mode).ok_or_else(|| Error::LookupErr {
+            key: self.mode.to_string(),
+            container: "known mode names".to_owned(),
+        })?;
         Ok(())
     }
 }
 
 impl TutorData {
-    pub fn chord(&self, name: &Name, mode: &ModeName) -> Option<Chord> {
-        if name == &Name(String::new()) {
+    pub fn chord(&self, name: &Name, mode: &ModeName) -> Result<Chord, Error> {
+        if name.is_empty() {
             // Used for skipping colors in the cheatsheet config
-            return Some(self.chord_spec.new_chord());
+            return Ok(self.chord_spec.new_chord());
         }
-        self.chords.get(mode)?.get(name).cloned()
+        self.chords
+            .get(mode)
+            .ok_or_else(|| Error::LookupErr {
+                key: mode.to_string(),
+                container: "tutor data modes".to_owned(),
+            })?.get(name)
+            .cloned()
+            .ok_or_else(|| Error::LookupErr {
+                key: name.into(),
+                container: "tutor data chords".to_owned(),
+            })
     }
 }
 
@@ -242,9 +254,11 @@ impl LearnState {
 
 pub fn read_state_file(path: &PathBuf) -> Result<Saveable, Error> {
     let file = File::open(path)
-        .context(format!("failed to open file: {}", path.display()))?;
-    let saveable: Saveable = serde_yaml::from_reader(file)
-        .context(format!("failed to read RON file: {}", path.display()))?;
+        .with_context(|| format!("failed to open file: {}", path.display()))?;
+    let saveable: Saveable =
+        serde_yaml::from_reader(file).with_context(|| {
+            format!("failed to read RON file: {}", path.display())
+        })?;
     saveable.validate()?;
     Ok(saveable)
 }

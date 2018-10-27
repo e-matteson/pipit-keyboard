@@ -1,10 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use error::{Error, ResultExt};
 use types::CCode;
-
-// use types::errors::*;
-use failure::{Error, ResultExt};
 
 // require Deserialize?
 
@@ -22,8 +20,9 @@ where
     fn validate(&self) -> Result<(), Error> {
         for (key, val) in self {
             key.validate().context("Invalid entry")?;
-            val.validate()
-                .context(format!("Invalid value for: '{}'", key.to_string()))?;
+            val.validate().with_context(|| {
+                format!("Invalid value for: '{}'", key.to_string())
+            })?;
         }
         Ok(())
     }
@@ -118,7 +117,7 @@ macro_rules! validated_struct {
                 fn validate(&self) -> Result<(), Error> {
                     $(
                         &self.$field.validate()
-                            .context(
+                            .with_context(||
                                 format!("Invalid value in: '{}'", stringify!($field))
                             )?;
                     )*
@@ -128,6 +127,7 @@ macro_rules! validated_struct {
         };
 }
 
+// TODO import Error, from wherever this is called?
 macro_rules! always_valid_enum {
     (
         $( #[$nested_macro:meta] )*

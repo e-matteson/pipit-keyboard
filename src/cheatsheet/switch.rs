@@ -1,13 +1,12 @@
-use failure::Error;
 use std::collections::HashMap;
 use svg::node::element::{ClipPath, Definitions, Group};
 use svg::Node;
 use unicode_segmentation::UnicodeSegmentation;
 
 use cheatsheet::draw::{
-    Color, Fill, FillPattern, Font, Label, MyCircle, MyRect, P2, V2, Wedge,
+    Color, Fill, FillPattern, Font, Label, MyCircle, MyRect, Wedge, P2, V2,
 };
-use types::errors::MissingErr;
+use error::Error;
 use types::Name;
 
 #[derive(Clone, Copy, Debug)]
@@ -389,10 +388,11 @@ fn get_symbol(name: &Name) -> Result<Symbol, Error> {
             ("".into(), Symbol::from("", 1.)), // used for skipping colors without displaying anything
         ].into_iter().collect();
     }
+    // TODO map?
     Ok(SYMBOLS
         .get(name)
-        .ok_or_else(|| MissingErr {
+        .ok_or_else(|| Error::Missing {
             missing: name.into(),
-            container: "cheatsheet symbol lookup".into(),
+            container: "cheatsheet symbol lookup".to_owned(),
         })?.to_owned())
 }

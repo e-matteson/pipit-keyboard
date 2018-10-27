@@ -7,7 +7,6 @@ use cursive::views::{
 };
 use cursive::Cursive;
 
-use types::errors::print_and_panic;
 use types::TutorData;
 
 use tutor::{load_lessons, Lesson, LessonConfig, State};
@@ -101,10 +100,8 @@ impl TutorApp {
         _name: &str,
         lesson_config: LessonConfig,
     ) {
-        let lesson = match Lesson::new(lesson_config) {
-            Ok(lesson) => lesson,
-            Err(error) => print_and_panic(&error),
-        };
+        // TODO will unwrap print nicely?
+        let lesson = Lesson::new(lesson_config).unwrap();
         let popup = lesson.popup.clone();
         siv.add_layer(lesson);
         if !popup.is_empty() {

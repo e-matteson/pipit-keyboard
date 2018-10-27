@@ -7,8 +7,6 @@ extern crate svg;
 extern crate time;
 extern crate unicode_segmentation;
 #[macro_use]
-extern crate failure;
-#[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate serde_derive;
@@ -17,6 +15,7 @@ extern crate clap;
 
 #[macro_use]
 mod types;
+mod error;
 #[macro_use]
 mod input;
 mod arduino;
@@ -31,11 +30,9 @@ use std::path::PathBuf;
 
 use arduino::ArduinoIDE;
 use cheatsheet::CheatSheet;
+use error::{Error, ResultExt};
 use input::AllDataBuilder;
 use tutor::TutorApp;
-use types::errors::print_error;
-
-use failure::{Error, ResultExt};
 
 use clap::{Arg, ArgGroup};
 
@@ -128,7 +125,8 @@ fn run() -> Result<(), Error> {
 
 fn main() {
     if let Err(error) = run() {
-        print_error(&error);
+        println!("{}", error);
+        // TODO impl exit code on error?
         ::std::process::exit(1);
     } else {
         println!("Done.");

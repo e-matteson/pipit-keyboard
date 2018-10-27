@@ -1,14 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::BitOr;
 
-use types::errors::OutOfRangeErr;
+use error::{Error, ResultExt};
 use types::{
     AllSeqMaps, AnagramNum, CCode, CTree, ChordMap, ChordSpec, Field,
     HuffmanTable, Name, SeqType, Sequence, ToC,
 };
 use util::usize_to_u16;
-
-use failure::{Error, ResultExt};
 
 // type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
 // type ChordMap = BTreeMap<Name, Chord>;
@@ -167,7 +165,7 @@ impl<'a> KmapBuilder<'a> {
                 names.len(),
                 info.anagram,
                 info.length,
-            ).with_context(|_| {
+            ).with_context(|| {
                 format!("Failed to render lookup: '{}'", struct_name)
             })?;
 
@@ -248,12 +246,12 @@ impl LookupKmapTypeLenAnagram {
 
         let max_len = max_val(bits_for_len) as usize;
         if seq_bit_len > max_len {
-            Err(OutOfRangeErr {
-                name: "length of compressed sequence".into(),
+            return Err(Error::OutOfRangeErr {
+                name: "length of compressed sequence".to_owned(),
                 value: seq_bit_len,
                 min: 0,
                 max: max_len,
-            })?;
+            });
         }
 
         let packed = u16::from(anagram.unwrap()).bitor(

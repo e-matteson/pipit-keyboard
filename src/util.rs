@@ -3,8 +3,7 @@ use std::io::prelude::*;
 use std::io::{stdin, stdout};
 use std::path::PathBuf;
 
-use failure::{Error, ResultExt};
-use types::errors::OutOfRangeErr;
+use error::{Error, ResultExt};
 
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
@@ -24,14 +23,15 @@ pub fn bools_to_bytes(v: &[bool]) -> Vec<u8> {
 
 pub fn bools_to_u32(v: &[bool]) -> Result<u32, Error> {
     // If v is shorter than 32, the missing most-significant digits will be zero
+    // TODO static? const?
     let max = 32;
     if v.len() > max {
-        Err(OutOfRangeErr {
+        return Err(Error::OutOfRangeErr {
             name: "number of bits to convert to a u32".into(),
             value: v.len(),
             min: 0,
             max,
-        })?;
+        });
     }
 
     let mut num: u32 = 0;
@@ -47,12 +47,12 @@ pub fn bools_to_u32(v: &[bool]) -> Result<u32, Error> {
 fn bools_to_u8(v: &[bool]) -> Result<u8, Error> {
     let max = 8;
     if v.len() > max {
-        Err(OutOfRangeErr {
+        return Err(Error::OutOfRangeErr {
             name: "number of bits to convert to a u8".into(),
             value: v.len(),
             min: 0,
             max,
-        })?;
+        });
     }
     let mut num: u8 = 0;
     let base: u8 = 2;
@@ -72,14 +72,15 @@ pub fn usize_to_u8(input: usize) -> Result<u8, Error> {
 pub fn ensure_u8(input: usize) -> Result<(), Error> {
     let truncated = input as u8;
     if input != (truncated as usize) {
-        Err(OutOfRangeErr {
-            name: "unsigned 8 bit int value".into(),
+        Err(Error::OutOfRangeErr {
+            name: "unsigned 8 bit int value".to_owned(),
             value: input,
             min: u8::min_value() as usize,
             max: u8::max_value() as usize,
-        })?;
+        })
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 pub fn usize_to_u16(input: usize) -> Result<u16, Error> {
@@ -89,15 +90,16 @@ pub fn usize_to_u16(input: usize) -> Result<u16, Error> {
 
 pub fn ensure_u16(input: usize) -> Result<(), Error> {
     let truncated = input as u16;
-    if input != (truncated as usize) {
-        Err(OutOfRangeErr {
+    if input == (truncated as usize) {
+        Ok(())
+    } else {
+        Err(Error::OutOfRangeErr {
             name: "unsigned 16 bit int value".into(),
             value: input,
             min: u16::min_value() as usize,
             max: u16::max_value() as usize,
-        })?;
+        })
     }
-    Ok(())
 }
 
 pub fn read_file(path: &PathBuf) -> Result<String, Error> {

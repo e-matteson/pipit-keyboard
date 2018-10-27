@@ -3,10 +3,8 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+use error::{Error, ResultExt};
 use types::{Chord, KmapFormat, KmapPath, Name};
-
-use failure::{Error, ResultExt};
-use types::errors::*;
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';
@@ -27,14 +25,13 @@ impl KmapPath {
         &self,
         format: &KmapFormat,
     ) -> Result<BTreeMap<Name, Chord>, Error> {
-        let lines =
-            self.load_lines()?.into_iter()
-            .enumerate()                    // track line numbers
+        let lines = self
+            .load_lines()?
+            .into_iter()
+            .enumerate() // track line numbers
             .map(|(i, l)|                   // trim whitespace
-                 (i, l.trim().to_owned()))
-            .filter(|&(_, ref l)|           // remove comments and empty lines
-                    !is_ignored(l))
-            .map(|(i, l)| check_ascii(i,l))
+                 (i, l.trim().to_owned())).filter(|&(_, ref l)|           // remove comments and empty lines
+                    !is_ignored(l)).map(|(i, l)| check_ascii(i, l))
             .collect::<Result<Vec<_>, Error>>()?;
 
         let mut mappings = Vec::new();
@@ -49,9 +46,9 @@ impl KmapPath {
         let buf = BufReader::new(File::open(&self.0)?);
         let mut lines: Vec<_> = buf.lines().map(|w| w.unwrap()).collect();
         if lines.is_empty() {
-            bail!("file is empty");
+            return Err(Error::Empty("kmap file".to_owned()));
         }
-        lines.insert(0, "".into()); // to make 0-indexed line numbering work
+        lines.insert(0, String::new()); // to make 0-indexed line numbering work
         Ok(lines)
     }
 }
@@ -65,12 +62,16 @@ impl Section {
             input.into_iter().cloned().unzip();
 
         if all_lines.len() != format.block_length() {
-            Err(KmapSyntaxErr(*line_nums.last().unwrap())).context(format!(
-                "According to the kmap_format setting, there should be {} \
-                 lines per block. {} lines were found.",
-                format.block_length(),
-                all_lines.len()
-            ))?
+            return Err(Error::KmapSyntaxErr {
+                line: *line_nums.last().unwrap(),
+            }).with_context(|| {
+                format!(
+                    "According to the kmap_format setting, there should be {} \
+                     lines per block. {} lines were found.",
+                    format.block_length(),
+                    all_lines.len()
+                )
+            });
         }
 
         Ok(Self {
@@ -145,13 +146,15 @@ impl Section {
         index: usize,
     ) -> Result<(), Error> {
         if line.len() != self.items_per_line[index] * self.num_blocks() {
-            Err(self.error_at(index + 1).context(format!(
+            Err(self.error_at(index + 1).with_context(|| {
+                format!(
                 "Wrong number of switches on line. Expected {} chords in this \
                  block, each with {} switches on this line. Is kmap_format \
                  correct for this file?",
                 self.num_blocks(),
                 self.items_per_line[index]
-            )))?;
+            )
+            }))?;
         }
         Ok(())
     }
@@ -159,7 +162,9 @@ impl Section {
     /// Produce a syntax error at a line with the given offset from the
     /// first line of the section.
     fn error_at(&self, line_offset: usize) -> Error {
-        KmapSyntaxErr(self.line_num + line_offset).into()
+        Error::KmapSyntaxErr {
+            line: self.line_num + line_offset,
+        }
     }
 
     fn num_blocks(&self) -> usize {
@@ -178,10 +183,12 @@ impl Section {
         } else {
             Err(self
                 .error_at(line_index)
-                .context(format!(
-                    "Expected '{}', '{}', or whitespace. Found '{}'",
-                    UNPRESSED_CHAR, PRESSED_CHAR, c
-                )).into())
+                .with_context(|| {
+                    format!(
+                        "Expected '{}', '{}', or whitespace. Found '{}'",
+                        UNPRESSED_CHAR, PRESSED_CHAR, c
+                    )
+                }).into())
         }
     }
 }
@@ -196,10 +203,10 @@ fn to_chord_map(
             continue;
         }
         if map.insert(name.clone(), chord).is_some() {
-            Err(ConflictErr {
+            return Err(Error::ConflictErr {
                 key: name.to_string(),
                 container: "chord names".into(),
-            }).context("Duplicate chord names in kmap file")?;
+            }).context("Duplicate chord names in kmap file");
         }
     }
     Ok(map)
@@ -216,8 +223,7 @@ fn check_ascii(
     if line.is_ascii() {
         Ok((line_number, line))
     } else {
-        Ok(Err(KmapSyntaxErr(line_number)).context(
-            "Non-ascii characters are not allowed outside of comments",
-        )?)
+        Err(Error::KmapSyntaxErr { line: line_number })
+            .context("Non-ascii characters are not allowed outside of comments")
     }
 }

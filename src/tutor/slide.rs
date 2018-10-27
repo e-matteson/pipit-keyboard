@@ -1,7 +1,8 @@
 use itertools::Itertools;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
-use failure::Error;
+use error::{Error, ResultExt};
 use tutor::{Label, LabeledChord, State};
 use types::{Chord, Name};
 
@@ -64,8 +65,14 @@ impl SlideLine {
             SlideLine::Words { words, .. } => {
                 let entries: Result<Vec<_>, _> = words
                     .iter()
-                    .map(|word| SlideEntry::from_word(word))
-                    .collect();
+                    .map(|word| {
+                        SlideEntry::from_word(word).with_context(|| {
+                            format!(
+                                "Failed to make slide entry from word: {}",
+                                word
+                            )
+                        })
+                    }).collect();
                 let entries = entries?;
                 let string =
                     entries.iter().map(|entry| entry.text.clone()).join("");
@@ -88,15 +95,16 @@ impl SlideEntry {
     // }
 
     fn from_word(word: &SlideWord) -> Result<Self, Error> {
-        let chords: Option<Vec<_>> =
-            word.names.iter().map(|name| State::chord(name)).collect();
+        let chords = word
+            .names
+            .iter()
+            .map(|name| State::chord(name))
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let chord = match chords {
-            None => bail!("failed to create chords for word"),
-            Some(v) => v.into_iter().fold1(|a, b| a.intersect(&b)).ok_or_else(
-                || format_err!("no chords to intersect for word"),
-            )?,
-        };
+        let chord = chords
+            .into_iter()
+            .fold1(|a, b| a.intersect(&b))
+            .ok_or_else(|| Error::Empty("word chords".to_owned()))?;
 
         Ok(Self {
             chord,
@@ -124,6 +132,12 @@ impl SlideEntry {
         } else {
             Label::default()
         }
+    }
+}
+
+impl fmt::Display for SlideWord {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.text.fmt(f)
     }
 }
 

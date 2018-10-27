@@ -10,8 +10,7 @@ use std::str::FromStr;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use failure::{Error, ResultExt};
-use types::errors::*;
+use error::{Error, ResultExt};
 use types::{CCode, Chord, ChordSpec, KeyPress, ModeName, ToC, Validate};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
@@ -107,12 +106,12 @@ impl Validate for Pin {
         if self.0 <= MAX_PIN_NUM && self.0 >= MIN_PIN_NUM {
             Ok(())
         } else {
-            Err(OutOfRangeErr {
+            Err(Error::OutOfRangeErr {
                 name: "pin number".into(),
                 value: self.0 as usize,
                 min: MIN_PIN_NUM as usize,
                 max: MAX_PIN_NUM as usize,
-            }.into())
+            })
         }
     }
 }
@@ -279,6 +278,12 @@ impl Validate for BoardName {
 }
 //////////////////////////////
 
+impl Name {
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 impl Validate for Name {
     fn validate(&self) -> Result<(), Error> {
         // TODO anything to check? Not used c_code...
@@ -327,13 +332,13 @@ impl fmt::Debug for Name {
 impl Spelling {
     pub fn new(s: &str) -> Result<Self, Error> {
         let mut chars = s.chars();
-        Ok(match (chars.next(), chars.next()) {
-            (Some(first), None) => Spelling(first),
-            (_, _) => Err(BadValueErr {
-                thing: "single ascii character".into(),
-                value: s.into(),
-            }).context("failed to make spelling")?,
-        })
+        match (chars.next(), chars.next()) {
+            (Some(first), None) => Ok(Spelling(first)),
+            (_, _) => Err(Error::BadValueErr {
+                thing: "single ascii character".to_owned(),
+                value: s.to_owned(),
+            }).context("failed to make spelling"),
+        }
     }
 
     pub fn is_uppercase(self) -> bool {
@@ -366,10 +371,10 @@ impl SpellingTable {
     /// Return a LookupErr if not found.
     /// TODO is this a good name?
     pub fn get_checked(&self, spelling: &Spelling) -> Result<&Name, Error> {
-        Ok(self.get(spelling).ok_or_else(|| LookupErr {
+        self.get(spelling).ok_or_else(|| Error::LookupErr {
             key: format!("name for '{}'", spelling),
-            container: "spelling table".into(),
-        })?)
+            container: "spelling table".to_owned(),
+        })
     }
 }
 
@@ -398,14 +403,14 @@ impl Sequence {
     }
 
     pub fn lone_keypress(&self) -> Result<KeyPress, Error> {
-        Ok(if self.len() == 1 {
-            self.0[0].clone()
+        if self.len() == 1 {
+            Ok(self.0[0].clone())
         } else {
-            Err(BadValueErr {
-                thing: "sequence length".into(),
+            Err(Error::BadValueErr {
+                thing: "sequence length".to_owned(),
                 value: self.len().to_string(),
-            }).context("Expected sequence containing only a single keypress")?
-        })
+            }).context("Expected sequence containing only a single keypress")
+        }
     }
 }
 
@@ -448,7 +453,7 @@ impl Permutation {
     pub fn from_to<T>(
         old_template: &[T],
         new_template: &[T],
-    ) -> Result<Self, PermuteErr>
+    ) -> Result<Self, Error>
     where
         T: Clone + Eq + ToString + Debug,
     {
@@ -457,7 +462,7 @@ impl Permutation {
             let pos_in_new = new_template
                 .iter()
                 .position(|item| item == old_item)
-                .ok_or_else(|| PermuteErr::WouldDrop)?;
+                .ok_or(Error::PermuteWouldDrop)?;
             order.push(pos_in_new)
         }
 
@@ -471,12 +476,12 @@ impl Permutation {
     /// template contained extra elements not in the old sequence template,
     /// those elements in the returned sequence will be set to their
     /// default value.
-    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, PermuteErr>
+    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, Error>
     where
         T: Clone + Default,
     {
         if old.len() != self.order.len() {
-            Err(PermuteErr::Length)?;
+            return Err(Error::PermuteLength);
         }
 
         let mut new: Vec<_> =

@@ -1,10 +1,8 @@
 use std::fmt;
 
-use types::errors::BadValueErr;
+use error::{Error, ResultExt};
 use types::{AnagramNum, CCode, Permutation, ToC};
 use util::bools_to_bytes;
-
-use failure::Error;
 
 /// This stores the specifications of the chord format, as learned from the
 /// settings file. We'll need it when creating a new empty Chord (to know how
@@ -98,15 +96,16 @@ impl Chord {
     /// something wrong, and might lose information by discarding the
     /// anagram number. Usually we'll just be intersecting plain_keys
     /// and/or plain_mods.
-    pub fn intersect_mut(&mut self, other: &Self) {
+    pub fn intersect_mut(&mut self, other: &Self) -> () {
         assert_eq!(self.len(), other.len());
 
         if other.anagram_num != AnagramNum::default() {
             // TODO return Result instead of unwrapping
-            Err(BadValueErr {
-                thing: "anagram number of other chord".into(),
-                value: format!("{}", other.anagram_num),
-            }).expect("Failed to intersect chords")
+            return Err(Error::BadValueErr {
+                thing: "anagram number of other chord".to_owned(),
+                value: other.anagram_num.to_string(),
+            }).context("Failed to intersect chords")
+            .unwrap();
         }
 
         for i in 0..self.switches.len() {

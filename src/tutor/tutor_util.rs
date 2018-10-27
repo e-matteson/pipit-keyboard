@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use serde_yaml;
 use unicode_segmentation::UnicodeSegmentation;
 
-use failure::{Error, ResultExt};
+use error::{Error, ResultExt};
 use tutor::Slide;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -50,9 +50,11 @@ fn lesson_path_to_name(path: &PathBuf) -> String {
 
 pub fn read_lesson_file(path: &PathBuf) -> Result<LessonConfig, Error> {
     let file = open_file(path)
-        .context(format!("failed to open file: {}", path.display()))?;
-    let lesson: LessonConfig = serde_yaml::from_reader(file)
-        .context(format!("failed to read lesson file: {}", path.display()))?;
+        .with_context(|| format!("Failed to open file: {}", path.display()))?;
+    let lesson: LessonConfig =
+        serde_yaml::from_reader(file).with_context(|| {
+            format!("Failed to read lesson file: {}", path.display())
+        })?;
     Ok(lesson)
 }
 

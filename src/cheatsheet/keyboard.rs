@@ -1,9 +1,8 @@
-use failure::{err_msg, Error};
 use svg::node::element::Group;
 use svg::Node;
 
 use cheatsheet::switch::{Content, Switch, SwitchStyle, Symbol};
-use types::errors::LookupErr;
+use error::Error;
 use types::{ModeName, Name, TutorData};
 
 use cheatsheet::draw::{Color, P2, V2};
@@ -38,18 +37,13 @@ impl Keyboard {
         assert_eq!(data.chord_spec.num_switches, self.switches.len());
         let chords = chord_names
             .iter()
-            .map(|name| {
-                data.chord(name, mode).ok_or_else(|| LookupErr {
-                    key: name.into(),
-                    container: "tutor data chords".into(),
-                })
-            }).collect::<Result<Vec<_>, _>>()?;
+            .map(|name| data.chord(name, mode))
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let symbols: Result<Vec<_>, Error> = chord_names
+        let symbols = chord_names
             .iter()
-            .map(|name| Symbol::from_name(name))
-            .collect();
-        let symbols = symbols?;
+            .map(Symbol::from_name)
+            .collect::<Result<Vec<_>, _>>()?;
 
         let mut chord_style_iter = SwitchStyle::chord_style_iter();
 
@@ -61,9 +55,7 @@ impl Keyboard {
                 // We should also consume a chord style if 0 switches are
                 // pressed, meaning this is a blank chord named "", used for
                 // skipping colors.
-                chord_style_iter.next().ok_or_else(|| {
-                    err_msg("ran out of unique switch fill styles")
-                })?
+                chord_style_iter.next().ok_or(Error::Style)?
             };
 
             let content = Content {

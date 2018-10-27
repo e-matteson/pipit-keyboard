@@ -10,10 +10,9 @@ use svg::node::element::{Definitions, Group};
 use svg::Document;
 use svg::Node;
 
-use failure::{Error, ResultExt};
-
-use cheatsheet::keyboard::{Keyboard, KeyboardSpec};
-use cheatsheet::switch::Switch;
+use self::keyboard::{Keyboard, KeyboardSpec};
+use self::switch::Switch;
+use error::{Error, ResultExt};
 use types::{ModeName, TutorData};
 use util::{read_file, user_confirm, ConfirmDefault};
 
@@ -40,14 +39,14 @@ pub struct CheatSheetSpec {
 
 impl CheatSheet {
     pub fn from_yaml(path: &PathBuf, data: &TutorData) -> Result<Self, Error> {
-        let file = read_file(path).with_context(|_| {
-            format!("failed to read cheatsheet config file: {:?}", path)
+        let file = read_file(path).with_context(|| {
+            format!("Failed to read cheatsheet config file: {:?}", path)
         })?;
         let spec: CheatSheetSpec =
-            serde_yaml::from_str(&file).with_context(|_| {
-                format!("failed to parse cheatsheet config file: {:?}", path)
+            serde_yaml::from_str(&file).with_context(|| {
+                format!("Failed to parse cheatsheet config file: {:?}", path)
             })?;
-        Self::new(&spec, data, Self::config_path_to_svg_path(path)?)
+        Self::new(&spec, data, Self::config_path_to_svg_path(path))
     }
 
     pub fn new(
@@ -82,10 +81,9 @@ impl CheatSheet {
                 let mut keyboard = Keyboard::new(*pos);
                 keyboard
                     .set(&kb_spec.chord_names, data, &spec.mode)
-                    .context(format!(
-                        "Failed to create image of keyboard #{}",
-                        i
-                    ))?;
+                    .with_context(|| {
+                        format!("Failed to create image of keyboard #{}", i)
+                    })?;
 
                 all.push(keyboard);
             }
@@ -102,14 +100,14 @@ impl CheatSheet {
         })
     }
 
-    fn config_path_to_svg_path(
-        config_path: &PathBuf,
-    ) -> Result<PathBuf, Error> {
-        Ok(config_path
+    fn config_path_to_svg_path(config_path: &PathBuf) -> PathBuf {
+        // TODO wait, doesn't return just a file name, not a complete path?
+        // TODO don't expect? when could that fail?
+        config_path
             .with_extension("svg")
             .file_name()
-            .ok_or_else(|| format_err!("Failed to construct svg filename"))?
-            .into())
+            .expect("failed to construct svg filename")
+            .into()
     }
 
     fn render(&self) -> Document {
@@ -154,10 +152,11 @@ impl CheatSheet {
         // yet, and it doesn't know to stop borrowing `path` after creating
         // `path_str`.
         {
-            let path_str = path
-                .to_str()
-                .to_owned()
-                .ok_or_else(|| format_err!("Invalid path: {:?}", path))?;
+            let path_str =
+                path.to_str().to_owned().ok_or_else(|| Error::BadValueErr {
+                    thing: "path".to_owned(),
+                    value: format!("{:?}", path),
+                })?;
 
             if path.exists() {
                 let confirmed = user_confirm(

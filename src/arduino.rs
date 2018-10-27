@@ -1,9 +1,7 @@
 use std::process::Command;
 
+use error::{Error, ResultExt};
 use types::BoardName;
-
-use failure::{Error, ResultExt};
-// use types::errors::*;
 
 pub struct ArduinoIDE {
     board: BoardName,
@@ -66,16 +64,16 @@ impl ArduinoIDE {
             .status()
             .context("Failed to open Arduino IDE")?;
 
-        // TODO use real error types
-        match status.code() {
-            Some(0) => Ok(()),
-            Some(1) => bail!("Build failed or upload failed"),
-            Some(2) => bail!("Sketch not found"),
-            Some(3) => bail!("Invalid (argument for) commandline option"),
-            Some(4) => bail!("Preference passed to --get-pref does not exist"),
-            None => bail!("Arduino IDE process was terminated"),
-            _ => bail!("Arduino IDE failed with unknown exit status"),
-        }
+        let context = match status.code() {
+            Some(0) => return Ok(()),
+            Some(1) => "Build failed or upload failed",
+            Some(2) => "Sketch not found",
+            Some(3) => "Invalid (argument for) commandline option",
+            Some(4) => "Preference passed to --get-pref does not exist",
+            None => "Arduino IDE process was terminated",
+            _ => "Arduino IDE failed with unknown exit status",
+        };
+        Err(Error::Arduino.context(context))
     }
 }
 
