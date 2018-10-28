@@ -178,3 +178,38 @@ fn increment(
     let count = map.entry(key).or_insert((0, is_mod));
     (*count).0 += 1;
 }
+
+#[test]
+fn test_huffman_bits() {
+    let table = make_test_table();
+    println!("{:?}", table);
+    let a_entry = &table.get(&"a".to_c()).unwrap().bits;
+    let b_entry = &table.get(&"b".to_c()).unwrap().bits;
+    let c_entry = &table.get(&"c".to_c()).unwrap().bits;
+    assert!(a_entry.get(0).unwrap() == &true);
+    assert!(b_entry.get(0).unwrap() == &false);
+    assert!(b_entry.get(1).unwrap() == &true);
+    assert!(c_entry.get(0).unwrap() == &false);
+    assert!(c_entry.get(1).unwrap() == &false);
+}
+
+#[test]
+fn test_huffman_u32() {
+    let table = make_test_table();
+    let a_entry = table.get(&"a".to_c()).unwrap();
+    let b_entry = table.get(&"b".to_c()).unwrap();
+    let c_entry = table.get(&"c".to_c()).unwrap();
+    assert_eq!(a_entry.as_uint32().unwrap(), 1.to_c());
+    assert_eq!(b_entry.as_uint32().unwrap(), 2.to_c());
+    assert_eq!(c_entry.as_uint32().unwrap(), 0.to_c());
+}
+
+#[cfg(test)]
+fn make_test_table() -> HuffmanTable {
+    let a = KeyPress::new_key("a");
+    let b = KeyPress::new_key("b");
+    let c = KeyPress::new_key("c");
+    let input =
+        vec![a.clone(), a.clone(), a.clone(), a.clone(), b.clone(), b, c];
+    HuffmanTable::new(input).unwrap()
+}

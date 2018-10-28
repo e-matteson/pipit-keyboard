@@ -186,7 +186,7 @@ lazy_static!{
 ////////////////////////////////////////////////////////////////////////////////
 
 impl KeyPress {
-    fn new_key<T>(keycode: T) -> Self
+    pub fn new_key<T>(keycode: T) -> Self
     where
         T: ToC,
     {
