@@ -99,7 +99,7 @@ impl Chord {
     pub fn intersect_mut(&mut self, other: &Self) -> () {
         assert_eq!(self.len(), other.len());
 
-        if other.anagram_num != AnagramNum::default() {
+        if !other.anagram_num.is_default() {
             // TODO return Result instead of unwrapping
             return Err(Error::BadValueErr {
                 thing: "anagram number of other chord".to_owned(),

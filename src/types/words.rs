@@ -5,6 +5,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use error::Error;
 use types::{KeyPress, Name, Sequence, Spelling, Validate};
 
+const DEFAULT_ANAGRAM_NUM: u8 = 0;
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct Word {
@@ -47,7 +49,7 @@ impl Word {
     }
 
     pub fn anagram_num(&self) -> AnagramNum {
-        self.anagram.unwrap_or(AnagramNum(0))
+        self.anagram.unwrap_or(AnagramNum(DEFAULT_ANAGRAM_NUM))
     }
 
     fn has_alternate_chord(&self) -> bool {
@@ -101,11 +103,15 @@ impl AnagramNum {
     pub fn up_to(self) -> Box<Iterator<Item = Self>> {
         Box::new((0..=self.0).map(AnagramNum))
     }
+
+    pub fn is_default(self) -> bool {
+        self.0 == DEFAULT_ANAGRAM_NUM
+    }
 }
 
 impl Default for AnagramNum {
     fn default() -> Self {
-        AnagramNum(0)
+        AnagramNum(DEFAULT_ANAGRAM_NUM)
     }
 }
 
