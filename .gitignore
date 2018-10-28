@@ -2,6 +2,7 @@ target
 /pipit-firmware/auto_config.cpp
 /pipit-firmware/auto_config.h
 /src/tests/actual-outputs/*
+callgrind.out.*
 *.svg
 *.pdf
 *.png
