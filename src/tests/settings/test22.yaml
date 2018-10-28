@@ -9,8 +9,8 @@ options:
   rgb_led_pins:                [10, 11, 12]
   enable_led_typing_feedback:  true
   battery_level_pin:           9
-  row_pins:                    [[1, 0, 19]]
-  column_pins:                 [[15,16,17,18, 20,21,5,6]]
+  row_pins:                    [1, 0, 19]
+  column_pins:                 [15,16,17,18, 20,21,5,6]
   output_directory:            src/tests/actual-outputs
 
   kmap_format:
@@ -117,9 +117,6 @@ commands:
   - command_led_battery
   - command_led_colors
   - command_led_rainbow
-  - command_left_hand_mode
-  - command_default_mode
-  - command_gaming_mode
 
 dictionary:
   - {word: "the"}

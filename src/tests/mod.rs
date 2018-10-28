@@ -1,13 +1,10 @@
-extern crate failure;
-
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
 
-use failure::{Error, ResultExt};
+use error::{Error, ResultExt};
 
 use input::AllDataBuilder;
-use types::errors::pretty_unwrap;
 
 fn expected_dir() -> PathBuf {
     PathBuf::from("src/tests/expected-outputs/")
@@ -61,11 +58,17 @@ fn assert_firmware_config_eq(name_base: &str) {
         &expected_dir.join(name_base).with_extension("h"),
         &actual_dir.join(name_base).with_extension("h"),
     );
+    let constants_base = format!("{}_constants", name_base);
+    assert_files_eq(
+        &expected_dir.join(&constants_base).with_extension("h"),
+        &actual_dir.join(&constants_base).with_extension("h"),
+    );
 }
 
 fn assert_files_eq(left_file: &PathBuf, right_file: &PathBuf) {
     // let left_str = read(left_file).unwrap_or_else(|e| print_and_panic(e));
-    if pretty_unwrap(read(left_file)) != pretty_unwrap(read(right_file)) {
+    // if pretty_unwrap(read(left_file)) != pretty_unwrap(read(right_file)) {
+    if read(left_file).unwrap() != read(right_file).unwrap() {
         panic!(
             "File contents don't match: {:?}, {:?}",
             left_file, right_file
@@ -75,7 +78,8 @@ fn assert_files_eq(left_file: &PathBuf, right_file: &PathBuf) {
 
 fn read(path: &PathBuf) -> Result<String, Error> {
     let mut reader = BufReader::new(
-        File::open(path).context(format!("failed to open: {:?}", path))?,
+        File::open(path)
+            .with_context(|| format!("failed to open: {:?}", path))?,
     );
     let mut string = String::new();
     reader.read_to_string(&mut string)?;

@@ -1,7 +1,6 @@
-#ifndef AUTO_CONFIG_BIG_TEST_H_
-#define AUTO_CONFIG_BIG_TEST_H_
-#include <Arduino.h>
-#include "structs.h"
+#pragma once
+#include <stdint.h>
+#include "util.h"
 typedef void (*voidFuncPtr)(void);
 
 #ifndef KEYPAD_0
@@ -129,92 +128,81 @@ typedef void (*voidFuncPtr)(void);
 #endif // ifndef KEYPAD_0
 
 namespace conf {
-#define CHORD_DELAY 30
-#define HELD_DELAY 200
-#define DEBOUNCE_DELAY 10
+extern const uint32_t CHORD_DELAY;
+extern const uint32_t HELD_DELAY;
+extern const uint32_t DEBOUNCE_DELAY;
 #define DEBUG_MESSAGES 0
-#define WORD_SPACE_POSITION 0
+extern const WordSpacePosition SPACE_POS;
 #define FEATHER_M0_BLE 
-extern const uint8_t* row_pins[];
-extern const uint8_t* column_pins[];
+extern const uint8_t row_pins[3];
+extern const uint8_t column_pins[8];
 #define ENABLE_LED_TYPING_FEEDBACK 
-#define USE_STANDBY_INTERRUPTS 
-extern const uint8_t rgb_led_pins[];
+extern const bool USE_STANDBY_INTERRUPTS;
+extern const uint8_t rgb_led_pins[3];
 extern const uint8_t battery_level_pin;
-#define NUM_ROWS 3
-#define NUM_COLUMNS 8
-#define NUM_HANDS 1
 #define NUM_MATRIX_POSITIONS 24
-#define NUM_RGB_LED_PINS 3
 #define ENABLE_RGB_LED 
 #define HAS_BATTERY 
-#define NUM_BYTES_IN_CHORD 3
-#define BLANK_KEY 0
-#define NUM_HUFFMAN_CODES 103
-#define MIN_HUFFMAN_CODE_BIT_LEN 3
-extern const HuffmanChar huffman_lookup[];
-enum mod_enum : uint8_t {
-  MOD_ALT_ENUM = 0,
-  MOD_ANAGRAM_1_ENUM = 1,
-  MOD_ANAGRAM_2_ENUM = 2,
-  MOD_CAPITAL_ENUM = 3,
-  MOD_CTRL_ENUM = 4,
-  MOD_DOUBLE_ENUM = 5,
-  MOD_GUI_ENUM = 6,
-  MOD_NOSPACE_ENUM = 7,
-  MOD_SHIFT_ENUM = 8,
-  MOD_SHORTEN_ENUM = 9,
+extern const uint8_t MIN_HUFFMAN_CODE_BIT_LEN;
+extern const HuffmanChar huffman_lookup[100];
+enum class Mod : uint8_t {
+  mod_alt = 0,
+  mod_anagram_1 = 1,
+  mod_anagram_2 = 2,
+  mod_capital = 3,
+  mod_ctrl = 4,
+  mod_double = 5,
+  mod_gui = 6,
+  mod_nospace = 7,
+  mod_shift = 8,
+  mod_shorten = 9,
 };
 
 #define NUM_MODIFIERS 10
-#define NUM_WORD_MODS 4
-#define NUM_ANAGRAM_MODS 2
-#define MAX_ANAGRAM_NUM 7
-#define NUM_PLAIN_MODS 4
-extern const mod_enum word_mod_indices[];
-extern const mod_enum plain_mod_indices[];
-extern const mod_enum anagram_mod_indices[];
-extern const uint8_t plain_mod_keys[];
-enum command_enum : uint8_t {
-  COMMAND_CYCLE_CAPITAL = 0,
-  COMMAND_CYCLE_NOSPACE = 1,
-  COMMAND_CYCLE_WORD = 2,
-  COMMAND_DEFAULT_MODE = 3,
-  COMMAND_DELETE_WORD = 4,
-  COMMAND_GAMING_MODE = 5,
-  COMMAND_LED_BATTERY = 6,
-  COMMAND_LED_COLORS = 7,
-  COMMAND_LED_RAINBOW = 8,
-  COMMAND_LEFT_HAND_MODE = 9,
-  COMMAND_LEFT_LIMIT = 10,
-  COMMAND_LEFT_WORD = 11,
-  COMMAND_PAUSE = 12,
-  COMMAND_RIGHT_LIMIT = 13,
-  COMMAND_RIGHT_WORD = 14,
-  COMMAND_SHORTEN_LAST_WORD = 15,
-  COMMAND_STICKY_ALT = 16,
-  COMMAND_STICKY_CTRL = 17,
-  COMMAND_STICKY_GUI = 18,
-  COMMAND_SWITCH_TO = 20,
-  COMMAND_WINDOWS_MODE = 21,
+extern const uint8_t MAX_ANAGRAM_NUM;
+extern const Mod word_mods[4];
+extern const Mod plain_mods[4];
+extern const Mod anagram_mods[2];
+extern const uint8_t anagram_mod_numbers[2];
+extern const uint8_t plain_mod_keys[4];
+enum class Command : uint8_t {
+  command_cycle_capital = 0,
+  command_cycle_nospace = 1,
+  command_cycle_word = 2,
+  command_delete_word = 3,
+  command_led_battery = 4,
+  command_led_colors = 5,
+  command_led_rainbow = 6,
+  command_left_limit = 7,
+  command_left_word = 8,
+  command_pause = 9,
+  command_right_limit = 10,
+  command_right_word = 11,
+  command_shorten_last_word = 12,
+  command_sticky_alt = 13,
+  command_sticky_ctrl = 14,
+  command_sticky_gui = 15,
+  command_sticky_shift = 16,
+  command_switch_to = 17,
+  command_windows_mode = 18,
 };
 
-enum seq_type_enum : uint8_t {
-  PLAIN = 0,
-  MACRO = 1,
-  COMMAND = 2,
-  WORD = 3,
+enum class SeqType : uint8_t {
+  Plain = 0,
+  Macro = 1,
+  Command = 2,
+  Word = 3,
 };
 
-enum mode_enum : uint8_t {
-  DEFAULT_MODE = 0,
-  GAMING_MODE = 1,
-  LEFT_HAND_MODE = 2,
-  WINDOWS_MODE = 3,
+enum class Mode : uint8_t {
+  default_mode = 0,
+  gaming_mode = 1,
+  left_hand_mode = 2,
+  windows_mode = 3,
 };
 
-#define MAX_KEYS_IN_SEQUENCE 41
-extern const ModeStruct* mode_structs[];
+extern const uint8_t MAX_KEYS_IN_SEQUENCE;
+extern const ModeStruct* mode_structs[4];
 
 } // end namespace conf
 
@@ -241,4 +229,3 @@ extern const ModeStruct* mode_structs[];
 #define DEBUG2_LN(msg) Serial.println(msg)
 #endif
 
-#endif // AUTO_CONFIG_BIG_TEST_H_

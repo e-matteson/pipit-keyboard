@@ -1,676 +1,635 @@
 #include "auto_config-22.h"
 namespace conf {
-const uint8_t row_pins_0[] = {
+const uint32_t CHORD_DELAY = 30;
+
+const uint32_t HELD_DELAY = 200;
+
+const uint32_t DEBOUNCE_DELAY = 10;
+
+const WordSpacePosition SPACE_POS = WordSpacePosition::Before;
+
+const uint8_t row_pins[3] = {
  1, 0, 19, 
 };
 
-const uint8_t* row_pins[] = {
- row_pins_0, 
-};
-
-const uint8_t column_pins_0[] = {
+const uint8_t column_pins[8] = {
  15, 16, 17, 18, 
  20, 21, 5, 6, 
 };
 
-const uint8_t* column_pins[] = {
- column_pins_0, 
-};
+const bool USE_STANDBY_INTERRUPTS = 1;
 
-const uint8_t rgb_led_pins[] = {
+const uint8_t rgb_led_pins[3] = {
  10, 11, 12, 
 };
 
 const uint8_t battery_level_pin = 9;
 
-const HuffmanChar huffman_lookup[] = {
+const uint8_t MIN_HUFFMAN_CODE_BIT_LEN = 4;
+
+const HuffmanChar huffman_lookup[68] = {
  {
-  19, // bits
+  21, // bits
   5, // num_bits
-  (BLANK_KEY)&0xff, // key_code
-  0, // is_mod
-}, {
-  45, // bits
-  7, // num_bits
-  (COMMAND_CYCLE_CAPITAL)&0xff, // key_code
-  0, // is_mod
-}, {
-  109, // bits
-  7, // num_bits
-  (COMMAND_CYCLE_NOSPACE)&0xff, // key_code
-  0, // is_mod
-}, {
-  87, // bits
-  7, // num_bits
-  (COMMAND_CYCLE_WORD)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  11, // bits
-  7, // num_bits
-  (COMMAND_DEFAULT_MODE)&0xff, // key_code
-  0, // is_mod
-}, {
-  14, // bits
-  6, // num_bits
-  (COMMAND_DELETE_WORD)&0xff, // key_code
+  static_cast<uint8_t>(0 /* blank key, when a keypress contains only modifiers and no key */), // key_code
   0, // is_mod
 }, {
   6, // bits
   6, // num_bits
-  (COMMAND_GAMING_MODE)&0xff, // key_code
-  0, // is_mod
-}, {
-  50, // bits
-  6, // num_bits
-  (COMMAND_LED_BATTERY)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  1, // bits
-  6, // num_bits
-  (COMMAND_LED_COLORS)&0xff, // key_code
-  0, // is_mod
-}, {
-  52, // bits
-  6, // num_bits
-  (COMMAND_LED_RAINBOW)&0xff, // key_code
-  0, // is_mod
-}, {
-  75, // bits
-  7, // num_bits
-  (COMMAND_LEFT_HAND_MODE)&0xff, // key_code
-  0, // is_mod
-}, {
-  79, // bits
-  7, // num_bits
-  (COMMAND_LEFT_LIMIT)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  46, // bits
-  6, // num_bits
-  (COMMAND_LEFT_WORD)&0xff, // key_code
-  0, // is_mod
-}, {
-  95, // bits
-  7, // num_bits
-  (COMMAND_PAUSE)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_cycle_capital), // key_code
   0, // is_mod
 }, {
   38, // bits
   6, // num_bits
-  (COMMAND_RIGHT_LIMIT)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_cycle_nospace), // key_code
+  0, // is_mod
+}, {
+  51, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_cycle_word), // key_code
+  0, // is_mod
+}, 
+ {
+  115, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_delete_word), // key_code
   0, // is_mod
 }, {
   12, // bits
   6, // num_bits
-  (COMMAND_RIGHT_WORD)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_led_battery), // key_code
+  0, // is_mod
+}, {
+  22, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Command::command_led_colors), // key_code
+  0, // is_mod
+}, {
+  87, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_led_rainbow), // key_code
+  0, // is_mod
+}, 
+ {
+  3, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_left_limit), // key_code
+  0, // is_mod
+}, {
+  125, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_left_word), // key_code
+  0, // is_mod
+}, {
+  45, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_pause), // key_code
+  0, // is_mod
+}, {
+  60, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Command::command_right_limit), // key_code
   0, // is_mod
 }, 
  {
   44, // bits
   6, // num_bits
-  (COMMAND_SHORTEN_LAST_WORD)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_right_word), // key_code
   0, // is_mod
 }, {
-  36, // bits
+  9, // bits
   6, // num_bits
-  (COMMAND_STICKY_ALT)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_shorten_last_word), // key_code
   0, // is_mod
 }, {
-  33, // bits
+  54, // bits
   6, // num_bits
-  (COMMAND_STICKY_CTRL)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_sticky_alt), // key_code
   0, // is_mod
 }, {
-  43, // bits
-  7, // num_bits
-  (COMMAND_STICKY_GUI)&0xff, // key_code
+  52, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Command::command_sticky_ctrl), // key_code
   0, // is_mod
 }, 
  {
-  24, // bits
-  6, // num_bits
-  (COMMAND_STICKY_SHIFT)&0xff, // key_code
+  15, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Command::command_sticky_gui), // key_code
   0, // is_mod
 }, {
-  47, // bits
+  99, // bits
   7, // num_bits
-  (COMMAND_WINDOWS_MODE)&0xff, // key_code
-  0, // is_mod
-}, {
-  55, // bits
-  7, // num_bits
-  (KEY_0)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_sticky_shift), // key_code
   0, // is_mod
 }, {
   7, // bits
-  6, // num_bits
-  (KEY_1)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  63, // bits
-  7, // num_bits
-  (KEY_2)&0xff, // key_code
-  0, // is_mod
-}, {
-  21, // bits
   5, // num_bits
-  (KEY_3)&0xff, // key_code
-  0, // is_mod
-}, {
-  30, // bits
-  6, // num_bits
-  (KEY_4)&0xff, // key_code
-  0, // is_mod
-}, {
-  49, // bits
-  6, // num_bits
-  (KEY_5)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  16, // bits
-  6, // num_bits
-  (KEY_6)&0xff, // key_code
-  0, // is_mod
-}, {
-  26, // bits
-  5, // num_bits
-  (KEY_7)&0xff, // key_code
-  0, // is_mod
-}, {
-  3, // bits
-  7, // num_bits
-  (KEY_8)&0xff, // key_code
-  0, // is_mod
-}, {
-  22, // bits
-  6, // num_bits
-  (KEY_9)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  54, // bits
-  6, // num_bits
-  (KEY_A)&0xff, // key_code
-  0, // is_mod
-}, {
-  34, // bits
-  6, // num_bits
-  (KEY_B)&0xff, // key_code
-  0, // is_mod
-}, {
-  2, // bits
-  6, // num_bits
-  (KEY_BACKSPACE)&0xff, // key_code
-  0, // is_mod
-}, {
-  37, // bits
-  6, // num_bits
-  (KEY_C)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  5, // bits
-  6, // num_bits
-  (KEY_D)&0xff, // key_code
-  0, // is_mod
-}, {
-  27, // bits
-  5, // num_bits
-  (KEY_E)&0xff, // key_code
-  0, // is_mod
-}, {
-  4, // bits
-  6, // num_bits
-  (KEY_ENTER)&0xff, // key_code
-  0, // is_mod
-}, {
-  18, // bits
-  6, // num_bits
-  (KEY_F)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  107, // bits
-  7, // num_bits
-  (KEY_G)&0xff, // key_code
-  0, // is_mod
-}, {
-  29, // bits
-  5, // num_bits
-  (KEY_H)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_switch_to), // key_code
   0, // is_mod
 }, {
   56, // bits
   6, // num_bits
-  (KEY_I)&0xff, // key_code
-  0, // is_mod
-}, {
-  20, // bits
-  6, // num_bits
-  (KEY_J)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  111, // bits
-  7, // num_bits
-  (KEY_K)&0xff, // key_code
-  0, // is_mod
-}, {
-  10, // bits
-  5, // num_bits
-  (KEY_L)&0xff, // key_code
-  0, // is_mod
-}, {
-  119, // bits
-  7, // num_bits
-  (KEY_M)&0xff, // key_code
-  0, // is_mod
-}, {
-  103, // bits
-  7, // num_bits
-  (KEY_N)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  23, // bits
-  7, // num_bits
-  (KEY_O)&0xff, // key_code
-  0, // is_mod
-}, {
-  39, // bits
-  7, // num_bits
-  (KEY_P)&0xff, // key_code
-  0, // is_mod
-}, {
-  127, // bits
-  7, // num_bits
-  (KEY_Q)&0xff, // key_code
-  0, // is_mod
-}, {
-  15, // bits
-  7, // num_bits
-  (KEY_R)&0xff, // key_code
-  0, // is_mod
-}, 
- {
-  28, // bits
-  5, // num_bits
-  (KEY_S)&0xff, // key_code
-  0, // is_mod
-}, {
-  62, // bits
-  6, // num_bits
-  (KEY_SPACE)&0xff, // key_code
-  0, // is_mod
-}, {
-  9, // bits
-  4, // num_bits
-  (KEY_T)&0xff, // key_code
-  0, // is_mod
-}, {
-  40, // bits
-  6, // num_bits
-  (KEY_TAB)&0xff, // key_code
+  static_cast<uint8_t>(Command::command_windows_mode), // key_code
   0, // is_mod
 }, 
  {
   8, // bits
   6, // num_bits
-  (KEY_U)&0xff, // key_code
+  static_cast<uint8_t>(KEY_0), // key_code
   0, // is_mod
 }, {
-  17, // bits
+  13, // bits
   6, // num_bits
-  (KEY_V)&0xff, // key_code
+  static_cast<uint8_t>(KEY_1), // key_code
   0, // is_mod
 }, {
-  48, // bits
-  6, // num_bits
-  (KEY_W)&0xff, // key_code
-  0, // is_mod
-}, {
-  99, // bits
+  109, // bits
   7, // num_bits
-  (KEY_X)&0xff, // key_code
+  static_cast<uint8_t>(KEY_2), // key_code
+  0, // is_mod
+}, {
+  5, // bits
+  5, // num_bits
+  static_cast<uint8_t>(KEY_3), // key_code
   0, // is_mod
 }, 
  {
-  31, // bits
-  7, // num_bits
-  (KEY_Y)&0xff, // key_code
+  18, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_4), // key_code
   0, // is_mod
 }, {
-  35, // bits
+  36, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_5), // key_code
+  0, // is_mod
+}, {
+  47, // bits
   7, // num_bits
-  (KEY_Z)&0xff, // key_code
+  static_cast<uint8_t>(KEY_6), // key_code
+  0, // is_mod
+}, {
+  43, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_7), // key_code
+  0, // is_mod
+}, 
+ {
+  41, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_8), // key_code
+  0, // is_mod
+}, {
+  95, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_9), // key_code
+  0, // is_mod
+}, {
+  16, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_A), // key_code
+  0, // is_mod
+}, {
+  62, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_B), // key_code
+  0, // is_mod
+}, 
+ {
+  1, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_BACKSPACE), // key_code
+  0, // is_mod
+}, {
+  30, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_C), // key_code
+  0, // is_mod
+}, {
+  79, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_D), // key_code
+  0, // is_mod
+}, {
+  27, // bits
+  5, // num_bits
+  static_cast<uint8_t>(KEY_E), // key_code
+  0, // is_mod
+}, 
+ {
+  20, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_ENTER), // key_code
   0, // is_mod
 }, {
   67, // bits
   7, // num_bits
-  (MODIFIERKEY_ALT)&0xff, // key_code
-  1, // is_mod
+  static_cast<uint8_t>(KEY_F), // key_code
+  0, // is_mod
 }, {
-  13, // bits
+  35, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_G), // key_code
+  0, // is_mod
+}, {
+  25, // bits
+  5, // num_bits
+  static_cast<uint8_t>(KEY_H), // key_code
+  0, // is_mod
+}, 
+ {
+  23, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_I), // key_code
+  0, // is_mod
+}, {
+  24, // bits
   6, // num_bits
-  (MODIFIERKEY_CTRL)&0xff, // key_code
-  1, // is_mod
+  static_cast<uint8_t>(KEY_J), // key_code
+  0, // is_mod
+}, {
+  40, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_K), // key_code
+  0, // is_mod
+}, {
+  19, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_L), // key_code
+  0, // is_mod
+}, 
+ {
+  61, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_M), // key_code
+  0, // is_mod
+}, {
+  93, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_N), // key_code
+  0, // is_mod
+}, {
+  29, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_O), // key_code
+  0, // is_mod
+}, {
+  14, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_P), // key_code
+  0, // is_mod
+}, 
+ {
+  46, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_Q), // key_code
+  0, // is_mod
+}, {
+  50, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_R), // key_code
+  0, // is_mod
+}, {
+  11, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_S), // key_code
+  0, // is_mod
+}, {
+  28, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_SPACE), // key_code
+  0, // is_mod
+}, 
+ {
+  10, // bits
+  4, // num_bits
+  static_cast<uint8_t>(KEY_T), // key_code
+  0, // is_mod
+}, {
+  4, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_TAB), // key_code
+  0, // is_mod
+}, {
+  111, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_U), // key_code
+  0, // is_mod
+}, {
+  0, // bits
+  6, // num_bits
+  static_cast<uint8_t>(KEY_V), // key_code
+  0, // is_mod
 }, 
  {
   32, // bits
   6, // num_bits
-  (MODIFIERKEY_GUI)&0xff, // key_code
+  static_cast<uint8_t>(KEY_W), // key_code
+  0, // is_mod
+}, {
+  119, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_X), // key_code
+  0, // is_mod
+}, {
+  55, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_Y), // key_code
+  0, // is_mod
+}, {
+  127, // bits
+  7, // num_bits
+  static_cast<uint8_t>(KEY_Z), // key_code
+  0, // is_mod
+}, 
+ {
+  63, // bits
+  7, // num_bits
+  static_cast<uint8_t>(MODIFIERKEY_ALT), // key_code
   1, // is_mod
 }, {
-  0, // bits
+  17, // bits
   6, // num_bits
-  (MODIFIERKEY_SHIFT)&0xff, // key_code
+  static_cast<uint8_t>(MODIFIERKEY_CTRL), // key_code
   1, // is_mod
+}, {
+  48, // bits
+  6, // num_bits
+  static_cast<uint8_t>(MODIFIERKEY_GUI), // key_code
+  1, // is_mod
+}, {
+  33, // bits
+  6, // num_bits
+  static_cast<uint8_t>(MODIFIERKEY_SHIFT), // key_code
+  1, // is_mod
+}, 
+ {
+  31, // bits
+  7, // num_bits
+  static_cast<uint8_t>(Mode::default_mode), // key_code
+  0, // is_mod
+}, {
+  49, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Mode::gaming_mode), // key_code
+  0, // is_mod
+}, {
+  34, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Mode::left_hand_mode), // key_code
+  0, // is_mod
+}, {
+  2, // bits
+  6, // num_bits
+  static_cast<uint8_t>(Mode::windows_mode), // key_code
+  0, // is_mod
 }, 
 };
 
-const mod_enum word_mod_indices[] = {
- MOD_CAPITAL_ENUM, MOD_NOSPACE_ENUM, MOD_DOUBLE_ENUM, MOD_SHORTEN_ENUM, 
+const uint8_t MAX_ANAGRAM_NUM = 1;
+
+const Mod word_mods[4] = {
+ Mod::mod_capital, Mod::mod_nospace, Mod::mod_double, Mod::mod_shorten, 
 };
 
-const mod_enum plain_mod_indices[] = {
- MOD_ALT_ENUM, MOD_CTRL_ENUM, MOD_GUI_ENUM, MOD_SHIFT_ENUM, 
+const Mod plain_mods[4] = {
+ Mod::mod_alt, Mod::mod_ctrl, Mod::mod_gui, Mod::mod_shift, 
 };
 
-const mod_enum anagram_mod_indices[] = {
- MOD_ANAGRAM_1_ENUM, MOD_ANAGRAM_2_ENUM, 
+const Mod anagram_mods[2] = {
+ Mod::mod_anagram_1, Mod::mod_anagram_2, 
 };
 
-const uint8_t plain_mod_keys[] = {
- (MODIFIERKEY_ALT)&0xff, (MODIFIERKEY_CTRL)&0xff, (MODIFIERKEY_GUI)&0xff, (MODIFIERKEY_SHIFT)&0xff, 
+const uint8_t anagram_mod_numbers[2] = {
+ 1, 2, 
 };
 
-const uint8_t kmap0_plain_len4_anagram0_chords[] = {
- 0, 0, 1, 
+const uint8_t plain_mod_keys[4] = {
+ static_cast<uint8_t>(MODIFIERKEY_ALT), static_cast<uint8_t>(MODIFIERKEY_CTRL), static_cast<uint8_t>(MODIFIERKEY_GUI), static_cast<uint8_t>(MODIFIERKEY_SHIFT), 
 };
 
-const uint8_t kmap0_plain_len4_anagram0_seqs[] = {
- 9, 
+const uint8_t MAX_KEYS_IN_SEQUENCE = 5;
+
+const ChordData kmap0_Plain_len4_anagram0_chords[1] = {
+ {0, 0, 1}, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len4_anagram0 = {
+const uint8_t kmap0_Plain_len4_anagram0_seqs[1] = {
+ 10, 
+};
+
+const LookupKmapTypeLenAnagram kmap0_Plain_len4_anagram0 = {
   64, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_plain_len4_anagram0_chords, // chords
-  kmap0_plain_len4_anagram0_seqs, // sequences
+  kmap0_Plain_len4_anagram0_chords, // chords
+  kmap0_Plain_len4_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_plain_len5_anagram0_chords[] = {
- 144, 0, 0, 130, 
- 0, 0, 16, 0, 
- 0, 0, 32, 0, 
- 0, 0, 128, 0, 
- 0, 64, 
+const ChordData kmap0_Plain_len5_anagram0_chords[3] = {
+ {144, 0, 0}, {16, 0, 0}, {0, 32, 0}, 
 };
 
-const uint8_t kmap0_plain_len5_anagram0_seqs[] = {
- 85, 239, 174, 56, 
+const uint8_t kmap0_Plain_len5_anagram0_seqs[2] = {
+ 101, 103, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len5_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Plain_len5_anagram0 = {
   80, // seq_bit_len_and_anagram
-  6, // num_chords
-  kmap0_plain_len5_anagram0_chords, // chords
-  kmap0_plain_len5_anagram0_seqs, // sequences
+  3, // num_chords
+  kmap0_Plain_len5_anagram0_chords, // chords
+  kmap0_Plain_len5_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_plain_len6_anagram0_chords[] = {
- 18, 0, 0, 0, 
- 0, 72, 128, 4, 
- 0, 0, 32, 8, 
- 16, 4, 0, 0, 
- 4, 0, 36, 0, 
- 0, 8, 0, 0, 
- 0, 0, 2, 0, 
- 64, 0, 0, 1, 
- 0, 2, 0, 0, 
- 0, 0, 144, 0, 
- 128, 0, 32, 0, 
- 0, 32, 8, 0, 
- 0, 64, 2, 
+const ChordData kmap0_Plain_len6_anagram0_chords[20] = {
+ {0, 32, 1}, {18, 0, 0}, {0, 0, 72}, {128, 4, 0}, 
+ {130, 0, 0}, {0, 0, 65}, {0, 4, 0}, {36, 0, 0}, 
+ {8, 0, 0}, {0, 0, 2}, {0, 0, 144}, {0, 9, 0}, 
+ {0, 0, 128}, {4, 0, 0}, {0, 64, 128}, {0, 0, 16}, 
+ {0, 0, 64}, {0, 128, 0}, {32, 8, 0}, {0, 64, 2}, 
 };
 
-const uint8_t kmap0_plain_len6_anagram0_seqs[] = {
- 135, 23, 67, 150, 
- 45, 10, 101, 33, 
- 225, 148, 143, 68, 
- 48, 
+const uint8_t kmap0_Plain_len6_anagram0_seqs[15] = {
+ 72, 35, 145, 107, 
+ 10, 249, 129, 135, 
+ 161, 147, 227, 202, 
+ 11, 7, 128, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len6_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Plain_len6_anagram0 = {
   96, // seq_bit_len_and_anagram
-  17, // num_chords
-  kmap0_plain_len6_anagram0_chords, // chords
-  kmap0_plain_len6_anagram0_seqs, // sequences
+  20, // num_chords
+  kmap0_Plain_len6_anagram0_chords, // chords
+  kmap0_Plain_len6_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_plain_len7_anagram0_chords[] = {
- 0, 32, 1, 0, 
- 0, 9, 0, 0, 
- 65, 32, 1, 0, 
- 0, 9, 0, 0, 
- 8, 0, 0, 0, 
- 8, 128, 0, 0, 
- 4, 0, 0, 0, 
- 64, 128, 0, 0, 
- 16, 0, 0, 130, 
- 0, 0, 18, 4, 
- 8, 0, 
+const ChordData kmap0_Plain_len7_anagram0_chords[14] = {
+ {0, 0, 9}, {0, 32, 8}, {16, 4, 0}, {0, 64, 0}, 
+ {0, 1, 0}, {32, 1, 0}, {2, 0, 0}, {0, 8, 0}, 
+ {0, 0, 8}, {128, 0, 0}, {32, 0, 0}, {0, 0, 130}, 
+ {0, 0, 18}, {4, 8, 0}, 
 };
 
-const uint8_t kmap0_plain_len7_anagram0_seqs[] = {
- 183, 223, 96, 253, 
- 190, 159, 47, 167, 
- 255, 99, 252, 25, 
- 1, 
+const uint8_t kmap0_Plain_len7_anagram0_seqs[13] = {
+ 237, 215, 247, 57, 
+ 28, 93, 122, 221, 
+ 206, 251, 126, 251, 
+ 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len7_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Plain_len7_anagram0 = {
   112, // seq_bit_len_and_anagram
   14, // num_chords
-  kmap0_plain_len7_anagram0_chords, // chords
-  kmap0_plain_len7_anagram0_seqs, // sequences
+  kmap0_Plain_len7_anagram0_chords, // chords
+  kmap0_Plain_len7_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_plain_len11_anagram0_chords[] = {
- 1, 0, 0, 0, 
- 16, 0, 64, 0, 
- 0, 
+const ChordData kmap0_Plain_len11_anagram0_chords[3] = {
+ {1, 0, 0}, {0, 16, 0}, {64, 0, 0}, 
 };
 
-const uint8_t kmap0_plain_len11_anagram0_seqs[] = {
- 205, 4, 39, 48, 
+const uint8_t kmap0_Plain_len11_anagram0_seqs[5] = {
+ 81, 133, 107, 88, 
  1, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len11_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Plain_len11_anagram0 = {
   176, // seq_bit_len_and_anagram
   3, // num_chords
-  kmap0_plain_len11_anagram0_chords, // chords
-  kmap0_plain_len11_anagram0_seqs, // sequences
+  kmap0_Plain_len11_anagram0_chords, // chords
+  kmap0_Plain_len11_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_plain_len12_anagram0_chords[] = {
- 0, 0, 4, 
+const ChordData kmap0_Plain_len12_anagram0_chords[1] = {
+ {0, 0, 4}, 
 };
 
-const uint8_t kmap0_plain_len12_anagram0_seqs[] = {
- 195, 9, 
+const uint8_t kmap0_Plain_len12_anagram0_seqs[2] = {
+ 191, 10, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_plain_len12_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Plain_len12_anagram0 = {
   192, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_plain_len12_anagram0_chords, // chords
-  kmap0_plain_len12_anagram0_seqs, // sequences
+  kmap0_Plain_len12_anagram0_chords, // chords
+  kmap0_Plain_len12_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_plain_lookups_array[] = {
- &kmap0_plain_len4_anagram0, &kmap0_plain_len5_anagram0, &kmap0_plain_len6_anagram0, &kmap0_plain_len7_anagram0, 
- &kmap0_plain_len11_anagram0, &kmap0_plain_len12_anagram0, 
+const LookupKmapTypeLenAnagram* kmap0_Plain_lookups_array[6] = {
+ &kmap0_Plain_len4_anagram0, &kmap0_Plain_len5_anagram0, &kmap0_Plain_len6_anagram0, &kmap0_Plain_len7_anagram0, 
+ &kmap0_Plain_len11_anagram0, &kmap0_Plain_len12_anagram0, 
 };
 
-const LookupKmapType kmap0_plain_lookups = {
+const LookupKmapType kmap0_Plain_lookups = {
   6, // num_lookups
-  kmap0_plain_lookups_array, // lookups
+  kmap0_Plain_lookups_array, // lookups
 };
 
-const uint8_t kmap0_macro_len16_anagram0_chords[] = {
- 0, 128, 192, 
+const ChordData kmap0_Macro_len18_anagram0_chords[1] = {
+ {0, 128, 192}, 
 };
 
-const uint8_t kmap0_macro_len16_anagram0_seqs[] = {
- 138, 19, 
+const uint8_t kmap0_Macro_len18_anagram0_seqs[3] = {
+ 211, 66, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_macro_len16_anagram0 = {
-  256, // seq_bit_len_and_anagram
+const LookupKmapTypeLenAnagram kmap0_Macro_len18_anagram0 = {
+  288, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_macro_len16_anagram0_chords, // chords
-  kmap0_macro_len16_anagram0_seqs, // sequences
+  kmap0_Macro_len18_anagram0_chords, // chords
+  kmap0_Macro_len18_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_macro_lookups_array[] = {
- &kmap0_macro_len16_anagram0, 
+const LookupKmapTypeLenAnagram* kmap0_Macro_lookups_array[1] = {
+ &kmap0_Macro_len18_anagram0, 
 };
 
-const LookupKmapType kmap0_macro_lookups = {
+const LookupKmapType kmap0_Macro_lookups = {
   1, // num_lookups
-  kmap0_macro_lookups_array, // lookups
+  kmap0_Macro_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap0_command_lookups_array[] = {
+const LookupKmapTypeLenAnagram* kmap0_Command_lookups_array[0] = {
 };
 
-const LookupKmapType kmap0_command_lookups = {
+const LookupKmapType kmap0_Command_lookups = {
   0, // num_lookups
-  kmap0_command_lookups_array, // lookups
+  kmap0_Command_lookups_array, // lookups
 };
 
-const uint8_t kmap0_word_len14_anagram0_chords[] = {
- 16, 32, 1, 
+const ChordData kmap0_Word_len14_anagram0_chords[1] = {
+ {16, 32, 1}, 
 };
 
-const uint8_t kmap0_word_len14_anagram0_seqs[] = {
- 217, 55, 
+const uint8_t kmap0_Word_len14_anagram0_seqs[2] = {
+ 154, 55, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_word_len14_anagram0 = {
+const LookupKmapTypeLenAnagram kmap0_Word_len14_anagram0 = {
   224, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_word_len14_anagram0_chords, // chords
-  kmap0_word_len14_anagram0_seqs, // sequences
+  kmap0_Word_len14_anagram0_chords, // chords
+  kmap0_Word_len14_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_word_len21_anagram0_chords[] = {
- 146, 0, 0, 
+const ChordData kmap0_Word_len22_anagram0_chords[1] = {
+ {146, 0, 0}, 
 };
 
-const uint8_t kmap0_word_len21_anagram0_seqs[] = {
- 71, 173, 26, 
+const uint8_t kmap0_Word_len22_anagram0_seqs[3] = {
+ 77, 41, 43, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_word_len21_anagram0 = {
-  336, // seq_bit_len_and_anagram
+const LookupKmapTypeLenAnagram kmap0_Word_len22_anagram0 = {
+  352, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_word_len21_anagram0_chords, // chords
-  kmap0_word_len21_anagram0_seqs, // sequences
+  kmap0_Word_len22_anagram0_chords, // chords
+  kmap0_Word_len22_anagram0_seqs, // sequences
 };
 
-const uint8_t kmap0_word_len23_anagram1_chords[] = {
- 16, 32, 1, 
+const ChordData kmap0_Word_len23_anagram1_chords[1] = {
+ {16, 32, 1}, 
 };
 
-const uint8_t kmap0_word_len23_anagram1_seqs[] = {
- 185, 119, 118, 
+const uint8_t kmap0_Word_len23_anagram1_seqs[3] = {
+ 186, 183, 102, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_word_len23_anagram1 = {
+const LookupKmapTypeLenAnagram kmap0_Word_len23_anagram1 = {
   369, // seq_bit_len_and_anagram
   1, // num_chords
-  kmap0_word_len23_anagram1_chords, // chords
-  kmap0_word_len23_anagram1_seqs, // sequences
+  kmap0_Word_len23_anagram1_chords, // chords
+  kmap0_Word_len23_anagram1_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_word_lookups_array[] = {
- &kmap0_word_len14_anagram0, &kmap0_word_len21_anagram0, &kmap0_word_len23_anagram1, 
+const LookupKmapTypeLenAnagram* kmap0_Word_lookups_array[3] = {
+ &kmap0_Word_len14_anagram0, &kmap0_Word_len22_anagram0, &kmap0_Word_len23_anagram1, 
 };
 
-const LookupKmapType kmap0_word_lookups = {
+const LookupKmapType kmap0_Word_lookups = {
   3, // num_lookups
-  kmap0_word_lookups_array, // lookups
+  kmap0_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap0_lookups_array[] = {
- &kmap0_plain_lookups, &kmap0_macro_lookups, &kmap0_command_lookups, &kmap0_word_lookups, 
+const LookupKmapType* kmap0_lookups_array[4] = {
+ &kmap0_Plain_lookups, &kmap0_Macro_lookups, &kmap0_Command_lookups, &kmap0_Word_lookups, 
 };
 
 const KmapStruct kmap0_lookups = {
   kmap0_lookups_array, // lookups_for_kmap
 };
 
-const KmapStruct* default_mode_kmaps_array[] = {
+const KmapStruct* default_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const uint8_t default_mode_mod_chord_0[] = {
- 0, 0, 4, 
+const ChordData default_mode_mod_chord[10] = {
+ {0, 0, 4}, {8, 0, 0}, {8, 128, 0}, {64, 0, 0}, 
+ {1, 0, 0}, {1, 0, 0}, {0, 16, 0}, {0, 0, 4}, 
+ {64, 0, 0}, {0, 16, 0}, 
 };
 
-const uint8_t default_mode_mod_chord_1[] = {
- 8, 0, 0, 
-};
-
-const uint8_t default_mode_mod_chord_2[] = {
- 8, 128, 0, 
-};
-
-const uint8_t default_mode_mod_chord_3[] = {
- 64, 0, 0, 
-};
-
-const uint8_t default_mode_mod_chord_4[] = {
- 1, 0, 0, 
-};
-
-const uint8_t default_mode_mod_chord_5[] = {
- 1, 0, 0, 
-};
-
-const uint8_t default_mode_mod_chord_6[] = {
- 0, 16, 0, 
-};
-
-const uint8_t default_mode_mod_chord_7[] = {
- 0, 0, 4, 
-};
-
-const uint8_t default_mode_mod_chord_8[] = {
- 64, 0, 0, 
-};
-
-const uint8_t default_mode_mod_chord_9[] = {
- 0, 16, 0, 
-};
-
-const uint8_t* default_mode_mod_chord[] = {
- default_mode_mod_chord_0, default_mode_mod_chord_1, default_mode_mod_chord_2, default_mode_mod_chord_3, 
- default_mode_mod_chord_4, default_mode_mod_chord_5, default_mode_mod_chord_6, default_mode_mod_chord_7, 
- default_mode_mod_chord_8, default_mode_mod_chord_9, 
-};
-
-const uint8_t default_mode_anagram_mask[] = {
- 8, 128, 0, 
-};
+const ChordData default_mode_anagram_mask = {8, 128, 0};
 
 const ModeStruct default_mode_struct = {
   0, // is_gaming
@@ -680,59 +639,17 @@ const ModeStruct default_mode_struct = {
   default_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* gaming_mode_kmaps_array[] = {
+const KmapStruct* gaming_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const uint8_t gaming_mode_mod_chord_0[] = {
- 0, 0, 4, 
+const ChordData gaming_mode_mod_chord[10] = {
+ {0, 0, 4}, {8, 0, 0}, {8, 128, 0}, {64, 0, 0}, 
+ {1, 0, 0}, {1, 0, 0}, {0, 16, 0}, {0, 0, 4}, 
+ {64, 0, 0}, {0, 16, 0}, 
 };
 
-const uint8_t gaming_mode_mod_chord_1[] = {
- 8, 0, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_2[] = {
- 8, 128, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_3[] = {
- 64, 0, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_4[] = {
- 1, 0, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_5[] = {
- 1, 0, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_6[] = {
- 0, 16, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_7[] = {
- 0, 0, 4, 
-};
-
-const uint8_t gaming_mode_mod_chord_8[] = {
- 64, 0, 0, 
-};
-
-const uint8_t gaming_mode_mod_chord_9[] = {
- 0, 16, 0, 
-};
-
-const uint8_t* gaming_mode_mod_chord[] = {
- gaming_mode_mod_chord_0, gaming_mode_mod_chord_1, gaming_mode_mod_chord_2, gaming_mode_mod_chord_3, 
- gaming_mode_mod_chord_4, gaming_mode_mod_chord_5, gaming_mode_mod_chord_6, gaming_mode_mod_chord_7, 
- gaming_mode_mod_chord_8, gaming_mode_mod_chord_9, 
-};
-
-const uint8_t gaming_mode_anagram_mask[] = {
- 8, 128, 0, 
-};
+const ChordData gaming_mode_anagram_mask = {8, 128, 0};
 
 const ModeStruct gaming_mode_struct = {
   0, // is_gaming
@@ -742,59 +659,17 @@ const ModeStruct gaming_mode_struct = {
   gaming_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* left_hand_mode_kmaps_array[] = {
+const KmapStruct* left_hand_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const uint8_t left_hand_mode_mod_chord_0[] = {
- 0, 0, 4, 
+const ChordData left_hand_mode_mod_chord[10] = {
+ {0, 0, 4}, {8, 0, 0}, {8, 128, 0}, {64, 0, 0}, 
+ {1, 0, 0}, {1, 0, 0}, {0, 16, 0}, {0, 0, 4}, 
+ {64, 0, 0}, {0, 16, 0}, 
 };
 
-const uint8_t left_hand_mode_mod_chord_1[] = {
- 8, 0, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_2[] = {
- 8, 128, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_3[] = {
- 64, 0, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_4[] = {
- 1, 0, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_5[] = {
- 1, 0, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_6[] = {
- 0, 16, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_7[] = {
- 0, 0, 4, 
-};
-
-const uint8_t left_hand_mode_mod_chord_8[] = {
- 64, 0, 0, 
-};
-
-const uint8_t left_hand_mode_mod_chord_9[] = {
- 0, 16, 0, 
-};
-
-const uint8_t* left_hand_mode_mod_chord[] = {
- left_hand_mode_mod_chord_0, left_hand_mode_mod_chord_1, left_hand_mode_mod_chord_2, left_hand_mode_mod_chord_3, 
- left_hand_mode_mod_chord_4, left_hand_mode_mod_chord_5, left_hand_mode_mod_chord_6, left_hand_mode_mod_chord_7, 
- left_hand_mode_mod_chord_8, left_hand_mode_mod_chord_9, 
-};
-
-const uint8_t left_hand_mode_anagram_mask[] = {
- 8, 128, 0, 
-};
+const ChordData left_hand_mode_anagram_mask = {8, 128, 0};
 
 const ModeStruct left_hand_mode_struct = {
   0, // is_gaming
@@ -804,59 +679,17 @@ const ModeStruct left_hand_mode_struct = {
   left_hand_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* windows_mode_kmaps_array[] = {
+const KmapStruct* windows_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const uint8_t windows_mode_mod_chord_0[] = {
- 0, 0, 4, 
+const ChordData windows_mode_mod_chord[10] = {
+ {0, 0, 4}, {8, 0, 0}, {8, 128, 0}, {64, 0, 0}, 
+ {1, 0, 0}, {1, 0, 0}, {0, 16, 0}, {0, 0, 4}, 
+ {64, 0, 0}, {0, 16, 0}, 
 };
 
-const uint8_t windows_mode_mod_chord_1[] = {
- 8, 0, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_2[] = {
- 8, 128, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_3[] = {
- 64, 0, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_4[] = {
- 1, 0, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_5[] = {
- 1, 0, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_6[] = {
- 0, 16, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_7[] = {
- 0, 0, 4, 
-};
-
-const uint8_t windows_mode_mod_chord_8[] = {
- 64, 0, 0, 
-};
-
-const uint8_t windows_mode_mod_chord_9[] = {
- 0, 16, 0, 
-};
-
-const uint8_t* windows_mode_mod_chord[] = {
- windows_mode_mod_chord_0, windows_mode_mod_chord_1, windows_mode_mod_chord_2, windows_mode_mod_chord_3, 
- windows_mode_mod_chord_4, windows_mode_mod_chord_5, windows_mode_mod_chord_6, windows_mode_mod_chord_7, 
- windows_mode_mod_chord_8, windows_mode_mod_chord_9, 
-};
-
-const uint8_t windows_mode_anagram_mask[] = {
- 8, 128, 0, 
-};
+const ChordData windows_mode_anagram_mask = {8, 128, 0};
 
 const ModeStruct windows_mode_struct = {
   0, // is_gaming
@@ -866,7 +699,7 @@ const ModeStruct windows_mode_struct = {
   windows_mode_anagram_mask, // anagram_mask
 };
 
-const ModeStruct* mode_structs[] = {
+const ModeStruct* mode_structs[4] = {
  &default_mode_struct, &gaming_mode_struct, &left_hand_mode_struct, &windows_mode_struct, 
 };
 

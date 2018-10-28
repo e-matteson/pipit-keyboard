@@ -11,8 +11,8 @@ options:
   enable_led_typing_feedback:  true
   # enable_audio_typing_feedback: true
   battery_level_pin:           9
-  row_pins:                    [[1, 0, 19]]
-  column_pins:                 [[15,16,17,18, 20,21,5,6]]
+  row_pins:                    [1, 0, 19]
+  column_pins:                 [15,16,17,18, 20,21,5,6]
 
   kmap_format:
     - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
@@ -315,9 +315,6 @@ commands:
   - command_led_battery
   - command_led_colors
   - command_led_rainbow
-  - command_left_hand_mode
-  - command_default_mode
-  - command_gaming_mode
 
 dictionary:
   - {word: "a", anagram: 1}
