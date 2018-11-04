@@ -1,3 +1,4 @@
+use bit_vec::BitVec;
 use std::collections::BTreeMap;
 use time::*;
 
@@ -6,7 +7,7 @@ use types::{
     AllData, CCode, CEnumVariant, CTree, Command, Field, HuffmanTable, KeyDefs,
     KeyPress, KmapPath, ModeName, Modifier, Name, SeqType, Sequence, ToC,
 };
-use util::{bools_to_bytes, usize_to_u8};
+use util::usize_to_u8;
 
 use output::{KmapBuilder, ModeBuilder};
 
@@ -269,7 +270,7 @@ impl HuffmanTable {
             // TODO Don't repeatedly look up key
             let entry = self.get(key)?;
             let init = HuffmanChar {
-                bits: entry.as_uint32()?,
+                bits: entry.as_uint32(),
                 num_bits: entry.num_bits(),
                 key_code: KeyPress::truncate(key),
                 is_mod: entry.is_mod,
@@ -310,10 +311,10 @@ impl KeyPress {
         "0".to_c()
     }
 
-    pub fn huffman(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
+    fn huffman(&self, table: &HuffmanTable) -> Result<BitVec<u32>, Error> {
         self.ensure_non_empty()?;
 
-        let mut bits = Vec::new();
+        let mut bits = BitVec::new();
         for modifier in &self.mods {
             bits.extend(table.bits(modifier)?);
         }
@@ -329,7 +330,9 @@ impl KeyPress {
 impl Sequence {
     pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CCode>, Error> {
         // TODO different name for "bytes"?
-        Ok(bools_to_bytes(&self.as_bits(table)?)
+        Ok(self
+            .as_bits(table)?
+            .to_bytes()
             .into_iter()
             .map(|x: u8| x.to_c())
             .collect())
@@ -339,12 +342,12 @@ impl Sequence {
         &self,
         table: &HuffmanTable,
     ) -> Result<usize, Error> {
-        // TODO don't compute twice! switch to bitvec
+        // TODO don't compute twice!
         Ok(self.as_bits(table)?.len())
     }
 
-    pub fn as_bits(&self, table: &HuffmanTable) -> Result<Vec<bool>, Error> {
-        let mut bits = Vec::new();
+    pub fn as_bits(&self, table: &HuffmanTable) -> Result<BitVec<u32>, Error> {
+        let mut bits = BitVec::new();
         for keypress in self.keypresses() {
             bits.extend(keypress.huffman(table)?)
         }

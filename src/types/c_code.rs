@@ -45,6 +45,8 @@ pub trait CEnumVariant: Sized {
     }
 }
 
+// TODO get rid of unused variants
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum CTree {
     /// Define a preprocessor macro with the given name and value.

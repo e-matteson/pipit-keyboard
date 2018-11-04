@@ -108,6 +108,7 @@ impl<'a> KmapBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &lookups_of_length),
+            // TODO no literal type name
             c_type: "LookupKmapTypeLenAnagram*".to_c(),
             is_extern: false,
         });
@@ -140,9 +141,6 @@ impl<'a> KmapBuilder<'a> {
                 info.anagram.unwrap()
             ).to_c();
 
-            let seqs_name = format!("{}_seqs", struct_name).to_c();
-            let chords_name = format!("{}_chords", struct_name).to_c();
-
             let chord_bytes = names
                 .iter()
                 .map(|name| {
@@ -159,29 +157,32 @@ impl<'a> KmapBuilder<'a> {
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
-            let lookup_struct = LookupKmapTypeLenAnagram::new(
-                chords_name.clone(),
-                seqs_name.clone(),
-                names.len(),
-                info.anagram,
-                info.length,
-            ).with_context(|| {
-                format!("Failed to render lookup: '{}'", struct_name)
-            })?;
+            let chords_name = format!("{}_chords", struct_name).to_c();
+            let seqs_name = format!("{}_seqs", struct_name).to_c();
 
             g.push(CTree::Array {
-                name: chords_name,
+                name: chords_name.clone(),
                 values: chord_bytes,
                 c_type: "ChordData".to_c(),
                 is_extern: false,
             });
 
             g.push(CTree::Array {
-                name: seqs_name,
+                name: seqs_name.clone(),
                 values: seq_bytes,
                 c_type: "uint8_t".to_c(),
                 is_extern: false,
             });
+
+            let lookup_struct = LookupKmapTypeLenAnagram::new(
+                chords_name,
+                seqs_name,
+                names.len(),
+                info.anagram,
+                info.length,
+            ).with_context(|| {
+                format!("Failed to make lookup: '{}'", struct_name)
+            })?;
 
             g.push(lookup_struct.render(struct_name.clone()));
             struct_names.push(struct_name);

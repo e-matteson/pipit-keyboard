@@ -1,3 +1,5 @@
+extern crate bit_vec;
+extern crate byteorder;
 extern crate cursive;
 extern crate itertools;
 extern crate natord;
