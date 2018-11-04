@@ -273,7 +273,7 @@ macros:
   macro_while_c: "while(){\n}↑▶←←"
   macro_arg_c: "(){\n}↑▶←←"
   macro_ifdef_guard: "#ifndef H\n#define H\n\n\n#endif↑↑↑↑▶←"
-  macro_printf: "printf(\"\n\");←←←←←"
+  macro_printf: "printf(\"\\n\");←←←←←"
   macro_print_py: "print()←"
   macro_docstr_py: "\"\"\"\"\"\"←←←"
   macro_lifetime_rs: "<'a>"
