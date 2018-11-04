@@ -56,6 +56,11 @@ void Matrix::scan() {
   uint8_t switch_index = 0;
   for(uint8_t col_pin : conf::column_pins) {
     selectColumn(col_pin);
+
+    // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
+    // The required length can depend on the properties of the ethernet cable.
+    delayMicroseconds(10);
+
     for(uint8_t row_pin : conf::row_pins) {
       if (isRowPressed(row_pin)) {
         setSwitch(switch_index);
@@ -79,10 +84,6 @@ bool Matrix::isRowPressed(uint8_t row_pin) {
 void Matrix::selectColumn(uint8_t column_pin) {
   pinMode(column_pin, OUTPUT);
   digitalWrite(column_pin, LOW);
-
-  // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
-  // The required length can depend on the properties of the ethernet cable.
-  delayMicroseconds(10);
 }
 
 void Matrix::unselectColumn(uint8_t column_pin) {
