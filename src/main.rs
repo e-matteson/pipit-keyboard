@@ -49,6 +49,11 @@ fn run() -> Result<(), Error> {
                 .value_name("cheatsheet_config_file")
                 .help("Generate a cheatsheet, according to given cheatsheet config file"),
         ).arg(
+            Arg::with_name("nosave")
+                .short("n")
+                .long("nosave")
+                .help("Don't save an updated firmware configuration, only perform the other specified action(s)"),
+        ).arg(
             Arg::with_name("tutor")
                 .short("t")
                 .long("tutor")
@@ -107,9 +112,13 @@ fn run() -> Result<(), Error> {
         return Ok(());
     }
 
-    all_data
-        .save_as("auto_config")
-        .context("Failed to save updated firmware")?;
+    if args.is_present("nosave") {
+        println!("Not configuring the firmware (because --nosave was passed)");
+    } else {
+        all_data
+            .save_as("auto_config")
+            .context("Failed to save updated firmware")?;
+    }
 
     if args.is_present("verify") {
         let ide = ArduinoIDE::new(all_data.board());
