@@ -49,7 +49,9 @@ class Switches {
   // We're now using the same timers for both press and release.
   // Will that always work? Why did we decide to have separate ones before?
   Timer debounce_timers[NUM_MATRIX_POSITIONS];
+
   // TODO could store in 2 uint32_ts, instead! (for 4 statuses, and <32 switches)
+  // Or 2 std::BitSets!
   SwitchStatus switch_status[NUM_MATRIX_POSITIONS] = {SwitchStatus::NotPressed};
   bool was_switch_double_tapped = 0;
 

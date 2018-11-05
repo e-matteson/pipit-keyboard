@@ -1,60 +1,22 @@
+/*
+ * Convenient methods for accessing data in auto_config.cpp
+ */
+
 #include "conf.h"
-#include "util.h"
 #include <Arduino.h>
 
 
-bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
-  return (a & mask) == (b & mask);
-}
-
 namespace conf {
-// Cast the enum to its underlying type
-std::underlying_type<Mod>::type to_index(Mod variant) {
-  return static_cast<std::underlying_type<Mod>::type>(variant);
-}
 
-// Cast the enum to its underlying type
-std::underlying_type<SeqType>::type to_index(SeqType variant) {
-  return static_cast<std::underlying_type<SeqType>::type>(variant);
-}
+const ModeStruct* getModeStruct(Mode mode) { return mode_structs[to_index(mode)]; }
 
-// Cast the enum to its underlying type
-std::underlying_type<Mode>::type to_index(Mode variant) {
-  return static_cast<std::underlying_type<Mode>::type>(variant);
-}
+bool isGaming(Mode mode) { return getModeStruct(mode)->is_gaming; }
 
-const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
-  uint32_t mask = makeMask32(length);
-  for (const HuffmanChar& entry : huffman_lookup) {
-    if (length != entry.num_bits) {
-      // Can't be a match, wrong length.
-      continue;
-    }
-    if (areBitsEqual(entry.bits, bits, mask)) {
-      // Success!
-      return &entry;
-    }
-  }
-  // Fail!
-  DEBUG2_LN("WARNING: Failed to find huffman code, try again with a longer code");
-  return nullptr;
-}
-
-const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
-                                        uint8_t kmap_num, SeqType seq_type) {
-  return mode->kmaps[kmap_num]->lookups_for_kmap[to_index(seq_type)];
-}
-
-const ModeStruct* getMode(Mode mode) { return mode_structs[to_index(mode)]; }
-
-bool isGaming(Mode mode) { return getMode(mode)->is_gaming; }
-
-const ChordData* getAnagramMask(Mode mode) { return &getMode(mode)->anagram_mask; }
+const ChordData* getAnagramMask(Mode mode) { return &getModeStruct(mode)->anagram_mask; }
 
 const ChordData* getModChord(Mode mode, Mod modifier) {
-  return &(getMode(mode)->mod_chords[to_index(modifier)]);
+  return &(getModeStruct(mode)->mod_chords[to_index(modifier)]);
 }
-
 
 
 ModType getModType(Mod modifier) {
@@ -71,11 +33,4 @@ ModType getModType(Mod modifier) {
   exit(1);
 }
 
-Mod getNospaceEnum() { return Mod::mod_nospace; }
-
-Mod getCapitalEnum() { return Mod::mod_capital; }
-
-Mod getDoubleEnum() { return Mod::mod_double; }
-
-Mod getModShortenEnum() { return Mod::mod_shorten; }
 }  // namespace conf

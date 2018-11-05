@@ -1,6 +1,5 @@
 #include "Chord.h"
 #include <type_traits>
-#include "util.h"
 #include <Arduino.h>
 
 #define FLAG_BIT 15
@@ -93,7 +92,7 @@ uint8_t Chord::getModByte() const {
   return mod_byte;
 }
 
-conf::Mode Chord::getMode() const { return mode; }
+conf::Mode Chord::getModeName() const { return mode; }
 
 bool Chord::hasAnagramNum(uint8_t other_anagram) const {
   return (anagram_num == other_anagram);
@@ -128,7 +127,7 @@ void Chord::editCaps(Key* data, uint8_t length) const {
 
 Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
                                                 uint8_t length) const {
-  bool has_cap_mod = hasMod(conf::getCapitalEnum());
+  bool has_cap_mod = hasMod(conf::Mod::mod_capital);
 
   if (!getFlagCycleCapital()) {
     // The simple case, without cap cycling.
@@ -160,13 +159,13 @@ Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
   return CAP_FIRST;
 }
 
-bool Chord::hasModNospace() const { return hasMod(conf::getNospaceEnum()); }
+bool Chord::hasModNospace() const { return hasMod(conf::Mod::mod_nospace); }
 
-bool Chord::hasModDouble() const { return hasMod(conf::getDoubleEnum()); }
+bool Chord::hasModDouble() const { return hasMod(conf::Mod::mod_double); }
 
-bool Chord::hasModShorten() const { return hasMod(conf::getModShortenEnum()); }
+bool Chord::hasModShorten() const { return hasMod(conf::Mod::mod_shorten); }
 
-void Chord::setModNospace() { setMod(conf::getNospaceEnum()); }
+void Chord::setModNospace() { setMod(conf::Mod::mod_nospace); }
 
 
 /// Return a mask where only the bit corresponding to the given modifier is set.
@@ -305,8 +304,8 @@ void Chord::prepareToCycle() {
   // Unset mods that affect the word before this one, like by backspacing or
   // doubling its letters. We don't want to repeat those effects every time we
   // cycle this chord.
-  unsetMod(conf::getModShortenEnum());
-  unsetMod(conf::getDoubleEnum());
+  unsetMod(conf::Mod::mod_shorten);
+  unsetMod(conf::Mod::mod_double);
 }
 
 void Chord::cycle(CycleType operation) {
@@ -335,7 +334,7 @@ void Chord::cycleCapital() {
 
 void Chord::cycleNospace() {
   prepareToCycle();
-  toggleMod(conf::getNospaceEnum());
+  toggleMod(conf::Mod::mod_nospace);
 }
 
 /********** Anagram manipulation ***********/

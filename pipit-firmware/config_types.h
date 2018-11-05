@@ -1,3 +1,7 @@
+/*
+ * Here's where we define things that require "auto_config_constants.h", and are required by "auto_config.h"
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -8,6 +12,7 @@
 #include <array>
 
 #include "auto_config_constants.h"
+
 
 typedef std::array<uint8_t, NUM_BYTES_IN_CHORD> ChordData;
 
@@ -55,6 +60,3 @@ enum class WordSpacePosition {
   None,
 };
 
-
-uint32_t makeMask32(uint8_t length);
-uint16_t makeMask16(uint8_t length);

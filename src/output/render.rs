@@ -371,7 +371,7 @@ fn intro(with_message: bool) -> Result<CTree, Error> {
         path: "<stdint.h>".to_c(),
     });
     group.push(CTree::IncludeH {
-        path: "\"util.h\"".to_c(),
+        path: "\"config_types.h\"".to_c(),
     });
 
     group.push(CTree::LiteralH(

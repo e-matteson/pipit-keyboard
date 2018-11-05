@@ -1,5 +1,40 @@
 #include "lookup.h"
 
+bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
+  // TODO use xor?
+  return (a & mask) == (b & mask);
+}
+
+uint32_t makeMask32(uint8_t length) {
+  // The "length" most significant bits are 1, and the rest are 0
+  if (length >= 32) {
+    return ~((uint32_t)0);
+  }
+  return ~((1 << (32 - length)) - 1);
+}
+
+const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
+                                        uint8_t kmap_num, conf::SeqType seq_type) {
+  return mode->kmaps[kmap_num]->lookups_for_kmap[conf::to_index(seq_type)];
+}
+
+const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
+  uint32_t mask = makeMask32(length);
+  for (const HuffmanChar& entry : conf::huffman_lookup) {
+    if (length != entry.num_bits) {
+      // Can't be a match, wrong length.
+      continue;
+    }
+    if (areBitsEqual(entry.bits, bits, mask)) {
+      // Success!
+      return &entry;
+    }
+  }
+  // Fail!
+  DEBUG2_LN("WARNING: Failed to find huffman code, try again with a longer code");
+  return nullptr;
+}
+
 uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
                        Key* keys_out) {
   // Return the number of keys in the decoded sequence, or zero if decoding
@@ -15,7 +50,7 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
     uint32_t code =
         lookup->sequence_code_bits(seq_num, code_bit_offset, code_bit_length);
 
-    const HuffmanChar* huffman = conf::decodeHuffman(code, code_bit_length);
+    const HuffmanChar* huffman = decodeHuffman(code, code_bit_length);
     if (huffman == nullptr) {
       // Not found! Try with a longer code next time.
       code_bit_length++;
@@ -84,10 +119,11 @@ uint8_t lookupInKmapAndType(const Chord* chord, const LookupKmapType* table,
 }
 
 namespace conf {
+
 uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out) {
-  const ModeStruct* mode = conf::getMode(chord->getMode());
+  const ModeStruct* mode = conf::getModeStruct(chord->getModeName());
   for (uint8_t i = 0; i < mode->num_kmaps; i++) {
-    const LookupKmapType* table = conf::getLookupKmapType(mode, i, type);
+    const LookupKmapType* table = getLookupKmapType(mode, i, type);
 
     uint8_t length = lookupInKmapAndType(chord, table, keys_out);
     if (length > 0) {

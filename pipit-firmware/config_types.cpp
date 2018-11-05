@@ -1,4 +1,4 @@
-#include "util.h"
+#include "config_types.h"
 #include "Arduino.h"
 #include <limits.h>
 
@@ -26,6 +26,13 @@ uint32_t getUnalignedBits(const uint8_t* address, uint32_t start_bit_offset,
  return out;
 }
 
+uint16_t makeMask16(uint8_t length) {
+  // The "length" least-significant bits are 1, and the rest are 0
+  if (length >= 16) {
+    return ~((uint16_t)0);
+  }
+  return (1 << length) - 1;
+}
 
 uint16_t LookupKmapTypeLenAnagram::seq_bit_length() const {
   return makeMask16(BITS_FOR_LEN) &
@@ -41,20 +48,4 @@ uint32_t LookupKmapTypeLenAnagram::sequence_code_bits(
   uint32_t start_bit_offset = seq_num * seq_bit_length();
   return getUnalignedBits(sequences, start_bit_offset + code_bit_offset,
                           code_bit_length);
-}
-
-uint32_t makeMask32(uint8_t length) {
-  // The first (from most significant) "length" bits are 1, and the rest are 0
-  if (length >= 32) {
-    return ~((uint32_t)0);
-  }
-  return ~((1 << (32 - length)) - 1);
-}
-
-uint16_t makeMask16(uint8_t length) {
-  // The first "length" bits are 1, and the rest are 0
-  if (length >= 16) {
-    return ~((uint16_t)0);
-  }
-  return (1 << length) - 1;
 }

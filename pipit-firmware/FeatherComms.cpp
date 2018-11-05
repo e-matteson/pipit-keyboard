@@ -65,8 +65,8 @@ void FeatherComms::press(const Report* report) {
   pressWireless(report);
 }
 
-void FeatherComms::pressWired(const Report* report) {
 #ifdef ENABLE_WIRED_FEATHER_HACK
+void FeatherComms::pressWired(const Report* report) {
   Keyboard.set_key1(report->get(0));
   Keyboard.set_key2(report->get(1));
   Keyboard.set_key3(report->get(2));
@@ -75,8 +75,8 @@ void FeatherComms::pressWired(const Report* report) {
   Keyboard.set_key6(report->get(5));
   Keyboard.set_modifier(report->getMod());
   Keyboard.send_now();
-#endif
 }
+#endif
 
 void FeatherComms::pressWireless(const Report* report) {
   static const char cmd_template[] =

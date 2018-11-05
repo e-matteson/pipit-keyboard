@@ -34,7 +34,7 @@ class Chord {
   const ChordData* getChordData() const;
   bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
-  conf::Mode getMode() const;
+  conf::Mode getModeName() const;
 
   bool hasMod(conf::Mod mod) const;
   void editCaps(Key* data, uint8_t length) const;
@@ -78,6 +78,7 @@ class Chord {
 #if NUM_MODIFIERS > 15
 #error "Too many modifiers, increase mods storage size in Chord.h"
 #endif
+  // TODO use bitset, always put flag in last bit!
   uint16_t mods_and_flags = 0;
 
   uint8_t anagram_num = 0;

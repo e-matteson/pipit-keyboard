@@ -19,9 +19,12 @@ class FeatherComms : public Comms {
   uint8_t getDelay(uint8_t data_length);
   void setupBluetooth();
   void disableBluetooth();
-  void pressWired(const Report* report);
-  void pressWireless(const Report* report);
   void moveMouseWireless(int8_t x, int8_t y, int8_t scroll, int8_t pan);
+  void pressWireless(const Report* report);
+
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  void pressWired(const Report* report);
+#endif
 
   Adafruit_BluefruitLE_SPI bluetooth;
 

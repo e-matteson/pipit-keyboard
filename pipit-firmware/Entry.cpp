@@ -1,7 +1,7 @@
 #include "Entry.h"
 
 Entry::Entry(const Chord* _chord, bool _is_anagrammable)
-    : is_anagrammable(_is_anagrammable), chord(*_chord) {}
+  : chord(*_chord), is_anagrammable(_is_anagrammable) {}
 
 const Chord* Entry::getChord() { return &chord; }
 

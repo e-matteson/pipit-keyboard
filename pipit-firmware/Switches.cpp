@@ -166,7 +166,9 @@ void Switches::reuseMods(Chord* chord) {
     if (!chord->hasMod((conf::Mod)m)) {
       continue;
     }
-    const ChordData* mod_chord = conf::getModChord(chord->getMode(), (conf::Mod)m);
+    const ChordData* mod_chord = conf::getModChord(chord->getModeName(), (conf::Mod)m);
+
+    // TODO simplify if we use BitSet for ChordData. But what if NUM_MATRIX_POSITIONS != num switches?
     uint8_t i = 0;
     for (uint8_t byte : *mod_chord) {
       for (uint8_t bit_num = 0; bit_num < 8; bit_num++) {
