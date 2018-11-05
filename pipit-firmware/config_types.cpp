@@ -28,6 +28,7 @@ uint32_t getUnalignedBits(const uint8_t* address, uint32_t start_bit_offset,
 
 uint16_t makeMask16(uint8_t length) {
   // The "length" least-significant bits are 1, and the rest are 0
+  // TODO compute by shifting all 1s, instead!
   if (length >= 16) {
     return ~((uint16_t)0);
   }

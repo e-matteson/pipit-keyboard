@@ -6,15 +6,11 @@
 
 #include <stdint.h>
 
-// Undefine these arduino macros that conflict with std::min/std::max, breaking std::array
-#undef max
-#undef min
-#include <array>
-
+#include "BitArray.h"
 #include "auto_config_constants.h"
 
-
-typedef std::array<uint8_t, NUM_BYTES_IN_CHORD> ChordData;
+// TODO automatically pick most efficient block type?
+typedef BitArray<uint8_t, NUM_MATRIX_POSITIONS> ChordData;
 
 
 struct LookupKmapTypeLenAnagram {

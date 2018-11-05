@@ -45,11 +45,10 @@ impl AllData {
         let main_files =
             self.render_main(with_message)?.format(file_name_base)?;
 
+        let constants_name_base = format!("{}_constants", file_name_base);
         let constants_files = self
             .render_constants(with_message)?
-            .format(file_name_base)?;
-
-        let constants_name_base = format!("{}_constants", file_name_base);
+            .format(&constants_name_base)?;
 
         let mut file_names =
             main_files.save(&self.output_directory, file_name_base)?;
@@ -72,18 +71,12 @@ impl AllData {
     /// Render c code defining any constants etc. that need to be included
     /// before / separately from the main auto_config.h file.
     fn render_constants(&self, with_message: bool) -> Result<CTree, Error> {
-        // The number of bytes in a chord is needed for declaring ChordData,
-        // which is then used in auto_config.h - so we can't define this in
-        // auto_config.h too!
-
         let mut group = Vec::new();
         if with_message {
             group.push(CTree::LiteralH(autogen_message()));
         }
-        group.push(CTree::Define {
-            name: "NUM_BYTES_IN_CHORD".to_c(),
-            value: self.num_bytes_in_chord()?.to_c(),
-        });
+        group.push(CTree::LiteralH("#pragma once\n".to_c()));
+        group.extend(self.early_options.clone());
         Ok(CTree::Group(group))
     }
 

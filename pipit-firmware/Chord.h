@@ -50,7 +50,7 @@ class Chord {
     // most significant bit will store the flag_cycle_capital. It's important to
     // keep Chords as small as possible, since we create a bunch of them
     // (especially in the history).
-    BitArray<uint16_t, NUM_MODIFIERS+1> data;
+    BitArray<uint16_t, NUM_MODIFIERS+1> bits;
 
     bool hasMod(conf::Mod mod) const;
     void setMod(conf::Mod mod);
@@ -86,7 +86,7 @@ class Chord {
 
   uint8_t anagram_num = 0;
 
-  ChordData chord_bytes = {{0}};
+  ChordData chord_data;
 
   // TODO what happens if there are no modes, so no variant with value 0, and
   // this cast is invalid?

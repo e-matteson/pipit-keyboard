@@ -43,6 +43,7 @@ pub struct AllData {
     pub commands: Vec<Command>,
 
     pub options: Vec<CTree>,
+    pub early_options: Vec<CTree>,
     pub output_directory: PathBuf,
     pub chord_spec: ChordSpec,
     pub board: BoardName,

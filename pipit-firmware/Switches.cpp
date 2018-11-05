@@ -150,26 +150,16 @@ void Switches::reuseHeldSwitches() {
 }
 
 /// Let modifiers be immediately re-used in future chords.
-// TODO could this ever set an unpressed switch to Held?
 // Not currently called in gaming mode, which simplifies things
+// TODO could this ever set an unpressed switch to Held?
+// TODO how does this distinguish between implicit and explicit mods?
 void Switches::reuseMods(Chord* chord) {
-  for (uint8_t m = 0; m < NUM_MODIFIERS; m++) {
-    if (!chord->hasMod((conf::Mod)m)) {
+  for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
+    conf::Mod mod = (conf::Mod) i;
+    if (!chord->hasMod(mod)) {
       continue;
     }
-    const ChordData* mod_chord = conf::getModChord(chord->getModeName(), (conf::Mod)m);
-
-    // TODO simplify if we use BitSet for ChordData. But what if NUM_MATRIX_POSITIONS != num switches?
-    uint8_t i = 0;
-    for (uint8_t byte : *mod_chord) {
-      for (uint8_t bit_num = 0; bit_num < 8; bit_num++) {
-        if (1 << bit_num & byte) {
-          // This switch was included in the modifier chord, let it be re-used.
-          statuses.set(i, SwitchStatus::Held);
-        }
-        i++;
-      }
-    }
+    statuses.setHeld(*conf::getModChord(chord->getModeName(), mod));
   }
 }
 
@@ -220,6 +210,11 @@ void Switches::Statuses::set(size_t index, Switches::SwitchStatus status){
 
 Switches::SwitchStatus Switches::Statuses::get(size_t index) const {
   return static_cast<Switches::SwitchStatus>((msb.test(index) << 1) | lsb.test(index));
+}
+
+void Switches::Statuses::setHeld(const ChordData& new_held_switches) {
+  lsb |= new_held_switches;
+  msb |= new_held_switches;
 }
 
 void Switches::Statuses::alreadySentToHeld(){

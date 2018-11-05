@@ -146,7 +146,7 @@ impl<'a> KmapBuilder<'a> {
                 .map(|name| {
                     Ok(self
                         .chord_spec
-                        .to_c_initializer(self.chord_map.get_result(name)?)?)
+                        .to_c_constructor(self.chord_map.get_result(name)?)?)
                 }).collect::<Result<Vec<_>, Error>>()?;
 
             let seqs = names
@@ -163,7 +163,7 @@ impl<'a> KmapBuilder<'a> {
             g.push(CTree::Array {
                 name: chords_name.clone(),
                 values: chord_bytes,
-                c_type: "ChordData".to_c(),
+                c_type: ChordSpec::c_type_name(),
                 is_extern: false,
             });
 

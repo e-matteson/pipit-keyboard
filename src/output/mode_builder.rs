@@ -81,8 +81,8 @@ impl<'a> ModeBuilder<'a> {
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
         let tree = CTree::ConstVar {
             name: array_name_out.clone(),
-            value: self.chord_spec.to_c_initializer(&self.anagram_mask)?,
-            c_type: "ChordData".to_c(),
+            value: self.chord_spec.to_c_constructor(&self.anagram_mask)?,
+            c_type: ChordSpec::c_type_name(),
             is_extern: false,
         };
         Ok((tree, array_name_out))
@@ -103,9 +103,9 @@ impl<'a> ModeBuilder<'a> {
             name: array_name_out.clone(),
             values: chords
                 .iter()
-                .map(|c| self.chord_spec.to_c_initializer(c))
+                .map(|c| self.chord_spec.to_c_constructor(c))
                 .collect::<Result<Vec<_>, _>>()?,
-            c_type: "ChordData".to_c(),
+            c_type: ChordSpec::c_type_name(),
             is_extern: false,
         };
         Ok((tree, array_name_out))

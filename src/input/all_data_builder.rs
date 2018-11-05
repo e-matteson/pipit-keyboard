@@ -81,6 +81,7 @@ impl AllDataBuilder {
             huffman_table: self.make_huffman_table()?,
             chord_spec: self.settings.options.chord_spec()?,
             options: self.settings.options.to_vec()?,
+            early_options: self.settings.options.early_to_vec()?,
             output_directory: self.settings.options.output_directory,
             commands: command_variants.into_iter().collect(),
 

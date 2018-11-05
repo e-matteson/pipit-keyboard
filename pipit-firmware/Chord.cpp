@@ -3,44 +3,8 @@
 #include <Arduino.h>
 
 
-void setMask(const ChordData* mask, ChordData* bytes)  {
-  for (uint8_t i = 0; i < mask->size(); i++) {
-    (*bytes)[i] |= (*mask)[i];
-  }
-}
 
-void unsetMask(const ChordData* mask, ChordData* bytes) {
-  for (uint8_t i = 0; i < mask->size(); i++) {
-    (*bytes)[i] &= ~(*mask)[i];
-  }
-}
 
-void andMask(const ChordData* mask, ChordData* bytes) {
-  for (uint8_t i = 0; i < mask->size(); i++) {
-    (*bytes)[i] &= (*mask)[i];
-  }
-}
-
-constexpr bool isByteMaskSet(const uint8_t mask, const uint8_t byte) {
-  return mask == (byte & mask);
-}
-
-bool isChordMaskSet(const ChordData* mask, const ChordData* bytes) {
-  bool return_val = 1;
-  for (uint8_t i = 0; i < mask->size(); i++) {
-    return_val &= isByteMaskSet((*mask)[i], (*bytes)[i]);
-  }
-  return return_val;
-}
-
-bool allZeroes(const ChordData* bytes) {
-  for(uint8_t byte : *bytes) {
-    if(byte) {
-      return 0;
-    }
-  }
-  return 1;
-}
 
 /// If this anagram number has a corresponding anagram number, return a pointer to it. Otherwise, return a nullptr.
 // TODO put this in conf.cpp?
@@ -61,21 +25,14 @@ const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
 Chord::Chord(conf::Mode mode) : mode(mode) {}
 
 void Chord::setSwitch(uint8_t switch_index) {
-  // TODO this seems inefficient to call for every index...
-  if (switch_index >= NUM_MATRIX_POSITIONS) {
-    DEBUG1_LN("WARNING: invalid chord switch index");
-    return;
-  }
-  uint8_t byte = switch_index / 8;
-  uint8_t bit = switch_index % 8;
-  chord_bytes[byte] |= (0x01 << bit);
+  chord_data.set(switch_index);
 }
 
 void Chord::setMode(conf::Mode _mode) { mode = _mode; }
 
 bool Chord::isEmptyExceptMods() const {
   // Doesn't check the mods, just the current chord bytes.
-  return allZeroes(&chord_bytes);
+  return chord_data.none();
 }
 
 /// Get the byte containing ctrl, shift, alt, and/or gui.
@@ -99,7 +56,7 @@ bool Chord::hasAnagramNum(uint8_t other_anagram) const {
 }
 
 const ChordData* Chord::getChordData() const {
-  return &chord_bytes;
+  return &chord_data;
 }
 
 /// Edit the capitalization of the given Keys, depending on a bunch of factors
@@ -223,8 +180,8 @@ bool Chord::extractMod(conf::Mod modifier) {
   // - remove the mod bits from the chord
   // - set a flag saying it's present
   // - return true
-  const ChordData* mod_chord_bytes = conf::getModChord(mode, modifier);
-  if (allZeroes(mod_chord_bytes)) {
+  const ChordData* mod_chord_data = conf::getModChord(mode, modifier);
+  if (mod_chord_data->none()) {
     // Mod is all zeroes - that's how we represent a missing mod chord. Ignore.
     return false;
   }
@@ -232,10 +189,10 @@ bool Chord::extractMod(conf::Mod modifier) {
   switch (conf::getModType(modifier)) {
     case conf::ModType::Plain:
     case conf::ModType::Word:
-      isPressed = isChordMaskSet(mod_chord_bytes, &chord_bytes);
+      isPressed = chord_data.contains(*mod_chord_data);
       break;
     case conf::ModType::Anagram:
-      isPressed = isExactAnagramPressed(mod_chord_bytes);
+      isPressed = isExactAnagramPressed(mod_chord_data);
       // TODO add default? or will it warn on new variants?
   }
   if (!isPressed) {
@@ -243,23 +200,20 @@ bool Chord::extractMod(conf::Mod modifier) {
     return false;
   }
 
-  // Mod is pressed
+  // Mod is pressed, set flag and unset switches in chord
   flags.setMod(modifier);
-  unsetMask(mod_chord_bytes, &chord_bytes);
+  chord_data &= ~*mod_chord_data;
   return true;
 }
 
 bool Chord::restoreMod(conf::Mod modifier) {
-  // If mod flag is set:
-  // - add the mod bits to the chord
-  // - unset the flag
-  // - return true
-  if (flags.hasMod(modifier)) {
-    flags.unsetMod(modifier);
-    setMask(conf::getModChord(mode, modifier), &chord_bytes);
-    return true;
+  if (!flags.hasMod(modifier)) {
+    return false;
   }
-  return false;
+  flags.unsetMod(modifier);
+  // Incorporate the switches of the mod chord into this chord.
+  chord_data |= *conf::getModChord(mode, modifier);
+  return true;
 }
 
 void Chord::prepareToCycle() {
@@ -313,15 +267,15 @@ uint8_t Chord::cycleAnagram() {
 }
 
 bool Chord::isAnagramMaskBlank() {
-  ChordData anagram_bytes = chord_bytes;
-  andMask(conf::getAnagramMask(mode), &anagram_bytes);
-  return allZeroes(&anagram_bytes);
+  ChordData anagram_bytes = chord_data;
+  anagram_bytes &= *conf::getAnagramMask(mode);
+  return anagram_bytes.none();
 }
 
 bool Chord::isExactAnagramPressed(const ChordData* mod_chord) {
   // TODO share code with isAnagramMaskBlank()
-  ChordData anagram_bytes = chord_bytes;
-  andMask(conf::getAnagramMask(mode), &anagram_bytes);
+  ChordData anagram_bytes = chord_data;
+  anagram_bytes &= *conf::getAnagramMask(mode);
   return *mod_chord == anagram_bytes;
 }
 
@@ -342,29 +296,30 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
 
 
 bool Chord::Flags::hasMod(conf::Mod mod) const {
-  return data.test(conf::to_index(mod));
+  return bits.test(conf::to_index(mod));
 }
 
 void Chord::Flags::setMod(conf::Mod mod) {
-  data.set(conf::to_index(mod));
+  bits.set(conf::to_index(mod));
 }
 
 void Chord::Flags::unsetMod(conf::Mod mod) {
-  data.reset(conf::to_index(mod));
+  bits.reset(conf::to_index(mod));
 }
 
 void Chord::Flags::toggleMod(conf::Mod mod) {
-  data.flip(conf::to_index(mod));
+  bits.flip(conf::to_index(mod));
 }
 
 bool Chord::Flags::getFlagCycleCapital() const {
-  return data.test(cycleCapitalOffset());
+  return bits.test(cycleCapitalOffset());
 }
 
 void Chord::Flags::toggleFlagCycleCapital() {
-  data.flip(cycleCapitalOffset());
+  bits.flip(cycleCapitalOffset());
 }
 
 constexpr size_t Chord::Flags::cycleCapitalOffset() const {
-  return data.size() - 1;
+  return bits.size() - 1;
 }
+

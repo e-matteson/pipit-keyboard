@@ -102,6 +102,13 @@ impl OptionsConfig {
         Ok(ops)
     }
 
+    pub fn early_to_vec(&self) -> Result<Vec<CTree>, Error> {
+        Ok(vec![CTree::Define {
+            name: "NUM_MATRIX_POSITIONS".to_c(),
+            value: self.num_matrix_positions()?.to_c(),
+        }])
+    }
+
     /// Info about the chord length etc. that the Chord struct needs to know.
     pub fn chord_spec(&self) -> Result<ChordSpec, Error> {
         let permutation = Permutation::from_to(
@@ -212,10 +219,6 @@ impl OptionsConfig {
         let enable_rgb_led = self.rgb_led_pins.is_some();
 
         Ok(vec![
-            CTree::Define {
-                name: "NUM_MATRIX_POSITIONS".to_c(),
-                value: self.num_matrix_positions()?.to_c(),
-            },
             CTree::DefineIf {
                 name: "ENABLE_RGB_LED".to_c(),
                 is_defined: enable_rgb_led,

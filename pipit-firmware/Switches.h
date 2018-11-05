@@ -39,11 +39,12 @@ private:
 
   // Represent the status of each switch with 2 bits, 1 from each array.
   struct Statuses {
-    BitArray<uint32_t, NUM_MATRIX_POSITIONS> lsb; // least significant
-    BitArray<uint32_t, NUM_MATRIX_POSITIONS> msb; // most significant
+    ChordData lsb; // least significant
+    ChordData msb; // most significant
 
     Switches::SwitchStatus get(size_t index) const;
     void set(size_t index, Switches::SwitchStatus status);
+    void setHeld(const ChordData& new_held_switches);
     bool sendable(size_t index) const;
     void pressedToAlreadySent();
     void alreadySentToHeld();

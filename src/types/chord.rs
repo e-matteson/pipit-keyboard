@@ -64,6 +64,19 @@ impl ChordSpec {
     pub fn to_c_initializer(&self, chord: &Chord) -> Result<CCode, Error> {
         Ok(format!("{{{}}}", self.to_c_bytes(chord)?.join(", ")).to_c())
     }
+
+    // TODO put this in output  module?
+    pub fn to_c_constructor(&self, chord: &Chord) -> Result<CCode, Error> {
+        Ok(format!(
+            "{}({})",
+            Self::c_type_name(),
+            self.to_c_initializer(chord)?
+        ).to_c())
+    }
+
+    pub fn c_type_name() -> CCode {
+        "ChordData".to_c()
+    }
 }
 
 impl Chord {
