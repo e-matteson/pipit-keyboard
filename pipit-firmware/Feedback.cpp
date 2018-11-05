@@ -298,8 +298,7 @@ void Feedback::updateLED() {
       break;
 
     default:
-      DEBUG1("WARNING: invalid LED routine: ");
-      DEBUG1_LN(led_routine);
+      DEBUG1_LN("WARNING: invalid LED routine");
   }
 }
 

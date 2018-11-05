@@ -200,8 +200,7 @@ uint16_t History::calcDistance(Motion motion, Direction direction) {
       return distance;
     }
     default:
-      DEBUG1("WARNING: Unknown motion: ");
-      DEBUG1_LN(motion);
+      DEBUG1_LN("WARNING: Unknown motion");
       return 0;
   }
 }

@@ -139,8 +139,7 @@ void Pipit::doCommand(const Key* data, uint8_t length) {
       break;
 
     default:
-      DEBUG1("WARNING: Unknown command: ");
-      DEBUG1_LN(command);
+      DEBUG1_LN("WARNING: Unknown command");
       break;
   }
 }

@@ -24,7 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Pipit pipit;
 
 void setup() {
+#ifdef ENABLE_SERIAL_DEBUG
   Serial.begin(115200);  // for sending feedback codes and debug messages
+#endif
   pipit.setup();
 }
 
