@@ -16,12 +16,11 @@ void Switches::update() {
   updateSwitchStatuses();
 
   // If any switches have been held for a while,
-  //  or 1 switch in a chord was released and re-pressed:
-  //  let the held switches be reused in future chords.
-
+  // or 1 switch in a chord was released and re-pressed,
+  // let the held switches be reused in future chords.
   // TODO always re-use modifers here?
   if (held_timer.isDone() || was_switch_double_tapped) {
-    reuseHeldSwitches();
+    statuses.alreadySentToHeld();
   }
 }
 
@@ -48,6 +47,7 @@ bool Switches::readyToRelease() {
 }
 
 void Switches::updateSwitchStatuses() {
+  // TODO use bitwise ops somehow?
   was_switch_double_tapped = false;
   for (uint8_t i = 0; i < statuses.size(); i++) {
     const SwitchStatus status = statuses.get(i);
@@ -143,11 +143,6 @@ void Switches::stopDebouncing(uint8_t i) {
   debounce_timers[i].disable();
 }
 
-/// If any switches have been held down for a while, let them be re-used
-///  in future chords.
-void Switches::reuseHeldSwitches() {
-  statuses.alreadySentToHeld();
-}
 
 /// Let modifiers be immediately re-used in future chords.
 // Not currently called in gaming mode, which simplifies things
@@ -170,13 +165,7 @@ bool Switches::anyDown() {
 void Switches::fillChord(Chord* chord) {
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.
-  // Also, update switch_status values from Pressed -> AlreadySent.
-  for (uint8_t i = 0; i < statuses.size(); i++) {
-    if (statuses.sendable(i)) {
-      // Store it in the chord.
-      chord->setSwitch(i);
-    }
-  }
+  statuses.writeSendable(chord->getDataMut());
   // Modify the status array to record that the switches have been processed.
   statuses.pressedToAlreadySent();
 }
@@ -184,8 +173,7 @@ void Switches::fillChord(Chord* chord) {
 // Fill up an array of chords, one for each pressed switch, instead of combining
 // them all into 1 chord like fillChord()
 uint8_t Switches::fillGamingSwitches(Chord* chords) {
-  // TODO use bitwise ops
-  // TODO use count()
+  // TODO use bitwise ops, count()
   uint8_t num_pressed = 0;
 
   for (uint8_t index = 0; index < statuses.size(); index++) {
@@ -212,15 +200,18 @@ Switches::SwitchStatus Switches::Statuses::get(size_t index) const {
   return static_cast<Switches::SwitchStatus>((msb.test(index) << 1) | lsb.test(index));
 }
 
+/// If any switches are AlreadySent, change their status to Held.
 void Switches::Statuses::setHeld(const ChordData& new_held_switches) {
   lsb |= new_held_switches;
   msb |= new_held_switches;
 }
 
+/// If any switches are AlreadySent, change their status to Held.
 void Switches::Statuses::alreadySentToHeld(){
   lsb |= msb;
 }
 
+/// If any switches are Pressed, change their status to AlreadySent.
 void Switches::Statuses::pressedToAlreadySent(){
   // TODO can we do this in-place instead?
   auto mask (msb);
@@ -240,4 +231,9 @@ bool Switches::Statuses::sendable(size_t index) const {
 
 constexpr size_t Switches::Statuses::size() const {
   return lsb.size();
+}
+
+void Switches::Statuses::writeSendable(ChordData* chord) const {
+  // If any switches are sendable (Pressed or Held), set them in the chord.
+  *chord |= lsb;
 }

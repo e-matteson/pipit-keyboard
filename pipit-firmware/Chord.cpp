@@ -37,6 +37,7 @@ bool Chord::isEmptyExceptMods() const {
 
 /// Get the byte containing ctrl, shift, alt, and/or gui.
 /// Needed for an HID keyboard report.
+// TODO can we speed this up?
 uint8_t Chord::getModByte() const {
   uint8_t mod_byte = 0;
   uint8_t index = 0;
@@ -55,25 +56,29 @@ bool Chord::hasAnagramNum(uint8_t other_anagram) const {
   return (anagram_num == other_anagram);
 }
 
-const ChordData* Chord::getChordData() const {
+const ChordData* Chord::getData() const {
+  return &chord_data;
+}
+
+ChordData* Chord::getDataMut() {
   return &chord_data;
 }
 
 /// Edit the capitalization of the given Keys, depending on a bunch of factors
 /// like what mod flags are set for this Chord, what literal modifiers are
 /// included in the Keys, etc.
-void Chord::editCaps(Key* data, uint8_t length) const {
-  switch (decideCapBehavior(data, length)) {
+void Chord::editCaps(Key* keys, uint8_t length) const {
+  switch (decideCapBehavior(keys, length)) {
     case CapBehaviorEnum::CAP_DEFAULT:
       break;
 
     case CapBehaviorEnum::CAP_FIRST:
-      data[0].setShift(1);
+      keys[0].setShift(1);
       break;
 
     case CapBehaviorEnum::CAP_NONE:
       for (uint8_t i = 0; i < length; i++) {
-        data[i].setShift(0);
+        keys[i].setShift(0);
       }
       break;
 
@@ -82,7 +87,7 @@ void Chord::editCaps(Key* data, uint8_t length) const {
   }
 }
 
-Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
+Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* keys,
                                                 uint8_t length) const {
   bool has_cap_mod = flags.hasMod(conf::Mod::mod_capital);
 
@@ -98,7 +103,7 @@ Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
   // be lowercase.
   bool has_literal_shift = 0;
   for (uint8_t i = 0; i < length; i++) {
-    if (data[i].containsShift()) {
+    if (keys[i].containsShift()) {
       has_literal_shift = 1;
       break;
     }

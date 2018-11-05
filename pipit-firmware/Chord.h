@@ -32,13 +32,14 @@ class Chord {
   void cycle(CycleType operation);
 
   bool hasAnagramNum(uint8_t other_anagram) const;
-  const ChordData* getChordData() const;
+  const ChordData* getData() const;
+  ChordData* getDataMut();
   bool isEmptyExceptMods() const;
   uint8_t getModByte() const;
   conf::Mode getModeName() const;
 
   bool hasMod(conf::Mod mod) const;
-  void editCaps(Key* data, uint8_t length) const;
+  void editCaps(Key* keys, uint8_t length) const;
   bool hasModNospace() const;
   bool hasModDouble() const;
   bool hasModShorten() const;
@@ -75,7 +76,7 @@ class Chord {
   void cycleCapital();
   void cycleNospace();
   uint8_t getAnagramNum();
-  CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
+  CapBehaviorEnum decideCapBehavior(const Key* keys, uint8_t length) const;
   void prepareToCycle();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);

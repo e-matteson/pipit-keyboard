@@ -23,6 +23,10 @@ void Matrix::setup() {
   }
 }
 
+bool Matrix::isDown(uint8_t index) const {
+  return switches_down.test(index);
+}
+
 bool Matrix::scanIfChanged() {
   // Return true if we scan. Handle entering and exiting standby.
 
@@ -50,9 +54,10 @@ bool Matrix::scanIfChanged() {
 
 void Matrix::scan() {
   // Scan the matrix for pressed switches.
-  // TODO is it more efficient to set LSB then <<=1 on every iteration?
+
+  // TODO is it more efficient to set a bit then shift on every iteration?
+  // would reverse order of bits...
   switches_down.reset();
-  bool is_any_switch_down = false;
   uint8_t switch_index = 0;
   for(uint8_t col_pin : conf::column_pins) {
     selectColumn(col_pin);
@@ -64,13 +69,12 @@ void Matrix::scan() {
     for(uint8_t row_pin : conf::row_pins) {
       if (isRowPressed(row_pin)) {
         switches_down.set(switch_index);
-        is_any_switch_down = true;
       }
       switch_index++;
     }
     unselectColumn(col_pin);
   }
-  if (conf::USE_STANDBY_INTERRUPTS && is_any_switch_down) {
+  if (conf::USE_STANDBY_INTERRUPTS && switches_down.any()) {
     standby_timer.start();
   }
 }
@@ -87,10 +91,6 @@ void Matrix::selectColumn(uint8_t column_pin) {
 
 void Matrix::unselectColumn(uint8_t column_pin) {
   pinMode(column_pin, HI_Z);
-}
-
-bool Matrix::isDown(uint8_t index) const {
-  return switches_down.test(index);
 }
 
 void Matrix::setRowsInput() {

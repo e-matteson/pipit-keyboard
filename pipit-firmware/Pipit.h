@@ -38,12 +38,12 @@ class Pipit {
   void processChord(Chord* new_chord);
   void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
 
-  void doCommand(const Key* data, uint8_t length);
+  void doCommand(const Key* keys, uint8_t length);
   void cycleLastWord(CycleType cycle_type);
 
-  uint8_t doIfFound(conf::SeqType type, Chord* chord, Key* data);
-  uint8_t replaceLastIfFound(conf::SeqType type, Chord* chord, Key* data);
-  uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data,
+  uint8_t doIfFound(conf::SeqType type, Chord* chord, Key* keys);
+  uint8_t replaceLastIfFound(conf::SeqType type, Chord* chord, Key* keys);
+  uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
                           bool delete_before_sending);
 
   Switches switches;

@@ -21,7 +21,7 @@ class BitArray {
 public:
 
   constexpr BitArray() : blocks() {}
-  constexpr BitArray(array_t data_blocks) : blocks(data_blocks) {
+  constexpr BitArray(array_t raw_blocks) : blocks(raw_blocks) {
     // TODO sanitize here?
   }
 

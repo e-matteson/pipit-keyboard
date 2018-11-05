@@ -49,6 +49,7 @@ private:
     void pressedToAlreadySent();
     void alreadySentToHeld();
     bool anyDown() const;
+    void writeSendable(ChordData* chord) const;
     constexpr size_t size() const;
   };
 
@@ -57,7 +58,6 @@ private:
   bool debounceRelease(uint8_t switch_index);
   void stopDebouncing(uint8_t i);
   void resetInactivityTimers();
-  void reuseHeldSwitches();
 
   Timer chord_timer;
   Timer release_timer;

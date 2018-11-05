@@ -17,9 +17,9 @@ class Sender {
   void backspace();
 
   bool sendIfEmptyExceptMods(const Chord* chord);
-  void sendPlain(const Key* data, uint8_t data_length, const Chord* chord);
-  void sendMacro(const Key* data, uint8_t data_length, const Chord* chord);
-  void sendWord(const Key* data, uint8_t data_length, Chord* chord);
+  void sendPlain(const Key* keys, uint8_t keys_length, const Chord* chord);
+  void sendMacro(const Key* keys, uint8_t keys_length, const Chord* chord);
+  void sendWord(const Key* keys, uint8_t keys_length, Chord* chord);
   void sendReport(Report* report);
 
   void releaseAll();

@@ -43,14 +43,14 @@ bool Sender::sendIfEmptyExceptMods(const Chord* chord) {
   return 1;
 }
 
-void Sender::sendPlain(const Key* data, uint8_t data_length,
+void Sender::sendPlain(const Key* keys, uint8_t keys_length,
                        const Chord* chord) {
   history.startEntry(chord, 1);
   // TODO should we modify the input Keys instead of copying to the temporary
   // value?
   Key key;
-  for (uint8_t i = 0; i < data_length; i++) {
-    key = data[i];
+  for (uint8_t i = 0; i < keys_length; i++) {
+    key = keys[i];
     key.addMod(chord->getModByte());
     // Let the chord change the key's capitalization, like if cycle_capital was
     // pressed.
@@ -59,18 +59,18 @@ void Sender::sendPlain(const Key* data, uint8_t data_length,
   }
 }
 
-void Sender::sendMacro(const Key* data, uint8_t data_length,
+void Sender::sendMacro(const Key* keys, uint8_t keys_length,
                        const Chord* chord) {
   history.startEntry(chord, 0);
-  for (uint8_t i = 0; i < data_length; i++) {
-    sendKey(data + i);
-    comms.proportionalDelay(data_length, 2);
+  for (uint8_t i = 0; i < keys_length; i++) {
+    sendKey(keys + i);
+    comms.proportionalDelay(keys_length, 2);
   }
   releaseAll();
 }
 
 // Send the word. May modify the chord - don't use it again after calling this.
-void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
+void Sender::sendWord(const Key* keys, uint8_t keys_length, Chord* chord) {
   if (conf::SPACE_POS == WordSpacePosition::Before) {
     // doubleMod and shortenMod would be kinda useless with a space here...
     // So they should prevent us from ever prepending a space.
@@ -83,7 +83,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
 
   if (chord->hasModShorten()) {
     backspace();
-    comms.proportionalDelay(data_length, 1);
+    comms.proportionalDelay(keys_length, 1);
   }
 
   if (chord->hasModDouble()) {
@@ -92,7 +92,7 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
     Key* doubled_key = history.getLastLetterAtCursor();
     history.startEntry(chord, 1);
     sendKey(doubled_key);
-    comms.proportionalDelay(data_length, 1);
+    comms.proportionalDelay(keys_length, 1);
   } else {
     // Just start the new history entry as usual
     history.startEntry(chord, 1);
@@ -101,24 +101,24 @@ void Sender::sendWord(const Key* data, uint8_t data_length, Chord* chord) {
   if (conf::SPACE_POS == WordSpacePosition::Before) {
     if (!chord->hasModNospace()) {
       space();
-      comms.proportionalDelay(data_length, 1);
+      comms.proportionalDelay(keys_length, 1);
     }
   }
 
   // TODO we only need to copy it if the capitalization is actually changing...
-  Key new_data[data_length];
-  memcpy(new_data, data, data_length * sizeof(Key));
-  chord->editCaps(new_data, data_length);
+  Key new_keys[keys_length];
+  memcpy(new_keys, keys, keys_length * sizeof(Key));
+  chord->editCaps(new_keys, keys_length);
 
-  for (uint8_t i = 0; i < data_length; i++) {
-    sendKey(new_data + i);
-    comms.proportionalDelay(data_length, 1);
+  for (uint8_t i = 0; i < keys_length; i++) {
+    sendKey(new_keys + i);
+    comms.proportionalDelay(keys_length, 1);
   }
 
   if (conf::SPACE_POS == WordSpacePosition::After) {
     if (!chord->hasModNospace()) {
       space();
-      comms.proportionalDelay(data_length, 1);
+      comms.proportionalDelay(keys_length, 1);
     }
   }
 

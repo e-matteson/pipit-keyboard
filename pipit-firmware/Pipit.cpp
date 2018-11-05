@@ -18,13 +18,13 @@ void Pipit::loop() {
 
 /// If you define a new command in the settings file, you must add a case for it
 /// here!
-void Pipit::doCommand(const Key* data, uint8_t length) {
-  if (length == 0 || data == nullptr) {
+void Pipit::doCommand(const Key* keys, uint8_t length) {
+  if (length == 0 || keys == nullptr) {
     DEBUG1_LN("WARNING: invalid command");
     return;
   }
 
-  conf::Command command = static_cast<conf::Command>(data[0].key_code);
+  conf::Command command = static_cast<conf::Command>(keys[0].key_code);
 
   // First check if we should un-pause, because that's the only command
   //  we're allowed to do while paused.
@@ -135,7 +135,7 @@ void Pipit::doCommand(const Key* data, uint8_t length) {
         DEBUG1_LN("WARNING: Wrong number of args for command_switch_to");
         return;
       }
-      mode = static_cast<conf::Mode>(data[1].key_code);
+      mode = static_cast<conf::Mode>(keys[1].key_code);
       break;
 
     default:
@@ -182,11 +182,11 @@ void Pipit::processChord(Chord* chord) {
     return;
   };
 
-  // Prepare to store data from the lookup table
-  Key data[conf::MAX_KEYS_IN_SEQUENCE];
+  // Prepare to store keys from the lookup table
+  Key keys[conf::MAX_KEYS_IN_SEQUENCE];
 
   // If chord is a known command, do it and return.
-  if (doIfFound(conf::SeqType::Command, chord, data)) {
+  if (doIfFound(conf::SeqType::Command, chord, keys)) {
     return;
   }
 
@@ -195,7 +195,7 @@ void Pipit::processChord(Chord* chord) {
   }
 
   // If chord is a known macro, send it and return.
-  if (doIfFound(conf::SeqType::Macro, chord, data)) {
+  if (doIfFound(conf::SeqType::Macro, chord, keys)) {
     return;
   }
 
@@ -205,7 +205,7 @@ void Pipit::processChord(Chord* chord) {
   chord->extractAnagramMods();
 
   // If chord is a known word, send it and return.
-  if (doIfFound(conf::SeqType::Word, chord, data)) {
+  if (doIfFound(conf::SeqType::Word, chord, keys)) {
     switches.reuseMods(chord);
     return;
   }
@@ -218,7 +218,7 @@ void Pipit::processChord(Chord* chord) {
   chord->extractPlainMods();
 
   // If chord is a known plain key, send it and return.
-  if (doIfFound(conf::SeqType::Plain, chord, data)) {
+  if (doIfFound(conf::SeqType::Plain, chord, keys)) {
     switches.reuseMods(chord);
     return;
   }
@@ -248,10 +248,10 @@ void Pipit::processGamingSwitches(Chord* gaming_switches,
   Report report;
   report.is_gaming = true;
   for (uint8_t i = 0; i < num_switches; i++) {
-    Key data[conf::MAX_KEYS_IN_SEQUENCE];
+    Key keys[conf::MAX_KEYS_IN_SEQUENCE];
 
     Chord* single_switch = gaming_switches + i;
-    if (doIfFound(conf::SeqType::Command, single_switch, data)) {
+    if (doIfFound(conf::SeqType::Command, single_switch, keys)) {
       return;
     }
 
@@ -259,18 +259,18 @@ void Pipit::processGamingSwitches(Chord* gaming_switches,
       return;
     }
 
-    if (doIfFound(conf::SeqType::Macro, single_switch, data)) {
+    if (doIfFound(conf::SeqType::Macro, single_switch, keys)) {
       return;
     }
 
     // We can't use doIfFound() here, because we're adding all
     // plain_keys to the report instead of sending each one immediately.
     if (uint8_t length =
-            conf::lookup(single_switch, conf::SeqType::Plain, data)) {
+            conf::lookup(single_switch, conf::SeqType::Plain, keys)) {
       if (length > 1) {
         DEBUG1_LN("WARNING: Extra plain_key data ignored");
       }
-      report.addKey(data);
+      report.addKey(keys);
       report.addMod(single_switch->getModByte());
       feedback.trigger(conf::SeqType::Plain);
       continue;
@@ -293,15 +293,15 @@ void Pipit::cycleLastWord(CycleType cycle_type) {
     return;
   }
   Chord new_chord(*entry->getChord());
-  Key data[conf::MAX_KEYS_IN_SEQUENCE];
+  Key keys[conf::MAX_KEYS_IN_SEQUENCE];
   // TODO loop until anagram num == original anagram num, instead?
   for (uint8_t i = 0; i < conf::MAX_ANAGRAM_NUM; i++) {
     new_chord.cycle(cycle_type);
 
-    if (replaceLastIfFound(conf::SeqType::Word, &new_chord, data)) {
+    if (replaceLastIfFound(conf::SeqType::Word, &new_chord, keys)) {
       return;  // Success
     }
-    if (replaceLastIfFound(conf::SeqType::Plain, &new_chord, data)) {
+    if (replaceLastIfFound(conf::SeqType::Plain, &new_chord, keys)) {
       return;  // Success
     }
 
@@ -317,22 +317,22 @@ void Pipit::cycleLastWord(CycleType cycle_type) {
   feedback.triggerCyclingFailed();
 }
 
-uint8_t Pipit::doIfFound(conf::SeqType type, Chord* chord, Key* data) {
-  return doIfFoundHelper(type, chord, data, false);
+uint8_t Pipit::doIfFound(conf::SeqType type, Chord* chord, Key* keys) {
+  return doIfFoundHelper(type, chord, keys, false);
 }
 
-uint8_t Pipit::replaceLastIfFound(conf::SeqType type, Chord* chord, Key* data) {
-  return doIfFoundHelper(type, chord, data, true);
+uint8_t Pipit::replaceLastIfFound(conf::SeqType type, Chord* chord, Key* keys) {
+  return doIfFoundHelper(type, chord, keys, true);
 }
 
 // Search for the chord in lookups of the given sequence type. If it's found,
 // send it (if it's a key sequence) or do it (if it's a command). Set
 // `delete_before_sending` you're using this to cycle a word. Return the
-// length of the data found in the lookup, or 0 if not found.
-uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data,
+// length of the keys found in the lookup, or 0 if not found.
+uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
                                bool delete_before_sending) {
-  uint8_t data_length = conf::lookup(chord, type, data);
-  if (data_length == 0) {
+  uint8_t keys_length = conf::lookup(chord, type, keys);
+  if (keys_length == 0) {
     return 0;  // Fail, chord not found.
   }
 
@@ -342,16 +342,16 @@ uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data,
 
   switch (type) {
     case conf::SeqType::Plain:
-      sender.sendPlain(data, data_length, chord);
+      sender.sendPlain(keys, keys_length, chord);
       break;
     case conf::SeqType::Word:
-      sender.sendWord(data, data_length, chord);
+      sender.sendWord(keys, keys_length, chord);
       break;
     case conf::SeqType::Macro:
-      sender.sendMacro(data, data_length, chord);
+      sender.sendMacro(keys, keys_length, chord);
       break;
     case conf::SeqType::Command:
-      doCommand(data, data_length);
+      doCommand(keys, keys_length);
       break;
     default:
       DEBUG1_LN("unknown seq type");
@@ -359,7 +359,7 @@ uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* data,
   }
 
   feedback.trigger(type);
-  return data_length;  // Success
+  return keys_length;  // Success
 }
 
 /// Shutdown to save power if a switch has been held down for a very long time,

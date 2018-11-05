@@ -86,7 +86,7 @@ uint8_t decodeSequence(const LookupKmapTypeLenAnagram* lookup, uint16_t seq_num,
 uint8_t lookupInKmapTypeLenAndAnagram(const Chord* chord,
                                       const LookupKmapTypeLenAnagram* lookup,
                                       Key* keys_out) {
-  const ChordData* chord_data = chord->getChordData();
+  const ChordData* chord_data = chord->getData();
   for (uint16_t i = 0; i < lookup->num_chords; i++) {
     if (*chord_data == lookup->chords[i]) {
       // Found match!
@@ -99,7 +99,7 @@ uint8_t lookupInKmapTypeLenAndAnagram(const Chord* chord,
 // TODO inline?
 uint8_t lookupInKmapAndType(const Chord* chord, const LookupKmapType* table,
                             Key* keys_out) {
-  // If chord is found in lookup, store data and return its length.
+  // If chord is found in lookup, store corresponding keys and return their length.
   // Otherwise, return 0.
   for (uint32_t lookup_index = 0; lookup_index < table->num_lookups;
        lookup_index++) {
