@@ -51,7 +51,7 @@ bool Matrix::scanIfChanged() {
 void Matrix::scan() {
   // Scan the matrix for pressed switches.
   // TODO is it more efficient to set LSB then <<=1 on every iteration?
-  switch_states = 0;
+  switches_down.reset();
   bool is_any_switch_down = false;
   uint8_t switch_index = 0;
   for(uint8_t col_pin : conf::column_pins) {
@@ -63,14 +63,13 @@ void Matrix::scan() {
 
     for(uint8_t row_pin : conf::row_pins) {
       if (isRowPressed(row_pin)) {
-        setSwitch(switch_index);
+        switches_down.set(switch_index);
         is_any_switch_down = true;
       }
       switch_index++;
     }
     unselectColumn(col_pin);
   }
-
   if (conf::USE_STANDBY_INTERRUPTS && is_any_switch_down) {
     standby_timer.start();
   }
@@ -91,10 +90,8 @@ void Matrix::unselectColumn(uint8_t column_pin) {
 }
 
 bool Matrix::isDown(uint8_t index) const {
-  return 0x1 & (switch_states >> index);
+  return switches_down.test(index);
 }
-
-void Matrix::setSwitch(uint8_t index) { switch_states |= (0x1 << index); }
 
 void Matrix::setRowsInput() {
   for (uint8_t pin : conf::row_pins) {

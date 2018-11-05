@@ -2,7 +2,6 @@
 #include <type_traits>
 #include <Arduino.h>
 
-#define FLAG_BIT 15
 
 void setMask(const ChordData* mask, ChordData* bytes)  {
   for (uint8_t i = 0; i < mask->size(); i++) {
@@ -45,6 +44,7 @@ bool allZeroes(const ChordData* bytes) {
 
 /// If this anagram number has a corresponding anagram number, return a pointer to it. Otherwise, return a nullptr.
 // TODO put this in conf.cpp?
+// TODO the pointer is slower than returning the small type directly. But how to express failure?
 const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
   uint8_t index = 0;
   for (uint8_t num : conf::anagram_mod_numbers) {
@@ -84,7 +84,7 @@ uint8_t Chord::getModByte() const {
   uint8_t mod_byte = 0;
   uint8_t index = 0;
   for (conf::Mod mod : conf::plain_mods) {
-    if (hasMod(mod)) {
+    if (flags.hasMod(mod)) {
       mod_byte |= conf::plain_mod_keys[index];
     }
     index++;
@@ -127,9 +127,9 @@ void Chord::editCaps(Key* data, uint8_t length) const {
 
 Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
                                                 uint8_t length) const {
-  bool has_cap_mod = hasMod(conf::Mod::mod_capital);
+  bool has_cap_mod = flags.hasMod(conf::Mod::mod_capital);
 
-  if (!getFlagCycleCapital()) {
+  if (!flags.getFlagCycleCapital()) {
     // The simple case, without cap cycling.
     if (has_cap_mod) {
       return CAP_FIRST;
@@ -159,54 +159,16 @@ Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* data,
   return CAP_FIRST;
 }
 
-bool Chord::hasModNospace() const { return hasMod(conf::Mod::mod_nospace); }
+bool Chord::hasModNospace() const { return flags.hasMod(conf::Mod::mod_nospace); }
 
-bool Chord::hasModDouble() const { return hasMod(conf::Mod::mod_double); }
+bool Chord::hasModDouble() const { return flags.hasMod(conf::Mod::mod_double); }
 
-bool Chord::hasModShorten() const { return hasMod(conf::Mod::mod_shorten); }
+bool Chord::hasModShorten() const { return flags.hasMod(conf::Mod::mod_shorten); }
 
-void Chord::setModNospace() { setMod(conf::Mod::mod_nospace); }
-
-
-/// Return a mask where only the bit corresponding to the given modifier is set.
-/// For use with mods_and_flags.
-// TODO constexpr?
-uint16_t getModMask(conf::Mod modifier) {
-  // Mask must be the same size as mods_and_flags member.
-  return (0x1 << conf::to_index(modifier));
-}
+void Chord::setModNospace() { flags.setMod(conf::Mod::mod_nospace); }
 
 bool Chord::hasMod(conf::Mod mod) const {
-  return mods_and_flags & getModMask(mod);
-}
-
-void Chord::setMod(conf::Mod mod) {
-  mods_and_flags |= getModMask(mod);
-}
-
-void Chord::unsetMod(conf::Mod mod) {
-  mods_and_flags &= ~getModMask(mod);
-}
-
-void Chord::toggleMod(conf::Mod mod) {
-  mods_and_flags ^= getModMask(mod);
-}
-
-/// Return a mask where only the bit corresponding to flag_cycle_capital is set.
-/// For use with mods_and_flags.
-// TODO just make this a const instead?
-uint16_t getFlagCycleCapitalMask() {
-  // Mask must be the same size as mods_and_flags member.
-  return (0x1 << FLAG_BIT);
-}
-
-
-bool Chord::getFlagCycleCapital() const {
-  return mods_and_flags & getFlagCycleCapitalMask();
-}
-
-void Chord::toggleFlagCycleCapital() {
-  mods_and_flags ^= getFlagCycleCapitalMask();
+  return flags.hasMod(mod);
 }
 
 void Chord::extractPlainMods() {
@@ -282,7 +244,7 @@ bool Chord::extractMod(conf::Mod modifier) {
   }
 
   // Mod is pressed
-  setMod(modifier);
+  flags.setMod(modifier);
   unsetMask(mod_chord_bytes, &chord_bytes);
   return true;
 }
@@ -292,20 +254,20 @@ bool Chord::restoreMod(conf::Mod modifier) {
   // - add the mod bits to the chord
   // - unset the flag
   // - return true
-  bool was_set = hasMod(modifier);
-  if (was_set) {
-    unsetMod(modifier);
+  if (flags.hasMod(modifier)) {
+    flags.unsetMod(modifier);
     setMask(conf::getModChord(mode, modifier), &chord_bytes);
+    return true;
   }
-  return was_set;
+  return false;
 }
 
 void Chord::prepareToCycle() {
   // Unset mods that affect the word before this one, like by backspacing or
   // doubling its letters. We don't want to repeat those effects every time we
   // cycle this chord.
-  unsetMod(conf::Mod::mod_shorten);
-  unsetMod(conf::Mod::mod_double);
+  flags.unsetMod(conf::Mod::mod_shorten);
+  flags.unsetMod(conf::Mod::mod_double);
 }
 
 void Chord::cycle(CycleType operation) {
@@ -329,12 +291,12 @@ void Chord::cycle(CycleType operation) {
 
 void Chord::cycleCapital() {
   prepareToCycle();
-  toggleFlagCycleCapital();
+  flags.toggleFlagCycleCapital();
 }
 
 void Chord::cycleNospace() {
   prepareToCycle();
-  toggleMod(conf::Mod::mod_nospace);
+  flags.toggleMod(conf::Mod::mod_nospace);
 }
 
 /********** Anagram manipulation ***********/
@@ -372,8 +334,37 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
   }
 
   if (value) {
-    setMod(*mod);
+    flags.setMod(*mod);
   } else {
-    unsetMod(*mod);
+    flags.unsetMod(*mod);
   }
+}
+
+
+bool Chord::Flags::hasMod(conf::Mod mod) const {
+  return data.test(conf::to_index(mod));
+}
+
+void Chord::Flags::setMod(conf::Mod mod) {
+  data.set(conf::to_index(mod));
+}
+
+void Chord::Flags::unsetMod(conf::Mod mod) {
+  data.reset(conf::to_index(mod));
+}
+
+void Chord::Flags::toggleMod(conf::Mod mod) {
+  data.flip(conf::to_index(mod));
+}
+
+bool Chord::Flags::getFlagCycleCapital() const {
+  return data.test(cycleCapitalOffset());
+}
+
+void Chord::Flags::toggleFlagCycleCapital() {
+  data.flip(cycleCapitalOffset());
+}
+
+constexpr size_t Chord::Flags::cycleCapitalOffset() const {
+  return data.size() - 1;
 }

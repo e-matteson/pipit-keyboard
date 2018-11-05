@@ -243,6 +243,7 @@ void Pipit::processChord(Chord* chord) {
 // individual switch, and if they're all plain_keys, send them all together at
 // the end. If any switch is a command or macro, handle it immediately and
 // ignore the rest of the switches.
+// TODO maybe don't ignore the rest of the switches?
 void Pipit::processGamingSwitches(Chord* gaming_switches,
                                   uint8_t num_switches) {
   Report report;

@@ -26,15 +26,31 @@ class Switches {
 
   Matrix matrix;
 
- private:
-  enum class SwitchStatus {
-    NotPressed = 0,  // not currently pressed
-    Pressed,         // pressed and not sent yet
-    AlreadySent,     // already sent, don't resend in future chords
-    Held             // already sent, but ok to resend in future chords
+private:
+
+  // The values of the variants matter! We use bitwise operations to efficiently
+  // change the status of multiple switches at once.
+  enum class SwitchStatus : uint8_t {
+    NotPressed = 0x0,   // not currently pressed
+    Pressed = 0x1,      // pressed and not sent yet
+    AlreadySent = 0x2,  // already sent, don't resend in future chords
+    Held = 0x3,         // already sent, but ok to resend in future chords
   };
 
-  void checkForHeldSwitches();
+  // Represent the status of each switch with 2 bits, 1 from each array.
+  struct Statuses {
+    BitArray<uint32_t, NUM_MATRIX_POSITIONS> lsb; // least significant
+    BitArray<uint32_t, NUM_MATRIX_POSITIONS> msb; // most significant
+
+    Switches::SwitchStatus get(size_t index) const;
+    void set(size_t index, Switches::SwitchStatus status);
+    bool sendable(size_t index) const;
+    void pressedToAlreadySent();
+    void alreadySentToHeld();
+    bool anyDown() const;
+    constexpr size_t size() const;
+  };
+
   void updateSwitchStatuses();
   bool debouncePress(uint8_t switch_index);
   bool debounceRelease(uint8_t switch_index);
@@ -49,10 +65,7 @@ class Switches {
   // We're now using the same timers for both press and release.
   // Will that always work? Why did we decide to have separate ones before?
   Timer debounce_timers[NUM_MATRIX_POSITIONS];
-
-  // TODO could store in 2 uint32_ts, instead! (for 4 statuses, and <32 switches)
-  // Or 2 std::BitSets!
-  SwitchStatus switch_status[NUM_MATRIX_POSITIONS] = {SwitchStatus::NotPressed};
+  Statuses statuses;
   bool was_switch_double_tapped = 0;
 
   // Index of last released switch, or NO_SWITCH

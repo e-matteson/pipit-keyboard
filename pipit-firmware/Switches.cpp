@@ -14,7 +14,15 @@ Switches::Switches() {
 void Switches::update() {
   matrix.scanIfChanged();
   updateSwitchStatuses();
-  checkForHeldSwitches();
+
+  // If any switches have been held for a while,
+  //  or 1 switch in a chord was released and re-pressed:
+  //  let the held switches be reused in future chords.
+
+  // TODO always re-use modifers here?
+  if (held_timer.isDone() || was_switch_double_tapped) {
+    reuseHeldSwitches();
+  }
 }
 
 void Switches::setup() { matrix.setup(); }
@@ -40,10 +48,11 @@ bool Switches::readyToRelease() {
 }
 
 void Switches::updateSwitchStatuses() {
-  uint8_t i = 0; // the index of the current switch
-  for (SwitchStatus status : switch_status) {
-    if (matrix.isDown(i)) {     // Switch is physically down now.
-      switch (status) {  // Old status is:
+  was_switch_double_tapped = false;
+  for (uint8_t i = 0; i < statuses.size(); i++) {
+    const SwitchStatus status = statuses.get(i);
+    if (matrix.isDown(i)) {   // Switch is physically down now.
+      switch (status) {   // Old status is:
         case SwitchStatus::Pressed:
         case SwitchStatus::AlreadySent:
         case SwitchStatus::Held:
@@ -72,14 +81,13 @@ void Switches::updateSwitchStatuses() {
             // even ran out. Change status back to Pressed, after
             // debounceRelease set it to NotPressed.
             // TODO how might this interact with the bouncy-switch grace period?
-            status = SwitchStatus::Pressed;
+            statuses.set(i, SwitchStatus::Pressed);
             // Force a send during this loop iteration.
             chord_timer.forceDone();
           }
           break;
       }
     }
-    i++;
   }
 }
 
@@ -92,7 +100,7 @@ bool Switches::debouncePress(uint8_t switch_index) {
   /*   debounce_timers[switch_index].start(); */
   /* } else if (debounce_timers[switch_index].isDone()) { */
   /*   // Debounce done, it's a real press! */
-    switch_status[switch_index] = SwitchStatus::Pressed;
+    statuses.set(switch_index, SwitchStatus::Pressed);
     debounce_timers[switch_index].disable();
 
     chord_timer.start();
@@ -119,7 +127,8 @@ bool Switches::debounceRelease(uint8_t switch_index) {
   } else if (debounce_timers[switch_index].isDone()) {
     // Debouncing done, it's a real release.
     debounce_timers[switch_index].disable();
-    switch_status[switch_index] = SwitchStatus::NotPressed;
+    statuses.set(switch_index, SwitchStatus::NotPressed);
+
     last_released_switch = switch_index;
     release_timer.start();
     held_timer.start();
@@ -134,33 +143,15 @@ void Switches::stopDebouncing(uint8_t i) {
   debounce_timers[i].disable();
 }
 
-void Switches::checkForHeldSwitches() {
-  // If any switches have been held for a while,
-  //  or 1 switch in a chord was released and re-pressed:
-  //  let the held switches be reused in future chords.
-
-  // always re-use modifers here?
-  if (held_timer.isDone()) {
-    held_timer.disable();
-    reuseHeldSwitches();
-  }
-  if (was_switch_double_tapped) {
-    was_switch_double_tapped = false;
-    reuseHeldSwitches();
-  }
-}
-
 /// If any switches have been held down for a while, let them be re-used
 ///  in future chords.
 void Switches::reuseHeldSwitches() {
-  for (SwitchStatus& status : switch_status) {
-    if (status == SwitchStatus::AlreadySent) {
-      status = SwitchStatus::Held;
-    }
-  }
+  statuses.alreadySentToHeld();
 }
 
 /// Let modifiers be immediately re-used in future chords.
+// TODO could this ever set an unpressed switch to Held?
+// Not currently called in gaming mode, which simplifies things
 void Switches::reuseMods(Chord* chord) {
   for (uint8_t m = 0; m < NUM_MODIFIERS; m++) {
     if (!chord->hasMod((conf::Mod)m)) {
@@ -174,7 +165,7 @@ void Switches::reuseMods(Chord* chord) {
       for (uint8_t bit_num = 0; bit_num < 8; bit_num++) {
         if (1 << bit_num & byte) {
           // This switch was included in the modifier chord, let it be re-used.
-          switch_status[i] = SwitchStatus::Held;
+          statuses.set(i, SwitchStatus::Held);
         }
         i++;
       }
@@ -183,47 +174,75 @@ void Switches::reuseMods(Chord* chord) {
 }
 
 bool Switches::anyDown() {
-  for (const SwitchStatus& status : switch_status) {
-    if (status != SwitchStatus::NotPressed) {
-      return true;
-    }
-  }
-  return false;
+  return statuses.anyDown();
 }
 
 void Switches::fillChord(Chord* chord) {
   // Binary-encode the values of the switch_status array into an array of bytes,
   //  for easy comparison to the bytes in the lookup arrays.
   // Also, update switch_status values from Pressed -> AlreadySent.
-  uint8_t index = 0;
-  for (SwitchStatus& status : switch_status) {
-    if (status == SwitchStatus::Pressed ||
-        status == SwitchStatus::Held) {
-      // Switch is pressed! Record it in the chord.
-      chord->setSwitch(index);
+  for (uint8_t i = 0; i < statuses.size(); i++) {
+    if (statuses.sendable(i)) {
+      // Store it in the chord.
+      chord->setSwitch(i);
     }
-    // Modify the status array to record that the switches have been processed.
-    if (status == SwitchStatus::Pressed) {
-      status = SwitchStatus::AlreadySent;
-    }
-    index++;
   }
+  // Modify the status array to record that the switches have been processed.
+  statuses.pressedToAlreadySent();
 }
 
 // Fill up an array of chords, one for each pressed switch, instead of combining
 // them all into 1 chord like fillChord()
 uint8_t Switches::fillGamingSwitches(Chord* chords) {
+  // TODO use bitwise ops
+  // TODO use count()
   uint8_t num_pressed = 0;
-  uint8_t index = 0;
-  for (SwitchStatus& status : switch_status) {
-    if (status != SwitchStatus::NotPressed) {
+
+  for (uint8_t index = 0; index < statuses.size(); index++) {
+    // TODO write statuses.gaming_sendable()
+    if (statuses.get(index) != SwitchStatus::NotPressed) {
       // Switch is basically pressed! Other states don't matter in gaming modes.
       chords[num_pressed].setSwitch(index);
       num_pressed++;
-      status = SwitchStatus::AlreadySent;
+      statuses.set(index, SwitchStatus::AlreadySent);
     }
     index++;
   }
   return num_pressed;
 }
 
+
+void Switches::Statuses::set(size_t index, Switches::SwitchStatus status){
+  uint8_t val = static_cast<uint8_t>(status);
+  lsb.set(index, val & 0x1);
+  msb.set(index, val & 0x2);
+}
+
+Switches::SwitchStatus Switches::Statuses::get(size_t index) const {
+  return static_cast<Switches::SwitchStatus>((msb.test(index) << 1) | lsb.test(index));
+}
+
+void Switches::Statuses::alreadySentToHeld(){
+  lsb |= msb;
+}
+
+void Switches::Statuses::pressedToAlreadySent(){
+  // TODO can we do this in-place instead?
+  auto mask (msb);
+  mask ^= lsb;
+  mask &= lsb;
+  msb ^= mask;
+  lsb ^= mask;
+}
+
+bool Switches::Statuses::anyDown() const {
+  return msb.any() | lsb.any();
+}
+
+bool Switches::Statuses::sendable(size_t index) const {
+  return lsb.test(index);
+}
+
+constexpr size_t Switches::Statuses::size() const {
+  return lsb.size();
+}

@@ -4,6 +4,7 @@
 #include "auto_config.h"
 #include "Key.h"
 #include "conf.h"
+#include "BitArray.h"
 
 /// How to modify cycled words
 enum class CycleType {
@@ -44,6 +45,22 @@ class Chord {
   void setModNospace();
 
  private:
+  struct Flags {
+    // The least significants bits will each represent one modifier, and the
+    // most significant bit will store the flag_cycle_capital. It's important to
+    // keep Chords as small as possible, since we create a bunch of them
+    // (especially in the history).
+    BitArray<uint16_t, NUM_MODIFIERS+1> data;
+
+    bool hasMod(conf::Mod mod) const;
+    void setMod(conf::Mod mod);
+    void unsetMod(conf::Mod mod);
+    void toggleMod(conf::Mod mod);
+    bool getFlagCycleCapital() const;
+    void toggleFlagCycleCapital();
+    constexpr size_t cycleCapitalOffset() const;
+  };
+
   enum CapBehaviorEnum {
     CAP_DEFAULT,
     CAP_FIRST,
@@ -51,9 +68,6 @@ class Chord {
   };
 
 
-  void setMod(conf::Mod mod);
-  void unsetMod(conf::Mod mod);
-  void toggleMod(conf::Mod modifier);
   bool extractMod(conf::Mod modifier);
   bool restoreMod(conf::Mod modifier);
 
@@ -63,23 +77,12 @@ class Chord {
   uint8_t getAnagramNum();
   CapBehaviorEnum decideCapBehavior(const Key* data, uint8_t length) const;
   void prepareToCycle();
-  bool getFlagCycleCapital() const;
-  void toggleFlagCycleCapital();
 
   void setAnagramModFlag(uint8_t anagram_num, bool value);
   bool isAnagramMaskBlank();
   bool isExactAnagramPressed(const ChordData* mod_chord);
 
-  // Make sure the modifiers will fit in the bits of a uint16_t. The least
-  // significants bits will each represent one modifier, and the most
-  // significant bit will store the flag_cycle_capital. It's important to keep
-  // Chords as small as possible, since we create a bunch of them (especially in
-  // the history).
-#if NUM_MODIFIERS > 15
-#error "Too many modifiers, increase mods storage size in Chord.h"
-#endif
-  // TODO use bitset, always put flag in last bit!
-  uint16_t mods_and_flags = 0;
+  Flags flags;
 
   uint8_t anagram_num = 0;
 
