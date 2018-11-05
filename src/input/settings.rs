@@ -102,6 +102,8 @@ impl OptionsConfig {
         Ok(ops)
     }
 
+    /// Get options that must be written to a separate config file that will be
+    /// loaded earlier than the main one.
     pub fn early_to_vec(&self) -> Result<Vec<CTree>, Error> {
         Ok(vec![CTree::Define {
             name: "NUM_MATRIX_POSITIONS".to_c(),

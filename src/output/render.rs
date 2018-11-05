@@ -45,17 +45,16 @@ impl AllData {
         let main_files =
             self.render_main(with_message)?.format(file_name_base)?;
 
-        let constants_name_base = format!("{}_constants", file_name_base);
-        let constants_files = self
-            .render_constants(with_message)?
-            .format(&constants_name_base)?;
+        let early_name_base = format!("{}_early", file_name_base);
+        let early_files = self
+            .render_early_config(with_message)?
+            .format(&early_name_base)?;
 
         let mut file_names =
             main_files.save(&self.output_directory, file_name_base)?;
 
         file_names.extend(
-            constants_files
-                .save(&self.output_directory, &constants_name_base)?,
+            early_files.save(&self.output_directory, &early_name_base)?,
         );
 
         let file_name_list = file_names
@@ -70,7 +69,7 @@ impl AllData {
 
     /// Render c code defining any constants etc. that need to be included
     /// before / separately from the main auto_config.h file.
-    fn render_constants(&self, with_message: bool) -> Result<CTree, Error> {
+    fn render_early_config(&self, with_message: bool) -> Result<CTree, Error> {
         let mut group = Vec::new();
         if with_message {
             group.push(CTree::LiteralH(autogen_message()));

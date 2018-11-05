@@ -1,5 +1,5 @@
 /*
- * Here's where we define things that require "auto_config_constants.h", and are required by "auto_config.h"
+ * Here's where we define things that require "auto_config_early.h", and are required by "auto_config.h"
  */
 
 #pragma once
@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "BitArray.h"
-#include "auto_config_constants.h"
+#include "auto_config_early.h"
 
 // TODO automatically pick most efficient block type?
 typedef BitArray<uint8_t, NUM_MATRIX_POSITIONS> ChordData;

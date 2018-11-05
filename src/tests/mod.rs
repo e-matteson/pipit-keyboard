@@ -58,10 +58,10 @@ fn assert_firmware_config_eq(name_base: &str) {
         &expected_dir.join(name_base).with_extension("h"),
         &actual_dir.join(name_base).with_extension("h"),
     );
-    let constants_base = format!("{}_constants", name_base);
+    let early_base = format!("{}_early", name_base);
     assert_files_eq(
-        &expected_dir.join(&constants_base).with_extension("h"),
-        &actual_dir.join(&constants_base).with_extension("h"),
+        &expected_dir.join(&early_base).with_extension("h"),
+        &actual_dir.join(&early_base).with_extension("h"),
     );
 }
 
