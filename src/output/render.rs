@@ -303,10 +303,10 @@ impl KeyPress {
         "0".to_c()
     }
 
-    fn huffman(&self, table: &HuffmanTable) -> Result<BitVec<u32>, Error> {
+    fn huffman(&self, table: &HuffmanTable) -> Result<BitVec<u8>, Error> {
         self.ensure_non_empty()?;
 
-        let mut bits = BitVec::new();
+        let mut bits: BitVec<u8> = BitVec::default();
         for modifier in &self.mods {
             bits.extend(table.bits(modifier)?);
         }
@@ -324,8 +324,7 @@ impl Sequence {
         // TODO different name for "bytes"?
         Ok(self
             .as_bits(table)?
-            .to_bytes()
-            .into_iter()
+            .blocks()
             .map(|x: u8| x.to_c())
             .collect())
     }
@@ -338,8 +337,8 @@ impl Sequence {
         Ok(self.as_bits(table)?.len())
     }
 
-    pub fn as_bits(&self, table: &HuffmanTable) -> Result<BitVec<u32>, Error> {
-        let mut bits = BitVec::new();
+    pub fn as_bits(&self, table: &HuffmanTable) -> Result<BitVec<u8>, Error> {
+        let mut bits = BitVec::default();
         for keypress in self.keypresses() {
             bits.extend(keypress.huffman(table)?)
         }

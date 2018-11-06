@@ -6,6 +6,15 @@
 #define BITS_FOR_ANAGRAM 4
 #define BITS_FOR_LEN 12
 
+bool bitToBool(const uint8_t* address, uint32_t bit_offset) {
+  uint32_t byte_offset = bit_offset / 8;
+  uint8_t local_bit_offset = bit_offset % 8;
+
+  uint8_t byte = address[byte_offset];
+  return (byte >> local_bit_offset) & 0x01;
+}
+
+// TODO could this read past the end of an array?
 uint32_t getUnalignedBits(const uint8_t* address, uint32_t start_bit_offset,
                           uint8_t num_bits) {
   if (num_bits > 32) {
@@ -13,17 +22,14 @@ uint32_t getUnalignedBits(const uint8_t* address, uint32_t start_bit_offset,
     // DEBUG1_LN("ERROR: getUnalignedBits can only get up to 32 bits!");
     return 0;
   }
-  uint32_t byte_offset = start_bit_offset / CHAR_BIT;
-  uint8_t local_bit_offset = start_bit_offset % CHAR_BIT;
-  // uint8_t num_bytes = (num_bits + CHAR_BIT - 1) / CHAR_BIT; // ceiling
 
   uint32_t out = 0;
-  const uint8_t total_bytes = 4;
-  for (uint8_t i = 0; i < total_bytes; i++) {
-    uint8_t byte_index = (total_bytes-1-i);
-    out |= (address[byte_offset + i] << (byte_index*CHAR_BIT + local_bit_offset));
- }
- return out;
+  for (int16_t i = num_bits - 1; i >= 0; i--) {
+    if (bitToBool(address, start_bit_offset + i)) {
+      out |= (1 << i);
+    }
+  }
+  return out;
 }
 
 uint16_t makeMask16(uint8_t length) {

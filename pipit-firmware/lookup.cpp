@@ -6,12 +6,9 @@ bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
 }
 
 uint32_t makeMask32(uint8_t length) {
-  // The "length" most significant bits are 1, and the rest are 0
-  // TODO compute by shifting all 1s, instead!
-  if (length >= 32) {
-    return ~((uint32_t)0);
-  }
-  return ~((1 << (32 - length)) - 1);
+  // The "length" least significant bits are 1, and the rest are 0
+  size_t num_unused = 32 - length;
+  return (~ (uint32_t)0) >> num_unused;
 }
 
 const LookupKmapType* getLookupKmapType(const ModeStruct* mode,

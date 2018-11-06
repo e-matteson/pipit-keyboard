@@ -1,5 +1,5 @@
 use bit_vec::BitVec;
-use byteorder::{BigEndian, ByteOrder};
+use byteorder::{ByteOrder, LittleEndian};
 use std;
 use std::collections::binary_heap::BinaryHeap;
 use std::collections::BTreeMap;
@@ -15,7 +15,7 @@ pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);
 #[derive(Debug, Clone)]
 pub struct HuffmanEntry {
     pub is_mod: bool,
-    bits: BitVec<u32>,
+    bits: BitVec<u8>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -38,11 +38,11 @@ impl HuffmanEntry {
 
     pub fn as_uint32(&self) -> CCode {
         assert!(self.bits.len() <= 32);
-        let mut bytes = self.bits.to_bytes();
+        let mut bytes: Vec<_> = self.bits.blocks().collect();
         let padding = 4 - bytes.len();
         bytes.extend(iter::repeat(0u8).take(padding));
 
-        let out = BigEndian::read_u32(&bytes);
+        let out = LittleEndian::read_u32(&bytes);
         out.to_c()
     }
 }
@@ -53,13 +53,13 @@ impl HuffmanTable {
         let counts = count(keys);
         let tree = make_tree(counts).expect("failed to make huffman tree");
         let mut map = BTreeMap::new();
-        make_codes(&tree, BitVec::new(), &mut map)?;
+        make_codes(&tree, BitVec::default(), &mut map)?;
         ensure_u8(map.len())
             .context("Huffman table contains too many encodings")?;
         Ok(HuffmanTable(map))
     }
 
-    pub fn bits(&self, key: &CCode) -> Result<&BitVec<u32>, Error> {
+    pub fn bits(&self, key: &CCode) -> Result<&BitVec<u8>, Error> {
         Ok(&self.get(key)?.bits)
     }
 
@@ -101,7 +101,7 @@ impl PartialOrd for HuffmanNode {
 }
 
 impl HuffmanEntry {
-    fn new(bits: BitVec<u32>, is_mod: bool) -> Result<Self, Error> {
+    fn new(bits: BitVec<u8>, is_mod: bool) -> Result<Self, Error> {
         // When each huffman code is stored as a uint32_t, this check will
         // matter
         const MAX_LEN: usize = 32;
@@ -122,7 +122,7 @@ impl HuffmanEntry {
 
 fn make_codes(
     node: &HuffmanNode,
-    prefix: BitVec<u32>,
+    prefix: BitVec<u8>,
     out: &mut BTreeMap<CCode, HuffmanEntry>,
 ) -> Result<(), Error> {
     match node {

@@ -113,17 +113,6 @@ impl AllData {
         chords
     }
 
-    /// The number of bytes required to represent a chord in the firmware.
-    pub fn num_bytes_in_chord(&self) -> Result<usize, Error> {
-        // The best way to be sure we're calculating num_bytes_in_chord
-        // correctly is to just create a chord, turn it to bytes like we will
-        // during rendering, and check how many bytes are in it.
-        Ok(self
-            .chord_spec
-            .to_bytes(&self.chord_spec.new_chord())?
-            .len())
-    }
-
     fn get_all_names(&self) -> Vec<Name> {
         self.sequences
             .names()
