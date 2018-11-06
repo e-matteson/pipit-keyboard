@@ -147,7 +147,8 @@ private:
     // Make sure this agrees with bit_mask() about bit order!
     // TODO will this get recomputed every time? Can use template magic instead?
     // return (~static_cast<T>(0)) << bit_offset(NumBits);
-    return (~static_cast<T>(0)) >> bit_offset(NumBits);
+    return (~static_cast<T>(0)) >>
+      (std::numeric_limits<T>::digits - bit_offset(NumBits) - 1);
   }
 
   static constexpr size_t block_index(size_t bit_index){
