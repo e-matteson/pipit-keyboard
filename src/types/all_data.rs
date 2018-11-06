@@ -70,7 +70,7 @@ impl AllData {
         self.anagram_mods
             .iter()
             .filter_map(|name| self.get_chord_in_mode(name, mode))
-            .fold1(|a, b| a.intersect(&b))
+            .fold1(|a, b| a.union(&b))
             .unwrap_or_else(|| self.chord_spec.new_chord())
     }
 
@@ -139,7 +139,7 @@ impl AllData {
         if num > 0 {
             let mod_chord =
                 self.get_chord_in_mode(self.anagram_mods.get(num - 1)?, mode)?;
-            chord.intersect_mut(&mod_chord);
+            chord.union_mut(&mod_chord);
             chord.anagram_num = AnagramNum::default();
         };
         Some(chord)

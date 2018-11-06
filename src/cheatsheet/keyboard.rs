@@ -62,7 +62,7 @@ impl Keyboard {
                 symbol: symbol.clone(),
                 style,
             };
-            for (index, &bit) in chord.iter().enumerate() {
+            for (index, bit) in chord.iter().enumerate() {
                 if bit {
                     self.switches[index].push_content(content.clone());
                 }

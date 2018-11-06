@@ -1,8 +1,9 @@
+use bit_vec::{self, BitVec};
 use std::fmt;
+use std::iter::{repeat, FromIterator};
 
 use error::{Error, ResultExt};
-use types::{AnagramNum, CCode, Permutation, ToC};
-use util::bools_to_bytes;
+use types::{AnagramNum, Permutation};
 
 /// This stores the specifications of the chord format, as learned from the
 /// settings file. We'll need it when creating a new empty Chord (to know how
@@ -22,13 +23,12 @@ pub struct ChordSpec {
 /// chords, the anagram number will be stored separately, instead of literally
 /// including the anagram modifier's switches in the word chord.
 
-#[derive(
-    Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
-)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Chord {
     /// Invariant: the length of this vec must always equal
     /// ChordSpec::num_switches.
-    switches: Vec<bool>,
+    // switches: Vec<bool>,
+    switches: BitVec<u8>,
     pub anagram_num: AnagramNum,
 }
 
@@ -40,43 +40,6 @@ impl ChordSpec {
     pub fn new_chord(&self) -> Chord {
         Chord::new_with_length(self.num_switches)
     }
-
-    /// Convert the chord into the byte representation used in the firmware.
-    /// Treat each switch as a bit (1 means pressed). Permute them from kmap
-    /// order to firmware order and pack them into bytes, padding the
-    /// most-significant bits with zeros as needed.
-    pub fn to_bytes(&self, chord: &Chord) -> Result<Vec<u8>, Error> {
-        let ordered_bools = self.to_firmware_order.permute(&chord.switches)?;
-        Ok(bools_to_bytes(&ordered_bools))
-    }
-
-    /// Convert the chord into CCode strings containing the byte representation
-    /// used in the firmware.
-    pub fn to_c_bytes(&self, chord: &Chord) -> Result<Vec<CCode>, Error> {
-        Ok(self
-            .to_bytes(chord)?
-            .into_iter()
-            .map(|x| x.to_c())
-            .collect())
-    }
-
-    // TODO put this in output  module?
-    pub fn to_c_initializer(&self, chord: &Chord) -> Result<CCode, Error> {
-        Ok(format!("{{{}}}", self.to_c_bytes(chord)?.join(", ")).to_c())
-    }
-
-    // TODO put this in output  module?
-    pub fn to_c_constructor(&self, chord: &Chord) -> Result<CCode, Error> {
-        Ok(format!(
-            "{}({})",
-            Self::c_type_name(),
-            self.to_c_initializer(chord)?
-        ).to_c())
-    }
-
-    pub fn c_type_name() -> CCode {
-        "ChordData".to_c()
-    }
 }
 
 impl Chord {
@@ -86,30 +49,32 @@ impl Chord {
     /// whether it does.
     pub fn from_vec(switches: Vec<bool>) -> Result<Self, Error> {
         Ok(Self {
-            switches,
+            switches: BitVec::from_iter(switches.into_iter()),
             anagram_num: AnagramNum::default(),
         })
     }
 
     fn new_with_length(len: usize) -> Self {
         Self {
-            switches: vec![false; len],
+            switches: BitVec::from_iter(repeat(false).take(len)),
             anagram_num: AnagramNum::default(),
         }
     }
 
     /// The number of pressed switches in this chord.
     pub fn count_pressed(&self) -> usize {
-        self.switches.iter().filter(|x| **x).count()
+        self.switches
+            .blocks()
+            .fold(0, |accum, b| accum + b.count_ones()) as usize
     }
 
     /// Make all the switches pressed in the other chord pressed in this chord,
     /// too. The AnagramNum of the other chord must be zero/default, or it
     /// will return an error. That's because otherwise we're probably doing
     /// something wrong, and might lose information by discarding the
-    /// anagram number. Usually we'll just be intersecting plain_keys
+    /// anagram number. Usually we'll just be unioning plain_keys
     /// and/or plain_mods.
-    pub fn intersect_mut(&mut self, other: &Self) -> () {
+    pub fn union_mut(&mut self, other: &Self) -> () {
         assert_eq!(self.len(), other.len());
 
         if !other.anagram_num.is_default() {
@@ -117,39 +82,30 @@ impl Chord {
             return Err(Error::BadValueErr {
                 thing: "anagram number of other chord".to_owned(),
                 value: other.anagram_num.to_string(),
-            }).context("Failed to intersect chords")
+            }).context("Failed to union chords")
             .unwrap();
         }
-
-        for i in 0..self.switches.len() {
-            self.switches[i] |= other.switches[i];
-        }
+        self.switches.union(&other.switches);
     }
 
-    pub fn intersect(&self, other: &Self) -> Self {
+    pub fn union(&self, other: &Self) -> Self {
         let mut new = Self::new_with_length(self.len());
-        new.intersect_mut(self);
-        new.intersect_mut(other);
+        new.union_mut(self);
+        new.union_mut(other);
         new
     }
 
     /// An iterator over the switch booleans (in kmap order)
-    pub fn iter(&self) -> ::std::slice::Iter<bool> {
+    pub fn iter(&self) -> bit_vec::Iter<u8> {
         self.switches.iter()
+    }
+
+    pub fn switches(&self) -> &BitVec<u8> {
+        &self.switches
     }
 
     fn len(&self) -> usize {
         self.switches.len()
-    }
-
-    /// Meant only for human-friendly debug printing
-    fn bit_string(&self) -> String {
-        let tmp: Vec<_> = self
-            .switches
-            .iter()
-            .map(|&b| if b { "1" } else { "0" })
-            .collect();
-        tmp.join("")
     }
 }
 
@@ -157,8 +113,8 @@ impl fmt::Debug for Chord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Chord {{ {} : {}}}",
-            self.bit_string(),
+            "Chord {{ {:?} : {}}}",
+            self.switches,
             self.anagram_num.unwrap()
         )
     }

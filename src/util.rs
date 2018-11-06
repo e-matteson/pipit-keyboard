@@ -13,34 +13,6 @@ pub enum ConfirmDefault {
     None,
 }
 
-pub fn bools_to_bytes(v: &[bool]) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    for chunk in v.chunks(8) {
-        bytes.push(bools_to_u8(chunk).unwrap());
-    }
-    bytes
-}
-
-/// If v is shorter than 8, the missing most-significant digits will be zero
-fn bools_to_u8(v: &[bool]) -> Result<u8, Error> {
-    let max = 8;
-    if v.len() > max {
-        return Err(Error::OutOfRangeErr {
-            name: "number of bits to convert to a u8".into(),
-            value: v.len(),
-            min: 0,
-            max,
-        });
-    }
-    let mut num: u8 = 0;
-    let base: u8 = 2;
-    for b in 0..8 {
-        let bit = if *v.get(b).unwrap_or(&false) { 1 } else { 0 };
-        num += base.pow(b as u32) * bit
-    }
-    Ok(num)
-}
-
 #[allow(dead_code)]
 pub fn usize_to_u8(input: usize) -> Result<u8, Error> {
     ensure_u8(input)?;

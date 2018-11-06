@@ -320,9 +320,9 @@ impl AllDataBuilder {
                 } else if b.is_err() {
                     b
                 } else {
-                    Ok(a.unwrap().intersect(&b.unwrap()))
+                    Ok(a.unwrap().union(&b.unwrap()))
                 }
-            }).expect("no chords spellings to intersect")?;
+            }).expect("no chords spellings to union")?;
         // TODO see if that expect is triggered by an empty word chord
 
         chord.anagram_num = word.anagram_num();

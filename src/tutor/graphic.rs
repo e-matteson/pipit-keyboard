@@ -77,7 +77,7 @@ impl Graphic {
     fn update_switches_with_type(&mut self, chord_type: ChordType) {
         if let Some(labeled_chord) = self.get(chord_type) {
             let chord = labeled_chord.chord;
-            for (&bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
+            for (bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
                 if bit {
                     switch.set(chord_type, labeled_chord.label.clone());
                 }

@@ -8,6 +8,7 @@ use std::string::ToString;
 
 use std::str::FromStr;
 
+use bit_vec::BitVec;
 use unicode_segmentation::UnicodeSegmentation;
 
 use error::{Error, ResultExt};
@@ -476,19 +477,16 @@ impl Permutation {
     /// template contained extra elements not in the old sequence template,
     /// those elements in the returned sequence will be set to their
     /// default value.
-    pub fn permute<T>(&self, old: &[T]) -> Result<Vec<T>, Error>
-    where
-        T: Clone + Default,
-    {
+    pub fn permute(&self, old: &BitVec<u8>) -> Result<BitVec<u8>, Error> {
         if old.len() != self.order.len() {
             return Err(Error::PermuteLength);
         }
 
-        let mut new: Vec<_> =
-            iter::repeat(T::default()).take(self.new_length).collect();
+        let mut new: BitVec<_> =
+            iter::repeat(false).take(self.new_length).collect();
 
         for (old_index, &new_index) in self.order.iter().enumerate() {
-            new[new_index] = old[old_index].to_owned();
+            new.set(new_index, old.get(old_index).expect("permutation failed"));
         }
         Ok(new)
     }

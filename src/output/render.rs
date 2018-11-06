@@ -4,8 +4,9 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Command, Field, HuffmanTable, KeyDefs,
-    KeyPress, KmapPath, ModeName, Modifier, Name, SeqType, Sequence, ToC,
+    AllData, CCode, CEnumVariant, CTree, Chord, ChordSpec, Command, Field,
+    HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeName, Modifier, Name,
+    SeqType, Sequence, ToC,
 };
 use util::usize_to_u8;
 
@@ -243,6 +244,31 @@ impl AllData {
                     .lone_keypress()?
                     .format_mods())
             }).collect()
+    }
+}
+
+impl ChordSpec {
+    /// Convert the chord into CCode strings containing the byte representation
+    /// used in the firmware.
+    fn to_c_bytes(&self, chord: &Chord) -> Result<Vec<CCode>, Error> {
+        let ordered_bools = self.to_firmware_order.permute(chord.switches())?;
+        Ok(ordered_bools.blocks().map(|x| x.to_c()).collect())
+    }
+
+    fn to_c_initializer(&self, chord: &Chord) -> Result<CCode, Error> {
+        Ok(format!("{{{}}}", self.to_c_bytes(chord)?.join(", ")).to_c())
+    }
+
+    pub fn to_c_constructor(&self, chord: &Chord) -> Result<CCode, Error> {
+        Ok(format!(
+            "{}({})",
+            Self::c_type_name(),
+            self.to_c_initializer(chord)?
+        ).to_c())
+    }
+
+    pub fn c_type_name() -> CCode {
+        "ChordData".to_c()
     }
 }
 
