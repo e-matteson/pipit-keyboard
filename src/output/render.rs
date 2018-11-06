@@ -1,4 +1,5 @@
 use bit_vec::BitVec;
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use time::*;
 
@@ -19,6 +20,17 @@ c_struct!(struct HuffmanChar {
     is_mod: bool,
 });
 
+impl PartialOrd for HuffmanChar {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for HuffmanChar {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.num_bits.cmp(&other.num_bits)
+    }
+}
 impl AllData {
     /// Generate and save the c code containing the keyboard firmware
     /// configuration. `file_name_base` should have no extension. `.h` and
@@ -273,30 +285,37 @@ impl ChordSpec {
 }
 
 impl HuffmanTable {
-    fn render(&self) -> Result<CTree, Error> {
-        let mut group = Vec::new();
+    fn sorted_chars(&self) -> Result<Vec<HuffmanChar>, Error> {
+        let mut v = self
+            .0
+            .iter()
+            .map(|(key, entry)| {
+                Ok(HuffmanChar {
+                    bits: entry.as_uint32()?,
+                    num_bits: entry.num_bits(),
+                    key_code: KeyPress::truncate(key),
+                    is_mod: entry.is_mod,
+                })
+            }).collect::<Result<Vec<_>, Error>>()?;
+        v.sort();
+        Ok(v)
+    }
 
+    fn render(&self) -> Result<CTree, Error> {
+        let chars = self.sorted_chars()?;
+
+        let mut group = Vec::new();
         group.push(CTree::ConstVar {
             name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
-            value: self.min_bit_length().to_c(),
+            value: chars.get(0).map(|x| x.num_bits).unwrap_or(0).to_c(),
             c_type: "uint8_t".to_c(),
             is_extern: true,
         });
-
-        let mut initializers = Vec::new();
-        for key in self.0.keys() {
-            // TODO Don't repeatedly look up key
-            let entry = self.get(key)?;
-            let init = HuffmanChar {
-                bits: entry.as_uint32(),
-                num_bits: entry.num_bits(),
-                key_code: KeyPress::truncate(key),
-                is_mod: entry.is_mod,
-            }.render(CCode::new())
-            .initializer();
-
-            initializers.push(init);
-        }
+        // TODO don't pass new
+        let initializers = chars
+            .into_iter()
+            .map(|c| c.render(CCode::new()).initializer())
+            .collect();
 
         group.push(CTree::Array {
             name: "huffman_lookup".to_c(),

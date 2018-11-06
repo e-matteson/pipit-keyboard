@@ -4,7 +4,7 @@
 
 macro_rules! c_struct {
     ( struct $struct_type: ident { $( $field:ident : $field_type:ty,)* }) => {
-        #[derive(Debug)]
+        #[derive(Debug, PartialEq, Eq)]
         struct $struct_type {
             $($field: $field_type,)*
         }

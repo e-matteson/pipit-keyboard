@@ -36,14 +36,23 @@ impl HuffmanEntry {
         self.bits.len()
     }
 
-    pub fn as_uint32(&self) -> CCode {
-        assert!(self.bits.len() <= 32);
+    pub fn as_uint32(&self) -> Result<CCode, Error> {
+        const MAX_LEN: usize = 32;
+        if self.num_bits() > MAX_LEN {
+            return Err(Error::OutOfRangeErr {
+                name: "huffman encoding length".into(),
+                value: self.num_bits(),
+                min: 0,
+                max: MAX_LEN,
+            });
+        }
+
         let mut bytes: Vec<_> = self.bits.blocks().collect();
         let padding = 4 - bytes.len();
         bytes.extend(iter::repeat(0u8).take(padding));
 
         let out = LittleEndian::read_u32(&bytes);
-        out.to_c()
+        Ok(out.to_c())
     }
 }
 
@@ -69,14 +78,6 @@ impl HuffmanTable {
             container: "huffman code table".into(),
         })
     }
-
-    pub fn min_bit_length(&self) -> usize {
-        self.0
-            .values()
-            .map(|entry| entry.num_bits())
-            .min()
-            .unwrap_or(1)
-    }
 }
 
 impl HuffmanNode {
@@ -97,26 +98,6 @@ impl Ord for HuffmanNode {
 impl PartialOrd for HuffmanNode {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(&other))
-    }
-}
-
-impl HuffmanEntry {
-    fn new(bits: BitVec<u8>, is_mod: bool) -> Result<Self, Error> {
-        // When each huffman code is stored as a uint32_t, this check will
-        // matter
-        const MAX_LEN: usize = 32;
-        let len = bits.len();
-
-        if len > MAX_LEN {
-            Err(Error::OutOfRangeErr {
-                name: "huffman encoding length".into(),
-                value: len,
-                min: 0,
-                max: MAX_LEN,
-            })
-        } else {
-            Ok(Self { bits, is_mod })
-        }
     }
 }
 
@@ -143,9 +124,10 @@ fn make_codes(
         } => {
             out.insert(
                 key.to_owned(),
-                HuffmanEntry::new(prefix, *is_mod).with_context(|| {
-                    format!("Failed to make huffman encoding for: '{}'", key)
-                })?,
+                HuffmanEntry {
+                    bits: prefix,
+                    is_mod: *is_mod,
+                },
             );
         }
     }

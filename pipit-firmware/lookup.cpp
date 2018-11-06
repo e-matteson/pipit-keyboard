@@ -19,9 +19,14 @@ const LookupKmapType* getLookupKmapType(const ModeStruct* mode,
 const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
   uint32_t mask = makeMask32(length);
   for (const HuffmanChar& entry : conf::huffman_lookup) {
-    if (length != entry.num_bits) {
-      // Can't be a match, wrong length.
+    // The table is sorted by increasing code length.
+    if (length > entry.num_bits) {
+      // Go further
       continue;
+    }
+    if (length < entry.num_bits) {
+      // Too far! Give up.
+      break;
     }
     if (areBitsEqual(entry.bits, bits, mask)) {
       // Success!
@@ -29,7 +34,8 @@ const HuffmanChar* decodeHuffman(uint32_t bits, uint8_t length) {
     }
   }
   // Fail!
-  DEBUG2_LN("WARNING: Failed to find huffman code, try again with a longer code");
+  DEBUG2("NOTE: Failed to find huffman code of length ");
+  DEBUG2_LN(length);
   return nullptr;
 }
 
