@@ -227,11 +227,11 @@ fn format_define(name: &CCode, value: &CCode) -> CFilePair {
 }
 
 fn format_include_h(path: &CCode) -> CFilePair {
-    CFilePair::with_h(&format!("#include {}\n", path).to_c())
+    CFilePair::with_h(format!("#include {}\n", path))
 }
 
 fn format_include_self(file_name_base: &str) -> CFilePair {
-    CFilePair::with_c(&format!("#include \"{}.h\"\n", file_name_base).to_c())
+    CFilePair::with_c(format!("#include \"{}.h\"\n", file_name_base))
 }
 
 fn format_ifndef(
@@ -240,9 +240,9 @@ fn format_ifndef(
     file_name_base: &str,
 ) -> Result<CFilePair, Error> {
     let mut f = CFilePair::new();
-    f += CFilePair::with_h(&format!("\n#ifndef {}\n", conditional));
+    f += CFilePair::with_h(format!("\n#ifndef {}\n", conditional));
     f += contents.format(file_name_base)?;
-    f += CFilePair::with_h(&format!("#endif // ifndef {}\n\n", conditional));
+    f += CFilePair::with_h(format!("#endif // ifndef {}\n\n", conditional));
     Ok(f)
 }
 
@@ -304,13 +304,12 @@ fn format_const_var(
     c_type: &CCode,
     is_extern: bool,
 ) -> CFilePair {
-    let h = if is_extern {
-        format!("extern const {} {};\n", c_type, name).to_c()
-    } else {
-        CCode::new()
-    };
     CFilePair {
-        h,
+        h: if is_extern {
+            format!("extern const {} {};\n", c_type, name).to_c()
+        } else {
+            CCode::new()
+        },
         c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
     }
 }

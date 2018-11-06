@@ -94,7 +94,9 @@ impl State {
         let name = Self::name(spelling)?;
         let mut chord = Self::chord(&name).ok()?;
         if spelling.is_uppercase() {
-            chord.union_mut(&Self::chord(&Name("mod_shift".into())).ok()?);
+            chord
+                .union_mut(&Self::chord(&Name("mod_shift".into())).ok()?)
+                .expect("failed to union shift with chord");
         }
         Some(chord)
     }

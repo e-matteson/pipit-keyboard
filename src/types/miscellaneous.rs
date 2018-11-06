@@ -288,7 +288,14 @@ impl Name {
 impl Validate for Name {
     fn validate(&self) -> Result<(), Error> {
         // TODO anything to check? Not used c_code...
-        Ok(())
+        if self.is_empty() {
+            Err(Error::BadValueErr {
+                thing: "binding name".to_owned(),
+                value: "(empty)".to_owned(),
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -393,6 +400,10 @@ impl Sequence {
 
     pub fn push(&mut self, keypress: KeyPress) {
         self.0.push(keypress)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
     pub fn len(&self) -> usize {

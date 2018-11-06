@@ -138,7 +138,7 @@ impl<'a> KmapBuilder<'a> {
                 self.kmap_nickname,
                 seq_type,
                 info.length,
-                info.anagram.unwrap()
+                info.anagram.get()
             ).to_c();
 
             let chord_bytes = names
@@ -255,7 +255,7 @@ impl LookupKmapTypeLenAnagram {
             });
         }
 
-        let packed = u16::from(anagram.unwrap()).bitor(
+        let packed = u16::from(anagram.get()).bitor(
             usize_to_u16(seq_bit_len)
                 .unwrap()
                 .checked_shl(bits_for_anagram)

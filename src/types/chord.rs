@@ -74,7 +74,7 @@ impl Chord {
     /// something wrong, and might lose information by discarding the
     /// anagram number. Usually we'll just be unioning plain_keys
     /// and/or plain_mods.
-    pub fn union_mut(&mut self, other: &Self) -> () {
+    pub fn union_mut(&mut self, other: &Self) -> Result<(), Error> {
         assert_eq!(self.len(), other.len());
 
         if !other.anagram_num.is_default() {
@@ -82,20 +82,21 @@ impl Chord {
             return Err(Error::BadValueErr {
                 thing: "anagram number of other chord".to_owned(),
                 value: other.anagram_num.to_string(),
-            }).context("Failed to union chords")
-            .unwrap();
+            }).context("Failed to union chords");
         }
         self.switches.union(&other.switches);
+        Ok(())
     }
 
-    pub fn union(&self, other: &Self) -> Self {
-        let mut new = Self::new_with_length(self.len());
-        new.union_mut(self);
-        new.union_mut(other);
-        new
+    /// Return a new chord that's the union of this one and the given one.
+    pub fn union(&self, other: &Self) -> Result<Self, Error> {
+        let mut new = self.to_owned();
+        new.union_mut(other)?;
+        Ok(new)
     }
 
-    /// An iterator over the switch booleans (in kmap order)
+    // An iterator over the switch booleans (in kmap order). The type signature
+    // says u8, but the iterator's Item is actually a bool.
     pub fn iter(&self) -> bit_vec::Iter<u8> {
         self.switches.iter()
     }
@@ -115,7 +116,7 @@ impl fmt::Debug for Chord {
             f,
             "Chord {{ {:?} : {}}}",
             self.switches,
-            self.anagram_num.unwrap()
+            self.anagram_num.get()
         )
     }
 }

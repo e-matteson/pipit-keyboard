@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{stdin, stdout};
@@ -66,17 +67,20 @@ fn get_input() -> Result<String, Error> {
     Ok(buffer)
 }
 
-pub fn user_confirm(
-    message: &str,
+pub fn user_confirm<'a, T>(
+    message: T,
     default: ConfirmDefault,
-) -> Result<bool, Error> {
+) -> Result<bool, Error>
+where
+    T: Into<Cow<'a, str>>,
+{
     let suggestion = match default {
         ConfirmDefault::Yes => "(Y/n)",
         ConfirmDefault::No => "(y/N)",
         ConfirmDefault::None => "(y/n)",
     };
 
-    print!("{} {}: ", message, suggestion);
+    print!("{} {}: ", message.into(), suggestion);
 
     loop {
         let input = get_input().context("Failed to get user input")?;

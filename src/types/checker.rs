@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
 
@@ -79,7 +80,7 @@ impl Checker {
                 kmap
             );
             print_iter(
-                &heading,
+                heading,
                 reversed
                     .iter()
                     .filter(|&(_chord, set)| {
@@ -121,7 +122,7 @@ impl Checker {
                     );
                 }
                 print_iter(
-                    &format!(
+                    format!(
                         "Multi-switch chords won't work in gaming modes.\nIn {}'s {}:",
                         mode_name,
                         kmap_info.file
@@ -233,16 +234,17 @@ impl fmt::Display for AnagramSet {
 
 /// If the iterator is non-empty, print the given heading and then print each
 /// element of the iterator on a separate line with some spaces before it.
-fn print_iter<T>(heading: &str, iter: T)
+fn print_iter<'a, T, U>(heading: U, iter: T)
 where
     T: Iterator,
     <T as Iterator>::Item: Display,
+    U: Into<Cow<'a, str>>,
 {
     let mut iter = iter.peekable();
     if iter.peek().is_none() {
         return;
     }
-    println!("{}", heading);
+    println!("{}", heading.into());
     for thing in iter {
         println!("  {}", thing);
     }

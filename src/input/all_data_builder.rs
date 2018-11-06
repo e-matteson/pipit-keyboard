@@ -1,7 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
-use itertools::Itertools;
 use serde_yaml;
 
 use input::Settings;
@@ -299,34 +298,48 @@ impl AllDataBuilder {
         kmap: &KmapPath,
         spelling_table: &SpellingTable,
     ) -> Result<(), Error> {
-        let name = word.name();
+        let word_name = word.name();
 
-        self.sequences
-            .insert(name.clone(), word.sequence()?, SeqType::Word)?;
+        self.sequences.insert(
+            word_name.clone(),
+            word.sequence().with_context(|| {
+                format!("Failed to make sequence for '{}'", word_name)
+            })?,
+            SeqType::Word,
+        )?;
 
-        // Get chords for each letter in the word and combine them.
-        // This is messy and doesn't short-circuit on the first error, but
-        // there's no fold1_result(), and this will get refactored away when we
-        // add internationalization, so whatever.
-        let mut chord: Chord = word
-            .chord_spellings()?
-            .iter()
-            .map(|spelling| {
-                let name = spelling_table.get_checked(spelling)?;
-                self.chords.get(&name, kmap)
-            }).fold1(|a, b| {
-                if a.is_err() {
-                    a
-                } else if b.is_err() {
-                    b
-                } else {
-                    Ok(a.unwrap().union(&b.unwrap()))
-                }
-            }).expect("no chords spellings to union")?;
-        // TODO see if that expect is triggered by an empty word chord
-
+        let mut chord = self
+            .make_word_chord(word, kmap, spelling_table)
+            .with_context(|| {
+                format!("Failed to make chord for '{}'", word_name)
+            })?;
         chord.anagram_num = word.anagram_num();
-        self.chords.insert(name, chord, kmap)
+        self.chords.insert(word_name, chord, kmap)
+    }
+
+    fn make_word_chord(
+        &self,
+        word: &Word,
+        kmap: &KmapPath,
+        spelling_table: &SpellingTable,
+    ) -> Result<Chord, Error> {
+        let spellings = word.chord_spellings()?;
+        let mut letter_chords = {
+            spellings.into_iter().map(|spelling| {
+                self.chords
+                    .get(spelling_table.get_checked(&spelling)?, kmap)
+            })
+        };
+
+        let mut word_chord = letter_chords.next().ok_or_else(|| {
+            Error::Empty(
+                "set of letter chords for constructing word chord".to_owned(),
+            )
+        })??;
+        for c in letter_chords {
+            word_chord.union_mut(&c?)?;
+        }
+        Ok(word_chord)
     }
 
     fn add_word_mod(&mut self, name: Name) {

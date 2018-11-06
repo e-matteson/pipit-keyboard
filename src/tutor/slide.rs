@@ -103,7 +103,7 @@ impl SlideEntry {
 
         let chord = chords
             .into_iter()
-            .fold1(|a, b| a.union(&b))
+            .fold1(|a, b| a.union(&b).expect("failed to union word chords"))
             .ok_or_else(|| Error::Empty("word chords".to_owned()))?;
 
         Ok(Self {

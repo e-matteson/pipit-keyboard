@@ -70,7 +70,7 @@ impl AllData {
         self.anagram_mods
             .iter()
             .filter_map(|name| self.get_chord_in_mode(name, mode))
-            .fold1(|a, b| a.union(&b))
+            .fold1(|a, b| a.union(&b).expect("failed to union anagram"))
             .unwrap_or_else(|| self.chord_spec.new_chord())
     }
 
@@ -135,11 +135,13 @@ impl AllData {
         mut chord: Chord,
         mode: &ModeName,
     ) -> Option<Chord> {
-        let num = chord.anagram_num.unwrap() as usize;
+        let num = chord.anagram_num.get() as usize;
         if num > 0 {
             let mod_chord =
                 self.get_chord_in_mode(self.anagram_mods.get(num - 1)?, mode)?;
-            chord.union_mut(&mod_chord);
+            chord
+                .union_mut(&mod_chord)
+                .expect("failed to union anagram");
             chord.anagram_num = AnagramNum::default();
         };
         Some(chord)

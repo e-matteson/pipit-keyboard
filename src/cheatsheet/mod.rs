@@ -160,7 +160,7 @@ impl CheatSheet {
 
             if path.exists() {
                 let confirmed = user_confirm(
-                &format!(
+                format!(
                     "The file '{}' already exists, do you want to overwrite it?",
                     path_str),
                 ConfirmDefault::No,

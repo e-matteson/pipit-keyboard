@@ -81,7 +81,7 @@ impl fmt::Display for Error {
                 write!(f, "Invalid {}: '{}'", thing, value)
             }
             Error::Empty (thing) => {
-                write!(f, "'{}' is empty", thing)
+                write!(f, "{} is empty", thing)
             }
             Error::PermuteLength => write!(f, "Unable to permute: input sequence is the wrong length"),
             Error::PermuteWouldDrop => write!(f, "Unable to create permutation: an element in the old sequence is not present in the new sequence"),

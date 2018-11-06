@@ -160,7 +160,7 @@ fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
     }
     counts
 }
-
+// TODO closure
 fn increment(
     map: &mut BTreeMap<CCode, (usize, bool)>,
     key: CCode,

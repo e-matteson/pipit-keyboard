@@ -297,7 +297,7 @@ impl<'de> Deserialize<'de> for Sequence {
                 E: de::Error,
             {
                 Sequence::from_str(value).map_err(|error| {
-                    // TODO figure out a proper way to get failure's error info
+                    // TODO figure out a proper way to get error info
                     // into de::Error
                     println!("{}", error);
                     de::Error::custom("invalid sequence string")

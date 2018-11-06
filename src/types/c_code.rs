@@ -250,7 +250,7 @@ impl ToC for SeqType {
 
 impl ToC for AnagramNum {
     fn to_c(self) -> CCode {
-        self.unwrap().to_c()
+        self.get().to_c()
     }
 }
 

@@ -66,6 +66,6 @@ pub fn grapheme_slice<'a>(
     s: &'a str,
     start: usize,
     end: usize,
-) -> Box<Iterator<Item = &'a str> + 'a> {
-    Box::new(s.graphemes(true).skip(start).take(end))
+) -> impl Iterator<Item = &'a str> {
+    s.graphemes(true).skip(start).take(end)
 }

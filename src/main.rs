@@ -96,6 +96,14 @@ fn run() -> Result<(), Error> {
     let all_data = AllDataBuilder::load(&settings_path)?.finalize()?;
     all_data.check();
 
+    if args.is_present("nosave") {
+        println!("Not configuring the firmware (because --nosave was passed)");
+    } else {
+        all_data
+            .save_as("auto_config")
+            .context("Failed to save updated firmware")?;
+    }
+
     if let Some(config_path) = args.value_of_os("cheatsheet") {
         let tutor_data = all_data.get_tutor_data()?;
         let path = PathBuf::from(config_path);
@@ -112,22 +120,16 @@ fn run() -> Result<(), Error> {
         return Ok(());
     }
 
-    if args.is_present("nosave") {
-        println!("Not configuring the firmware (because --nosave was passed)");
-    } else {
-        all_data
-            .save_as("auto_config")
-            .context("Failed to save updated firmware")?;
-    }
-
     if args.is_present("verify") {
         let ide = ArduinoIDE::new(all_data.board());
+        drop(all_data);
         ide.verify()?;
         return Ok(());
     }
 
     if args.is_present("upload") {
         let ide = ArduinoIDE::new(all_data.board());
+        drop(all_data);
         ide.upload(args.value_of("port"))?;
         return Ok(());
     }
