@@ -404,6 +404,9 @@ fn intro(with_message: bool) -> Result<CTree, Error> {
     group.push(CTree::IncludeSelf);
 
     group.push(CTree::IncludeH {
+        path: "<Arduino.h>".to_c(),
+    });
+    group.push(CTree::IncludeH {
         path: "<stdint.h>".to_c(),
     });
     group.push(CTree::IncludeH {

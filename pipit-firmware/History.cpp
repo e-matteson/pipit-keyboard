@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "History.h"
 
 void History::startEntry(const Chord* new_chord, bool is_anagrammable) {

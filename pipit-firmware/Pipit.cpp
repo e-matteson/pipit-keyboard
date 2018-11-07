@@ -1,4 +1,5 @@
 #include "Pipit.h"
+#include "Arduino.h"
 
 void Pipit::setup() {
   switches.setup();

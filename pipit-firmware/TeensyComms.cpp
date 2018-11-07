@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "TeensyComms.h"
 
 #ifdef TEENSY_LC
