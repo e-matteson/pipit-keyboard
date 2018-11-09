@@ -1,11 +1,11 @@
 use unicode_segmentation::UnicodeSegmentation;
 
 use tutor::State;
-use types::{Chord, Spelling};
+use types::{Chord, KmapOrder, Spelling};
 
 #[derive(Clone, Debug)]
 pub struct LabeledChord {
-    pub chord: Chord,
+    pub chord: Chord<KmapOrder>,
     pub label: Label,
 }
 
@@ -102,6 +102,6 @@ impl<'a> Into<Label> for &'a str {
     }
 }
 
-fn backspace_chord() -> Option<Chord> {
+fn backspace_chord() -> Option<Chord<KmapOrder>> {
     State::chord(&"key_backspace".into()).ok()
 }

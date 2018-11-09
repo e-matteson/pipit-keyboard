@@ -50,7 +50,15 @@ uint8_t LookupKmapTypeLenAnagram::anagram() const {
   return makeMask16(BITS_FOR_ANAGRAM) & seq_bit_len_and_anagram;
 }
 
-uint32_t LookupKmapTypeLenAnagram::sequence_code_bits(
+const ChordData* LookupKmapTypeLenAnagram::begin() const {
+  return chords;
+}
+
+const ChordData* LookupKmapTypeLenAnagram::end() const {
+  return chords + num_chords;
+}
+
+uint32_t LookupKmapTypeLenAnagram::sequence_code_bits  (
     uint16_t seq_num, uint32_t code_bit_offset, uint8_t code_bit_length) const {
   uint32_t start_bit_offset = seq_num * seq_bit_length();
   return getUnalignedBits(sequences, start_bit_offset + code_bit_offset,

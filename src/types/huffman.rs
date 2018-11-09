@@ -90,6 +90,7 @@ impl HuffmanNode {
 }
 
 impl Ord for HuffmanNode {
+    /// Most frequent nodes come first.
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         other.count().cmp(&self.count())
     }

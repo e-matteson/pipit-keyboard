@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use error::{Error, ResultExt};
-use types::{Chord, KmapFormat, KmapPath, Name};
+use types::{Chord, KmapFormat, KmapOrder, KmapPath, Name};
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';
@@ -24,7 +24,7 @@ impl KmapPath {
     pub fn read(
         &self,
         format: &KmapFormat,
-    ) -> Result<BTreeMap<Name, Chord>, Error> {
+    ) -> Result<BTreeMap<Name, Chord<KmapOrder>>, Error> {
         let lines = self
             .load_lines()?
             .into_iter()
@@ -83,14 +83,14 @@ impl Section {
     }
 
     /// Get all Name -> Chord mappings from the section.
-    fn mappings(self) -> Result<Vec<(Name, Chord)>, Error> {
+    fn mappings(self) -> Result<Vec<(Name, Chord<KmapOrder>)>, Error> {
         let chords = self.chords()?;
         Ok(self.names.into_iter().zip(chords.into_iter()).collect())
     }
 
     /// Extract the Chords from the section, in the same order as their
     /// names.
-    fn chords(&self) -> Result<Vec<Chord>, Error> {
+    fn chords(&self) -> Result<Vec<Chord<KmapOrder>>, Error> {
         let mut chords = Vec::new();
         let mut switch_chunks = self.switch_chunks()?;
 
@@ -194,8 +194,8 @@ impl Section {
 }
 
 fn to_chord_map(
-    mappings: Vec<(Name, Chord)>,
-) -> Result<BTreeMap<Name, Chord>, Error> {
+    mappings: Vec<(Name, Chord<KmapOrder>)>,
+) -> Result<BTreeMap<Name, Chord<KmapOrder>>, Error> {
     // let blank_mapping = Name::from(BLANK_MAPPING);
     let mut map = BTreeMap::new();
     for (name, chord) in mappings {

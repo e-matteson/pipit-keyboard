@@ -5,7 +5,7 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Chord, ChordSpec, Command, Field,
+    AllData, CCode, CEnumVariant, CTree, Chord, Command, Field, FirmwareOrder,
     HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeName, Modifier, Name,
     SeqType, Sequence, ToC,
 };
@@ -259,24 +259,26 @@ impl AllData {
     }
 }
 
-impl ChordSpec {
+impl Ord for Chord<FirmwareOrder> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.switches().blocks().cmp(other.switches().blocks())
+    }
+}
+
+impl Chord<FirmwareOrder> {
     /// Convert the chord into CCode strings containing the byte representation
     /// used in the firmware.
-    fn to_c_bytes(&self, chord: &Chord) -> Result<Vec<CCode>, Error> {
-        let ordered_bools = self.to_firmware_order.permute(chord.switches())?;
-        Ok(ordered_bools.blocks().map(|x| x.to_c()).collect())
+    fn to_c_bytes(&self) -> Vec<CCode> {
+        self.switches().blocks().map(|x| x.to_c()).collect()
     }
 
-    fn to_c_initializer(&self, chord: &Chord) -> Result<CCode, Error> {
-        Ok(format!("{{{}}}", self.to_c_bytes(chord)?.join(", ")).to_c())
+    fn to_c_initializer(&self) -> CCode {
+        format!("{{{}}}", self.to_c_bytes().join(", ")).to_c()
     }
 
-    pub fn to_c_constructor(&self, chord: &Chord) -> Result<CCode, Error> {
-        Ok(format!(
-            "{}({})",
-            Self::c_type_name(),
-            self.to_c_initializer(chord)?
-        ).to_c())
+    pub fn to_c_constructor(&self) -> CCode {
+        // TODO there are a bunch of extra allocations here...
+        format!("{}({})", Self::c_type_name(), self.to_c_initializer()).to_c()
     }
 
     pub fn c_type_name() -> CCode {

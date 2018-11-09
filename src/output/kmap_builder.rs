@@ -3,13 +3,11 @@ use std::ops::BitOr;
 
 use error::{Error, ResultExt};
 use types::{
-    AllSeqMaps, AnagramNum, CCode, CTree, ChordMap, ChordSpec, Field,
+    AllSeqMaps, AnagramNum, CCode, CTree, Chord, ChordMap, ChordSpec, Field,
     HuffmanTable, Name, SeqType, Sequence, ToC,
 };
 use util::usize_to_u16;
 
-// type SeqMap = BTreeMap<SeqType, BTreeMap<Name, Sequence>>;
-// type ChordMap = BTreeMap<Name, Chord>;
 type LenMap = BTreeMap<LenAndAnagram, Vec<Name>>;
 
 // TODO refactor this whole file
@@ -141,18 +139,29 @@ impl<'a> KmapBuilder<'a> {
                 info.anagram.get()
             ).to_c();
 
-            let chord_bytes = names
+            let chords = names
                 .iter()
                 .map(|name| {
                     Ok(self
                         .chord_spec
-                        .to_c_constructor(self.chord_map.get_result(name)?)?)
+                        .to_firmware(self.chord_map.get_result(name)?)?)
                 }).collect::<Result<Vec<_>, Error>>()?;
 
             let seqs = names
                 .iter()
                 .map(|name| self.seq_maps.get(name, seq_type))
                 .collect::<Result<Vec<_>, Error>>()?;
+
+            let mut chords_and_seqs: Vec<_> =
+                chords.into_iter().zip(seqs.into_iter()).collect();
+
+            chords_and_seqs.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
+
+            // TODO lots of allocations!
+            let (chord_bytes, seqs): (Vec<_>, Vec<_>) = chords_and_seqs
+                .into_iter()
+                .map(|(c, s)| (c.to_c_constructor(), s))
+                .unzip();
 
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
@@ -163,7 +172,7 @@ impl<'a> KmapBuilder<'a> {
             g.push(CTree::Array {
                 name: chords_name.clone(),
                 values: chord_bytes,
-                c_type: ChordSpec::c_type_name(),
+                c_type: Chord::c_type_name(),
                 is_extern: false,
             });
 

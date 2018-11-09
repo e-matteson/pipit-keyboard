@@ -2,7 +2,8 @@ use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
 use types::{
-    CCode, CTree, Chord, ChordSpec, Field, KmapPath, ModeInfo, ModeName, ToC,
+    CCode, CTree, Chord, ChordSpec, Field, KmapOrder, KmapPath, ModeInfo,
+    ModeName, ToC,
 };
 
 use util::usize_to_u8;
@@ -11,8 +12,8 @@ pub struct ModeBuilder<'a> {
     pub mode_name: &'a ModeName,
     pub info: &'a ModeInfo,
     pub kmap_struct_names: &'a BTreeMap<KmapPath, CCode>,
-    pub mod_chords: Vec<Chord>,
-    pub anagram_mask: Chord,
+    pub mod_chords: Vec<Chord<KmapOrder>>,
+    pub anagram_mask: Chord<KmapOrder>,
     pub chord_spec: ChordSpec,
 }
 
@@ -81,8 +82,11 @@ impl<'a> ModeBuilder<'a> {
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
         let tree = CTree::ConstVar {
             name: array_name_out.clone(),
-            value: self.chord_spec.to_c_constructor(&self.anagram_mask)?,
-            c_type: ChordSpec::c_type_name(),
+            value: self
+                .chord_spec
+                .to_firmware(&self.anagram_mask)?
+                .to_c_constructor(),
+            c_type: Chord::c_type_name(),
             is_extern: false,
         };
         Ok((tree, array_name_out))
@@ -94,7 +98,7 @@ impl<'a> ModeBuilder<'a> {
 
     fn render_chord_array_helper(
         &self,
-        chords: &[Chord],
+        chords: &[Chord<KmapOrder>],
         label: &CCode,
     ) -> Result<(CTree, CCode), Error> {
         // TODO share code with stuff in kmap_builder? get rid of this helper?
@@ -103,9 +107,9 @@ impl<'a> ModeBuilder<'a> {
             name: array_name_out.clone(),
             values: chords
                 .iter()
-                .map(|c| self.chord_spec.to_c_constructor(c))
-                .collect::<Result<Vec<_>, _>>()?,
-            c_type: ChordSpec::c_type_name(),
+                .map(|c| Ok(self.chord_spec.to_firmware(c)?.to_c_constructor()))
+                .collect::<Result<Vec<CCode>, Error>>()?,
+            c_type: Chord::c_type_name(),
             is_extern: false,
         };
         Ok((tree, array_name_out))

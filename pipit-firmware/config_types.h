@@ -21,6 +21,8 @@ struct LookupKmapTypeLenAnagram {
 
   uint16_t seq_bit_length() const;
   uint8_t anagram() const;
+  const ChordData* begin() const;
+  const ChordData* end() const;
   uint32_t sequence_code_bits(uint16_t seq_num, uint32_t code_bit_offset,
                               uint8_t code_bit_length) const;
 };

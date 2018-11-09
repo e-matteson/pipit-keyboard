@@ -2,7 +2,9 @@ use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
 
-use types::{AllData, AnagramNum, Chord, KmapPath, ModeInfo, ModeName, Name};
+use types::{
+    AllData, AnagramNum, Chord, KmapOrder, KmapPath, ModeInfo, ModeName, Name,
+};
 
 /// The Checker warns about sub-optimal configuration, like conflicting chords
 /// or skipped anagram numbers. Any config issues that would break the firmware
@@ -10,7 +12,7 @@ use types::{AllData, AnagramNum, Chord, KmapPath, ModeInfo, ModeName, Name};
 #[derive(Debug)]
 struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
-    reverse_kmaps: HashMap<KmapPath, HashMap<Chord, AnagramSet>>,
+    reverse_kmaps: HashMap<KmapPath, HashMap<Chord<KmapOrder>, AnagramSet>>,
     seq_names: HashSet<Name>,
     chord_names: HashSet<Name>,
     word_mod_names: HashSet<Name>,
@@ -40,7 +42,9 @@ impl AllData {
         }
     }
 
-    fn reverse_chords(&self) -> HashMap<KmapPath, HashMap<Chord, AnagramSet>> {
+    fn reverse_chords(
+        &self,
+    ) -> HashMap<KmapPath, HashMap<Chord<KmapOrder>, AnagramSet>> {
         let mut reversed = HashMap::new();
         for (kmap, chord_map) in self.chords.iter() {
             for (name, chord) in chord_map.iter() {

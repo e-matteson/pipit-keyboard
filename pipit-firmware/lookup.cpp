@@ -1,4 +1,5 @@
 #include "lookup.h"
+#include <algorithm>
 
 bool areBitsEqual(const uint32_t a, const uint32_t b, uint32_t mask) {
   // TODO use xor?
@@ -90,16 +91,16 @@ uint8_t lookupInKmapTypeLenAndAnagram(const Chord* chord,
                                       const LookupKmapTypeLenAnagram* lookup,
                                       Key* keys_out) {
   const ChordData* chord_data = chord->getData();
-  for (uint16_t i = 0; i < lookup->num_chords; i++) {
-    if (*chord_data == lookup->chords[i]) {
-      // Found match!
-      return decodeSequence(lookup, i, keys_out);
-    }
+  auto end = lookup->end();
+  auto pos = std::lower_bound(lookup->begin(), end, *chord_data);
+  if (pos != end && *pos == *chord_data) {
+    // Found match!
+    size_t index = pos - lookup->begin();
+    return decodeSequence(lookup, index, keys_out);
   }
   return 0;  // Fail! No match found.
 }
 
-// TODO inline?
 uint8_t lookupInKmapAndType(const Chord* chord, const LookupKmapType* table,
                             Key* keys_out) {
   // If chord is found in lookup, store corresponding keys and return their length.

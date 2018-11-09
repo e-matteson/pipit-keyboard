@@ -4,7 +4,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use error::{Error, ResultExt};
 use tutor::{Label, LabeledChord, State};
-use types::{Chord, Name};
+use types::{Chord, KmapOrder, Name};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -38,7 +38,7 @@ pub struct SlideWord {
 #[derive(Debug, Clone)]
 pub struct SlideEntry {
     pub text: String,
-    pub chord: Chord,
+    pub chord: Chord<KmapOrder>,
     pub length: usize,
 }
 

@@ -6,13 +6,13 @@ use std::path::PathBuf;
 use error::{Error, ResultExt};
 use types::{
     AnagramNum, BoardName, CTree, Chord, ChordSpec, Command, HuffmanTable,
-    KeyPress, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+    KeyPress, KmapOrder, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
     SpellingTable, TutorData,
 };
 use util::ensure_u8;
 
 #[derive(Debug)]
-pub struct ChordMap(BTreeMap<Name, Chord>);
+pub struct ChordMap(BTreeMap<Name, Chord<KmapOrder>>);
 
 #[derive(Debug)]
 pub struct SeqMap(BTreeMap<Name, Sequence>);
@@ -56,7 +56,7 @@ impl AllData {
         &self,
         chord_name: &Name,
         mode: &ModeName,
-    ) -> Option<Chord> {
+    ) -> Option<Chord<KmapOrder>> {
         for kmap_info in &self.modes.get(mode).expect("unknown mode").keymaps {
             if let Ok(chord) = self.chords.get(chord_name, &kmap_info.file) {
                 return Some(chord);
@@ -66,7 +66,7 @@ impl AllData {
     }
 
     /// Get a Chord containing all the switches used in any anagram mod.
-    pub fn get_anagram_mask(&self, mode: &ModeName) -> Chord {
+    pub fn get_anagram_mask(&self, mode: &ModeName) -> Chord<KmapOrder> {
         self.anagram_mods
             .iter()
             .filter_map(|name| self.get_chord_in_mode(name, mode))
@@ -100,7 +100,7 @@ impl AllData {
     /// Get chords the for all modifiers in the given mode, in the same order
     /// as `modifier_names()`. If any modifier was not assigned a chord in this
     /// mode, give it a blank chord instead.
-    pub fn modifier_chords(&self, mode: &ModeName) -> Vec<Chord> {
+    pub fn modifier_chords(&self, mode: &ModeName) -> Vec<Chord<KmapOrder>> {
         let mut chords = Vec::new();
         for name in self.modifier_names() {
             // Missing mod chords are represented in the firmware config as a
@@ -132,9 +132,9 @@ impl AllData {
     /// in this mode, return None.
     pub fn incorporate_anagram(
         &self,
-        mut chord: Chord,
+        mut chord: Chord<KmapOrder>,
         mode: &ModeName,
-    ) -> Option<Chord> {
+    ) -> Option<Chord<KmapOrder>> {
         let num = chord.anagram_num.get() as usize;
         if num > 0 {
             let mod_chord =
@@ -187,7 +187,7 @@ impl AllChordMaps {
         &self,
         chord_name: &Name,
         kmap: &KmapPath,
-    ) -> Result<Chord, Error> {
+    ) -> Result<Chord<KmapOrder>, Error> {
         // TODO be consistent about argument order
         Ok(self
             .get_kmap(kmap)?
@@ -236,7 +236,7 @@ impl AllChordMaps {
     pub fn insert(
         &mut self,
         name: Name,
-        chord: Chord,
+        chord: Chord<KmapOrder>,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
         self.maps
@@ -251,7 +251,7 @@ impl AllChordMaps {
 
     pub fn insert_map(
         &mut self,
-        named_chords: BTreeMap<Name, Chord>,
+        named_chords: BTreeMap<Name, Chord<KmapOrder>>,
         kmap: &KmapPath,
     ) -> Result<(), Error> {
         for (name, chord) in named_chords {
@@ -368,11 +368,11 @@ impl ChordMap {
         ChordMap(BTreeMap::new())
     }
 
-    pub fn get(&self, name: &Name) -> Option<&Chord> {
+    pub fn get(&self, name: &Name) -> Option<&Chord<KmapOrder>> {
         self.0.get(name)
     }
 
-    pub fn get_result(&self, name: &Name) -> Result<&Chord, Error> {
+    pub fn get_result(&self, name: &Name) -> Result<&Chord<KmapOrder>, Error> {
         // TODO merge with get?
         self.0.get(name).ok_or_else(|| Error::LookupErr {
             key: name.into(),
@@ -380,7 +380,11 @@ impl ChordMap {
         })
     }
 
-    fn insert(&mut self, name: Name, chord: Chord) -> Result<(), Error> {
+    fn insert(
+        &mut self,
+        name: Name,
+        chord: Chord<KmapOrder>,
+    ) -> Result<(), Error> {
         if self.0.contains_key(&name) {
             return Err(Error::ConflictErr {
                 key: name.clone().into(),
@@ -392,7 +396,7 @@ impl ChordMap {
         Ok(())
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&Name, &Chord)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&Name, &Chord<KmapOrder>)> {
         self.0.iter()
     }
 

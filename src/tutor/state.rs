@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 use error::{Error, ResultExt};
-use types::{Chord, ModeName, Name, Spelling, TutorData};
+use types::{Chord, KmapOrder, ModeName, Name, Spelling, TutorData};
 
 lazy_static! {
     static ref STATE: Mutex<State> = Mutex::new(State::new());
@@ -81,7 +81,7 @@ impl State {
         }
     }
 
-    pub fn chord(name: &Name) -> Result<Chord, Error> {
+    pub fn chord(name: &Name) -> Result<Chord<KmapOrder>, Error> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
             data.chord(name, &state.saveable.mode)
@@ -90,7 +90,7 @@ impl State {
         }
     }
 
-    pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord> {
+    pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord<KmapOrder>> {
         let name = Self::name(spelling)?;
         let mut chord = Self::chord(&name).ok()?;
         if spelling.is_uppercase() {
@@ -215,7 +215,11 @@ impl Saveable {
 }
 
 impl TutorData {
-    pub fn chord(&self, name: &Name, mode: &ModeName) -> Result<Chord, Error> {
+    pub fn chord(
+        &self,
+        name: &Name,
+        mode: &ModeName,
+    ) -> Result<Chord<KmapOrder>, Error> {
         if name.is_empty() {
             // Used for skipping colors in the cheatsheet config
             return Ok(self.chord_spec.new_chord());

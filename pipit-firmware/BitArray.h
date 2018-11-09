@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-// #include <Arduino.h>
 
 // Undefine these arduino macros that conflict with std::min/std::max, breaking other std lib stuff
 #undef max
@@ -9,11 +8,13 @@
 #include <array>
 #include <limits>
 
+
 template<typename T, size_t NumBits>
 class BitArray {
-  // Invariant: the unused bits at the end of the last block should always be 0! If
-  // you initialize them to 1, or manually set them by indexing out of bounds,
-  // things will break.
+  // Invariant: the unused bits at the end of the last block should always be 0!
+  // If the sure initializes them to 1, or manually sets them by indexing out of
+  // bounds, things will break. Any method that could change their value (eg.
+  // flip()) should call sanitize() afterwards.
 
   // Calculate the number of blocks required to store this many bits (ceiling)
   using array_t = std::array<T, ((NumBits + std::numeric_limits<T>::digits - 1) / std::numeric_limits<T>::digits)>;
@@ -25,7 +26,7 @@ public:
     // TODO sanitize here?
   }
 
-  void reset(){
+  void reset() {
     std::fill(blocks.begin(), blocks.end(), 0);
   }
 
@@ -45,15 +46,15 @@ public:
     }
   }
 
-  void flip(size_t bit_index) {
-    blocks[block_index(bit_index)] ^= bit_mask(bit_index);
-  }
-
   void flip() {
     for(size_t i = 0; i < blocks.size(); i++) {
       blocks[i] = ~blocks[i];
     }
     sanitize();
+  }
+
+  void flip(size_t bit_index) {
+    blocks[block_index(bit_index)] ^= bit_mask(bit_index);
   }
 
   bool test(size_t bit_index) const {
@@ -69,12 +70,24 @@ public:
     return false;
   }
 
-  bool none() const {
+  constexpr bool none() const {
     return !any();
   }
 
-  constexpr size_t size() const{
+  constexpr size_t size() const {
     return NumBits;
+  }
+
+  constexpr const array_t& raw() const {
+    return blocks;
+  }
+
+  constexpr const T* begin() const {
+    return blocks.begin();
+  }
+
+  constexpr const T* end() const {
+    return blocks.end();
   }
 
   // If every high bit in the mask is high in this too, return true.
@@ -133,9 +146,9 @@ public:
   //   Serial.println("");
   // }
 
-  array_t blocks;
 
 private:
+  array_t blocks;
 
   /// Set extra unused bits in the last block to zero.
   void sanitize() {
@@ -143,10 +156,8 @@ private:
   }
 
   /// Return a mask where each bit is 1 if it used in the last block, and 0 if not.
-  constexpr T mask_last_block() const {
+  static constexpr T mask_last_block() {
     // Make sure this agrees with bit_mask() about bit order!
-    // TODO will this get recomputed every time? Can use template magic instead?
-    // return (~static_cast<T>(0)) << bit_offset(NumBits);
     return (~static_cast<T>(0)) >>
       (std::numeric_limits<T>::digits - bit_offset(NumBits) - 1);
   }
@@ -160,8 +171,26 @@ private:
   }
 
   static constexpr T bit_mask(size_t bit_index){
-    // return 0x1 << (std::numeric_limits<T>::digits - bit_offset(bit_index) - 1);
     return 0x1 << bit_offset(bit_index);
   }
-
 };
+
+
+/// Compare 2 BitArrays of equal length by comparing the values of their underlying block types.
+template<typename T, size_t NumBits>
+bool operator<(const BitArray<T, NumBits>& lhs, const BitArray<T, NumBits>& rhs) {
+  // We don't need to mask out unused bits because we assume they've already been sanitized to zero.
+  for (size_t i = 0; i < lhs.raw().size(); i++) {
+    T left = lhs.raw()[i];
+    T right = rhs.raw()[i];
+
+    if (left < right) {
+      return true;
+    }
+    if (left > right) {
+      return false;
+    }
+  }
+  // equal!
+  return false;
+}

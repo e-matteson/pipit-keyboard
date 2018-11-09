@@ -8,8 +8,8 @@ use input::Settings;
 use error::{Error, ResultExt};
 use types::{
     AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
-    HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeInfo, ModeName, Name,
-    SeqType, Sequence, SpellingTable, Validate, Word,
+    HuffmanTable, KeyDefs, KeyPress, KmapOrder, KmapPath, ModeInfo, ModeName,
+    Name, SeqType, Sequence, SpellingTable, Validate, Word,
 };
 use util::read_file;
 
@@ -322,7 +322,7 @@ impl AllDataBuilder {
         word: &Word,
         kmap: &KmapPath,
         spelling_table: &SpellingTable,
-    ) -> Result<Chord, Error> {
+    ) -> Result<Chord<KmapOrder>, Error> {
         let spellings = word.chord_spellings()?;
         let mut letter_chords = {
             spellings.into_iter().map(|spelling| {
