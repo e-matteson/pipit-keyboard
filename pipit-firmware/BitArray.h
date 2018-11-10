@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+// #include <Arduino.h>
+#include "BitSlice.h"
 
 // Undefine these arduino macros that conflict with std::min/std::max, breaking other std lib stuff
 #undef max
@@ -24,6 +26,10 @@ public:
   constexpr BitArray() : blocks() {}
   constexpr BitArray(array_t raw_blocks) : blocks(raw_blocks) {
     // TODO sanitize here?
+  }
+
+  constexpr BitSlice<T> slice_to(size_t end_index) {
+    return BitSlice<T> (blocks.data(), 0, std::min(end_index, NumBits));
   }
 
   void reset() {

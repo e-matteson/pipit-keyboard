@@ -6,8 +6,8 @@ use time::*;
 use error::Error;
 use types::{
     AllData, CCode, CEnumVariant, CTree, Chord, Command, Field, FirmwareOrder,
-    HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeName, Modifier, Name,
-    SeqType, Sequence, ToC,
+    HuffmanEntry, HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeName,
+    Modifier, Name, SeqType, Sequence, ToC,
 };
 use util::usize_to_u8;
 
@@ -89,6 +89,7 @@ impl AllData {
         }
         group.push(CTree::LiteralH("#pragma once\n".to_c()));
         group.extend(self.early_options.clone());
+        group.push(self.huffman_table.render_early());
         Ok(CTree::Group(group))
     }
 
@@ -286,43 +287,69 @@ impl Chord<FirmwareOrder> {
     }
 }
 
+impl HuffmanEntry {
+    fn to_huffman_char(&self, key: &CCode) -> HuffmanChar {
+        HuffmanChar {
+            bits: self.to_c_constructor(),
+            num_bits: self.num_bits(),
+            key_code: KeyPress::truncate(key),
+            is_mod: self.is_mod,
+        }
+    }
+
+    fn to_c_bytes(&self) -> Vec<CCode> {
+        // TODO impl ToC for BitVec?
+        self.bits().blocks().map(|x| x.to_c()).collect()
+    }
+
+    fn to_c_initializer(&self) -> CCode {
+        format!("{{{}}}", self.to_c_bytes().join(", ")).to_c()
+    }
+
+    fn to_c_constructor(&self) -> CCode {
+        // TODO there are a bunch of extra allocations here...
+        format!("{}({})", Self::c_type_name(), self.to_c_initializer()).to_c()
+    }
+
+    fn c_type_name() -> CCode {
+        "HuffmanBits".to_c()
+    }
+}
+
 impl HuffmanTable {
-    fn sorted_chars(&self) -> Result<Vec<HuffmanChar>, Error> {
-        let mut v = self
+    fn initializers(&self) -> Vec<CCode> {
+        let mut v: Vec<_> = self
             .0
             .iter()
-            .map(|(key, entry)| {
-                Ok(HuffmanChar {
-                    bits: entry.as_uint32()?,
-                    num_bits: entry.num_bits(),
-                    key_code: KeyPress::truncate(key),
-                    is_mod: entry.is_mod,
-                })
-            }).collect::<Result<Vec<_>, Error>>()?;
+            .map(|(key, entry)| entry.to_huffman_char(key))
+            .collect();
         v.sort();
-        Ok(v)
+        v.into_iter()
+            .map(|huffchar| huffchar.initializer())
+            .collect()
+    }
+
+    fn render_early(&self) -> CTree {
+        CTree::Define {
+            name: "MAX_HUFFMAN_CODE_BIT_LEN".to_c(),
+            value: self.max_length().to_c(),
+        }
     }
 
     fn render(&self) -> Result<CTree, Error> {
-        let chars = self.sorted_chars()?;
-
         let mut group = Vec::new();
         group.push(CTree::ConstVar {
             name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
-            value: chars.get(0).map(|x| x.num_bits).unwrap_or(0).to_c(),
+            value: self.min_length().to_c(),
+            // chars.get(0).map(|x| x.num_bits).unwrap_or(0).to_c(),
             c_type: "uint8_t".to_c(),
             is_extern: true,
         });
-        // TODO don't pass new
-        let initializers = chars
-            .into_iter()
-            .map(|c| c.render(CCode::new()).initializer())
-            .collect();
 
         group.push(CTree::Array {
             name: "huffman_lookup".to_c(),
-            values: initializers,
-            c_type: "HuffmanChar".to_c(),
+            values: self.initializers(),
+            c_type: HuffmanChar::c_type(),
             is_extern: true,
         });
 

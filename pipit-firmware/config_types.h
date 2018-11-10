@@ -7,11 +7,13 @@
 #include <stdint.h>
 
 #include "BitArray.h"
+#include "BitSlice.h"
 #include "auto_config_early.h"
 
 // TODO automatically pick most efficient block type?
 typedef BitArray<uint8_t, NUM_MATRIX_POSITIONS> ChordData;
 
+typedef BitArray<uint8_t, MAX_HUFFMAN_CODE_BIT_LEN> HuffmanBits;
 
 struct LookupKmapTypeLenAnagram {
   uint16_t seq_bit_len_and_anagram;
@@ -21,10 +23,13 @@ struct LookupKmapTypeLenAnagram {
 
   uint16_t seq_bit_length() const;
   uint8_t anagram() const;
-  const ChordData* begin() const;
-  const ChordData* end() const;
-  uint32_t sequence_code_bits(uint16_t seq_num, uint32_t code_bit_offset,
-                              uint8_t code_bit_length) const;
+  BitSlice<uint8_t> sequence_bits (uint16_t seq_num) const;
+  constexpr const ChordData* begin() const {
+    return chords;
+  }
+  constexpr const ChordData* end() const {
+    return chords + num_chords;
+  }
 };
 
 struct LookupKmapType {
@@ -46,10 +51,14 @@ struct ModeStruct {
 };
 
 struct HuffmanChar {
-  uint32_t bits;
-  uint8_t num_bits;  // actual max is 32, not 255
+  HuffmanBits bits;
+  uint8_t num_bits;
   uint8_t key_code;
   bool is_mod;
+
+  constexpr BitSlice<uint8_t> code_bits() const {
+    return bits.slice_to(num_bits);
+  }
 };
 
 enum class WordSpacePosition {

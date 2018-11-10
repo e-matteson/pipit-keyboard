@@ -1,12 +1,10 @@
 use bit_vec::BitVec;
-use byteorder::{ByteOrder, LittleEndian};
 use std;
 use std::collections::binary_heap::BinaryHeap;
 use std::collections::BTreeMap;
-use std::iter;
 
 use error::{Error, ResultExt};
-use types::{CCode, KeyPress, ToC};
+use types::{CCode, KeyPress};
 use util::ensure_u8;
 
 #[derive(Debug, Clone)]
@@ -32,27 +30,12 @@ enum HuffmanNode {
 }
 
 impl HuffmanEntry {
-    pub fn num_bits(&self) -> usize {
-        self.bits.len()
+    pub fn bits(&self) -> &BitVec<u8> {
+        &self.bits
     }
 
-    pub fn as_uint32(&self) -> Result<CCode, Error> {
-        const MAX_LEN: usize = 32;
-        if self.num_bits() > MAX_LEN {
-            return Err(Error::OutOfRangeErr {
-                name: "huffman encoding length".into(),
-                value: self.num_bits(),
-                min: 0,
-                max: MAX_LEN,
-            });
-        }
-
-        let mut bytes: Vec<_> = self.bits.blocks().collect();
-        let padding = 4 - bytes.len();
-        bytes.extend(iter::repeat(0u8).take(padding));
-
-        let out = LittleEndian::read_u32(&bytes);
-        Ok(out.to_c())
+    pub fn num_bits(&self) -> usize {
+        self.bits.len()
     }
 }
 
@@ -77,6 +60,22 @@ impl HuffmanTable {
             key: key.into(),
             container: "huffman code table".into(),
         })
+    }
+
+    pub fn min_length(&self) -> usize {
+        self.0
+            .values()
+            .map(|entry| entry.num_bits())
+            .min()
+            .expect("failed to get minimum huffman entry length")
+    }
+
+    pub fn max_length(&self) -> usize {
+        self.0
+            .values()
+            .map(|entry| entry.num_bits())
+            .max()
+            .expect("failed to get maximum huffman entry length")
     }
 }
 

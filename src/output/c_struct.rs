@@ -18,10 +18,18 @@ macro_rules! c_struct {
                     fields: vec![
                         $( Field{name: stringify!($field).to_c(), value: (&self.$field).to_c()}, )*
                     ],
-                    c_type: stringify!($struct_type).to_c(),
-                    // TODO always false?
+                    c_type: Self::c_type(),
                     is_extern: false,
                 }
+            }
+
+            #[allow(dead_code)]
+            fn initializer(&self) -> CCode {
+                 self.render(CCode::new()).initializer()
+            }
+
+            fn c_type() -> CCode {
+                stringify!($struct_type).to_c()
             }
         }
     };
