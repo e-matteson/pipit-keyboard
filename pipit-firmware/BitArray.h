@@ -28,7 +28,7 @@ public:
     // TODO sanitize here?
   }
 
-  constexpr BitSlice<T> slice_to(size_t end_index) {
+  constexpr BitSlice<T> slice_to(size_t end_index) const {
     return BitSlice<T> (blocks.data(), 0, std::min(end_index, NumBits));
   }
 

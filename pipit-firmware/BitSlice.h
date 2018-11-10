@@ -57,15 +57,15 @@ public:
 
 private:
 
-  constexpr size_t block_index(size_t bit_index){
+  constexpr size_t block_index(size_t bit_index) const {
     return (start_bit_offset + bit_index) / std::numeric_limits<T>::digits;
   }
 
-  constexpr size_t bit_offset(size_t bit_index){
+  constexpr size_t bit_offset(size_t bit_index) const {
     return (start_bit_offset + bit_index) % std::numeric_limits<T>::digits;
   }
 
-  constexpr T bit_mask(size_t bit_index){
+  constexpr T bit_mask(size_t bit_index) const {
     return 0x1 << bit_offset(bit_index);
   }
 
