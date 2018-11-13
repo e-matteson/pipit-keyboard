@@ -1,7 +1,6 @@
 #include "Timer.h"
 #include <Arduino.h>
 
-
 Timer::Timer() {
   // For making arrays of Timers.
   // If you use this, you must manually set the default value later!

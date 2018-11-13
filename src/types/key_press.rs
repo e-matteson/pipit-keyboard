@@ -247,7 +247,8 @@ impl KeyPress {
             Err(Error::BadValueErr {
                 value: "(empty)".into(),
                 thing: "KeyPress".into(),
-            }).context("KeyPress must contain at least one key or modifier")
+            })
+            .context("KeyPress must contain at least one key or modifier")
         } else {
             Ok(())
         }
@@ -260,7 +261,8 @@ impl KeyPress {
             Err(Error::BadValueErr {
                 thing: "number of modifiers".into(),
                 value: self.mods.len().to_string(),
-            }).context("Expected KeyPress to contain exactly one modifier")
+            })
+            .context("Expected KeyPress to contain exactly one modifier")
         }
     }
 }
@@ -332,7 +334,8 @@ impl KeyDefs {
                     keypress
                 ),
                 container: "key definition table".into(),
-            })?.spelling)
+            })?
+            .spelling)
     }
 
     fn keypress_from_spelling(
@@ -393,7 +396,8 @@ impl KeyDefs {
             Err(Error::BadValueErr {
                 thing: "keycode or mod".to_owned(),
                 value: keycode.into(),
-            }).context("Not defined in the firmware")
+            })
+            .context("Not defined in the firmware")
         }
     }
 
@@ -405,7 +409,8 @@ impl KeyDefs {
             Err(Error::BadValueErr {
                 thing: "modifier".into(),
                 value: modifier.to_string(),
-            }).context("Not defined in the firmware")
+            })
+            .context("Not defined in the firmware")
         }
     }
 }

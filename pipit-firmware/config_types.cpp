@@ -1,6 +1,6 @@
 #include "config_types.h"
-#include "Arduino.h"
 #include <limits.h>
+#include "Arduino.h"
 
 // Should sum to 16
 #define BITS_FOR_ANAGRAM 4
@@ -24,9 +24,10 @@ uint8_t LookupKmapTypeLenAnagram::anagram() const {
   return makeMask16(BITS_FOR_ANAGRAM) & seq_bit_len_and_anagram;
 }
 
-BitSlice<uint8_t> LookupKmapTypeLenAnagram::sequence_bits (uint16_t seq_num) const {
+BitSlice<uint8_t> LookupKmapTypeLenAnagram::sequence_bits(
+    uint16_t seq_num) const {
   size_t length = seq_bit_length();
   size_t start_bit_offset = seq_num * length;
-  BitSlice<uint8_t> b (sequences, start_bit_offset, length);
+  BitSlice<uint8_t> b(sequences, start_bit_offset, length);
   return b;
 }

@@ -245,8 +245,10 @@ impl AllChordMaps {
                 Error::BadValueErr {
                     thing: "kmap".into(),
                     value: kmap.to_owned().into(),
-                }.context("tried to add chord to uninitialized kmap")
-            })?.insert(name, chord)
+                }
+                .context("tried to add chord to uninitialized kmap")
+            })?
+            .insert(name, chord)
     }
 
     pub fn insert_map(
@@ -304,7 +306,8 @@ impl AllSeqMaps {
             Err(Error::ConflictErr {
                 key: name.into(),
                 container: "sequences".to_owned(),
-            }.context("Found multiple sequences with the same name"))
+            }
+            .context("Found multiple sequences with the same name"))
         }
     }
 

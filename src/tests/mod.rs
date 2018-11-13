@@ -18,7 +18,8 @@ fn actual_dir() -> PathBuf {
 fn big_settings_output() {
     let all_data = AllDataBuilder::load(&PathBuf::from(
         "src/tests/settings/big-test.yaml",
-    )).unwrap()
+    ))
+    .unwrap()
     .finalize()
     .unwrap();
 

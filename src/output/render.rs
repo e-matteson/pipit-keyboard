@@ -1,6 +1,7 @@
-use bit_vec::BitVec;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
+
+use bit_vec::BitVec;
 use time::*;
 
 use error::Error;
@@ -13,12 +14,14 @@ use util::usize_to_u8;
 
 use output::{KmapBuilder, ModeBuilder};
 
-c_struct!(struct HuffmanChar {
-    bits: CCode,
-    num_bits: usize,
-    key_code: CCode,
-    is_mod: bool,
-});
+c_struct!(
+    struct HuffmanChar {
+        bits: CCode,
+        num_bits: usize,
+        key_code: CCode,
+        is_mod: bool,
+    }
+);
 
 impl PartialOrd for HuffmanChar {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -256,7 +259,8 @@ impl AllData {
                     .get_seq_of_any_type(name)?
                     .lone_keypress()?
                     .format_mods())
-            }).collect()
+            })
+            .collect()
     }
 }
 
@@ -502,7 +506,8 @@ fn render_keycode_definitions() -> CTree {
             .map(|(&name, &value)| CTree::Define {
                 name: name.to_owned(),
                 value: value.to_c(),
-            }).collect(),
+            })
+            .collect(),
     );
 
     CTree::Ifndef {

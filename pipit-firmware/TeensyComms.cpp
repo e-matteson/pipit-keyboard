@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #include "TeensyComms.h"
+#include <Arduino.h>
 
 #ifdef TEENSY_LC
 

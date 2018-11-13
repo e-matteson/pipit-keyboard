@@ -31,11 +31,13 @@ impl CTree {
             CTree::DefineIf {
                 ref name,
                 is_defined,
-            } => if is_defined {
-                format_define(name, &CCode::new())
-            } else {
-                CFilePair::new()
-            },
+            } => {
+                if is_defined {
+                    format_define(name, &CCode::new())
+                } else {
+                    CFilePair::new()
+                }
+            }
             CTree::Ifndef {
                 ref conditional,
                 ref contents,

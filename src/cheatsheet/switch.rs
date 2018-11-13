@@ -125,7 +125,8 @@ impl Switch {
                         size: self.font_size() * content.symbol.scale,
                         color: Color::Black,
                         font: Font::default(),
-                    }.finalize(),
+                    }
+                    .finalize(),
                 );
             }
         }
@@ -146,7 +147,8 @@ impl Switch {
                 size: self.font_size() * sole_content.symbol.scale,
                 color: Color::Black,
                 font: Font::default(),
-            }.finalize(),
+            }
+            .finalize(),
         );
         group.append(Self::outline(P2::origin()).finalize());
     }
@@ -198,7 +200,8 @@ impl SwitchStyle {
             SwitchStyle::Shared9,
             SwitchStyle::Shared10,
             SwitchStyle::Shared11,
-        ].into_iter()
+        ]
+        .into_iter()
     }
 
     pub fn fill(self) -> Fill {
@@ -394,5 +397,6 @@ fn get_symbol(name: &Name) -> Result<Symbol, Error> {
         .ok_or_else(|| Error::Missing {
             missing: name.into(),
             container: "cheatsheet symbol lookup".to_owned(),
-        })?.to_owned())
+        })?
+        .to_owned())
 }

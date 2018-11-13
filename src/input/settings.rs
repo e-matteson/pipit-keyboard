@@ -116,7 +116,8 @@ impl OptionsConfig {
         let permutation = Permutation::from_to(
             &self.kmap_format.kmap_order(),
             &self.firmware_order()?,
-        ).context(
+        )
+        .context(
             "'kmap_format' contains pin numbers not present in 'row_pins' or \
              'column_pins'",
         )?;
@@ -327,7 +328,8 @@ impl ToC for Verbosity {
             Verbosity::None => 0,
             Verbosity::Some => 1,
             Verbosity::All => 2,
-        }.to_c()
+        }
+        .to_c()
     }
 }
 
@@ -343,7 +345,8 @@ impl CEnumVariant for WordSpacePosition {
             WordSpacePosition::Before => "Before",
             WordSpacePosition::After => "After",
             WordSpacePosition::None => "None",
-        }.to_c()
+        }
+        .to_c()
     }
 
     /// The underlying type determining the size of the C++ enum

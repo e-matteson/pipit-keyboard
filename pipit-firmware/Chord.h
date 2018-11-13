@@ -1,10 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include "auto_config.h"
-#include "Key.h"
-#include "conf.h"
 #include "BitArray.h"
+#include "Key.h"
+#include "auto_config.h"
+#include "conf.h"
 
 /// How to modify cycled words
 enum class CycleType {
@@ -51,7 +51,7 @@ class Chord {
     // most significant bit will store the flag_cycle_capital. It's important to
     // keep Chords as small as possible, since we create a bunch of them
     // (especially in the history).
-    BitArray<uint16_t, NUM_MODIFIERS+1> bits;
+    BitArray<uint16_t, NUM_MODIFIERS + 1> bits;
 
     bool hasMod(conf::Mod mod) const;
     void setMod(conf::Mod mod);
@@ -67,7 +67,6 @@ class Chord {
     CAP_FIRST,
     CAP_NONE,
   };
-
 
   bool extractMod(conf::Mod modifier);
   bool restoreMod(conf::Mod modifier);

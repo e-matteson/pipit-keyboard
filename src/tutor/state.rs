@@ -229,7 +229,8 @@ impl TutorData {
             .ok_or_else(|| Error::LookupErr {
                 key: mode.to_string(),
                 container: "tutor data modes".to_owned(),
-            })?.get(name)
+            })?
+            .get(name)
             .cloned()
             .ok_or_else(|| Error::LookupErr {
                 key: name.into(),

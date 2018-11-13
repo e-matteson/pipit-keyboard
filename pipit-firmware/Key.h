@@ -1,7 +1,7 @@
 #pragma once
 
-#include "stdint.h"
 #include "auto_config.h"
+#include "stdint.h"
 
 class Key {
  public:

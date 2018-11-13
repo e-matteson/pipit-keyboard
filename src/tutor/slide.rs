@@ -72,7 +72,8 @@ impl SlideLine {
                                 word
                             )
                         })
-                    }).collect();
+                    })
+                    .collect();
                 let entries = entries?;
                 let string =
                     entries.iter().map(|entry| entry.text.clone()).join("");

@@ -15,7 +15,7 @@ const ChordData* getModChord(Mode mode, Mod modifier);
 ModType getModType(Mod modifier);
 
 // Get the underlying type of the enum, to be used as an index
-template<typename TEnum>
+template <typename TEnum>
 typename std::underlying_type<TEnum>::type to_index(TEnum variant) {
   return static_cast<typename std::underlying_type<TEnum>::type>(variant);
 }

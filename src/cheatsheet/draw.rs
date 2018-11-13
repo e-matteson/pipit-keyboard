@@ -261,10 +261,12 @@ impl Wedge {
     }
 
     fn arc_end(&self) -> P2 {
-        self.tip_pos + polar_vec(
-            self.radius,
-            self.rotation_radians() + self.width_radians(),
-        ).reflect_xy()
+        self.tip_pos
+            + polar_vec(
+                self.radius,
+                self.rotation_radians() + self.width_radians(),
+            )
+            .reflect_xy()
     }
 
     fn rotation_radians(&self) -> f64 {
@@ -296,15 +298,19 @@ impl Wedge {
                     large_arc_flag: self.is_large_arc(),
                     sweep_flag: false,
                     end: self.arc_end(),
-                }.finalize(),
-            ).close()
+                }
+                .finalize(),
+            )
+            .close()
     }
 
     pub fn label_pos(&self) -> P2 {
-        self.tip_pos + polar_vec(
-            self.radius / 3.,
-            self.rotation_radians() + self.width_radians() / 2.,
-        ).reflect_xy()
+        self.tip_pos
+            + polar_vec(
+                self.radius / 3.,
+                self.rotation_radians() + self.width_radians() / 2.,
+            )
+            .reflect_xy()
     }
 }
 
@@ -426,7 +432,8 @@ impl FillPattern {
             FillPattern::HorizStripes => Self::horiz_stripes_pattern(),
             FillPattern::DiagStripes => Self::diag_stripes_pattern(),
             FillPattern::Dots => Self::dots_pattern(),
-        }.set("id", self.pattern_id());
+        }
+        .set("id", self.pattern_id());
 
         let rect = background.finalize().set("fill", self.pattern_url());
         let mask = Mask::new().set("id", self.mask_id()).add(rect);
@@ -583,7 +590,8 @@ impl Into<Value> for Color {
             Color::White => "#ffffff",
             Color::LightGrey => "#f3f1f1",
             Color::DarkGrey => "#d0c9c8",
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -604,7 +612,8 @@ impl Into<Value> for FontStyle {
             FontStyle::Normal => "normal",
             FontStyle::Italic => "italic",
             FontStyle::Oblique => "oblique",
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -615,7 +624,8 @@ impl Into<Value> for FontWeight {
             FontWeight::Bold => "bold",
             FontWeight::Bolder => "bolder",
             FontWeight::Lighter => "lighter",
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -625,7 +635,8 @@ impl Into<Value> for TextAnchor {
             TextAnchor::Start => "start",
             TextAnchor::Middle => "middle",
             TextAnchor::End => "end",
-        }.into()
+        }
+        .into()
     }
 }
 

@@ -1,14 +1,12 @@
 #include "Chord.h"
-#include <type_traits>
 #include <Arduino.h>
+#include <type_traits>
 
-
-
-
-
-/// If this anagram number has a corresponding anagram number, return a pointer to it. Otherwise, return a nullptr.
+/// If this anagram number has a corresponding anagram number, return a pointer
+/// to it. Otherwise, return a nullptr.
 // TODO put this in conf.cpp?
-// TODO the pointer is slower than returning the small type directly. But how to express failure?
+// TODO the pointer is slower than returning the small type directly. But how to
+// express failure?
 const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
   uint8_t index = 0;
   for (uint8_t num : conf::anagram_mod_numbers) {
@@ -24,9 +22,7 @@ const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
 
 Chord::Chord(conf::Mode mode) : mode(mode) {}
 
-void Chord::setSwitch(uint8_t switch_index) {
-  chord_data.set(switch_index);
-}
+void Chord::setSwitch(uint8_t switch_index) { chord_data.set(switch_index); }
 
 void Chord::setMode(conf::Mode _mode) { mode = _mode; }
 
@@ -56,13 +52,9 @@ bool Chord::hasAnagramNum(uint8_t other_anagram) const {
   return (anagram_num == other_anagram);
 }
 
-const ChordData* Chord::getData() const {
-  return &chord_data;
-}
+const ChordData* Chord::getData() const { return &chord_data; }
 
-ChordData* Chord::getDataMut() {
-  return &chord_data;
-}
+ChordData* Chord::getDataMut() { return &chord_data; }
 
 /// Edit the capitalization of the given Keys, depending on a bunch of factors
 /// like what mod flags are set for this Chord, what literal modifiers are
@@ -121,17 +113,19 @@ Chord::CapBehaviorEnum Chord::decideCapBehavior(const Key* keys,
   return CAP_FIRST;
 }
 
-bool Chord::hasModNospace() const { return flags.hasMod(conf::Mod::mod_nospace); }
+bool Chord::hasModNospace() const {
+  return flags.hasMod(conf::Mod::mod_nospace);
+}
 
 bool Chord::hasModDouble() const { return flags.hasMod(conf::Mod::mod_double); }
 
-bool Chord::hasModShorten() const { return flags.hasMod(conf::Mod::mod_shorten); }
+bool Chord::hasModShorten() const {
+  return flags.hasMod(conf::Mod::mod_shorten);
+}
 
 void Chord::setModNospace() { flags.setMod(conf::Mod::mod_nospace); }
 
-bool Chord::hasMod(conf::Mod mod) const {
-  return flags.hasMod(mod);
-}
+bool Chord::hasMod(conf::Mod mod) const { return flags.hasMod(mod); }
 
 void Chord::extractPlainMods() {
   for (conf::Mod plain_mod : conf::plain_mods) {
@@ -176,7 +170,7 @@ void Chord::restoreAnagramMods() {
 
 void Chord::restoreWordMods() {
   for (conf::Mod word_mod : conf::word_mods) {
-      restoreMod(word_mod);
+    restoreMod(word_mod);
   }
 }
 
@@ -299,32 +293,22 @@ void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
   }
 }
 
-
 bool Chord::Flags::hasMod(conf::Mod mod) const {
   return bits.test(conf::to_index(mod));
 }
 
-void Chord::Flags::setMod(conf::Mod mod) {
-  bits.set(conf::to_index(mod));
-}
+void Chord::Flags::setMod(conf::Mod mod) { bits.set(conf::to_index(mod)); }
 
-void Chord::Flags::unsetMod(conf::Mod mod) {
-  bits.reset(conf::to_index(mod));
-}
+void Chord::Flags::unsetMod(conf::Mod mod) { bits.reset(conf::to_index(mod)); }
 
-void Chord::Flags::toggleMod(conf::Mod mod) {
-  bits.flip(conf::to_index(mod));
-}
+void Chord::Flags::toggleMod(conf::Mod mod) { bits.flip(conf::to_index(mod)); }
 
 bool Chord::Flags::getFlagCycleCapital() const {
   return bits.test(cycleCapitalOffset());
 }
 
-void Chord::Flags::toggleFlagCycleCapital() {
-  bits.flip(cycleCapitalOffset());
-}
+void Chord::Flags::toggleFlagCycleCapital() { bits.flip(cycleCapitalOffset()); }
 
 constexpr size_t Chord::Flags::cycleCapitalOffset() const {
   return bits.size() - 1;
 }
-

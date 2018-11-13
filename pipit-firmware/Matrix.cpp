@@ -18,19 +18,17 @@ void Matrix::setup() {
   setRowsInput();   // rows should always stay in input mode
   setColumnsHiZ();  // columns will change, during scanning and during standby
 
-  if (conf::USE_STANDBY_INTERRUPTS){
+  if (conf::USE_STANDBY_INTERRUPTS) {
     enterStandby();
   }
 }
 
-bool Matrix::isDown(uint8_t index) const {
-  return switches_down.test(index);
-}
+bool Matrix::isDown(uint8_t index) const { return switches_down.test(index); }
 
 bool Matrix::scanIfChanged() {
   // Return true if we scan. Handle entering and exiting standby.
 
-  if (conf::USE_STANDBY_INTERRUPTS){
+  if (conf::USE_STANDBY_INTERRUPTS) {
     if (standby_timer.isDone()) {
       // A bunch of time has passed since a switch was pressed
       enterStandby();
@@ -59,14 +57,14 @@ void Matrix::scan() {
   // would reverse order of bits...
   switches_down.reset();
   uint8_t switch_index = 0;
-  for(uint8_t col_pin : conf::column_pins) {
+  for (uint8_t col_pin : conf::column_pins) {
     selectColumn(col_pin);
 
     // Wait for digitalWrite to take effect, to avoid weird ghosting problems.
     // The required length can depend on the properties of the ethernet cable.
     delayMicroseconds(10);
 
-    for(uint8_t row_pin : conf::row_pins) {
+    for (uint8_t row_pin : conf::row_pins) {
       if (isRowPressed(row_pin)) {
         switches_down.set(switch_index);
       }
@@ -89,9 +87,7 @@ void Matrix::selectColumn(uint8_t column_pin) {
   digitalWrite(column_pin, LOW);
 }
 
-void Matrix::unselectColumn(uint8_t column_pin) {
-  pinMode(column_pin, HI_Z);
-}
+void Matrix::unselectColumn(uint8_t column_pin) { pinMode(column_pin, HI_Z); }
 
 void Matrix::setRowsInput() {
   for (uint8_t pin : conf::row_pins) {
@@ -101,25 +97,25 @@ void Matrix::setRowsInput() {
 
 void Matrix::setColumnsLow() {
   // To prepare for setting pin interrupts, to wake from standby
-  for(uint8_t pin : conf::column_pins) {
+  for (uint8_t pin : conf::column_pins) {
     selectColumn(pin);
   }
 }
 
 void Matrix::setColumnsHiZ() {
   // To prepare for scanning, after waking from standby
-  for(uint8_t pin : conf::column_pins) {
+  for (uint8_t pin : conf::column_pins) {
     unselectColumn(pin);
   }
 }
 
 void Matrix::attachRowPinInterrupts(voidFuncPtr isr) {
   for (uint8_t pin : conf::row_pins) {
-      // Triggering on FALLING/RISING/CHANGE requires some clocks, which could
-      // be a problem in deep sleep. But it's fine for normal use. Although it
-      // seems to trigger as soon as it's attached, if a switch is already down.
-      attachInterrupt(digitalPinToInterrupt(pin), isr, CHANGE);
-    }
+    // Triggering on FALLING/RISING/CHANGE requires some clocks, which could
+    // be a problem in deep sleep. But it's fine for normal use. Although it
+    // seems to trigger as soon as it's attached, if a switch is already down.
+    attachInterrupt(digitalPinToInterrupt(pin), isr, CHANGE);
+  }
 }
 
 void Matrix::detachRowPinInterrupts() {

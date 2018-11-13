@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #include "Key.h"
+#include <Arduino.h>
 
 Key::Key(uint8_t _key_code, uint8_t _mod_byte)
     : key_code(_key_code), mod_byte(_mod_byte) {}

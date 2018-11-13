@@ -26,8 +26,7 @@ class Switches {
 
   Matrix matrix;
 
-private:
-
+ private:
   // The values of the variants matter! We use bitwise operations to efficiently
   // change the status of multiple switches at once.
   enum class SwitchStatus : uint8_t {
@@ -39,8 +38,8 @@ private:
 
   // Represent the status of each switch with 2 bits, 1 from each array.
   struct Statuses {
-    ChordData lsb; // least significant
-    ChordData msb; // most significant
+    ChordData lsb;  // least significant
+    ChordData msb;  // most significant
 
     Switches::SwitchStatus get(size_t index) const;
     void set(size_t index, Switches::SwitchStatus status);

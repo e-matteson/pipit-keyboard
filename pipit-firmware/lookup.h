@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-#include "auto_config.h"
 #include "Chord.h"
 #include "Key.h"
+#include "auto_config.h"
 
 namespace conf {
 

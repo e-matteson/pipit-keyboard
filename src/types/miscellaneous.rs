@@ -347,7 +347,8 @@ impl Spelling {
             (_, _) => Err(Error::BadValueErr {
                 thing: "single ascii character".to_owned(),
                 value: s.to_owned(),
-            }).context("failed to make spelling"),
+            })
+            .context("failed to make spelling"),
         }
     }
 
@@ -423,7 +424,8 @@ impl Sequence {
             Err(Error::BadValueErr {
                 thing: "sequence length".to_owned(),
                 value: self.len().to_string(),
-            }).context("Expected sequence containing only a single keypress")
+            })
+            .context("Expected sequence containing only a single keypress")
         }
     }
 }

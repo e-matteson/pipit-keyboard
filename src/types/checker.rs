@@ -89,7 +89,8 @@ impl Checker {
                     .iter()
                     .filter(|&(_chord, set)| {
                         set.is_invalid(&self.word_mod_names)
-                    }).map(|(_chord, set)| set),
+                    })
+                    .map(|(_chord, set)| set),
             );
         }
     }
@@ -178,9 +179,11 @@ impl AnagramSet {
         for v in self.0.values() {
             match v.len() {
                 1 => continue,
-                2 => if !is_pair_legal(&v[0], &v[1], word_mod_names) {
-                    return true;
-                },
+                2 => {
+                    if !is_pair_legal(&v[0], &v[1], word_mod_names) {
+                        return true;
+                    }
+                }
                 _ => return true,
             }
         }

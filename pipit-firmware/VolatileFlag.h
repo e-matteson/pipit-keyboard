@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "auto_config.h"
 
 class VolatileFlag {

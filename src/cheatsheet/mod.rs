@@ -67,7 +67,8 @@ impl CheatSheet {
             .map(|c| {
                 let c = c as f64;
                 P2::new((c + 1.) * x_padding + c * Keyboard::width(), y_padding)
-            }).collect();
+            })
+            .collect();
 
         let height = V2::new(0., Keyboard::height() + y_padding);
 
@@ -130,7 +131,8 @@ impl CheatSheet {
         let desc = MyDescription::new(
             "Cheatsheet reference for a layout of a pipit keyboard. \
              https://github.com/e-matteson/pipit-keyboard",
-        ).finalize();
+        )
+        .finalize();
 
         let mut doc = Document::new()
             .set("viewBox", (0, 0, self.page_width, self.page_height));

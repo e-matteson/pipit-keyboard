@@ -97,7 +97,8 @@ where
             return Err(Error::BadValueErr {
                 thing: "anagram number of other chord".to_owned(),
                 value: other.anagram_num.to_string(),
-            }).context("Failed to union chords");
+            })
+            .context("Failed to union chords");
         }
         self.switches.union(&other.switches);
         Ok(())

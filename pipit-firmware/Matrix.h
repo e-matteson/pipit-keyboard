@@ -7,7 +7,6 @@
 #include "VolatileFlag.h"
 #include "auto_config.h"
 
-
 // Use input without pullup as high-impedance state
 #define HI_Z INPUT
 

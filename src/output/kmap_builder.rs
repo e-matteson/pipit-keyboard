@@ -27,21 +27,27 @@ pub struct KmapBuilder<'a> {
     pub chord_spec: ChordSpec,
 }
 
-c_struct!(struct KmapStruct {
-    lookups_for_kmap: CCode,
-});
+c_struct!(
+    struct KmapStruct {
+        lookups_for_kmap: CCode,
+    }
+);
 
-c_struct!(struct LookupKmapType {
-    num_lookups: usize,
-    lookups: CCode,
-});
+c_struct!(
+    struct LookupKmapType {
+        num_lookups: usize,
+        lookups: CCode,
+    }
+);
 
-c_struct!(struct LookupKmapTypeLenAnagram {
-    seq_bit_len_and_anagram: u16,
-    num_chords: u16,
-    chords: CCode,
-    sequences: CCode,
-});
+c_struct!(
+    struct LookupKmapTypeLenAnagram {
+        seq_bit_len_and_anagram: u16,
+        num_chords: u16,
+        chords: CCode,
+        sequences: CCode,
+    }
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +92,8 @@ impl<'a> KmapBuilder<'a> {
         g.push(
             KmapStruct {
                 lookups_for_kmap: array_name,
-            }.render(kmap_struct_name.clone()),
+            }
+            .render(kmap_struct_name.clone()),
         );
         (CTree::Group(g), kmap_struct_name)
     }
@@ -115,7 +122,8 @@ impl<'a> KmapBuilder<'a> {
             LookupKmapType {
                 num_lookups,
                 lookups: array_name,
-            }.render(struct_name.clone()),
+            }
+            .render(struct_name.clone()),
         );
 
         (CTree::Group(g), struct_name)
@@ -137,7 +145,8 @@ impl<'a> KmapBuilder<'a> {
                 seq_type,
                 info.length,
                 info.anagram.get()
-            ).to_c();
+            )
+            .to_c();
 
             let chords = names
                 .iter()
@@ -145,7 +154,8 @@ impl<'a> KmapBuilder<'a> {
                     Ok(self
                         .chord_spec
                         .to_firmware(self.chord_map.get_result(name)?)?)
-                }).collect::<Result<Vec<_>, Error>>()?;
+                })
+                .collect::<Result<Vec<_>, Error>>()?;
 
             let seqs = names
                 .iter()
@@ -189,7 +199,8 @@ impl<'a> KmapBuilder<'a> {
                 names.len(),
                 info.anagram,
                 info.length,
-            ).with_context(|| {
+            )
+            .with_context(|| {
                 format!("Failed to make lookup: '{}'", struct_name)
             })?;
 

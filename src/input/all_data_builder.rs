@@ -176,7 +176,8 @@ impl AllDataBuilder {
                 normal_command.name().to_owned(),
                 normal_command,
                 &[],
-            ).context("Failed to add command")?;
+            )
+            .context("Failed to add command")?;
         }
 
         let modes = { self.modes.keys().cloned().collect::<Vec<ModeName>>() };
@@ -189,7 +190,8 @@ impl AllDataBuilder {
                 name,
                 variant.clone(),
                 &[mode.qualified_enum_variant()],
-            ).context("Failed to add mode-switching command")?;
+            )
+            .context("Failed to add mode-switching command")?;
         }
 
         Ok(variants)
@@ -249,7 +251,8 @@ impl AllDataBuilder {
             return Err(Error::ConflictErr {
                 key: mode_name.into(),
                 container: "modes".to_owned(),
-            }).context("Mode has already been added");
+            })
+            .context("Mode has already been added");
         }
 
         // Initialize the kmaps that are included in this mode

@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #include "History.h"
+#include <Arduino.h>
 
 void History::startEntry(const Chord* new_chord, bool is_anagrammable) {
   // Store the chord we're sending, and whether we're allowed to try anagramming

@@ -1,5 +1,6 @@
 /*
- * Here's where we define things that require "auto_config_early.h", and are required by "auto_config.h"
+ * Here's where we define things that require "auto_config_early.h", and are
+ * required by "auto_config.h"
  */
 
 #pragma once
@@ -23,13 +24,9 @@ struct LookupKmapTypeLenAnagram {
 
   uint16_t seq_bit_length() const;
   uint8_t anagram() const;
-  BitSlice<uint8_t> sequence_bits (uint16_t seq_num) const;
-  constexpr const ChordData* begin() const {
-    return chords;
-  }
-  constexpr const ChordData* end() const {
-    return chords + num_chords;
-  }
+  BitSlice<uint8_t> sequence_bits(uint16_t seq_num) const;
+  constexpr const ChordData* begin() const { return chords; }
+  constexpr const ChordData* end() const { return chords + num_chords; }
 };
 
 struct LookupKmapType {
@@ -66,4 +63,3 @@ enum class WordSpacePosition {
   After,
   None,
 };
-

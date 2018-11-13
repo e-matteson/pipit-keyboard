@@ -30,8 +30,10 @@ impl KmapPath {
             .into_iter()
             .enumerate() // track line numbers
             .map(|(i, l)|                   // trim whitespace
-                 (i, l.trim().to_owned())).filter(|&(_, ref l)|           // remove comments and empty lines
-                    !is_ignored(l)).map(|(i, l)| check_ascii(i, l))
+                 (i, l.trim().to_owned()))
+            .filter(|&(_, ref l)|           // remove comments and empty lines
+                    !is_ignored(l))
+            .map(|(i, l)| check_ascii(i, l))
             .collect::<Result<Vec<_>, Error>>()?;
 
         let mut mappings = Vec::new();
@@ -64,7 +66,8 @@ impl Section {
         if all_lines.len() != format.block_length() {
             return Err(Error::KmapSyntaxErr {
                 line: *line_nums.last().unwrap(),
-            }).with_context(|| {
+            })
+            .with_context(|| {
                 format!(
                     "According to the kmap_format setting, there should be {} \
                      lines per block. {} lines were found.",
@@ -188,7 +191,8 @@ impl Section {
                         "Expected '{}', '{}', or whitespace. Found '{}'",
                         UNPRESSED_CHAR, PRESSED_CHAR, c
                     )
-                }).into())
+                })
+                .into())
         }
     }
 }
@@ -206,7 +210,8 @@ fn to_chord_map(
             return Err(Error::ConflictErr {
                 key: name.to_string(),
                 container: "chord names".into(),
-            }).context("Duplicate chord names in kmap file");
+            })
+            .context("Duplicate chord names in kmap file");
         }
     }
     Ok(map)

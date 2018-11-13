@@ -51,8 +51,8 @@ void Switches::updateSwitchStatuses() {
   was_switch_double_tapped = false;
   for (uint8_t i = 0; i < statuses.size(); i++) {
     const SwitchStatus status = statuses.get(i);
-    if (matrix.isDown(i)) {   // Switch is physically down now.
-      switch (status) {   // Old status is:
+    if (matrix.isDown(i)) {  // Switch is physically down now.
+      switch (status) {      // Old status is:
         case SwitchStatus::Pressed:
         case SwitchStatus::AlreadySent:
         case SwitchStatus::Held:
@@ -64,7 +64,7 @@ void Switches::updateSwitchStatuses() {
           debouncePress(i);
           break;
       }
-    } else {  // Switch is physically up now.
+    } else {             // Switch is physically up now.
       switch (status) {  // Old status is:
         case SwitchStatus::AlreadySent:
         case SwitchStatus::Held:
@@ -100,18 +100,18 @@ bool Switches::debouncePress(uint8_t switch_index) {
   /*   debounce_timers[switch_index].start(); */
   /* } else if (debounce_timers[switch_index].isDone()) { */
   /*   // Debounce done, it's a real press! */
-    statuses.set(switch_index, SwitchStatus::Pressed);
-    debounce_timers[switch_index].disable();
+  statuses.set(switch_index, SwitchStatus::Pressed);
+  debounce_timers[switch_index].disable();
 
-    chord_timer.start();
-    held_timer.start();
+  chord_timer.start();
+  held_timer.start();
 
-    // Check if the switch was double tapped.
-    // TODO why `|=` and not `=`?
-    was_switch_double_tapped |= (switch_index == last_released_switch);
-    last_released_switch = NO_SWITCH;
+  // Check if the switch was double tapped.
+  // TODO why `|=` and not `=`?
+  was_switch_double_tapped |= (switch_index == last_released_switch);
+  last_released_switch = NO_SWITCH;
 
-    is_debounce_done = 1;
+  is_debounce_done = 1;
   /* } */
   // Else, keep debouncing, don't change status.
   return is_debounce_done;
@@ -143,14 +143,13 @@ void Switches::stopDebouncing(uint8_t i) {
   debounce_timers[i].disable();
 }
 
-
 /// Let modifiers be immediately re-used in future chords.
 // Not currently called in gaming mode, which simplifies things
 // TODO could this ever set an unpressed switch to Held?
 // TODO how does this distinguish between implicit and explicit mods?
 void Switches::reuseMods(Chord* chord) {
   for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
-    conf::Mod mod = (conf::Mod) i;
+    conf::Mod mod = (conf::Mod)i;
     if (!chord->hasMod(mod)) {
       continue;
     }
@@ -158,9 +157,7 @@ void Switches::reuseMods(Chord* chord) {
   }
 }
 
-bool Switches::anyDown() {
-  return statuses.anyDown();
-}
+bool Switches::anyDown() { return statuses.anyDown(); }
 
 void Switches::fillChord(Chord* chord) {
   // Binary-encode the values of the switch_status array into an array of bytes,
@@ -189,15 +186,15 @@ uint8_t Switches::fillGamingSwitches(Chord* chords) {
   return num_pressed;
 }
 
-
-void Switches::Statuses::set(size_t index, Switches::SwitchStatus status){
+void Switches::Statuses::set(size_t index, Switches::SwitchStatus status) {
   uint8_t val = static_cast<uint8_t>(status);
   lsb.set(index, val & 0x1);
   msb.set(index, val & 0x2);
 }
 
 Switches::SwitchStatus Switches::Statuses::get(size_t index) const {
-  return static_cast<Switches::SwitchStatus>((msb.test(index) << 1) | lsb.test(index));
+  return static_cast<Switches::SwitchStatus>((msb.test(index) << 1) |
+                                             lsb.test(index));
 }
 
 /// If any switches are AlreadySent, change their status to Held.
@@ -207,31 +204,25 @@ void Switches::Statuses::setHeld(const ChordData& new_held_switches) {
 }
 
 /// If any switches are AlreadySent, change their status to Held.
-void Switches::Statuses::alreadySentToHeld(){
-  lsb |= msb;
-}
+void Switches::Statuses::alreadySentToHeld() { lsb |= msb; }
 
 /// If any switches are Pressed, change their status to AlreadySent.
-void Switches::Statuses::pressedToAlreadySent(){
+void Switches::Statuses::pressedToAlreadySent() {
   // TODO can we do this in-place instead?
-  auto mask (msb);
+  auto mask(msb);
   mask ^= lsb;
   mask &= lsb;
   msb ^= mask;
   lsb ^= mask;
 }
 
-bool Switches::Statuses::anyDown() const {
-  return msb.any() | lsb.any();
-}
+bool Switches::Statuses::anyDown() const { return msb.any() | lsb.any(); }
 
 bool Switches::Statuses::sendable(size_t index) const {
   return lsb.test(index);
 }
 
-constexpr size_t Switches::Statuses::size() const {
-  return lsb.size();
-}
+constexpr size_t Switches::Statuses::size() const { return lsb.size(); }
 
 void Switches::Statuses::writeSendable(ChordData* chord) const {
   // If any switches are sendable (Pressed or Held), set them in the chord.
