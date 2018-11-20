@@ -22,6 +22,8 @@ struct LookupKmapTypeLenAnagram {
   const ChordData* chords;
   const uint8_t* sequences;
 
+  BitSlice<uint8_t> find(const ChordData* chord_data) const;
+
   uint16_t seq_bit_length() const;
   uint8_t anagram() const;
   BitSlice<uint8_t> sequence_bits(uint16_t seq_num) const;
@@ -33,6 +35,7 @@ struct LookupKmapType {
   // TODO or just make the last element NULL?
   uint32_t num_lookups;
   const LookupKmapTypeLenAnagram** lookups;
+  BitSlice<uint8_t> find(const ChordData* chord_data, uint8_t chord_anagram_num) const;
 };
 
 struct KmapStruct {

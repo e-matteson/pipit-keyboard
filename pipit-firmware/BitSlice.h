@@ -17,6 +17,12 @@ class BitSlice {
         start_bit_offset(start_bit_offset_),
         num_bits(num_bits_) {}
 
+  /// Construct a null, empty BitSlice.
+  constexpr BitSlice()
+    : address(nullptr),
+      start_bit_offset(0),
+      num_bits(0) {}
+
   constexpr BitSlice<T> slice_to(size_t end_index) const {
     return BitSlice<T>(address, start_bit_offset,
                        std::min(end_index, num_bits));
@@ -31,10 +37,15 @@ class BitSlice {
   }
 
   constexpr bool test(size_t bit_index) const {
-    return address[block_index(bit_index)] & bit_mask(bit_index);
+    // TODO remove checks to improve performance?
+    return !is_null()
+      && (bit_index < num_bits)
+      && address[block_index(bit_index)] & bit_mask(bit_index);
   }
 
   constexpr size_t size() const { return num_bits; }
+
+  constexpr bool is_null() const { return address == nullptr; }
 
   bool has_prefix(const BitSlice<T>& prefix) const {
     if (prefix.size() > size()) {

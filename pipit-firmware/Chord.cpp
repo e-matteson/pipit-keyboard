@@ -278,7 +278,7 @@ bool Chord::isExactAnagramPressed(const ChordData* mod_chord) {
   return *mod_chord == anagram_bytes;
 }
 
-uint8_t Chord::getAnagramNum() { return anagram_num; }
+uint8_t Chord::getAnagramNum() const { return anagram_num; }
 
 void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
   const conf::Mod* mod = getAnagramModFromNumber(anagram_num);
