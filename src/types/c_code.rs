@@ -37,6 +37,7 @@ pub trait CEnumVariant: Sized {
         T: Iterator<Item = &'a Self>,
         Self: 'a,
     {
+        // TODO ensure variants are unique?
         CTree::EnumDecl {
             name: Self::enum_type(),
             size: Self::underlying_type(),

@@ -1,4 +1,5 @@
 #include "Key.h"
+#include "auto_config.h"
 #include <Arduino.h>
 
 Key::Key(uint8_t _key_code, uint8_t _mod_byte)

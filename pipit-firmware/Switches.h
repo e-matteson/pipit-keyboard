@@ -4,7 +4,6 @@
 #include "Chord.h"
 #include "Matrix.h"
 #include "Timer.h"
-#include "auto_config.h"
 
 // Possible value of last_released_switch:
 // (also all positive values up to NUM_MATRIX_POSITIONS)

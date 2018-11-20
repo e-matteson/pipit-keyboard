@@ -1,4 +1,5 @@
 #include "Switches.h"
+#include "conf.h"
 #include <Arduino.h>
 
 Switches::Switches() {

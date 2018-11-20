@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include "BitArray.h"
 #include "Key.h"
-#include "auto_config.h"
-#include "conf.h"
+#include "auto_config_early.h"
+
+// TODO automatically pick most efficient block type?
+typedef BitArray<uint8_t, NUM_MATRIX_POSITIONS> ChordData;
 
 /// How to modify cycled words
 enum class CycleType {

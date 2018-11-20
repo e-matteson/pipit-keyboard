@@ -91,8 +91,30 @@ impl AllData {
             group.push(CTree::LiteralH(autogen_message()));
         }
         group.push(CTree::LiteralH("#pragma once\n".to_c()));
-        group.extend(self.early_options.clone());
-        group.push(self.huffman_table.render_early());
+
+        let mut namespace = Vec::new();
+        namespace.extend(self.early_options.clone());
+        namespace.push(self.huffman_table.render_early());
+        namespace.push(ModeName::render_c_enum(self.modes.keys()));
+
+        let all_mods: Vec<_> = self
+            .modifier_names()
+            .into_iter()
+            .map(|name| Modifier::new(name))
+            .collect();
+
+        namespace.push(Modifier::render_c_enum(all_mods.iter()));
+        namespace.push(CTree::Define {
+            name: "NUM_MODIFIERS".to_c(),
+            value: all_mods.len().to_c(),
+        });
+        namespace.push(SeqType::render_c_enum(self.sequences.seq_types()));
+
+        group.push(CTree::Namespace {
+            name: "conf".to_c(),
+            contents: Box::new(CTree::Group(namespace)),
+        });
+
         Ok(CTree::Group(group))
     }
 
@@ -106,8 +128,6 @@ impl AllData {
                     self.huffman_table.render()?,
                     self.render_modifiers()?,
                     Command::render_c_enum(self.commands.iter()),
-                    SeqType::render_c_enum(self.sequences.seq_types()),
-                    ModeName::render_c_enum(self.modes.keys()),
                     self.render_modes()?,
                 ])),
             },
@@ -186,19 +206,6 @@ impl AllData {
         }
 
         let mut group = Vec::new();
-
-        let all_mods: Vec<_> = self
-            .modifier_names()
-            .into_iter()
-            .map(|name| Modifier::new(name))
-            .collect();
-
-        group.push(Modifier::render_c_enum(all_mods.iter()));
-
-        group.push(CTree::Define {
-            name: "NUM_MODIFIERS".to_c(),
-            value: all_mods.len().to_c(),
-        });
 
         group.push(CTree::ConstVar {
             name: "MAX_ANAGRAM_NUM".to_c(),

@@ -1,4 +1,6 @@
 #include "Chord.h"
+#include "auto_config.h"
+#include "conf.h"
 #include <Arduino.h>
 #include <type_traits>
 

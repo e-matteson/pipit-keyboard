@@ -23,7 +23,6 @@
 #include "Key.h"
 #include "Sender.h"
 #include "Switches.h"
-#include "lookup.h"
 
 #define MAX_PREFIX_LENGTH 3
 

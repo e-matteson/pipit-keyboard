@@ -8,6 +8,7 @@ namespace conf {
 
 enum class ModType { Plain = 0, Word, Anagram };
 
+uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out);
 const ModeStruct* getModeStruct(Mode mode);
 bool isGaming(Mode mode);
 const ChordData* getAnagramMask(Mode mode);
