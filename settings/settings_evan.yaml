@@ -323,11 +323,13 @@ macros:
   macro_org_calendar: " aooc"
   macro_org_capture: " aoc"
   macro_org_tree: " mTt"
-  macro_org_archive: " mod"
+  macro_org_archive: " moa"
   macro_org_someday: " mos"
   macro_org_insert: " moi"
   macro_org_to_md: " moy"
   macro_org_refile: " mor"
+  macro_org_uncle_below: " mou"
+  macro_org_uncle_above: " moU"
   macro_anagram_1: ", anagram: 1"
   # macro_fake_alt_tab:
   #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
@@ -5022,6 +5024,7 @@ dictionary:
   - {word: "why"}
   - {word: "wicked"}
   - {word: "wide", anagram: 1}
+  - {word: "widen"}
   - {word: "width", anagram: 1}
   - {word: "wife"}
   - {word: "wifi", anagram: 1}
@@ -5035,7 +5038,7 @@ dictionary:
   - {word: "win"}
   - {word: "wind", anagram: 1}
   - {word: "window"}
-  - {word: "wine"}
+  - {word: "wine", anagram: 1}
   - {word: "wing"}
   - {word: "winter", anagram: 2}
   - {word: "wire"}

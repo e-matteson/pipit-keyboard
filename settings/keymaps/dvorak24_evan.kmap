@@ -520,7 +520,7 @@ macro_dotspacemacs    macro_magit_status
   ... .*.               ... .*.
 
 macro_open_planner    macro_open_active    macro_open_settings  macro_open_kmap
-...*   ....           ..*.   ....          ...*   ....          ...*   *...
+...*   ....           .**.   ....          ...*   ....          ...*   *...
 .*..   ....           .*..   ....          .*..   ...*          .*..   ....
   .     .               .     .              .     .              .     .
   ... .*.               ... .*.              ... .*.              ... .*.
@@ -538,13 +538,13 @@ macro_org_capture macro_org_calendar
   ... .*.           ... .*.
 
 macro_org_tree   macro_org_archive  macro_org_someday   macro_org_refile
-....   ....      ....   *...        ....   ....         ....   ..*.
-**..   .*..      **..   ....        **..   ...*         **..   ....
+....   ....      ....   ....        ....   ....         ....   ..*.
+.*..   .*..      **..   ....        .*..   ...*         .*..   ....
   .     .          .     .            .     .             .     .
   ... .*.          ... .*.            ... .*.             ... .*.
 
-macro_org_insert      macro_org_to_md
-....   ....           ....   .**.
-.*..   ....           **..   ....
-  .     .               .     .
-  ... .*.               ... .*.
+macro_org_insert      macro_org_to_md    macro_org_uncle_above macro_org_uncle_below
+....   ....           ....   .**.        ..*.   ....           ..*.   ....
+.*..   ....           .*..   ....        .*..   ....           .*..   ....
+  .     .               .     .            .     .               .     .
+  ... .*.               ... .*.            *.. .*.               ... .*.
