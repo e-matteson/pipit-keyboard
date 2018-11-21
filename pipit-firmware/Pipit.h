@@ -24,7 +24,6 @@
 #include "Sender.h"
 #include "Switches.h"
 
-#define MAX_PREFIX_LENGTH 3
 
 class Pipit {
  public:

@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::ops::BitOr;
 
 use error::{Error, ResultExt};
 use types::{
@@ -8,13 +7,13 @@ use types::{
 };
 use util::usize_to_u16;
 
-type LenMap = BTreeMap<LenAndAnagram, Vec<Name>>;
+type LenMap = BTreeMap<LengthAndAnagram, Vec<Name>>;
 
 // TODO refactor this whole file
 // At least be more consistent about terminology
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Copy, Debug)]
-struct LenAndAnagram {
+struct LengthAndAnagram {
     pub length: usize,
     pub anagram: AnagramNum,
 }
@@ -42,7 +41,7 @@ c_struct!(
 
 c_struct!(
     struct LookupKmapTypeLenAnagram {
-        seq_bit_len_and_anagram: u16,
+        seq_bit_len_and_anagram: CCode,
         num_chords: u16,
         chords: CCode,
         sequences: CCode,
@@ -138,7 +137,7 @@ impl<'a> KmapBuilder<'a> {
         let mut g = Vec::new();
         let mut struct_names = Vec::new();
 
-        for (info, names) in grouped_names {
+        for (&info, names) in grouped_names {
             let struct_name = format!(
                 "{}_{}_len{}_anagram{}",
                 self.kmap_nickname,
@@ -197,8 +196,7 @@ impl<'a> KmapBuilder<'a> {
                 chords_name,
                 seqs_name,
                 names.len(),
-                info.anagram,
-                info.length,
+                info,
             )
             .with_context(|| {
                 format!("Failed to make lookup: '{}'", struct_name)
@@ -220,13 +218,12 @@ impl<'a> KmapBuilder<'a> {
             self.seq_maps.get_seq_map(seq_type)?.names().collect();
 
         for &name in names_in_kmap.intersection(&names_of_type) {
-            let info = LenAndAnagram {
-                length: self
-                    .seq_maps
+            let info = LengthAndAnagram::new(
+                self.seq_maps
                     .get(name, seq_type)?
                     .formatted_length_in_bits(&self.huffman_table)?,
-                anagram: self.chord_map.get(name).unwrap().anagram_num,
-            };
+                self.chord_map.get(name).unwrap().anagram_num,
+            )?;
 
             grouped_names
                 .entry(info)
@@ -236,6 +233,28 @@ impl<'a> KmapBuilder<'a> {
 
         Ok(grouped_names)
     }
+
+    /// This depends on the representation in the firmware lookup tables.
+    fn max_allowed_bit_length() -> usize {
+        // We currently use 12 bits to store length
+        2_usize.pow(12) - 1
+    }
+
+    /// State the limits we used when enforcing max lengths / anagrams, so the
+    /// firmware can produce a compile time error if it disagree about what the
+    /// limits should have been.
+    pub fn render_limits() -> CTree {
+        CTree::Group(vec![
+            CTree::Define {
+                name: "MAX_ALLOWED_ANAGRAM".to_c(),
+                value: AnagramNum::max_allowed().to_c(),
+            },
+            CTree::Define {
+                name: "MAX_ALLOWED_SEQUENCE_BIT_LENGTH".to_c(),
+                value: Self::max_allowed_bit_length().to_c(),
+            },
+        ])
+    }
 }
 
 impl LookupKmapTypeLenAnagram {
@@ -244,47 +263,36 @@ impl LookupKmapTypeLenAnagram {
         chords: CCode,
         sequences: CCode,
         num_chords: usize,
-        anagram: AnagramNum,
-        seq_bit_len: usize,
+        info: LengthAndAnagram,
     ) -> Result<Self, Error> {
         Ok(Self {
             num_chords: usize_to_u16(num_chords)
                 .context("Too many chords in lookup struct")?,
             chords,
             sequences,
-            seq_bit_len_and_anagram: Self::pack(seq_bit_len, anagram)?,
+            seq_bit_len_and_anagram: info.initializer(),
         })
-    }
-
-    fn pack(seq_bit_len: usize, anagram: AnagramNum) -> Result<u16, Error> {
-        let bits_for_len = 12;
-        let bits_for_anagram = 4;
-
-        assert!(16 == bits_for_anagram + bits_for_len);
-        assert!(
-            u32::from(AnagramNum::max_allowable()) == max_val(bits_for_anagram)
-        );
-
-        let max_len = max_val(bits_for_len) as usize;
-        if seq_bit_len > max_len {
-            return Err(Error::OutOfRangeErr {
-                name: "length of compressed sequence".to_owned(),
-                value: seq_bit_len,
-                min: 0,
-                max: max_len,
-            });
-        }
-
-        let packed = u16::from(anagram.get()).bitor(
-            usize_to_u16(seq_bit_len)
-                .unwrap()
-                .checked_shl(bits_for_anagram)
-                .expect("failed to pack seq len and anagram"),
-        );
-        Ok(packed)
     }
 }
 
-fn max_val(num_bits: u32) -> u32 {
-    2_u32.pow(num_bits) - 1
+impl LengthAndAnagram {
+    fn new(length: usize, anagram: AnagramNum) -> Result<Self, Error> {
+        if length > KmapBuilder::max_allowed_bit_length() {
+            return Err(Error::OutOfRangeErr {
+                name: "length of compressed sequence".to_owned(),
+                value: length,
+                min: 0,
+                max: KmapBuilder::max_allowed_bit_length(),
+            });
+        }
+        Ok(LengthAndAnagram { length, anagram })
+    }
+
+    fn initializer(&self) -> CCode {
+        format!("{}({}, {})", Self::c_type(), self.length, self.anagram).to_c()
+    }
+
+    fn c_type() -> CCode {
+        "LengthAndAnagram".to_c()
+    }
 }

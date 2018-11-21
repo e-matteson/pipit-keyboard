@@ -34,6 +34,7 @@ impl Ord for HuffmanChar {
         self.num_bits.cmp(&other.num_bits)
     }
 }
+
 impl AllData {
     /// Generate and save the c code containing the keyboard firmware
     /// configuration. `file_name_base` should have no extension. `.h` and
@@ -94,6 +95,7 @@ impl AllData {
 
         let mut namespace = Vec::new();
         namespace.extend(self.early_options.clone());
+        namespace.push(KmapBuilder::render_limits());
         namespace.push(self.huffman_table.render_early());
         namespace.push(ModeName::render_c_enum(self.modes.keys()));
 

@@ -110,8 +110,9 @@ impl AnagramNum {
     }
 
     /// This depends on the representation in the firmware lookup tables.
-    pub fn max_allowable() -> u8 {
-        15
+    pub fn max_allowed() -> u8 {
+        // We currently use 4 bits to store anagram.
+        (2_u32.pow(4) - 1) as u8
     }
 
     /// Return an iterator over all the anagram numbers from zero to self,
@@ -133,7 +134,7 @@ impl Default for AnagramNum {
 
 impl Validate for AnagramNum {
     fn validate(&self) -> Result<(), Error> {
-        let max = Self::max_allowable();
+        let max = Self::max_allowed();
         if self.0 <= max {
             Ok(())
         } else {

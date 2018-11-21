@@ -6,6 +6,11 @@
 #pragma once
 
 #include <stdint.h>
+// Undefine these arduino macros that conflict with std::min/std::max, breaking
+// other std lib stuff
+#undef max
+#undef min
+#include <limits>
 
 #include "BitArray.h"
 #include "BitSlice.h"
@@ -14,20 +19,52 @@
 
 typedef BitArray<uint8_t, MAX_HUFFMAN_CODE_BIT_LEN> HuffmanBits;
 
-
 class LengthAndAnagram {
 public:
-  // constexpr LengthAndAnagram(uint16_t length, uint8_t anagram) : combined( anagram & (length << length_offset) ) {}
-  constexpr LengthAndAnagram(uint16_t combined_) : combined(combined_) {}
+  constexpr LengthAndAnagram(uint16_t length, uint8_t anagram)
+    : combined( combine(length, anagram))  {}
 
-  uint16_t length() const;
-  uint8_t anagram() const;
+  constexpr uint16_t length() const {
+    return (combined & length_mask()) >> length_offset;
+  }
+  constexpr uint8_t anagram() const {
+    return combined & anagram_mask();
+  }
+
+  static constexpr uint8_t max_anagram() {
+    return max_val_of_bits(length_offset);
+  }
+
+  static constexpr uint16_t max_length() {
+    return max_val_of_bits(std::numeric_limits<uint16_t>::digits - length_offset);
+  }
 
 private:
+  static constexpr uint16_t combine(uint16_t length, uint8_t anagram) {
+    return (anagram & anagram_mask()) | (length << length_offset);
+  }
+
+  static constexpr uint16_t anagram_mask() {
+    return max_val_of_bits(length_offset);
+  }
+
+  static constexpr uint16_t length_mask() {
+    return std::numeric_limits<uint16_t>::max() - anagram_mask();
+  }
+
+  static constexpr uint16_t max_val_of_bits(size_t num_bits) {
+    return (1 << num_bits)-1;
+  }
+
   uint16_t combined;
-  // static const uint8_t anagram_offset = 0;
-  // static const uint8_t length_offset = 4;
+  static const uint8_t length_offset = 4;
 };
+
+  static_assert(MAX_ALLOWED_ANAGRAM == LengthAndAnagram::max_anagram(),
+                "The firmware and config program disagree about how big anagram numbers can be");
+
+  static_assert(MAX_ALLOWED_SEQUENCE_BIT_LENGTH == LengthAndAnagram::max_length(),
+                "The firmware and config program disagree about how long compressed sequences can be");
 
 struct LookupKmapTypeLenAnagram {
   LengthAndAnagram seq_bit_len_and_anagram;
