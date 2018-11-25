@@ -315,6 +315,11 @@ commands:
   - command_led_battery
   - command_led_colors
   - command_led_rainbow
+  - command_toggle_wireless
+  - command_scroll_down
+  - command_scroll_up
+  - command_pan_left
+  - command_pan_right
 
 dictionary:
   - {word: "a", anagram: 1}

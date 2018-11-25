@@ -40,6 +40,7 @@ fn chord22_output() {
             .unwrap();
 
     let name_base = "auto_config-22";
+    // let name_base = "auto_config";
     all_data
         .save_without_message_as(&name_base)
         .expect("Failed to save configuration");

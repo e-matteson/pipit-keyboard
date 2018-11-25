@@ -1,6 +1,7 @@
 #pragma once
+#include <Arduino.h>
 #include <stdint.h>
-#include "util.h"
+#include "config_types.h"
 typedef void (*voidFuncPtr)(void);
 
 #ifndef KEYPAD_0
@@ -134,37 +135,22 @@ extern const uint32_t DEBOUNCE_DELAY;
 #define DEBUG_MESSAGES 0
 extern const WordSpacePosition SPACE_POS;
 #define FEATHER_M0_BLE 
-extern const uint8_t row_pins[3];
-extern const uint8_t column_pins[8];
+extern const std::array<uint8_t,3> row_pins;
+extern const std::array<uint8_t,8> column_pins;
 #define ENABLE_LED_TYPING_FEEDBACK 
 extern const bool USE_STANDBY_INTERRUPTS;
-extern const uint8_t rgb_led_pins[3];
+extern const std::array<uint8_t,3> rgb_led_pins;
 extern const uint8_t battery_level_pin;
-#define NUM_MATRIX_POSITIONS 24
 #define ENABLE_RGB_LED 
 #define HAS_BATTERY 
 extern const uint8_t MIN_HUFFMAN_CODE_BIT_LEN;
-extern const HuffmanChar huffman_lookup[100];
-enum class Mod : uint8_t {
-  mod_alt = 0,
-  mod_anagram_1 = 1,
-  mod_anagram_2 = 2,
-  mod_capital = 3,
-  mod_ctrl = 4,
-  mod_double = 5,
-  mod_gui = 6,
-  mod_nospace = 7,
-  mod_shift = 8,
-  mod_shorten = 9,
-};
-
-#define NUM_MODIFIERS 10
+extern const HuffmanChar huffman_lookup[105];
 extern const uint8_t MAX_ANAGRAM_NUM;
-extern const Mod word_mods[4];
-extern const Mod plain_mods[4];
-extern const Mod anagram_mods[2];
-extern const uint8_t anagram_mod_numbers[2];
-extern const uint8_t plain_mod_keys[4];
+extern const std::array<Mod,4> word_mods;
+extern const std::array<Mod,4> plain_mods;
+extern const std::array<Mod,2> anagram_mods;
+extern const std::array<uint8_t,2> anagram_mod_numbers;
+extern const std::array<uint8_t,4> plain_mod_keys;
 enum class Command : uint8_t {
   command_cycle_capital = 0,
   command_cycle_nospace = 1,
@@ -175,30 +161,21 @@ enum class Command : uint8_t {
   command_led_rainbow = 6,
   command_left_limit = 7,
   command_left_word = 8,
-  command_pause = 9,
-  command_right_limit = 10,
-  command_right_word = 11,
-  command_shorten_last_word = 12,
-  command_sticky_alt = 13,
-  command_sticky_ctrl = 14,
-  command_sticky_gui = 15,
-  command_sticky_shift = 16,
-  command_switch_to = 17,
-  command_windows_mode = 18,
-};
-
-enum class SeqType : uint8_t {
-  Plain = 0,
-  Macro = 1,
-  Command = 2,
-  Word = 3,
-};
-
-enum class Mode : uint8_t {
-  default_mode = 0,
-  gaming_mode = 1,
-  left_hand_mode = 2,
-  windows_mode = 3,
+  command_pan_left = 9,
+  command_pan_right = 10,
+  command_pause = 11,
+  command_right_limit = 12,
+  command_right_word = 13,
+  command_scroll_down = 14,
+  command_scroll_up = 15,
+  command_shorten_last_word = 16,
+  command_sticky_alt = 17,
+  command_sticky_ctrl = 18,
+  command_sticky_gui = 19,
+  command_sticky_shift = 20,
+  command_switch_to = 21,
+  command_toggle_wireless = 22,
+  command_windows_mode = 23,
 };
 
 extern const uint8_t MAX_KEYS_IN_SEQUENCE;
@@ -207,25 +184,22 @@ extern const ModeStruct* mode_structs[4];
 } // end namespace conf
 
 #if DEBUG_MESSAGES == 0
-#define DEBUG1(msg)
-#define DEBUG1_LN(msg)
-#define DEBUG2(msg)
-#define DEBUG2_LN(msg)
-#endif
+    #define DEBUG1(msg)
+    #define DEBUG1_LN(msg)
+    #define DEBUG2(msg)
+    #define DEBUG2_LN(msg)
+#else
+   #define ENABLE_SERIAL_DEBUG
+   #include <Arduino.h>
+   #define DEBUG1(msg) Serial.print(msg)
+   #define DEBUG1_LN(msg) Serial.println(msg)
+   #if DEBUG_MESSAGES == 1
+       #define DEBUG2(msg)
+       #define DEBUG2_LN(msg)
+   #else
+       #define DEBUG2(msg) Serial.print(msg)
+       #define DEBUG2_LN(msg) Serial.println(msg)
+   #endif
 
-#if DEBUG_MESSAGES == 1
-#define ENABLE_SERIAL_DEBUG
-#define DEBUG1(msg) Serial.print(msg)
-#define DEBUG1_LN(msg) Serial.println(msg)
-#define DEBUG2(msg)
-#define DEBUG2_LN(msg)
-#endif
-
-#if DEBUG_MESSAGES == 2
-#define ENABLE_SERIAL_DEBUG
-#define DEBUG1(msg) Serial.print(msg)
-#define DEBUG1_LN(msg) Serial.println(msg)
-#define DEBUG2(msg) Serial.print(msg)
-#define DEBUG2_LN(msg) Serial.println(msg)
 #endif
 
