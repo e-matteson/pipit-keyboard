@@ -42,7 +42,6 @@ uint8_t decodeSequence(BitSlice<uint8_t> seq_bits, Key* keys_out) {
   return key_index;  // Success
 }
 
-
 namespace conf {
 
 uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out) {
@@ -87,6 +86,19 @@ ModType getModType(Mod modifier) {
   }
   DEBUG1_LN("ERROR: Unknown modifier type");
   exit(1);
+}
+
+/// If this anagram number has a corresponding anagram number, return a pointer
+/// to it. Otherwise, return a nullptr.
+// TODO the pointer is slower than returning the small type directly. But how to
+// express failure?
+const Mod* anagramNumToMod(uint8_t anagram_num) {
+  for (uint8_t i = 0; i < anagram_mod_numbers.size(); i++) {
+    if (anagram_mod_numbers[i] == anagram_num) {
+      return &anagram_mods[i];
+    }
+  }
+  return nullptr;
 }
 
 }  // namespace conf

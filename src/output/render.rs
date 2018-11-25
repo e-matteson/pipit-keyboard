@@ -216,28 +216,28 @@ impl AllData {
             is_extern: true,
         });
 
-        group.push(CTree::Array {
+        group.push(CTree::StdArray {
             name: "word_mods".to_c(),
             values: to_variants(&self.word_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
-        group.push(CTree::Array {
+        group.push(CTree::StdArray {
             name: "plain_mods".to_c(),
             values: to_variants(&self.plain_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
-        group.push(CTree::Array {
+        group.push(CTree::StdArray {
             name: "anagram_mods".to_c(),
             values: to_variants(&self.anagram_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
         });
 
-        group.push(CTree::Array {
+        group.push(CTree::StdArray {
             name: "anagram_mod_numbers".to_c(),
             values: self
                 .get_anagram_mod_numbers()?
@@ -248,7 +248,7 @@ impl AllData {
             is_extern: true,
         });
 
-        group.push(CTree::Array {
+        group.push(CTree::StdArray {
             name: "plain_mod_keys".to_c(),
             values: self.get_plain_mod_codes()?,
             c_type: "uint8_t".to_c(),

@@ -14,6 +14,7 @@ bool isGaming(Mode mode);
 const ChordData* getAnagramMask(Mode mode);
 const ChordData* getModChord(Mode mode, Mod modifier);
 ModType getModType(Mod modifier);
+const Mod* anagramNumToMod(uint8_t anagram_num);
 
 // Get the underlying type of the enum, to be used as an index
 template <typename TEnum>

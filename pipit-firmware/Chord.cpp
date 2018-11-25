@@ -1,24 +1,8 @@
 #include "Chord.h"
-#include "auto_config.h"
-#include "conf.h"
 #include <Arduino.h>
 #include <type_traits>
-
-/// If this anagram number has a corresponding anagram number, return a pointer
-/// to it. Otherwise, return a nullptr.
-// TODO put this in conf.cpp?
-// TODO the pointer is slower than returning the small type directly. But how to
-// express failure?
-const conf::Mod* getAnagramModFromNumber(uint8_t anagram_num) {
-  uint8_t index = 0;
-  for (uint8_t num : conf::anagram_mod_numbers) {
-    if (num == anagram_num) {
-      return conf::anagram_mods + index;
-    }
-    index++;
-  }
-  return nullptr;
-}
+#include "auto_config.h"
+#include "conf.h"
 
 //////////////////////////////////////////////////
 
@@ -38,12 +22,10 @@ bool Chord::isEmptyExceptMods() const {
 // TODO can we speed this up?
 uint8_t Chord::getModByte() const {
   uint8_t mod_byte = 0;
-  uint8_t index = 0;
-  for (conf::Mod mod : conf::plain_mods) {
-    if (flags.hasMod(mod)) {
-      mod_byte |= conf::plain_mod_keys[index];
+  for (uint8_t i = 0; i < conf::plain_mods.size(); i++) {
+    if (flags.hasMod(conf::plain_mods[i])) {
+      mod_byte |= conf::plain_mod_keys[i];
     }
-    index++;
   }
   return mod_byte;
 }
@@ -147,14 +129,12 @@ void Chord::extractAnagramMods() {
   if (!isAnagramMaskBlank()) {
     // At least one switch in an anagram is pressed, check to see if it's an
     //  actual mod chord.
-    uint8_t index = 0;
-    for (conf::Mod mod : conf::anagram_mods) {
-      if (extractMod(mod)) {
+    for (uint8_t i = 0; i < conf::anagram_mods.size(); i++) {
+      if (extractMod(conf::anagram_mods[i])) {
         // Found mod!
-        anagram_num = index + 1;  // 0 is reserved for no mod
+        anagram_num = conf::anagram_mod_numbers[i];
         return;
       }
-      index++;
     }
   }
   // No valid anagram mod pressed
@@ -162,7 +142,7 @@ void Chord::extractAnagramMods() {
 }
 
 void Chord::restoreAnagramMods() {
-  const conf::Mod* mod = getAnagramModFromNumber(anagram_num);
+  const conf::Mod* mod = conf::anagramNumToMod(anagram_num);
   if (mod != nullptr) {
     // This anagram number can be directly selected by an anagram modifier.
     restoreMod(*mod);
@@ -259,11 +239,11 @@ void Chord::cycleNospace() {
 uint8_t Chord::cycleAnagram() {
   prepareToCycle();
   // Unset old mod flag
-  setAnagramModFlag(anagram_num, 0);
+  setAnagramModFlag(anagram_num, false);
   anagram_num = (anagram_num + 1) % (conf::MAX_ANAGRAM_NUM + 1);
 
   // Set new mod flag
-  setAnagramModFlag(anagram_num, 1);
+  setAnagramModFlag(anagram_num, true);
   return anagram_num;
 }
 
@@ -283,7 +263,7 @@ bool Chord::isExactAnagramPressed(const ChordData* mod_chord) {
 uint8_t Chord::getAnagramNum() const { return anagram_num; }
 
 void Chord::setAnagramModFlag(uint8_t anagram_num, bool value) {
-  const conf::Mod* mod = getAnagramModFromNumber(anagram_num);
+  const conf::Mod* mod = conf::anagramNumToMod(anagram_num);
   if (mod == nullptr) {
     return;
   }

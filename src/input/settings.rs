@@ -162,13 +162,13 @@ impl OptionsConfig {
                 name: self.board_name.to_c(),
                 is_defined: true,
             },
-            CTree::Array {
+            CTree::StdArray {
                 name: "row_pins".to_c(),
                 values: Pin::c_vec(&self.row_pins),
                 c_type: "uint8_t".to_c(),
                 is_extern: true,
             },
-            CTree::Array {
+            CTree::StdArray {
                 name: "column_pins".to_c(),
                 values: Pin::c_vec(&self.column_pins),
                 c_type: "uint8_t".to_c(),
@@ -195,7 +195,7 @@ impl OptionsConfig {
         ];
 
         if let Some(ref pins) = self.rgb_led_pins {
-            ops.push(CTree::Array {
+            ops.push(CTree::StdArray {
                 name: "rgb_led_pins".to_c(),
                 values: Pin::c_vec(pins),
                 c_type: "uint8_t".to_c(),

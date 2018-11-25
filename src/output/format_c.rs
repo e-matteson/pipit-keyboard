@@ -53,19 +53,13 @@ impl CTree {
                 ref values,
                 ref c_type,
                 is_extern,
-            } => format_array(name, values, c_type, is_extern),
-            CTree::CompoundArray {
+            } => format_array(name, values, c_type, is_extern, false),
+            CTree::StdArray {
                 ref name,
                 ref values,
-                ref subarray_type,
+                ref c_type,
                 is_extern,
-            } => format_compound_array(
-                name,
-                values,
-                subarray_type,
-                is_extern,
-                file_name_base,
-            )?,
+            } => format_array(name, values, c_type, is_extern, true),
             CTree::EnumDecl {
                 ref name,
                 ref variants,
@@ -101,7 +95,7 @@ impl CTree {
             | CTree::Ifndef { .. }
             | CTree::ConstVar { .. }
             | CTree::Array { .. }
-            | CTree::CompoundArray { .. }
+            | CTree::StdArray { .. }
             | CTree::EnumDecl { .. }
             | CTree::Namespace { .. } => unimplemented!(),
         }
@@ -269,37 +263,6 @@ fn format_group(v: &[CTree], file_name_base: &str) -> Result<CFilePair, Error> {
     Ok(f)
 }
 
-fn format_compound_array(
-    name: &CCode,
-    values: &[Vec<CCode>],
-    subarray_type: &CCode,
-    is_extern: bool,
-    file_name_base: &str,
-) -> Result<CFilePair, Error> {
-    // TODO prepend underscore? special meaning?
-    let subarray_names: Vec<_> = (0..values.len())
-        .map(|x| CCode(format!("{}_{}", name, x)))
-        .collect();
-    let mut g = Vec::new();
-    for (sub_name, sub_values) in subarray_names.iter().zip(values.into_iter())
-    {
-        g.push(CTree::Array {
-            name: sub_name.to_owned(),
-            values: sub_values.to_owned(),
-            c_type: subarray_type.to_c(),
-            is_extern: false,
-        });
-    }
-
-    g.push(CTree::Array {
-        name: name.to_owned(),
-        values: subarray_names,
-        c_type: format!("{}*", subarray_type).to_c(),
-        is_extern,
-    });
-    CTree::Group(g).format(file_name_base)
-}
-
 fn format_const_var(
     name: &CCode,
     value: &CCode,
@@ -345,24 +308,37 @@ fn format_array(
     values: &[CCode],
     c_type: &CCode,
     is_extern: bool,
+    is_std: bool,
 ) -> CFilePair {
     let length = values.len();
     let h = if is_extern {
-        CCode(format!("extern const {} {}[{}];\n", c_type, name, length))
+        if is_std {
+            format!(
+                "extern const std::array<{},{}> {};\n",
+                c_type, length, name,
+            )
+        } else {
+            format!("extern const {} {}[{}];\n", c_type, name, length)
+        }
+        .to_c()
     } else {
         CCode::new()
     };
-
-    CFilePair {
-        h,
-        c: CCode(format!(
+    let initializer = make_c_array_contents(values);
+    let c = if is_std {
+        format!(
+            "const std::array<{},{}> {} = {};\n",
+            c_type, length, name, initializer
+        )
+    } else {
+        format!(
             "const {} {}[{}] = {};\n\n",
-            c_type,
-            name,
-            length,
-            make_c_array_contents(values)
-        )),
+            c_type, name, length, initializer
+        )
     }
+    .to_c();
+
+    CFilePair { h, c }
 }
 
 fn make_c_array_contents<T>(v: &[T]) -> CCode

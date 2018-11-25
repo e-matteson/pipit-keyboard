@@ -47,7 +47,6 @@ pub trait CEnumVariant: Sized {
 }
 
 // TODO get rid of unused variants
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum CTree {
     /// Define a preprocessor macro with the given name and value.
@@ -72,16 +71,16 @@ pub enum CTree {
         c_type: CCode,
         is_extern: bool,
     },
-    Array {
+    StdArray {
         name: CCode,
         values: Vec<CCode>,
         c_type: CCode,
         is_extern: bool,
     },
-    CompoundArray {
+    Array {
         name: CCode,
-        values: Vec<Vec<CCode>>,
-        subarray_type: CCode,
+        values: Vec<CCode>,
+        c_type: CCode,
         is_extern: bool,
     },
     EnumDecl {
