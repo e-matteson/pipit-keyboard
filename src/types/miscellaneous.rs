@@ -507,23 +507,35 @@ impl Permutation {
     }
 }
 
+#[cfg(test)]
+fn bits(b: &[u8]) -> BitVec<u8> {
+    b.into_iter().map(|&bit| bit != 0).collect()
+}
+
 #[test]
 fn test_permute_reverse() {
-    let p = Permutation::from_to(&[1, 2, 3], &[3, 2, 1]).unwrap();
-    assert_eq!(vec!["c", "b", "a"], p.permute(&["a", "b", "c"]).unwrap())
+    let p =
+        Permutation::from_to(&[1, 2, 3, 4, 5, 6, 7], &[7, 6, 5, 4, 3, 2, 1])
+            .unwrap();
+    assert_eq!(
+        bits(&[0, 1, 0, 0, 1, 0, 1]),
+        p.permute(&bits(&[1, 0, 1, 0, 0, 1, 0])).unwrap()
+    )
 }
 
 #[test]
 fn test_permute_identity() {
     let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
-    assert_eq!(vec![11, 12, 13], p.permute(&[11, 12, 13]).unwrap())
+    assert_eq!(bits(&[0, 1, 1]), p.permute(&bits(&[0, 1, 1])).unwrap())
 }
 
 #[test]
 fn test_permute_lengthen() {
     let p = Permutation::from_to(&[1, 2, 3], &[5, 4, 3, 2, 1]).unwrap();
-    // println!("lengthen permutation: {:?}", p);
-    assert_eq!(vec![0, 0, 13, 12, 11], p.permute(&[11, 12, 13]).unwrap())
+    assert_eq!(
+        bits(&[0, 0, 1, 1, 0]),
+        p.permute(&bits(&[0, 1, 1])).unwrap()
+    )
 }
 
 #[test]
@@ -536,7 +548,7 @@ fn test_permute_err_shorten() {
 #[test]
 fn test_permute_err_long() {
     let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
-    if p.permute(&[11, 12, 13, 14]).is_ok() {
+    if p.permute(&bits(&[1, 1, 1, 1])).is_ok() {
         panic!("should be permute error, but was ok");
     }
 }
@@ -544,7 +556,7 @@ fn test_permute_err_long() {
 #[test]
 fn test_permute_err_short() {
     let p = Permutation::from_to(&[1, 2, 3], &[1, 2, 3]).unwrap();
-    if p.permute(&[11, 12]).is_ok() {
+    if p.permute(&bits(&[1, 1])).is_ok() {
         panic!("should be permute error, but was ok");
     }
 }
