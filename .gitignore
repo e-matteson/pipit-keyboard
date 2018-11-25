@@ -1,8 +1,22 @@
+# Rust compilation output:
 target
+
+# Auto-generated firmware configuration:
 /pipit-firmware/auto_config.cpp
 /pipit-firmware/auto_config.h
+/pipit-firmware/auto_config_early.h
+
+# Persistent tutor options:
+/settings/tutor/saved_options.yaml
+
+# Temporary files:
 /src/tests/actual-outputs/*
 callgrind.out.*
+
+# Images / binary files:
 *.svg
 *.pdf
 *.png
+
+# Personal emacs settings:
+.dir-locals.el
