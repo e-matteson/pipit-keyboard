@@ -30,7 +30,7 @@ bool Ring::push_interrupt(ChordData data) {
 }
 
 bool Ring::pop_interrupt(ChordData* data_out) {
-  /// Call this from the loop.
+  /// Call this from the interrupt
   if (_tail != _head) {
     // Not empty!
     *data_out = _ring[_tail];

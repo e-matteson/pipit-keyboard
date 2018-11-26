@@ -33,6 +33,8 @@ class Chord {
   void restoreAnagramMods();
   void cycle(CycleType operation);
 
+  ChordData getExtractedMods();
+
   // TODO reduce number of methods
 
   uint8_t getAnagramNum() const;

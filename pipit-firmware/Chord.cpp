@@ -197,6 +197,21 @@ bool Chord::restoreMod(conf::Mod modifier) {
   return true;
 }
 
+/// Create a chord containing the union of all of modifiers that have been
+/// extracted from the this chord.
+// TODO store this explicitly when extracting? space vs time
+// TODO share code with restoreMod
+ChordData Chord::getExtractedMods() {
+  ChordData all_mods;
+  for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
+    conf::Mod mod = (conf::Mod)i;
+    if (hasMod(mod)) {
+      all_mods |= *conf::getModChord(mode, mod);
+    }
+  }
+  return all_mods;
+}
+
 void Chord::prepareToCycle() {
   // Unset mods that affect the word before this one, like by backspacing or
   // doubling its letters. We don't want to repeat those effects every time we

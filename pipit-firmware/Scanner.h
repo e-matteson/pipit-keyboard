@@ -42,9 +42,12 @@ class Statuses {
  public:
   SwitchStatus get(size_t index) const;
   void set(size_t index, SwitchStatus status);
-  void setHeld(const ChordData& new_held_switches);
   void pressedToAlreadySent();
+
+  // TODO better hold/reuseable terms, consistent method names
   void alreadySentToHeld();
+  void holdSome(ChordData new_held_switches);
+
   bool anyDown() const;
   void writeSendable(ChordData* chord) const;
   constexpr size_t size() const;
@@ -58,16 +61,19 @@ class Statuses {
 
 class Scanner {
  public:
+  // TODO separate private/interrupt from public/loop better!
+
+  ///// For loop:
   void setup();
-  bool pop(ChordData* data_out);
+  bool pop_to_send(ChordData* data_out);
+  bool push_to_hold(ChordData data);
   static Scanner* getInstance();
 
-  // TODO separate private/interrupt from public/loop better!
+  ///// For interrupt context:
   void scanStep();
   void updateSwitches();
   void detectChords();
 
-  // TODO getter
   State state = State::Scan;
 
  private:
@@ -77,7 +83,8 @@ class Scanner {
   Matrix matrix;
   Statuses statuses;
   Stopwatches stopwatches;
-  Ring chords;
+  Ring to_send;
+  Ring to_hold;
 
   // Index of last released switch, or NO_SWITCH
   ssize_t last_released_switch = NO_SWITCH;

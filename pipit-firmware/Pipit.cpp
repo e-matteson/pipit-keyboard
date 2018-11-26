@@ -22,6 +22,13 @@ void Pipit::loop() {
   // shutdownIfSquished();
 }
 
+void Pipit::reuseMods(Chord* chord) {
+  ChordData mods = chord->getExtractedMods();
+  if (mods.any()) {
+    Scanner::getInstance()->push_to_hold(mods);
+  }
+}
+
 /// If you define a new command in the settings file, you must add a case for it
 /// here!
 void Pipit::doCommand(const Key* keys, uint8_t length) {
@@ -152,7 +159,7 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
 
 void Pipit::processIfReady() {
   Chord chord(mode);
-  if (Scanner::getInstance()->pop(chord.getDataMut())) {
+  if (Scanner::getInstance()->pop_to_send(chord.getDataMut())) {
     processChord(&chord);
   }
 }
@@ -190,8 +197,7 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known word, send it and return.
   if (doIfFound(conf::SeqType::Word, chord, keys)) {
-    // TODO reuseMods
-    // switches.reuseMods(chord);
+    reuseMods(chord);
     return;
   }
 
@@ -204,14 +210,14 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known plain key, send it and return.
   if (doIfFound(conf::SeqType::Plain, chord, keys)) {
-    // switches.reuseMods(chord);
+    reuseMods(chord);
     return;
   }
 
   // If only modifiers were pressed, send them now. (We know it's not totally
   // empty, since we checked at the top of this function)
   if (sender.sendIfEmptyExceptMods(chord)) {
-    // switches.reuseMods(chord);
+    reuseMods(chord);
     feedback.trigger(conf::SeqType::Plain);
     return;
   }

@@ -43,6 +43,8 @@ class Pipit {
   uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
                           bool delete_before_sending);
 
+  void reuseMods(Chord* chord);
+
   // Switches switches;
   Feedback feedback;
   Sender sender;

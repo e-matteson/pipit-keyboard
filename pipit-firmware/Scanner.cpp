@@ -58,10 +58,16 @@ SwitchStatus Statuses::get(size_t index) const {
   return static_cast<SwitchStatus>((msb.test(index) << 1) | lsb.test(index));
 }
 
-/// If any switches are AlreadySent, change their status to Held.
-void Statuses::setHeld(const ChordData& new_held_switches) {
-  lsb |= new_held_switches;
-  msb |= new_held_switches;
+/// If any of the switches in the given chord are not NotPressed, change their
+/// statuses to Held.
+void Statuses::holdSome(ChordData new_held_switches) {
+  // Because I haven't bothered to implement non-assigning bitwise ops...
+  ChordData mask;
+  mask |= lsb;
+  mask |= msb;
+  mask &= new_held_switches;
+  msb |= mask;
+  lsb |= mask;
 }
 
 /// If any switches are AlreadySent, change their status to Held.
@@ -88,7 +94,11 @@ void Statuses::writeSendable(ChordData* chord) const {
   *chord |= lsb;
 }
 
-bool Scanner::pop(ChordData* data_out) { return chords.pop_loop(data_out); }
+bool Scanner::pop_to_send(ChordData* data_out) {
+  return to_send.pop_loop(data_out);
+}
+
+bool Scanner::push_to_hold(ChordData data) { return to_hold.push_loop(data); }
 
 void Scanner::setup() {
   matrix.setup();
@@ -155,16 +165,21 @@ void Scanner::scanStep() {
 }
 
 void Scanner::detectChords() {
-  // TODO releaseNonMods?
   stopwatches.tick();
-  if (stopwatches.chord.isDone()) {
-    chords.push_interrupt(makeChordData());
-  }
-  if (stopwatches.release.isDone()) {
-    chords.push_interrupt(ChordData({0}));
-  }
   if (stopwatches.held.isDone()) {
     statuses.alreadySentToHeld();
+  }
+
+  static ChordData switches_to_hold;
+  if (to_hold.pop_interrupt(&switches_to_hold)) {
+    statuses.holdSome(switches_to_hold);
+  }
+
+  if (stopwatches.chord.isDone()) {
+    to_send.push_interrupt(makeChordData());
+  }
+  if (stopwatches.release.isDone()) {
+    to_send.push_interrupt(ChordData({0}));
   }
   state = State::Scan;
   schedule(UNTIL_SCAN_COUNT);
