@@ -2,9 +2,12 @@
 
 #include "Matrix.h"
 #include "OneShot.h"
+#include "Ring.h"
 #include "auto_config.h"
 
 #define NO_SWITCH -1
+
+enum class State : uint8_t { Scan, UpdateSwitches, DetectChords };
 
 class Stopwatch {
  public:
@@ -53,21 +56,6 @@ class Statuses {
   ChordData msb;  // most significant
 };
 
-class Ring {
- public:
-  // TODO config size?
-  bool push(ChordData data);
-  bool pop(ChordData* data_out);
-
- private:
-  size_t incr(size_t index);
-
-  // TODO which should be volatile?
-  volatile size_t _tail = 0;
-  volatile size_t _head = 0;
-  std::array<ChordData, 16> _ring;
-};
-
 class Scanner {
  public:
   void setup();
@@ -78,11 +66,15 @@ class Scanner {
   void scanStep();
   void updateSwitches();
   void detectChords();
-  Matrix matrix;
+
+  // TODO getter
+  State state = State::Scan;
 
  private:
   ChordData makeChordData();
+  void schedule(uint32_t count);
 
+  Matrix matrix;
   Statuses statuses;
   Stopwatches stopwatches;
   Ring chords;

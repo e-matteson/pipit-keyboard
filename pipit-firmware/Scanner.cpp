@@ -3,24 +3,22 @@
 
 // TODO specify as microsecs instead of raw counts
 #define CAPACITANCE_COUNT 0x2
-#define PAUSE_COUNT 0x2
+#define YIELD_COUNT 0x2
 #define UNTIL_SCAN_COUNT 0x19
 
-void scanRowsISR();
-
-void detectChordsISR() {
-  Scanner::getInstance()->detectChords();
-  OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scanRowsISR);
-}
-
-void updateSwitchesISR() {
-  Scanner::getInstance()->updateSwitches();
-  OneShot::getInstance()->schedule(PAUSE_COUNT, detectChordsISR);
-}
-
-void scanRowsISR() {
-  Scanner::getInstance()->scanStep();
-  // TODO be consistent about where to set OneShot
+void scannerISR() {
+  auto s = Scanner::getInstance();
+  switch (s->state) {
+    case State::Scan:
+      s->scanStep();
+      break;
+    case State::UpdateSwitches:
+      s->updateSwitches();
+      break;
+    case State::DetectChords:
+      s->detectChords();
+      break;
+  }
 }
 
 Stopwatch::Stopwatch(uint32_t default_val) : _default(default_val) {}
@@ -90,41 +88,11 @@ void Statuses::writeSendable(ChordData* chord) const {
   *chord |= lsb;
 }
 
-size_t Ring::incr(size_t index) { return (index + 1) % _ring.size(); }
-
-bool Ring::push(ChordData data) {
-  /// Call this from the interrupt.
-  // TODO should we discard old data instead?
-  bool success = false;
-  size_t next_head = incr(_head);
-  if (_tail != next_head) {
-    // Not full!
-    _ring[_head] = data;
-    _head = next_head;
-    success = true;
-  }
-  return success;
-}
-
-bool Ring::pop(ChordData* data_out) {
-  /// Call this from the loop.
-  bool success = false;
-  noInterrupts();
-  if (_tail != _head) {
-    // Not empty!
-    *data_out = _ring[_tail];
-    _tail = incr(_tail);
-    success = true;
-  }
-  interrupts();
-  return success;
-}
-
-bool Scanner::pop(ChordData* data_out) { return chords.pop(data_out); }
+bool Scanner::pop(ChordData* data_out) { return chords.pop_loop(data_out); }
 
 void Scanner::setup() {
   matrix.setup();
-  OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scanRowsISR);
+  OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scannerISR);
 }
 
 ChordData Scanner::makeChordData() {
@@ -162,6 +130,8 @@ void Scanner::updateSwitches() {
     // Ensure that tapping 1 switch in a chord will always resend the full chord
     statuses.alreadySentToHeld();
   }
+  state = State::DetectChords;
+  schedule(YIELD_COUNT);
 }
 
 void Scanner::scanStep() {
@@ -174,12 +144,13 @@ void Scanner::scanStep() {
   if (col_index == conf::column_pins.size()) {
     // Last column, done scanning!
     col_index = 0;
-    OneShot::getInstance()->schedule(PAUSE_COUNT, updateSwitchesISR);
+    state = State::UpdateSwitches;
+    schedule(YIELD_COUNT);
   } else {
     // Set next column and then wait for it to take effect before reading.
     matrix.selectColumn(col_index);
     col_index++;
-    OneShot::getInstance()->schedule(CAPACITANCE_COUNT, scanRowsISR);
+    schedule(CAPACITANCE_COUNT);
   }
 }
 
@@ -187,14 +158,20 @@ void Scanner::detectChords() {
   // TODO releaseNonMods?
   stopwatches.tick();
   if (stopwatches.chord.isDone()) {
-    chords.push(makeChordData());
+    chords.push_interrupt(makeChordData());
   }
   if (stopwatches.release.isDone()) {
-    chords.push(ChordData({0}));
+    chords.push_interrupt(ChordData({0}));
   }
   if (stopwatches.held.isDone()) {
     statuses.alreadySentToHeld();
   }
+  state = State::Scan;
+  schedule(UNTIL_SCAN_COUNT);
+}
+
+void Scanner::schedule(uint32_t count) {
+  OneShot::getInstance()->schedule(count);
 }
 
 Scanner* Scanner::getInstance() {

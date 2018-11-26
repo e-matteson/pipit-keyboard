@@ -12,11 +12,14 @@ void Pipit::setup() {
 }
 
 void Pipit::loop() {
-  processIfReady();
-  feedback.updateLED();
+  __WFI();
 
+  // Give the scanner time to finish before bothering to check for chords
+  feedback.updateLED();
+  delayMicroseconds(500);
+
+  processIfReady();
   // shutdownIfSquished();
-  delayMicroseconds(1000);
 }
 
 /// If you define a new command in the settings file, you must add a case for it
