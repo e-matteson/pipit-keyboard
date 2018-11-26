@@ -9,7 +9,6 @@
 void scanRowsISR();
 
 void detectChordsISR() {
-  // conf::cyan();
   Scanner::getInstance()->detectChords();
   OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scanRowsISR);
 }
@@ -20,7 +19,6 @@ void updateSwitchesISR() {
 }
 
 void scanRowsISR() {
-  // conf::redgreen();
   Scanner::getInstance()->scanStep();
   // TODO be consistent about where to set OneShot
 }
@@ -141,6 +139,7 @@ ChordData Scanner::makeChord() {
 
 void Scanner::updateSwitches() {
   // For each switch index, update status based on readings.
+  bool was_switch_double_tapped = false;
   for (uint8_t i = 0; i < statuses.size(); i++) {
     // if (matrix.any(i)) {
     //   debug();
@@ -152,16 +151,23 @@ void Scanner::updateSwitches() {
       stopwatches.chord.restart();
       stopwatches.held.restart();
       statuses.set(i, SwitchStatus::Pressed);
-      // TODO double tap
+
+      // Check if this switch was double tapped.
+      was_switch_double_tapped |= (i == last_released_switch);
+      last_released_switch = NO_SWITCH;
     } else if (status != SwitchStatus::NotPressed && matrix.none(i)) {
       // Debounced release!
-      // debug();
       conf::white();
       stopwatches.release.restart();
       stopwatches.held.restart();
       statuses.set(i, SwitchStatus::NotPressed);
-      // TODO double tap, quick tap
+      last_released_switch = i;
+      // TODO quick tap (shorter than chord delay)
     }
+  }
+  if (was_switch_double_tapped) {
+    // Ensure that tapping 1 switch in a chord will always resend the full chord
+    statuses.alreadySentToHeld();
   }
 }
 
@@ -175,7 +181,6 @@ void Scanner::scanStep() {
   if (col_index == conf::column_pins.size()) {
     // Last column, done scanning!
     col_index = 0;
-    // conf::black();
     OneShot::getInstance()->schedule(PAUSE_COUNT, updateSwitchesISR);
   } else {
     // Set next column and then wait for it to take effect before reading.
@@ -193,11 +198,9 @@ void Scanner::detectChords() {
     chords.push(makeChord());
   }
   if (stopwatches.release.isDone()) {
-    // conf::blue();
     chords.push(ChordData({0}));
   }
   if (stopwatches.held.isDone()) {
-    // conf::white();
     statuses.alreadySentToHeld();
   }
 }

@@ -23,7 +23,7 @@ void Pipit::setup() {
 
 void Pipit::loop() {
   processIfReady();
-  delayMicroseconds(100);
+  delayMicroseconds(1000);
   // switches.update();
 
   // feedback.updateLED();

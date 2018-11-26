@@ -4,6 +4,8 @@
 #include "OneShot.h"
 #include "auto_config.h"
 
+#define NO_SWITCH -1
+
 class Stopwatch {
  public:
   Stopwatch(uint32_t default_val);
@@ -87,6 +89,10 @@ class Scanner {
   Statuses statuses;
   Stopwatches stopwatches;
   Ring chords;
+
+  // Index of last released switch, or NO_SWITCH
+  ssize_t last_released_switch = NO_SWITCH;
+
   // // Index of last released switch, or NO_SWITCH
   // int16_t last_released_switch = NO_SWITCH;
   // bool was_switch_double_tapped = 0;
