@@ -3,31 +3,20 @@
 #include "Scanner.h"
 #include "conf.h"
 
-// #include "Matrix.h"
-
-// Matrix matrix;
-
 void Pipit::setup() {
-  // switches.setup();
   sender.setup();
   feedback.setup();
   feedback.startRoutine(LEDRoutine::Battery);
   feedback.updateLED();
   Scanner::getInstance()->setup();
-  // matrix.setup();
-
-  conf::black();
-  delay(500);
-  Serial.println(F_CPU);
 }
 
 void Pipit::loop() {
   processIfReady();
-  delayMicroseconds(1000);
-  // switches.update();
+  feedback.updateLED();
 
-  // feedback.updateLED();
   // shutdownIfSquished();
+  delayMicroseconds(1000);
 }
 
 /// If you define a new command in the settings file, you must add a case for it
@@ -164,37 +153,6 @@ void Pipit::processIfReady() {
     processChord(&chord);
   }
 }
-// void Pipit::processIfReady() {
-//   bool is_gaming_mode = conf::isGaming(mode);
-//   if (switches.readyToPress(is_gaming_mode)) {
-//     if (is_gaming_mode) {
-//       Chord gaming_switches[NUM_MATRIX_POSITIONS] = {Chord(mode)};
-//       uint8_t num_switches = switches.fillGamingSwitches(gaming_switches);
-//       processGamingSwitches(gaming_switches, num_switches);
-//     } else {
-//       Chord chord(mode);
-//       switches.fillChord(&chord);
-//       processChord(&chord);
-//     }
-//     return;
-//   }
-
-//   if (switches.readyToRelease()) {
-//     if (switches.anyDown()) {
-//       // If you pressed a mix of plain mods and plain keys, the mod release
-//       // won't be sent until all keys are up. This lets you hold `alt` and
-//       tap
-//       // `tab` to cycle through windows. The only weird edge case I'm aware
-//       of
-//       // is that after pressing `alt+tab', holding `tab` and tapping `alt`
-//       has
-//       // the exact same behavior as holding `alt` and tapping `tab`.
-//       sender.releaseNonMods();
-//     } else {
-//       sender.releaseAll();
-//     }
-//   }
-// }
 
 /// Search for the chord in all of the lookup arrays of every sequence type, and
 /// perform the appropriate action if it's found. For non-gaming modes only.

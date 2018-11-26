@@ -6,16 +6,15 @@
 
 namespace conf {
 
-void black();
-void white();
-void red();
-void green();
-void blue();
-void purple();
-void cyan();
-void redgreen();
-void redgreenblue();
-int readPinMode(uint8_t pin);
+// void black();
+// void white();
+// void red();
+// void green();
+// void blue();
+// void purple();
+// void cyan();
+// void redgreen();
+// void redgreenblue();
 
 enum class ModType { Plain = 0, Word, Anagram };
 

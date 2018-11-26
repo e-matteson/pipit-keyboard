@@ -23,12 +23,9 @@ class Stopwatches {
  public:
   void tick();
 
-  // Stopwatch chord = conf::CHORD_DELAY;
-  // Stopwatch release = conf::CHORD_DELAY;
-  // Stopwatch held = conf::HELD_DELAY;
-  Stopwatch chord = 30;
-  Stopwatch release = 30;
-  Stopwatch held = 200;
+  Stopwatch chord = conf::CHORD_DELAY;
+  Stopwatch release = conf::CHORD_DELAY;
+  Stopwatch held = conf::HELD_DELAY;
 };
 
 enum class SwitchStatus : uint8_t {
@@ -84,7 +81,7 @@ class Scanner {
   Matrix matrix;
 
  private:
-  ChordData makeChord();
+  ChordData makeChordData();
 
   Statuses statuses;
   Stopwatches stopwatches;
@@ -92,8 +89,4 @@ class Scanner {
 
   // Index of last released switch, or NO_SWITCH
   ssize_t last_released_switch = NO_SWITCH;
-
-  // // Index of last released switch, or NO_SWITCH
-  // int16_t last_released_switch = NO_SWITCH;
-  // bool was_switch_double_tapped = 0;
 };

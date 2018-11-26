@@ -26,36 +26,11 @@ void Matrix::readRows() {
   static uint8_t switch_index = 0;
 
   for (uint8_t row_pin : conf::row_pins) {
-    // Shift in the next readings.
-    // Reading is low if the switch is pressed.
-    uint8_t bit = (digitalRead(row_pin) == LOW) ? 1 : 0;
-
-    // Serial.print(row_pin);
-    // Serial.print(":");
-    // Serial.print(bit);
-    // Serial.print("-");
-
-    // Serial.print(conf::readPinMode(row_pin));
-    // Serial.print(" ");
-    // if (bit) {
-    //   conf::green();
-    // } else {
-    //   conf::red();
-    // }
-    // delay(150);
-    // conf::black();
-    // delay(200);
-
-    readings[switch_index] = (readings[switch_index] << 1) | bit;
-    // readings[switch_index] = bit;
-    // readings[switch_index] |= ;
-    switch_index++;
-
-    if (switch_index >= NUM_MATRIX_POSITIONS) {
-      switch_index = 0;
-    }
+    // Shift in the new reading.
+    uint8_t is_pressed = (digitalRead(row_pin) == LOW);
+    readings[switch_index] = (readings[switch_index] << 1) | is_pressed;
+    switch_index = (switch_index + 1) % NUM_MATRIX_POSITIONS;
   }
-  // Serial.println("");
 }
 
 uint8_t Matrix::columnIndexToPin(uint8_t column_index) {

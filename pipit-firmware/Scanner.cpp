@@ -127,9 +127,7 @@ void Scanner::setup() {
   OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scanRowsISR);
 }
 
-ChordData Scanner::makeChord() {
-  // Binary-encode the values of the switch_status array into an array of bytes,
-  //  for easy comparison to the bytes in the lookup arrays.
+ChordData Scanner::makeChordData() {
   ChordData data;
   statuses.writeSendable(&data);
   // Modify the status array to record that the switches have been processed.
@@ -141,13 +139,9 @@ void Scanner::updateSwitches() {
   // For each switch index, update status based on readings.
   bool was_switch_double_tapped = false;
   for (uint8_t i = 0; i < statuses.size(); i++) {
-    // if (matrix.any(i)) {
-    //   debug();
-    // }
     const SwitchStatus status = statuses.get(i);
     if (status == SwitchStatus::NotPressed && matrix.any(i)) {
       // New press! Accept it immediately without debouncing.
-      conf::purple();
       stopwatches.chord.restart();
       stopwatches.held.restart();
       statuses.set(i, SwitchStatus::Pressed);
@@ -157,7 +151,6 @@ void Scanner::updateSwitches() {
       last_released_switch = NO_SWITCH;
     } else if (status != SwitchStatus::NotPressed && matrix.none(i)) {
       // Debounced release!
-      conf::white();
       stopwatches.release.restart();
       stopwatches.held.restart();
       statuses.set(i, SwitchStatus::NotPressed);
@@ -194,8 +187,7 @@ void Scanner::detectChords() {
   // TODO releaseNonMods?
   stopwatches.tick();
   if (stopwatches.chord.isDone()) {
-    // conf::cyan();
-    chords.push(makeChord());
+    chords.push(makeChordData());
   }
   if (stopwatches.release.isDone()) {
     chords.push(ChordData({0}));
