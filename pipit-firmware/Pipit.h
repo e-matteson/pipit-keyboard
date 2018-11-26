@@ -22,8 +22,7 @@
 #include "Feedback.h"
 #include "Key.h"
 #include "Sender.h"
-#include "Switches.h"
-
+// #include "Switches.h"
 
 class Pipit {
  public:
@@ -32,9 +31,9 @@ class Pipit {
 
  private:
   void processIfReady();
-  void shutdownIfSquished();
+  // void shutdownIfSquished();
   void processChord(Chord* new_chord);
-  void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
+  // void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
 
   void doCommand(const Key* keys, uint8_t length);
   void cycleLastWord(CycleType cycle_type);
@@ -44,7 +43,7 @@ class Pipit {
   uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
                           bool delete_before_sending);
 
-  Switches switches;
+  // Switches switches;
   Feedback feedback;
   Sender sender;
 

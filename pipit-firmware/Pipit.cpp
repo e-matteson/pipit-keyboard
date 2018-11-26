@@ -1,21 +1,33 @@
 #include "Pipit.h"
-#include "conf.h"
 #include <Arduino.h>
+#include "Scanner.h"
+#include "conf.h"
+
+// #include "Matrix.h"
+
+// Matrix matrix;
 
 void Pipit::setup() {
-  switches.setup();
+  // switches.setup();
   sender.setup();
   feedback.setup();
   feedback.startRoutine(LEDRoutine::Battery);
   feedback.updateLED();
+  Scanner::getInstance()->setup();
+  // matrix.setup();
+
+  conf::black();
+  delay(500);
+  Serial.println(F_CPU);
 }
 
 void Pipit::loop() {
-  switches.update();
   processIfReady();
-  feedback.updateLED();
-  shutdownIfSquished();
   delayMicroseconds(100);
+  // switches.update();
+
+  // feedback.updateLED();
+  // shutdownIfSquished();
 }
 
 /// If you define a new command in the settings file, you must add a case for it
@@ -147,33 +159,42 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
 }
 
 void Pipit::processIfReady() {
-  bool is_gaming_mode = conf::isGaming(mode);
-  if (switches.readyToPress(is_gaming_mode)) {
-    if (is_gaming_mode) {
-      Chord gaming_switches[NUM_MATRIX_POSITIONS] = {Chord(mode)};
-      uint8_t num_switches = switches.fillGamingSwitches(gaming_switches);
-      processGamingSwitches(gaming_switches, num_switches);
-    } else {
-      Chord chord(mode);
-      switches.fillChord(&chord);
-      processChord(&chord);
-    }
-    return;
-  }
-
-  if (switches.readyToRelease()) {
-    if (switches.anyDown()) {
-      // If you pressed a mix of plain mods and plain keys, the mod release
-      // won't be sent until all keys are up. This lets you hold `alt` and tap
-      // `tab` to cycle through windows. The only weird edge case I'm aware of
-      // is that after pressing `alt+tab', holding `tab` and tapping `alt` has
-      // the exact same behavior as holding `alt` and tapping `tab`.
-      sender.releaseNonMods();
-    } else {
-      sender.releaseAll();
-    }
+  Chord chord(mode);
+  if (Scanner::getInstance()->pop(chord.getDataMut())) {
+    processChord(&chord);
   }
 }
+// void Pipit::processIfReady() {
+//   bool is_gaming_mode = conf::isGaming(mode);
+//   if (switches.readyToPress(is_gaming_mode)) {
+//     if (is_gaming_mode) {
+//       Chord gaming_switches[NUM_MATRIX_POSITIONS] = {Chord(mode)};
+//       uint8_t num_switches = switches.fillGamingSwitches(gaming_switches);
+//       processGamingSwitches(gaming_switches, num_switches);
+//     } else {
+//       Chord chord(mode);
+//       switches.fillChord(&chord);
+//       processChord(&chord);
+//     }
+//     return;
+//   }
+
+//   if (switches.readyToRelease()) {
+//     if (switches.anyDown()) {
+//       // If you pressed a mix of plain mods and plain keys, the mod release
+//       // won't be sent until all keys are up. This lets you hold `alt` and
+//       tap
+//       // `tab` to cycle through windows. The only weird edge case I'm aware
+//       of
+//       // is that after pressing `alt+tab', holding `tab` and tapping `alt`
+//       has
+//       // the exact same behavior as holding `alt` and tapping `tab`.
+//       sender.releaseNonMods();
+//     } else {
+//       sender.releaseAll();
+//     }
+//   }
+// }
 
 /// Search for the chord in all of the lookup arrays of every sequence type, and
 /// perform the appropriate action if it's found. For non-gaming modes only.
@@ -208,7 +229,8 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known word, send it and return.
   if (doIfFound(conf::SeqType::Word, chord, keys)) {
-    switches.reuseMods(chord);
+    // TODO reuseMods
+    // switches.reuseMods(chord);
     return;
   }
 
@@ -221,14 +243,14 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known plain key, send it and return.
   if (doIfFound(conf::SeqType::Plain, chord, keys)) {
-    switches.reuseMods(chord);
+    // switches.reuseMods(chord);
     return;
   }
 
   // If only modifiers were pressed, send them now. (We know it's not totally
   // empty, since we checked at the top of this function)
   if (sender.sendIfEmptyExceptMods(chord)) {
-    switches.reuseMods(chord);
+    // switches.reuseMods(chord);
     feedback.trigger(conf::SeqType::Plain);
     return;
   }
@@ -245,44 +267,44 @@ void Pipit::processChord(Chord* chord) {
 // the end. If any switch is a command or macro, handle it immediately and
 // ignore the rest of the switches.
 // TODO maybe don't ignore the rest of the switches?
-void Pipit::processGamingSwitches(Chord* gaming_switches,
-                                  uint8_t num_switches) {
-  Report report;
-  report.is_gaming = true;
-  for (uint8_t i = 0; i < num_switches; i++) {
-    Key keys[conf::MAX_KEYS_IN_SEQUENCE];
+// void Pipit::processGamingSwitches(Chord* gaming_switches,
+//                                   uint8_t num_switches) {
+//   Report report;
+//   report.is_gaming = true;
+//   for (uint8_t i = 0; i < num_switches; i++) {
+//     Key keys[conf::MAX_KEYS_IN_SEQUENCE];
 
-    Chord* single_switch = gaming_switches + i;
-    if (doIfFound(conf::SeqType::Command, single_switch, keys)) {
-      return;
-    }
+//     Chord* single_switch = gaming_switches + i;
+//     if (doIfFound(conf::SeqType::Command, single_switch, keys)) {
+//       return;
+//     }
 
-    if (is_paused) {
-      return;
-    }
+//     if (is_paused) {
+//       return;
+//     }
 
-    if (doIfFound(conf::SeqType::Macro, single_switch, keys)) {
-      return;
-    }
+//     if (doIfFound(conf::SeqType::Macro, single_switch, keys)) {
+//       return;
+//     }
 
-    // We can't use doIfFound() here, because we're adding all
-    // plain_keys to the report instead of sending each one immediately.
-    if (uint8_t length =
-            conf::lookup(single_switch, conf::SeqType::Plain, keys)) {
-      if (length > 1) {
-        DEBUG1_LN("WARNING: Extra plain_key data ignored");
-      }
-      report.addKey(keys);
-      report.addMod(single_switch->getModByte());
-      feedback.trigger(conf::SeqType::Plain);
-      continue;
-    }
+//     // We can't use doIfFound() here, because we're adding all
+//     // plain_keys to the report instead of sending each one immediately.
+//     if (uint8_t length =
+//             conf::lookup(single_switch, conf::SeqType::Plain, keys)) {
+//       if (length > 1) {
+//         DEBUG1_LN("WARNING: Extra plain_key data ignored");
+//       }
+//       report.addKey(keys);
+//       report.addMod(single_switch->getModByte());
+//       feedback.trigger(conf::SeqType::Plain);
+//       continue;
+//     }
 
-    // Failed to find the chord anywhere
-    feedback.triggerUnknown();
-  }
-  sender.sendReport(&report);
-}
+//     // Failed to find the chord anywhere
+//     feedback.triggerUnknown();
+//   }
+//   sender.sendReport(&report);
+// }
 
 // Delete the last word (or more precisely, the output of the last chord), and
 // replace it with a modified version. The `cycle_type` argument determines
@@ -368,22 +390,22 @@ uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
 /// since that probably means the keyboard is squished against something. This
 /// mostly happens with battery-powered models that are left on inside a
 /// backpack.
-void Pipit::shutdownIfSquished() {
-  if (!switches.matrix.isSquishedInBackpack()) {
-    return;
-  }
-  DEBUG1_LN(
-      "WARNING: Switches have been held down too long, you might be inside a "
-      "backpack.");
-  DEBUG1_LN("         Please reboot.");
+// void Pipit::shutdownIfSquished() {
+//   if (!switches.matrix.isSquishedInBackpack()) {
+//     return;
+//   }
+//   DEBUG1_LN(
+//       "WARNING: Switches have been held down too long, you might be inside a
+//       " "backpack.");
+//   DEBUG1_LN("         Please reboot.");
 
-  // TODO disable bluetooth as well
-  switches.matrix.shutdown();
-  sender.releaseAll();
-  delay(1000);
+//   // TODO disable bluetooth as well
+//   switches.matrix.shutdown();
+//   sender.releaseAll();
+//   delay(1000);
 
-  // TODO enter deep sleep instead of looping forever.
-  noInterrupts();
-  while (1) {
-  }
-}
+//   // TODO enter deep sleep instead of looping forever.
+//   noInterrupts();
+//   while (1) {
+//   }
+// }

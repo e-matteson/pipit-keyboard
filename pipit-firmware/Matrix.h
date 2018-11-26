@@ -15,35 +15,19 @@ class Matrix {
   Matrix();
   void setup();
 
-  bool isDown(uint8_t index) const;
-
-  bool scanIfChanged();
-  bool isSquishedInBackpack();
-  void shutdown();
+  void readRows();
+  void selectColumn(uint8_t column_index);
+  void unselectColumn(uint8_t column_index);
+  uint8_t get(uint8_t switch_index);
+  bool any(uint8_t switch_index);
+  bool none(uint8_t switch_index);
+  void clear(uint8_t switch_index);
 
  private:
-  void scan();
-  void selectColumn(uint8_t column_pin);
-  void unselectColumn(uint8_t column_pin);
-  bool isRowPressed(uint8_t row_pin);
-
-  bool isInStandby();
-  void enterStandby();
-  void exitStandby();
-
-  void enablePinChangeInterrupt();
-  void disablePinChangeInterrupt();
-
+  uint8_t columnIndexToPin(uint8_t column_index);
   void setRowsInput();
   void setColumnsLow();
   void setColumnsHiZ();
-  void attachRowPinInterrupts(voidFuncPtr isr);
-  void detachRowPinInterrupts();
 
-  static void pinChangeISR();
-
-  Timer standby_timer;
-  Timer squished_switch_timer;
-
-  BitArray<uint32_t, NUM_MATRIX_POSITIONS> switches_down;
+  volatile uint8_t readings[NUM_MATRIX_POSITIONS] = {0};
 };

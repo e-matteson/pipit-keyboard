@@ -35,13 +35,13 @@ void Sender::deleteLastWord() {
 /************* Keypress sending ************/
 
 bool Sender::sendIfEmptyExceptMods(const Chord* chord) {
-  // If chord is all zeros (ignoring modifiers), send 0 (with any modifiers) and
-  // return 0. Else return 1.
-  if (!chord->isEmptyExceptMods()) {
-    return 0;
+  // If chord is all zeros (ignoring modifiers), send it (including any
+  // modifiers) and return true.
+  if (chord->isEmptyExceptMods()) {
+    sendKeyAndMod(0, chord->getModByte());
+    return true;
   }
-  sendKeyAndMod(0, chord->getModByte());
-  return 1;
+  return false;
 }
 
 void Sender::sendPlain(const Key* keys, uint8_t keys_length,

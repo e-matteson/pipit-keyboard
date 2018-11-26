@@ -101,4 +101,86 @@ const Mod* anagramNumToMod(uint8_t anagram_num) {
   return nullptr;
 }
 
+void red() {
+  digitalWrite(10, 1);
+  digitalWrite(11, 0);
+  digitalWrite(12, 0);
+}
+
+void green() {
+  digitalWrite(10, 0);
+  digitalWrite(11, 1);
+  digitalWrite(12, 0);
+}
+
+void blue() {
+  digitalWrite(10, 0);
+  digitalWrite(11, 0);
+  digitalWrite(12, 1);
+}
+
+void white() {
+  digitalWrite(10, 1);
+  digitalWrite(11, 1);
+  digitalWrite(12, 1);
+}
+
+void purple() {
+  digitalWrite(10, 1);
+  digitalWrite(11, 0);
+  digitalWrite(12, 1);
+}
+
+void black() {
+  digitalWrite(10, 0);
+  digitalWrite(11, 0);
+  digitalWrite(12, 0);
+}
+
+void cyan() {
+  digitalWrite(10, 0);
+  digitalWrite(11, 1);
+  digitalWrite(12, 1);
+}
+
+void redgreen() {
+  static uint8_t toggle = 0;
+  switch (toggle) {
+    case 0:
+      red();
+      break;
+    case 1:
+      green();
+      break;
+  }
+  toggle = (toggle + 1) % 2;
+}
+
+void redgreenblue() {
+  static uint8_t toggle = 0;
+  switch (toggle) {
+    case 0:
+      red();
+      break;
+    case 1:
+      green();
+      break;
+    case 2:
+      blue();
+      break;
+  }
+  toggle = (toggle + 1) % 3;
+}
+
+int readPinMode(uint8_t pin) {
+  if (pin >= NUM_DIGITAL_PINS) return (-1);
+
+  auto bit = digitalPinToBitMask(pin);
+  auto port = digitalPinToPort(pin);
+  volatile uint32_t* reg = portModeRegister(port);
+  if (*reg & bit) return (OUTPUT);
+
+  volatile uint32_t* out = portOutputRegister(port);
+  return ((*out & bit) ? INPUT_PULLUP : INPUT);
+}
 }  // namespace conf

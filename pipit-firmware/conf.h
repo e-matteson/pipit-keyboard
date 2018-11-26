@@ -6,6 +6,17 @@
 
 namespace conf {
 
+void black();
+void white();
+void red();
+void green();
+void blue();
+void purple();
+void cyan();
+void redgreen();
+void redgreenblue();
+int readPinMode(uint8_t pin);
+
 enum class ModType { Plain = 0, Word, Anagram };
 
 uint8_t lookup(const Chord* chord, SeqType type, Key* keys_out);

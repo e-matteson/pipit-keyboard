@@ -32,6 +32,7 @@ class FeatherOneShot : public OneShot {
   void setCount(uint32_t count);
   void sync();
 
+  // const uint32_t _prescaler = TC_CTRLA_PRESCALER_DIV16;
   const uint32_t _prescaler = TC_CTRLA_PRESCALER_DIV1024;
   TcCount32* const _timer = &TC4->COUNT32;
 };
