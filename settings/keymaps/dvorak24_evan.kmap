@@ -339,6 +339,12 @@ macro_in_quote  macro_in_equal   macro_in_doublequote macro_in_grave
   .     .         .     .          .     .              .     .
   ... .*.         ... .*.          ... .*.              ... .*.
 
+macro_in_pipes
+.*..   ....
+..*.   ....
+  .     .
+  ... .*.
+
 macro_backslash_n
 ..*.   ....
 ...*   ..*.
@@ -348,8 +354,8 @@ macro_backslash_n
 #### python macros ####
 
 macro_print_py   macro_exit_py     macro_docstr_py
-...*   .**.      ....   .*.*       ...*   .**.
-....   ....      ..**   .*..       *...   ...*
+...*   .**.      ....   .*.*       *...   .**.
+....   ....      ..**   .*..       ...*   ....
   .     .          .     .           .     .
   ... .*.          ... .*.           ... .*.
 
@@ -419,23 +425,17 @@ macro_if_c        macro_else_c      macro_for_c        macro_ifdef_guard
   .     .           .     .           .     .            .     .
   ... .*.           ... .*.           ... .*.            ... .*.
 
-macro_while_c    macro_right_arrow    macro_left_arrow  macro_arg_c
-....   **.*      ....   ...*          ....   ...*       ..**   ....
-..**   *...      *.*.   *...          **..   *...       ....   **..
-  .     .          .     .              .     .           .     .
-  ... .*.          ... ...              ... ...           ... .*.
+macro_while_c    macro_arg_c       macro_printf     macro_include_c
+....   **.*      ..**   ....       ...*   .*..      ....   .*..
+..**   *...      ....   **..       ....   ....      ...*   ..*.
+  .     .          .     .           .     .          .     .
+  ... .*.          ... .*.           ... .*.          ... .*.
 
 macro_cout        macro_endl        macro_cerr          macro_this_arrow
 ..*.   .*..       ....   *..*       ....   .**.         ....   ....
 .*..   .*..       ..*.   ..*.       ..*.   ....         ...*   **.*
   .     .           .     .           .     .             .     .
   ... .*.           ... .*.           ... .*.             ... .*.
-
-macro_printf     macro_include_c
-...*   .*..      ....   .*..
-....   ....      ...*   ..*.
-  .     .          .     .
-  ... .*.          ... .*.
 
 
 #### vim/spacemacs macros ####

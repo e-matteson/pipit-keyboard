@@ -200,12 +200,11 @@ macros:
   macro_in_doublequote: "\"\"←"
   macro_in_equal: "==←"
   macro_in_grave: "``←"
+  macro_in_pipes: "||←"
   macro_out_paren: "()"
   macro_out_angle: "<>"
   macro_out_brace: "[]"
   macro_out_curly: "{}"
-  macro_right_arrow: "->"
-  macro_left_arrow: "<-"
   macro_this_arrow: "this->"
   macro_cerr: "cerr << "
   macro_cout: "cout <<"
@@ -284,7 +283,7 @@ macros:
   macro_fn_rs: "fn () -> {\n}↑▶←←←←←←←"
   macro_fn_self_rs: "fn (&self) -> {\n}↑▶←←←←←←←←←←←←"
   macro_fn_self_void_rs: "fn (&self){\n}↑▶←←←←←←←←"
-  macro_fn_void_rs: "fn (&self){\n}↑▶←←←←"
+  macro_fn_void_rs: "fn (){\n}↑▶←←←"
   macro_amperstr_rs: "&str"
   macro_bang_dollar: "!$ "
   macro_hash_bang: "#!/bin/bash"
@@ -370,6 +369,11 @@ commands:
   - command_pan_right
 
 dictionary:
+  - {word: "Ok()←", chord: " ok"}
+  - {word: "Some()←", chord: " some"}
+  # - {word: "Result<, Error>←←←←←←←←", chord: " res"}
+  - {word: "->"}
+  - {word: "<-"}
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
   - {word: "abandon"}
@@ -2276,7 +2280,7 @@ dictionary:
   - {word: "half"}
   - {word: "hall"}
   - {word: "halloween"}
-  - {word: "halo", anagram: 1}
+  - {word: "halo"}
   - {word: "halt"}
   - {word: "halve"}
   - {word: "halves"}
