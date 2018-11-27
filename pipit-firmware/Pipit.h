@@ -41,7 +41,7 @@ class Pipit {
   uint8_t doIfFound(conf::SeqType type, Chord* chord, Key* keys);
   uint8_t replaceLastIfFound(conf::SeqType type, Chord* chord, Key* keys);
   uint8_t doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
-                          bool delete_before_sending);
+                          bool is_replacement);
 
   void reuseMods(Chord* chord);
 

@@ -167,9 +167,10 @@ void Pipit::processIfReady() {
 /// Search for the chord in all of the lookup arrays of every sequence type, and
 /// perform the appropriate action if it's found. For non-gaming modes only.
 void Pipit::processChord(Chord* chord) {
-  // If no switch is pressed, just send zero and be done with it.
-  // (There can't be mods because we haven't extracted them yet)
-  if (sender.sendIfEmptyExceptMods(chord)) {
+  // If no switch is pressed, just send a release and be done with it.
+  if (chord->isEmptyExceptMods()) {
+    //  TODO handle releaseNonMods stuff here?
+    sender.releaseAll();
     return;
   };
 
@@ -197,7 +198,6 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known word, send it and return.
   if (doIfFound(conf::SeqType::Word, chord, keys)) {
-    reuseMods(chord);
     return;
   }
 
@@ -210,13 +210,13 @@ void Pipit::processChord(Chord* chord) {
 
   // If chord is a known plain key, send it and return.
   if (doIfFound(conf::SeqType::Plain, chord, keys)) {
-    reuseMods(chord);
     return;
   }
 
   // If only modifiers were pressed, send them now. (We know it's not totally
   // empty, since we checked at the top of this function)
-  if (sender.sendIfEmptyExceptMods(chord)) {
+  if (chord->isEmptyExceptMods()) {
+    sender.sendMods(chord);
     reuseMods(chord);
     feedback.trigger(conf::SeqType::Plain);
     return;
@@ -318,17 +318,23 @@ uint8_t Pipit::replaceLastIfFound(conf::SeqType type, Chord* chord, Key* keys) {
 
 // Search for the chord in lookups of the given sequence type. If it's found,
 // send it (if it's a key sequence) or do it (if it's a command). Set
-// `delete_before_sending` you're using this to cycle a word. Return the
-// length of the keys found in the lookup, or 0 if not found.
+// `is_replacement` you're using this to cycle a word, and want to delete the
+// previous word first. Return the length of the keys found in the lookup, or 0
+// if not found.
 uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
-                               bool delete_before_sending) {
+                               bool is_replacement) {
   uint8_t keys_length = conf::lookup(chord, type, keys);
   if (keys_length == 0) {
     return 0;  // Fail, chord not found.
   }
 
-  if (delete_before_sending) {
+  if (is_replacement) {
     sender.deleteLastWord();
+  } else {
+    // Only reuse the mods if this a newly pressed chord.
+    // A cycled one was probably released long ago, and its mod flags have
+    // probably been manipulated so they don't match the switches anyway.
+    reuseMods(chord);
   }
 
   switch (type) {

@@ -16,7 +16,7 @@ class Sender {
   void move(Motion motion, Direction direction);
   void backspace();
 
-  bool sendIfEmptyExceptMods(const Chord* chord);
+  void sendMods(const Chord* chord);
   void sendPlain(const Key* keys, uint8_t keys_length, const Chord* chord);
   void sendMacro(const Key* keys, uint8_t keys_length, const Chord* chord);
   void sendWord(const Key* keys, uint8_t keys_length, Chord* chord);
