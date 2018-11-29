@@ -94,11 +94,11 @@ void Statuses::writeSendable(ChordData* chord) const {
   *chord |= lsb;
 }
 
-bool Scanner::pop_to_send(ChordData* data_out) {
-  return to_send.pop_loop(data_out);
+bool Scanner::popToSend(ChordData* data_out) {
+  return to_send.popInLoop(data_out);
 }
 
-bool Scanner::push_to_hold(ChordData data) { return to_hold.push_loop(data); }
+bool Scanner::pushToHold(ChordData data) { return to_hold.pushInLoop(data); }
 
 void Scanner::setup() {
   matrix.setup();
@@ -171,15 +171,15 @@ void Scanner::detectChords() {
   }
 
   static ChordData switches_to_hold;
-  if (to_hold.pop_interrupt(&switches_to_hold)) {
+  if (to_hold.popInInterrupt(&switches_to_hold)) {
     statuses.holdSome(switches_to_hold);
   }
 
   if (stopwatches.chord.isDone()) {
-    to_send.push_interrupt(makeChordData());
+    to_send.pushInInterrupt(makeChordData());
   }
   if (stopwatches.release.isDone()) {
-    to_send.push_interrupt(ChordData({0}));
+    to_send.pushInInterrupt(ChordData({0}));
   }
   state = State::Scan;
   schedule(UNTIL_SCAN_COUNT);

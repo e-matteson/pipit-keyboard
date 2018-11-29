@@ -2,7 +2,7 @@
 
 #include "Matrix.h"
 #include "OneShot.h"
-#include "Ring.h"
+#include "Queue.h"
 #include "auto_config.h"
 
 #define NO_SWITCH -1
@@ -65,8 +65,8 @@ class Scanner {
 
   ///// For loop:
   void setup();
-  bool pop_to_send(ChordData* data_out);
-  bool push_to_hold(ChordData data);
+  bool popToSend(ChordData* data_out);
+  bool pushToHold(ChordData data);
   static Scanner* getInstance();
 
   ///// For interrupt context:
@@ -83,8 +83,8 @@ class Scanner {
   Matrix matrix;
   Statuses statuses;
   Stopwatches stopwatches;
-  Ring to_send;
-  Ring to_hold;
+  Queue to_send;
+  Queue to_hold;
 
   // Index of last released switch, or NO_SWITCH
   ssize_t last_released_switch = NO_SWITCH;

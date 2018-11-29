@@ -25,7 +25,7 @@ void Pipit::loop() {
 void Pipit::reuseMods(Chord* chord) {
   ChordData mods = chord->getExtractedMods();
   if (mods.any()) {
-    Scanner::getInstance()->push_to_hold(mods);
+    Scanner::getInstance()->pushToHold(mods);
   }
 }
 
@@ -159,7 +159,7 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
 
 void Pipit::processIfReady() {
   Chord chord(mode);
-  if (Scanner::getInstance()->pop_to_send(chord.getDataMut())) {
+  if (Scanner::getInstance()->popToSend(chord.getDataMut())) {
     processChord(&chord);
   }
 }
