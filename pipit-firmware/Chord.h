@@ -22,7 +22,7 @@ enum class CycleType {
 class Chord {
  public:
   Chord() = default;
-  Chord(conf::Mode mode);
+  Chord(conf::Mode mode, ChordData data = ChordData({0}));
 
   void setSwitch(uint8_t switch_index);
   void setMode(conf::Mode _mode);
@@ -92,9 +92,7 @@ class Chord {
 
   uint8_t anagram_num = 0;
 
-  ChordData chord_data;
+  conf::Mode mode = conf::defaultMode();
 
-  // TODO what happens if there are no modes, so no variant with value 0, and
-  // this cast is invalid?
-  conf::Mode mode = static_cast<conf::Mode>(0);
+  ChordData chord_data;
 };

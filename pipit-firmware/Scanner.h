@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Chord.h"
 #include "Matrix.h"
 #include "OneShot.h"
 #include "Queue.h"
-#include "auto_config.h"
+#include "conf.h"
 
 #define NO_SWITCH -1
 
@@ -12,23 +13,27 @@ enum class State : uint8_t { Scan, UpdateSwitches, DetectChords };
 class Stopwatch {
  public:
   Stopwatch(uint32_t default_val);
+  void setDefault(uint32_t new_default);
   void restart();
   void tick();
   bool isDone();
 
  private:
-  bool enabled = false;
+  uint32_t _default;
   uint32_t _count;
-  const uint32_t _default;
+  bool _enabled;
 };
 
 class Stopwatches {
  public:
+  Stopwatches(conf::Mode mode = conf::defaultMode());
   void tick();
+  void setDefaultsForMode(conf::Mode mode);
+  bool isChordOrReleaseDone();
 
-  Stopwatch chord = conf::CHORD_DELAY;
-  Stopwatch release = conf::CHORD_DELAY;
-  Stopwatch held = conf::HELD_DELAY;
+  Stopwatch chord;
+  Stopwatch release;
+  Stopwatch held;
 };
 
 enum class SwitchStatus : uint8_t {
@@ -43,7 +48,6 @@ class Statuses {
   SwitchStatus get(size_t index) const;
   void set(size_t index, SwitchStatus status);
   void pressedToAlreadySent();
-
   // TODO better hold/reuseable terms, consistent method names
   void alreadySentToHeld();
   void holdSome(ChordData new_held_switches);
@@ -55,26 +59,50 @@ class Statuses {
  private:
   bool sendable(size_t index) const;
 
+  // Efficiently encode the Status of each switch using 2 bits, one from each
+  // ChordData array.
   ChordData lsb;  // least significant
   ChordData msb;  // most significant
+};
+
+class Packet {
+ public:
+  Packet(conf::Mode mode, bool is_partial_release,
+         ChordData chord_data = ChordData({0}));
+  Packet() = default;
+
+  bool isPress() const;
+  bool isPartialRelease() const;
+  Chord toChord() const;
+  conf::Mode mode() const;
+
+  // Use 1 bit for partial_release flag, and reserve 1 bit for the future.
+  static const uint8_t m_num_mode_bits = 6;
+
+ private:
+  ChordData m_chord_data;
+  uint8_t m_metadata = 0;
 };
 
 class Scanner {
  public:
   // TODO separate private/interrupt from public/loop better!
 
-  ///// For loop:
+  ///// For use in loop:
   void setup();
-  bool popToSend(ChordData* data_out);
+  bool popToSend(Packet* packet_out);
   bool pushToHold(ChordData data);
-  static Scanner* getInstance();
+  void setMode(conf::Mode new_mode);
 
-  ///// For interrupt context:
+  ///// For use in interrupt context:
   void scanStep();
   void updateSwitches();
   void detectChords();
 
   State state = State::Scan;
+
+  //// For either:
+  static Scanner* getInstance();
 
  private:
   ChordData makeChordData();
@@ -83,8 +111,9 @@ class Scanner {
   Matrix matrix;
   Statuses statuses;
   Stopwatches stopwatches;
-  Queue to_send;
-  Queue to_hold;
+  conf::Mode mode = conf::defaultMode();
+  Queue<Packet, 8> to_send;
+  Queue<ChordData, 4> to_hold;
 
   // Index of last released switch, or NO_SWITCH
   ssize_t last_released_switch = NO_SWITCH;

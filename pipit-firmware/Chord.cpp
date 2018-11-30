@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////
 
-Chord::Chord(conf::Mode mode) : mode(mode) {}
+Chord::Chord(conf::Mode mode, ChordData data) : mode(mode), chord_data(data) {}
 
 void Chord::setSwitch(uint8_t switch_index) { chord_data.set(switch_index); }
 

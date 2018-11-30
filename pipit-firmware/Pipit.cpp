@@ -148,7 +148,8 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
         DEBUG1_LN("WARNING: Wrong number of args for command_switch_to");
         return;
       }
-      mode = static_cast<conf::Mode>(keys[1].key_code);
+      Scanner::getInstance()->setMode(
+          static_cast<conf::Mode>(keys[1].key_code));
       break;
 
     default:
@@ -158,22 +159,34 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
 }
 
 void Pipit::processIfReady() {
-  Chord chord(mode);
-  if (Scanner::getInstance()->popToSend(chord.getDataMut())) {
-    processChord(&chord);
+  Packet packet;
+  if (Scanner::getInstance()->popToSend(&packet)) {
+    if (packet.isPress()) {
+      Chord chord = packet.toChord();
+      if (conf::isGaming(chord.getModeName())) {
+        processGamingSwitches(&chord);
+      } else {
+        processPress(&chord);
+      }
+    } else {
+      // It's a release
+      if (packet.isPartialRelease()) {
+        // If you pressed a mix of plain mods and plain keys, the mod release
+        // won't be sent until all keys are up. This lets you hold `alt` and tap
+        // `tab` to cycle through windows. The only weird edge case I'm aware of
+        // is that after pressing `alt+tab', holding `tab` and tapping `alt` has
+        // the exact same behavior as holding `alt` and tapping `tab`.
+        sender.releaseNonMods();
+      } else {
+        sender.releaseAll();
+      }
+    }
   }
 }
 
 /// Search for the chord in all of the lookup arrays of every sequence type, and
 /// perform the appropriate action if it's found. For non-gaming modes only.
-void Pipit::processChord(Chord* chord) {
-  // If no switch is pressed, just send a release and be done with it.
-  if (chord->isEmptyExceptMods()) {
-    //  TODO handle releaseNonMods stuff here?
-    sender.releaseAll();
-    return;
-  };
-
+void Pipit::processPress(Chord* chord) {
   // Prepare to store keys from the lookup table
   Key keys[conf::MAX_KEYS_IN_SEQUENCE];
 
@@ -234,44 +247,45 @@ void Pipit::processChord(Chord* chord) {
 // the end. If any switch is a command or macro, handle it immediately and
 // ignore the rest of the switches.
 // TODO maybe don't ignore the rest of the switches?
-// void Pipit::processGamingSwitches(Chord* gaming_switches,
-//                                   uint8_t num_switches) {
-//   Report report;
-//   report.is_gaming = true;
-//   for (uint8_t i = 0; i < num_switches; i++) {
-//     Key keys[conf::MAX_KEYS_IN_SEQUENCE];
+void Pipit::processGamingSwitches(Chord* switches) {
+  Report report;
+  report.is_gaming = true;
+  for (uint8_t i = 0; i < switches->getData()->size(); i++) {
+    Key keys[conf::MAX_KEYS_IN_SEQUENCE];
+    if (!switches->getData()->test(i)) {
+      // this switch isn't pressed
+      continue;
+    }
 
-//     Chord* single_switch = gaming_switches + i;
-//     if (doIfFound(conf::SeqType::Command, single_switch, keys)) {
-//       return;
-//     }
+    Chord single_switch;
+    single_switch.setSwitch(i);
+    single_switch.setMode(switches->getModeName());
 
-//     if (is_paused) {
-//       return;
-//     }
+    if (doIfFound(conf::SeqType::Command, &single_switch, keys)) {
+      return;
+    }
 
-//     if (doIfFound(conf::SeqType::Macro, single_switch, keys)) {
-//       return;
-//     }
+    if (is_paused) {
+      return;
+    }
 
-//     // We can't use doIfFound() here, because we're adding all
-//     // plain_keys to the report instead of sending each one immediately.
-//     if (uint8_t length =
-//             conf::lookup(single_switch, conf::SeqType::Plain, keys)) {
-//       if (length > 1) {
-//         DEBUG1_LN("WARNING: Extra plain_key data ignored");
-//       }
-//       report.addKey(keys);
-//       report.addMod(single_switch->getModByte());
-//       feedback.trigger(conf::SeqType::Plain);
-//       continue;
-//     }
+    if (doIfFound(conf::SeqType::Macro, &single_switch, keys)) {
+      return;
+    }
 
-//     // Failed to find the chord anywhere
-//     feedback.triggerUnknown();
-//   }
-//   sender.sendReport(&report);
-// }
+    // We can't use doIfFound() here, because we're adding all
+    // plain_keys to the report instead of sending each one immediately.
+    if (conf::lookup(&single_switch, conf::SeqType::Plain, keys)) {
+      report.addKey(keys);
+      report.addMod(single_switch.getModByte());
+      feedback.trigger(conf::SeqType::Plain);
+      continue;
+    }
+    // Failed to find the chord anywhere
+    feedback.triggerUnknown();
+  }
+  sender.sendReport(&report);
+}
 
 // Delete the last word (or more precisely, the output of the last chord), and
 // replace it with a modified version. The `cycle_type` argument determines

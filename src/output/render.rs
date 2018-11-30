@@ -165,10 +165,10 @@ impl AllData {
             mode_struct_names.push(name);
         }
 
-        g.push(CTree::Array {
+        g.push(CTree::StdArray {
             name: "mode_structs".to_c(),
             values: CCode::map_prepend("&", &mode_struct_names),
-            c_type: "ModeStruct*".to_c(),
+            c_type: "const ModeStruct*".to_c(),
             is_extern: true,
         });
         Ok(CTree::Group(g))

@@ -32,8 +32,8 @@ class Pipit {
  private:
   void processIfReady();
   // void shutdownIfSquished();
-  void processChord(Chord* new_chord);
-  // void processGamingSwitches(Chord gaming_switches[], uint8_t num_switches);
+  void processPress(Chord* new_chord);
+  void processGamingSwitches(Chord* switches);
 
   void doCommand(const Key* keys, uint8_t length);
   void cycleLastWord(CycleType cycle_type);
@@ -49,6 +49,5 @@ class Pipit {
   Feedback feedback;
   Sender sender;
 
-  conf::Mode mode = conf::Mode::default_mode;
   bool is_paused = 0;
 };
