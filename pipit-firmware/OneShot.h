@@ -15,7 +15,7 @@ class OneShot {
 };
 
 #if defined(TEENSY_LC)
-#error "OneShot not yet implemented for TEENSY_LC"
+// #error "OneShot not yet implemented for TEENSY_LC"
 
 #elif defined(FEATHER_M0_BLE)
 
