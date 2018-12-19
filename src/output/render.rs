@@ -99,6 +99,14 @@ impl AllData {
         namespace.push(self.huffman_table.render_early());
         namespace.push(ModeName::render_c_enum(self.modes.keys()));
 
+        // Use the first mode enum variant as the default mode
+        // TODO what happens if there are no modes, so no variant with value 0,
+        // and this cast is invalid?
+        namespace.push(CTree::LiteralH(
+            "constexpr Mode defaultMode() { return static_cast<Mode>(0); }\n\n"
+                .to_c(),
+        ));
+
         let all_mods: Vec<_> = self
             .modifier_names()
             .into_iter()

@@ -26,11 +26,6 @@ const ChordData* getModChord(Mode mode, Mod modifier);
 ModType getModType(Mod modifier);
 const Mod* anagramNumToMod(uint8_t anagram_num);
 
-/// Use the first mode enum variant as the default mode
-// TODO what happens if there are no modes, so no variant with value 0, and
-// this cast is invalid?
-constexpr Mode defaultMode() { return static_cast<Mode>(0); }
-
 // Get the underlying type of the enum, to be used as an index
 template <typename TEnum>
 typename std::underlying_type<TEnum>::type to_index(TEnum variant) {
