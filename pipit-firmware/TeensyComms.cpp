@@ -11,8 +11,9 @@ void TeensyComms::proportionalDelay(uint8_t data_length, uint8_t multiplier) {
   // don't need to sleep between USB keypresses
 }
 
-void TeensyComms::toggleWireless() {
-  // no wireless option!
+bool TeensyComms::toggleWireless() {
+  // no wireless option! always reports failure
+  return false;
 }
 
 void TeensyComms::press(const Report* report) {

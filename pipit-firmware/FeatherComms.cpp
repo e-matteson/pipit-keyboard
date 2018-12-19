@@ -125,6 +125,12 @@ uint8_t FeatherComms::getDelay(uint8_t data_length) {
   return 1;
 }
 
-void FeatherComms::toggleWireless() { use_wired ^= 1; }
+bool FeatherComms::toggleWireless() {
+#ifdef ENABLE_WIRED_FEATHER_HACK
+  use_wired ^= 1;
+  return true;  // success
+#endif
+  return false;  // fail
+}
 
 #endif

@@ -237,7 +237,7 @@ void Feedback::updateLED() {
     case LEDRoutine::Warning:
       switch (led_subroutine) {
         case 0:
-          led_timer.start(700);
+          led_timer.start(400);
           setLEDColor(LEDColor::Orange);
           led_subroutine++;
           break;

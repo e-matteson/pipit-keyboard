@@ -122,8 +122,15 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
       break;
 
     case conf::Command::command_toggle_wireless:
-      sender.comms.toggleWireless();
-      feedback.startRoutine(LEDRoutine::ToggleWireless);
+      if (sender.comms.toggleWireless()) {
+        // success
+        feedback.startRoutine(LEDRoutine::ToggleWireless);
+        DEBUG1_LN("toggled wireless/wired sending");
+      } else {
+        // fail
+        feedback.startRoutine(LEDRoutine::Warning);
+        DEBUG1_LN("Warning: failed to toggle wireless/wired sending");
+      }
       break;
 
     case conf::Command::command_scroll_down:

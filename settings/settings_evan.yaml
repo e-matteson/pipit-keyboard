@@ -10,7 +10,7 @@ options:
   board_name:                  FEATHER_M0_BLE
   rgb_led_pins:                [10, 11, 12]
   enable_led_typing_feedback:  true
-  # enable_wired_feather_hack:   true
+  enable_wired_feather_hack:   true
   # enable_audio_typing_feedback: true
   battery_level_pin:           9
   row_pins:                    [1, 0, 19]
