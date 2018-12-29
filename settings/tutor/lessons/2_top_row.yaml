@@ -1,46 +1,37 @@
 ---
 popup: "Next you'll learn the 8 letters on the top row of the keyboard"
+persistent: [i, e, o, a, h, t, n, s, p, u, f, m, d, c, r, l, " "]
 slides:
   - line:
       Letters: pufm dcrl mfup pufm lrcd dcrl
   - line:
-      Letters: pufm mfup ppuu ffmm mfup pufm
+      Letters: pu dc dud pup cup cpu udp cud
   - line:
-      Letters: fume pipe puff pop pump mop
+      Letters: fm rl full rum lull fur ruff mull fluff
   - line:
-      Letters: ppuuffmm mufp uppmf mffup uufp pufm
+      Letters: pu fm mum puff ump muff pump pup
+  - line:
+      Letters: pop up map femme meme emo fop foam pip pope
   - line:
       Letters: a poem of miami fame
   - line:
-      Letters: fpfp umum ufuf pmpm pufm
+      Letters: fume me up opium imp
   - line:
-      Letters: pop up map femme meme
-  - line:
-      Letters: mfupufm fpfp ummu fump mpufm
-  - line:
-      Letters: dcrl lrcd ddcc rrll mfup pufm
+      Letters: pufm dcrl mfup lrcd
   - line:
       Letters: carol called local area radio
   - line:
-      Letters: drdr lclc rdrd ldld lrcd dcrl
+      Letters: dale carried real ideal railroad coal
   - line:
-      Letters: dale carried real railroad coal
+      Letters: eric recalled a cool red car carried ice cold rice
   - line:
-      Letters: rcdl lrrrl drl cld crc ddlrc
-  - line:
-      Letters: claire decided to race in colorado
-  - line:
-      Letters: lrcd drcd dcrl rrcdd dldl crcr drcl
+      Letters: claire decided to race a car in colorado
   - line:
       Letters: pufm dcrl pduc frml prfu dmfl rcpm mrul lpur frmc
   - line:
-      Letters: paul produced a popular crime film
-  - line:
-      Letters: pduc cfur plfp mdrcd pclufm ffpuc mrfcld dpcu rflm mfup dcrl
+      Letters: alice produced a popular crime film
   - line:
       Letters: memorial parades for dead emperors are full of color
-  - line:
-      Letters: dcrlpufm fmuu rldcu frld mmrcp urlf drluf mfpurf
   - line:
       Letters: placid prairie mules feel real relief
   - line:
