@@ -10,41 +10,43 @@ use cursive::{Cursive, Printer};
 
 use error::{Error, ResultExt};
 
-use tutor::{offset, Copier, Graphic, LessonConfig, PrevCharStatus, Slide};
+use tutor::{
+    offset, Copier, Graphic, LabeledChord, LessonConfig, PrevCharStatus, Slide,
+};
 
 pub struct Lesson {
     pub popup: String,
     slides: Vec<Slide>,
     graphic: Graphic,
-    graphic_spacing: usize,
-    instruction_spacing: usize,
     copier: Copier,
     start_time: Option<Instant>,
     net_words: f64,
     instruction: String,
     info_bar: String,
-    info_bar_spacing: usize,
     total_slides: usize,
 }
 
 impl Lesson {
     pub fn new(config: LessonConfig) -> Result<Self, Error> {
         let copier = Copier::new(79);
+        let shown = config
+            .shown
+            .iter()
+            .filter_map(|c| LabeledChord::from_letter(c))
+            .collect();
+
+        // reverse slide order so we can pop them off the end of a vec
         let slides: Vec<_> = config.slides.into_iter().rev().collect();
         let mut lesson = Self {
-            // reverse slide order so we can pop them off the end of a vec
             total_slides: slides.len(),
-            slides,
             popup: config.popup,
-            graphic: Graphic::new(),
-            graphic_spacing: 1,
-            instruction_spacing: 3,
-            copier,
+            graphic: Graphic::new(shown),
             start_time: None,
             net_words: 0.,
             instruction: String::new(),
             info_bar: String::new(),
-            info_bar_spacing: 1,
+            slides,
+            copier,
         };
         let status = lesson.next_slide().unwrap();
         lesson.update_chord(&status)?;
@@ -79,6 +81,25 @@ impl Lesson {
         Ok(())
     }
 
+    fn start_if_not_started(&mut self) {
+        if self.start_time.is_none() {
+            self.start_time = Some(Instant::now());
+        }
+    }
+
+    fn minutes(&self) -> f64 {
+        (self
+            .start_time
+            .expect("timer was not started")
+            .elapsed()
+            .as_secs() as f64)
+            / 60.
+    }
+
+    fn words_per_minute(&self) -> usize {
+        (self.net_words / self.minutes()) as usize
+    }
+
     fn instruction_size(&self) -> Vec2 {
         let max_width = 80;
         let rows = make_lines(&self.instruction, max_width);
@@ -99,14 +120,15 @@ impl Lesson {
     fn copy_padding(&self) -> Vec2 {
         // eprintln!("padding: {:?}", self.instruction_padding());
         let x = offset(self.copier.size().x, self.size().x);
-        let y = self.instruction_padding().y + self.instruction_spacing;
+        let y = self.instruction_padding().y + Self::instruction_spacing();
         Vec2::new(x, y)
     }
 
     fn graphic_padding(&self) -> Vec2 {
         let x = offset(self.graphic.size().x, self.size().x);
-        let y =
-            self.copy_padding().y + self.copier.size().y + self.graphic_spacing;
+        let y = self.copy_padding().y
+            + self.copier.size().y
+            + Self::graphic_spacing();
         Vec2::new(x, y)
     }
 
@@ -127,27 +149,20 @@ impl Lesson {
         let x = 1;
         let y = self.graphic_padding().y
             + self.graphic.size().y
-            + self.info_bar_spacing;
+            + Self::info_bar_spacing();
         Vec2::new(x, y)
     }
 
-    fn start_if_not_started(&mut self) {
-        if self.start_time.is_none() {
-            self.start_time = Some(Instant::now());
-        }
+    fn instruction_spacing() -> usize {
+        3
     }
 
-    fn minutes(&self) -> f64 {
-        (self
-            .start_time
-            .expect("timer was not started")
-            .elapsed()
-            .as_secs() as f64)
-            / 60.
+    fn info_bar_spacing() -> usize {
+        1
     }
 
-    fn words_per_minute(&self) -> usize {
-        (self.net_words / self.minutes()) as usize
+    fn graphic_spacing() -> usize {
+        1
     }
 
     fn size(&self) -> Vec2 {
@@ -165,9 +180,9 @@ impl Lesson {
             + graphic_size.y
             + copy_size.y
             + instruction_size.y
-            + self.info_bar_spacing
-            + self.graphic_spacing
-            + self.instruction_spacing;
+            + Self::info_bar_spacing()
+            + Self::graphic_spacing()
+            + Self::instruction_spacing();
         Vec2::new(x, y)
     }
 
@@ -196,7 +211,7 @@ impl View for Lesson {
         //     self.copier.size()
         // );
         let fake_padding =
-            self.copy_padding() - Vec2::new(0, self.instruction_spacing);
+            self.copy_padding() - Vec2::new(0, Self::instruction_spacing());
         // eprintln!("fake pad: {:?} ", fake_padding);
         self.draw_instruction(&printer.sub_printer(
             // self.instruction_padding(),

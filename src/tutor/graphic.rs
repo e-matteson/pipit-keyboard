@@ -3,15 +3,9 @@ use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::Printer;
 
-// use types::Chord;
-// use types::errors::*;
-
 use tutor::{Label, LabeledChord, PrevCharStatus};
 
 pub struct Graphic {
-    pub next: Option<LabeledChord>,
-    pub error: Option<LabeledChord>,
-    pub backspace: Option<LabeledChord>,
     switches: Vec<Switch>,
 }
 
@@ -20,40 +14,30 @@ pub enum ChordType {
     Next,
     Error,
     Backspace,
+    Shown,
 }
 
 struct Switch {
     position: (usize, usize),
     next: Option<Label>,
     error: Option<Label>,
+    shown: Option<Label>,
     backspace: Option<Label>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Graphic {
-    pub fn new() -> Self {
+    pub fn new(shown: Vec<LabeledChord>) -> Self {
         let switches: Vec<_> = get_switch_positions()
             .into_iter()
             .map(Switch::new)
             .collect();
-        Self {
-            next: None,
-            error: None,
-            backspace: None,
-            switches,
+        let mut graphic = Self { switches };
+        for labeled_chord in shown {
+            graphic.apply_chord(labeled_chord, ChordType::Shown);
         }
-    }
-
-    // fn draw_question_mark(&self, printer: &Printer) {
-    //     let center = printer.size.x / 2 as usize;
-    //     printer.with_color(Switch::next_style(), |printer| {
-    //         printer.print((center - 1, 1), "???");
-    //     });
-    // }
-
-    pub fn size(&self) -> Vec2 {
-        Vec2::new(78, 12)
+        graphic
     }
 
     pub fn update(
@@ -61,42 +45,31 @@ impl Graphic {
         next: Option<LabeledChord>,
         prev: &PrevCharStatus,
     ) {
-        self.next = next;
-        self.error = prev.error();
-        self.backspace = prev.backspace();
-        self.update_switches();
+        for switch in &mut self.switches {
+            switch.clear()
+        }
+        if let Some(c) = next {
+            self.apply_chord(c, ChordType::Next)
+        }
+        if let Some(c) = prev.backspace() {
+            self.apply_chord(c, ChordType::Backspace)
+        }
+        if let Some(c) = prev.error() {
+            self.apply_chord(c, ChordType::Error)
+        }
     }
 
-    pub fn update_switches(&mut self) {
-        self.clear_switches();
-        self.update_switches_with_type(ChordType::Next);
-        self.update_switches_with_type(ChordType::Backspace);
-        self.update_switches_with_type(ChordType::Error);
-    }
-
-    fn update_switches_with_type(&mut self, chord_type: ChordType) {
-        if let Some(labeled_chord) = self.get(chord_type) {
-            let chord = labeled_chord.chord;
-            for (bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
-                if bit {
-                    switch.set(chord_type, labeled_chord.label.clone());
-                }
+    fn apply_chord(&mut self, lc: LabeledChord, chord_type: ChordType) {
+        let (label, chord) = (lc.label, lc.chord);
+        for (bit, switch) in chord.iter().zip(self.switches.iter_mut()) {
+            if bit {
+                switch.set_label(chord_type, label.clone());
             }
         }
     }
 
-    fn clear_switches(&mut self) {
-        for switch in &mut self.switches {
-            switch.clear()
-        }
-    }
-
-    fn get(&self, chord_type: ChordType) -> Option<LabeledChord> {
-        match chord_type {
-            ChordType::Next => self.next.clone(),
-            ChordType::Error => self.error.clone(),
-            ChordType::Backspace => self.backspace.clone(),
-        }
+    pub fn size(&self) -> Vec2 {
+        Vec2::new(78, 12)
     }
 }
 
@@ -118,70 +91,56 @@ impl Switch {
             next: None,
             error: None,
             backspace: None,
+            shown: None,
             position,
         }
     }
 
-    fn draw(&self, printer: &Printer) {
-        let (x, y) = self.position;
-        let row2_left = format!("│{}", self.label().pad(3));
-        let (left, right) = self.styles();
-        printer.with_color(left, |printer| {
-            printer.print((x, y), "╭───");
-            printer.print((x, y + 1), &row2_left);
-            printer.print((x, y + 2), "╰");
-        });
-        printer.with_color(right, |printer| {
-            printer.print((x + 4, y), "╮");
-            printer.print((x + 4, y + 1), "│");
-            printer.print((x + 1, y + 2), "───╯");
-        });
+    fn set_label(&mut self, chord_type: ChordType, label: Label) {
+        match chord_type {
+            ChordType::Next => self.next = Some(label),
+            ChordType::Error => self.error = Some(label),
+            ChordType::Backspace => self.backspace = Some(label),
+            ChordType::Shown => self.shown = Some(label),
+        }
     }
 
+    /// Clear all labels except the `shown` label, since that one stays for the
+    /// whole lesson
     fn clear(&mut self) {
         self.next = None;
         self.error = None;
         self.backspace = None;
     }
 
+    /// Pick 1 label to show, according to their priority order
     fn label(&self) -> Label {
-        if let Some(ref label) = self.next {
-            label.to_owned()
-        } else if let Some(ref label) = self.error {
-            label.to_owned()
-        } else if let Some(ref label) = self.backspace {
-            label.to_owned()
-        } else {
-            Label::default()
-        }
+        self.next
+            .as_ref()
+            .or(self.error.as_ref())
+            .or(self.backspace.as_ref())
+            .or(self.shown.as_ref())
+            .cloned()
+            .unwrap_or_else(Label::default)
     }
 
+    /// Pick a style for the switch, based on which labeled chords include it
     fn styles(&self) -> (ColorStyle, ColorStyle) {
-        match (&self.next, &self.error, &self.backspace) {
-            (&Some(_), &None, &None) => {
-                (Self::next_style(), Self::next_style())
-            }
-            (&None, &Some(_), &None) => {
-                (Self::error_style(), Self::error_style())
-            }
-            (&None, &None, &Some(_)) => {
-                (Self::backspace_style(), Self::backspace_style())
-            }
-            (&Some(_), &Some(_), &None) => {
-                (Self::next_style(), Self::error_style())
-            }
-            (&Some(_), &None, &Some(_)) => {
-                (Self::next_style(), Self::backspace_style())
-            }
-            _ => (Self::default_style(), Self::default_style()),
-        }
-    }
-
-    pub fn set(&mut self, chord_type: ChordType, label: Label) {
-        match chord_type {
-            ChordType::Next => self.next = Some(label),
-            ChordType::Error => self.error = Some(label),
-            ChordType::Backspace => self.backspace = Some(label),
+        let next = Self::next_style();
+        let error = Self::error_style();
+        let backspace = Self::backspace_style();
+        let default = Self::default_style();
+        match (
+            self.next.is_some(),
+            self.error.is_some(),
+            self.backspace.is_some(),
+        ) {
+            (true, false, false) => (next, next),
+            (false, true, false) => (error, error),
+            (false, false, true) => (backspace, backspace),
+            (true, true, false) => (next, error),
+            (true, false, true) => (next, backspace),
+            _ => (default, default),
         }
     }
 
@@ -201,6 +160,22 @@ impl Switch {
 
     fn default_style() -> ColorStyle {
         ColorStyle::title_secondary()
+    }
+
+    fn draw(&self, printer: &Printer) {
+        let (x, y) = self.position;
+        let row2_left = format!("│{}", self.label().pad(3));
+        let (left, right) = self.styles();
+        printer.with_color(left, |printer| {
+            printer.print((x, y), "╭───");
+            printer.print((x, y + 1), &row2_left);
+            printer.print((x, y + 2), "╰");
+        });
+        printer.with_color(right, |printer| {
+            printer.print((x + 4, y), "╮");
+            printer.print((x + 4, y + 1), "│");
+            printer.print((x + 1, y + 2), "───╯");
+        });
     }
 }
 

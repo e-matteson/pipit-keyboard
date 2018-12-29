@@ -41,10 +41,6 @@ impl Copier {
         }
     }
 
-    pub fn needs_hint(&self, letter: &str) -> bool {
-        !State::is_learned(letter).unwrap_or(false)
-    }
-
     pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
         let word_edge_hint = self.line.hint_map.get(&self.line.index);
         if word_edge_hint.is_some() {
@@ -63,7 +59,7 @@ impl Copier {
             .expected_next()
             .expect("failed to get next char, did we check for end of line?");
 
-        let letter_hint = if self.needs_hint(&next_letter) {
+        let letter_hint = if needs_hint(&next_letter) {
             LabeledChord::from_letter(&next_letter)
         } else {
             None
@@ -292,4 +288,8 @@ fn make_hint_map(entries: &[SlideEntry]) -> HashMap<usize, LabeledChord> {
         position += entry.len();
     }
     map
+}
+
+pub fn needs_hint(letter: &str) -> bool {
+    !State::is_learned(letter).unwrap_or(false)
 }
