@@ -40,7 +40,7 @@ impl State {
             learning_map: HashMap::new(),
             save_path: PathBuf::from("settings/tutor/saved_options.yaml"),
             saveable: Saveable {
-                initial_learn_state: 10,
+                initial_learn_state: 2,
                 mode: ModeName::default(),
                 allow_mistakes: false,
                 show_persistent_letters: true,
