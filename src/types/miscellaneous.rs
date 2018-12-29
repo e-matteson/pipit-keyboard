@@ -87,7 +87,7 @@ pub struct TutorData {
 /// How a key would be represented in text. The Spelling for `key_a` would be
 /// "a".
 /// TODO this can't be a single char once we do internationalization, it might
-/// be unicode. Wait, some spellings are already unicode! why does that work?
+/// be unicode. Wait, chars are unicode!
 pub struct Spelling(pub char);
 
 #[derive(Clone, Debug)]
