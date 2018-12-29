@@ -14,6 +14,8 @@ pub struct LessonConfig {
     pub slides: Vec<Slide>,
     #[serde(default)]
     pub popup: String,
+    #[serde(default)]
+    pub shown: Vec<String>,
 }
 
 pub fn offset(width1: usize, width2: usize) -> usize {
