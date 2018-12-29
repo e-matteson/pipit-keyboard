@@ -122,11 +122,16 @@ impl Copier {
     }
 
     pub fn type_backspace(&mut self) -> PrevCharStatus {
+        if !State::allow_mistakes() {
+            // Don't let the user type backspace, show it as incorrect
+            return PrevCharStatus::Incorrect(LabeledChord::backspace());
+        }
         if self.line.index > 0 {
             self.line.actual.pop();
             self.line.index -= 1;
             self.prev_char_status(&self.actual_prev(), &self.expected_prev())
         } else {
+            // At the beginning of the line, nothing to delete
             PrevCharStatus::Correct
         }
     }

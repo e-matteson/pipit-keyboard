@@ -29,7 +29,7 @@ impl LabeledChord {
         })
     }
 
-    fn backspace() -> Option<Self> {
+    pub fn backspace() -> Option<Self> {
         Some(Self {
             chord: backspace_chord()?,
             label: "bak".into(),
