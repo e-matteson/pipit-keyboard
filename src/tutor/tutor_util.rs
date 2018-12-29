@@ -15,7 +15,7 @@ pub struct LessonConfig {
     #[serde(default)]
     pub popup: String,
     #[serde(default)]
-    pub shown: Vec<String>,
+    pub persistent: Vec<String>,
 }
 
 pub fn offset(width1: usize, width2: usize) -> usize {

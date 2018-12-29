@@ -1,6 +1,6 @@
 ---
 popup: "First you'll learn the 8 letters on the bottom row. The blue hints show which chord to press next, and red hints will show the location of an incorrect letter you typed by mistake."
-shown: [i, e, o, a, h, t, n, s, " "]
+persistent: [i, e, o, a, h, t, n, s, " "]
 slides:
   - line:
       Letters: ieoa htns aoei ieoa snth htns
