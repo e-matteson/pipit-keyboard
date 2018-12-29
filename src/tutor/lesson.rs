@@ -12,6 +12,7 @@ use error::{Error, ResultExt};
 
 use tutor::{
     offset, Copier, Graphic, LabeledChord, LessonConfig, PrevCharStatus, Slide,
+    State,
 };
 
 pub struct Lesson {
@@ -29,11 +30,15 @@ pub struct Lesson {
 impl Lesson {
     pub fn new(config: LessonConfig) -> Result<Self, Error> {
         let copier = Copier::new(79);
-        let persistent = config
-            .persistent
-            .iter()
-            .filter_map(|c| LabeledChord::from_letter(c))
-            .collect();
+        let persistent = if State::show_persistent_letters() {
+            config
+                .persistent
+                .iter()
+                .filter_map(|c| LabeledChord::from_letter(c))
+                .collect()
+        } else {
+            Vec::new()
+        };
 
         // reverse slide order so we can pop them off the end of a vec
         let slides: Vec<_> = config.slides.into_iter().rev().collect();

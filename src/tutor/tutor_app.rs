@@ -45,8 +45,11 @@ impl TutorApp {
         let initial = State::initial_learn_state() as usize;
         let max = initial.max(10);
 
-        let mut check_box = Checkbox::new();
-        check_box.set_checked(State::allow_mistakes());
+        let mut mistakes_box = Checkbox::new();
+        mistakes_box.set_checked(State::allow_mistakes());
+
+        let mut persistence_box = Checkbox::new();
+        persistence_box.set_checked(State::show_persistent_letters());
 
         let list = ListView::new()
             .child(
@@ -67,8 +70,14 @@ impl TutorApp {
             )
             .child(
                 "Allow mistakes:",
-                check_box
+                mistakes_box
                     .on_change(|_siv, value| State::set_allow_mistakes(value)),
+            )
+            .child(
+                "Show persistent hints for the lesson's new letters:",
+                persistence_box.on_change(|_siv, value| {
+                    State::set_show_persistent_letters(value)
+                }),
             );
         siv.add_layer(Dialog::new().title("Options").content(list).button(
             "Back",

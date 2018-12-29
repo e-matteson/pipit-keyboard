@@ -27,6 +27,7 @@ pub struct Saveable {
     initial_learn_state: usize,
     mode: ModeName,
     allow_mistakes: bool,
+    show_persistent_letters: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -42,6 +43,7 @@ impl State {
                 initial_learn_state: 10,
                 mode: ModeName::default(),
                 allow_mistakes: false,
+                show_persistent_letters: true,
             },
         }
     }
@@ -135,6 +137,17 @@ impl State {
         STATE.lock().unwrap().saveable.initial_learn_state
     }
 
+    pub fn set_initial_learn_state(initial: usize) {
+        let mut state = STATE.lock().unwrap();
+        for learn_state in state.learning_map.values_mut() {
+            learn_state.reset(initial);
+        }
+        state.saveable.initial_learn_state = initial;
+
+        // ignore any errors while saving
+        state.save().ok();
+    }
+
     pub fn allow_mistakes() -> bool {
         STATE.lock().unwrap().saveable.allow_mistakes
     }
@@ -147,12 +160,13 @@ impl State {
         state.save().ok();
     }
 
-    pub fn set_initial_learn_state(initial: usize) {
+    pub fn show_persistent_letters() -> bool {
+        STATE.lock().unwrap().saveable.show_persistent_letters
+    }
+
+    pub fn set_show_persistent_letters(value: bool) {
         let mut state = STATE.lock().unwrap();
-        for learn_state in state.learning_map.values_mut() {
-            learn_state.reset(initial);
-        }
-        state.saveable.initial_learn_state = initial;
+        state.saveable.show_persistent_letters = value;
 
         // ignore any errors while saving
         state.save().ok();
