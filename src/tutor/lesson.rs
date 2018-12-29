@@ -29,8 +29,8 @@ pub struct Lesson {
 impl Lesson {
     pub fn new(config: LessonConfig) -> Result<Self, Error> {
         let copier = Copier::new(79);
-        let shown = config
-            .shown
+        let persistent = config
+            .persistent
             .iter()
             .filter_map(|c| LabeledChord::from_letter(c))
             .collect();
@@ -40,7 +40,7 @@ impl Lesson {
         let mut lesson = Self {
             total_slides: slides.len(),
             popup: config.popup,
-            graphic: Graphic::new(shown),
+            graphic: Graphic::new(persistent),
             start_time: None,
             net_words: 0.,
             instruction: String::new(),
@@ -111,14 +111,11 @@ impl Lesson {
     }
 
     fn instruction_padding(&self) -> Vec2 {
-        // eprintln!("size: {:?}", self.instruction_size());
         let x = offset(self.instruction_size().x, self.size().x);
         Vec2::new(x, 0)
-        // Vec2::new(5, 0)
     }
 
     fn copy_padding(&self) -> Vec2 {
-        // eprintln!("padding: {:?}", self.instruction_padding());
         let x = offset(self.copier.size().x, self.size().x);
         let y = self.instruction_padding().y + Self::instruction_spacing();
         Vec2::new(x, y)
@@ -205,17 +202,9 @@ impl View for Lesson {
     }
 
     fn draw(&self, printer: &Printer) {
-        // eprintln!(
-        //     "copy pad: {:?}, size: {:?}",
-        //     self.copy_padding(),
-        //     self.copier.size()
-        // );
         let fake_padding =
             self.copy_padding() - Vec2::new(0, Self::instruction_spacing());
-        // eprintln!("fake pad: {:?} ", fake_padding);
         self.draw_instruction(&printer.sub_printer(
-            // self.instruction_padding(),
-            // self.instruction_size() + self.instruction_padding(),
             fake_padding,
             self.copier.size(),
             false,

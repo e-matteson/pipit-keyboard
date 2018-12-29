@@ -14,28 +14,28 @@ pub enum ChordType {
     Next,
     Error,
     Backspace,
-    Shown,
+    Persistent,
 }
 
 struct Switch {
     position: (usize, usize),
     next: Option<Label>,
     error: Option<Label>,
-    shown: Option<Label>,
+    persistent: Vec<Label>,
     backspace: Option<Label>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Graphic {
-    pub fn new(shown: Vec<LabeledChord>) -> Self {
+    pub fn new(persistent: Vec<LabeledChord>) -> Self {
         let switches: Vec<_> = get_switch_positions()
             .into_iter()
             .map(Switch::new)
             .collect();
         let mut graphic = Self { switches };
-        for labeled_chord in shown {
-            graphic.apply_chord(labeled_chord, ChordType::Shown);
+        for labeled_chord in persistent {
+            graphic.apply_chord(labeled_chord, ChordType::Persistent);
         }
         graphic
     }
@@ -91,7 +91,7 @@ impl Switch {
             next: None,
             error: None,
             backspace: None,
-            shown: None,
+            persistent: Vec::new(),
             position,
         }
     }
@@ -101,12 +101,12 @@ impl Switch {
             ChordType::Next => self.next = Some(label),
             ChordType::Error => self.error = Some(label),
             ChordType::Backspace => self.backspace = Some(label),
-            ChordType::Shown => self.shown = Some(label),
+            ChordType::Persistent => self.persistent.push(label),
         }
     }
 
-    /// Clear all labels except the `shown` label, since that one stays for the
-    /// whole lesson
+    /// Clear all labels except the `persistent` label, since that one stays for
+    /// the whole lesson
     fn clear(&mut self) {
         self.next = None;
         self.error = None;
@@ -119,8 +119,8 @@ impl Switch {
             .as_ref()
             .or(self.error.as_ref())
             .or(self.backspace.as_ref())
-            .or(self.shown.as_ref())
             .cloned()
+            .or_else(|| Label::join(&self.persistent))
             .unwrap_or_else(Label::default)
     }
 
@@ -164,7 +164,7 @@ impl Switch {
 
     fn draw(&self, printer: &Printer) {
         let (x, y) = self.position;
-        let row2_left = format!("│{}", self.label().pad(3));
+        let row2_left = format!("│{}", self.label());
         let (left, right) = self.styles();
         printer.with_color(left, |printer| {
             printer.print((x, y), "╭───");

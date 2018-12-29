@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 use tutor::State;
@@ -11,12 +13,6 @@ pub struct LabeledChord {
 
 #[derive(Debug, Clone)]
 pub struct Label(String);
-
-#[derive(Debug, Clone)]
-pub enum PrevCharStatus {
-    Correct,
-    Incorrect(Option<LabeledChord>),
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,50 +33,62 @@ impl LabeledChord {
     }
 }
 
-impl PrevCharStatus {
-    pub fn backspace(&self) -> Option<LabeledChord> {
-        if State::allow_mistakes() {
-            match self {
-                PrevCharStatus::Correct => None,
-                PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
-            }
-        } else {
-            None
-        }
-    }
-
-    pub fn error(&self) -> Option<LabeledChord> {
-        match self {
-            PrevCharStatus::Correct => None,
-            PrevCharStatus::Incorrect(x) => x.clone(),
-        }
-    }
-
-    pub fn is_correct(&self) -> bool {
-        match self {
-            PrevCharStatus::Correct => true,
-            PrevCharStatus::Incorrect(_) => false,
-        }
-    }
-}
-
 impl Label {
+    pub fn new(s: String) -> Option<Label> {
+        if s.len() > Label::max_len() {
+            None
+        } else {
+            Some(Label(s))
+        }
+    }
+
     pub fn from_char(character: &str) -> Self {
-        match character {
+        let s = match character {
             "\n" => "ret".into(), // "⏎"
             "\t" => "tab".into(),
             " " => "spc".into(),
             c => c.into(),
-        }
+        };
+        Label::new(s).expect("label too long")
     }
 
-    pub fn pad(&self, width: usize) -> String {
+    fn pad(&self, width: usize) -> String {
         let start = (width - self.len()) / 2. as usize;
         " ".repeat(start) + &self.0 + &" ".repeat(width - start)
     }
 
     fn len(&self) -> usize {
         self.0.graphemes(true).count()
+    }
+
+    pub fn join(labels: &[Label]) -> Option<Label> {
+        if labels.is_empty() {
+            return None;
+        }
+        if labels.len() == 1 {
+            return Some(labels[0].to_owned());
+        }
+        // Try concatening everything, separated by spaces
+        // If that's too long, try without spaces.
+        // If that's still too long, give and return a placeholder
+        Label::new(labels.join(" "))
+            .or_else(|| Label::new(labels.join("")))
+            .or_else(|| Some(Label::new_conflict()))
+    }
+
+    fn new_conflict() -> Label {
+        Label::new("…".into()).expect("label conflict placeholder too long")
+    }
+
+    fn max_len() -> usize {
+        3
+    }
+}
+
+impl fmt::Display for Label {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = self.pad(Self::max_len());
+        fmt::Display::fmt(&s, f)
     }
 }
 
@@ -96,9 +104,27 @@ impl Into<Label> for String {
     }
 }
 
+impl From<Label> for String {
+    fn from(label: Label) -> String {
+        label.0
+    }
+}
+
+impl<'a> From<&'a Label> for String {
+    fn from(label: &'a Label) -> String {
+        label.to_owned().into()
+    }
+}
+
 impl<'a> Into<Label> for &'a str {
     fn into(self) -> Label {
         self.to_owned().into()
+    }
+}
+
+impl Borrow<str> for Label {
+    fn borrow(&self) -> &str {
+        &self.0
     }
 }
 

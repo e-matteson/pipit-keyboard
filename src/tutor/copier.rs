@@ -7,8 +7,7 @@ use cursive::Printer;
 
 use error::Error;
 use tutor::{
-    grapheme_slice, offset, LabeledChord, PrevCharStatus, SlideEntry,
-    SlideLine, State,
+    grapheme_slice, offset, LabeledChord, SlideEntry, SlideLine, State,
 };
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -28,6 +27,12 @@ struct CopierLine {
     show_errors: bool,
     hint_map: HashMap<usize, LabeledChord>,
     show_hints_within_words: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum PrevCharStatus {
+    Correct,
+    Incorrect(Option<LabeledChord>),
 }
 
 impl Copier {
@@ -79,12 +84,10 @@ impl Copier {
 
     fn expected_next(&self) -> Option<String> {
         self.expected_at_offset(self.next_offset())
-        // .expect("failed to get next expected char")
     }
 
     fn expected_prev(&self) -> Option<String> {
         self.expected_at_offset(self.prev_offset())
-        // .expect("failed to get prev expected char")
     }
 
     fn actual_prev(&self) -> String {
@@ -266,6 +269,33 @@ impl Default for CopierLine {
             show_errors: true,
             hint_map: HashMap::new(),
             show_hints_within_words: true,
+        }
+    }
+}
+
+impl PrevCharStatus {
+    pub fn backspace(&self) -> Option<LabeledChord> {
+        if State::allow_mistakes() {
+            match self {
+                PrevCharStatus::Correct => None,
+                PrevCharStatus::Incorrect(_) => LabeledChord::backspace(),
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn error(&self) -> Option<LabeledChord> {
+        match self {
+            PrevCharStatus::Correct => None,
+            PrevCharStatus::Incorrect(x) => x.clone(),
+        }
+    }
+
+    pub fn is_correct(&self) -> bool {
+        match self {
+            PrevCharStatus::Correct => true,
+            PrevCharStatus::Incorrect(_) => false,
         }
     }
 }
