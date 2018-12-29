@@ -361,11 +361,11 @@ macro_print_py   macro_exit_py     macro_docstr_py
 
 #### bash macros ####
 
-macro_bang_dollar  macro_hash_bang   macro_ls
-....   *...        ....   .*..       ....   ...*
-*..*   .*..        *..*   ...*       ....   ...*
-  .     .            .     .           .     .
-  ... ...            ... .*.           ... .*.
+macro_hash_bang   macro_ls
+....   .*..       ....   ...*
+*..*   ...*       ....   ...*
+  .     .           .     .
+  ... .*.           ... .*.
 
 #### arduino macros ####
 
@@ -548,3 +548,10 @@ macro_org_insert      macro_org_to_md    macro_org_uncle_above macro_org_uncle_b
 .*..   ....           .*..   ....        .*..   ....           .*..   ....
   .     .               .     .            .     .               .     .
   ... .*.               ... .*.            *.. .*.               ... .*.
+
+
+macro_esc        macro_enter    macro_f3       macro_f4
+....   ....      ....   ....    ...*   ....    ..*.   ....
+..*.   ....      .*..   ....    ....   ....    ....   ....
+ .     .          .     .        .     .        .     .
+  .*. ...          .*. ...        .*. ...        .*. ...

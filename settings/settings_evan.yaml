@@ -5,7 +5,7 @@ options:
   chord_delay:                 30
   held_delay:                  200
   debounce_delay:              10
-  debug_messages:              None
+  debug_messages:              Some
 
   board_name:                  FEATHER_M0_BLE
   rgb_led_pins:                [10, 11, 12]
@@ -285,7 +285,6 @@ macros:
   macro_fn_self_void_rs: "fn (&self){\n}↑▶←←←←←←←←"
   macro_fn_void_rs: "fn (){\n}↑▶←←←"
   macro_amperstr_rs: "&str"
-  macro_bang_dollar: "!$ "
   macro_hash_bang: "#!/bin/bash"
   macro_exit_py: "exit(3)"
   macro_error_next: " en"
@@ -332,6 +331,14 @@ macros:
   macro_anagram_1: ", anagram: 1"
   # macro_fake_alt_tab:
   #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
+  macro_esc:
+    - {key: "KEY_ESC"}
+  macro_enter:
+    - {key: "KEY_ENTER"}
+  macro_f3:
+    - {key: "KEY_F3"}
+  macro_f4:
+    - {key: "KEY_F4"}
 
 word_modifiers:
   - mod_capital
@@ -374,6 +381,7 @@ dictionary:
   # - {word: "Result<, Error>←←←←←←←←", chord: " res"}
   - {word: "->"}
   - {word: "<-"}
+  - {word: "!$"}
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
   - {word: "abandon"}
@@ -4795,7 +4803,7 @@ dictionary:
   - {word: "typical", anagram: 1}
   - {word: "typo"}
   - {word: "ual"}
-  - {word: "u", anagram: 1}
+  # - {word: "u", anagram: 1}
   - {word: "ubuntu", anagram: 1}
   - {word: "ugly", anagram: 1}
   - {word: "UK"}
