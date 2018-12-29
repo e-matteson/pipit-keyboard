@@ -12,13 +12,11 @@ borders = "simple"  # Alternatives are "none" and "outset"
     view       = "black"
 
     primary   = "white"
-    secondary = ["#b22222", "red"]
-    tertiary  = ["#4169e1", "blue"]
+    secondary = ["red", "#b22222"]
+    tertiary  = ["blue", "#4169e1"]
 
-    title_primary   = ["#5f5f5f", "white"]
-    title_secondary = ["#303030", "white"]
+    title_primary   = ["white", "#5f5f5f"]
+    title_secondary = ["white", "#303030"]
 
-    # highlight          = ["#5151bd", "blue"]
-    # highlight          = ["#5f5faf", "blue"]
-    highlight          = ["#5151bd", "blue"]
-    highlight_inactive = [ "#878787", "white"]
+    highlight          = ["cyan", "#5151bd"]
+    highlight_inactive = ["white", "#878787"]

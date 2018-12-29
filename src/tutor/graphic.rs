@@ -1,4 +1,4 @@
-use cursive::theme::{Color, ColorStyle};
+use cursive::theme::{BaseColor, Color, ColorStyle};
 use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::Printer;
@@ -151,7 +151,10 @@ impl Switch {
     fn backspace_style() -> ColorStyle {
         // TODO the background color is hardcoded, instead of inheriting from
         // the theme!
-        ColorStyle::new(Color::Rgb(100, 95, 0), Color::Rgb(0, 0, 0))
+        ColorStyle::new(
+            Color::Dark(BaseColor::Yellow),
+            Color::Dark(BaseColor::Black),
+        )
     }
 
     fn error_style() -> ColorStyle {
