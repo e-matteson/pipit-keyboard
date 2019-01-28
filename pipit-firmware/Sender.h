@@ -2,16 +2,13 @@
 
 #include <stdint.h>
 #include "Chord.h"
-#include "FeatherComms.h"
+#include "Comms.h"
 #include "Feedback.h"
 #include "History.h"
-#include "TeensyComms.h"
 #include "auto_config.h"
 
 class Sender {
  public:
-  void setup();
-
   void deleteLastWord();
   void move(Motion motion, Direction direction);
   void backspace();
@@ -29,11 +26,7 @@ class Sender {
 
   History history;
 
-#ifdef FEATHER_M0_BLE
-  FeatherComms comms;
-#elif defined(TEENSY_LC)
-  TeensyComms comms;
-#endif
+  Comms comms;
 
  private:
   void leftArrow();

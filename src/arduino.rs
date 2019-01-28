@@ -80,13 +80,11 @@ impl ArduinoIDE {
 impl BoardName {
     fn ide_name(&self) -> &'static str {
         match self {
-            BoardName::FeatherM0BLE => "adafruit:samd:adafruit_feather_m0",
             BoardName::TeensyLC => unimplemented!(),
         }
     }
     // fn parameters(&self) -> Option<&'static str> {
     //     match self {
-    //         BoardName::FeatherM0BLE => None
     //         BoardName::TeensyLC => unimplemented!(),
     //     }
     // }

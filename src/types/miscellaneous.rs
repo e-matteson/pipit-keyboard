@@ -53,8 +53,6 @@ pub struct KmapPath(pub String);
 
 #[derive(Deserialize, Debug, Clone, Copy)]
 pub enum BoardName {
-    #[serde(rename = "FEATHER_M0_BLE")]
-    FeatherM0BLE,
     #[serde(rename = "TEENSY_LC")]
     TeensyLC,
 }
@@ -268,7 +266,6 @@ impl fmt::Display for KmapPath {
 impl ToC for BoardName {
     fn to_c(self) -> CCode {
         match self {
-            BoardName::FeatherM0BLE => "FEATHER_M0_BLE".to_c(),
             BoardName::TeensyLC => "TEENSY_LC".to_c(),
         }
     }

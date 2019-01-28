@@ -9,11 +9,6 @@
 #error "Wrong board_name, the arduino IDE did not expect a teensy_lc"
 #endif
 
-#elif defined(FEATHER_M0_BLE) || defined(FEATHER_M0_USB)
-#ifndef ARDUINO_SAMD_FEATHER_M0
-#error "Wrong board_name, the arduino IDE did not expect a feather_m0"
-#endif
-
 #else
 #error "Unknown board_name"
 #endif

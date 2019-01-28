@@ -1,13 +1,19 @@
 #include "OneShot.h"
 
-// The arduino IDE tries to compile all files, even if they're not included.
-#if defined(TEENSY_LC)
+#ifndef TEENSY_LC
+#error "OneShot implementation is specific to TEENSY_LC"
+#endif
 
 /// The user-provided interrupt service routine.
 static voidFuncPtr _callback = nullptr;
 static volatile KINETISK_PIT_CHANNEL_t* channel = KINETISK_PIT_CHANNELS;
 
-OneShotTeensy::OneShotTeensy() {
+OneShot* OneShot::getInstance() {
+  static OneShot singleton = OneShot();
+  return &singleton;
+}
+
+OneShot::OneShot() {
   // setup clock for PIT (periodic interrupt timer)
   SIM_SCGC6 |= SIM_SCGC6_PIT;
 
@@ -23,12 +29,7 @@ OneShotTeensy::OneShotTeensy() {
   NVIC_ENABLE_IRQ(IRQ_PIT);
 }
 
-OneShot* OneShot::getInstance() {
-  static OneShotTeensy singleton = OneShotTeensy();
-  return &singleton;
-}
-
-void OneShotTeensy::enableInterrupt() {
+void OneShot::enableInterrupt() {
   // clear interrupt flag before enabling, just in case
   channel->TFLG = 1;
 
@@ -36,12 +37,12 @@ void OneShotTeensy::enableInterrupt() {
   channel->TCTRL = 3;
 }
 
-void OneShotTeensy::schedule_micros(uint32_t micros, voidFuncPtr callback) {
+void OneShot::schedule_micros(uint32_t micros, voidFuncPtr callback) {
   _callback = callback;
   schedule_micros(micros);
 }
 
-void OneShotTeensy::schedule_micros(uint32_t micros) {
+void OneShot::schedule_micros(uint32_t micros) {
   // load countdown value
   uint32_t cycles = (F_BUS / 1000000) * micros - 1;
   channel->LDVAL = cycles;
@@ -56,6 +57,7 @@ void pit_isr() {
     channel->TFLG = 1;
     // disable timer
     channel->TCTRL = 0;
+
     if (_callback != nullptr) {
       (*_callback)();
     }
@@ -65,5 +67,3 @@ void pit_isr() {
   // PIT_TFLG0 = 1;
   // PIT_TFLG1 = 1;
 }
-
-#endif

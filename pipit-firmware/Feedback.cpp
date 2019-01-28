@@ -88,52 +88,6 @@ void Feedback::updateLED() {
       }
       break;
 
-    case LEDRoutine::Battery:
-      switch (led_subroutine) {
-        case 0:
-          led_timer.start(2000);
-          led_subroutine++;
-          switch (battery.getLevel()) {
-            case 0:
-              setLEDColor(LEDColor::Red);
-              break;
-            case 1:
-              setLEDColor(LEDColor::Orange);
-              break;
-            case 2:
-              setLEDColor(LEDColor::Yellow);
-              break;
-            case 3:
-              setLEDColor(LEDColor::Green);
-              break;
-            case 4:
-              setLEDColor(LEDColor::Teal);
-              break;
-            default:
-              // Battery not present, or bad level
-              setLEDColor(LEDColor::White);
-              break;
-          }
-          break;
-        default:
-          endRoutine();
-          break;
-      }
-      break;
-
-    case LEDRoutine::BleNoConnection:
-      switch (led_subroutine) {
-        case 0:
-          led_timer.start(100);
-          setLEDColor(LEDColor::DimBlue);
-          led_subroutine++;
-          break;
-        default:
-          endRoutine();
-          break;
-      }
-      break;
-
     case LEDRoutine::FlashGreen:
       switch (led_subroutine) {
         case 0:
@@ -244,19 +198,6 @@ void Feedback::updateLED() {
         default:
           endRoutine();
       }
-      break;
-
-    case LEDRoutine::ToggleWireless:
-      if (led_subroutine == 6) {
-        endRoutine();
-      } else if (led_subroutine % 2 == 0) {
-        led_timer.start(500);
-        setLEDColor(LEDColor::Purple);
-      } else {
-        led_timer.start(500);
-        setLEDColor(LEDColor::Black);
-      }
-      led_subroutine++;
       break;
 
     case LEDRoutine::AllColors:

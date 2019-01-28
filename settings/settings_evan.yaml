@@ -19,33 +19,6 @@ options:
       - [        [11,18],[11,17],[11,16],   [15,16],[15,17],[15,18]        ]
 
 
-  # board_name:                  FEATHER_M0_BLE
-  # rgb_led_pins:                [10, 11, 12]
-  # enable_led_typing_feedback:  true
-  # enable_wired_feather_hack:   true
-  # # enable_audio_typing_feedback: true
-  # battery_level_pin:           9
-  # row_pins:                    [1, 0, 19]
-  # column_pins:                 [15,16,17,18, 20,21,5,6]
-
-  # kmap_format:
-  #   - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
-  #   - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
-  #   - [                  [1, 18],                      [1,  6]                ]
-  #   - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
-
-  # ######## NEWEST (MS)
-  # board_name:                TEENSY_LC
-  # row_pins:                  [16, 17, 18, 19, 20, 21]
-  # column_pins:               [11, 12, 14, 15]
-  # use_standby_interrupts:    false
-  # kmap_format:
-  #     - [[16,15],[16,14],[16,12],[16,11],   [19,11],[19,12],[19,14],[19,15]]
-  #     - [[17,15],[17,14],[17,12],[17,11],   [20,11],[20,12],[20,14],[20,15]]
-  #     - [                [18,15],                 [21,15]                  ]
-  #     - [        [18,14],[18,12],[18,11],   [21,11],[21,12],[21,14]        ]
-
-
   # ######## JS, swapped some rows/cols! 2.1 PCBs
   # board_name:                TEENSY_LC
   # row_pins:                  [11, 12, 14, 15, 20, 21]
@@ -56,6 +29,18 @@ options:
   #     - [[14,19],[12,18],[14,17],[14,16],   [20,16],[20,17],[20,18],[20,19]]
   #     - [                [11,19],                   [15,19]                ]
   #     - [        [11,18],[11,17],[11,16],   [15,18],[15,17],[15,16]        ]
+
+
+  # ######## MS, row pins don't support interrupts
+  # board_name:                TEENSY_LC
+  # row_pins:                  [16, 17, 18, 19, 20, 21]
+  # column_pins:               [11, 12, 14, 15]
+  # use_standby_interrupts:    false
+  # kmap_format:
+  #     - [[16,15],[16,14],[16,12],[16,11],   [19,11],[19,12],[19,14],[19,15]]
+  #     - [[17,15],[17,14],[17,12],[17,11],   [20,11],[20,12],[20,14],[20,15]]
+  #     - [                [18,15],                 [21,15]                  ]
+  #     - [        [18,14],[18,12],[18,11],   [21,11],[21,12],[21,14]        ]
 
 
   ####### OLDEST BOARD
@@ -378,10 +363,8 @@ commands:
   - command_sticky_alt
   - command_sticky_shift
   - command_sticky_gui
-  - command_led_battery
   - command_led_colors
   - command_led_rainbow
-  - command_toggle_wireless
   - command_scroll_down
   - command_scroll_up
   - command_pan_left

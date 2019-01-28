@@ -1,8 +1,6 @@
 #include "Sender.h"
 #include <Arduino.h>
 
-void Sender::setup() { comms.setup(); }
-
 /************* Editing Commands *********/
 
 void Sender::move(Motion motion, Direction direction) {
@@ -14,7 +12,6 @@ void Sender::move(Motion motion, Direction direction) {
     } else {
       rightArrow();
     }
-    comms.proportionalDelay(count, 6);
   }
 }
 
@@ -25,10 +22,6 @@ void Sender::deleteLastWord() {
   uint16_t count = history.calcDistance(Motion::Word, Direction::Left);
   for (uint16_t i = 0; i < count; i++) {
     backspace();
-
-    // For some reason the backspaces get dropped more easily then word letters,
-    // so add a longer delay between sends.
-    comms.proportionalDelay(count, 6);
   }
 }
 
@@ -60,7 +53,6 @@ void Sender::sendMacro(const Key* keys, uint8_t keys_length,
   history.startEntry(chord, 0);
   for (uint8_t i = 0; i < keys_length; i++) {
     sendKey(keys + i);
-    comms.proportionalDelay(keys_length, 2);
   }
   releaseAll();
 }
@@ -79,7 +71,6 @@ void Sender::sendWord(const Key* keys, uint8_t keys_length, Chord* chord) {
 
   if (chord->hasModShorten()) {
     backspace();
-    comms.proportionalDelay(keys_length, 1);
   }
 
   if (chord->hasModDouble()) {
@@ -88,7 +79,6 @@ void Sender::sendWord(const Key* keys, uint8_t keys_length, Chord* chord) {
     Key* doubled_key = history.getLastLetterAtCursor();
     history.startEntry(chord, 1);
     sendKey(doubled_key);
-    comms.proportionalDelay(keys_length, 1);
   } else {
     // Just start the new history entry as usual
     history.startEntry(chord, 1);
@@ -97,7 +87,6 @@ void Sender::sendWord(const Key* keys, uint8_t keys_length, Chord* chord) {
   if (conf::SPACE_POS == WordSpacePosition::Before) {
     if (!chord->hasModNospace()) {
       space();
-      comms.proportionalDelay(keys_length, 1);
     }
   }
 
@@ -108,13 +97,11 @@ void Sender::sendWord(const Key* keys, uint8_t keys_length, Chord* chord) {
 
   for (uint8_t i = 0; i < keys_length; i++) {
     sendKey(new_keys + i);
-    comms.proportionalDelay(keys_length, 1);
   }
 
   if (conf::SPACE_POS == WordSpacePosition::After) {
     if (!chord->hasModNospace()) {
       space();
-      comms.proportionalDelay(keys_length, 1);
     }
   }
 
@@ -174,7 +161,7 @@ void Sender::press(const Report* report) {
   report->printDebug();
 
   // Actually send the keypress, over USB or bluetooth:
-  this->comms.press(report);
+  comms.press(report);
 }
 
 void Sender::setStickymod(uint8_t mod_byte) { stickymod |= mod_byte; }

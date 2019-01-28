@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (C) 2016 e-matteson (e.r.matteson@gmail.com)
+Copyright (C) 2019 e-matteson (e.r.matteson@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **********************************************************************/
 
 // // Treat all compiler warnings as errors
-// // The Adafruit_BLE.h library has warnings, though.
-// #pragma GCC diagnostic error "-Werror"
+#pragma GCC diagnostic error "-Werror"
 
 #include "Pipit.h"
 

@@ -4,17 +4,12 @@
 
 #include "auto_config.h"
 
-#include "Battery.h"
 #include "Timer.h"
 
 // Possible routines for the rgb led:
 enum class LEDRoutine {
   None = 0,
-  Battery,
   Boot,
-  BleNoConnection,
-  BleTxpower,
-  BleRssi,
   Flymacro,
   FlashGreen,
   FlashRed,
@@ -25,7 +20,6 @@ enum class LEDRoutine {
   NoAnagramFeedback,
   CommandFeedback,
   Warning,
-  ToggleWireless,
   Test,
   AllColors,
   Rainbow,
@@ -67,7 +61,6 @@ class Feedback {
   void setLEDColor(LEDColor color);
   void setLEDRGB(uint8_t red, uint8_t green, uint8_t blue);
 
-  Battery battery;
   Timer led_timer;
 
   LEDRoutine led_routine = LEDRoutine::None;  // The active LED routine

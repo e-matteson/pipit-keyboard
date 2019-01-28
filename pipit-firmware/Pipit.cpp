@@ -4,15 +4,12 @@
 #include "conf.h"
 
 void Pipit::setup() {
-  sender.setup();
   feedback.setup();
-  feedback.startRoutine(LEDRoutine::Battery);
   feedback.updateLED();
   Scanner::getInstance()->setup();
 }
 
 void Pipit::loop() {
-  // __WFI();
   asm("wfi");
 
   // Give the scanner time to finish before bothering to check for chords
@@ -110,28 +107,12 @@ void Pipit::doCommand(const Key* keys, uint8_t length) {
       sender.setStickymod(MODIFIERKEY_GUI & 0xff);
       break;
 
-    case conf::Command::command_led_battery:
-      feedback.startRoutine(LEDRoutine::Battery);
-      break;
-
     case conf::Command::command_led_colors:
       feedback.startRoutine(LEDRoutine::AllColors);
       break;
 
     case conf::Command::command_led_rainbow:
       feedback.startRoutine(LEDRoutine::Rainbow);
-      break;
-
-    case conf::Command::command_toggle_wireless:
-      if (sender.comms.toggleWireless()) {
-        // success
-        feedback.startRoutine(LEDRoutine::ToggleWireless);
-        DEBUG1_LN("toggled wireless/wired sending");
-      } else {
-        // fail
-        feedback.startRoutine(LEDRoutine::Warning);
-        DEBUG1_LN("Warning: failed to toggle wireless/wired sending");
-      }
       break;
 
     case conf::Command::command_scroll_down:
@@ -380,27 +361,3 @@ uint8_t Pipit::doIfFoundHelper(conf::SeqType type, Chord* chord, Key* keys,
   feedback.trigger(type);
   return keys_length;  // Success
 }
-
-/// Shutdown to save power if a switch has been held down for a very long time,
-/// since that probably means the keyboard is squished against something. This
-/// mostly happens with battery-powered models that are left on inside a
-/// backpack.
-// void Pipit::shutdownIfSquished() {
-//   if (!switches.matrix.isSquishedInBackpack()) {
-//     return;
-//   }
-//   DEBUG1_LN(
-//       "WARNING: Switches have been held down too long, you might be inside a
-//       " "backpack.");
-//   DEBUG1_LN("         Please reboot.");
-
-//   // TODO disable bluetooth as well
-//   switches.matrix.shutdown();
-//   sender.releaseAll();
-//   delay(1000);
-
-//   // TODO enter deep sleep instead of looping forever.
-//   noInterrupts();
-//   while (1) {
-//   }
-// }

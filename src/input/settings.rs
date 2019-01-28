@@ -15,7 +15,7 @@ fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
 }
 
-validated_struct!{
+validated_struct! {
     #[derive(Deserialize, Debug)]
     #[serde(deny_unknown_fields)]
     pub struct Settings {
@@ -31,7 +31,7 @@ validated_struct!{
     }
 }
 
-validated_struct!{
+validated_struct! {
     #[derive(Deserialize, Debug)]
     #[serde(deny_unknown_fields)]
     pub struct OptionsConfig {
@@ -45,7 +45,6 @@ validated_struct!{
         pub kmap_format: KmapFormat,
 
         pub rgb_led_pins: Option<[Pin; 3]>,
-        pub battery_level_pin: Option<Pin>,
 
         #[serde(default = "WordSpacePosition::default")]
         pub word_space_position: WordSpacePosition,
@@ -59,15 +58,12 @@ validated_struct!{
         #[serde(default = "return_false")]
         pub enable_audio_typing_feedback: bool,
 
-        #[serde(default = "return_false")]
-        pub enable_wired_feather_hack: bool,
-
         #[serde(default = "return_true")]
         pub use_standby_interrupts: bool,
     }
 }
 
-always_valid_enum!{
+always_valid_enum! {
     #[derive(Deserialize, Debug, Clone, Copy)]
     pub enum Verbosity {
         None,
@@ -76,7 +72,7 @@ always_valid_enum!{
     }
 }
 
-always_valid_enum!{
+always_valid_enum! {
     #[derive(Deserialize, Debug, Clone, Copy)]
     pub enum WordSpacePosition {
         Before,
@@ -182,10 +178,6 @@ impl OptionsConfig {
                 name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
                 is_defined: self.enable_audio_typing_feedback,
             },
-            CTree::DefineIf {
-                name: "ENABLE_WIRED_FEATHER_HACK".to_c(),
-                is_defined: self.enable_wired_feather_hack,
-            },
             CTree::ConstVar {
                 name: "USE_STANDBY_INTERRUPTS".to_c(),
                 value: self.use_standby_interrupts.to_c(),
@@ -203,34 +195,18 @@ impl OptionsConfig {
             });
         }
 
-        if let Some(pin) = self.battery_level_pin {
-            ops.push(CTree::ConstVar {
-                name: "battery_level_pin".to_c(),
-                value: pin.to_c(),
-                c_type: "uint8_t".to_c(),
-                is_extern: true,
-            });
-        }
         ops
     }
 
     /// Generate the OpReq::Auto options that depend only on other
     /// options
     fn get_auto_ops(&self) -> Result<Vec<CTree>, Error> {
-        let has_battery = self.battery_level_pin.is_some();
-
         let enable_rgb_led = self.rgb_led_pins.is_some();
 
-        Ok(vec![
-            CTree::DefineIf {
-                name: "ENABLE_RGB_LED".to_c(),
-                is_defined: enable_rgb_led,
-            },
-            CTree::DefineIf {
-                name: "HAS_BATTERY".to_c(),
-                is_defined: has_battery,
-            },
-        ])
+        Ok(vec![CTree::DefineIf {
+            name: "ENABLE_RGB_LED".to_c(),
+            is_defined: enable_rgb_led,
+        }])
     }
 
     fn num_rows(&self) -> Result<usize, Error> {

@@ -7,7 +7,7 @@ Common letters are typed by pressing a single switch, and rarer letters are type
 
 You can change the keymap, dictionary, and other settings by editing config files. You then run the configuration tool once to generate updated firmware, and load the new firmware onto the keyboard\'s microcontroller.
 
-The firmware is compatible with several varieties of arduino-compatible ARM microcontroller boards. It currently suppports the `Adafruit Feather BLE M0` (for a wireless keyboard) and the `Teensy LC` (for a wired keyboard).
+The firmware currently supports only the `Teensy LC`, an arduino-compatible board with an ARM Cortex M0+. 
 
 ![keyboard photo](https://raw.githubusercontent.com/e-matteson/pipit-guide/master/src/assets/v2_with_hand.png)
 
