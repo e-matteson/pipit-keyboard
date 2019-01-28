@@ -10,12 +10,25 @@
 class OneShot {
  public:
   static OneShot* getInstance();
-  virtual void schedule(uint32_t count);
-  virtual void schedule(uint32_t count, voidFuncPtr callback);
+  virtual void schedule_micros(uint32_t micros);
+  virtual void schedule_micros(uint32_t micros, voidFuncPtr callback);
+  // virtual void schedule(uint32_t count);
+  // virtual void schedule(uint32_t count, voidFuncPtr callback);
 };
 
 #if defined(TEENSY_LC)
-#error "OneShot not yet implemented for TEENSY_LC"
+
+class OneShotTeensy : public OneShot {
+ public:
+  OneShotTeensy();
+  // void schedule(uint32_t count);
+  // void schedule(uint32_t count, voidFuncPtr callback);
+  void schedule_micros(uint32_t micros);
+  void schedule_micros(uint32_t micros, voidFuncPtr callback);
+
+ private:
+  void enableInterrupt();
+};
 
 #elif defined(FEATHER_M0_BLE)
 

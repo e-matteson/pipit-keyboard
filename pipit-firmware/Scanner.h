@@ -106,7 +106,8 @@ class Scanner {
 
  private:
   ChordData makeChordData();
-  void schedule(uint32_t count);
+  // void schedule(uint32_t count);
+  void schedule_micros(uint32_t micros);
 
   Matrix matrix;
   Statuses statuses;

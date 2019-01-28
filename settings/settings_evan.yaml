@@ -5,22 +5,34 @@ options:
   chord_delay:                 30
   held_delay:                  200
   debounce_delay:              10
-  debug_messages:              Some
+  debug_messages:              None
 
-  board_name:                  FEATHER_M0_BLE
-  rgb_led_pins:                [10, 11, 12]
-  enable_led_typing_feedback:  true
-  enable_wired_feather_hack:   true
-  # enable_audio_typing_feedback: true
-  battery_level_pin:           9
-  row_pins:                    [1, 0, 19]
-  column_pins:                 [15,16,17,18, 20,21,5,6]
-
+  ######## my teensy, 2.1 PCBs
+  board_name:                TEENSY_LC
+  use_standby_interrupts:    false
+  row_pins:                  [11, 12, 14, 15, 20, 21]
+  column_pins:               [16, 17, 18, 19]
   kmap_format:
-    - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
-    - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
-    - [                  [1, 18],                      [1,  6]                ]
-    - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
+      - [[14,19],[14,18],[14,17],[14,16],   [21,16],[21,17],[21,18],[21,19]]
+      - [[12,19],[12,18],[12,17],[12,16],   [20,16],[20,17],[20,18],[20,19]]
+      - [                [11,19],                   [15,19]                ]
+      - [        [11,18],[11,17],[11,16],   [15,16],[15,17],[15,18]        ]
+
+
+  # board_name:                  FEATHER_M0_BLE
+  # rgb_led_pins:                [10, 11, 12]
+  # enable_led_typing_feedback:  true
+  # enable_wired_feather_hack:   true
+  # # enable_audio_typing_feedback: true
+  # battery_level_pin:           9
+  # row_pins:                    [1, 0, 19]
+  # column_pins:                 [15,16,17,18, 20,21,5,6]
+
+  # kmap_format:
+  #   - [[19,18], [19,17], [19,16], [19,15],    [19,20], [19,21], [19,5], [19,6]]
+  #   - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
+  #   - [                  [1, 18],                      [1,  6]                ]
+  #   - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
 
   # ######## NEWEST (MS)
   # board_name:                TEENSY_LC

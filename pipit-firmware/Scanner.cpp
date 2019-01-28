@@ -2,9 +2,12 @@
 #include "conf.h"
 
 // TODO specify as microsecs instead of raw counts
-#define CAPACITANCE_COUNT 0x2
-#define YIELD_COUNT 0x2
-#define UNTIL_SCAN_COUNT 0x19
+// #define CAPACITANCE_COUNT 0x2
+// #define YIELD_COUNT 0x2
+// #define UNTIL_SCAN_COUNT 0x19
+#define CAPACITANCE_MICROS 5
+#define YIELD_MICROS 5
+#define UNTIL_SCAN_MICROS 1000
 
 void scannerISR() {
   Scanner* s = Scanner::getInstance();
@@ -130,7 +133,8 @@ bool Scanner::pushToHold(ChordData data) { return to_hold.pushInLoop(data); }
 
 void Scanner::setup() {
   matrix.setup();
-  OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scannerISR);
+  // OneShot::getInstance()->schedule(UNTIL_SCAN_COUNT, scannerISR);
+  OneShot::getInstance()->schedule_micros(UNTIL_SCAN_MICROS, scannerISR);
 }
 
 ChordData Scanner::makeChordData() {
@@ -171,7 +175,8 @@ void Scanner::updateSwitches() {
     statuses.alreadySentToHeld();
   }
   state = State::DetectChords;
-  schedule(YIELD_COUNT);
+  // schedule(YIELD_COUNT);
+  schedule_micros(YIELD_MICROS);
 }
 
 void Scanner::scanStep() {
@@ -185,12 +190,14 @@ void Scanner::scanStep() {
     // Last column, done scanning!
     col_index = 0;
     state = State::UpdateSwitches;
-    schedule(YIELD_COUNT);
+    // schedule(YIELD_COUNT);
+    schedule_micros(YIELD_MICROS);
   } else {
     // Set next column and then wait for it to take effect before reading.
     matrix.selectColumn(col_index);
     col_index++;
-    schedule(CAPACITANCE_COUNT);
+    // schedule(CAPACITANCE_COUNT);
+    schedule_micros(CAPACITANCE_MICROS);
   }
 }
 
@@ -213,7 +220,8 @@ void Scanner::detectChords() {
 
   stopwatches.tick();
   state = State::Scan;
-  schedule(UNTIL_SCAN_COUNT);
+  // schedule(UNTIL_SCAN_COUNT);
+  schedule_micros(UNTIL_SCAN_MICROS);
 }
 
 void Scanner::setMode(conf::Mode new_mode) {
@@ -223,8 +231,11 @@ void Scanner::setMode(conf::Mode new_mode) {
   interrupts();
 }
 
-void Scanner::schedule(uint32_t count) {
-  OneShot::getInstance()->schedule(count);
+// void Scanner::schedule(uint32_t count) {
+//   OneShot::getInstance()->schedule(count);
+// }
+void Scanner::schedule_micros(uint32_t micros) {
+  OneShot::getInstance()->schedule_micros(micros);
 }
 
 Scanner* Scanner::getInstance() {
