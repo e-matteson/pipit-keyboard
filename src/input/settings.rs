@@ -37,7 +37,6 @@ validated_struct! {
     pub struct OptionsConfig {
         pub chord_delay: Delay,
         pub held_delay: Delay,
-        pub debounce_delay: Delay,
         pub debug_messages: Verbosity,
         pub board_name: BoardName,
         pub row_pins: Vec<Pin>,
@@ -135,12 +134,6 @@ impl OptionsConfig {
             CTree::ConstVar {
                 name: "HELD_DELAY".to_c(),
                 value: self.held_delay.to_c(),
-                c_type: "uint32_t".to_c(),
-                is_extern: true,
-            },
-            CTree::ConstVar {
-                name: "DEBOUNCE_DELAY".to_c(),
-                value: self.debounce_delay.to_c(),
                 c_type: "uint32_t".to_c(),
                 is_extern: true,
             },

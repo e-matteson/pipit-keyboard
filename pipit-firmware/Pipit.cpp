@@ -17,7 +17,6 @@ void Pipit::loop() {
   delayMicroseconds(500);
 
   processIfReady();
-  // shutdownIfSquished();
 }
 
 void Pipit::reuseMods(Chord* chord) {

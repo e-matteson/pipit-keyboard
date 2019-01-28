@@ -10,10 +10,6 @@ options:
 # Required. Milliseconds.
   held_delay:                  200
 
-# How long a switch must stay down (or up) to be considered a real press (or
-# release), and not an accidental bounce. Required. Milliseconds.
-  debounce_delay:              10
-
 # How much debugging info to send over the serial connection. Messages can be
 # viewed in the Arduino serial monitor. Required. None, Some, or All.
   debug_messages:              None

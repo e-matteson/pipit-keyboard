@@ -4,7 +4,6 @@ options:
 
   chord_delay:                 30
   held_delay:                  200
-  debounce_delay:              10
   debug_messages:              None
 
   ######## my teensy, 2.1 PCBs
