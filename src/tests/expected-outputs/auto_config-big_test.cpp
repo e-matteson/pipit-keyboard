@@ -4,8 +4,6 @@ const uint32_t CHORD_DELAY = 30;
 
 const uint32_t HELD_DELAY = 200;
 
-const uint32_t DEBOUNCE_DELAY = 10;
-
 const WordSpacePosition SPACE_POS = WordSpacePosition::Before;
 
 const std::array<uint8_t,3> row_pins = {
@@ -20,8 +18,6 @@ const bool USE_STANDBY_INTERRUPTS = 1;
 const std::array<uint8_t,3> rgb_led_pins = {
  10, 11, 12, 
 };
-const uint8_t battery_level_pin = 9;
-
 const uint8_t MIN_HUFFMAN_CODE_BIT_LEN = 3;
 
 const HuffmanChar huffman_lookup[105] = {
@@ -10026,9 +10022,8 @@ const ModeStruct windows_mode_struct = {
   windows_mode_anagram_mask, // anagram_mask
 };
 
-const ModeStruct* mode_structs[4] = {
+const std::array<const ModeStruct*,4> mode_structs = {
  &default_mode_struct, &gaming_mode_struct, &left_hand_mode_struct, &windows_mode_struct, 
 };
-
 
 } // end namespace conf

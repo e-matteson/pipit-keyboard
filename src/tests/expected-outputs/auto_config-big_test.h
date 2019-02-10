@@ -131,18 +131,15 @@ typedef void (*voidFuncPtr)(void);
 namespace conf {
 extern const uint32_t CHORD_DELAY;
 extern const uint32_t HELD_DELAY;
-extern const uint32_t DEBOUNCE_DELAY;
 #define DEBUG_MESSAGES 0
 extern const WordSpacePosition SPACE_POS;
-#define FEATHER_M0_BLE 
+#define TEENSY_LC 
 extern const std::array<uint8_t,3> row_pins;
 extern const std::array<uint8_t,8> column_pins;
 #define ENABLE_LED_TYPING_FEEDBACK 
 extern const bool USE_STANDBY_INTERRUPTS;
 extern const std::array<uint8_t,3> rgb_led_pins;
-extern const uint8_t battery_level_pin;
 #define ENABLE_RGB_LED 
-#define HAS_BATTERY 
 extern const uint8_t MIN_HUFFMAN_CODE_BIT_LEN;
 extern const HuffmanChar huffman_lookup[105];
 extern const uint8_t MAX_ANAGRAM_NUM;
@@ -179,7 +176,7 @@ enum class Command : uint8_t {
 };
 
 extern const uint8_t MAX_KEYS_IN_SEQUENCE;
-extern const ModeStruct* mode_structs[4];
+extern const std::array<const ModeStruct*,4> mode_structs;
 
 } // end namespace conf
 

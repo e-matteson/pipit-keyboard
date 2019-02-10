@@ -2,15 +2,16 @@ options:
 
   chord_delay:                 30
   held_delay:                  200
-  debounce_delay:              10
+  # debounce_delay:              10
   debug_messages:              None
   output_directory:            src/tests/actual-outputs
 
-  board_name:                  FEATHER_M0_BLE
+  # board_name:                  FEATHER_M0_BLE
+  board_name:                  TEENSY_LC
   rgb_led_pins:                [10, 11, 12]
   enable_led_typing_feedback:  true
   # enable_audio_typing_feedback: true
-  battery_level_pin:           9
+  # battery_level_pin:           9
   row_pins:                    [1, 0, 19]
   column_pins:                 [15,16,17,18, 20,21,5,6]
 
