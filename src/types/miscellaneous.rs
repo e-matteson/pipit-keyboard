@@ -372,17 +372,32 @@ impl fmt::Display for Spelling {
 
 impl SpellingTable {
     /// Return None if not found.
-    pub fn get(&self, spelling: &Spelling) -> Option<&Name> {
-        self.0.get(spelling)
+    // TODO return Cow<Name>
+    pub fn get(&self, spelling: &Spelling) -> Vec<Name> {
+        if let Some(exact_name) = self.0.get(spelling) {
+            return vec![exact_name.to_owned()];
+        }
+        if spelling.is_uppercase() {
+            if let Some(name) = self.0.get(&(spelling.to_lowercase())) {
+                // TODO don't hardcode shift name
+                return vec![name.to_owned(), Name::from("mod_shift")];
+            }
+        }
+        Vec::new()
     }
 
     /// Return a LookupErr if not found.
     /// TODO is this a good name?
-    pub fn get_checked(&self, spelling: &Spelling) -> Result<&Name, Error> {
-        self.get(spelling).ok_or_else(|| Error::LookupErr {
-            key: format!("name for '{}'", spelling),
-            container: "spelling table".to_owned(),
-        })
+    pub fn get_checked(&self, spelling: &Spelling) -> Result<Vec<Name>, Error> {
+        let names = self.get(spelling);
+        if names.is_empty() {
+            Err(Error::LookupErr {
+                key: format!("name for '{}'", spelling),
+                container: "spelling table".to_owned(),
+            })
+        } else {
+            Ok(names)
+        }
     }
 }
 

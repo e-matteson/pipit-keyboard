@@ -9,7 +9,7 @@ use error::{Error, ResultExt};
 use types::{
     AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
     HuffmanTable, KeyDefs, KeyPress, KmapOrder, KmapPath, ModeInfo, ModeName,
-    Name, SeqType, Sequence, SpellingTable, Validate, Word,
+    Name, SeqType, Sequence, SpellingTable, Validate, Wordlike,
 };
 use util::read_file;
 
@@ -202,11 +202,22 @@ impl AllDataBuilder {
         spellings: &SpellingTable,
     ) -> Result<(), Error> {
         let dictionary = self.settings.dictionary.clone();
+        let snippets = self.settings.snippets.clone();
         for kmap in &self.get_kmaps_with_words() {
-            for info in &dictionary {
-                self.add_word(info, kmap, spellings).with_context(|| {
-                    format!("Failed to add word: {}", info.word)
-                })?
+            for word_info in &dictionary {
+                self.add_wordlike(word_info, kmap, spellings, SeqType::Word)
+                    .with_context(|| {
+                        format!("Failed to add word: {}", word_info.word)
+                    })?
+            }
+            for snippet_info in &snippets {
+                self.add_wordlike(snippet_info, kmap, spellings, SeqType::Macro)
+                    .with_context(|| {
+                        format!(
+                            "Failed to add snippet: {}",
+                            snippet_info.snippet
+                        )
+                    })?
             }
         }
         Ok(())
@@ -295,48 +306,54 @@ impl AllDataBuilder {
         self.sequences.insert(name, fake_seq, SeqType::Command)
     }
 
-    fn add_word(
+    fn add_wordlike<T>(
         &mut self,
-        word: &Word,
+        wordlike: &T,
         kmap: &KmapPath,
         spelling_table: &SpellingTable,
-    ) -> Result<(), Error> {
-        let word_name = word.name();
+        seq_type: SeqType,
+    ) -> Result<(), Error>
+    where
+        T: Wordlike,
+    {
+        let name = wordlike.name();
 
         self.sequences.insert(
-            word_name.clone(),
-            word.sequence().with_context(|| {
-                format!("Failed to make sequence for '{}'", word_name)
+            name.clone(),
+            wordlike.sequence().with_context(|| {
+                format!("Failed to make sequence for '{}'", name)
             })?,
-            SeqType::Word,
+            seq_type,
         )?;
 
         let mut chord = self
-            .make_word_chord(word, kmap, spelling_table)
-            .with_context(|| {
-                format!("Failed to make chord for '{}'", word_name)
-            })?;
-        chord.anagram_num = word.anagram_num();
-        self.chords.insert(word_name, chord, kmap)
+            .make_relative_chord(wordlike, kmap, spelling_table)
+            .with_context(|| format!("Failed to make chord for '{}'", name))?;
+        chord.anagram_num = wordlike.anagram_num();
+        self.chords.insert(name, chord, kmap)
     }
 
-    fn make_word_chord(
+    fn make_relative_chord<T>(
         &self,
-        word: &Word,
+        wordlike: &T,
         kmap: &KmapPath,
         spelling_table: &SpellingTable,
-    ) -> Result<Chord<KmapOrder>, Error> {
-        let spellings = word.chord_spellings()?;
-        let mut letter_chords = {
-            spellings.into_iter().map(|spelling| {
-                self.chords
-                    .get(spelling_table.get_checked(&spelling)?, kmap)
-            })
-        };
+    ) -> Result<Chord<KmapOrder>, Error>
+    where
+        T: Wordlike,
+    {
+        let mut names = Vec::new();
+        for spelling in wordlike.chord_spellings()? {
+            names.extend(spelling_table.get_checked(&spelling)?)
+        }
+
+        let mut letter_chords =
+            names.iter().map(|name| self.chords.get(name, kmap));
 
         let mut word_chord = letter_chords.next().ok_or_else(|| {
             Error::Empty(
-                "set of letter chords for constructing word chord".to_owned(),
+                "set of letter chords for constructing relative chord"
+                    .to_owned(),
             )
         })??;
         for c in letter_chords {

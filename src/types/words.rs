@@ -31,56 +31,53 @@ pub struct Word {
 #[serde(deny_unknown_fields)]
 pub struct AnagramNum(u8);
 
+/// Snippets are basically just sugar around macros. Their definitions in the
+/// settings file are like `word` definitions, with relative chords and strings
+/// for sequences. But to the firmware, they look just like other macros.
+#[derive(Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct Snippet {
+    pub snippet: String,
+    pub chord: Option<String>,
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-impl Word {
-    // pub fn seq_spelling(&self) -> String {
-    //     self.word.clone()
-    // }
-    pub fn seq_spelling(&self) -> &str {
-        &self.word
+// TODO shrink, make more methods default
+// TODO be consistent about meaning of "spelling"
+pub trait Wordlike {
+    fn seq_field(&self) -> &str;
+    fn chord_field(&self) -> Option<&String>;
+    fn anagram_num(&self) -> AnagramNum;
+    fn name_prefix() -> &'static str;
+
+    fn has_alternate_chord(&self) -> bool {
+        self.chord_field().is_some()
     }
 
-    fn chord_spelling(&self) -> &str {
-        // self.chord.clone().unwrap_or_else(|| self.word.clone())
-        self.chord.as_ref().unwrap_or_else(|| &self.word)
-    }
-
-    pub fn chord_spellings(&self) -> Result<Vec<Spelling>, Error> {
+    fn chord_spellings(&self) -> Result<Vec<Spelling>, Error> {
         self.chord_spelling()
             .graphemes(true)
-            .map(|letter| Ok(Spelling::new(letter)?.to_lowercase()))
+            .map(Spelling::new)
             .collect()
     }
 
-    pub fn anagram_num(&self) -> AnagramNum {
-        self.anagram.unwrap_or_default()
-    }
-
-    fn has_alternate_chord(&self) -> bool {
-        self.chord.is_some()
-    }
-
-    /// Generate a name for this word mapping that will be unique
-    pub fn name(&self) -> Name {
-        let mut parts: Vec<Cow<str>> =
-            vec!["word".into(), self.seq_spelling().into()];
-        if self.has_alternate_chord() {
-            parts.push(self.chord_spelling().into());
+    fn chord_spelling(&self) -> Cow<str> {
+        // If an alternate chord string was given, use that. Otherwise, use the
+        // sequence string. Also return true if the chord should include
+        // `shift`.
+        if let Some(chord_str) = self.chord_field() {
+            chord_str.into()
+        } else {
+            // uppercase letters in the sequence string don't affect the chord
+            self.seq_field().to_lowercase().into()
         }
-        parts.push(self.anagram_num().to_string().into());
-        let name = parts.join("_");
-
-        // Sanitize escape chars that are allowed in sequences, but shouldn't
-        // be interepreted literally in names
-        let name = name.replace("\n", r"\n").replace("\t", r"\t");
-        Name(name)
     }
 
-    pub fn sequence(&self) -> Result<Sequence, Error> {
+    fn sequence(&self) -> Result<Sequence, Error> {
         let mut seq = Sequence::default();
 
-        for letter in self.seq_spelling().graphemes(true) {
+        for letter in self.seq_field().graphemes(true) {
             let keypress = KeyPress::from_str(&letter.to_string())?;
             seq.push(keypress);
         }
@@ -90,11 +87,76 @@ impl Word {
         }
         Ok(seq)
     }
+
+    /// Generate a name for this word mapping that will be unique
+    fn name(&self) -> Name {
+        let mut parts: Vec<Cow<str>> =
+            vec![Self::name_prefix().into(), self.seq_field().into()];
+        if let Some(alternate_chord) = self.chord_field() {
+            parts.push(alternate_chord.into());
+        }
+        parts.push(self.anagram_num().to_string().into());
+        let name = parts.join("_");
+
+        // Sanitize escape chars that are allowed in sequences, but shouldn't
+        // be interepreted literally in names
+        let name = name.replace("\n", r"\n").replace("\t", r"\t");
+        Name(name)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl Wordlike for Word {
+    fn seq_field(&self) -> &str {
+        &self.word
+    }
+
+    fn chord_field(&self) -> Option<&String> {
+        self.chord.as_ref().map(|s| s.into())
+    }
+
+    fn anagram_num(&self) -> AnagramNum {
+        self.anagram.unwrap_or_default()
+    }
+
+    fn has_alternate_chord(&self) -> bool {
+        self.chord.is_some()
+    }
+
+    fn name_prefix() -> &'static str {
+        "word"
+    }
+}
+
+impl Wordlike for Snippet {
+    fn seq_field(&self) -> &str {
+        &self.snippet
+    }
+
+    fn chord_field(&self) -> Option<&String> {
+        self.chord.as_ref().map(|s| s.into())
+    }
+
+    fn anagram_num(&self) -> AnagramNum {
+        // Should always be anagram 0, like macros and plain keys
+        AnagramNum::default()
+    }
+
+    fn name_prefix() -> &'static str {
+        "snippet"
+    }
 }
 
 impl Validate for Word {
     fn validate(&self) -> Result<(), Error> {
         self.anagram.validate()
+    }
+}
+
+impl Validate for Snippet {
+    fn validate(&self) -> Result<(), Error> {
+        Ok(())
     }
 }
 

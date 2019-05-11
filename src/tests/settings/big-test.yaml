@@ -146,10 +146,12 @@ plain_keys:
   key_underscore:     {key: "KEY_MINUS", mods: ["MODIFIERKEY_SHIFT"]}
 # "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
 
+snippets:
+  - {snippet: "ls\n", chord: " ls"}
+
 macros:
   macro_vim_save: ":w\n"
   macro_vim_quit: ":q\n"
-  macro_ls: "ls\n"
   macro_mx:
     - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
   macro_other_buffer1: " \t"

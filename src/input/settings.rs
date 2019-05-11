@@ -7,7 +7,7 @@ use std::str::FromStr;
 use error::{Error, ResultExt};
 use types::{
     BoardName, CCode, CEnumVariant, CTree, ChordSpec, Command, KeyPress,
-    KmapFormat, ModeInfo, ModeName, Name, Permutation, Pin, Sequence,
+    KmapFormat, ModeInfo, ModeName, Name, Permutation, Pin, Sequence, Snippet,
     SwitchPos, ToC, Validate, Word,
 };
 
@@ -28,6 +28,8 @@ validated_struct! {
         pub anagram_modifiers: Vec<Name>,
         pub commands: Vec<Command>,
         pub dictionary: Vec<Word>,
+        #[serde(default)]
+        pub snippets: Vec<Snippet>,
     }
 }
 
@@ -45,7 +47,7 @@ validated_struct! {
 
         pub rgb_led_pins: Option<[Pin; 3]>,
 
-        #[serde(default = "WordSpacePosition::default")]
+        #[serde(default)]
         pub word_space_position: WordSpacePosition,
 
         #[serde(default = "default_output_dir")]

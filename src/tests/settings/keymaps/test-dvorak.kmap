@@ -332,11 +332,17 @@ macro_print_py   macro_exit_py     macro_self_dot    macro_docstr_py
 
 #### bash macros ####
 
-macro_bang_dollar  macro_hash_bang   macro_ls
-....   *...        ....   .*..       ....   ...*
-*..*   .*..        *..*   ...*       ....   ...*
-  .     .            .     .           .     .
-  ... ...            ... .*.           ... .*.
+macro_bang_dollar  macro_hash_bang
+....   *...        ....   .*..
+*..*   .*..        *..*   ...*
+  .     .            .     .
+  ... ...            ... .*.
+
+# macro_ls
+# ....   ...*
+# ....   ...*
+  # .     .
+  # ... .*.
 
 #### arduino macros ####
 

@@ -93,22 +93,20 @@ impl State {
     }
 
     pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord<KmapOrder>> {
-        let is_upper = spelling.is_uppercase();
-        let name = Self::name(&spelling.to_lowercase())?;
+        let mut names = Self::names(&spelling).into_iter();
 
-        let mut chord = Self::chord(&name).ok()?;
-        if is_upper {
-            chord
-                .union_mut(&Self::chord(&"mod_shift".into()).ok()?)
-                .expect("failed to union shift with chord");
+        let mut chord = Self::chord(&names.next()?).ok()?;
+        for name in names {
+            chord.union_mut(&Self::chord(&name).ok()?).ok()?;
+            // .expect("failed to union chords");
         }
         Some(chord)
     }
 
-    fn name(spelling: &Spelling) -> Option<Name> {
+    fn names(spelling: &Spelling) -> Vec<Name> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
-            data.spellings.get(spelling).cloned()
+            data.spellings.get(spelling)
         } else {
             panic!("tutor data was not set")
         }
