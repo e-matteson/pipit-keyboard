@@ -53,6 +53,8 @@ void Sender::sendMacro(const Key* keys, uint8_t keys_length,
   history.startEntry(chord, 0);
   for (uint8_t i = 0; i < keys_length; i++) {
     sendKey(keys + i);
+    // Some applications can't react to keypresses fast enough, pause.
+    delay(40);
   }
   releaseAll();
 }
