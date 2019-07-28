@@ -335,11 +335,11 @@ macro_mx       macro_search_project   macro_search_project_at_point
   .     .        .     .                .     .
   ... ...        ... .*.                ... .*.
 
-macro_close_other_wins     macro_other_win         macro_recompile
-....   *..*                ....   ....             ....   ....
-....   ....                ...*   ....             ....   **..
-  .     .                    .     .                 .     .
-  ... .*.                    ... .*.                 ... .*.
+macro_close_other_wins     macro_other_win   macro_recompile macro_run
+....   *..*                ....   ....       ....   ....     ....   ....
+....   ....                ...*   ....       ....   **..     ....   ***.
+  .     .                    .     .           .     .         .     .
+  ... .*.                    ... .*.           ... .*.         ... .*.
 
 macro_comment        macro_nohlsearch      macro_paste_history
 ....   .*.*          ..**   **..           ...*   ....

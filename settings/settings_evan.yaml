@@ -193,10 +193,7 @@ macros:
   macro_search_project:
     - {key: "KEY_F", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
   macro_search_project_at_point:
-    - {key: "KEY_V" }
-    - {key: "KEY_I" }
-    - {key: "KEY_W" }
-    - {key: "KEY_F", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_F7", mods: ["MODIFIERKEY_ALT"]}
   macro_find_file:
     - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_F", mods: ["MODIFIERKEY_CTRL"]}
@@ -254,6 +251,8 @@ macros:
   #   - {key: "KEY_F3"}
   macro_recompile:
     - {key: "KEY_F10", mods: ["MODIFIERKEY_SHIFT"]}
+  macro_run:
+    - {key: "KEY_F9", mods: ["MODIFIERKEY_SHIFT"]}
   macro_comment:
     - {key: "KEY_SLASH", mods: ["MODIFIERKEY_CTRL"]}
   macro_paste_history:
@@ -284,7 +283,6 @@ macros:
   #   - {key: "KEY_DOWN"}
   #   - {key: "KEY_DOWN"}
   #   - {key: "KEY_ENTER"}
-
 snippets:
   # GENERAL
   - {snippet: "e.r.matteson@gmail.com", chord: " gmail"}
@@ -341,6 +339,32 @@ snippets:
   - {snippet: " opu"} # open_active
   - {snippet: " ops"} # open_settings
   - {snippet: " opd"} # open_kmap
+
+  # emacs GDB mode:
+  - {snippet: " ouu", chord: " u"} 
+  - {snippet: " ouu", chord: " u."} 
+  - {snippet: " oui", chord: " ui"} 
+  - {snippet: " ouc", chord: " uc"} 
+  - {snippet: " our", chord: " ur"} 
+  - {snippet: " ous", chord: " us"} 
+  - {snippet: " oun", chord: " un"} 
+  - {snippet: " ouj", chord: " uj"} 
+  - {snippet: " oud", chord: " ud"} 
+  - {snippet: " ouD", chord: " uD"} 
+  - {snippet: " ouf", chord: " uf"} 
+  - {snippet: " out", chord: " ut"} 
+  - {snippet: " ouh", chord: " uh"} 
+  - {snippet: " ouH", chord: " uH"} 
+  - {snippet: " ouk", chord: " uk"} 
+  - {snippet: " ou}k", chord: " ukt"} 
+  - {snippet: " ouK", chord: " uK"} 
+  - {snippet: " oux", chord: " ux"}
+  - {snippet: " ouow", chord: " uow"}
+  - {snippet: " ouol", chord: " uol"}
+  - {snippet: " ouos", chord: " uos"}
+  - {snippet: " ouok", chord: " uok"}
+  - {snippet: " ouq", chord: " uq"}
+
   # - {snippet: " en", chord: " en"} # error_next
   # - {snippet: " ep", chord: " eN"} # error_prev
   # C/C++
@@ -2020,6 +2044,7 @@ dictionary:
   - {word: "fire"}
   - {word: "firefox"}
   - {word: "firm"}
+  - {word: "firmware", chord: "fw"}
   - {word: "first"}
   - {word: "fish"}
   - {word: "fist"}
@@ -2347,6 +2372,7 @@ dictionary:
   - {word: "harass"}
   - {word: "harbor"}
   - {word: "hard"}
+  - {word: "hardware", chord: "hw"}
   - {word: "harm"}
   - {word: "harmony"}
   - {word: "harp"}
