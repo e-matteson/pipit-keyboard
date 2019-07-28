@@ -17,11 +17,12 @@ class Stopwatch {
   void restart();
   void tick();
   bool isDone();
+  bool isDisabled();
 
  private:
-  uint32_t _default;
-  uint32_t _count;
-  bool _enabled;
+  volatile uint32_t _default;
+  volatile uint32_t _count;
+  volatile bool _enabled;
 };
 
 class Stopwatches {
@@ -98,8 +99,9 @@ class Scanner {
   void scanStep();
   void updateSwitches();
   void detectChords();
+  void exitStandby();
 
-  State state = State::Scan;
+  volatile State state = State::Scan;
 
   //// For either:
   static Scanner* getInstance();
@@ -112,7 +114,7 @@ class Scanner {
   Matrix matrix;
   Statuses statuses;
   Stopwatches stopwatches;
-  conf::Mode mode = conf::defaultMode();
+  volatile conf::Mode mode = conf::defaultMode();
   Queue<Packet, 8> to_send;
   Queue<ChordData, 4> to_hold;
 

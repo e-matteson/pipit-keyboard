@@ -67,3 +67,25 @@ void Matrix::setColumnsHiZ() {
     unselectColumn(i);
   }
 }
+
+void Matrix::enterStandby(voidFuncPtr isr) {
+  setColumnsLow();
+  attachRowPinInterrupts(isr);
+}
+
+void Matrix::exitStandby() {
+  detachRowPinInterrupts();
+  setColumnsHiZ();
+}
+
+void Matrix::attachRowPinInterrupts(voidFuncPtr isr) {
+  for (uint8_t pin : conf::row_pins) {
+    attachInterrupt(digitalPinToInterrupt(pin), isr, LOW);
+  }
+}
+
+void Matrix::detachRowPinInterrupts() {
+  for (uint8_t pin : conf::row_pins) {
+    detachInterrupt(digitalPinToInterrupt(pin));
+  }
+}

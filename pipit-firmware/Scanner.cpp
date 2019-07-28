@@ -24,10 +24,17 @@ void scannerISR() {
   }
 }
 
+void exitStandbyISR() {
+  Scanner* s = Scanner::getInstance();
+  s->exitStandby();
+}
+
 Stopwatch::Stopwatch(uint32_t default_val)
     : _default(default_val), _count(0), _enabled(false) {}
 
 void Stopwatch::setDefault(uint32_t new_default) { _default = new_default; }
+
+bool Stopwatch::isDisabled() { return !_enabled; }
 
 bool Stopwatch::isDone() {
   if (_enabled && _count == 0) {
@@ -216,7 +223,26 @@ void Scanner::detectChords() {
 
   stopwatches.tick();
   state = State::Scan;
-  schedule_micros(UNTIL_SCAN_MICROS);
+
+  // Force it to peform a minimum number of scans after each wakeup. This is
+  // because a short bounce when pressing a key could cause a wake, but then
+  // disappear before it can be scanned. We need to give it time to reappear
+  // before going back into standby.
+  // TODO watch with scope, confirm that's what's going on.
+  static uint32_t consecutive_scans = 0;
+  if (consecutive_scans > 8 && stopwatches.release.isDisabled() &&
+      !statuses.anyDown()) {
+    consecutive_scans = 0;
+    matrix.enterStandby(exitStandbyISR);
+  } else {
+    consecutive_scans++;
+    schedule_micros(UNTIL_SCAN_MICROS);
+  }
+}
+
+void Scanner::exitStandby() {
+  matrix.exitStandby();
+  scannerISR();
 }
 
 void Scanner::setMode(conf::Mode new_mode) {

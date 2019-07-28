@@ -23,11 +23,16 @@ class Matrix {
   bool none(uint8_t switch_index);
   void clear(uint8_t switch_index);
 
+  void enterStandby(voidFuncPtr isr);
+  void exitStandby();
+
  private:
   uint8_t columnIndexToPin(uint8_t column_index);
   void setRowsInput();
   void setColumnsLow();
   void setColumnsHiZ();
+  void attachRowPinInterrupts(voidFuncPtr isr);
+  void detachRowPinInterrupts();
 
   volatile uint8_t readings[NUM_MATRIX_POSITIONS] = {0};
 };
