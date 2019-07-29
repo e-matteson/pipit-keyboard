@@ -8,6 +8,9 @@
 void scannerISR() {
   Scanner* s = Scanner::getInstance();
   switch (s->state) {
+    case State::Standby:
+      s->exitStandby();
+      // Don't break, execute the scan case right after exiting standby!
     case State::Scan:
       s->scanStep();
       break;
@@ -18,11 +21,6 @@ void scannerISR() {
       s->detectChords();
       break;
   }
-}
-
-void exitStandbyISR() {
-  Scanner* s = Scanner::getInstance();
-  s->exitStandby();
 }
 
 Timers::Timers(conf::Mode mode) : chord(0), release(0), held(0) {
@@ -185,8 +183,6 @@ void Scanner::detectChords() {
     to_send.pushInInterrupt(Packet(mode, statuses.anyDown(), ChordData({0})));
   }
 
-  state = State::Scan;
-
   // Force it to peform a minimum number of scans after each wakeup. This is
   // because a short bounce when pressing a key could cause a wake, but then
   // disappear before it can be scanned. We need to give it time to reappear
@@ -197,16 +193,18 @@ void Scanner::detectChords() {
   if (conf::USE_STANDBY_INTERRUPTS && consecutive_scans > 8 &&
       timers.release.isDisabled() && !statuses.anyDown()) {
     consecutive_scans = 0;
-    matrix.enterStandby(exitStandbyISR);
+    state = State::Standby;
+    matrix.enterStandby(scannerISR);
   } else {
     consecutive_scans++;
+    state = State::Scan;
     schedule_micros(UNTIL_SCAN_MICROS);
   }
 }
 
 void Scanner::exitStandby() {
   matrix.exitStandby();
-  scannerISR();
+  state = State::Scan;
 }
 
 void Scanner::setMode(conf::Mode new_mode) {

@@ -9,7 +9,7 @@
 
 #define NO_SWITCH -1
 
-enum class State : uint8_t { Scan, UpdateSwitches, DetectChords };
+enum class State : uint8_t { Scan, UpdateSwitches, DetectChords, Standby };
 
 class Timers {
  public:
@@ -93,7 +93,6 @@ class Scanner {
 
  private:
   ChordData makeChordData();
-  // void schedule(uint32_t count);
   void schedule_micros(uint32_t micros);
 
   Matrix matrix;
