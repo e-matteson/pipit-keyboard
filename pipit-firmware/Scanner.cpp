@@ -1,10 +1,6 @@
 #include "Scanner.h"
 #include "conf.h"
 
-// TODO specify as microsecs instead of raw counts
-// #define CAPACITANCE_COUNT 0x2
-// #define YIELD_COUNT 0x2
-// #define UNTIL_SCAN_COUNT 0x19
 #define CAPACITANCE_MICROS 5
 #define YIELD_MICROS 5
 #define UNTIL_SCAN_MICROS 1000
@@ -29,49 +25,23 @@ void exitStandbyISR() {
   s->exitStandby();
 }
 
-Stopwatch::Stopwatch(uint32_t default_val)
-    : _default(default_val), _count(0), _enabled(false) {}
-
-void Stopwatch::setDefault(uint32_t new_default) { _default = new_default; }
-
-bool Stopwatch::isDisabled() { return !_enabled; }
-
-bool Stopwatch::isDone() {
-  if (_enabled && _count == 0) {
-    _enabled = false;
-    return true;
-  }
-  return false;
-}
-
-void Stopwatch::tick() {
-  if (_enabled && _count != 0) {
-    _count--;
-  }
-}
-
-void Stopwatch::restart() {
-  _count = _default;
-  _enabled = true;
-}
-
-Stopwatches::Stopwatches(conf::Mode mode) : chord(0), release(0), held(0) {
+Timers::Timers(conf::Mode mode) : chord(0), release(0), held(0) {
   setDefaultsForMode(mode);
 }
 
-void Stopwatches::setDefaultsForMode(conf::Mode mode) {
+void Timers::setDefaultsForMode(conf::Mode mode) {
   if (conf::isGaming(mode)) {
-    chord = 0;
-    release = 0;
-    held = 0;
+    chord.setDefaultValue(0);
+    release.setDefaultValue(0);
+    held.setDefaultValue(0);
   } else {
-    chord = conf::CHORD_DELAY;
-    release = conf::CHORD_DELAY;
-    held = conf::HELD_DELAY;
+    chord.setDefaultValue(conf::CHORD_DELAY);
+    release.setDefaultValue(conf::CHORD_DELAY);
+    held.setDefaultValue(conf::HELD_DELAY);
   }
 }
 
-bool Stopwatches::isChordOrReleaseDone() {
+bool Timers::isChordOrReleaseDone() {
   if (chord.isDone() || release.isDone()) {
     // Ensure we always check the release counter and disable it if it's done,
     // even if the 'or' short-circuits.
@@ -79,12 +49,6 @@ bool Stopwatches::isChordOrReleaseDone() {
     return true;
   }
   return false;
-}
-
-void Stopwatches::tick() {
-  chord.tick();
-  release.tick();
-  held.tick();
 }
 
 void Statuses::set(size_t index, SwitchStatus status) {
@@ -158,8 +122,8 @@ void Scanner::updateSwitches() {
     const SwitchStatus status = statuses.get(i);
     if (status == SwitchStatus::NotPressed && matrix.any(i)) {
       // New press! Accept it immediately without debouncing.
-      stopwatches.chord.restart();
-      stopwatches.held.restart();
+      timers.chord.start();
+      timers.held.start();
       statuses.set(i, SwitchStatus::Pressed);
 
       // Check if this switch was double tapped.
@@ -167,8 +131,8 @@ void Scanner::updateSwitches() {
       last_released_switch = NO_SWITCH;
     } else if (status != SwitchStatus::NotPressed && matrix.none(i)) {
       // Debounced release!
-      stopwatches.release.restart();
-      stopwatches.held.restart();
+      timers.release.start();
+      timers.held.start();
       statuses.set(i, SwitchStatus::NotPressed);
       last_released_switch = i;
       // TODO detect quick taps (pressed and released before chord delay is up)
@@ -205,7 +169,7 @@ void Scanner::scanStep() {
 }
 
 void Scanner::detectChords() {
-  if (stopwatches.held.isDone()) {
+  if (timers.held.isDone()) {
     statuses.alreadySentToHeld();
   }
 
@@ -214,14 +178,13 @@ void Scanner::detectChords() {
     statuses.holdSome(switches_to_hold);
   }
 
-  if ((conf::isGaming(mode) && stopwatches.isChordOrReleaseDone()) ||
-      stopwatches.chord.isDone()) {
+  if ((conf::isGaming(mode) && timers.isChordOrReleaseDone()) ||
+      timers.chord.isDone()) {
     to_send.pushInInterrupt(Packet(mode, false, makeChordData()));
-  } else if (stopwatches.release.isDone()) {
+  } else if (timers.release.isDone()) {
     to_send.pushInInterrupt(Packet(mode, statuses.anyDown(), ChordData({0})));
   }
 
-  stopwatches.tick();
   state = State::Scan;
 
   // Force it to peform a minimum number of scans after each wakeup. This is
@@ -230,7 +193,7 @@ void Scanner::detectChords() {
   // before going back into standby.
   // TODO watch with scope, confirm that's what's going on.
   static uint32_t consecutive_scans = 0;
-  if (consecutive_scans > 8 && stopwatches.release.isDisabled() &&
+  if (consecutive_scans > 8 && timers.release.isDisabled() &&
       !statuses.anyDown()) {
     consecutive_scans = 0;
     matrix.enterStandby(exitStandbyISR);
@@ -248,7 +211,7 @@ void Scanner::exitStandby() {
 void Scanner::setMode(conf::Mode new_mode) {
   noInterrupts();
   mode = new_mode;
-  stopwatches.setDefaultsForMode(new_mode);
+  timers.setDefaultsForMode(new_mode);
   interrupts();
 }
 

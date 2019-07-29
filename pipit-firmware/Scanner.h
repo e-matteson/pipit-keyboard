@@ -4,37 +4,22 @@
 #include "Matrix.h"
 #include "OneShot.h"
 #include "Queue.h"
+#include "Timer.h"
 #include "conf.h"
 
 #define NO_SWITCH -1
 
 enum class State : uint8_t { Scan, UpdateSwitches, DetectChords };
 
-class Stopwatch {
+class Timers {
  public:
-  Stopwatch(uint32_t default_val);
-  void setDefault(uint32_t new_default);
-  void restart();
-  void tick();
-  bool isDone();
-  bool isDisabled();
-
- private:
-  volatile uint32_t _default;
-  volatile uint32_t _count;
-  volatile bool _enabled;
-};
-
-class Stopwatches {
- public:
-  Stopwatches(conf::Mode mode = conf::defaultMode());
-  void tick();
+  Timers(conf::Mode mode = conf::defaultMode());
   void setDefaultsForMode(conf::Mode mode);
   bool isChordOrReleaseDone();
 
-  Stopwatch chord;
-  Stopwatch release;
-  Stopwatch held;
+  Timer chord;
+  Timer release;
+  Timer held;
 };
 
 enum class SwitchStatus : uint8_t {
@@ -113,7 +98,7 @@ class Scanner {
 
   Matrix matrix;
   Statuses statuses;
-  Stopwatches stopwatches;
+  Timers timers;
   volatile conf::Mode mode = conf::defaultMode();
   Queue<Packet, 8> to_send;
   Queue<ChordData, 4> to_hold;

@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include "BitArray.h"
-#include "Timer.h"
 #include "VolatileFlag.h"
 #include "auto_config.h"
 
