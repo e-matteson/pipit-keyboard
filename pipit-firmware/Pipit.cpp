@@ -11,11 +11,7 @@ void Pipit::setup() {
 
 void Pipit::loop() {
   asm("wfi");
-
-  // Give the scanner time to finish before bothering to check for chords
   feedback.updateLED();
-  delayMicroseconds(500);
-
   processIfReady();
 }
 
