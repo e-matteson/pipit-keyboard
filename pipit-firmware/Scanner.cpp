@@ -193,8 +193,9 @@ void Scanner::detectChords() {
   // before going back into standby.
   // TODO watch with scope, confirm that's what's going on.
   static uint32_t consecutive_scans = 0;
-  if (consecutive_scans > 8 && timers.release.isDisabled() &&
-      !statuses.anyDown()) {
+
+  if (conf::USE_STANDBY_INTERRUPTS && consecutive_scans > 8 &&
+      timers.release.isDisabled() && !statuses.anyDown()) {
     consecutive_scans = 0;
     matrix.enterStandby(exitStandbyISR);
   } else {
