@@ -249,7 +249,7 @@ impl Symbol {
 
     fn from_lines(lines: &[&str], scale: f64) -> Self {
         Self {
-            lines: lines.into_iter().map(|s| s.to_string()).collect(),
+            lines: lines.iter().map(|s| s.to_string()).collect(),
             scale,
         }
     }

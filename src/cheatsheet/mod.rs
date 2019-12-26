@@ -74,7 +74,7 @@ impl CheatSheet {
 
         let mut all = Vec::new();
         for (i, kb_spec) in spec.keyboards.iter().enumerate() {
-            let mut pos = col_positions
+            let pos = col_positions
                 .get_mut(i % (num_cols as usize))
                 .expect("bug in CheatSheet::new()");
 

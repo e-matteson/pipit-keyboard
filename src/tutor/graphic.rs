@@ -117,8 +117,8 @@ impl Switch {
     fn label(&self) -> Label {
         self.next
             .as_ref()
-            .or(self.error.as_ref())
-            .or(self.backspace.as_ref())
+            .or_else(|| self.error.as_ref())
+            .or_else(|| self.backspace.as_ref())
             .cloned()
             .or_else(|| Label::join(&self.persistent))
             .unwrap_or_else(Label::default)

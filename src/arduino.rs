@@ -78,7 +78,7 @@ impl ArduinoIDE {
 }
 
 impl BoardName {
-    fn ide_name(&self) -> &'static str {
+    fn ide_name(self) -> &'static str {
         match self {
             BoardName::TeensyLC => unimplemented!(),
         }

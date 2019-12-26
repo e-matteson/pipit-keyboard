@@ -195,7 +195,7 @@ fn format_enum_decl(
     size: &Option<CCode>,
 ) -> CFilePair {
     let contents = variants
-        .into_iter()
+        .iter()
         .enumerate()
         .fold(String::new(), |acc, (index, field)| {
             format!("{}  {} = {},\n", acc, field, index)

@@ -100,6 +100,7 @@ impl Pin {
 }
 
 impl Validate for Pin {
+    #[allow(clippy::absurd_extreme_comparisons)]
     fn validate(&self) -> Result<(), Error> {
         const MIN_PIN_NUM: u8 = 0;
         const MAX_PIN_NUM: u8 = 30; // TODO pick real value
@@ -373,8 +374,8 @@ impl fmt::Display for Spelling {
 impl SpellingTable {
     /// Return None if not found.
     // TODO return Cow<Name>
-    pub fn get(&self, spelling: &Spelling) -> Vec<Name> {
-        if let Some(exact_name) = self.0.get(spelling) {
+    pub fn get(&self, spelling: Spelling) -> Vec<Name> {
+        if let Some(exact_name) = self.0.get(&spelling) {
             return vec![exact_name.to_owned()];
         }
         if spelling.is_uppercase() {
@@ -388,7 +389,7 @@ impl SpellingTable {
 
     /// Return a LookupErr if not found.
     /// TODO is this a good name?
-    pub fn get_checked(&self, spelling: &Spelling) -> Result<Vec<Name>, Error> {
+    pub fn get_checked(&self, spelling: Spelling) -> Result<Vec<Name>, Error> {
         let names = self.get(spelling);
         if names.is_empty() {
             Err(Error::LookupErr {
@@ -407,7 +408,7 @@ impl Sequence {
     /// their keypresses.
     pub fn flatten(seqs: &[&Self]) -> Self {
         Sequence(
-            seqs.into_iter()
+            seqs.iter()
                 .flat_map(|seq| seq.keypresses().cloned())
                 .collect(),
         )

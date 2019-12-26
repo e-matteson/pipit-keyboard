@@ -61,7 +61,7 @@ impl Section {
         format: &KmapFormat,
     ) -> Result<Self, Error> {
         let (line_nums, all_lines): (Vec<_>, Vec<_>) =
-            input.into_iter().cloned().unzip();
+            input.iter().cloned().unzip();
 
         if all_lines.len() != format.block_length() {
             return Err(Error::KmapSyntaxErr {
@@ -132,7 +132,6 @@ impl Section {
             // chunk order for later popping.
             let chunks: Vec<Vec<_>> = switch_line
                 .chunks(self.items_per_line[i])
-                .into_iter()
                 .map(|v| v.to_owned())
                 .rev()
                 .collect();
@@ -149,7 +148,7 @@ impl Section {
         index: usize,
     ) -> Result<(), Error> {
         if line.len() != self.items_per_line[index] * self.num_blocks() {
-            Err(self.error_at(index + 1).with_context(|| {
+            return Err(self.error_at(index + 1).with_context(|| {
                 format!(
                 "Wrong number of switches on line. Expected {} chords in this \
                  block, each with {} switches on this line. Is kmap_format \
@@ -157,7 +156,7 @@ impl Section {
                 self.num_blocks(),
                 self.items_per_line[index]
             )
-            }))?;
+            }));
         }
         Ok(())
     }
@@ -184,15 +183,12 @@ impl Section {
         } else if c == UNPRESSED_CHAR {
             Ok(false)
         } else {
-            Err(self
-                .error_at(line_index)
-                .with_context(|| {
-                    format!(
-                        "Expected '{}', '{}', or whitespace. Found '{}'",
-                        UNPRESSED_CHAR, PRESSED_CHAR, c
-                    )
-                })
-                .into())
+            Err(self.error_at(line_index).with_context(|| {
+                format!(
+                    "Expected '{}', '{}', or whitespace. Found '{}'",
+                    UNPRESSED_CHAR, PRESSED_CHAR, c
+                )
+            }))
         }
     }
 }

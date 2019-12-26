@@ -113,7 +113,7 @@ impl Wordlike for Word {
     }
 
     fn chord_field(&self) -> Option<&String> {
-        self.chord.as_ref().map(|s| s.into())
+        self.chord.as_ref()
     }
 
     fn anagram_num(&self) -> AnagramNum {
@@ -135,7 +135,7 @@ impl Wordlike for Snippet {
     }
 
     fn chord_field(&self) -> Option<&String> {
-        self.chord.as_ref().map(|s| s.into())
+        self.chord.as_ref()
     }
 
     fn anagram_num(&self) -> AnagramNum {

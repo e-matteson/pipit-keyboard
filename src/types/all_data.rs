@@ -158,7 +158,7 @@ impl AllData {
         for mode in self.modes.keys() {
             let mut mode_chords = BTreeMap::new();
             for name in &names {
-                if let Some(mut chord) = self.get_chord_in_mode(name, mode) {
+                if let Some(chord) = self.get_chord_in_mode(name, mode) {
                     // TODO speed up by fetching all anagram chords in advance?
                     if let Some(new) = self.incorporate_anagram(chord, mode) {
                         mode_chords.insert(name.to_owned(), new);

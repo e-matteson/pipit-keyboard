@@ -146,7 +146,7 @@ impl CCode {
         T: ToC + Clone,
     {
         let prefix = prefix.to_c();
-        v.into_iter()
+        v.iter()
             .map(|c| format!("{}{}", prefix, c).to_c())
             .collect()
     }

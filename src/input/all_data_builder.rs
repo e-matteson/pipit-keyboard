@@ -344,7 +344,7 @@ impl AllDataBuilder {
     {
         let mut names = Vec::new();
         for spelling in wordlike.chord_spellings()? {
-            names.extend(spelling_table.get_checked(&spelling)?)
+            names.extend(spelling_table.get_checked(spelling)?)
         }
 
         let mut letter_chords =

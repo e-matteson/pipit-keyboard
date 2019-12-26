@@ -64,10 +64,10 @@ fn open_file(path: &PathBuf) -> Result<File, Error> {
     Ok(File::open(path)?)
 }
 
-pub fn grapheme_slice<'a>(
-    s: &'a str,
+pub fn grapheme_slice(
+    s: &str,
     start: usize,
     end: usize,
-) -> impl Iterator<Item = &'a str> {
+) -> impl Iterator<Item = &str> {
     s.graphemes(true).skip(start).take(end)
 }

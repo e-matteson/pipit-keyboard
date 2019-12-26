@@ -93,7 +93,7 @@ impl State {
     }
 
     pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord<KmapOrder>> {
-        let mut names = Self::names(&spelling).into_iter();
+        let mut names = Self::names(spelling).into_iter();
 
         let mut chord = Self::chord(&names.next()?).ok()?;
         for name in names {
@@ -103,7 +103,7 @@ impl State {
         Some(chord)
     }
 
-    fn names(spelling: &Spelling) -> Vec<Name> {
+    fn names(spelling: Spelling) -> Vec<Name> {
         let state = STATE.lock().unwrap();
         if let Some(ref data) = state.tutor_data {
             data.spellings.get(spelling)

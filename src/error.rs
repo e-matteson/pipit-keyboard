@@ -110,7 +110,7 @@ impl From<serde_yaml::Error> for Error {
 }
 
 impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             Error::Context { ref cause, .. } => Some(cause),
             Error::Io(ref cause) => Some(cause),
