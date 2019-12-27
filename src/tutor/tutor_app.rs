@@ -17,7 +17,7 @@ impl TutorApp {
     pub fn run(data: TutorData) {
         State::initialize(data).expect("failed to initialize global state");
 
-        let mut siv = Cursive::new();
+        let mut siv = Cursive::default();
 
         siv.load_theme_file("settings/tutor/color_theme.toml")
             .expect("failed to load theme");
@@ -80,7 +80,9 @@ impl TutorApp {
             );
         siv.add_layer(Dialog::new().title("Options").content(list).button(
             "Back",
-            |siv| siv.pop_layer(), // TODO how to go back?
+            |siv| {
+                siv.pop_layer().expect("No layer to pop!");
+            },
         ));
     }
 
@@ -98,11 +100,12 @@ impl TutorApp {
             Self::show_lesson(siv, name, lesson)
         });
 
-        siv.add_layer(
-            Dialog::around(select)
-                .title("Lessons")
-                .button("Back", |siv| siv.pop_layer()),
-        );
+        siv.add_layer(Dialog::around(select).title("Lessons").button(
+            "Back",
+            |siv| {
+                siv.pop_layer().expect("No layer to pop!");
+            },
+        ));
     }
 
     fn show_lesson(
@@ -118,7 +121,7 @@ impl TutorApp {
             siv.add_layer(Dialog::around(TextView::new(popup)).button(
                 "Begin",
                 |siv| {
-                    siv.pop_layer(); // pop dialog
+                    siv.pop_layer();
                 },
             ))
         }

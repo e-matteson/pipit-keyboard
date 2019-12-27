@@ -209,21 +209,19 @@ impl View for Lesson {
     fn draw(&self, printer: &Printer) {
         let fake_padding =
             self.copy_padding() - Vec2::new(0, Self::instruction_spacing());
-        self.draw_instruction(&printer.sub_printer(
-            fake_padding,
-            self.copier.size(),
-            false,
-        ));
-        self.copier.draw(&printer.sub_printer(
-            self.copy_padding(),
-            self.copier.size(),
-            false,
-        ));
-        self.graphic.draw(&printer.sub_printer(
-            self.graphic_padding(),
-            self.graphic.size(),
-            false,
-        ));
+        self.draw_instruction(
+            &printer.offset(fake_padding).cropped(self.copier.size()),
+        );
+        self.copier.draw(
+            &printer
+                .offset(self.copy_padding())
+                .cropped(self.copier.size()),
+        );
+        self.graphic.draw(
+            &printer
+                .offset(self.graphic_padding())
+                .cropped(self.graphic.size()),
+        );
 
         self.draw_info_bar(printer)
     }
