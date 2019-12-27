@@ -1,13 +1,16 @@
 //! This module handles the details of writing the configuration data to output
 //! files.
 
-use self::kmap_builder::KmapBuilder;
-use self::mode_builder::ModeBuilder;
-
 #[macro_use]
 mod c_struct;
 
-mod format_c;
-mod kmap_builder;
-mod mode_builder;
-mod render;
+mod format_ctree;
+mod render_all_data;
+mod render_chord;
+mod render_huffman;
+mod render_kmap;
+mod render_mode;
+mod render_sequence;
+
+use self::render_kmap::KmapBuilder;
+use self::render_mode::ModeBuilder;

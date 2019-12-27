@@ -1,39 +1,15 @@
-use std::cmp::Ordering;
 use std::collections::BTreeMap;
 
-use bit_vec::BitVec;
 use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Chord, Command, Field, FirmwareOrder,
-    HuffmanEntry, HuffmanTable, KeyDefs, KeyPress, KmapPath, ModeName,
-    Modifier, Name, SeqType, Sequence, ToC,
+    AllData, CCode, CEnumVariant, CTree, Command, KeyDefs, KmapPath, ModeName,
+    Modifier, Name, SeqType, ToC,
 };
-use util::usize_to_u8;
 
 use output::{KmapBuilder, ModeBuilder};
-
-c_struct!(
-    struct HuffmanChar {
-        bits: CCode,
-        num_bits: usize,
-        key_code: CCode,
-        is_mod: bool,
-    }
-);
-
-impl PartialOrd for HuffmanChar {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for HuffmanChar {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.num_bits.cmp(&other.num_bits)
-    }
-}
+use util::usize_to_u8;
 
 impl AllData {
     /// Generate and save the c code containing the keyboard firmware
@@ -278,166 +254,6 @@ impl AllData {
                     .format_mods())
             })
             .collect()
-    }
-}
-
-impl Ord for Chord<FirmwareOrder> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.switches().blocks().cmp(other.switches().blocks())
-    }
-}
-
-impl Chord<FirmwareOrder> {
-    /// Convert the chord into CCode strings containing the byte representation
-    /// used in the firmware.
-    fn to_c_bytes(&self) -> Vec<CCode> {
-        self.switches().blocks().map(|x| x.to_c()).collect()
-    }
-
-    fn to_c_initializer(&self) -> CCode {
-        format!("{{{}}}", self.to_c_bytes().join(", ")).to_c()
-    }
-
-    pub fn to_c_constructor(&self) -> CCode {
-        // TODO there are a bunch of extra allocations here...
-        format!("{}({})", Self::c_type_name(), self.to_c_initializer()).to_c()
-    }
-
-    pub fn c_type_name() -> CCode {
-        "ChordData".to_c()
-    }
-}
-
-impl HuffmanEntry {
-    fn to_huffman_char(&self, key: &CCode) -> HuffmanChar {
-        HuffmanChar {
-            bits: self.to_c_constructor(),
-            num_bits: self.num_bits(),
-            key_code: KeyPress::truncate(key),
-            is_mod: self.is_mod,
-        }
-    }
-
-    fn to_c_bytes(&self) -> Vec<CCode> {
-        // TODO impl ToC for BitVec?
-        self.bits().blocks().map(|x| x.to_c()).collect()
-    }
-
-    fn to_c_initializer(&self) -> CCode {
-        format!("{{{}}}", self.to_c_bytes().join(", ")).to_c()
-    }
-
-    fn to_c_constructor(&self) -> CCode {
-        // TODO there are a bunch of extra allocations here...
-        format!("{}({})", Self::c_type_name(), self.to_c_initializer()).to_c()
-    }
-
-    fn c_type_name() -> CCode {
-        "HuffmanBits".to_c()
-    }
-}
-
-impl HuffmanTable {
-    fn initializers(&self) -> Vec<CCode> {
-        let mut v: Vec<_> = self
-            .0
-            .iter()
-            .map(|(key, entry)| entry.to_huffman_char(key))
-            .collect();
-        v.sort();
-        v.into_iter()
-            .map(|huffchar| huffchar.initializer())
-            .collect()
-    }
-
-    fn render_early(&self) -> CTree {
-        CTree::Define {
-            name: "MAX_HUFFMAN_CODE_BIT_LEN".to_c(),
-            value: self.max_length().to_c(),
-        }
-    }
-
-    fn render(&self) -> Result<CTree, Error> {
-        let mut group = Vec::new();
-        group.push(CTree::ConstVar {
-            name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
-            value: self.min_length().to_c(),
-            // chars.get(0).map(|x| x.num_bits).unwrap_or(0).to_c(),
-            c_type: "uint8_t".to_c(),
-            is_extern: true,
-        });
-
-        group.push(CTree::Array {
-            name: "huffman_lookup".to_c(),
-            values: self.initializers(),
-            c_type: HuffmanChar::c_type(),
-            is_extern: true,
-        });
-
-        Ok(CTree::Group(group))
-    }
-}
-
-impl KeyPress {
-    fn truncate(contents: &CCode) -> CCode {
-        // CCode(format!("({})&0xff", contents))
-        // TODO don't cast everything? Just enums.
-        CCode(format!("static_cast<uint8_t>({})", contents))
-    }
-
-    fn format_mods(&self) -> CCode {
-        // TODO think about this
-        if self.mods.is_empty() {
-            Self::empty_code()
-        } else {
-            Self::truncate(&CCode::join(&self.mods, "|"))
-        }
-    }
-
-    fn empty_code() -> CCode {
-        "0".to_c()
-    }
-
-    fn huffman(&self, table: &HuffmanTable) -> Result<BitVec<u8>, Error> {
-        self.ensure_non_empty()?;
-
-        let mut bits: BitVec<u8> = BitVec::default();
-        for modifier in &self.mods {
-            bits.extend(table.bits(modifier)?);
-        }
-
-        // There must be a key following the mod(s), so that we know when the
-        // entry ends. If a keypress has a mod but no key,
-        // use a blank dummy value for the key.
-        bits.extend(table.bits(&self.key_or_blank())?);
-        Ok(bits)
-    }
-}
-
-impl Sequence {
-    pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CCode>, Error> {
-        // TODO different name for "bytes"?
-        Ok(self
-            .as_bits(table)?
-            .blocks()
-            .map(|x: u8| x.to_c())
-            .collect())
-    }
-
-    pub fn formatted_length_in_bits(
-        &self,
-        table: &HuffmanTable,
-    ) -> Result<usize, Error> {
-        // TODO don't compute twice!
-        Ok(self.as_bits(table)?.len())
-    }
-
-    pub fn as_bits(&self, table: &HuffmanTable) -> Result<BitVec<u8>, Error> {
-        let mut bits = BitVec::default();
-        for keypress in self.keypresses() {
-            bits.extend(keypress.huffman(table)?)
-        }
-        Ok(bits)
     }
 }
 

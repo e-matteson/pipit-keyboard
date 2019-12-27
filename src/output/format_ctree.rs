@@ -102,93 +102,6 @@ impl CTree {
     }
 }
 
-impl CFilePair {
-    pub fn new() -> Self {
-        Self {
-            h: CCode::new(),
-            c: CCode::new(),
-        }
-    }
-
-    pub fn with_c<T>(contents: T) -> Self
-    where
-        T: ToC,
-    {
-        Self {
-            h: CCode::new(),
-            c: contents.to_c(),
-        }
-    }
-
-    pub fn with_h<T>(contents: T) -> Self
-    where
-        T: ToC,
-    {
-        Self {
-            h: contents.to_c(),
-            c: CCode::new(),
-        }
-    }
-
-    pub fn with<T>(contents: T) -> Self
-    where
-        T: ToC,
-    {
-        let contents = contents.to_c();
-        Self {
-            h: contents.clone(),
-            c: contents,
-        }
-    }
-
-    pub fn append(&mut self, other: &Self) {
-        self.h += &other.h;
-        self.c += &other.c;
-    }
-
-    pub fn save(
-        &self,
-        directory: &PathBuf,
-        name_base: &str,
-    ) -> Result<Vec<PathBuf>, Error> {
-        let mut path_base = directory.to_owned();
-        path_base.push(name_base);
-
-        let mut saved_paths = Vec::new();
-
-        // TODO if the c file tries to include an empty h file, it will fail to
-        // compile...
-        // TODO share code between c and h?
-        if !self.h.is_empty() {
-            let mut path = path_base.clone();
-            path.set_extension("h");
-            write_to_file(path.clone(), &self.h)?;
-            saved_paths.push(path);
-        }
-
-        if !self.c.is_empty() {
-            let mut path = path_base.clone();
-            path.set_extension("cpp");
-            write_to_file(path.clone(), &self.c)?;
-            saved_paths.push(path);
-        }
-
-        Ok(saved_paths)
-    }
-}
-
-impl AddAssign<CFilePair> for CFilePair {
-    fn add_assign(&mut self, rhs: CFilePair) {
-        self.append(&rhs)
-    }
-}
-
-impl<'a> AddAssign<&'a CFilePair> for CFilePair {
-    fn add_assign(&mut self, rhs: &'a CFilePair) {
-        self.append(rhs)
-    }
-}
-
 fn format_enum_decl(
     name: &CCode,
     variants: &[CCode],
@@ -374,7 +287,7 @@ where
     code_lines
 }
 
-pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<(), Error> {
+fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<(), Error> {
     // let path = Path::new(full_path);
     let mut file = OpenOptions::new()
         .create(true)
@@ -387,4 +300,91 @@ pub fn write_to_file(full_path: PathBuf, s: &CCode) -> Result<(), Error> {
     file.write_all(s.to_string().as_bytes())
         .context("Failed to write to output file")?;
     Ok(())
+}
+
+impl CFilePair {
+    pub fn new() -> Self {
+        Self {
+            h: CCode::new(),
+            c: CCode::new(),
+        }
+    }
+
+    pub fn with_c<T>(contents: T) -> Self
+    where
+        T: ToC,
+    {
+        Self {
+            h: CCode::new(),
+            c: contents.to_c(),
+        }
+    }
+
+    pub fn with_h<T>(contents: T) -> Self
+    where
+        T: ToC,
+    {
+        Self {
+            h: contents.to_c(),
+            c: CCode::new(),
+        }
+    }
+
+    pub fn with<T>(contents: T) -> Self
+    where
+        T: ToC,
+    {
+        let contents = contents.to_c();
+        Self {
+            h: contents.clone(),
+            c: contents,
+        }
+    }
+
+    pub fn append(&mut self, other: &Self) {
+        self.h += &other.h;
+        self.c += &other.c;
+    }
+
+    pub fn save(
+        &self,
+        directory: &PathBuf,
+        name_base: &str,
+    ) -> Result<Vec<PathBuf>, Error> {
+        let mut path_base = directory.to_owned();
+        path_base.push(name_base);
+
+        let mut saved_paths = Vec::new();
+
+        // TODO if the c file tries to include an empty h file, it will fail to
+        // compile...
+        // TODO share code between c and h?
+        if !self.h.is_empty() {
+            let mut path = path_base.clone();
+            path.set_extension("h");
+            write_to_file(path.clone(), &self.h)?;
+            saved_paths.push(path);
+        }
+
+        if !self.c.is_empty() {
+            let mut path = path_base.clone();
+            path.set_extension("cpp");
+            write_to_file(path.clone(), &self.c)?;
+            saved_paths.push(path);
+        }
+
+        Ok(saved_paths)
+    }
+}
+
+impl AddAssign<CFilePair> for CFilePair {
+    fn add_assign(&mut self, rhs: CFilePair) {
+        self.append(&rhs)
+    }
+}
+
+impl<'a> AddAssign<&'a CFilePair> for CFilePair {
+    fn add_assign(&mut self, rhs: &'a CFilePair) {
+        self.append(rhs)
+    }
 }
