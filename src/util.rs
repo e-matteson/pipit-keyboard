@@ -14,7 +14,6 @@ pub enum ConfirmDefault {
     None,
 }
 
-#[allow(dead_code)]
 pub fn usize_to_u8(input: usize) -> Result<u8, Error> {
     ensure_u8(input)?;
     Ok(input as u8)

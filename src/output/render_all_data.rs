@@ -22,7 +22,7 @@ impl AllData {
     /// Used for testing. The message contains a timestamp that would make the
     /// same output files look different if they're only generated at different
     /// times.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn save_without_message_as(
         &self,
         file_name_base: &str,

@@ -3,8 +3,9 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+use super::kmap_format::KmapFormat;
 use error::{Error, ResultExt};
-use types::{Chord, KmapFormat, KmapOrder, KmapPath, Name};
+use types::{Chord, KmapOrder, KmapPath, Name};
 
 const COMMENT_START: char = '#';
 const UNPRESSED_CHAR: char = '.';

@@ -7,9 +7,12 @@ use std::str::FromStr;
 use error::{Error, ResultExt};
 use types::{
     BoardName, CCode, CEnumVariant, CTree, ChordSpec, Command, KeyPress,
-    KmapFormat, ModeInfo, ModeName, Name, Permutation, Pin, Sequence, Snippet,
-    SwitchPos, ToC, Validate, Word,
+    ModeInfo, ModeName, Name, Permutation, Sequence, Snippet, ToC, Validate,
+    Word,
 };
+
+use super::kmap_format::{KmapFormat, SwitchPos};
+use super::pin::Pin;
 
 fn default_output_dir() -> PathBuf {
     PathBuf::from("pipit-firmware")
