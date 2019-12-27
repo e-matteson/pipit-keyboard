@@ -1,4 +1,9 @@
+use std::collections::BTreeMap;
+use std::fs::{self, File};
+use std::path::PathBuf;
 use std::time::Instant;
+
+use serde_yaml;
 
 use cursive::event::{Callback, Event, EventResult, Key};
 use cursive::theme::ColorStyle;
@@ -11,13 +16,22 @@ use cursive::{Cursive, Printer};
 use error::{Error, ResultExt};
 
 use tutor::{
-    offset, Copier, Graphic, LabeledChord, LessonConfig, PrevCharStatus, Slide,
-    State,
+    offset, Copier, Graphic, LabeledChord, PrevCharStatus, Slide, State,
 };
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LessonConfig {
+    slides: Vec<Slide>,
+    #[serde(default)]
+    popup: String,
+    #[serde(default)]
+    persistent: Vec<String>,
+}
 
 pub struct Lesson {
     pub popup: String,
-    slides: Vec<Slide>,
+    slide_stack: Vec<Slide>,
     graphic: Graphic,
     copier: Copier,
     start_time: Option<Instant>,
@@ -25,6 +39,53 @@ pub struct Lesson {
     instruction: String,
     info_bar: String,
     total_slides: usize,
+}
+
+impl LessonConfig {
+    pub fn from_file(path: &PathBuf) -> Result<LessonConfig, Error> {
+        let file = File::open(path).with_context(|| {
+            format!("Failed to open file: {}", path.display())
+        })?;
+        let lesson: LessonConfig =
+            serde_yaml::from_reader(file).with_context(|| {
+                format!("Failed to read lesson file: {}", path.display())
+            })?;
+        Ok(lesson)
+    }
+
+    pub fn load_directory(
+        lesson_dir: &str,
+    ) -> Result<BTreeMap<String, LessonConfig>, Error> {
+        // TODO cleanup
+        let paths: Result<Vec<PathBuf>, Error> =
+            fs::read_dir(lesson_dir)?.map(|f| Ok(f?.path())).collect();
+        let paths = paths?;
+        let mut map = BTreeMap::new();
+        for path in paths {
+            if let Some(ext) = path.extension() {
+                if ext == "yaml" {
+                    map.insert(
+                        LessonConfig::name_from_path(&path),
+                        LessonConfig::from_file(&path)?,
+                    );
+                }
+            }
+        }
+        Ok(map)
+    }
+
+    fn name_from_path(path: &PathBuf) -> String {
+        // TODO return result
+        let s = path
+            .file_stem()
+            .expect("invalid lesson file name")
+            .to_str()
+            .expect("lesson path is not valid unicode");
+        let mut sections = s.split('_');
+        let number = sections.next().expect("invalid lesson file name");
+        let words: Vec<_> = sections.collect();
+        format!("{}) {}", number, words.join(" "))
+    }
 }
 
 impl Lesson {
@@ -41,16 +102,16 @@ impl Lesson {
         };
 
         // reverse slide order so we can pop them off the end of a vec
-        let slides: Vec<_> = config.slides.into_iter().rev().collect();
+        let slide_stack: Vec<_> = config.slides.into_iter().rev().collect();
         let mut lesson = Self {
-            total_slides: slides.len(),
+            total_slides: slide_stack.len(),
             popup: config.popup,
             graphic: Graphic::new(persistent),
             start_time: None,
             net_words: 0.,
             instruction: String::new(),
             info_bar: String::new(),
-            slides,
+            slide_stack,
             copier,
         };
         let status = lesson.next_slide().unwrap();
@@ -62,10 +123,11 @@ impl Lesson {
         // TODO check for empty lessons when loading from file, instead.
         // We should panic here instead if we failed to end the lesson after
         // going through all the slides.
-        let slide = self.slides.pop().ok_or_else(|| Error::BadValueErr {
-            thing: "lesson contents".to_owned(),
-            value: "(empty)".to_owned(),
-        })?;
+        let slide =
+            self.slide_stack.pop().ok_or_else(|| Error::BadValueErr {
+                thing: "lesson contents".to_owned(),
+                value: "(empty)".to_owned(),
+            })?;
         self.copier.start_line(&slide.line)?;
         self.instruction = slide.instruction;
         self.info_bar =
@@ -75,7 +137,7 @@ impl Lesson {
     }
 
     fn slide_counter(&self) -> String {
-        let current_num = self.total_slides - self.slides.len();
+        let current_num = self.total_slides - self.slide_stack.len();
         format!("{}/{}", current_num, self.total_slides)
     }
 
@@ -243,7 +305,7 @@ impl View for Lesson {
             {
                 // End the line, and maybe the whole lesson.
                 self.net_words += self.copier.net_words();
-                if self.slides.is_empty() {
+                if self.slide_stack.is_empty() {
                     // Lesson is done
                     let wpm = self.words_per_minute();
                     return EventResult::Consumed(Some(Callback::from_fn(

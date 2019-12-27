@@ -6,9 +6,7 @@ use cursive::vec::Vec2;
 use cursive::Printer;
 
 use error::Error;
-use tutor::{
-    grapheme_slice, offset, LabeledChord, SlideEntry, SlideLine, State,
-};
+use tutor::{offset, LabeledChord, SlideEntry, SlideLine, State};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Clone)]
@@ -325,6 +323,14 @@ fn make_hint_map(entries: &[SlideEntry]) -> HashMap<usize, LabeledChord> {
     map
 }
 
-pub fn needs_hint(letter: &str) -> bool {
+fn needs_hint(letter: &str) -> bool {
     !State::is_learned(letter).unwrap_or(false)
+}
+
+fn grapheme_slice(
+    s: &str,
+    start: usize,
+    end: usize,
+) -> impl Iterator<Item = &str> {
+    s.graphemes(true).skip(start).take(end)
 }

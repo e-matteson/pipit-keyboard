@@ -9,7 +9,7 @@ use cursive::Cursive;
 
 use types::TutorData;
 
-use tutor::{load_lessons, Lesson, LessonConfig, State};
+use tutor::{Lesson, LessonConfig, State};
 
 pub struct TutorApp;
 
@@ -87,8 +87,10 @@ impl TutorApp {
     }
 
     fn show_lesson_menu(siv: &mut Cursive) {
-        let lessons = load_lessons("settings/tutor/lessons/")
+        // TODO don't hardcode
+        let lessons = LessonConfig::load_directory("settings/tutor/lessons/")
             .expect("failed to get lessons");
+
         let mut names: Vec<String> = lessons.keys().cloned().collect();
         names.sort_by(|a, b| natord::compare(a, b));
 
