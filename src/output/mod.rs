@@ -11,6 +11,7 @@ mod render_huffman;
 mod render_kmap;
 mod render_mode;
 mod render_sequence;
+mod render_user_options;
 
 use self::render_kmap::KmapBuilder;
 use self::render_mode::ModeBuilder;

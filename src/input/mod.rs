@@ -13,7 +13,5 @@ pub use self::all_data_builder::AllDataBuilder;
 use self::settings::Settings;
 
 mod all_data_builder;
-mod kmap_format;
 mod parse_kmap;
-mod pin;
 mod settings;

@@ -79,12 +79,10 @@ impl AllDataBuilder {
         Ok(AllData {
             huffman_table: self.make_huffman_table()?,
             chord_spec: self.settings.options.chord_spec()?,
-            options: self.settings.options.to_vec()?,
-            early_options: self.settings.options.early_to_vec()?,
-            output_directory: self.settings.options.output_directory,
+            output_directory: self.settings.options.output_directory.clone(),
             commands: command_variants.into_iter().collect(),
-
-            board: self.settings.options.board_name,
+            board: self.settings.options.board_name.clone(),
+            user_options: self.settings.options,
             chords: self.chords,
             sequences: self.sequences,
             word_mods: self.word_mods,

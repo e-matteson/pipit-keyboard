@@ -5,9 +5,9 @@ use std::path::PathBuf;
 
 use error::{Error, ResultExt};
 use types::{
-    AnagramNum, BoardName, CTree, Chord, ChordSpec, Command, HuffmanTable,
-    KeyPress, KmapOrder, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
-    SpellingTable, TutorData,
+    AnagramNum, BoardName, Chord, ChordSpec, Command, HuffmanTable, KeyPress,
+    KmapOrder, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
+    SpellingTable, TutorData, UserOptions,
 };
 use util::ensure_u8;
 
@@ -31,9 +31,6 @@ pub struct AllChordMaps {
 pub struct AllData {
     pub chords: AllChordMaps,
     pub sequences: AllSeqMaps,
-    // pub word_mods: Vec<Name>,
-    // pub plain_mods: Vec<Name>,
-    // pub anagram_mods: Vec<Name>,
     pub word_mods: Vec<Name>,
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
@@ -41,9 +38,7 @@ pub struct AllData {
     pub huffman_table: HuffmanTable,
     pub spellings: SpellingTable,
     pub commands: Vec<Command>,
-
-    pub options: Vec<CTree>,
-    pub early_options: Vec<CTree>,
+    pub user_options: UserOptions,
     pub output_directory: PathBuf,
     pub chord_spec: ChordSpec,
     pub board: BoardName,

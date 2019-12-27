@@ -70,7 +70,7 @@ impl AllData {
         group.push(CTree::LiteralH("#pragma once\n".to_c()));
 
         let mut namespace = Vec::new();
-        namespace.extend(self.early_options.clone());
+        namespace.extend(self.user_options.render_early());
         namespace.push(KmapBuilder::render_limits());
         namespace.push(self.huffman_table.render_early());
         namespace.push(ModeName::render_c_enum(self.modes.keys()));
@@ -110,7 +110,7 @@ impl AllData {
             CTree::Namespace {
                 name: "conf".to_c(),
                 contents: Box::new(CTree::Group(vec![
-                    self.render_options(),
+                    self.user_options.render(),
                     self.huffman_table.render()?,
                     self.render_modifiers()?,
                     Command::render_c_enum(self.commands.iter()),
@@ -177,10 +177,6 @@ impl AllData {
             kmap_struct_names.insert(kmap_name.to_owned(), kmap_struct_name);
         }
         Ok((CTree::Group(g), kmap_struct_names))
-    }
-
-    fn render_options(&self) -> CTree {
-        CTree::Group(self.options.clone())
     }
 
     fn render_modifiers(&self) -> Result<CTree, Error> {

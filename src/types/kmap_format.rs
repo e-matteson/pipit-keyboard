@@ -1,6 +1,5 @@
 use std::fmt::{self, Debug};
 
-use super::pin::Pin;
 use error::Error;
 use types::Validate;
 
@@ -14,6 +13,10 @@ pub struct SwitchPos {
     pub row: Pin,
     pub col: Pin,
 }
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Pin(pub u8);
 
 impl KmapFormat {
     pub fn num_switches(&self) -> usize {
@@ -79,5 +82,36 @@ impl Validate for SwitchPos {
 impl fmt::Display for SwitchPos {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?},{:?}]", self.row, self.col)
+    }
+}
+
+impl Validate for Pin {
+    #[allow(clippy::absurd_extreme_comparisons)]
+    fn validate(&self) -> Result<(), Error> {
+        const MIN_PIN_NUM: u8 = 0;
+        const MAX_PIN_NUM: u8 = 30; // TODO pick real value
+
+        if self.0 <= MAX_PIN_NUM && self.0 >= MIN_PIN_NUM {
+            Ok(())
+        } else {
+            Err(Error::OutOfRangeErr {
+                name: "pin number".into(),
+                value: self.0 as usize,
+                min: MIN_PIN_NUM as usize,
+                max: MAX_PIN_NUM as usize,
+            })
+        }
+    }
+}
+
+impl From<Pin> for usize {
+    fn from(pin: Pin) -> usize {
+        pin.0 as usize
+    }
+}
+
+impl From<Pin> for u8 {
+    fn from(pin: Pin) -> u8 {
+        pin.0
     }
 }
