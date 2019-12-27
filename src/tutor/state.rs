@@ -10,20 +10,24 @@ use error::{Error, ResultExt};
 use types::{Chord, KmapOrder, ModeName, Name, Spelling, TutorData};
 
 lazy_static! {
-    static ref STATE: Mutex<State> = Mutex::new(State::new());
+    static ref STATE: Mutex<Option<InnerState>> = Mutex::new(None);
 }
 
 #[derive(Debug, Clone)]
-pub struct State {
-    tutor_data: Option<TutorData>,
+pub struct InnerState {
+    tutor_data: TutorData,
     learning_map: HashMap<String, LearnState>,
     save_path: PathBuf,
-    saveable: Saveable,
+    saveable: SaveableSettings,
 }
+
+// TODO module instead?
+#[derive(Debug, Clone)]
+pub struct State;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct Saveable {
+pub struct SaveableSettings {
     initial_learn_state: usize,
     mode: ModeName,
     allow_mistakes: bool,
@@ -33,30 +37,8 @@ pub struct Saveable {
 #[derive(Debug, Clone)]
 pub struct LearnState(pub usize);
 
-impl State {
-    fn new() -> Self {
-        Self {
-            tutor_data: None,
-            learning_map: HashMap::new(),
-            save_path: PathBuf::from("settings/tutor/saved_options.yaml"),
-            saveable: Saveable {
-                initial_learn_state: 2,
-                mode: ModeName::default(),
-                allow_mistakes: false,
-                show_persistent_letters: true,
-            },
-        }
-    }
-
-    pub fn load() -> Result<(), Error> {
-        let path = Self::save_path();
-        let saveable = read_state_file(&path)?;
-        saveable.validate()?;
-        STATE.lock().unwrap().saveable = saveable;
-        Ok(())
-    }
-
-    pub fn save(&self) -> Result<(), Error> {
+impl InnerState {
+    fn save_settings(&self) -> Result<(), Error> {
         let s = serde_yaml::to_string(&self.saveable)?;
         let mut file = OpenOptions::new()
             .create(true)
@@ -71,160 +53,275 @@ impl State {
         Ok(())
     }
 
-    fn save_path() -> PathBuf {
-        STATE.lock().unwrap().save_path.clone()
+    fn chord(&self, name: &Name) -> Result<Chord<KmapOrder>, Error> {
+        self.tutor_data.chord(name, &self.saveable.mode)
     }
 
-    pub fn set_tutor_data(data: TutorData) {
-        let mut state = STATE.lock().unwrap();
-        match state.tutor_data {
-            Some(_) => panic!("tutor data can only be set once"),
-            None => state.tutor_data = Some(data),
-        }
-    }
+    fn chord_from_spelling(
+        &self,
+        spelling: Spelling,
+    ) -> Option<Chord<KmapOrder>> {
+        let mut names = self.names(spelling).into_iter();
 
-    pub fn chord(name: &Name) -> Result<Chord<KmapOrder>, Error> {
-        let state = STATE.lock().unwrap();
-        if let Some(ref data) = state.tutor_data {
-            data.chord(name, &state.saveable.mode)
-        } else {
-            panic!("tutor data was not set")
-        }
-    }
-
-    pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord<KmapOrder>> {
-        let mut names = Self::names(spelling).into_iter();
-
-        let mut chord = Self::chord(&names.next()?).ok()?;
+        // TODO fold?
+        let mut chord = self.chord(&names.next()?).ok()?;
         for name in names {
-            chord.union_mut(&Self::chord(&name).ok()?).ok()?;
-            // .expect("failed to union chords");
+            chord.union_mut(&self.chord(&name).ok()?).ok()?;
         }
         Some(chord)
     }
 
-    fn names(spelling: Spelling) -> Vec<Name> {
-        let state = STATE.lock().unwrap();
-        if let Some(ref data) = state.tutor_data {
-            data.spellings.get(spelling)
-        } else {
-            panic!("tutor data was not set")
+    fn names(&self, spelling: Spelling) -> Vec<Name> {
+        self.tutor_data.spellings.get(spelling)
+    }
+
+    fn is_learned(&self, name: &str) -> Option<bool> {
+        self.learning_map.get(name).map(|state| state.is_learned())
+    }
+
+    fn update_learn_state(&mut self, name: String, was_correct: bool) {
+        let initial_learn_state = self.saveable.initial_learn_state;
+        self.learning_map
+            .entry(name)
+            .or_insert_with(|| LearnState(initial_learn_state))
+            .update(was_correct);
+    }
+
+    fn set_initial_learn_state(&mut self, initial: usize) {
+        for learn_state in self.learning_map.values_mut() {
+            learn_state.reset(initial);
         }
+        self.saveable.initial_learn_state = initial;
+
+        // ignore any errors while saving
+        self.save_settings().ok();
+    }
+
+    fn set_allow_mistakes(&mut self, value: bool) {
+        self.saveable.allow_mistakes = value;
+
+        // ignore any errors while saving
+        self.save_settings().ok();
+    }
+
+    fn set_show_persistent_letters(&mut self, value: bool) {
+        self.saveable.show_persistent_letters = value;
+        // ignore any errors while saving
+        self.save_settings().ok();
+    }
+
+    fn mode_list(&self) -> Vec<ModeName> {
+        self.tutor_data.chords.keys().cloned().collect()
+    }
+
+    fn mode_index(&self, mode: &ModeName) -> Option<usize> {
+        self.mode_list().into_iter().position(|m| &m == mode)
+    }
+
+    fn current_mode_index(&self) -> usize {
+        self.mode_index(&self.saveable.mode)
+            .expect("current mode not found in list")
+    }
+
+    fn set_mode(&mut self, mode_str: &str) {
+        let mode = ModeName::from(mode_str);
+        if !self.tutor_data.chords.contains_key(&mode) {
+            panic!("tried to switch to unknown ModeName: {}", mode);
+        }
+        self.saveable.mode = mode;
+
+        // Reset the learning state for each letter, since the chords could be
+        // totally different now.
+        let initial = self.saveable.initial_learn_state;
+        for learn_state in self.learning_map.values_mut() {
+            learn_state.reset(initial);
+        }
+        // ignore any errors while saving
+        self.save_settings().ok();
+    }
+}
+
+impl State {
+    pub fn initialize(tutor_data: TutorData) -> Result<(), Error> {
+        let mut state = STATE.lock().unwrap();
+        assert!(state.is_none(), "State was already initialized");
+
+        // TODO don't hardcode path
+        let save_path = PathBuf::from("settings/tutor/saved_options.yaml");
+        let saveable = SaveableSettings::from_file(&save_path, &tutor_data)?
+            .unwrap_or_default();
+        let inner = InnerState {
+            tutor_data,
+            learning_map: HashMap::new(),
+            save_path,
+            saveable,
+        };
+
+        *state = Some(inner);
+        Ok(())
+    }
+
+    pub fn chord(name: &Name) -> Result<Chord<KmapOrder>, Error> {
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .chord(name)
+    }
+
+    pub fn chord_from_spelling(spelling: Spelling) -> Option<Chord<KmapOrder>> {
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .chord_from_spelling(spelling)
     }
 
     pub fn is_learned(name: &str) -> Option<bool> {
         STATE
             .lock()
             .unwrap()
-            .learning_map
-            .get(name)
-            .map(|state| state.is_learned())
+            .as_ref()
+            .expect("state not set")
+            .is_learned(name)
     }
 
     pub fn update_learn_state(name: String, was_correct: bool) {
-        let mut state = STATE.lock().unwrap();
-        let initial_learn_state = state.saveable.initial_learn_state;
-        state
-            .learning_map
-            .entry(name)
-            .or_insert_with(|| LearnState(initial_learn_state))
-            .update(was_correct);
+        STATE
+            .lock()
+            .unwrap()
+            .as_mut()
+            .expect("state not set")
+            .update_learn_state(name, was_correct);
     }
 
     pub fn initial_learn_state() -> usize {
-        STATE.lock().unwrap().saveable.initial_learn_state
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .saveable
+            .initial_learn_state
     }
 
     pub fn set_initial_learn_state(initial: usize) {
-        let mut state = STATE.lock().unwrap();
-        for learn_state in state.learning_map.values_mut() {
-            learn_state.reset(initial);
-        }
-        state.saveable.initial_learn_state = initial;
-
-        // ignore any errors while saving
-        state.save().ok();
+        STATE
+            .lock()
+            .unwrap()
+            .as_mut()
+            .expect("state not set")
+            .set_initial_learn_state(initial)
     }
 
     pub fn allow_mistakes() -> bool {
-        STATE.lock().unwrap().saveable.allow_mistakes
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .saveable
+            .allow_mistakes
     }
 
     pub fn set_allow_mistakes(value: bool) {
-        let mut state = STATE.lock().unwrap();
-        state.saveable.allow_mistakes = value;
-
-        // ignore any errors while saving
-        state.save().ok();
+        STATE
+            .lock()
+            .unwrap()
+            .as_mut()
+            .expect("state not set")
+            .set_allow_mistakes(value)
     }
 
     pub fn show_persistent_letters() -> bool {
-        STATE.lock().unwrap().saveable.show_persistent_letters
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .saveable
+            .show_persistent_letters
     }
 
     pub fn set_show_persistent_letters(value: bool) {
-        let mut state = STATE.lock().unwrap();
-        state.saveable.show_persistent_letters = value;
-
-        // ignore any errors while saving
-        state.save().ok();
-    }
-
-    fn mode_list() -> Vec<ModeName> {
-        let state = STATE.lock().unwrap();
-        if let Some(ref data) = state.tutor_data {
-            data.chords.keys().cloned().collect()
-        } else {
-            panic!("tutor data was not set")
-        }
+        STATE
+            .lock()
+            .unwrap()
+            .as_mut()
+            .expect("state not set")
+            .set_show_persistent_letters(value)
     }
 
     pub fn mode_string_list() -> Vec<String> {
-        Self::mode_list()
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .mode_list()
             .into_iter()
             .map(|mode| mode.0.clone())
             .collect()
     }
 
-    fn mode_index(mode: &ModeName) -> Option<usize> {
-        Self::mode_list().into_iter().position(|m| &m == mode)
-    }
-
     pub fn current_mode_index() -> usize {
-        let mode = STATE.lock().unwrap().saveable.mode.clone();
-        Self::mode_index(&mode).expect("current mode not found in list")
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .current_mode_index()
     }
 
     pub fn set_mode(mode_str: &str) {
-        let mode = ModeName::from(mode_str);
-        let mut state = STATE.lock().unwrap();
-        if let Some(ref data) = state.tutor_data {
-            if !data.chords.contains_key(&mode) {
-                panic!("tried to switch unknown ModeName: {}", mode);
-            }
-        } else {
-            panic!("tutor data was not set")
-        }
-
-        state.saveable.mode = mode;
-
-        // Reset the learning state for each letter, since the chords could be
-        // totally different now.
-        let initial = state.saveable.initial_learn_state;
-        for learn_state in state.learning_map.values_mut() {
-            learn_state.reset(initial);
-        }
-        // ignore any errors while saving
-        state.save().ok();
+        STATE
+            .lock()
+            .unwrap()
+            .as_mut()
+            .expect("state not set")
+            .set_mode(mode_str)
     }
 }
-impl Saveable {
-    pub fn validate(&self) -> Result<(), Error> {
-        State::mode_index(&self.mode).ok_or_else(|| Error::LookupErr {
-            key: self.mode.to_string(),
-            container: "known mode names".to_owned(),
-        })?;
-        Ok(())
+
+impl Default for SaveableSettings {
+    fn default() -> SaveableSettings {
+        SaveableSettings {
+            initial_learn_state: 2,
+            mode: ModeName::default(),
+            allow_mistakes: false,
+            show_persistent_letters: true,
+        }
+    }
+}
+
+impl SaveableSettings {
+    pub fn from_file(
+        path: &PathBuf,
+        tutor_data: &TutorData,
+    ) -> Result<Option<Self>, Error> {
+        if let Ok(file) = File::open(path) {
+            let settings: SaveableSettings = serde_yaml::from_reader(file)
+                .with_context(|| {
+                    format!("failed to read file: {}", path.display())
+                })?;
+            settings.validate(tutor_data)?;
+            Ok(Some(settings))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn validate(&self, tutor_data: &TutorData) -> Result<(), Error> {
+        if !tutor_data.chords.contains_key(&self.mode) {
+            Err(Error::LookupErr {
+                key: self.mode.to_string(),
+                container: "known mode names".to_owned(),
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -271,15 +368,4 @@ impl LearnState {
     pub fn is_learned(&self) -> bool {
         self.0 == 0
     }
-}
-
-pub fn read_state_file(path: &PathBuf) -> Result<Saveable, Error> {
-    let file = File::open(path)
-        .with_context(|| format!("failed to open file: {}", path.display()))?;
-    let saveable: Saveable =
-        serde_yaml::from_reader(file).with_context(|| {
-            format!("failed to read RON file: {}", path.display())
-        })?;
-    saveable.validate()?;
-    Ok(saveable)
 }

@@ -15,8 +15,7 @@ pub struct TutorApp;
 
 impl TutorApp {
     pub fn run(data: TutorData) {
-        State::set_tutor_data(data);
-        State::load().ok(); // ignore errors
+        State::initialize(data).expect("failed to initialize global state");
 
         let mut siv = Cursive::new();
 
