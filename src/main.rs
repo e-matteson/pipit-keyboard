@@ -32,7 +32,7 @@ use std::path::PathBuf;
 use arduino::ArduinoIDE;
 use cheatsheet::CheatSheet;
 use error::{Error, ResultExt};
-use input::AllDataBuilder;
+use input::load_all_data;
 use tutor::TutorApp;
 
 use clap::{Arg, ArgGroup};
@@ -92,7 +92,7 @@ fn run() -> Result<(), Error> {
             .expect("settings file not specified"),
     );
 
-    let all_data = AllDataBuilder::load(&settings_path)?.finalize()?;
+    let all_data = load_all_data(&settings_path)?;
     all_data.check();
 
     if args.is_present("nosave") {

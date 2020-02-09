@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use error::{Error, ResultExt};
 
-use input::AllDataBuilder;
+use input::load_all_data;
 
 fn expected_dir() -> PathBuf {
     PathBuf::from("src/tests/expected-outputs/")
@@ -16,12 +16,9 @@ fn actual_dir() -> PathBuf {
 
 #[test]
 fn big_settings_output() {
-    let all_data = AllDataBuilder::load(&PathBuf::from(
-        "src/tests/settings/big-test.yaml",
-    ))
-    .unwrap()
-    .finalize()
-    .unwrap();
+    let all_data =
+        load_all_data(&PathBuf::from("src/tests/settings/big-test.yaml"))
+            .unwrap();
 
     let name_base = "auto_config-big_test";
     all_data
@@ -34,9 +31,7 @@ fn big_settings_output() {
 #[test]
 fn chord22_output() {
     let all_data =
-        AllDataBuilder::load(&PathBuf::from("src/tests/settings/test22.yaml"))
-            .unwrap()
-            .finalize()
+        load_all_data(&PathBuf::from("src/tests/settings/test22.yaml"))
             .unwrap();
 
     let name_base = "auto_config-22";

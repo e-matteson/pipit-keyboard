@@ -23,6 +23,12 @@ pub struct KmapInfo {
 #[serde(deny_unknown_fields)]
 pub struct KmapPath(pub String);
 
+impl ModeInfo {
+    pub fn kmap_paths(&self) -> impl Iterator<Item = &KmapPath> {
+        self.keymaps.iter().map(|info| &info.file)
+    }
+}
+
 impl Validate for ModeInfo {
     fn validate(&self) -> Result<(), Error> {
         for kmap in &self.keymaps {

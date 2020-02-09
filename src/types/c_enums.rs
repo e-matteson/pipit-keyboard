@@ -80,6 +80,12 @@ impl From<ModeName> for String {
     }
 }
 
+impl<'a> From<&'a ModeName> for String {
+    fn from(m: &'a ModeName) -> Self {
+        m.0.to_owned()
+    }
+}
+
 impl Command {
     pub fn name(&self) -> &Name {
         &self.0

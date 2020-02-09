@@ -1,11 +1,11 @@
 use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::str::FromStr;
 
 use error::{Error, ResultExt};
 use types::{
-    Command, KeyPress, ModeInfo, ModeName, Name, Sequence, Snippet,
+    Command, KeyPress, KmapPath, ModeInfo, ModeName, Name, Sequence, Snippet,
     UserOptions, Validate, Word,
 };
 
@@ -28,6 +28,28 @@ validated_struct! {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+impl Settings {
+    pub fn mode_names(&self) -> impl Iterator<Item = &ModeName> {
+        self.modes.keys()
+    }
+
+    pub fn kmaps(&self) -> BTreeSet<&KmapPath> {
+        self.modes
+            .values()
+            .flat_map(|mode_info| mode_info.kmap_paths())
+            .collect()
+    }
+
+    pub fn kmaps_with_words(&self) -> BTreeSet<&KmapPath> {
+        self.modes
+            .values()
+            .flat_map(|mode_info| mode_info.keymaps.iter())
+            .filter(|kmap_info| kmap_info.use_words)
+            .map(|kmap_info| &kmap_info.file)
+            .collect()
+    }
+}
 
 impl<'de> Deserialize<'de> for Sequence {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

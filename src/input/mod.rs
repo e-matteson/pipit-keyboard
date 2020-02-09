@@ -9,7 +9,7 @@
 //! like it should be contained in this module, we need to add the derive
 //! attributes to the struct definition itself.
 
-pub use self::all_data_builder::AllDataBuilder;
+pub use self::all_data_builder::load_all_data;
 use self::settings::Settings;
 
 mod all_data_builder;

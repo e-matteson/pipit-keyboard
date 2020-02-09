@@ -1,4 +1,6 @@
-pub(crate) use self::all_data::{AllChordMaps, AllData, AllSeqMaps, ChordMap};
+pub(crate) use self::all_data::{
+    AllChordMaps, AllData, AllSeqMaps, ChordMap, SeqMap,
+};
 // TODO move to output?
 pub(crate) use self::c_code::{CCode, CEnumVariant, CTree, Field, ToC};
 pub(crate) use self::c_enums::{Command, ModeName, Modifier, SeqType};

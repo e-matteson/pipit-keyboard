@@ -8,375 +8,244 @@ use input::Settings;
 use error::{Error, ResultExt};
 use types::{
     AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
-    HuffmanTable, KeyDefs, KeyPress, KmapOrder, KmapPath, ModeInfo, ModeName,
-    Name, SeqType, Sequence, SpellingTable, Validate, Wordlike,
+    HuffmanTable, KeyDefs, KeyPress, KmapOrder, KmapPath, Name, SeqMap,
+    SeqType, Sequence, SpellingTable, Validate, Wordlike,
 };
 use util::read_file;
 
 /// This handles all the details of building an AllData struct from
 /// configuration files. It loads sequences and chords, generates word chords,
 /// generates huffman encodings, and so on.
-pub struct AllDataBuilder {
-    settings: Settings,
-    chords: AllChordMaps,
-    sequences: AllSeqMaps,
-    word_mods: Vec<Name>,
-    plain_mods: Vec<Name>,
-    anagram_mods: Vec<Name>,
-    modes: BTreeMap<ModeName, ModeInfo>,
+pub fn load_all_data(settings_path: &PathBuf) -> Result<AllData, Error> {
+    let settings: Settings = serde_yaml::from_str(&read_file(settings_path)?)?;
+    settings.validate()?;
+
+    let mut chords = load_chords(&settings).context("Failed to load chords")?;
+
+    let mut sequences = AllSeqMaps::default();
+    sequences
+        .insert_map(SeqMap::from(settings.macros.clone()), SeqType::Macro)?;
+    let mut plain_seqs = SeqMap::from(settings.plain_keys.clone());
+    plain_seqs.append(
+        load_plain_mods(&settings).context("Failed to load plain mods")?,
+    )?;
+    sequences.insert_map(plain_seqs, SeqType::Plain)?;
+
+    let spellings = make_spelling_table(&settings)
+        .context("Failed to make spelling table")?;
+
+    load_dictionary(&settings, &spellings, &mut chords, &mut sequences)
+        .context("Failed to load dictionary")?;
+
+    let commands = load_commands(&settings, &mut sequences)
+        .context("Failed to load commands")?;
+
+    let huffman_table = HuffmanTable::new(sequences.all_keypresses())
+        .context("Failed to make table of huffman encodings")?;
+
+    Ok(AllData {
+        huffman_table,
+        commands,
+        chords,
+        sequences,
+        word_mods: settings.word_modifiers.clone(),
+        anagram_mods: settings.anagram_modifiers.clone(),
+        plain_mods: settings.plain_modifiers.keys().cloned().collect(),
+        modes: settings.modes.clone(),
+        spellings,
+        chord_spec: settings.options.chord_spec()?,
+        output_directory: settings.options.output_directory.clone(),
+        board: settings.options.board_name.clone(),
+        user_options: settings.options,
+    })
 }
 
-impl AllDataBuilder {
-    /// Read the contents of the given settings file, and return a
-    /// AllDataBuilder that's prepared to build an AllData struct.
-    pub fn load(settings_path: &PathBuf) -> Result<Self, Error> {
-        let settings: Settings =
-            serde_yaml::from_str(&read_file(settings_path)?)?;
-        settings.validate()?;
+fn load_chords(settings: &Settings) -> Result<AllChordMaps, Error> {
+    let mut chords = AllChordMaps::default();
+    for kmap in settings.kmaps() {
+        let named_chords = kmap
+            .read(&settings.options.kmap_format)
+            .with_context(|| format!("Failed to load kmap file: '{}'", kmap))?;
 
-        Ok(Self {
-            settings,
-            chords: AllChordMaps::default(),
-            sequences: AllSeqMaps::default(),
-            word_mods: Vec::new(),
-            plain_mods: Vec::new(),
-            anagram_mods: Vec::new(),
-            modes: BTreeMap::new(),
-        })
+        chords.insert_map(named_chords, kmap.to_owned())?;
     }
+    Ok(chords)
+}
 
-    /// Attempt to build an AllData struct, using the settings file that was
-    /// passed to `load()`.
-    pub fn finalize(mut self) -> Result<AllData, Error> {
-        // The order of these calls matters! Some depend on data loaded in
-        // previous ones.
-        self.load_modes()?;
-
-        self.load_chords().context("Failed to load chords")?;
-
-        self.load_plains()?;
-
-        self.load_macros()?;
-
-        self.load_plain_mods()
-            .context("Failed to load plain mods")?;
-
-        self.make_spelling_table()
-            .context("Failed to make spelling table")?;
-
-        self.load_word_mods();
-
-        self.load_anagram_mods();
-
-        let spellings = self.make_spelling_table()?;
-
-        self.load_dictionary(&spellings)
-            .context("Failed to load dictionary")?;
-
-        let command_variants =
-            self.load_commands().context("Failed to load commands")?;
-
-        Ok(AllData {
-            huffman_table: self.make_huffman_table()?,
-            chord_spec: self.settings.options.chord_spec()?,
-            output_directory: self.settings.options.output_directory.clone(),
-            commands: command_variants.into_iter().collect(),
-            board: self.settings.options.board_name.clone(),
-            user_options: self.settings.options,
-            chords: self.chords,
-            sequences: self.sequences,
-            word_mods: self.word_mods,
-            plain_mods: self.plain_mods,
-            anagram_mods: self.anagram_mods,
-            modes: self.modes,
-            spellings,
-        })
-    }
-
-    fn load_modes(&mut self) -> Result<(), Error> {
-        let modes = self.settings.modes.clone();
-        for (name, info) in modes {
-            self.add_mode(name, info)?;
-        }
-        Ok(())
-    }
-
-    fn load_chords(&mut self) -> Result<(), Error> {
-        // Get the names of all the kmap files we found when calling
-        // `load_modes()`
-        let kmaps: Vec<_> = self.chords.kmap_paths().cloned().collect();
-        let kmap_format = self.settings.options.kmap_format.clone();
-
-        for kmap in kmaps {
-            let named_chords = kmap.read(&kmap_format).with_context(|| {
-                format!("Failed to load kmap file: '{}'", kmap)
-            })?;
-
-            self.chords.insert_map(named_chords, &kmap)?;
-        }
-        Ok(())
-    }
-
-    fn load_macros(&mut self) -> Result<(), Error> {
-        let macros = self.settings.macros.clone();
-        self.sequences
-            .insert_map(macros, SeqType::Macro)
-            .context("Failed to load macros")?;
-        Ok(())
-    }
-
-    fn load_plains(&mut self) -> Result<(), Error> {
-        let plain_keys = self.settings.plain_keys.clone();
-        self.sequences
-            .insert_map(plain_keys, SeqType::Plain)
-            .context("Failed to load plain keys")?;
-        Ok(())
-    }
-
-    fn load_plain_mods(&mut self) -> Result<(), Error> {
-        let plain_mods = self.settings.plain_modifiers.clone();
-        for (name, keypress) in plain_mods {
-            self.add_plain_mod(name, keypress)
-                .context("Failed to add plain_mod")?;
-        }
-        Ok(())
-    }
-
-    fn load_word_mods(&mut self) {
-        let word_mods = self.settings.word_modifiers.clone();
-        for name in word_mods {
-            self.add_word_mod(name);
-        }
-    }
-
-    fn load_anagram_mods(&mut self) {
-        let anagram_mods = self.settings.anagram_modifiers.clone();
-        for name in anagram_mods {
-            self.add_anagram_mod(name);
-        }
-    }
-
-    /// In addition to loading commands from the settings file, automatically
-    /// create command bindings for switching to every mode (eg.
-    /// "command_switch_to_default_mode"). This means you don't need to manually
-    /// list mode-switching commands in the settings file, or more importantly,
-    /// in the firmware's `Command` enum or `Pipit::doCommand()`. Otherwise,
-    /// deleting modes in the settings file would cause a firmware compilation
-    /// error, because `doCommand()` would reference an unknown `Command`
-    /// variant. Instead, we store mode-switching commands in the lookup using a
-    /// single `Command::command_switch_to` variant, followed by a mode
-    /// argument.
-    fn load_commands(&mut self) -> Result<BTreeSet<Command>, Error> {
-        let mut variants = BTreeSet::new();
-        for normal_command in self.settings.commands.clone() {
-            variants.insert(normal_command.clone());
-            self.add_command(
-                normal_command.name().to_owned(),
-                normal_command,
-                &[],
-            )
-            .context("Failed to add command")?;
-        }
-
-        let modes = { self.modes.keys().cloned().collect::<Vec<ModeName>>() };
-        let base_name = "command_switch_to";
-        let variant = Command(base_name.into());
-        variants.insert(variant.clone());
-        for mode in modes {
-            let name = Name::from(format!("{}_{}", base_name, mode));
-            self.add_command(
-                name,
-                variant.clone(),
-                &[mode.qualified_enum_variant()],
-            )
-            .context("Failed to add mode-switching command")?;
-        }
-
-        Ok(variants)
-    }
-
-    fn load_dictionary(
-        &mut self,
-        spellings: &SpellingTable,
-    ) -> Result<(), Error> {
-        let dictionary = self.settings.dictionary.clone();
-        let snippets = self.settings.snippets.clone();
-        for kmap in &self.get_kmaps_with_words() {
-            for word_info in &dictionary {
-                self.add_wordlike(word_info, kmap, spellings, SeqType::Word)
-                    .with_context(|| {
-                        format!("Failed to add word: {}", word_info.word)
-                    })?
-            }
-            for snippet_info in &snippets {
-                self.add_wordlike(snippet_info, kmap, spellings, SeqType::Macro)
-                    .with_context(|| {
-                        format!(
-                            "Failed to add snippet: {}",
-                            snippet_info.snippet
-                        )
-                    })?
-            }
-        }
-        Ok(())
-    }
-
-    fn make_spelling_table(&mut self) -> Result<SpellingTable, Error> {
-        let mut table = BTreeMap::new();
-        {
-            let plain_names = self
-                .sequences
-                .get_seq_map(SeqType::Plain)?
-                .names()
-                .chain(self.plain_mods.iter());
-
-            for name in plain_names {
-                let keypress = self
-                    .sequences
-                    .get_seq_of_any_type(name)?
-                    .lone_keypress()?;
-                if let Some(spelling) =
-                    KeyDefs::spelling_from_keypress(&keypress)?
-                {
-                    table.insert(spelling, name.to_owned());
-                }
-            }
-        }
-        Ok(SpellingTable(table))
-    }
-
-    fn make_huffman_table(&mut self) -> Result<HuffmanTable, Error> {
-        Ok(HuffmanTable::new(self.sequences.dump_all_keypresses())
-            .context("Failed to make table of huffman encodings")?)
-    }
-
-    fn add_mode(
-        &mut self,
-        mode_name: ModeName,
-        info: ModeInfo,
-    ) -> Result<(), Error> {
-        // Check if a mode with this name has been added already
-        if self.modes.contains_key(&mode_name) {
-            return Err(Error::ConflictErr {
-                key: mode_name.into(),
-                container: "modes".to_owned(),
+fn load_plain_mods(settings: &Settings) -> Result<SeqMap, Error> {
+    settings
+        .plain_modifiers
+        .iter()
+        .map(|(name, keypress)| {
+            KeyDefs::ensure_plain_mod(&keypress).with_context(|| {
+                format!("Invalid plain modifier keypress for {}", name)
             })
-            .context("Mode has already been added");
-        }
+        })
+        .collect::<Result<Vec<_>, Error>>()?;
 
-        // Initialize the kmaps that are included in this mode
-        for kmap_info in &info.keymaps {
-            self.chords.init_kmap(&kmap_info.file);
-        }
+    Ok(SeqMap::from(settings.plain_modifiers.clone()))
+}
 
-        self.modes.insert(mode_name, info);
-        Ok(())
-    }
-
-    fn add_plain_mod(
-        &mut self,
-        name: Name,
-        key_press: KeyPress,
-    ) -> Result<(), Error> {
-        KeyDefs::ensure_plain_mod(&key_press)?;
-        self.plain_mods.push(name.clone());
-        self.sequences
-            .insert(name, key_press.into(), SeqType::Plain)
-    }
-
-    /// Create a sequence for this command. The command variants will be
-    /// collected separately.
-    fn add_command(
-        &mut self,
-        name: Name,
-        variant: Command,
-        args: &[CCode],
-    ) -> Result<(), Error> {
-        // Commands don't have actual key sequences, just a byte containing an
-        // enum value, and maybe some extra bytes as argument. But we'll
-        // store them as Sequences for convenience.
-        let mut fake_seq: Sequence =
-            KeyPress::new_fake(variant.qualified_enum_variant()).into();
-        for arg in args {
-            fake_seq.push(KeyPress::new_fake(arg.to_owned()))
-        }
-
-        self.sequences.insert(name, fake_seq, SeqType::Command)
-    }
-
-    fn add_wordlike<T>(
-        &mut self,
-        wordlike: &T,
-        kmap: &KmapPath,
-        spelling_table: &SpellingTable,
-        seq_type: SeqType,
-    ) -> Result<(), Error>
-    where
-        T: Wordlike,
+// Requires all the SeqType::Plain sequences to have been loaded already.
+// TODO how to enforce that invariant?
+// fn make_spelling_table(plain_seqs: &SeqMap) -> Result<SpellingTable, Error> {
+fn make_spelling_table(settings: &Settings) -> Result<SpellingTable, Error> {
+    let mut table = BTreeMap::new();
+    for (name, keypress) in settings
+        .plain_keys
+        .iter()
+        .chain(settings.plain_modifiers.iter())
     {
-        let name = wordlike.name();
-
-        self.sequences.insert(
-            name.clone(),
-            wordlike.sequence().with_context(|| {
-                format!("Failed to make sequence for '{}'", name)
-            })?,
-            seq_type,
-        )?;
-
-        let mut chord = self
-            .make_relative_chord(wordlike, kmap, spelling_table)
-            .with_context(|| format!("Failed to make chord for '{}'", name))?;
-        chord.anagram_num = wordlike.anagram_num();
-        self.chords.insert(name, chord, kmap)
-    }
-
-    fn make_relative_chord<T>(
-        &self,
-        wordlike: &T,
-        kmap: &KmapPath,
-        spelling_table: &SpellingTable,
-    ) -> Result<Chord<KmapOrder>, Error>
-    where
-        T: Wordlike,
-    {
-        let mut names = Vec::new();
-        for spelling in wordlike.chord_spellings()? {
-            names.extend(spelling_table.get_checked(spelling)?)
+        if let Some(spelling) = KeyDefs::spelling_from_keypress(keypress)? {
+            table.insert(spelling, name.to_owned());
         }
+    }
+    Ok(SpellingTable(table))
+}
 
-        let mut letter_chords =
-            names.iter().map(|name| self.chords.get(name, kmap));
-
-        let mut word_chord = letter_chords.next().ok_or_else(|| {
-            Error::Empty(
-                "set of letter chords for constructing relative chord"
-                    .to_owned(),
+fn load_dictionary(
+    settings: &Settings,
+    spellings: &SpellingTable,
+    chords: &mut AllChordMaps,
+    sequences: &mut AllSeqMaps,
+) -> Result<(), Error> {
+    for kmap in settings.kmaps_with_words() {
+        for word_info in &settings.dictionary {
+            add_wordlike(
+                word_info,
+                kmap.to_owned(),
+                spellings,
+                chords,
+                sequences,
             )
-        })??;
-        for c in letter_chords {
-            word_chord.union_mut(&c?)?;
+            .with_context(|| {
+                format!("Failed to add word: {}", word_info.word)
+            })?;
         }
-        Ok(word_chord)
-    }
-
-    fn add_word_mod(&mut self, name: Name) {
-        self.word_mods.push(name);
-    }
-
-    fn add_anagram_mod(&mut self, name: Name) {
-        self.anagram_mods.push(name);
-    }
-
-    fn get_kmaps_with_words(&self) -> Vec<KmapPath> {
-        let mut out = BTreeSet::new();
-        for mode_info in self.settings.modes.values() {
-            for kmap_info in &mode_info.keymaps {
-                if kmap_info.use_words {
-                    out.insert(kmap_info.file.clone());
-                }
-            }
+        for snippet_info in &settings.snippets {
+            add_wordlike(
+                snippet_info,
+                kmap.to_owned(),
+                spellings,
+                chords,
+                sequences,
+            )
+            .with_context(|| {
+                format!("Failed to add snippet: {}", snippet_info.snippet)
+            })?;
         }
-        out.into_iter().collect()
     }
+    Ok(())
+}
+
+fn add_wordlike<T>(
+    wordlike: &T,
+    kmap: KmapPath,
+    spellings: &SpellingTable,
+    chords: &mut AllChordMaps,
+    sequences: &mut AllSeqMaps,
+) -> Result<(), Error>
+where
+    T: Wordlike,
+{
+    let name = wordlike.name();
+    sequences.insert(name.clone(), wordlike.sequence()?, T::seq_type())?;
+
+    let chord = make_wordlike_chord(wordlike, &kmap, spellings, chords)
+        .with_context(|| format!("Failed to make chord for '{}'", name))?;
+    chords.insert(name, chord, kmap)
+}
+
+fn make_wordlike_chord<T>(
+    wordlike: &T,
+    kmap: &KmapPath,
+    spelling_table: &SpellingTable,
+    chords: &AllChordMaps,
+) -> Result<Chord<KmapOrder>, Error>
+where
+    T: Wordlike,
+{
+    let mut names = Vec::new();
+    for spelling in wordlike.chord_spellings()? {
+        names.extend(spelling_table.get_checked(spelling)?)
+    }
+
+    let mut letter_chords = names.iter().map(|name| chords.get(name, kmap));
+
+    // TODO better static union method?
+    let mut word_chord = letter_chords.next().ok_or_else(|| {
+        Error::Empty(
+            "set of letter chords for constructing relative chord".to_owned(),
+        )
+    })??;
+    for c in letter_chords {
+        word_chord.union_mut(&c?)?;
+    }
+    word_chord.anagram_num = wordlike.anagram_num();
+    Ok(word_chord)
+}
+
+/// In addition to loading commands from the settings file, automatically
+/// create command bindings for switching to every mode (eg.
+/// "command_switch_to_default_mode"). This means you don't need to manually
+/// list mode-switching commands in the settings file, or more importantly,
+/// in the firmware's `Command` enum or `Pipit::doCommand()`. Otherwise,
+/// deleting modes in the settings file would cause a firmware compilation
+/// error, because `doCommand()` would reference an unknown `Command`
+/// variant. Instead, we store mode-switching commands in the lookup using a
+/// single `Command::command_switch_to` variant, followed by a mode
+/// argument.
+fn load_commands(
+    settings: &Settings,
+    sequences: &mut AllSeqMaps,
+) -> Result<Vec<Command>, Error> {
+    // TODO cleanup
+    let mut variants = BTreeSet::new();
+    for normal_command in settings.commands.clone() {
+        variants.insert(normal_command.clone());
+        add_command(
+            normal_command.name().to_owned(),
+            normal_command,
+            &[],
+            sequences,
+        )
+        .context("Failed to add command")?;
+    }
+
+    let base_name = "command_switch_to";
+    let variant = Command(base_name.into());
+    variants.insert(variant.clone());
+    for mode in settings.mode_names() {
+        let name = Name::from(format!("{}_{}", base_name, mode));
+        add_command(
+            name,
+            variant.clone(),
+            &[mode.qualified_enum_variant()],
+            sequences,
+        )
+        .context("Failed to add mode-switching command")?;
+    }
+
+    Ok(variants.into_iter().collect())
+}
+
+/// Create a sequence for this command. The command variants will be
+/// collected separately.
+// TODO don't take sequences? just return stuff
+fn add_command(
+    name: Name,
+    variant: Command,
+    args: &[CCode],
+    sequences: &mut AllSeqMaps,
+) -> Result<(), Error> {
+    // Commands don't have actual key sequences, just a byte containing an
+    // enum value, and maybe some extra bytes as argument. But we'll
+    // store them as Sequences for convenience.
+    let mut fake_seq: Sequence =
+        KeyPress::new_fake(variant.qualified_enum_variant()).into();
+    for arg in args {
+        fake_seq.push(KeyPress::new_fake(arg.to_owned()))
+    }
+
+    sequences.insert(name, fake_seq, SeqType::Command)
 }

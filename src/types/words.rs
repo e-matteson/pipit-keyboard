@@ -3,8 +3,8 @@ use std::fmt;
 use std::str::FromStr;
 use unicode_segmentation::UnicodeSegmentation;
 
-use error::Error;
-use types::{KeyPress, Name, Sequence, Spelling, Validate};
+use error::{Error, ResultExt};
+use types::{KeyPress, Name, SeqType, Sequence, Spelling, Validate};
 
 const DEFAULT_ANAGRAM_NUM: u8 = 0;
 
@@ -46,6 +46,7 @@ pub struct Snippet {
 // TODO shrink, make more methods default
 // TODO be consistent about meaning of "spelling"
 pub trait Wordlike {
+    fn seq_type() -> SeqType;
     fn seq_field(&self) -> &str;
     fn chord_field(&self) -> Option<&String>;
     fn anagram_num(&self) -> AnagramNum;
@@ -56,16 +57,19 @@ pub trait Wordlike {
     }
 
     fn chord_spellings(&self) -> Result<Vec<Spelling>, Error> {
-        self.chord_spelling()
+        self.chord_string()
             .graphemes(true)
             .map(Spelling::new)
             .collect()
     }
 
-    fn chord_spelling(&self) -> Cow<str> {
+    fn chord_string(&self) -> Cow<str> {
         // If an alternate chord string was given, use that. Otherwise, use the
-        // sequence string. Also return true if the chord should include
-        // `shift`.
+        // sequence string.
+
+        // Also return true if the chord should include
+        // `shift`.  TODO wait what?
+
         if let Some(chord_str) = self.chord_field() {
             chord_str.into()
         } else {
@@ -78,12 +82,17 @@ pub trait Wordlike {
         let mut seq = Sequence::default();
 
         for letter in self.seq_field().graphemes(true) {
-            let keypress = KeyPress::from_str(&letter.to_string())?;
+            let keypress = KeyPress::from_str(&letter.to_string())
+                .with_context(|| {
+                    format!("Invalid letter in sequence for {}", self.name())
+                })?;
             seq.push(keypress);
         }
 
         if seq.is_empty() {
-            return Err(Error::Empty("Sequence".into()));
+            return Err(Error::Empty("Sequence".into())).with_context(|| {
+                format!("Invalid sequence for {}", self.name())
+            });
         }
         Ok(seq)
     }
@@ -108,6 +117,10 @@ pub trait Wordlike {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Wordlike for Word {
+    fn seq_type() -> SeqType {
+        SeqType::Word
+    }
+
     fn seq_field(&self) -> &str {
         &self.word
     }
@@ -130,6 +143,10 @@ impl Wordlike for Word {
 }
 
 impl Wordlike for Snippet {
+    fn seq_type() -> SeqType {
+        SeqType::Macro
+    }
+
     fn seq_field(&self) -> &str {
         &self.snippet
     }

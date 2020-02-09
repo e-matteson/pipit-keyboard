@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use std::clone::Clone;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use error::{Error, ResultExt};
@@ -11,10 +11,10 @@ use types::{
 };
 use util::ensure_u8;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ChordMap(BTreeMap<Name, Chord<KmapOrder>>);
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SeqMap(BTreeMap<Name, Sequence>);
 
 #[derive(Debug, Default)]
@@ -184,6 +184,7 @@ impl AllChordMaps {
         kmap: &KmapPath,
     ) -> Result<Chord<KmapOrder>, Error> {
         // TODO be consistent about argument order
+        // TODO don't clone? Chords are small though...
         Ok(self
             .get_kmap(kmap)?
             .get(chord_name)
@@ -201,10 +202,6 @@ impl AllChordMaps {
         })
     }
 
-    pub fn kmap_paths(&self) -> impl Iterator<Item = &KmapPath> {
-        self.maps.keys()
-    }
-
     pub fn names(&self) -> impl Iterator<Item = &Name> {
         self.maps.values().flat_map(|chord_map| chord_map.names())
     }
@@ -217,42 +214,24 @@ impl AllChordMaps {
             .unwrap_or_default()
     }
 
-    /// If this kmap was not already present, initialize its chord map and
-    /// return true. Otherwise return false.
-    pub fn init_kmap(&mut self, kmap: &KmapPath) -> bool {
-        if self.maps.contains_key(kmap) {
-            return false;
-        }
-
-        self.maps.insert(kmap.to_owned(), ChordMap::new());
-        true
-    }
-
     pub fn insert(
         &mut self,
         name: Name,
         chord: Chord<KmapOrder>,
-        kmap: &KmapPath,
+        kmap: KmapPath,
     ) -> Result<(), Error> {
-        self.maps
-            .get_mut(kmap)
-            .ok_or_else(|| {
-                Error::BadValueErr {
-                    thing: "kmap".into(),
-                    value: kmap.to_owned().into(),
-                }
-                .context("tried to add chord to uninitialized kmap")
-            })?
-            .insert(name, chord)
+        self.maps.entry(kmap).or_default().insert(name, chord)
     }
 
+    // TODO is it worth having this separate method?
+    // It's not actually more efficient...
     pub fn insert_map(
         &mut self,
         named_chords: BTreeMap<Name, Chord<KmapOrder>>,
-        kmap: &KmapPath,
+        kmap: KmapPath,
     ) -> Result<(), Error> {
         for (name, chord) in named_chords {
-            self.insert(name, chord, kmap)?;
+            self.insert(name, chord, kmap.clone())?;
         }
         Ok(())
     }
@@ -314,18 +293,12 @@ impl AllSeqMaps {
         self.maps.values().flat_map(|seq_map| seq_map.names())
     }
 
-    pub fn insert_map<T>(
+    pub fn insert_map(
         &mut self,
-        seqs: BTreeMap<Name, T>,
+        seqs: SeqMap,
         seq_type: SeqType,
-    ) -> Result<(), Error>
-    where
-        T: Into<Sequence>,
-    {
-        for (name, seq) in seqs {
-            self.insert(name, seq.into(), seq_type)?;
-        }
-        Ok(())
+    ) -> Result<(), Error> {
+        self.maps.entry(seq_type).or_default().append(seqs)
     }
 
     pub fn insert(
@@ -334,11 +307,7 @@ impl AllSeqMaps {
         seq: Sequence,
         seq_type: SeqType,
     ) -> Result<(), Error> {
-        self.maps
-            .entry(seq_type)
-            .or_insert_with(SeqMap::new)
-            .insert(name, seq)?;
-        Ok(())
+        self.maps.entry(seq_type).or_default().insert(name, seq)
     }
 
     /// The length of the longest sequence contained anywhere in this map.
@@ -350,7 +319,7 @@ impl AllSeqMaps {
             .unwrap_or(0)
     }
 
-    pub fn dump_all_keypresses(&self) -> Vec<KeyPress> {
+    pub fn all_keypresses(&self) -> Vec<KeyPress> {
         let mut v = Vec::new();
         for seq_map in self.maps.values() {
             for seq in seq_map.0.values() {
@@ -362,10 +331,6 @@ impl AllSeqMaps {
 }
 
 impl ChordMap {
-    fn new() -> Self {
-        ChordMap(BTreeMap::new())
-    }
-
     pub fn get(&self, name: &Name) -> Option<&Chord<KmapOrder>> {
         self.0.get(name)
     }
@@ -412,8 +377,19 @@ impl ChordMap {
 }
 
 impl SeqMap {
-    fn new() -> Self {
-        SeqMap(BTreeMap::new())
+    pub fn append(&mut self, mut other: SeqMap) -> Result<(), Error> {
+        let self_names: BTreeSet<_> = self.names().collect();
+        let other_names: BTreeSet<_> = other.names().collect();
+        let conflicts = self_names.intersection(&other_names);
+        if let Some(first_conflict) = conflicts.into_iter().next() {
+            return Err(Error::ConflictErr {
+                key: (*first_conflict).into(),
+                container: "sequence map".into(),
+            });
+        }
+
+        self.0.append(&mut other.0);
+        Ok(())
     }
 
     fn get(&self, name: &Name) -> Option<&Sequence> {
@@ -442,5 +418,25 @@ impl SeqMap {
         } else {
             Ok(())
         }
+    }
+}
+
+impl From<BTreeMap<Name, KeyPress>> for SeqMap {
+    fn from(keypresses: BTreeMap<Name, KeyPress>) -> SeqMap {
+        // We can skip the checks in insert() because a single keypress won't be
+        // a long sequence, and the BTreeMap can't contain duplicates.
+        SeqMap(
+            keypresses
+                .into_iter()
+                .map(|(name, keypress)| (name, keypress.into()))
+                .collect(),
+        )
+    }
+}
+
+impl From<BTreeMap<Name, Sequence>> for SeqMap {
+    fn from(seqs: BTreeMap<Name, Sequence>) -> SeqMap {
+        // TODO ensure no sequences are too long?
+        SeqMap(seqs)
     }
 }

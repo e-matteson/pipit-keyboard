@@ -80,3 +80,9 @@ impl From<KeyPress> for Sequence {
         s
     }
 }
+
+impl<'a> From<&'a KeyPress> for Sequence {
+    fn from(single: &'a KeyPress) -> Sequence {
+        Sequence::from(single.to_owned())
+    }
+}
