@@ -28,7 +28,7 @@ struct KeyDef {
 
 pub struct KeyDefs;
 
-lazy_static!{
+lazy_static! {
     static ref TABLE: Vec<KeyDef> = vec![
         // keypress                                   spelling    scancode
         (KeyPress::new_mod("MODIFIERKEY_CTRL"),        None,       Some(1)),
@@ -242,6 +242,13 @@ impl KeyPress {
         }
     }
 
+    pub fn uncapitalize(&mut self) {
+        let shift = "MODIFIERKEY_SHIFT".to_c();
+        if let Some(index) = self.mods.iter().position(|m| m == &shift) {
+            self.mods.remove(index);
+        }
+    }
+
     pub fn ensure_non_empty(&self) -> Result<(), Error> {
         if self.key.is_none() && self.mods.is_empty() {
             Err(Error::BadValueErr {
@@ -336,6 +343,23 @@ impl KeyDefs {
                 container: "key definition table".into(),
             })?
             .spelling)
+    }
+
+    pub fn spelling_from_keypress_any_case(
+        keypress: &KeyPress,
+    ) -> Result<Spelling, Error> {
+        if let Ok(Some(exact)) = KeyDefs::spelling_from_keypress(keypress) {
+            Ok(exact)
+        } else {
+            let mut lower_key = keypress.clone();
+            lower_key.uncapitalize();
+            let lower_spelling = KeyDefs::spelling_from_keypress(&lower_key)?
+                .ok_or_else(|| Error::Missing {
+                missing: format!("spelling for {:?}", keypress),
+                container: "key definitions".into(),
+            })?;
+            Ok(lower_spelling.to_uppercase())
+        }
     }
 
     fn keypress_from_spelling(

@@ -1,3 +1,4 @@
+use rand::seq::IteratorRandom;
 use serde_yaml;
 use std::collections::HashMap;
 use std::fs::File;
@@ -7,7 +8,10 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 use error::{Error, ResultExt};
-use types::{Chord, KmapOrder, ModeName, Name, Spelling, TutorData};
+use types::{
+    Chord, KeyDefs, KmapOrder, ModeName, Name, Spelling, TutorData,
+    WordSpacePosition,
+};
 
 lazy_static! {
     static ref STATE: Mutex<Option<InnerState>> = Mutex::new(None);
@@ -138,6 +142,34 @@ impl InnerState {
         }
         // ignore any errors while saving
         self.save_settings().ok();
+    }
+
+    fn random_word_names(&self, count: usize) -> Vec<Name> {
+        self.tutor_data
+            .word_sequences
+            .names()
+            .choose_multiple(&mut rand::thread_rng(), count)
+            .into_iter()
+            .cloned()
+            .collect()
+    }
+
+    fn word_spelling(&self, word_name: &Name) -> Result<String, Error> {
+        let seq =
+            self.tutor_data
+                .word_sequences
+                .get(word_name)
+                .ok_or_else(|| Error::LookupErr {
+                    key: word_name.into(),
+                    container: "words".into(),
+                })?;
+        seq.keypresses()
+            .map(|keypress| {
+                let spelling =
+                    KeyDefs::spelling_from_keypress_any_case(keypress)?;
+                Ok(spelling.0)
+            })
+            .collect()
     }
 }
 
@@ -282,6 +314,34 @@ impl State {
             .as_mut()
             .expect("state not set")
             .set_mode(mode_str)
+    }
+
+    pub fn word_space_position() -> WordSpacePosition {
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .tutor_data
+            .word_space_position
+    }
+
+    pub fn word_spelling(word_name: &Name) -> Result<String, Error> {
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .word_spelling(word_name)
+    }
+
+    pub fn random_word_names(count: usize) -> Vec<Name> {
+        STATE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("state not set")
+            .random_word_names(count)
     }
 }
 

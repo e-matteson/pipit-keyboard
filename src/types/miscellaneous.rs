@@ -5,8 +5,8 @@ use std::fmt::Debug;
 
 use error::Error;
 use types::{
-    CCode, Chord, ChordSpec, KmapOrder, ModeName, Name, SpellingTable, ToC,
-    Validate,
+    CCode, Chord, ChordSpec, KmapOrder, ModeName, Name, SeqMap, SpellingTable,
+    ToC, Validate, WordSpacePosition,
 };
 
 #[derive(Deserialize, Debug, Clone, Copy)]
@@ -18,8 +18,10 @@ pub enum BoardName {
 #[derive(Debug, Clone)]
 pub struct TutorData {
     pub chords: BTreeMap<ModeName, BTreeMap<Name, Chord<KmapOrder>>>,
+    pub word_sequences: SeqMap,
     pub spellings: SpellingTable,
     pub chord_spec: ChordSpec,
+    pub word_space_position: WordSpacePosition,
 }
 
 impl ToC for BoardName {

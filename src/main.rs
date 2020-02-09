@@ -2,6 +2,7 @@ extern crate bit_vec;
 extern crate cursive;
 extern crate itertools;
 extern crate natord;
+extern crate rand;
 extern crate serde;
 extern crate serde_yaml;
 extern crate svg;

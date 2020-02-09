@@ -9,7 +9,7 @@ use cursive::Cursive;
 
 use types::TutorData;
 
-use tutor::{Lesson, LessonConfig, State};
+use tutor::{create_random_words, Lesson, LessonConfig, State};
 
 pub struct TutorApp;
 
@@ -27,12 +27,13 @@ impl TutorApp {
     }
 
     fn show_main_menu(siv: &mut Cursive) {
-        let items = vec!["Lessons", "Options", "Quit"];
+        let items = vec!["Lessons", "Random Words", "Options", "Quit"];
         let select = SelectView::new()
             .h_align(HAlign::Left)
             .with_all_str(items)
             .on_submit(move |siv, item| match item {
                 "Lessons" => Self::show_lesson_menu(siv),
+                "Random Words" => Self::show_random_words(siv),
                 "Options" => Self::show_option_menu(siv),
                 "Quit" => siv.quit(),
                 _ => panic!("unknown menu item"),
@@ -97,9 +98,9 @@ impl TutorApp {
         let mut select = SelectView::new().h_align(HAlign::Left);
 
         select.add_all_str(names);
-        select.set_on_submit(move |siv, name| {
+        select.set_on_submit(move |siv, name: &str| {
             let lesson = lessons.get(name).cloned().expect("lesson not found");
-            Self::show_lesson(siv, name, lesson)
+            Self::show_lesson(siv, lesson)
         });
 
         siv.add_layer(Dialog::around(select).title("Lessons").button(
@@ -110,11 +111,12 @@ impl TutorApp {
         ));
     }
 
-    fn show_lesson(
-        siv: &mut Cursive,
-        _name: &str,
-        lesson_config: LessonConfig,
-    ) {
+    fn show_random_words(siv: &mut Cursive) {
+        let config = create_random_words().unwrap();
+        Self::show_lesson(siv, config)
+    }
+
+    fn show_lesson(siv: &mut Cursive, lesson_config: LessonConfig) {
         // TODO will unwrap print nicely?
         let lesson = Lesson::new(lesson_config).unwrap();
         let popup = lesson.popup.clone();

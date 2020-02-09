@@ -118,6 +118,15 @@ impl fmt::Display for SlideWord {
     }
 }
 
+impl From<SlideLine> for Slide {
+    fn from(line: SlideLine) -> Slide {
+        Slide {
+            instruction: String::new(),
+            line,
+        }
+    }
+}
+
 fn return_true() -> bool {
     true
 }

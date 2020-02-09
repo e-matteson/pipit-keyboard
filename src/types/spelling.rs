@@ -38,6 +38,15 @@ impl Spelling {
                 .expect("failed to get lowercase spelling"),
         )
     }
+
+    pub fn to_uppercase(self) -> Self {
+        Spelling(
+            self.0
+                .to_uppercase()
+                .next()
+                .expect("failed to get uppercase spelling"),
+        )
+    }
 }
 
 impl fmt::Display for Spelling {

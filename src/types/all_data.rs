@@ -14,7 +14,7 @@ use util::ensure_u8;
 #[derive(Debug, Default)]
 pub struct ChordMap(BTreeMap<Name, Chord<KmapOrder>>);
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct SeqMap(BTreeMap<Name, Sequence>);
 
 #[derive(Debug, Default)]
@@ -167,8 +167,13 @@ impl AllData {
         // TODO use references instead of cloning spellings
         Ok(TutorData {
             chords,
+            word_sequences: self
+                .sequences
+                .get_seq_map(SeqType::Word)?
+                .to_owned(),
             spellings: self.spellings.clone(),
             chord_spec: self.chord_spec.clone(),
+            word_space_position: self.user_options.word_space_position,
         })
     }
 
@@ -392,7 +397,7 @@ impl SeqMap {
         Ok(())
     }
 
-    fn get(&self, name: &Name) -> Option<&Sequence> {
+    pub fn get(&self, name: &Name) -> Option<&Sequence> {
         // TODO return result?
         self.0.get(name)
     }
