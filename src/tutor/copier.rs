@@ -7,7 +7,7 @@ use cursive::Printer;
 use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 
-use error::{Error, ResultExt};
+use error::Error;
 use tutor::{offset, Label, LabeledChord, SlideLine, SlideWord, State};
 use types::{Chord, KmapOrder};
 
@@ -308,18 +308,10 @@ impl LineEntry {
         Ok(match line {
             SlideLine::Letters(string) => (Vec::new(), string.to_owned()),
             SlideLine::Words { words, .. } => {
-                let entries: Result<Vec<_>, _> = words
+                let entries: Vec<_> = words
                     .iter()
-                    .map(|word| {
-                        LineEntry::from_word(word).with_context(|| {
-                            format!(
-                                "Failed to make slide entry from word: {}",
-                                word
-                            )
-                        })
-                    })
+                    .filter_map(|word| LineEntry::from_word(word).ok())
                     .collect();
-                let entries = entries?;
                 let string =
                     entries.iter().map(|entry| entry.text.clone()).join("");
                 (entries, string)
