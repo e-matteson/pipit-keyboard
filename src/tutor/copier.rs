@@ -4,10 +4,12 @@ use cursive::theme::ColorStyle;
 use cursive::traits::*;
 use cursive::vec::Vec2;
 use cursive::Printer;
-
-use error::Error;
-use tutor::{offset, LabeledChord, SlideEntry, SlideLine, State};
+use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
+
+use error::{Error, ResultExt};
+use tutor::{offset, Label, LabeledChord, SlideLine, SlideWord, State};
+use types::{Chord, KmapOrder};
 
 #[derive(Debug, Clone)]
 pub struct Copier {
@@ -25,6 +27,13 @@ struct CopierLine {
     show_errors: bool,
     hint_map: HashMap<usize, LabeledChord>,
     show_hints_within_words: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct LineEntry {
+    pub text: String,
+    pub chord: Chord<KmapOrder>,
+    pub length: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -241,7 +250,7 @@ impl View for Copier {
 
 impl CopierLine {
     fn from(line: &SlideLine, extra_spaces: usize) -> Result<Self, Error> {
-        let (entries, text) = line.to_entries()?;
+        let (entries, text) = LineEntry::from_line(line)?;
 
         let pad = " ".repeat(extra_spaces);
         let expected = pad.clone() + &text;
@@ -267,6 +276,73 @@ impl Default for CopierLine {
             show_errors: true,
             hint_map: HashMap::new(),
             show_hints_within_words: true,
+        }
+    }
+}
+
+impl LineEntry {
+    fn from_word(word: &SlideWord) -> Result<Self, Error> {
+        let chords = word
+            .names
+            .iter()
+            .map(|name| State::chord(name))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let chord = chords
+            .into_iter()
+            .fold1(|a, b| a.union(&b).expect("failed to union word chords"))
+            .ok_or_else(|| Error::Empty("word chords".to_owned()))?;
+
+        Ok(Self {
+            chord,
+            length: word
+                .length_override
+                .unwrap_or_else(|| word.text.graphemes(true).count()),
+            text: word.text.clone(),
+        })
+    }
+
+    pub fn from_line(
+        line: &SlideLine,
+    ) -> Result<(Vec<LineEntry>, String), Error> {
+        Ok(match line {
+            SlideLine::Letters(string) => (Vec::new(), string.to_owned()),
+            SlideLine::Words { words, .. } => {
+                let entries: Result<Vec<_>, _> = words
+                    .iter()
+                    .map(|word| {
+                        LineEntry::from_word(word).with_context(|| {
+                            format!(
+                                "Failed to make slide entry from word: {}",
+                                word
+                            )
+                        })
+                    })
+                    .collect();
+                let entries = entries?;
+                let string =
+                    entries.iter().map(|entry| entry.text.clone()).join("");
+                (entries, string)
+            }
+        })
+    }
+
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
+    pub fn to_labeled_chord(&self) -> LabeledChord {
+        LabeledChord {
+            label: self.label(),
+            chord: self.chord.clone(),
+        }
+    }
+
+    pub fn label(&self) -> Label {
+        if self.text.graphemes(true).count() == 1 {
+            Label::from_char(&self.text)
+        } else {
+            Label::default()
         }
     }
 }
@@ -313,7 +389,7 @@ fn get_style(actual_char: &str, expected_char: Option<&str>) -> ColorStyle {
     }
 }
 
-fn make_hint_map(entries: &[SlideEntry]) -> HashMap<usize, LabeledChord> {
+fn make_hint_map(entries: &[LineEntry]) -> HashMap<usize, LabeledChord> {
     let mut position = 0;
     let mut map = HashMap::new();
     for entry in entries {

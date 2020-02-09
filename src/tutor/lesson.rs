@@ -1,9 +1,4 @@
-use std::collections::BTreeMap;
-use std::fs::{self, File};
-use std::path::PathBuf;
 use std::time::Instant;
-
-use serde_yaml;
 
 use cursive::event::{Callback, Event, EventResult, Key};
 use cursive::theme::ColorStyle;
@@ -16,18 +11,9 @@ use cursive::{Cursive, Printer};
 use error::{Error, ResultExt};
 
 use tutor::{
-    offset, Copier, Graphic, LabeledChord, PrevCharStatus, Slide, State,
+    offset, Copier, Graphic, LabeledChord, LessonConfig, PrevCharStatus, Slide,
+    State,
 };
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct LessonConfig {
-    slides: Vec<Slide>,
-    #[serde(default)]
-    popup: String,
-    #[serde(default)]
-    persistent: Vec<String>,
-}
 
 pub struct Lesson {
     pub popup: String,
@@ -39,53 +25,6 @@ pub struct Lesson {
     instruction: String,
     info_bar: String,
     total_slides: usize,
-}
-
-impl LessonConfig {
-    pub fn from_file(path: &PathBuf) -> Result<LessonConfig, Error> {
-        let file = File::open(path).with_context(|| {
-            format!("Failed to open file: {}", path.display())
-        })?;
-        let lesson: LessonConfig =
-            serde_yaml::from_reader(file).with_context(|| {
-                format!("Failed to read lesson file: {}", path.display())
-            })?;
-        Ok(lesson)
-    }
-
-    pub fn load_directory(
-        lesson_dir: &str,
-    ) -> Result<BTreeMap<String, LessonConfig>, Error> {
-        // TODO cleanup
-        let paths: Result<Vec<PathBuf>, Error> =
-            fs::read_dir(lesson_dir)?.map(|f| Ok(f?.path())).collect();
-        let paths = paths?;
-        let mut map = BTreeMap::new();
-        for path in paths {
-            if let Some(ext) = path.extension() {
-                if ext == "yaml" {
-                    map.insert(
-                        LessonConfig::name_from_path(&path),
-                        LessonConfig::from_file(&path)?,
-                    );
-                }
-            }
-        }
-        Ok(map)
-    }
-
-    fn name_from_path(path: &PathBuf) -> String {
-        // TODO return result
-        let s = path
-            .file_stem()
-            .expect("invalid lesson file name")
-            .to_str()
-            .expect("lesson path is not valid unicode");
-        let mut sections = s.split('_');
-        let number = sections.next().expect("invalid lesson file name");
-        let words: Vec<_> = sections.collect();
-        format!("{}) {}", number, words.join(" "))
-    }
 }
 
 impl Lesson {
