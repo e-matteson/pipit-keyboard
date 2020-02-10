@@ -81,9 +81,8 @@ impl Lesson {
     }
 
     fn update_chord(&mut self, status: &PrevCharStatus) -> Result<(), Error> {
-        let next_char =
-            self.copier.next_hint().context("Failed to get hint")?;
-        self.graphic.update(next_char, status);
+        let next = self.copier.next_hint().context("Failed to get hint")?;
+        self.graphic.update(next, status);
         Ok(())
     }
 

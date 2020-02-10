@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::iter;
 
 use cursive::theme::ColorStyle;
 use cursive::traits::*;
@@ -9,7 +10,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use error::Error;
 use tutor::{offset, Label, LabeledChord, SlideLine, SlideWord, State};
-use types::{Chord, KmapOrder};
+use types::{Chord, KmapOrder, Spelling};
 
 #[derive(Debug, Clone)]
 pub struct Copier {
@@ -25,7 +26,7 @@ struct CopierLine {
     actual: String,
     index: usize,
     show_errors: bool,
-    hint_map: HashMap<usize, LabeledChord>,
+    hint_map: HashMap<usize, Vec<LabeledChord>>,
     show_hints_within_words: bool,
 }
 
@@ -53,31 +54,35 @@ impl Copier {
         }
     }
 
-    pub fn next_hint(&mut self) -> Result<Option<LabeledChord>, Error> {
+    pub fn next_hint(&mut self) -> Result<Vec<LabeledChord>, Error> {
         let word_edge_hint = self.line.hint_map.get(&self.line.index);
-        if word_edge_hint.is_some() {
-            return Ok(word_edge_hint.cloned());
+        if let Some(chords) = word_edge_hint {
+            return Ok(chords.to_owned());
         }
 
         if self.at_end_of_line() {
-            return Ok(LabeledChord::from_letter("\n"));
+            return Ok(vec![LabeledChord::from_letter("\n").ok_or(
+                Error::Missing {
+                    missing: "newline".into(),
+                    container: "labeled chords".into(),
+                },
+            )?]);
         }
 
         if !self.line.show_hints_within_words {
-            return Ok(None);
+            return Ok(vec![]);
         }
 
         let next_letter = self
             .expected_next()
             .expect("failed to get next char, did we check for end of line?");
 
-        let letter_hint = if needs_hint(&next_letter) {
-            LabeledChord::from_letter(&next_letter)
-        } else {
-            None
-        };
-
-        Ok(letter_hint)
+        if needs_hint(&next_letter) {
+            if let Some(chord) = LabeledChord::from_letter(&next_letter) {
+                return Ok(vec![chord]);
+            }
+        }
+        Ok(vec![])
     }
 
     /// Offset of the most recently typed character
@@ -323,19 +328,27 @@ impl LineEntry {
         self.length
     }
 
-    pub fn to_labeled_chord(&self) -> LabeledChord {
-        LabeledChord {
-            label: self.label(),
-            chord: self.chord.clone(),
-        }
-    }
-
-    pub fn label(&self) -> Label {
-        if self.text.graphemes(true).count() == 1 {
-            Label::from_char(&self.text)
-        } else {
-            Label::default()
-        }
+    pub fn to_labeled_chords(&self) -> Vec<LabeledChord> {
+        self.text
+            .graphemes(true)
+            .filter_map(|letter| {
+                let mut subchord =
+                    State::chord_from_spelling(Spelling::new(letter).ok()?)?;
+                subchord.intersect_mut(&self.chord).ok()?;
+                if subchord.count_pressed() == 0 {
+                    None
+                } else {
+                    Some(LabeledChord {
+                        label: Label::from_char(letter),
+                        chord: subchord,
+                    })
+                }
+            })
+            .chain(iter::once(LabeledChord {
+                label: Label::default(),
+                chord: self.chord.clone(),
+            }))
+            .collect()
     }
 }
 
@@ -381,11 +394,11 @@ fn get_style(actual_char: &str, expected_char: Option<&str>) -> ColorStyle {
     }
 }
 
-fn make_hint_map(entries: &[LineEntry]) -> HashMap<usize, LabeledChord> {
+fn make_hint_map(entries: &[LineEntry]) -> HashMap<usize, Vec<LabeledChord>> {
     let mut position = 0;
     let mut map = HashMap::new();
     for entry in entries {
-        map.insert(position, entry.to_labeled_chord());
+        map.insert(position, entry.to_labeled_chords());
         position += entry.len();
     }
     map

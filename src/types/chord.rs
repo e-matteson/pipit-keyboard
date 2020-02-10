@@ -93,7 +93,6 @@ where
         assert_eq!(self.len(), other.len());
 
         if !other.anagram_num.is_default() {
-            // TODO return Result instead of unwrapping
             return Err(Error::BadValueErr {
                 thing: "anagram number of other chord".to_owned(),
                 value: other.anagram_num.to_string(),
@@ -109,6 +108,19 @@ where
         let mut new = self.to_owned();
         new.union_mut(other)?;
         Ok(new)
+    }
+
+    pub fn intersect_mut(&mut self, other: &Self) -> Result<(), Error> {
+        assert_eq!(self.len(), other.len());
+        if !other.anagram_num.is_default() {
+            return Err(Error::BadValueErr {
+                thing: "anagram number of other chord".to_owned(),
+                value: other.anagram_num.to_string(),
+            })
+            .context("Failed to intersect chords");
+        }
+        self.switches.intersect(&other.switches);
+        Ok(())
     }
 
     fn len(&self) -> usize {

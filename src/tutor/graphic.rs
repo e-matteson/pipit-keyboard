@@ -42,13 +42,16 @@ impl Graphic {
 
     pub fn update(
         &mut self,
-        next: Option<LabeledChord>,
+        mut next: Vec<LabeledChord>,
         prev: &PrevCharStatus,
     ) {
         for switch in &mut self.switches {
             switch.clear()
         }
-        if let Some(c) = next {
+        // Apply the largest chords first, so that some of their switches can be
+        // overwritten by smaller chords
+        next.sort_by_cached_key(|c| (c.chord.count_pressed() as isize) * -1);
+        for c in next {
             self.apply_chord(c, ChordType::Next)
         }
         if let Some(c) = prev.backspace() {
