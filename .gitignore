@@ -5,6 +5,7 @@ target
 /pipit-firmware/auto_config.cpp
 /pipit-firmware/auto_config.h
 /pipit-firmware/auto_config_early.h
+/pipit-firmware/auto_config_early.cpp
 
 # Persistent tutor options:
 /settings/tutor/saved_options.yaml
