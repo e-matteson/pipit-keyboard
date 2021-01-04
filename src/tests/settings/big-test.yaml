@@ -150,54 +150,17 @@ snippets:
   - {snippet: "ls\n", chord: " ls"}
 
 macros:
-  macro_vim_save: ":w\n"
-  macro_vim_quit: ":q\n"
   macro_mx:
     - {key: "KEY_X", mods: ["MODIFIERKEY_ALT"]}
-  macro_other_buffer1: " \t"
-  macro_other_buffer2: " ozb2"
-  macro_other_buffer3: " ozb3"
-  macro_other_buffer4: " ozb4"
-  macro_kill_buffer: " bd"
-  macro_in_paren: "()←"
-  macro_in_angle: "<>←"
-  macro_in_brace: "[]←"
-  macro_in_curly: "{}←"
-  macro_in_quote: "''←"
-  macro_in_doublequote: "\"\"←"
-  macro_in_equal: "==←"
-  macro_in_grave: "``←"
-  macro_out_paren: "()"
-  macro_out_angle: "<>"
-  macro_out_brace: "[]"
-  macro_out_curly: "{}"
-  macro_right_arrow: "->"
-  macro_left_arrow: "<-"
-  macro_this_arrow: "this->"
-  macro_cerr: "cerr << "
-  macro_cout: "cout <<"
-  macro_endl: "<< endl"
-  macro_print_ino: "Serial.print();←←"
-  macro_println_ino: "Serial.println();←←"
-  macro_gmail: "e.r.matteson@gmail.com"
-  macro_bmail: "evan_matteson@brown.edu"
-  # macro_compile: " mozc"
-  macro_compile: " cr"
-  macro_helm_mini: " bb"
   macro_helm_imenu:
     - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_I"}
   macro_helm_imenu_all:
     - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_I", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_find_file: " ff"
-  macro_proj_find_file: " pf"
-  macro_recentf: " fr"
-  macro_find_other_file: " of"
   macro_close_other_wins:
     - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_1"}
-  macro_other_win: " ww"
   macro_aspace:
     - {key: "KEY_A"}
     - {key: "KEY_SPACE"}
@@ -216,46 +179,6 @@ macros:
     - {key: "KEY_SPACE"}
     - {key: "KEY_ESC"}
     - {key: "KEY_P"}
-  macro_at_at: "@@"
-  macro_yank_eol: "y$"
-  macro_next_comma: "f,"
-  macro_prev_comma: "F,"
-  macro_kill_ring: " ry"
-  macro_comment: " cl"
-  macro_org_calendar: " aooc"
-  macro_magit_status: " gs"
-  macro_org_capture: " aoc"
-  macro_dotspacemacs: " fed"
-  macro_open_planner: " opp"
-  macro_open_active: " opu"
-  macro_open_settings: " ops"
-  macro_open_kmap: " opd"
-  macro_self_dot: "self."
-  macro_include_c: "#include "
-  macro_if_c: "if(){\n}↑▶←←"
-  macro_else_c: "else{\n\n}↑"
-  macro_for_c: "for(;;){\n}↑▶←←←←"
-  macro_while_c: "while(){\n}↑▶←←"
-  macro_arg_c: "(){\n}↑▶←←"
-  macro_ifdef_guard: "#ifndef H\n#define H\n\n\n#endif↑↑↑↑▶←"
-  macro_printf: "printf(\"\n\");←←←←←"
-  macro_print_py: "print()←"
-  macro_docstr_py: "\"\"\"\"\"\"←←←"
-  macro_lifetime_rs: "<'a>"
-  macro_new_rs: "::new()"
-  macro_print_rs: "println!(\"{}\",);←←"
-  macro_print_debug_rs: "println!(\"{:?}\",);←←"
-  macro_return_rs: " -> {\n}↑▶←"
-  macro_fn_rs: "fn () -> {\n}↑▶←←←←←←←"
-  macro_fn_self_rs: "fn (&self) -> {\n}↑▶←←←←←←←←←←←←"
-  macro_fn_self_void_rs: "fn (&self){\n}↑▶←←←←←←←←"
-  macro_fn_void_rs: "fn (&self){\n}↑▶←←←←"
-  macro_amperstr_rs: "&str"
-  macro_bang_dollar: "!$ "
-  macro_hash_bang: "#!/bin/bash"
-  macro_exit_py: "exit(3)"
-  macro_error_next: " en"
-  macro_error_prev: " ep"
   macro_increment:
     - {key: "KEY_A", mods: ["MODIFIERKEY_CTRL"]}
   macro_decrement:
@@ -266,26 +189,10 @@ macros:
   macro_nohlsearch:
     - {key: "KEY_SLASH"}
     - {key: "KEY_ESC"}
-  macro_prev_search: "/↑↑\n"
   macro_next_tab:
     - {key: "KEY_PAGE_DOWN", mods: ["MODIFIERKEY_CTRL"]}
   macro_prev_tab:
     - {key: "KEY_PAGE_UP", mods: ["MODIFIERKEY_CTRL"]}
-  macro_backslash_n: "\\n"
-  macro_blackhole: "\"_"
-  macro_tex_citep: "\\citep{}←"
-  macro_tex_itemize: "\\begin{itemize}\n\n\\end{itemize}↑\\item "
-  macro_tex_enumerate: "\\begin{enumerate}\n\n\\end{enumerate}↑\\item "
-  macro_open_scratch: " bs"
-  macro_eval: " oze"
-  macro_org_clock: " ol"
-  macro_org_tree: " mTt"
-  macro_org_archive: " mor"
-  macro_org_someday: " mos"
-  macro_org_insert: " moi"
-  macro_anagram_1: ", anagram: 1"
-  # macro_fake_alt_tab:
-  #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
 
 
 word_modifiers:

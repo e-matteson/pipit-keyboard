@@ -290,26 +290,8 @@ command_pause       command_led_colors  command_led_rainbow
 
 ##### macros #####
 
-macro_email      macro_apple_save_as
-*...   ....      ....   ....
-....   ....      ....   ...*
-  .     .          .     .
-  ... .*.          ... .*.
-
-macro_in_paren   macro_in_curly   macro_in_brace   macro_in_angle
-...*   ....      ..*.   ....      .*..   ....      *...   ....
-....   **..      ....   **..      ....   **..      ....   **..
-  .     .          .     .          .     .          .     .
-  ... ...          ... ...          ... ...          ... ...
-
-macro_in_quote   macro_in_doublequote
-....   ...*      *...   ....
-....   *...      ...*   ....
-  .     .          .     .
-  ... .*.          ... .*.
-
-macro_if_c       macro_vim_save   macro_vim_quit
-.*..   .*..      ....   ....      ....   ....
-...*   ....      ....   *...      ****   *...
-  .     .          .     .          .     .
-  ... .*.          ... .*.          ... .*.
+macro_apple_save_as  macro_vim_save   macro_vim_quit
+....   ....          ....   ....      ....   ....
+....   ...*          ....   *...      ****   *...
+  .     .              .     .          .     .
+  ... .*.              ... .*.          ... .*.

@@ -69,8 +69,26 @@ modes:
 
 
 # Add new macro key sequences here!
-# Simple text-like macros can just be written out in quotes, where the following
-# characters have special meanings:
+# Specify which key and modifiers are sent during each press. Provide chords in a kmap file.
+macros:
+  macro_apple_save_as:
+    - {key: "KEY_S", mods: ["MODIFIERKEY_GUI", "MODIFIERKEY_SHIFT"]}
+
+  macro_windows_save_as:
+    - {key: "KEY_S", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+
+  macro_vim_save:
+    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_W"}
+    - {key: "KEY_ENTER"}
+
+  macro_vim_quit:
+    - {key: "KEY_SEMICOLON", mods: ["MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_Q"}
+    - {key: "KEY_ENTER"}
+
+# TODO document
+# The following characters have special meanings:
 #    ←   | left
 #    →   | right
 #    ↑   | up
@@ -81,26 +99,16 @@ modes:
 #    \t  | tab
 #    \"  | doublequote
 #    \\  | backslash
-# If the macros contain modifiers, you'll need to manually specify
-# the key and modifiers sent during each press.
-macros:
-  macro_email: "me@example.com"
+snippets:
+  - {snippet: "me@example.com", chord: " me"}
+  - {snippet: "()←", chord: "()"}
+  - {snippet: "{}←", chord: "{}"}
+  - {snippet: "[]←", chord: "[]"}
+  - {snippet: "<>←", chord: "<>"}
+  - {snippet: "''←", chord: " '"}
+  - {snippet: "\"\"←", chord: " \""}
+  - {snippet: "if () {\n}↑▶←←", chord: " if"} 
 
-  macro_apple_save_as:
-    - {key: "KEY_S", mods: ["MODIFIERKEY_GUI", "MODIFIERKEY_SHIFT"]}
-
-  macro_windows_save_as:
-    - {key: "KEY_S", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
-
-  macro_in_paren: "()←"
-  macro_in_brace: "[]←"
-  macro_in_curly: "{}←"
-  macro_in_angle: "<>←"
-  macro_in_quote: "''←"
-  macro_in_doublequote: "\"\"←"
-  macro_if_c: "if(){\n}↑▶←←"
-  macro_vim_save: ":w\n"
-  macro_vim_quit: ":q\n"
 
 # Add new words here!
 # Higher anagram numbers have lower priority, and must be accessed with anagram

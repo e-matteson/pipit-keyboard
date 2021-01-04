@@ -9,7 +9,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use error::{Error, ResultExt};
 use types::{KeyPress, Validate};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Deserialize)]
 pub struct Sequence(pub Vec<KeyPress>);
 
 impl Sequence {

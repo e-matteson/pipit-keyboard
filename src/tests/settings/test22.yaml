@@ -86,7 +86,12 @@ plain_keys:
   key_space:          {key: "KEY_SPACE"}
 
 macros:
-  macro_ls: "ls\n"
+  macro_ls:
+    - {key: "KEY_L"}
+    - {key: "KEY_S"}
+    - {key: "KEY_ENTER"}
+
+# TODO add snippet
 
 word_modifiers:
   - mod_capital
