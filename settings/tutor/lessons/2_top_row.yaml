@@ -1,6 +1,6 @@
 ---
 popup: "Next you'll learn the 8 letters on the top row of the keyboard"
-persistent: [i, e, o, a, h, t, n, s, p, u, f, m, d, c, r, l, " "]
+persistent: [p, u, f, m, d, c, r, l]
 slides:
   - line:
       Letters: pufm dcrl mfup pufm lrcd dcrl

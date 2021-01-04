@@ -1,5 +1,5 @@
 ---
-persistent: [",", z, x, v, q, ".", "!", "?", " "]
+persistent: [",", z, x, v, q, ".", "!", "?"]
 slides:
   - line:
       Letters: zv,! qx.? zq vx ,. !?

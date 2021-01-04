@@ -351,7 +351,7 @@ impl Default for SaveableSettings {
             initial_learn_state: 2,
             mode: ModeName::default(),
             allow_mistakes: false,
-            show_persistent_letters: true,
+            show_persistent_letters: false,
         }
     }
 }

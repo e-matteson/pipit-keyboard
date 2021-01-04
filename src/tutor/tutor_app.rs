@@ -69,15 +69,15 @@ impl TutorApp {
                     }),
             )
             .child(
-                "Allow mistakes:",
-                mistakes_box
-                    .on_change(|_siv, value| State::set_allow_mistakes(value)),
-            )
-            .child(
                 "Show persistent hints for the lesson's new letters:",
                 persistence_box.on_change(|_siv, value| {
                     State::set_show_persistent_letters(value)
                 }),
+            )
+            .child(
+                "Allow mistakes:",
+                mistakes_box
+                    .on_change(|_siv, value| State::set_allow_mistakes(value)),
             );
         siv.add_layer(Dialog::new().title("Options").content(list).button(
             "Back",
