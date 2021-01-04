@@ -283,6 +283,7 @@ macros:
   #   - {key: "KEY_DOWN"}
   #   - {key: "KEY_DOWN"}
   #   - {key: "KEY_ENTER"}
+
 snippets:
   # GENERAL
   - {snippet: "e.r.matteson@gmail.com", chord: " gmail"}

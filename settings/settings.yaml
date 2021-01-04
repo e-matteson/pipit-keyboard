@@ -35,7 +35,7 @@ options:
       - [        [11,18],[11,17],[11,16],   [15,16],[15,17],[15,18]        ]
 
 
-# You can change the keyboard layout by switching modes.
+# You can select a different keyboard layout while typing by switching modes.
 modes:
   # The keyboard will always start in `default_mode` after powering on. If you
   # change modes, you can switch back using `command_default_mode`.
@@ -43,7 +43,7 @@ modes:
     keymaps:
       # Keymap files specify which chord you press to type each plain_key,
       # macro, or command. If `use_words` is true, use this keymap to generate
-      # chords for all the words in the dictionary.
+      # chords for all the words in the dictionary list.
       - {file: "settings/keymaps/dvorak24.kmap", use_words: true}
 
   # Each mode can use multiple keymap files. If the same chord appears in more than 1
@@ -68,8 +68,8 @@ modes:
     gaming: true
 
 
-# Add new macro key sequences here!
-# Specify which key and modifiers are sent during each press. Provide chords in a kmap file.
+# Add new macros here. Specify the sequence as a list of keys and modifiers to
+# send. Provide a chord for each macro in a kmap file.
 macros:
   macro_apple_save_as:
     - {key: "KEY_S", mods: ["MODIFIERKEY_GUI", "MODIFIERKEY_SHIFT"]}
@@ -87,7 +87,7 @@ macros:
     - {key: "KEY_Q"}
     - {key: "KEY_ENTER"}
 
-# TODO document
+# Add new snippets here.
 # The following characters have special meanings:
 #    ←   | left
 #    →   | right
@@ -107,10 +107,10 @@ snippets:
   - {snippet: "<>←", chord: "<>"}
   - {snippet: "''←", chord: " '"}
   - {snippet: "\"\"←", chord: " \""}
-  - {snippet: "if () {\n}↑▶←←", chord: " if"} 
+  - {snippet: "if () {\n}↑▶←←", chord: " if"}
 
 
-# Add new words here!
+# Add new words here.
 # Higher anagram numbers have lower priority, and must be accessed with anagram
 # modifiers or cycling commands. Chords can be manually specified, if you don't
 # want to use the default chord containing all the letters in the word.
@@ -4842,6 +4842,8 @@ dictionary:
   - {word: "zsh"}
 
 # Add new commands here, and in `doCommand()` in pipit-firmware/Pipit.cpp
+# Note that commands for changing modes don't need to be listed, because those
+# are generated automatically.
 commands:
   - command_delete_word
   - command_shorten_last_word
@@ -4864,11 +4866,11 @@ commands:
   - command_pan_left
   - command_pan_right
 
-# Add up to 7 anagram mods here.
+# Add up to 15 anagram mods here. You can press them at the same time as a word
+# chord to select a certain anagram of the word.
 anagram_modifiers:
   - mod_anagram_1
   - mod_anagram_2
-
 
 # You shouldn't need to edit these.
 plain_modifiers:
@@ -4980,4 +4982,4 @@ plain_keys:
   key_slash:          {key: "KEY_SLASH"}
   key_tilde:          {key: "KEY_TILDE", mods: ["MODIFIERKEY_SHIFT"]}
   key_underscore:     {key: "KEY_MINUS", mods: ["MODIFIERKEY_SHIFT"]}
-# "key_scroll_lock" : [("KEY_SCROLL_LOCK", "")],
+# key_scroll_lock:    {key: "KEY_SCROLL_LOCK"}
