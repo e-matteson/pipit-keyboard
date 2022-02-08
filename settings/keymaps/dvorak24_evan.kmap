@@ -302,12 +302,6 @@ macro_next_tab  macro_prev_tab    macro_move_tab_forward  macro_move_tab_back
   .     .         .     .           .     .                 .     .
   ... .*.         ... .*.           *.. .*.                 *.. .*.
 
-macro_new_tab
-....   ....
-....   .*..
-  .     .
-  ... .*.
-
 
 #### vim/spacemacs macros ####
 
@@ -341,17 +335,29 @@ macro_close_other_wins     macro_other_win   macro_recompile macro_run
   .     .                    .     .           .     .         .     .
   ... .*.                    ... .*.           ... .*.         ... .*.
 
-macro_comment        macro_nohlsearch      macro_paste_history
-....   .*.*          ..**   **..           ...*   ....
-....   ....          ....   ....           ....   ....
-  .     .              .     .               .     .
-  ... .*.              ... .*.               ... .*.
+macro_nohlsearch      macro_paste_history
+..**   **..           ...*   ....
+....   ....           ....   ....
+  .     .               .     .
+  ... .*.               ... .*.
 
 macro_next_error     macro_prev_error
 ....   ....          ....   ....
 ..*.   ..*.          ..*.   ..*.
   .     .              .     .
   ... .*.              *.. .*.
+
+macro_degree
+....   ***.
+..*.   ....
+  .     .
+  ... .*.
+
+# macro_comment
+# ....   .*.*
+# ....   ....
+#   .     .
+#   ... .*.
 
 
 # macro_other_buffer1  macro_other_buffer2  macro_other_buffer3  macro_other_buffer4

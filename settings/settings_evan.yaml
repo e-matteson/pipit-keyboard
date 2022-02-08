@@ -1,8 +1,7 @@
 ###### EVAN'S PERSONAL SETTINGS ######
 
 options:
-
-  chord_delay:                 30
+  chord_delay:                 26
   held_delay:                  200
   debug_messages:              None
 
@@ -40,7 +39,6 @@ options:
   #     - [[17,15],[17,14],[17,12],[17,11],   [20,11],[20,12],[20,14],[20,15]]
   #     - [                [18,15],                 [21,15]                  ]
   #     - [        [18,14],[18,12],[18,11],   [21,11],[21,12],[21,14]        ]
-
 
   ####### OLDEST BOARD
   # board_name:                TEENSY_LC
@@ -185,8 +183,6 @@ macros:
     - {key: "KEY_B" }
   macro_helm_imenu:
     - {key: "KEY_F12", mods: ["MODIFIERKEY_CTRL"]}
-    # - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
-    # - {key: "KEY_I"}
   macro_helm_imenu_all:
     - {key: "KEY_C", mods: ["MODIFIERKEY_CTRL"]}
     - {key: "KEY_I", mods: ["MODIFIERKEY_SHIFT"]}
@@ -239,28 +235,23 @@ macros:
     - {key: "KEY_PAGE_DOWN", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
   macro_move_tab_back:
     - {key: "KEY_PAGE_UP", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
-  macro_new_tab:
-    - {key: "KEY_T", mods: ["MODIFIERKEY_CTRL"]}
-  # macro_fake_alt_tab:
-  #   - {key: "KEY_TAB", mods: ["MODIFIERKEY_ALT"]}
-  # macro_esc:
-  #   - {key: "KEY_ESC"}
-  # macro_enter:
-  #   - {key: "KEY_ENTER"}
-  # macro_f3:
-  #   - {key: "KEY_F3"}
   macro_recompile:
     - {key: "KEY_F10", mods: ["MODIFIERKEY_SHIFT"]}
   macro_run:
     - {key: "KEY_F9", mods: ["MODIFIERKEY_SHIFT"]}
-  macro_comment:
-    - {key: "KEY_SLASH", mods: ["MODIFIERKEY_CTRL"]}
+  # macro_comment:
+  #   - {key: "KEY_SLASH", mods: ["MODIFIERKEY_CTRL"]}
   macro_paste_history:
     - {key: "KEY_V", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
   macro_next_error:
     - {key: "KEY_UP", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT"]}
   macro_prev_error:
     - {key: "KEY_DOWN", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_ALT"]}
+  macro_degree:
+    - {key: "KEY_U", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_B", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+    - {key: "KEY_0", mods: ["MODIFIERKEY_CTRL", "MODIFIERKEY_SHIFT"]}
+
   # macro_other_buffer1:
   #   - {key: "KEY_X", mods: ["MODIFIERKEY_CTRL"]}
   #   - {key: "KEY_B"}
@@ -286,8 +277,8 @@ macros:
 
 snippets:
   # GENERAL
+  - {snippet: " cl"}
   - {snippet: "e.r.matteson@gmail.com", chord: " gmail"}
-  - {snippet: "evan_matteson@brown.edu", chord: " bmail"}
   - {snippet: "evan.matteson@formlabs.com", chord: " fmail"}
   - {snippet: "e-matteson", chord: " e-m"}
   - {snippet: "()←", chord: "()"}
@@ -305,6 +296,9 @@ snippets:
   - {snippet: "``←", chord: " `"}
   - {snippet: "||←", chord: " |"}
   - {snippet: "\\n"}
+  - {snippet: "->"}
+  - {snippet: "<-"}
+  
   # VIM
   - {snippet: ":w\n", chord: " h"} # vim_save
   - {snippet: ":q\n", chord: " haoei"} # vim_quit
@@ -340,7 +334,17 @@ snippets:
   - {snippet: " opu"} # open_active
   - {snippet: " ops"} # open_settings
   - {snippet: " opd"} # open_kmap
-
+  # # emacs bookmarks:
+  # - {snippet: " oe", chord: " oie"} 
+  # - {snippet: " oih"} 
+  # - {snippet: " oit"} 
+  # - {snippet: " oin"} 
+  # - {snippet: " ois"} 
+  # - {snippet: " oid"} 
+  # - {snippet: " oic"} 
+  # - {snippet: " oir"} 
+  # - {snippet: " oil"} 
+  
   # emacs GDB mode:
   - {snippet: " ouu", chord: " u"} 
   - {snippet: " ouu", chord: " u."} 
@@ -365,15 +369,15 @@ snippets:
   - {snippet: " ouos", chord: " uos"}
   - {snippet: " ouok", chord: " uok"}
   - {snippet: " ouq", chord: " uq"}
-
   # - {snippet: " en", chord: " en"} # error_next
   # - {snippet: " ep", chord: " eN"} # error_prev
   # C/C++
   - {snippet: "#include ", chord: " inc"} # include_c
-  - {snippet: "if () {\n}↑▶←←", chord: " ic"} # if_c
+  - {snippet: "#pragma once", chord: " once"}
+  - {snippet: "if () {\n}↑▶←←←", chord: " ic"} # if_c
   - {snippet: "else {\n\n}↑\t", chord: " ec"} # else_c
-  - {snippet: "for (;;) {\n}↑▶←←←←", chord: " fc"} # for_c
-  - {snippet: "while () {\n}↑▶←←", chord: " while"} # while_c
+  - {snippet: "for (;;) {\n}↑▶←←←←←", chord: " fc"} # for_c
+  - {snippet: "while () {\n}↑▶←←←", chord: " while"} # while_c
   - {snippet: "#ifndef H\n#define H\n\n\n#endif↑↑↑↑▶←", chord: " ifndef"}
   - {snippet: "printf(\"\\n\");←←←←←", chord: " pc"} # printf
   - {snippet: "Serial.print();←←", chord: " sp"}
@@ -396,6 +400,9 @@ snippets:
   - {snippet: "fn (){\n}↑▶←←←", chord: " rfv"}
   - {snippet: "fn (&self) -> {\n}↑▶←←←←←←←←←←←←", chord: " rfs"}
   - {snippet: "fn (&self){\n}↑▶←←←←←←←←", chord: " rfsv"}
+  - {snippet: "Ok()←", chord: " ok"}
+  - {snippet: "Err()←", chord: " err"}
+  - {snippet: "Some()←", chord: " some"}
   # LATEX
   - {snippet: "\\begin{itemize}\n\n\\end{itemize}↑\\item ", chord: " xi"}
   - {snippet: "\\begin{enumerate}\n\n\\end{enumerate}↑\\item ", chord: " xe"}
@@ -404,6 +411,17 @@ snippets:
   - {snippet: "ls\n", chord: " ls"}
   - {snippet: "tmux attach -t ", chord: " tma"}
   - {snippet: "tmux new -s ", chord: " tmn"}
+  - {snippet: "!$"}
+  # WORK
+  - {snippet: "/data/home/evan/", chord: " dhe"}
+  - {snippet: "/data/home/code/evan/", chord: " dhce"}
+  - {snippet: "/data/logs/", chord: " log"}
+  - {snippet: "watch -n 0.5 tail -n 25 /data/logs/", chord: " tail"}
+  - {snippet: "/etc/formlabs/", chord: " ecf"}
+  - {snippet: "/etc/init.d/", chord: " ecd"}
+  - {snippet: "QLOG_INFO() << ", chord: " li"}
+  - {snippet: "QLOG_ERROR() << ", chord: " le"}
+  - {snippet: "QLOG_WARN() << ", chord: " lw"}
   # OTHER
   - {snippet: ", anagram: 1", chord: " a1"}
 
@@ -439,15 +457,20 @@ commands:
   - command_scroll_up
   - command_pan_left
   - command_pan_right
+  
 
 dictionary:
-  - {word: "/data/home/code/evan/", chord: " dhce"}
-  - {word: "Ok()←", chord: " ok"}
-  - {word: "Some()←", chord: " some"}
-  # - {word: "Result<, Error>←←←←←←←←", chord: " res"}
-  - {word: "->"}
-  - {word: "<-"}
-  - {word: "!$"}
+  - {word: "thank you", chord: "thy"}
+  - {word: "thanks", chord: "thx"}
+  - {word: "\nThanks,\nEvan\n", chord: "tsig"}
+  - {word: "\nBest,\nEvan\n", chord: "bsig"}
+  - {word: "as far as I know", chord: "afi"}
+  - {word: "good luck", chord: "gdl"}
+  - {word: "cool, thanks", chord: "coolt"}
+  - {word: "sounds good", chord: "sg"}
+  - {word: "no problem", chord: "np"}
+  - {word: "StateMachine_", chord: "sm"}
+  - {word: "StateMachineFactory_", chord: "smf"}
   - {word: "a", anagram: 1}
   - {word: "Aaron"}
   - {word: "abandon"}
@@ -494,7 +517,6 @@ dictionary:
   - {word: "acoustic"}
   - {word: "acquire"}
   - {word: "acquisition"}
-  - {word: "acquisition", chord: "acqu"}
   - {word: "across"}
   - {word: "acrylic"}
   - {word: "act", anagram: 1}
@@ -507,9 +529,9 @@ dictionary:
   - {word: "actual"}
   - {word: "acute"}
   - {word: "Adafruit"}
+  - {word: "Adam"}
   - {word: "adapt"}
   - {word: "adaptive"}
-  - {word: "aDBS"}
   - {word: "add"}
   - {word: "addict", anagram: 1}
   - {word: "addition"}
@@ -708,7 +730,6 @@ dictionary:
   - {word: "artificial"}
   - {word: "artist", anagram: 1}
   - {word: "as"}
-  - {word: "as far as I know", chord: "afi"}
   - {word: "ASCII"}
   - {word: "Asia"}
   - {word: "aside", anagram: 1}
@@ -774,6 +795,7 @@ dictionary:
   - {word: "awkward"}
   - {word: "axis"}
   - {word: "axon"}
+  - {word: "ayeaye", anagram: 2}
   - {word: "baby", anagram: 1}
   - {word: "back"}
   - {word: "backward"}
@@ -859,7 +881,6 @@ dictionary:
   - {word: "bent"}
   - {word: "beside"}
   - {word: "best"}
-  - {word: "\nBest,\nEvan\n", chord: "bsig"}
   - {word: "bet"}
   - {word: "beta"}
   - {word: "better"}
@@ -881,7 +902,6 @@ dictionary:
   - {word: "bingo"}
   - {word: "bio"}
   - {word: "biology"}
-  - {word: "biomarker", chord: "biom"}
   - {word: "biomedical"}
   - {word: "bios"}
   - {word: "bird"}
@@ -911,20 +931,19 @@ dictionary:
   - {word: "blue"}
   - {word: "blue-pill", chord: "bluepill"}
   - {word: "blur"}
-  - {word: "BNO055"}
   - {word: "board"}
   - {word: "boat", anagram: 1}
   - {word: "body"}
   - {word: "bold"}
   - {word: "bolt"}
-  - {word: "bomb", anagram: 1}
+  - {word: "bomb", anagram: 2}
   - {word: "bond", anagram: 2}
   - {word: "bone"}
   - {word: "bonus"}
   - {word: "book"}
   - {word: "bool"}
   - {word: "boolean"}
-  - {word: "boom"}
+  - {word: "boom", anagram: 1}
   - {word: "boost"}
   - {word: "boot", anagram: 1}
   - {word: "booth", anagram: 1}
@@ -1003,7 +1022,7 @@ dictionary:
   - {word: "business"}
   - {word: "busy"}
   - {word: "but"}
-  - {word: "Butler"}
+  - {word: "butler"}
   - {word: "butter", anagram: 2}
   - {word: "button"}
   - {word: "buy", anagram: 1}
@@ -1016,7 +1035,7 @@ dictionary:
   - {word: "cabinet"}
   - {word: "cable"}
   - {word: "cache", anagram: 2}
-  - {word: "cad", anagram: 1}
+  - {word: "cad"}
   - {word: "cafe", anagram: 1}
   - {word: "cage"}
   - {word: "cake"}
@@ -1026,6 +1045,8 @@ dictionary:
   - {word: "calendar"}
   - {word: "calf", anagram: 1}
   - {word: "calibrate"}
+  - {word: "calibration"}
+  - {word: "calibration", chord: "cali"}
   - {word: "California"}
   - {word: "call"}
   - {word: "calm", anagram: 1}
@@ -1043,7 +1064,8 @@ dictionary:
   - {word: "candidate", anagram: 2}
   - {word: "candle"}
   - {word: "candy", anagram: 1}
-  - {word: "candybus"}
+  - {word: "candybus", chord: "cbus"}
+  - {word: "CandyBus", chord: "cbus", anagram: 1}
   - {word: "cannot", anagram: 1}
   - {word: "canon"}
   - {word: "canonical"}
@@ -1066,8 +1088,8 @@ dictionary:
   - {word: "card", anagram: 5}
   - {word: "cardiac"}
   - {word: "cardio"}
-  - {word: "care", anagram: 1}
-  - {word: "career", anagram: 3}
+  - {word: "care"}
+  - {word: "career", anagram: 4}
   - {word: "cargo"}
   - {word: "carlos"}
   - {word: "carpet"}
@@ -1309,7 +1331,6 @@ dictionary:
   - {word: "congratulate"}
   - {word: "congress"}
   - {word: "connect"}
-  - {word: "connectivity", chord: "con", anagram: 1}
   - {word: "Connor"}
   - {word: "conscious"}
   - {word: "consecutive"}
@@ -1458,7 +1479,6 @@ dictionary:
   - {word: "cycle", anagram: 1}
   - {word: "cylinder"}
   - {word: "'d"}
-  - {word: "dACC"}
   - {word: "dad", anagram: 1}
   - {word: "daemon"}
   - {word: "daily"}
@@ -1654,12 +1674,10 @@ dictionary:
   - {word: "division"}
   - {word: "divorce"}
   - {word: "DIY"}
-  - {word: "dlPFC"}
-  - {word: "dmPFC"}
   - {word: "DNA", anagram: 1}
   - {word: "DNS"}
   - {word: "do"}
-  - {word: "doc", anagram: 2}
+  - {word: "doc"}
   - {word: "dock"}
   - {word: "doctor"}
   - {word: "docu"}
@@ -1736,8 +1754,6 @@ dictionary:
   - {word: "Dylan"}
   - {word: "dynamic"}
   - {word: "dys"}
-  - {word: "dysarthria"}
-  - {word: "dysarthric", anagram: 1}
   - {word: "dysphoria"}
   - {word: "each"}
   - {word: "ear", anagram: 4}
@@ -1752,19 +1768,17 @@ dictionary:
   - {word: "eat"}
   - {word: "echo"}
   - {word: "eco"}
-  - {word: "ECoG"}
   - {word: "economy", anagram: 1}
   - {word: "ed"}
   - {word: "edge"}
   - {word: "edit"}
   - {word: "editor"}
   - {word: "educate"}
-  - {word: "EEG"}
   - {word: "effect"}
   - {word: "efficacy"}
   - {word: "efficient"}
   - {word: "effort"}
-  - {word: "egg", anagram: 1}
+  - {word: "egg"}
   - {word: "eigen", anagram: 1}
   - {word: "eight", anagram: 1}
   - {word: "either", anagram: 1}
@@ -1773,7 +1787,6 @@ dictionary:
   - {word: "elder"}
   - {word: "elect", anagram: 2}
   - {word: "electric"}
-  - {word: "electrode"}
   - {word: "electrode", chord: "trode"}
   - {word: "electronic"}
   - {word: "elegant"}
@@ -1787,13 +1800,11 @@ dictionary:
   - {word: "emacs"}
   - {word: "email"}
   - {word: "em", anagram: 1}
-  - {word: "ematteso"}
   - {word: "embassy"}
   - {word: "embed"}
   - {word: "embedded", anagram: 1}
   - {word: "emerge", anagram: 3}
   - {word: "emergency"}
-  - {word: "emg"}
   - {word: "emission"}
   - {word: "emo", anagram: 1}
   - {word: "emotion", anagram: 1}
@@ -1804,6 +1815,7 @@ dictionary:
   - {word: "employ"}
   - {word: "empty"}
   - {word: "emulate", anagram: 1}
+  - {word: "emulator", chord: "emu"}
   - {word: "en"}
   - {word: "enable"}
   - {word: "ence"}
@@ -2008,6 +2020,7 @@ dictionary:
   - {word: "feed", anagram: 1}
   - {word: "feel"}
   - {word: "feet"}
+  - {word: "feh"}
   - {word: "fell", anagram: 1}
   - {word: "fellow"}
   - {word: "fellowship"}
@@ -2048,7 +2061,7 @@ dictionary:
   - {word: "firmware", chord: "fw"}
   - {word: "first"}
   - {word: "fish"}
-  - {word: "fist"}
+  - {word: "fist", anagram: 1}
   - {word: "fit"}
   - {word: "five", anagram: 1}
   - {word: "fix"}
@@ -2182,7 +2195,7 @@ dictionary:
   - {word: "furnish"}
   - {word: "furniture", anagram: 1}
   - {word: "further"}
-  - {word: "fuse"}
+  - {word: "fuse", anagram: 1}
   - {word: "fusion"}
   - {word: "future"}
   - {word: "fuzz", anagram: 1}
@@ -2209,12 +2222,11 @@ dictionary:
   - {word: "gauge", anagram: 1}
   - {word: "gave"}
   - {word: "gay"}
-  - {word: "gca"}
   - {word: "gcc"}
   - {word: "gear", anagram: 1}
-  - {word: "geek", anagram: 3}
+  - {word: "geek"}
   - {word: "gel", anagram: 2}
-  - {word: "gem", anagram: 2}
+  - {word: "gem", anagram: 1}
   - {word: "gen", anagram: 1}
   - {word: "gender"}
   - {word: "gene"}
@@ -2275,7 +2287,6 @@ dictionary:
   - {word: "gone"}
   - {word: "gonna"}
   - {word: "good"}
-  - {word: "good luck", chord: "gdl"}
   - {word: "google"}
   - {word: "goose", anagram: 1}
   - {word: "gore", anagram: 2}
@@ -2337,7 +2348,7 @@ dictionary:
   - {word: "GSM", anagram: 1}
   - {word: "guarantee", anagram: 1}
   - {word: "guard", anagram: 3}
-  - {word: "guess", anagram: 1}
+  - {word: "guess"}
   - {word: "guest", anagram: 1}
   - {word: "GUI", anagram: 1}
   - {word: "guide"}
@@ -2559,7 +2570,6 @@ dictionary:
   - {word: "improve"}
   - {word: "impulsive", anagram: 1}
   - {word: "impulsivity"}
-  - {word: "impulsivity", chord: "impt"}
   - {word: "imum", anagram: 2}
   - {word: "in"}
   - {word: "inch"}
@@ -2626,12 +2636,12 @@ dictionary:
   - {word: "interest"}
   - {word: "internal"}
   - {word: "intern", anagram: 2}
-  - {word: "interpret"}
+  - {word: "interpret", anagram: 1}
   - {word: "interrupt"}
   - {word: "interval", anagram: 1}
   - {word: "intimate", anagram: 1}
   - {word: "into", anagram: 1}
-  - {word: "intra"}
+  - {word: "intra", anagram: 1}
   - {word: "intro"}
   - {word: "introduce"}
   - {word: "intuit", anagram: 1}
@@ -2939,7 +2949,7 @@ dictionary:
   - {word: "machine"}
   - {word: "machinist"}
   - {word: "macro"}
-  - {word: "mad"}
+  - {word: "mad", anagram: 1}
   - {word: "made"}
   - {word: "mag", anagram: 3}
   - {word: "magic"}
@@ -3039,7 +3049,6 @@ dictionary:
   - {word: "meet"}
   - {word: "meeting"}
   - {word: "mega", anagram: 2}
-  - {word: "meg", anagram: 1}
   - {word: "meh"}
   - {word: "melt"}
   - {word: "mem", anagram: 2}
@@ -3113,11 +3122,13 @@ dictionary:
   - {word: "miss"}
   - {word: "missile", anagram: 1}
   - {word: "mission"}
+  - {word: "mist", anagram: 1}
   - {word: "mistake"}
   - {word: "mit"}
   - {word: "mix"}
   - {word: "mkdir"}
   - {word: "mobile"}
+  - {word: "mobo"}
   - {word: "mod"}
   - {word: "mode"}
   - {word: "model"}
@@ -3172,8 +3183,6 @@ dictionary:
   - {word: "movement"}
   - {word: "movie"}
   - {word: "mozilla"}
-  - {word: "mpc"}
-  - {word: "mpd", anagram: 1}
   - {word: "MPG", anagram: 2}
   - {word: "MPH", anagram: 1}
   - {word: "Mr."}
@@ -3255,14 +3264,12 @@ dictionary:
   - {word: "neural"}
   - {word: "neuro"}
   - {word: "neuron", anagram: 1}
-  - {word: "neuropsychiatric", chord: "np"}
   - {word: "neutral"}
   - {word: "never"}
   - {word: "new"}
   - {word: "newbie"}
   - {word: "next"}
   - {word: "ng", anagram: 1}
-  - {word: "NHP"}
   - {word: "nice"}
   - {word: "nick"}
   - {word: "Nicolas"}
@@ -3299,7 +3306,6 @@ dictionary:
   - {word: "November"}
   - {word: "now"}
   - {word: "nsfw"}
-  - {word: "NSGP"}
   - {word: "n't"}
   - {word: "nuclear"}
   - {word: "nude"}
@@ -3327,12 +3333,11 @@ dictionary:
   - {word: "occasion"}
   - {word: "occupy", anagram: 1}
   - {word: "occur", anagram: 2}
-  - {word: "OCD"}
+  - {word: "OCD", anagram: 3}
   - {word: "ocean"}
   - {word: "October"}
   - {word: "odd", anagram: 1}
   - {word: "of"}
-  - {word: "OFC"}
   - {word: "off", anagram: 1}
   - {word: "offense"}
   - {word: "offer"}
@@ -3343,7 +3348,6 @@ dictionary:
   - {word: "oh"}
   - {word: "oil"}
   - {word: "ok"}
-  - {word: "Ok, thanks", chord: "okth"}
   - {word: "okay"}
   - {word: "old"}
   - {word: "olive"}
@@ -3393,7 +3397,6 @@ dictionary:
   - {word: "ory"}
   - {word: "oscillate"}
   - {word: "oscillation"}
-  - {word: "oscillation", chord: "osc"}
   - {word: "other"}
   - {word: "ough", anagram: 1}
   - {word: "ought", anagram: 2}
@@ -3424,10 +3427,10 @@ dictionary:
   - {word: "pain"}
   - {word: "paint"}
   - {word: "pair"}
-  - {word: "palace", anagram: 2}
   - {word: "pal", anagram: 1}
+  - {word: "palace", anagram: 2}
+  - {word: "palantir"}
   - {word: "pale"}
-  - {word: "pallidum"}
   - {word: "palm", anagram: 1}
   - {word: "pan"}
   - {word: "panel", anagram: 1}
@@ -3459,7 +3462,6 @@ dictionary:
   - {word: "particularly", anagram: 2}
   - {word: "partner", anagram: 2}
   - {word: "party"}
-  - {word: "pasm", anagram: 1}
   - {word: "pass"}
   - {word: "passenger"}
   - {word: "passion"}
@@ -3484,7 +3486,6 @@ dictionary:
   - {word: "pay"}
   - {word: "PCB"}
   - {word: "PCI"}
-  - {word: "PC+S"}
   - {word: "pdf"}
   - {word: "PDMS"}
   - {word: "peace", anagram: 1}
@@ -3536,8 +3537,6 @@ dictionary:
   - {word: "petite"}
   - {word: "petition"}
   - {word: "petroleum"}
-  - {word: "PFC"}
-  - {word: "pgrep", anagram: 2}
   - {word: "phantom"}
   - {word: "pharma"}
   - {word: "pharmacy"}
@@ -3613,7 +3612,6 @@ dictionary:
   - {word: "plural"}
   - {word: "plus"}
   - {word: "PM", anagram: 1}
-  - {word: "PMd"}
   - {word: "png"}
   - {word: "pocket"}
   - {word: "pod"}
@@ -3707,6 +3705,7 @@ dictionary:
   - {word: "principal"}
   - {word: "principle", anagram: 1}
   - {word: "print"}
+  - {word: "printer"}
   - {word: "printf"}
   - {word: "prior"}
   - {word: "priority"}
@@ -3768,7 +3767,6 @@ dictionary:
   - {word: "provocation", chord: "proca"}
   - {word: "proximal"}
   - {word: "proxy", anagram: 1}
-  - {word: "PRU", anagram: 1}
   - {word: "ps"}
   - {word: "pseudo"}
   - {word: "PSI"}
@@ -3815,6 +3813,7 @@ dictionary:
   - {word: "query"}
   - {word: "quest"}
   - {word: "question"}
+  - {word: "question", chord: "q", anagram: 1}
   - {word: "queue"}
   - {word: "quick"}
   - {word: "quiet", anagram: 1}
@@ -3825,7 +3824,7 @@ dictionary:
   - {word: "quiz"}
   - {word: "quote"}
   - {word: "rabbit"}
-  - {word: "race", anagram: 2}
+  - {word: "race", anagram: 3}
   - {word: "racial", anagram: 1}
   - {word: "rack"}
   - {word: "radar"}
@@ -3860,7 +3859,6 @@ dictionary:
   - {word: "raw", anagram: 2}
   - {word: "ray", anagram: 4}
   - {word: "razor"}
-  - {word: "RC+S"}
   - {word: "'re"}
   - {word: "reach", anagram: 1}
   - {word: "react", anagram: 1}
@@ -3899,7 +3897,6 @@ dictionary:
   - {word: "refer", anagram: 2}
   - {word: "reference"}
   - {word: "reflect"}
-  - {word: "reflection impulsivity", chord: "refl"}
   - {word: "refrigerate"}
   - {word: "refugee", anagram: 2}
   - {word: "refurbish"}
@@ -4119,7 +4116,8 @@ dictionary:
   - {word: "scope"}
   - {word: "score"}
   - {word: "scout"}
-  - {word: "scrap", anagram: 1}
+  - {word: "scp"}
+  - {word: "scrap"}
   - {word: "scrape"}
   - {word: "scratch"}
   - {word: "screen"}
@@ -4161,11 +4159,10 @@ dictionary:
   - {word: "seminar"}
   - {word: "senate"}
   - {word: "send"}
-  - {word: "senior", anagram: 1}
+  - {word: "senior"}
   - {word: "sense", anagram: 1}
   - {word: "sensitive"}
   - {word: "sensor"}
-  - {word: "sensori"}
   - {word: "sent"}
   - {word: "sentence"}
   - {word: "separable", anagram: 1}
@@ -4238,6 +4235,8 @@ dictionary:
   - {word: "shuttle"}
   - {word: "sick"}
   - {word: "side"}
+  - {word: "sift"}
+  - {word: "SiftControl", chord: "sc", anagram: 1}
   - {word: "sig"}
   - {word: "sight"}
   - {word: "sigma"}
@@ -4352,7 +4351,6 @@ dictionary:
   - {word: "sought"}
   - {word: "soul", anagram: 1}
   - {word: "sound"}
-  - {word: "sounds good", chord: "sg"}
   - {word: "soup"}
   - {word: "source"}
   - {word: "south"}
@@ -4403,7 +4401,7 @@ dictionary:
   - {word: "sport"}
   - {word: "spot", anagram: 2}
   - {word: "spouse", anagram: 1}
-  - {word: "spray", anagram: 2}
+  - {word: "spray", anagram: 1}
   - {word: "spread"}
   - {word: "spring"}
   - {word: "sprint"}
@@ -4459,6 +4457,7 @@ dictionary:
   - {word: "stem"}
   - {word: "steno", anagram: 2}
   - {word: "step"}
+  - {word: "stepper"}
   - {word: "Steph"}
   - {word: "Stephanie"}
   - {word: "stereo", anagram: 1}
@@ -4467,12 +4466,10 @@ dictionary:
   - {word: "Steven"}
   - {word: "stick"}
   - {word: "still", anagram: 1}
-  - {word: "stim", anagram: 1}
-  - {word: "stimulate", chord: "stim"}
-  - {word: "stimulator", chord: "stimr"}
-  - {word: "stimulation", chord: "stimn"}
+  - {word: "stim"}
+  - {word: "stimulate", anagram: 1}
+  - {word: "stimulation"}
   - {word: "stimulus"}
-  - {word: "STN"}
   - {word: "stock"}
   - {word: "stole"}
   - {word: "stomach"}
@@ -4671,14 +4668,10 @@ dictionary:
   - {word: "textile", anagram: 3}
   - {word: "texture", anagram: 2}
   - {word: "Thai"}
-  - {word: "thalam"}
   - {word: "thalamus"}
   - {word: "than"}
   - {word: "thank"}
-  - {word: "thank you", chord: "thy"}
-  - {word: "thank you for", chord: "tyf"}
   - {word: "thanks"}
-  - {word: "\nThanks,\nEvan\n", chord: "tsig"}
   - {word: "that"}
   - {word: "the"}
   - {word: "theater", anagram: 1}
@@ -4742,6 +4735,7 @@ dictionary:
   - {word: "titanium"}
   - {word: "title", anagram: 1}
   - {word: "tmp"}
+  - {word: "tmux"}
   - {word: "to"}
   - {word: "toast"}
   - {word: "tobacco"}
@@ -4793,7 +4787,7 @@ dictionary:
   - {word: "traffic"}
   - {word: "tragedy"}
   - {word: "trail", anagram: 1}
-  - {word: "train", anagram: 1}
+  - {word: "train"}
   - {word: "trait"}
   - {word: "traitor", anagram: 1}
   - {word: "trajectory", chord: "traj"}
@@ -4879,9 +4873,9 @@ dictionary:
   - {word: "typical", anagram: 1}
   - {word: "typo"}
   - {word: "ual"}
-  # - {word: "u", anagram: 1}
   - {word: "ubuntu", anagram: 1}
   - {word: "ugly", anagram: 1}
+  - {word: "UI", anagram: 1}
   - {word: "UK"}
   - {word: "ulnar"}
   - {word: "ultimate"}
@@ -4950,7 +4944,6 @@ dictionary:
   - {word: "vat"}
   - {word: "vatican"}
   - {word: "vault", anagram: 1}
-  - {word: "VC/VS"}
   - {word: "'ve"}
   - {word: "vec"}
   - {word: "vector"}
@@ -4964,6 +4957,7 @@ dictionary:
   - {word: "velvet"}
   - {word: "vend"}
   - {word: "Venice"}
+  - {word: "vent", anagram: 1}
   - {word: "ventral", anagram: 1}
   - {word: "venture"}
   - {word: "venue", anagram: 3}
@@ -5033,7 +5027,6 @@ dictionary:
   - {word: "volunteer"}
   - {word: "vote"}
   - {word: "VPN"}
-  - {word: "VRML"}
   - {word: "vs", anagram: 1}
   - {word: "vulner"}
   - {word: "vulnerable"}
@@ -5148,7 +5141,7 @@ dictionary:
   - {word: "wonder"}
   - {word: "wonky"}
   - {word: "won't"}
-  - {word: "wood", anagram: 1}
+  - {word: "wood", anagram: 2}
   - {word: "wool", anagram: 2}
   - {word: "word", anagram: 1}
   - {word: "work"}
@@ -5162,7 +5155,7 @@ dictionary:
   - {word: "worth", anagram: 1}
   - {word: "would"}
   - {word: "wound"}
-  - {word: "wow", anagram: 3}
+  - {word: "wow", anagram: 1}
   - {word: "wrap"}
   - {word: "wrestle"}
   - {word: "wretch", anagram: 2}
@@ -5185,7 +5178,7 @@ dictionary:
   - {word: "yaourt"}
   - {word: "yarn", anagram: 1}
   - {word: "yeah"}
-  - {word: "year"}
+  - {word: "year", anagram: 1}
   - {word: "yeast"}
   - {word: "yellow"}
   - {word: "yen"}
