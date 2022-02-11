@@ -1,9 +1,10 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
 use types::{
-    Command, KeyPress, KmapPath, ModeInfo, ModeName, Name, Sequence, Snippet,
-    UserOptions, Validate, Word,
+    Command, KeyPress, LayerInfo, LayerName, ModeInfo, ModeName, Name,
+    Sequence, Snippet, SnippetListName, UserOptions, Validate, Word,
+    WordListName,
 };
 
 validated_struct! {
@@ -11,6 +12,7 @@ validated_struct! {
     #[serde(deny_unknown_fields)]
     pub struct Settings {
         pub options: UserOptions,
+        pub layers: BTreeMap<LayerName, LayerInfo>,
         pub modes: BTreeMap<ModeName, ModeInfo>,
         pub plain_modifiers: BTreeMap<Name, KeyPress>,
         pub plain_keys: BTreeMap<Name, KeyPress>,
@@ -18,9 +20,10 @@ validated_struct! {
         pub word_modifiers: Vec<Name>,
         pub anagram_modifiers: Vec<Name>,
         pub commands: Vec<Command>,
-        pub dictionary: Vec<Word>,
+        pub word_lists: BTreeMap<WordListName, Vec<Word>>,
+
         #[serde(default)]
-        pub snippets: Vec<Snippet>,
+        pub snippets: BTreeMap<SnippetListName, Vec<Snippet>>,
     }
 }
 
@@ -31,20 +34,23 @@ impl Settings {
         self.modes.keys()
     }
 
-    pub fn kmaps(&self) -> BTreeSet<&KmapPath> {
-        self.modes
-            .values()
-            .flat_map(|mode_info| mode_info.kmap_paths())
-            .collect()
-    }
-
-    pub fn kmaps_with_words(&self) -> BTreeSet<&KmapPath> {
-        self.modes
-            .values()
-            .flat_map(|mode_info| mode_info.keymaps.iter())
-            .filter(|kmap_info| kmap_info.use_words)
-            .map(|kmap_info| &kmap_info.file)
-            .collect()
+    pub fn validate_layer_list(&self) -> Result<(), Error> {
+        for (mode_name, mode_info) in &self.modes {
+            for layer_name in &mode_info.layers {
+                if !self.layers.contains_key(layer_name) {
+                    Err(Error::LookupErr {
+                        key: layer_name.to_string(),
+                        container: "layer definitions".into(),
+                    })
+                    .with_context(|| {
+                        format!(
+                            "Invalid layer name in mode: '{}'",
+                            mode_name.to_string()
+                        )
+                    })?;
+                }
+            }
+        }
+        Ok(())
     }
 }
-

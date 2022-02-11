@@ -9,7 +9,7 @@ pub(crate) use self::huffman::{HuffmanEntry, HuffmanTable};
 pub(crate) use self::key_press::{KeyDefs, KeyPress};
 pub(crate) use self::kmap_format::{KmapFormat, Pin, SwitchPos};
 pub(crate) use self::miscellaneous::{BoardName, TutorData};
-pub(crate) use self::mode_info::{KmapPath, ModeInfo};
+pub(crate) use self::mode_info::{KmapPath, LayerInfo, LayerName, ModeInfo};
 pub(crate) use self::name::Name;
 pub(crate) use self::permutation::Permutation;
 pub(crate) use self::sequence::Sequence;
@@ -18,7 +18,9 @@ pub(crate) use self::user_options::{
     Delay, UserOptions, Verbosity, WordSpacePosition,
 };
 pub(crate) use self::validate::Validate;
-pub(crate) use self::words::{AnagramNum, Snippet, Word, Wordlike};
+pub(crate) use self::words::{
+    AnagramNum, Snippet, SnippetListName, Word, WordListName, Wordlike,
+};
 
 #[macro_use]
 mod validate;

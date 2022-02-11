@@ -1,9 +1,11 @@
+use itertools::Itertools;
 use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
 
 use types::{
-    AllData, AnagramNum, Chord, KmapOrder, KmapPath, ModeInfo, ModeName, Name,
+    AllData, AnagramNum, Chord, KmapOrder, LayerInfo, LayerName, ModeInfo,
+    ModeName, Name,
 };
 
 /// The Checker warns about sub-optimal configuration, like conflicting chords
@@ -12,11 +14,13 @@ use types::{
 #[derive(Debug)]
 struct Checker {
     // TODO use more references, instead of duplicating lots of stuff
-    reverse_kmaps: HashMap<KmapPath, HashMap<Chord<KmapOrder>, AnagramSet>>,
+    reverse_layer_lookups:
+        HashMap<LayerName, HashMap<Chord<KmapOrder>, AnagramSet>>,
     seq_names: HashSet<Name>,
     chord_names: HashSet<Name>,
     word_mod_names: HashSet<Name>,
     modes: BTreeMap<ModeName, ModeInfo>,
+    layers: BTreeMap<LayerName, LayerInfo>,
 }
 
 #[derive(Debug)]
@@ -30,29 +34,31 @@ impl AllData {
         checker.check_unused();
         checker.check_conflicts();
         checker.check_gaming_modes();
+        // checker.check_big_chords(4);
     }
 
     fn checker(&self) -> Checker {
         Checker {
-            reverse_kmaps: self.reverse_chords(),
+            reverse_layer_lookups: self.reverse_chords(),
             seq_names: self.sequences.names().cloned().collect(),
             chord_names: self.chords.names().cloned().collect(),
             word_mod_names: self.word_mods(),
             modes: self.modes.clone(),
+            layers: self.layers.clone(),
         }
     }
 
     fn reverse_chords(
         &self,
-    ) -> HashMap<KmapPath, HashMap<Chord<KmapOrder>, AnagramSet>> {
+    ) -> HashMap<LayerName, HashMap<Chord<KmapOrder>, AnagramSet>> {
         let mut reversed = HashMap::new();
-        for (kmap, chord_map) in self.chords.iter() {
+        for (layer_name, chord_map) in self.chords.iter() {
             for (name, chord) in chord_map.iter() {
                 let mut base_chord = chord.to_owned();
                 base_chord.anagram_num = AnagramNum::default();
 
                 reversed
-                    .entry(kmap.to_owned())
+                    .entry(layer_name.to_owned())
                     .or_insert_with(HashMap::new)
                     .entry(base_chord)
                     .or_insert_with(AnagramSet::new)
@@ -72,20 +78,31 @@ impl AllData {
 }
 
 impl Checker {
-    /// If two names have the same chord, or there's a skipped anagram
-    /// number, print out that whole set of names.
+    /// If two names have the same chord in the same mode, or there's a skipped
+    /// anagram number, print out that whole set of names.
     fn check_conflicts(&self) {
-        // TODO option to check for mode conflicts instead
-        for (kmap, reversed) in &self.reverse_kmaps {
+        for (mode_name, mode_info) in &self.modes {
+            let mut reverse_mode: HashMap<Chord<KmapOrder>, AnagramSet> =
+                HashMap::new();
+            for layer_name in &mode_info.layers {
+                for (chord, anagram_set) in
+                    self.reverse_layer_lookups.get(layer_name).unwrap()
+                {
+                    reverse_mode
+                        .entry(chord.to_owned())
+                        .or_insert_with(AnagramSet::new)
+                        .extend(anagram_set);
+                }
+            }
             let heading = format!(
                 "\nConflicting chords (in parens) or skipped anagrams \
                  (\"{}\") in \'{}\':",
                 AnagramSet::missing_symbol(),
-                kmap
+                mode_name
             );
             print_iter(
                 heading,
-                reversed
+                reverse_mode
                     .iter()
                     .filter(|&(_chord, set)| {
                         set.is_invalid(&self.word_mod_names)
@@ -118,35 +135,86 @@ impl Checker {
             if !mode_info.gaming {
                 continue;
             }
-            for kmap_info in &mode_info.keymaps {
-                if kmap_info.use_words {
-                    println!(
-                        "Don't use words in a gaming mode, \
-                         multi-switch chords won't work: '{}' \n",
-                        mode_name
-                    );
+            for layer_name in &mode_info.layers {
+                let layer_info =
+                    self.layers.get(layer_name).expect("unknown layer name");
+                match layer_info {
+                    LayerInfo::KmapLayer { .. } => (),
+                    LayerInfo::WordLayer { .. }
+                    | LayerInfo::SnippetLayer { .. } => {
+                        println!(
+                            "Don't use words in a gaming mode, \
+                             multi-switch chords won't work: '{}' \n",
+                            mode_name
+                        );
+                    }
                 }
                 print_iter(
                     format!(
                         "Multi-switch chords won't work in gaming modes.\nIn {}'s {}:",
                         mode_name,
-                        kmap_info.file
-                    ),
-                    self.multiswitch_chords(&kmap_info.file),
+                        layer_name),
+                    self.multiswitch_chords(layer_name, 1),
                 );
+            }
+        }
+    }
+
+    #[allow(unused)]
+    fn check_big_chords(&self, chord_size_threshold: usize) {
+        for (mode_name, mode_info) in &self.modes {
+            let mut size_groups: BTreeMap<usize, Vec<String>> = BTreeMap::new();
+            for layer_name in &mode_info.layers {
+                let layer_info =
+                    self.layers.get(layer_name).expect("unknown layer name");
+                match layer_info {
+                    LayerInfo::KmapLayer { .. }
+                    | LayerInfo::SnippetLayer { .. } => (),
+                    LayerInfo::WordLayer { .. } => {
+                        for (chord, anagram_set) in self
+                            .reverse_layer_lookups
+                            .get(layer_name)
+                            .expect(
+                                "checker's layers don't match all_data's modes",
+                            )
+                            .iter()
+                        {
+                            let size = chord.count_pressed();
+                            if size >= chord_size_threshold {
+                                size_groups
+                                    .entry(size)
+                                    .or_default()
+                                    .push(anagram_set.all_names().join(", "));
+                            }
+                        }
+                    }
+                }
+            }
+            if !size_groups.is_empty() {
+                println!("Big chords in {}:", mode_name);
+                for (size, mut entries) in size_groups.into_iter() {
+                    println!("  {}:", size);
+                    entries.sort();
+                    for entry in entries.iter() {
+                        println!("    {}:", entry);
+                    }
+                }
             }
         }
     }
 
     fn multiswitch_chords(
         &self,
-        kmap: &KmapPath,
+        layer_name: &LayerName,
+        allowed_num_switches: usize,
     ) -> impl Iterator<Item = &Name> {
-        self.reverse_kmaps
-            .get(kmap)
-            .expect("checker's kmaps don't match all_data's modes")
+        self.reverse_layer_lookups
+            .get(layer_name)
+            .expect("checker's layers don't match all_data's modes")
             .iter()
-            .filter(|(chord, _)| chord.count_pressed() > 1)
+            .filter(move |(chord, _)| {
+                chord.count_pressed() > allowed_num_switches
+            })
             .flat_map(|(_, anagram_set)| anagram_set.all_names())
     }
 }
@@ -161,6 +229,15 @@ impl AnagramSet {
             .entry(anagram_num)
             .or_insert_with(Vec::new)
             .push(name);
+    }
+
+    fn extend(&mut self, other: &AnagramSet) {
+        for (&anagram_num, names) in other.iter() {
+            self.0
+                .entry(anagram_num)
+                .or_insert_with(Vec::new)
+                .extend_from_slice(names);
+        }
     }
 
     fn is_invalid(&self, word_mod_names: &HashSet<Name>) -> bool {
@@ -223,6 +300,10 @@ impl AnagramSet {
 
     fn all_names(&self) -> impl Iterator<Item = &Name> {
         self.0.values().flat_map(|v| v.iter())
+    }
+
+    fn iter(&self) -> impl Iterator<Item = (&AnagramNum, &Vec<Name>)> {
+        self.0.iter()
     }
 }
 

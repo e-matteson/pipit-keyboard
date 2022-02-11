@@ -8,8 +8,8 @@ use input::Settings;
 use error::{Error, ResultExt};
 use types::{
     AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
-    HuffmanTable, KeyDefs, KeyPress, KmapOrder, KmapPath, Name, SeqMap,
-    SeqType, Sequence, SpellingTable, Validate, Wordlike,
+    HuffmanTable, KeyDefs, KeyPress, KmapOrder, LayerInfo, LayerName, Name,
+    SeqMap, SeqType, Sequence, SpellingTable, Validate, Wordlike,
 };
 use util::read_file;
 
@@ -19,6 +19,7 @@ use util::read_file;
 pub fn load_all_data(settings_path: &PathBuf) -> Result<AllData, Error> {
     let settings: Settings = serde_yaml::from_str(&read_file(settings_path)?)?;
     settings.validate()?;
+    settings.validate_layer_list()?;
 
     let mut chords = load_chords(&settings).context("Failed to load chords")?;
 
@@ -34,8 +35,8 @@ pub fn load_all_data(settings_path: &PathBuf) -> Result<AllData, Error> {
     let spellings = make_spelling_table(&settings)
         .context("Failed to make spelling table")?;
 
-    load_dictionary(&settings, &spellings, &mut chords, &mut sequences)
-        .context("Failed to load dictionary")?;
+    load_words_and_snippets(&settings, &spellings, &mut chords, &mut sequences)
+        .context("Failed to load words and snippets")?;
 
     let commands = load_commands(&settings, &mut sequences)
         .context("Failed to load commands")?;
@@ -51,6 +52,7 @@ pub fn load_all_data(settings_path: &PathBuf) -> Result<AllData, Error> {
         word_mods: settings.word_modifiers.clone(),
         anagram_mods: settings.anagram_modifiers.clone(),
         plain_mods: settings.plain_modifiers.keys().cloned().collect(),
+        layers: settings.layers.clone(),
         modes: settings.modes.clone(),
         spellings,
         chord_spec: settings.options.chord_spec()?,
@@ -62,12 +64,15 @@ pub fn load_all_data(settings_path: &PathBuf) -> Result<AllData, Error> {
 
 fn load_chords(settings: &Settings) -> Result<AllChordMaps, Error> {
     let mut chords = AllChordMaps::default();
-    for kmap in settings.kmaps() {
-        let named_chords = kmap
-            .read(&settings.options.kmap_format)
-            .with_context(|| format!("Failed to load kmap file: '{}'", kmap))?;
+    for (layer_name, layer_info) in &settings.layers {
+        if let LayerInfo::KmapLayer { kmap_file } = layer_info {
+            let named_chords =
+                kmap_file.read(&settings.options.kmap_format).with_context(
+                    || format!("Failed to load kmap file: '{}'", kmap_file),
+                )?;
 
-        chords.insert_map(named_chords, kmap.to_owned())?;
+            chords.insert_map(named_chords, layer_name.to_owned())?;
+        }
     }
     Ok(chords)
 }
@@ -103,36 +108,83 @@ fn make_spelling_table(settings: &Settings) -> Result<SpellingTable, Error> {
     Ok(SpellingTable(table))
 }
 
-fn load_dictionary(
+fn load_words_and_snippets(
     settings: &Settings,
     spellings: &SpellingTable,
-    chords: &mut AllChordMaps,
+    destination_chords: &mut AllChordMaps,
     sequences: &mut AllSeqMaps,
 ) -> Result<(), Error> {
-    for kmap in settings.kmaps_with_words() {
-        for word_info in &settings.dictionary {
-            add_wordlike(
-                word_info,
-                kmap.to_owned(),
-                spellings,
-                chords,
-                sequences,
-            )
-            .with_context(|| {
-                format!("Failed to add word: {}", word_info.word)
-            })?;
-        }
-        for snippet_info in &settings.snippets {
-            add_wordlike(
-                snippet_info,
-                kmap.to_owned(),
-                spellings,
-                chords,
-                sequences,
-            )
-            .with_context(|| {
-                format!("Failed to add snippet: {}", snippet_info.snippet)
-            })?;
+    for (layer_name, layer_info) in &settings.layers {
+        match layer_info {
+            LayerInfo::KmapLayer { .. } => continue,
+            LayerInfo::WordLayer {
+                word_list_name,
+                kmap_file_for_chord_generation: kmap_file,
+            } => {
+                let word_list = settings
+                    .word_lists
+                    .get(word_list_name)
+                    .ok_or_else(|| Error::LookupErr {
+                        key: word_list_name.to_string(),
+                        container: "word lists".into(),
+                    })?;
+                let source_chords = kmap_file
+                    .read(&settings.options.kmap_format)
+                    .with_context(|| {
+                        format!("Failed to load kmap file: '{}'", kmap_file)
+                    })?;
+                for word_info in word_list {
+                    add_wordlike(
+                        word_info,
+                        layer_name,
+                        word_list_name,
+                        spellings,
+                        &source_chords,
+                        destination_chords,
+                        sequences,
+                    )
+                    .with_context(|| {
+                        format!("Failed to add word: {}", word_info.word)
+                    })?;
+                }
+            }
+
+            LayerInfo::SnippetLayer {
+                snippet_list_name,
+                kmap_file_for_chord_generation: kmap_file,
+            } => {
+                let snippets = settings
+                    .snippets
+                    .get(snippet_list_name)
+                    .ok_or_else(|| Error::LookupErr {
+                        key: snippet_list_name.to_string(),
+                        container: "snippet lists".into(),
+                    })?;
+
+                let source_chords = kmap_file
+                    .read(&settings.options.kmap_format)
+                    .with_context(|| {
+                        format!("Failed to load kmap file: '{}'", kmap_file)
+                    })?;
+
+                for snippet_info in snippets {
+                    add_wordlike(
+                        snippet_info,
+                        layer_name,
+                        snippet_list_name,
+                        spellings,
+                        &source_chords,
+                        destination_chords,
+                        sequences,
+                    )
+                    .with_context(|| {
+                        format!(
+                            "Failed to add snippet: {}",
+                            snippet_info.snippet
+                        )
+                    })?;
+                }
+            }
         }
     }
     Ok(())
@@ -140,27 +192,28 @@ fn load_dictionary(
 
 fn add_wordlike<T>(
     wordlike: &T,
-    kmap: KmapPath,
+    layer_name: &LayerName,
+    wordlike_list_name: &T::WordlikeListName,
     spellings: &SpellingTable,
-    chords: &mut AllChordMaps,
+    source_chords: &BTreeMap<Name, Chord<KmapOrder>>,
+    destination_chords: &mut AllChordMaps,
     sequences: &mut AllSeqMaps,
 ) -> Result<(), Error>
 where
     T: Wordlike,
 {
-    let name = wordlike.name();
+    let name = wordlike.name(wordlike_list_name);
     sequences.insert(name.clone(), wordlike.sequence()?, T::seq_type())?;
 
-    let chord = make_wordlike_chord(wordlike, &kmap, spellings, chords)
+    let chord = make_wordlike_chord(wordlike, spellings, source_chords)
         .with_context(|| format!("Failed to make chord for '{}'", name))?;
-    chords.insert(name, chord, kmap)
+    destination_chords.insert(name, chord, layer_name.clone())
 }
 
 fn make_wordlike_chord<T>(
     wordlike: &T,
-    kmap: &KmapPath,
     spelling_table: &SpellingTable,
-    chords: &AllChordMaps,
+    chords: &BTreeMap<Name, Chord<KmapOrder>>,
 ) -> Result<Chord<KmapOrder>, Error>
 where
     T: Wordlike,
@@ -170,16 +223,24 @@ where
         names.extend(spelling_table.get_checked(spelling)?)
     }
 
-    let mut letter_chords = names.iter().map(|name| chords.get(name, kmap));
+    let mut letter_chords = names.iter().map(|name| {
+        chords.get(name).ok_or_else(|| Error::LookupErr {
+            key: name.into(),
+            container: "chord map".into(),
+        })
+    });
 
     // TODO better static union method?
-    let mut word_chord = letter_chords.next().ok_or_else(|| {
-        Error::Empty(
-            "set of letter chords for constructing relative chord".to_owned(),
-        )
-    })??;
+    let mut word_chord: Chord<KmapOrder> = letter_chords
+        .next()
+        .ok_or_else(|| {
+            Error::Empty(
+                "set of letter chords for constructing relative chord".into(),
+            )
+        })??
+        .to_owned();
     for c in letter_chords {
-        word_chord.union_mut(&c?)?;
+        word_chord.union_mut(c?)?;
     }
     word_chord.anagram_num = wordlike.anagram_num();
     Ok(word_chord)

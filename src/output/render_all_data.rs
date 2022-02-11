@@ -4,7 +4,7 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Command, KeyDefs, KmapPath, ModeName,
+    AllData, CCode, CEnumVariant, CTree, Command, KeyDefs, LayerName, ModeName,
     Modifier, Name, SeqType, ToC,
 };
 
@@ -131,7 +131,7 @@ impl AllData {
             is_extern: true,
         });
 
-        let (tree, kmap_struct_names) = self.render_kmaps()?;
+        let (tree, layer_struct_names) = self.render_layers()?;
         g.push(tree);
 
         let mut mode_struct_names = Vec::new();
@@ -139,7 +139,7 @@ impl AllData {
             let m = ModeBuilder {
                 mode_name: mode,
                 info,
-                kmap_struct_names: &kmap_struct_names,
+                layer_struct_names: &layer_struct_names,
                 mod_chords: self.modifier_chords(mode),
                 anagram_mask: self.get_anagram_mask(mode),
                 chord_spec: self.chord_spec.clone(),
@@ -158,13 +158,13 @@ impl AllData {
         Ok(CTree::Group(g))
     }
 
-    fn render_kmaps(
+    fn render_layers(
         &self,
-    ) -> Result<(CTree, BTreeMap<KmapPath, CCode>), Error> {
-        // Render all keymap structs as CTrees, and return their names
-        let mut kmap_struct_names = BTreeMap::new();
+    ) -> Result<(CTree, BTreeMap<LayerName, CCode>), Error> {
+        // Render all layer structs as CTrees, and return their names
+        let mut layer_struct_names = BTreeMap::new();
         let mut g = Vec::new();
-        for (i, (kmap_name, chords)) in self.chords.iter().enumerate() {
+        for (i, (layer_name, chords)) in self.chords.iter().enumerate() {
             let builder = KmapBuilder {
                 kmap_nickname: format!("kmap{}", i),
                 chord_map: chords,
@@ -172,11 +172,11 @@ impl AllData {
                 huffman_table: &self.huffman_table,
                 chord_spec: self.chord_spec.clone(),
             };
-            let (tree, kmap_struct_name) = builder.render()?;
+            let (tree, layer_struct_name) = builder.render()?;
             g.push(tree);
-            kmap_struct_names.insert(kmap_name.to_owned(), kmap_struct_name);
+            layer_struct_names.insert(layer_name.to_owned(), layer_struct_name);
         }
-        Ok((CTree::Group(g), kmap_struct_names))
+        Ok((CTree::Group(g), layer_struct_names))
     }
 
     fn render_modifiers(&self) -> Result<CTree, Error> {

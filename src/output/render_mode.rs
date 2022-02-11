@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
 use types::{
-    CCode, CTree, Chord, ChordSpec, Field, KmapOrder, KmapPath, ModeInfo,
+    CCode, CTree, Chord, ChordSpec, Field, KmapOrder, LayerName, ModeInfo,
     ModeName, ToC,
 };
 
@@ -11,7 +11,7 @@ use util::usize_to_u8;
 pub struct ModeBuilder<'a> {
     pub mode_name: &'a ModeName,
     pub info: &'a ModeInfo,
-    pub kmap_struct_names: &'a BTreeMap<KmapPath, CCode>,
+    pub layer_struct_names: &'a BTreeMap<LayerName, CCode>,
     pub mod_chords: Vec<Chord<KmapOrder>>,
     pub anagram_mask: Chord<KmapOrder>,
     pub chord_spec: ChordSpec,
@@ -32,7 +32,7 @@ c_struct!(
 impl<'a> ModeBuilder<'a> {
     pub fn render(&self) -> Result<(CTree, CCode), Error> {
         let mut g = Vec::new();
-        let (tree, kmap_array_name, num_kmaps) = self.render_kmap_array()?;
+        let (tree, kmap_array_name, num_kmaps) = self.render_layer_array()?;
         g.push(tree);
 
         let (tree, mod_array_name) = self.render_modifier_array()?;
@@ -54,19 +54,19 @@ impl<'a> ModeBuilder<'a> {
         Ok((CTree::Group(g), mode_struct_name))
     }
 
-    fn render_kmap_array(&self) -> Result<(CTree, CCode, usize), Error> {
+    fn render_layer_array(&self) -> Result<(CTree, CCode, usize), Error> {
         let mut g = Vec::new();
 
         let array_name = format!("{}_kmaps_array", self.mode_name).to_c();
 
         let contents: Vec<_> = self
             .info
-            .keymaps
+            .layers
             .iter()
-            .map(|info| {
-                self.kmap_struct_names
-                    .get(&info.file)
-                    .expect("no struct name was found for kmap")
+            .map(|layer_name| {
+                self.layer_struct_names
+                    .get(&layer_name)
+                    .expect("no struct name was found for layer")
                     .to_owned()
             })
             .collect();
