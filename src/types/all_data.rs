@@ -6,8 +6,8 @@ use std::path::PathBuf;
 use error::{Error, ResultExt};
 use types::{
     AnagramNum, BoardName, Chord, ChordSpec, Command, HuffmanTable, KeyPress,
-    KmapOrder, KmapPath, ModeInfo, ModeName, Name, SeqType, Sequence,
-    SpellingTable, TutorData, UserOptions,
+    KmapOrder, LayerInfo, LayerName, ModeInfo, ModeName, Name, SeqType,
+    Sequence, SpellingTable, TutorData, UserOptions,
 };
 use util::ensure_u8;
 
@@ -24,7 +24,7 @@ pub struct AllSeqMaps {
 
 #[derive(Debug, Default)]
 pub struct AllChordMaps {
-    maps: BTreeMap<KmapPath, ChordMap>,
+    maps: BTreeMap<LayerName, ChordMap>,
 }
 
 #[derive(Debug)]
@@ -34,6 +34,7 @@ pub struct AllData {
     pub word_mods: Vec<Name>,
     pub plain_mods: Vec<Name>,
     pub anagram_mods: Vec<Name>,
+    pub layers: BTreeMap<LayerName, LayerInfo>,
     pub modes: BTreeMap<ModeName, ModeInfo>,
     pub huffman_table: HuffmanTable,
     pub spellings: SpellingTable,
@@ -46,14 +47,14 @@ pub struct AllData {
 
 impl AllData {
     /// Return the first chord found for the given name in any of this mode's
-    /// kmaps.
+    /// layers.
     pub fn get_chord_in_mode(
         &self,
         chord_name: &Name,
         mode: &ModeName,
     ) -> Option<Chord<KmapOrder>> {
-        for kmap_info in &self.modes.get(mode).expect("unknown mode").keymaps {
-            if let Ok(chord) = self.chords.get(chord_name, &kmap_info.file) {
+        for layer_name in &self.modes.get(mode).expect("unknown mode").layers {
+            if let Ok(chord) = self.chords.get(chord_name, layer_name) {
                 return Some(chord);
             }
         }
@@ -186,23 +187,26 @@ impl AllChordMaps {
     pub fn get(
         &self,
         chord_name: &Name,
-        kmap: &KmapPath,
+        layer_name: &LayerName,
     ) -> Result<Chord<KmapOrder>, Error> {
         // TODO be consistent about argument order
         // TODO don't clone? Chords are small though...
         Ok(self
-            .get_kmap(kmap)?
+            .get_layer(layer_name)?
             .get(chord_name)
             .and_then(|x| Some(x.clone()))
             .ok_or_else(|| Error::LookupErr {
                 key: chord_name.into(),
-                container: format!("{} chord map", kmap),
+                container: format!("{} chord map", layer_name),
             })?)
     }
 
-    pub fn get_kmap(&self, kmap: &KmapPath) -> Result<&ChordMap, Error> {
-        self.maps.get(kmap).ok_or_else(|| Error::LookupErr {
-            key: kmap.into(),
+    pub fn get_layer(
+        &self,
+        layer_name: &LayerName,
+    ) -> Result<&ChordMap, Error> {
+        self.maps.get(layer_name).ok_or_else(|| Error::LookupErr {
+            key: layer_name.to_string(),
             container: "chord maps".into(),
         })
     }
@@ -223,9 +227,9 @@ impl AllChordMaps {
         &mut self,
         name: Name,
         chord: Chord<KmapOrder>,
-        kmap: KmapPath,
+        layer_name: LayerName,
     ) -> Result<(), Error> {
-        self.maps.entry(kmap).or_default().insert(name, chord)
+        self.maps.entry(layer_name).or_default().insert(name, chord)
     }
 
     // TODO is it worth having this separate method?
@@ -233,15 +237,15 @@ impl AllChordMaps {
     pub fn insert_map(
         &mut self,
         named_chords: BTreeMap<Name, Chord<KmapOrder>>,
-        kmap: KmapPath,
+        layer_name: LayerName,
     ) -> Result<(), Error> {
         for (name, chord) in named_chords {
-            self.insert(name, chord, kmap.clone())?;
+            self.insert(name, chord, layer_name.clone())?;
         }
         Ok(())
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&KmapPath, &ChordMap)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&LayerName, &ChordMap)> {
         self.maps.iter()
     }
 }

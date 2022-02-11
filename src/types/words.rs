@@ -41,11 +41,23 @@ pub struct Snippet {
     pub chord: Option<String>,
 }
 
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+#[serde(from = "String")]
+pub struct WordListName(pub String);
+
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+#[serde(from = "String")]
+pub struct SnippetListName(pub String);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // TODO shrink, make more methods default
 // TODO be consistent about meaning of "spelling"
 pub trait Wordlike {
+    type WordlikeListName: ToString;
+
     fn seq_type() -> SeqType;
     fn seq_field(&self) -> &str;
     fn chord_field(&self) -> Option<&String>;
@@ -84,23 +96,24 @@ pub trait Wordlike {
         for letter in self.seq_field().graphemes(true) {
             let keypress = KeyPress::from_str(&letter.to_string())
                 .with_context(|| {
-                    format!("Invalid letter in sequence for {}", self.name())
+                    format!("Invalid letter in sequence {}", self.seq_field())
                 })?;
             seq.push(keypress);
         }
 
         if seq.is_empty() {
-            return Err(Error::Empty("Sequence".into())).with_context(|| {
-                format!("Invalid sequence for {}", self.name())
-            });
+            return Err(Error::Empty("Sequence".into()));
         }
         Ok(seq)
     }
 
     /// Generate a name for this word mapping that will be unique
-    fn name(&self) -> Name {
-        let mut parts: Vec<Cow<str>> =
-            vec![Self::name_prefix().into(), self.seq_field().into()];
+    fn name(&self, wordlike_list_name: &Self::WordlikeListName) -> Name {
+        let mut parts: Vec<Cow<str>> = vec![
+            Self::name_prefix().into(),
+            wordlike_list_name.to_string().into(),
+            self.seq_field().into(),
+        ];
         if let Some(alternate_chord) = self.chord_field() {
             parts.push(alternate_chord.into());
         }
@@ -117,6 +130,8 @@ pub trait Wordlike {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl Wordlike for Word {
+    type WordlikeListName = WordListName;
+
     fn seq_type() -> SeqType {
         SeqType::Word
     }
@@ -143,6 +158,8 @@ impl Wordlike for Word {
 }
 
 impl Wordlike for Snippet {
+    type WordlikeListName = SnippetListName;
+
     fn seq_type() -> SeqType {
         SeqType::Macro
     }
@@ -174,6 +191,32 @@ impl Validate for Word {
 impl Validate for Snippet {
     fn validate(&self) -> Result<(), Error> {
         Ok(())
+    }
+}
+
+impl Validate for WordListName {
+    fn validate(&self) -> Result<(), Error> {
+        if self.0.is_empty() {
+            Err(Error::BadValueErr {
+                thing: "word list name".to_owned(),
+                value: "(empty)".to_owned(),
+            })
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl Validate for SnippetListName {
+    fn validate(&self) -> Result<(), Error> {
+        if self.0.is_empty() {
+            Err(Error::BadValueErr {
+                thing: "snippet list name".to_owned(),
+                value: "(empty)".to_owned(),
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -238,5 +281,41 @@ impl fmt::Display for AnagramNum {
         // TODO use color?
         let s = format!("{}", self.get());
         fmt::Display::fmt(&s, f)
+    }
+}
+
+impl fmt::Display for SnippetListName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<String> for SnippetListName {
+    fn from(s: String) -> SnippetListName {
+        SnippetListName(s)
+    }
+}
+
+impl Into<String> for SnippetListName {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl fmt::Display for WordListName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<String> for WordListName {
+    fn from(s: String) -> WordListName {
+        WordListName(s)
+    }
+}
+
+impl Into<String> for WordListName {
+    fn into(self) -> String {
+        self.0
     }
 }
