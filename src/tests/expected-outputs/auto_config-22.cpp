@@ -571,57 +571,11 @@ const LookupKmapType kmap0_Command_lookups = {
   kmap0_Command_lookups_array, // lookups
 };
 
-const ChordData kmap0_Word_len14_anagram0_chords[1] = {
- ChordData({16, 32, 1}), 
-};
-
-const uint8_t kmap0_Word_len14_anagram0_seqs[2] = {
- 144, 50, 
-};
-
-const LookupKmapTypeLenAnagram kmap0_Word_len14_anagram0 = {
-  LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
-  1, // num_chords
-  kmap0_Word_len14_anagram0_chords, // chords
-  kmap0_Word_len14_anagram0_seqs, // sequences
-};
-
-const ChordData kmap0_Word_len22_anagram0_chords[1] = {
- ChordData({146, 0, 0}), 
-};
-
-const uint8_t kmap0_Word_len22_anagram0_seqs[3] = {
- 67, 140, 43, 
-};
-
-const LookupKmapTypeLenAnagram kmap0_Word_len22_anagram0 = {
-  LengthAndAnagram(22, 0), // seq_bit_len_and_anagram
-  1, // num_chords
-  kmap0_Word_len22_anagram0_chords, // chords
-  kmap0_Word_len22_anagram0_seqs, // sequences
-};
-
-const ChordData kmap0_Word_len23_anagram1_chords[1] = {
- ChordData({16, 32, 1}), 
-};
-
-const uint8_t kmap0_Word_len23_anagram1_seqs[3] = {
- 144, 51, 36, 
-};
-
-const LookupKmapTypeLenAnagram kmap0_Word_len23_anagram1 = {
-  LengthAndAnagram(23, 1), // seq_bit_len_and_anagram
-  1, // num_chords
-  kmap0_Word_len23_anagram1_chords, // chords
-  kmap0_Word_len23_anagram1_seqs, // sequences
-};
-
-const LookupKmapTypeLenAnagram* kmap0_Word_lookups_array[3] = {
- &kmap0_Word_len14_anagram0, &kmap0_Word_len22_anagram0, &kmap0_Word_len23_anagram1, 
+const LookupKmapTypeLenAnagram* kmap0_Word_lookups_array[0] = {
 };
 
 const LookupKmapType kmap0_Word_lookups = {
-  3, // num_lookups
+  0, // num_lookups
   kmap0_Word_lookups_array, // lookups
 };
 
@@ -633,8 +587,94 @@ const KmapStruct kmap0_lookups = {
   kmap0_lookups_array, // lookups_for_kmap
 };
 
-const KmapStruct* default_mode_kmaps_array[1] = {
- &kmap0_lookups, 
+const LookupKmapTypeLenAnagram* kmap1_Plain_lookups_array[0] = {
+};
+
+const LookupKmapType kmap1_Plain_lookups = {
+  0, // num_lookups
+  kmap1_Plain_lookups_array, // lookups
+};
+
+const LookupKmapTypeLenAnagram* kmap1_Macro_lookups_array[0] = {
+};
+
+const LookupKmapType kmap1_Macro_lookups = {
+  0, // num_lookups
+  kmap1_Macro_lookups_array, // lookups
+};
+
+const LookupKmapTypeLenAnagram* kmap1_Command_lookups_array[0] = {
+};
+
+const LookupKmapType kmap1_Command_lookups = {
+  0, // num_lookups
+  kmap1_Command_lookups_array, // lookups
+};
+
+const ChordData kmap1_Word_len14_anagram0_chords[1] = {
+ ChordData({16, 32, 1}), 
+};
+
+const uint8_t kmap1_Word_len14_anagram0_seqs[2] = {
+ 144, 50, 
+};
+
+const LookupKmapTypeLenAnagram kmap1_Word_len14_anagram0 = {
+  LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
+  1, // num_chords
+  kmap1_Word_len14_anagram0_chords, // chords
+  kmap1_Word_len14_anagram0_seqs, // sequences
+};
+
+const ChordData kmap1_Word_len22_anagram0_chords[1] = {
+ ChordData({146, 0, 0}), 
+};
+
+const uint8_t kmap1_Word_len22_anagram0_seqs[3] = {
+ 67, 140, 43, 
+};
+
+const LookupKmapTypeLenAnagram kmap1_Word_len22_anagram0 = {
+  LengthAndAnagram(22, 0), // seq_bit_len_and_anagram
+  1, // num_chords
+  kmap1_Word_len22_anagram0_chords, // chords
+  kmap1_Word_len22_anagram0_seqs, // sequences
+};
+
+const ChordData kmap1_Word_len23_anagram1_chords[1] = {
+ ChordData({16, 32, 1}), 
+};
+
+const uint8_t kmap1_Word_len23_anagram1_seqs[3] = {
+ 144, 51, 36, 
+};
+
+const LookupKmapTypeLenAnagram kmap1_Word_len23_anagram1 = {
+  LengthAndAnagram(23, 1), // seq_bit_len_and_anagram
+  1, // num_chords
+  kmap1_Word_len23_anagram1_chords, // chords
+  kmap1_Word_len23_anagram1_seqs, // sequences
+};
+
+const LookupKmapTypeLenAnagram* kmap1_Word_lookups_array[3] = {
+ &kmap1_Word_len14_anagram0, &kmap1_Word_len22_anagram0, &kmap1_Word_len23_anagram1, 
+};
+
+const LookupKmapType kmap1_Word_lookups = {
+  3, // num_lookups
+  kmap1_Word_lookups_array, // lookups
+};
+
+const LookupKmapType* kmap1_lookups_array[4] = {
+ &kmap1_Plain_lookups, &kmap1_Macro_lookups, &kmap1_Command_lookups, &kmap1_Word_lookups, 
+};
+
+const KmapStruct kmap1_lookups = {
+  kmap1_lookups_array, // lookups_for_kmap
+};
+
+const KmapStruct* default_mode_kmaps_array[2] = {
+ &kmap1_lookups, &kmap0_lookups, 
 };
 
 const ChordData default_mode_mod_chord[10] = {
@@ -647,7 +687,7 @@ const ChordData default_mode_anagram_mask = ChordData({8, 128, 0});
 
 const ModeStruct default_mode_struct = {
   0, // is_gaming
-  1, // num_kmaps
+  2, // num_kmaps
   default_mode_kmaps_array, // kmaps
   default_mode_mod_chord, // mod_chords
   default_mode_anagram_mask, // anagram_mask

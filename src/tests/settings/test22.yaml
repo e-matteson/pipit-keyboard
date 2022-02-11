@@ -19,22 +19,33 @@ options:
     - [[0, 18], [0, 17], [0, 16], [0, 15],    [0, 20], [0, 21], [0, 5], [0, 6]]
     - [         [1, 17], [1, 16], [1, 15],    [1, 20], [1, 21], [1, 5]        ]
 
+layers:
+  layer_default_keys:
+    type: "KmapLayer"
+    kmap_file: "src/tests/settings/keymaps/test22.kmap"
+
+  layer_english_words:
+    type: "WordLayer"
+    word_list_name: "english_words"
+    kmap_file_for_chord_generation: "src/tests/settings/keymaps/test22.kmap"
+
 modes:
   default_mode:
-    keymaps:
-      - {file: "src/tests/settings/keymaps/test22.kmap", use_words: true}
+    layers:
+      - "layer_english_words"
+      - "layer_default_keys"
 
   left_hand_mode:
-    keymaps:
-      - {file: "src/tests/settings/keymaps/test22.kmap"}
+    layers:
+      - "layer_default_keys"
 
   gaming_mode:
-    keymaps:
-      - {file: "src/tests/settings/keymaps/test22.kmap"}
+    layers:
+      - "layer_default_keys"
 
   windows_mode:
-    keymaps:
-      - {file: "src/tests/settings/keymaps/test22.kmap"}
+    layers:
+      - "layer_default_keys"
 
 
 plain_modifiers:
@@ -129,7 +140,8 @@ commands:
   - command_pan_left
   - command_pan_right
 
-dictionary:
-  - {word: "the"}
-  - {word: "teeth", anagram: 1}
-  - {word: "1337"}
+word_lists:
+  english_words:
+    - {word: "the"}
+    - {word: "teeth", anagram: 1}
+    - {word: "1337"}
