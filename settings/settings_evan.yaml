@@ -5268,6 +5268,7 @@ word_lists:
     - {word: "awen", chord: "ahe"}
     - {word: "e"}
     - {word: "en"}
+    - {word: "epiku", chord: "epi"}
     - {word: "esun", chord: "esu"}
     - {word: "ijo", chord: "ifo"}
     - {word: "ike", chord: "ice"}
@@ -5275,6 +5276,7 @@ word_lists:
     - {word: "insa", chord: "isa"}
     - {word: "jaki", chord: "fac"}
     - {word: "jan", chord: "fan"}
+    - {word: "jasima", chord: "fas"}
     - {word: "jelo", chord: "fel"}
     - {word: "jo", chord: "fo"}
     - {word: "kala", chord: "cala"}
@@ -5282,18 +5284,25 @@ word_lists:
     - {word: "kama", chord: "cam"}
     - {word: "kasi", chord: "cas"}
     - {word: "ken", chord: "cen"}
+    - {word: "kin", chord: "cin"}
     - {word: "kepeken", chord: "cep"}
+    - {word: "kijetesantakalu", chord: "cif"}
     - {word: "kili", chord: "cil"}
+    - {word: "kipisi", chord: "cip"}
     - {word: "kiwen", chord: "cih"}
     - {word: "ko", chord: "co"}
+    - {word: "kokosila", chord: "coi"}
     - {word: "kon", chord: "con"}
+    - {word: "ku", chord: "cu"}
     - {word: "kule", chord: "cue"}
     - {word: "kulupu", chord: "cup"}
     - {word: "kute", chord: "cut"}
     - {word: "la"}
+    - {word: "lanpan", chord: "lan"}
     - {word: "lape", chord: "ape"}
     - {word: "laso", chord: "lao"}
     - {word: "lawa", chord: "lah"}
+    - {word: "leko", chord: "lec"}
     - {word: "len"}
     - {word: "lete"}
     - {word: "li", chord: "i"}
@@ -5306,18 +5315,24 @@ word_lists:
     - {word: "lukin", chord: "luc"}
     - {word: "lupa", chord: "lup"}
     - {word: "ma"}
+    - {word: "majuna", chord: "maf"}
     - {word: "mama", anagram: 1}
     - {word: "mani", chord: "man"}
     - {word: "meli", chord: "mel"}
+    - {word: "meso", chord: "meo"}
     - {word: "mi", chord: "m"}
     - {word: "mije", chord: "mif"}
+    - {word: "misikeke", chord: "mis"}
     - {word: "moku", chord: "moc"}
     - {word: "moli", chord: "mol"}
     - {word: "monsi", chord: "mon"}
+    - {word: "monsuta", chord: "mos"}
     - {word: "mu"}
     - {word: "mun"}
     - {word: "musi", chord: "mus"}
     - {word: "mute", chord: "mut"}
+    - {word: "n"}
+    - {word: "namako", chord: "amo"}
     - {word: "nanpa", chord: "np"}
     - {word: "nasa"}
     - {word: "nasin", chord: "nai"}
@@ -5326,10 +5341,12 @@ word_lists:
     - {word: "nimi"}
     - {word: "noka", chord: "nca"}
     - {word: "o"}
+    - {word: "oko", chord: "oc", anagram: 1}
     - {word: "olin", chord: "oin"}
     - {word: "ona"}
     - {word: "open", chord: "ope"}
     - {word: "pakala", chord: "pac"}
+    - {word: "pake", chord: "pac", anagram: 1}
     - {word: "pali", chord: "pal"}
     - {word: "palisa", chord: "pas"}
     - {word: "pan"}
@@ -5340,8 +5357,9 @@ word_lists:
     - {word: "pini"}
     - {word: "pipi"}
     - {word: "poka", chord: "poa"}
-    - {word: "poki", chord: "poi"}
+    - {word: "poki", chord: "poc"}
     - {word: "pona", chord: "pon"}
+    - {word: "powe", chord: "poh"}
     - {word: "pu"}
     - {word: "sama", chord: "sam"}
     - {word: "seli", chord: "sei"}
@@ -5354,6 +5372,7 @@ word_lists:
     - {word: "sina", chord: "s"}
     - {word: "sinpin", chord: "sip"}
     - {word: "sitelen", chord: "sit"}
+    - {word: "soko", chord: "soc"}
     - {word: "sona", chord: "son"}
     - {word: "soweli", chord: "soh"}
     - {word: "suli", chord: "sul"}
@@ -5367,8 +5386,10 @@ word_lists:
     - {word: "tenpo", chord: "tep"}
     - {word: "toki", chord: "toc"}
     - {word: "tomo"}
+    - {word: "tonsi", chord: "ton"}
     - {word: "tu"}
     - {word: "unpa", chord: "unp"}
+    - {word: "usawi", chord: "usa"}
     - {word: "uta"}
     - {word: "utala", chord: "utl"}
     - {word: "walo", chord: "hao"}
