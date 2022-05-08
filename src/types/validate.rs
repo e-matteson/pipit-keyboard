@@ -116,7 +116,7 @@ macro_rules! validated_struct {
             impl Validate for $struct_type {
                 fn validate(&self) -> Result<(), Error> {
                     $(
-                        &self.$field.validate()
+                        let _ = &self.$field.validate()
                             .with_context(||
                                 format!("Invalid value in: '{}'", stringify!($field))
                             )?;
