@@ -87,6 +87,7 @@ impl<'a> KmapBuilder<'a> {
             values: CCode::map_prepend("&", &seq_type_names),
             c_type: "LookupKmapType*".to_c(),
             is_extern: false,
+            use_std_array: false,
         });
         g.push(
             KmapStruct {
@@ -115,6 +116,7 @@ impl<'a> KmapBuilder<'a> {
             // TODO no literal type name
             c_type: "LookupKmapTypeLenAnagram*".to_c(),
             is_extern: false,
+            use_std_array: false,
         });
 
         g.push(
@@ -183,6 +185,7 @@ impl<'a> KmapBuilder<'a> {
                 values: chord_bytes,
                 c_type: Chord::c_type_name(),
                 is_extern: false,
+                use_std_array: false,
             });
 
             g.push(CTree::Array {
@@ -190,6 +193,7 @@ impl<'a> KmapBuilder<'a> {
                 values: seq_bytes,
                 c_type: "uint8_t".to_c(),
                 is_extern: false,
+                use_std_array: false,
             });
 
             let lookup_struct = LookupKmapTypeLenAnagram::new(

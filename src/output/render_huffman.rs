@@ -26,6 +26,7 @@ impl HuffmanTable {
             values: self.initializers(),
             c_type: HuffmanChar::c_type(),
             is_extern: true,
+            use_std_array: false,
         });
 
         Ok(CTree::Group(group))

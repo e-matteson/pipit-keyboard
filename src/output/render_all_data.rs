@@ -154,11 +154,12 @@ impl AllData {
             mode_struct_names.push(name);
         }
 
-        g.push(CTree::StdArray {
+        g.push(CTree::Array {
             name: "mode_structs".to_c(),
             values: CCode::map_prepend("&", &mode_struct_names),
             c_type: "const ModeStruct*".to_c(),
             is_extern: true,
+            use_std_array: true,
         });
         Ok(CTree::Group(g))
     }
@@ -200,28 +201,31 @@ impl AllData {
             c_type: "uint8_t".to_c(),
         });
 
-        group.push(CTree::StdArray {
+        group.push(CTree::Array {
             name: "word_mods".to_c(),
             values: to_variants(&self.word_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
+            use_std_array: true,
         });
 
-        group.push(CTree::StdArray {
+        group.push(CTree::Array {
             name: "plain_mods".to_c(),
             values: to_variants(&self.plain_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
+            use_std_array: true,
         });
 
-        group.push(CTree::StdArray {
+        group.push(CTree::Array {
             name: "anagram_mods".to_c(),
             values: to_variants(&self.anagram_mods),
             c_type: Modifier::enum_type(),
             is_extern: true,
+            use_std_array: true,
         });
 
-        group.push(CTree::StdArray {
+        group.push(CTree::Array {
             name: "anagram_mod_numbers".to_c(),
             values: self
                 .get_anagram_mod_numbers()?
@@ -230,13 +234,15 @@ impl AllData {
                 .collect(),
             c_type: "uint8_t".to_c(),
             is_extern: true,
+            use_std_array: true,
         });
 
-        group.push(CTree::StdArray {
+        group.push(CTree::Array {
             name: "plain_mod_keys".to_c(),
             values: self.get_plain_mod_codes()?,
             c_type: "uint8_t".to_c(),
             is_extern: true,
+            use_std_array: true,
         });
 
         Ok(CTree::Group(group))

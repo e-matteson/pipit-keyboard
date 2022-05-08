@@ -76,6 +76,7 @@ impl<'a> ModeBuilder<'a> {
             values: CCode::map_prepend("&", &contents),
             c_type: "KmapStruct*".to_c(),
             is_extern: false,
+            use_std_array: false,
         });
 
         Ok((CTree::Group(g), array_name, contents.len()))
@@ -113,6 +114,7 @@ impl<'a> ModeBuilder<'a> {
                 .collect::<Result<Vec<CCode>, Error>>()?,
             c_type: Chord::c_type_name(),
             is_extern: false,
+            use_std_array: false,
         };
         Ok((tree, array_name_out))
     }

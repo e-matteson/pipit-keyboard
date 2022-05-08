@@ -63,17 +63,12 @@ pub enum CTree {
         value: CCode,
         c_type: CCode,
     },
-    StdArray {
-        name: CCode,
-        values: Vec<CCode>,
-        c_type: CCode,
-        is_extern: bool,
-    },
     Array {
         name: CCode,
         values: Vec<CCode>,
         c_type: CCode,
         is_extern: bool,
+        use_std_array: bool,
     },
     EnumDecl {
         name: CCode,

@@ -49,13 +49,8 @@ impl CTree {
                 ref values,
                 ref c_type,
                 is_extern,
-            } => format_array(name, values, c_type, is_extern, false),
-            CTree::StdArray {
-                ref name,
-                ref values,
-                ref c_type,
-                is_extern,
-            } => format_array(name, values, c_type, is_extern, true),
+                use_std_array,
+            } => format_array(name, values, c_type, is_extern, use_std_array),
             CTree::EnumDecl {
                 ref name,
                 ref variants,
@@ -89,7 +84,6 @@ impl CTree {
             | CTree::PublicConst { .. }
             | CTree::PrivateConst { .. }
             | CTree::Array { .. }
-            | CTree::StdArray { .. }
             | CTree::EnumDecl { .. }
             | CTree::Namespace { .. } => unimplemented!(),
         }
