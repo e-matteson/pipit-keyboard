@@ -384,6 +384,7 @@ impl KeyDefs {
 
     /// Get the c-preprocessor names of all keycodes/modifiers and their
     /// scancodes. Doesn't distinguish between keycodes and modifiers
+    #[allow(dead_code)]
     pub fn scancode_table() -> &'static BTreeMap<&'static CCode, u8> {
         lazy_static! {
             static ref SCANCODES: BTreeMap<&'static CCode, u8> = TABLE

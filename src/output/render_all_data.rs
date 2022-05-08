@@ -4,7 +4,7 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Command, KeyDefs, LayerName, ModeName,
+    AllData, CCode, CEnumVariant, CTree, Command, LayerName, ModeName,
     Modifier, Name, SeqType, ToC,
 };
 
@@ -279,8 +279,6 @@ fn intro(with_message: bool) -> Result<CTree, Error> {
         "typedef void (*voidFuncPtr)(void);\n".to_c(),
     ));
 
-    group.push(render_keycode_definitions());
-
     Ok(CTree::Group(group))
 }
 
@@ -319,28 +317,4 @@ fn make_debug_macros() -> CTree {
     s += "   #endif\n\n";
     s += "#endif\n\n";
     CTree::LiteralH(CCode(s))
-}
-
-fn render_keycode_definitions() -> CTree {
-    let keycodes = KeyDefs::scancode_table();
-    let example = keycodes
-        .keys()
-        .nth(0)
-        .expect("KeyDefs::scancode_table() is empty!")
-        .to_owned();
-
-    let keycode_definitions = CTree::Group(
-        keycodes
-            .iter()
-            .map(|(&name, &value)| CTree::Define {
-                name: name.to_owned(),
-                value: value.to_c(),
-            })
-            .collect(),
-    );
-
-    CTree::Ifndef {
-        conditional: example.to_owned(),
-        contents: Box::new(keycode_definitions),
-    }
 }

@@ -38,10 +38,6 @@ impl CTree {
                     CFilePair::new()
                 }
             }
-            CTree::Ifndef {
-                ref conditional,
-                ref contents,
-            } => format_ifndef(conditional, contents, file_name_base)?,
             CTree::ConstVar {
                 ref name,
                 ref value,
@@ -92,7 +88,6 @@ impl CTree {
             | CTree::Group(..)
             | CTree::Define { .. }
             | CTree::DefineIf { .. }
-            | CTree::Ifndef { .. }
             | CTree::ConstVar { .. }
             | CTree::Array { .. }
             | CTree::StdArray { .. }
@@ -141,18 +136,6 @@ fn format_include_h(path: &CCode) -> CFilePair {
 
 fn format_include_self(file_name_base: &str) -> CFilePair {
     CFilePair::with_c(format!("#include \"{}.h\"\n", file_name_base))
-}
-
-fn format_ifndef(
-    conditional: &CCode,
-    contents: &CTree,
-    file_name_base: &str,
-) -> Result<CFilePair, Error> {
-    let mut f = CFilePair::new();
-    f += CFilePair::with_h(format!("\n#ifndef {}\n", conditional));
-    f += contents.format(file_name_base)?;
-    f += CFilePair::with_h(format!("#endif // ifndef {}\n\n", conditional));
-    Ok(f)
 }
 
 fn format_namespace(

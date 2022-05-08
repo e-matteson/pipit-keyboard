@@ -46,7 +46,6 @@ pub trait CEnumVariant: Sized {
     }
 }
 
-// TODO get rid of unused variants
 #[derive(Debug, Clone)]
 pub enum CTree {
     /// Define a preprocessor macro with the given name and value.
@@ -58,11 +57,6 @@ pub enum CTree {
     DefineIf {
         name: CCode,
         is_defined: bool,
-    },
-    /// Wrap the contents in a preprocessor ifndef block.
-    Ifndef {
-        conditional: CCode,
-        contents: Box<CTree>,
     },
     // Declare and initialize a const variable.
     ConstVar {
