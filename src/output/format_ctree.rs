@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use std::fmt::Display;
-use std::fs::OpenOptions;
+use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use std::ops::AddAssign;
 use std::path::PathBuf;
@@ -351,6 +351,7 @@ impl CFilePair {
         directory: &PathBuf,
         name_base: &str,
     ) -> Result<Vec<PathBuf>, Error> {
+        create_dir_all(directory)?;
         let mut path_base = directory.to_owned();
         path_base.push(name_base);
 
