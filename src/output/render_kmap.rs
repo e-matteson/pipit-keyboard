@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use error::{Error, ResultExt};
 use types::{
-    AllSeqMaps, AnagramNum, CCode, CTree, Chord, ChordMap, ChordSpec, Field,
-    HuffmanTable, Name, SeqType, Sequence, ToC,
+    AllSeqMaps, AnagramNum, CCode, CTree, CType, Chord, ChordMap, ChordSpec,
+    Field, HuffmanTable, Name, SeqType, Sequence, ToC,
 };
 use util::usize_to_u16;
 
@@ -85,7 +85,9 @@ impl<'a> KmapBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &seq_type_names),
-            c_type: "LookupKmapType*".to_c(),
+            c_type: CType::Pointer(Box::new(CType::Custom(
+                "LookupKmapType".to_c(),
+            ))),
             is_extern: false,
             use_std_array: false,
         });
@@ -114,7 +116,9 @@ impl<'a> KmapBuilder<'a> {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &lookups_of_length),
             // TODO no literal type name
-            c_type: "LookupKmapTypeLenAnagram*".to_c(),
+            c_type: CType::Pointer(Box::new(CType::Custom(
+                "LookupKmapTypeLenAnagram".to_c(),
+            ))),
             is_extern: false,
             use_std_array: false,
         });
@@ -191,7 +195,7 @@ impl<'a> KmapBuilder<'a> {
             g.push(CTree::Array {
                 name: seqs_name.clone(),
                 values: seq_bytes,
-                c_type: "uint8_t".to_c(),
+                c_type: CType::U8,
                 is_extern: false,
                 use_std_array: false,
             });
@@ -252,12 +256,12 @@ impl<'a> KmapBuilder<'a> {
             CTree::PublicConst {
                 name: "MAX_ALLOWED_ANAGRAM".to_c(),
                 value: AnagramNum::max_allowed().to_c(),
-                c_type: "uint8_t".to_c(),
+                c_type: CType::U8,
             },
             CTree::PublicConst {
                 name: "MAX_ALLOWED_SEQUENCE_BIT_LENGTH".to_c(),
                 value: Self::max_allowed_bit_length().to_c(),
-                c_type: "uint16_t".to_c(),
+                c_type: CType::U16,
             },
         ])
     }

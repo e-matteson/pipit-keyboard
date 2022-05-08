@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
 
 use error::Error;
-use types::{CCode, CTree, Field, HuffmanEntry, HuffmanTable, KeyPress, ToC};
+use types::{
+    CCode, CTree, CType, Field, HuffmanEntry, HuffmanTable, KeyPress, ToC,
+};
 
 c_struct!(
     struct HuffmanChar {
@@ -18,7 +20,7 @@ impl HuffmanTable {
         group.push(CTree::PublicConst {
             name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
             value: self.min_length().to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         });
 
         group.push(CTree::Array {
@@ -36,7 +38,7 @@ impl HuffmanTable {
         CTree::PublicConst {
             name: "MAX_HUFFMAN_CODE_BIT_LEN".to_c(),
             value: self.max_length().to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         }
     }
 

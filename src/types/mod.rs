@@ -2,7 +2,7 @@ pub(crate) use self::all_data::{
     AllChordMaps, AllData, AllSeqMaps, ChordMap, SeqMap,
 };
 // TODO move to output?
-pub(crate) use self::c_code::{CCode, CEnumVariant, CTree, Field, ToC};
+pub(crate) use self::c_code::{CCode, CEnumVariant, CTree, CType, Field, ToC};
 pub(crate) use self::c_enums::{Command, ModeName, Modifier, SeqType};
 pub(crate) use self::chord::{Chord, ChordSpec, FirmwareOrder, KmapOrder};
 pub(crate) use self::huffman::{HuffmanEntry, HuffmanTable};

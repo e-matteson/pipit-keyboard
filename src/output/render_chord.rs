@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use types::{CCode, Chord, FirmwareOrder, ToC};
+use types::{CCode, CType, Chord, FirmwareOrder, ToC};
 
 impl Ord for Chord<FirmwareOrder> {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -21,10 +21,15 @@ impl Chord<FirmwareOrder> {
 
     pub fn to_c_constructor(&self) -> CCode {
         // TODO there are a bunch of extra allocations here...
-        format!("{}({})", Self::c_type_name(), self.to_c_initializer()).to_c()
+        format!(
+            "{}({})",
+            Self::c_type_name().to_c(),
+            self.to_c_initializer()
+        )
+        .to_c()
     }
 
-    pub fn c_type_name() -> CCode {
-        "ChordData".to_c()
+    pub fn c_type_name() -> CType {
+        CType::Custom("ChordData".to_c())
     }
 }

@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
 use types::{
-    CCode, CTree, Chord, ChordSpec, Field, KmapOrder, LayerName, ModeInfo,
-    ModeName, ToC,
+    CCode, CTree, CType, Chord, ChordSpec, Field, KmapOrder, LayerName,
+    ModeInfo, ModeName, ToC,
 };
 
 use util::usize_to_u8;
@@ -74,7 +74,9 @@ impl<'a> ModeBuilder<'a> {
         g.push(CTree::Array {
             name: array_name.clone(),
             values: CCode::map_prepend("&", &contents),
-            c_type: "KmapStruct*".to_c(),
+            c_type: CType::Pointer(Box::new(CType::Custom(
+                "KmapStruct".to_c(),
+            ))),
             is_extern: false,
             use_std_array: false,
         });

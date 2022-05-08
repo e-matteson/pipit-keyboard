@@ -6,7 +6,7 @@ use std::ops::AddAssign;
 use std::path::PathBuf;
 
 use error::{Error, ResultExt};
-use types::{CCode, CTree, Field, ToC};
+use types::{CCode, CTree, CType, Field, ToC};
 
 #[derive(Debug, Default)]
 pub struct CFilePair {
@@ -155,27 +155,27 @@ fn format_group(v: &[CTree], file_name_base: &str) -> Result<CFilePair, Error> {
 fn format_public_const(
     name: &CCode,
     value: &CCode,
-    c_type: &CCode,
+    c_type: &CType,
 ) -> CFilePair {
     CFilePair {
-        h: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
+        h: CCode(format!("const {} {} = {};\n\n", c_type.to_c(), name, value)),
         c: CCode::new(),
     }
 }
 fn format_private_const(
     name: &CCode,
     value: &CCode,
-    c_type: &CCode,
+    c_type: &CType,
 ) -> CFilePair {
     CFilePair {
         h: CCode::new(),
-        c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
+        c: CCode(format!("const {} {} = {};\n\n", c_type.to_c(), name, value)),
     }
 }
 
 fn format_struct_instance(
     name: &CCode,
-    c_type: &CCode,
+    c_type: &CType,
     fields: &[Field],
 ) -> CFilePair {
     format_private_const(name, &format_struct_initializer(fields), c_type)
@@ -194,7 +194,7 @@ fn format_struct_initializer(fields: &[Field]) -> CCode {
 fn format_array(
     name: &CCode,
     values: &[CCode],
-    c_type: &CCode,
+    c_type: &CType,
     is_extern: bool,
     is_std: bool,
 ) -> CFilePair {
@@ -203,10 +203,12 @@ fn format_array(
         if is_std {
             format!(
                 "extern const std::array<{},{}> {};\n",
-                c_type, length, name,
+                c_type.to_c(),
+                length,
+                name,
             )
         } else {
-            format!("extern const {} {}[{}];\n", c_type, name, length)
+            format!("extern const {} {}[{}];\n", c_type.to_c(), name, length)
         }
         .to_c()
     } else {
@@ -216,12 +218,18 @@ fn format_array(
     let c = if is_std {
         format!(
             "const std::array<{},{}> {} = {};\n",
-            c_type, length, name, initializer
+            c_type.to_c(),
+            length,
+            name,
+            initializer
         )
     } else {
         format!(
             "const {} {}[{}] = {};\n\n",
-            c_type, name, length, initializer
+            c_type.to_c(),
+            name,
+            length,
+            initializer
         )
     }
     .to_c();
@@ -362,5 +370,18 @@ impl AddAssign<CFilePair> for CFilePair {
 impl<'a> AddAssign<&'a CFilePair> for CFilePair {
     fn add_assign(&mut self, rhs: &'a CFilePair) {
         self.append(rhs)
+    }
+}
+
+impl ToC for CType {
+    fn to_c(self) -> CCode {
+        match self {
+            CType::U8 => "uint8_t".to_c(),
+            CType::U16 => "uint16_t".to_c(),
+            CType::U32 => "uint32_t".to_c(),
+            CType::Bool => "bool".to_c(),
+            CType::Custom(contents) => contents,
+            CType::Pointer(ctype) => ctype.to_c() + "*",
+        }
     }
 }

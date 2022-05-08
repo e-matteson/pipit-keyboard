@@ -27,8 +27,8 @@ macro_rules! c_struct {
                  self.render(CCode::new()).initializer()
             }
 
-            fn c_type() -> CCode {
-                stringify!($struct_type).to_c()
+            fn c_type() -> CType {
+                CType::Custom(stringify!($struct_type).to_c())
             }
         }
     };

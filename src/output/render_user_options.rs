@@ -1,6 +1,7 @@
 use error::Error;
 use types::{
-    CCode, CEnumVariant, CTree, Delay, Pin, ToC, UserOptions, WordSpacePosition,
+    CCode, CEnumVariant, CTree, CType, Delay, Pin, ToC, UserOptions,
+    WordSpacePosition,
 };
 
 impl UserOptions {
@@ -20,7 +21,7 @@ impl UserOptions {
         let group = vec![CTree::PublicConst {
             name: "NUM_MATRIX_POSITIONS".to_c(),
             value: self.num_matrix_positions()?.to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         }];
         Ok(CTree::Group(group))
     }
@@ -52,12 +53,12 @@ impl UserOptions {
             CTree::PublicConst {
                 name: "CHORD_DELAY".to_c(),
                 value: self.chord_delay.to_c(),
-                c_type: "uint32_t".to_c(),
+                c_type: CType::U32,
             },
             CTree::PublicConst {
                 name: "HELD_DELAY".to_c(),
                 value: self.held_delay.to_c(),
-                c_type: "uint32_t".to_c(),
+                c_type: CType::U32,
             },
             CTree::DefineIf {
                 name: "DEBUG_MESSAGES".to_c(),
@@ -75,14 +76,14 @@ impl UserOptions {
             CTree::Array {
                 name: "row_pins".to_c(),
                 values: Pin::c_vec(&self.row_pins),
-                c_type: "uint8_t".to_c(),
+                c_type: CType::U8,
                 is_extern: true,
                 use_std_array: true,
             },
             CTree::Array {
                 name: "column_pins".to_c(),
                 values: Pin::c_vec(&self.column_pins),
-                c_type: "uint8_t".to_c(),
+                c_type: CType::U8,
                 is_extern: true,
                 use_std_array: true,
             },
@@ -97,7 +98,7 @@ impl UserOptions {
             CTree::PublicConst {
                 name: "USE_STANDBY_INTERRUPTS".to_c(),
                 value: self.use_standby_interrupts.to_c(),
-                c_type: "bool".to_c(),
+                c_type: CType::Bool,
             },
         ];
 
@@ -105,7 +106,7 @@ impl UserOptions {
             ops.push(CTree::Array {
                 name: "rgb_led_pins".to_c(),
                 values: Pin::c_vec(pins),
-                c_type: "uint8_t".to_c(),
+                c_type: CType::U8,
                 is_extern: true,
                 use_std_array: true,
             });
@@ -133,8 +134,8 @@ impl ToC for Delay {
 
 impl CEnumVariant for WordSpacePosition {
     /// The type name of C++ enum
-    fn enum_type() -> CCode {
-        "WordSpacePosition".to_c()
+    fn enum_type() -> CType {
+        CType::Custom("WordSpacePosition".to_c())
     }
 
     /// The variant name of this SeqType in the C++ enum
@@ -148,7 +149,7 @@ impl CEnumVariant for WordSpacePosition {
     }
 
     /// The underlying type determining the size of the C++ enum
-    fn underlying_type() -> Option<CCode> {
+    fn underlying_type() -> Option<CType> {
         None
     }
 }

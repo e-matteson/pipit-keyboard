@@ -1,7 +1,7 @@
 use std::fmt;
 
 use error::Error;
-use types::{CCode, CEnumVariant, Name, ToC, Validate};
+use types::{CCode, CEnumVariant, CType, Name, ToC, Validate};
 
 #[derive(
     Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
@@ -30,12 +30,12 @@ pub enum SeqType {
 }
 
 impl CEnumVariant for ModeName {
-    fn enum_type() -> CCode {
-        "Mode".to_c()
+    fn enum_type() -> CType {
+        CType::Custom("Mode".to_c())
     }
 
-    fn underlying_type() -> Option<CCode> {
-        Some("uint8_t".to_c())
+    fn underlying_type() -> Option<CType> {
+        Some(CType::U8)
     }
 
     fn enum_variant(&self) -> CCode {
@@ -93,12 +93,12 @@ impl Command {
 }
 
 impl CEnumVariant for Command {
-    fn enum_type() -> CCode {
-        "Command".to_c()
+    fn enum_type() -> CType {
+        CType::Custom("Command".to_c())
     }
 
-    fn underlying_type() -> Option<CCode> {
-        Some("uint8_t".to_c())
+    fn underlying_type() -> Option<CType> {
+        Some(CType::U8)
     }
 
     fn enum_variant(&self) -> CCode {
@@ -121,12 +121,12 @@ impl Modifier {
 }
 
 impl CEnumVariant for Modifier {
-    fn enum_type() -> CCode {
-        "Mod".to_c()
+    fn enum_type() -> CType {
+        CType::Custom("Mod".to_c())
     }
 
-    fn underlying_type() -> Option<CCode> {
-        Some("uint8_t".to_c())
+    fn underlying_type() -> Option<CType> {
+        Some(CType::U8)
     }
 
     fn enum_variant(&self) -> CCode {
@@ -136,19 +136,18 @@ impl CEnumVariant for Modifier {
 
 impl CEnumVariant for SeqType {
     /// The type name of C++ enum
-    fn enum_type() -> CCode {
-        "SeqType".to_c()
+    fn enum_type() -> CType {
+        CType::Custom("SeqType".to_c())
     }
 
     /// The variant name of this SeqType in the C++ enum
     fn enum_variant(&self) -> CCode {
-        // self.to_c().to_uppercase()
         self.to_c()
     }
 
     /// The underlying type determining the size of the C++ enum
-    fn underlying_type() -> Option<CCode> {
-        Some("uint8_t".to_c())
+    fn underlying_type() -> Option<CType> {
+        Some(CType::U8)
     }
 }
 

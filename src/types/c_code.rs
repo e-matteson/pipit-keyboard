@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 use std::fmt;
-use std::ops::AddAssign;
+use std::ops::{Add, AddAssign};
 
 use types::{AnagramNum, ModeName, Name, SeqType};
 
@@ -16,18 +16,18 @@ pub trait ToC {
 
 pub trait CEnumVariant: Sized {
     /// The type name of C++ enum
-    fn enum_type() -> CCode;
+    fn enum_type() -> CType;
 
     /// The unqualified name of this variant in the C++ enum
     fn enum_variant(&self) -> CCode;
 
     /// The qualified name of this variant in the C++ enum
     fn qualified_enum_variant(&self) -> CCode {
-        format!("{}::{}", Self::enum_type(), self.enum_variant()).to_c()
+        format!("{}::{}", Self::enum_type().to_c(), self.enum_variant()).to_c()
     }
 
     /// The underlying type determining the size of the C++ enum
-    fn underlying_type() -> Option<CCode> {
+    fn underlying_type() -> Option<CType> {
         None
     }
 
@@ -39,11 +39,21 @@ pub trait CEnumVariant: Sized {
     {
         // TODO ensure variants are unique?
         CTree::EnumDecl {
-            name: Self::enum_type(),
-            size: Self::underlying_type(),
+            name: Self::enum_type().to_c(),
+            size: Self::underlying_type().map(|t| t.to_c()),
             variants: variants.map(|x| x.enum_variant()).collect(),
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum CType {
+    U8,
+    U16,
+    U32,
+    Bool,
+    Custom(CCode),
+    Pointer(Box<CType>),
 }
 
 #[derive(Debug, Clone)]
@@ -56,17 +66,17 @@ pub enum CTree {
     PublicConst {
         name: CCode,
         value: CCode,
-        c_type: CCode,
+        c_type: CType,
     },
     PrivateConst {
         name: CCode,
         value: CCode,
-        c_type: CCode,
+        c_type: CType,
     },
     Array {
         name: CCode,
         values: Vec<CCode>,
-        c_type: CCode,
+        c_type: CType,
         is_extern: bool,
         use_std_array: bool,
     },
@@ -78,7 +88,7 @@ pub enum CTree {
     StructInstance {
         name: CCode,
         fields: Vec<Field>,
-        c_type: CCode,
+        c_type: CType,
     },
     /// Wrap the given CTree in a namespace block.
     Namespace {
@@ -177,6 +187,14 @@ impl AddAssign<String> for CCode {
 impl<'a> AddAssign<&'a str> for CCode {
     fn add_assign(&mut self, rhs: &'a str) {
         self.0 += rhs;
+    }
+}
+
+impl<'a> Add<&'a str> for CCode {
+    type Output = CCode;
+    fn add(mut self, rhs: &'a str) -> CCode {
+        self += rhs;
+        self
     }
 }
 

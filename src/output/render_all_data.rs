@@ -4,7 +4,7 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, Command, LayerName, ModeName,
+    AllData, CCode, CEnumVariant, CTree, CType, Command, LayerName, ModeName,
     Modifier, Name, SeqType, ToC,
 };
 
@@ -85,7 +85,7 @@ impl AllData {
         namespace.push(CTree::PublicConst {
             name: "DEFAULT_MODE".to_c(),
             value: format!("Mode::{}", default_mode_name).to_c(),
-            c_type: "Mode".to_c(),
+            c_type: CType::Custom("Mode".to_c()),
         });
 
         let all_mods: Vec<_> = self
@@ -98,7 +98,7 @@ impl AllData {
         namespace.push(CTree::PublicConst {
             name: "NUM_MODIFIERS".to_c(),
             value: all_mods.len().to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         });
         namespace.push(SeqType::render_c_enum(self.sequences.seq_types()));
 
@@ -133,7 +133,7 @@ impl AllData {
         g.push(CTree::PublicConst {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
             value: usize_to_u8(self.sequences.max_seq_length())?.to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         });
 
         let (tree, layer_struct_names) = self.render_layers()?;
@@ -157,7 +157,9 @@ impl AllData {
         g.push(CTree::Array {
             name: "mode_structs".to_c(),
             values: CCode::map_prepend("&", &mode_struct_names),
-            c_type: "const ModeStruct*".to_c(),
+            c_type: CType::Pointer(Box::new(CType::Custom(
+                "const ModeStruct".to_c(),
+            ))),
             is_extern: true,
             use_std_array: true,
         });
@@ -198,7 +200,7 @@ impl AllData {
         group.push(CTree::PublicConst {
             name: "MAX_ANAGRAM_NUM".to_c(),
             value: self.chords.max_anagram_num().to_c(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
         });
 
         group.push(CTree::Array {
@@ -232,7 +234,7 @@ impl AllData {
                 .iter()
                 .map(|num| num.to_c())
                 .collect(),
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
             is_extern: true,
             use_std_array: true,
         });
@@ -240,7 +242,7 @@ impl AllData {
         group.push(CTree::Array {
             name: "plain_mod_keys".to_c(),
             values: self.get_plain_mod_codes()?,
-            c_type: "uint8_t".to_c(),
+            c_type: CType::U8,
             is_extern: true,
             use_std_array: true,
         });
