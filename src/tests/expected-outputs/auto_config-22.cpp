@@ -1,11 +1,5 @@
 #include "auto_config-22.h"
 namespace conf {
-const uint32_t CHORD_DELAY = 30;
-
-const uint32_t HELD_DELAY = 200;
-
-const WordSpacePosition SPACE_POS = WordSpacePosition::Before;
-
 const std::array<uint8_t,3> row_pins = {
  1, 0, 19, 
 };
@@ -13,13 +7,9 @@ const std::array<uint8_t,8> column_pins = {
  15, 16, 17, 18, 
  20, 21, 5, 6, 
 };
-const bool USE_STANDBY_INTERRUPTS = 1;
-
 const std::array<uint8_t,3> rgb_led_pins = {
  10, 11, 12, 
 };
-const uint8_t MIN_HUFFMAN_CODE_BIT_LEN = 4;
-
 const HuffmanChar huffman_lookup[73] = {
  {
   HuffmanBits({2}), // bits
@@ -407,8 +397,6 @@ const HuffmanChar huffman_lookup[73] = {
 }, 
 };
 
-const uint8_t MAX_ANAGRAM_NUM = 1;
-
 const std::array<Mod,4> word_mods = {
  Mod::mod_capital, Mod::mod_nospace, Mod::mod_double, Mod::mod_shorten, 
 };
@@ -424,8 +412,6 @@ const std::array<uint8_t,2> anagram_mod_numbers = {
 const std::array<uint8_t,4> plain_mod_keys = {
  static_cast<uint8_t>(MODIFIERKEY_ALT), static_cast<uint8_t>(MODIFIERKEY_CTRL), static_cast<uint8_t>(MODIFIERKEY_GUI), static_cast<uint8_t>(MODIFIERKEY_SHIFT), 
 };
-const uint8_t MAX_KEYS_IN_SEQUENCE = 5;
-
 const ChordData kmap0_Plain_len4_anagram0_chords[1] = {
  ChordData({0, 0, 1}), 
 };

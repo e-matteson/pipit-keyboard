@@ -17,7 +17,7 @@
 #include "auto_config_early.h"
 #include "Chord.h"
 
-typedef BitArray<uint8_t, MAX_HUFFMAN_CODE_BIT_LEN> HuffmanBits;
+typedef BitArray<uint8_t, conf::MAX_HUFFMAN_CODE_BIT_LEN> HuffmanBits;
 
 class LengthAndAnagram {
 public:
@@ -60,11 +60,11 @@ private:
   static const uint8_t length_offset = 4;
 };
 
-  static_assert(MAX_ALLOWED_ANAGRAM == LengthAndAnagram::max_anagram(),
-                "The firmware and config program disagree about how big anagram numbers can be");
+static_assert(conf::MAX_ALLOWED_ANAGRAM == LengthAndAnagram::max_anagram(),
+              "The firmware and config program disagree about how big anagram numbers can be");
 
-  static_assert(MAX_ALLOWED_SEQUENCE_BIT_LENGTH == LengthAndAnagram::max_length(),
-                "The firmware and config program disagree about how long compressed sequences can be");
+static_assert(conf::MAX_ALLOWED_SEQUENCE_BIT_LENGTH == LengthAndAnagram::max_length(),
+              "The firmware and config program disagree about how long compressed sequences can be");
 
 struct LookupKmapTypeLenAnagram {
   LengthAndAnagram seq_bit_len_and_anagram;

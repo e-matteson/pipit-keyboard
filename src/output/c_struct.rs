@@ -19,7 +19,6 @@ macro_rules! c_struct {
                         $( Field{name: stringify!($field).to_c(), value: (&self.$field).to_c()}, )*
                     ],
                     c_type: Self::c_type(),
-                    is_extern: false,
                 }
             }
 

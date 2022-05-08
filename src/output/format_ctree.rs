@@ -24,10 +24,6 @@ impl CTree {
             CTree::LiteralH(ref text) => CFilePair::with_h(text),
             CTree::LiteralC(ref text) => CFilePair::with_c(text),
             CTree::Group(ref vec) => format_group(vec, file_name_base)?,
-            CTree::Define {
-                ref name,
-                ref value,
-            } => format_define(name, value),
             CTree::DefineIf {
                 ref name,
                 is_defined,
@@ -38,12 +34,16 @@ impl CTree {
                     CFilePair::new()
                 }
             }
-            CTree::ConstVar {
+            CTree::PublicConst {
                 ref name,
                 ref value,
                 ref c_type,
-                is_extern,
-            } => format_const_var(name, value, c_type, is_extern),
+            } => format_public_const(name, value, c_type),
+            CTree::PrivateConst {
+                ref name,
+                ref value,
+                ref c_type,
+            } => format_private_const(name, value, c_type),
             CTree::Array {
                 ref name,
                 ref values,
@@ -65,8 +65,7 @@ impl CTree {
                 ref name,
                 ref c_type,
                 ref fields,
-                is_extern,
-            } => format_struct_instance(name, c_type, fields, is_extern),
+            } => format_struct_instance(name, c_type, fields),
             CTree::Namespace {
                 ref name,
                 ref contents,
@@ -86,9 +85,9 @@ impl CTree {
             | CTree::LiteralH(..)
             | CTree::LiteralC(..)
             | CTree::Group(..)
-            | CTree::Define { .. }
             | CTree::DefineIf { .. }
-            | CTree::ConstVar { .. }
+            | CTree::PublicConst { .. }
+            | CTree::PrivateConst { .. }
             | CTree::Array { .. }
             | CTree::StdArray { .. }
             | CTree::EnumDecl { .. }
@@ -159,18 +158,23 @@ fn format_group(v: &[CTree], file_name_base: &str) -> Result<CFilePair, Error> {
     Ok(f)
 }
 
-fn format_const_var(
+fn format_public_const(
     name: &CCode,
     value: &CCode,
     c_type: &CCode,
-    is_extern: bool,
 ) -> CFilePair {
     CFilePair {
-        h: if is_extern {
-            format!("extern const {} {};\n", c_type, name).to_c()
-        } else {
-            CCode::new()
-        },
+        h: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
+        c: CCode::new(),
+    }
+}
+fn format_private_const(
+    name: &CCode,
+    value: &CCode,
+    c_type: &CCode,
+) -> CFilePair {
+    CFilePair {
+        h: CCode::new(),
         c: CCode(format!("const {} {} = {};\n\n", c_type, name, value)),
     }
 }
@@ -179,14 +183,8 @@ fn format_struct_instance(
     name: &CCode,
     c_type: &CCode,
     fields: &[Field],
-    is_extern: bool,
 ) -> CFilePair {
-    format_const_var(
-        name,
-        &format_struct_initializer(fields),
-        c_type,
-        is_extern,
-    )
+    format_private_const(name, &format_struct_initializer(fields), c_type)
 }
 
 fn format_struct_initializer(fields: &[Field]) -> CCode {

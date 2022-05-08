@@ -15,11 +15,10 @@ c_struct!(
 impl HuffmanTable {
     pub fn render(&self) -> Result<CTree, Error> {
         let mut group = Vec::new();
-        group.push(CTree::ConstVar {
+        group.push(CTree::PublicConst {
             name: "MIN_HUFFMAN_CODE_BIT_LEN".to_c(),
             value: self.min_length().to_c(),
             c_type: "uint8_t".to_c(),
-            is_extern: true,
         });
 
         group.push(CTree::Array {
@@ -33,9 +32,10 @@ impl HuffmanTable {
     }
 
     pub fn render_early(&self) -> CTree {
-        CTree::Define {
+        CTree::PublicConst {
             name: "MAX_HUFFMAN_CODE_BIT_LEN".to_c(),
             value: self.max_length().to_c(),
+            c_type: "uint8_t".to_c(),
         }
     }
 

@@ -83,14 +83,13 @@ impl<'a> ModeBuilder<'a> {
 
     fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
         let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
-        let tree = CTree::ConstVar {
+        let tree = CTree::PrivateConst {
             name: array_name_out.clone(),
             value: self
                 .chord_spec
                 .to_firmware(&self.anagram_mask)?
                 .to_c_constructor(),
             c_type: Chord::c_type_name(),
-            is_extern: false,
         };
         Ok((tree, array_name_out))
     }

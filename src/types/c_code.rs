@@ -48,22 +48,20 @@ pub trait CEnumVariant: Sized {
 
 #[derive(Debug, Clone)]
 pub enum CTree {
-    /// Define a preprocessor macro with the given name and value.
-    Define {
-        name: CCode,
-        value: CCode,
-    },
     /// Define a preprocessor macro (with no value) if `is_defined` is true.
     DefineIf {
         name: CCode,
         is_defined: bool,
     },
-    // Declare and initialize a const variable.
-    ConstVar {
+    PublicConst {
         name: CCode,
         value: CCode,
         c_type: CCode,
-        is_extern: bool,
+    },
+    PrivateConst {
+        name: CCode,
+        value: CCode,
+        c_type: CCode,
     },
     StdArray {
         name: CCode,
@@ -86,7 +84,6 @@ pub enum CTree {
         name: CCode,
         fields: Vec<Field>,
         c_type: CCode,
-        is_extern: bool,
     },
     /// Wrap the given CTree in a namespace block.
     Namespace {

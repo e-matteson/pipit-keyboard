@@ -6,7 +6,7 @@
 #include "auto_config_early.h"
 
 // TODO automatically pick most efficient block type?
-typedef BitArray<uint8_t, NUM_MATRIX_POSITIONS> ChordData;
+typedef BitArray<uint8_t, conf::NUM_MATRIX_POSITIONS> ChordData;
 
 /// How to modify cycled words
 enum class CycleType {
@@ -58,7 +58,7 @@ class Chord {
     // most significant bit will store the flag_cycle_capital. It's important to
     // keep Chords as small as possible, since we create a bunch of them
     // (especially in the history).
-    BitArray<uint16_t, NUM_MODIFIERS + 1> bits;
+    BitArray<uint16_t, conf::NUM_MODIFIERS + 1> bits;
 
     bool hasMod(conf::Mod mod) const;
     void setMod(conf::Mod mod);

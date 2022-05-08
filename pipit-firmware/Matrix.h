@@ -33,5 +33,5 @@ class Matrix {
   void attachRowPinInterrupts(voidFuncPtr isr);
   void detachRowPinInterrupts();
 
-  volatile uint8_t readings[NUM_MATRIX_POSITIONS] = {0};
+  volatile uint8_t readings[conf::NUM_MATRIX_POSITIONS] = {0};
 };

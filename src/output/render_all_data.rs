@@ -90,9 +90,10 @@ impl AllData {
             .collect();
 
         namespace.push(Modifier::render_c_enum(all_mods.iter()));
-        namespace.push(CTree::Define {
+        namespace.push(CTree::PublicConst {
             name: "NUM_MODIFIERS".to_c(),
             value: all_mods.len().to_c(),
+            c_type: "uint8_t".to_c(),
         });
         namespace.push(SeqType::render_c_enum(self.sequences.seq_types()));
 
@@ -124,11 +125,10 @@ impl AllData {
     fn render_modes(&self) -> Result<CTree, Error> {
         let mut g = Vec::new();
 
-        g.push(CTree::ConstVar {
+        g.push(CTree::PublicConst {
             name: "MAX_KEYS_IN_SEQUENCE".to_c(),
             value: usize_to_u8(self.sequences.max_seq_length())?.to_c(),
             c_type: "uint8_t".to_c(),
-            is_extern: true,
         });
 
         let (tree, layer_struct_names) = self.render_layers()?;
@@ -189,11 +189,10 @@ impl AllData {
 
         let mut group = Vec::new();
 
-        group.push(CTree::ConstVar {
+        group.push(CTree::PublicConst {
             name: "MAX_ANAGRAM_NUM".to_c(),
             value: self.chords.max_anagram_num().to_c(),
             c_type: "uint8_t".to_c(),
-            is_extern: true,
         });
 
         group.push(CTree::StdArray {

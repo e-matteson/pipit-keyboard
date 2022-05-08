@@ -1,9 +1,13 @@
 #pragma once
 namespace conf {
-#define NUM_MATRIX_POSITIONS 24
-#define MAX_ALLOWED_ANAGRAM 15
-#define MAX_ALLOWED_SEQUENCE_BIT_LENGTH 4095
-#define MAX_HUFFMAN_CODE_BIT_LEN 7
+const uint8_t NUM_MATRIX_POSITIONS = 24;
+
+const uint8_t MAX_ALLOWED_ANAGRAM = 15;
+
+const uint16_t MAX_ALLOWED_SEQUENCE_BIT_LENGTH = 4095;
+
+const uint8_t MAX_HUFFMAN_CODE_BIT_LEN = 7;
+
 enum class Mode : uint8_t {
   default_mode = 0,
   gaming_mode = 1,
@@ -26,7 +30,8 @@ enum class Mod : uint8_t {
   mod_shorten = 9,
 };
 
-#define NUM_MODIFIERS 10
+const uint8_t NUM_MODIFIERS = 10;
+
 enum class SeqType : uint8_t {
   Plain = 0,
   Macro = 1,

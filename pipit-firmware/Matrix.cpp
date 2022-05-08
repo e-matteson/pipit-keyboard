@@ -29,7 +29,7 @@ void Matrix::readRows() {
     // Shift in the new reading.
     uint8_t is_pressed = (digitalRead(row_pin) == LOW);
     readings[switch_index] = (readings[switch_index] << 1) | is_pressed;
-    switch_index = (switch_index + 1) % NUM_MATRIX_POSITIONS;
+    switch_index = (switch_index + 1) % conf::NUM_MATRIX_POSITIONS;
   }
 }
 

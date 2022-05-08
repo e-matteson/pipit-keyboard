@@ -203,7 +203,7 @@ bool Chord::restoreMod(conf::Mod modifier) {
 // TODO share code with restoreMod
 ChordData Chord::getExtractedMods() {
   ChordData all_mods;
-  for (uint8_t i = 0; i < NUM_MODIFIERS; i++) {
+  for (uint8_t i = 0; i < conf::NUM_MODIFIERS; i++) {
     conf::Mod mod = (conf::Mod)i;
     if (hasMod(mod)) {
       all_mods |= *conf::getModChord(mode, mod);

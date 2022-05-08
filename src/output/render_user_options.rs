@@ -17,9 +17,10 @@ impl UserOptions {
     /// Get options that must be written to a separate config file that will be
     /// loaded earlier than the main one.
     pub fn render_early(&self) -> Result<CTree, Error> {
-        let group = vec![CTree::Define {
+        let group = vec![CTree::PublicConst {
             name: "NUM_MATRIX_POSITIONS".to_c(),
             value: self.num_matrix_positions()?.to_c(),
+            c_type: "uint8_t".to_c(),
         }];
         Ok(CTree::Group(group))
     }
@@ -48,27 +49,24 @@ impl UserOptions {
 
     fn get_literal_ops(&self) -> Vec<CTree> {
         let mut ops = vec![
-            CTree::ConstVar {
+            CTree::PublicConst {
                 name: "CHORD_DELAY".to_c(),
                 value: self.chord_delay.to_c(),
                 c_type: "uint32_t".to_c(),
-                is_extern: true,
             },
-            CTree::ConstVar {
+            CTree::PublicConst {
                 name: "HELD_DELAY".to_c(),
                 value: self.held_delay.to_c(),
                 c_type: "uint32_t".to_c(),
-                is_extern: true,
             },
             CTree::DefineIf {
                 name: "DEBUG_MESSAGES".to_c(),
                 is_defined: self.debug_messages,
             },
-            CTree::ConstVar {
+            CTree::PublicConst {
                 name: "SPACE_POS".to_c(),
                 value: self.word_space_position.qualified_enum_variant(),
                 c_type: WordSpacePosition::enum_type(),
-                is_extern: true,
             },
             CTree::DefineIf {
                 name: self.board_name.to_c(),
@@ -94,11 +92,10 @@ impl UserOptions {
                 name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
                 is_defined: self.enable_audio_typing_feedback,
             },
-            CTree::ConstVar {
+            CTree::PublicConst {
                 name: "USE_STANDBY_INTERRUPTS".to_c(),
                 value: self.use_standby_interrupts.to_c(),
                 c_type: "bool".to_c(),
-                is_extern: true,
             },
         ];
 

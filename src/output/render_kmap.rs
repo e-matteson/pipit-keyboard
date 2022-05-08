@@ -245,13 +245,15 @@ impl<'a> KmapBuilder<'a> {
     /// limits should have been.
     pub fn render_limits() -> CTree {
         CTree::Group(vec![
-            CTree::Define {
+            CTree::PublicConst {
                 name: "MAX_ALLOWED_ANAGRAM".to_c(),
                 value: AnagramNum::max_allowed().to_c(),
+                c_type: "uint8_t".to_c(),
             },
-            CTree::Define {
+            CTree::PublicConst {
                 name: "MAX_ALLOWED_SEQUENCE_BIT_LENGTH".to_c(),
                 value: Self::max_allowed_bit_length().to_c(),
+                c_type: "uint16_t".to_c(),
             },
         ])
     }
