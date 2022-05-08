@@ -92,7 +92,7 @@ class Chord {
 
   uint8_t anagram_num = 0;
 
-  conf::Mode mode = conf::defaultMode();
+  conf::Mode mode = conf::DEFAULT_MODE;
 
   ChordData chord_data;
 };

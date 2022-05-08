@@ -15,7 +15,7 @@ enum class Mode : uint8_t {
   windows_mode = 3,
 };
 
-constexpr Mode defaultMode() { return static_cast<Mode>(0); }
+const Mode DEFAULT_MODE = Mode::default_mode;
 
 enum class Mod : uint8_t {
   mod_alt = 0,

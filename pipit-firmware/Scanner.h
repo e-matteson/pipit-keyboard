@@ -13,7 +13,7 @@ enum class State : uint8_t { Scan, UpdateSwitches, DetectChords, Standby };
 
 class Timers {
  public:
-  Timers(conf::Mode mode = conf::defaultMode());
+  Timers(conf::Mode mode = conf::DEFAULT_MODE);
   void setDefaultsForMode(conf::Mode mode);
   bool isChordOrReleaseDone();
 
@@ -98,7 +98,7 @@ class Scanner {
   Matrix matrix;
   Statuses statuses;
   Timers timers;
-  volatile conf::Mode mode = conf::defaultMode();
+  volatile conf::Mode mode = conf::DEFAULT_MODE;
   Queue<Packet, 8> to_send;
   Queue<ChordData, 4> to_hold;
 
