@@ -10,9 +10,9 @@ options:
 # Required. Milliseconds.
   held_delay:                  200
 
-# How much debugging info to send over the serial connection. Messages can be
-# viewed in the Arduino serial monitor. Required. None, Some, or All.
-  debug_messages:              None
+# Whether to send messages over the serial connection for debugging. Messages
+# can be viewed in the Arduino serial monitor. Required. True or false.
+  debug_messages:              false
 
 # The name of the microcontroller board. Required. TEENSY_LC.
   board_name:                  TEENSY_LC

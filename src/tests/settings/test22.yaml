@@ -3,7 +3,7 @@ options:
   chord_delay:                 30
   held_delay:                  200
   # debounce_delay:              10
-  debug_messages:              Some
+  debug_messages:              false
 
   # board_name:                  FEATHER_M0_BLE
   board_name:                  TEENSY_LC

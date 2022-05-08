@@ -3,7 +3,7 @@
 options:
   chord_delay:                 26
   held_delay:                  200
-  debug_messages:              None
+  debug_messages:              false
 
   ######## my teensy, 2.1 PCBs
   board_name:                TEENSY_LC

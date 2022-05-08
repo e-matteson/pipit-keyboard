@@ -298,23 +298,14 @@ fn make_debug_macros() -> CTree {
     // TODO clean up debug macros
     // TODO use Define variant instead
     let mut s = String::new();
-    s += "\n#if DEBUG_MESSAGES == 0\n";
-    s += "    #define DEBUG1(msg)\n";
-    s += "    #define DEBUG1_LN(msg)\n";
-    s += "    #define DEBUG2(msg)\n";
-    s += "    #define DEBUG2_LN(msg)\n";
-    s += "#else\n";
+    s += "\n#ifdef DEBUG_MESSAGES\n";
     s += "   #define ENABLE_SERIAL_DEBUG\n";
     s += "   #include <Arduino.h>\n";
     s += "   #define DEBUG1(msg) Serial.print(msg)\n";
     s += "   #define DEBUG1_LN(msg) Serial.println(msg)\n";
-    s += "   #if DEBUG_MESSAGES == 1\n";
-    s += "       #define DEBUG2(msg)\n";
-    s += "       #define DEBUG2_LN(msg)\n";
-    s += "   #else\n";
-    s += "       #define DEBUG2(msg) Serial.print(msg)\n";
-    s += "       #define DEBUG2_LN(msg) Serial.println(msg)\n";
-    s += "   #endif\n\n";
+    s += "#else\n";
+    s += "    #define DEBUG1(msg)\n";
+    s += "    #define DEBUG1_LN(msg)\n";
     s += "#endif\n\n";
     CTree::LiteralH(CCode(s))
 }

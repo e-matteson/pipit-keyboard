@@ -3,7 +3,7 @@ options:
   chord_delay:                 30
   held_delay:                  200
   # debounce_delay:              10
-  debug_messages:              None
+  debug_messages:              false
   output_directory:            src/tests/actual-outputs
 
   # board_name:                  FEATHER_M0_BLE

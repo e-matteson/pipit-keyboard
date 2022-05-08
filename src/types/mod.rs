@@ -14,9 +14,7 @@ pub(crate) use self::name::Name;
 pub(crate) use self::permutation::Permutation;
 pub(crate) use self::sequence::Sequence;
 pub(crate) use self::spelling::{Spelling, SpellingTable};
-pub(crate) use self::user_options::{
-    Delay, UserOptions, Verbosity, WordSpacePosition,
-};
+pub(crate) use self::user_options::{Delay, UserOptions, WordSpacePosition};
 pub(crate) use self::validate::Validate;
 pub(crate) use self::words::{
     AnagramNum, Snippet, SnippetListName, Word, WordListName, Wordlike,

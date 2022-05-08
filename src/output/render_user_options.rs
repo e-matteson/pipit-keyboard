@@ -1,7 +1,6 @@
 use error::Error;
 use types::{
-    CCode, CEnumVariant, CTree, Delay, Pin, ToC, UserOptions, Verbosity,
-    WordSpacePosition,
+    CCode, CEnumVariant, CTree, Delay, Pin, ToC, UserOptions, WordSpacePosition,
 };
 
 impl UserOptions {
@@ -61,9 +60,9 @@ impl UserOptions {
                 c_type: "uint32_t".to_c(),
                 is_extern: true,
             },
-            CTree::Define {
+            CTree::DefineIf {
                 name: "DEBUG_MESSAGES".to_c(),
-                value: self.debug_messages.to_c(),
+                is_defined: self.debug_messages,
             },
             CTree::ConstVar {
                 name: "SPACE_POS".to_c(),
@@ -129,17 +128,6 @@ impl UserOptions {
 impl ToC for Delay {
     fn to_c(self) -> CCode {
         self.0.to_c()
-    }
-}
-
-impl ToC for Verbosity {
-    fn to_c(self) -> CCode {
-        match self {
-            Verbosity::None => 0,
-            Verbosity::Some => 1,
-            Verbosity::All => 2,
-        }
-        .to_c()
     }
 }
 

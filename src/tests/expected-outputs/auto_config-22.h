@@ -6,7 +6,6 @@ typedef void (*voidFuncPtr)(void);
 namespace conf {
 extern const uint32_t CHORD_DELAY;
 extern const uint32_t HELD_DELAY;
-#define DEBUG_MESSAGES 1
 extern const WordSpacePosition SPACE_POS;
 #define TEENSY_LC 
 extern const std::array<uint8_t,3> row_pins;
@@ -55,23 +54,13 @@ extern const std::array<const ModeStruct*,4> mode_structs;
 
 } // end namespace conf
 
-#if DEBUG_MESSAGES == 0
-    #define DEBUG1(msg)
-    #define DEBUG1_LN(msg)
-    #define DEBUG2(msg)
-    #define DEBUG2_LN(msg)
-#else
+#ifdef DEBUG_MESSAGES
    #define ENABLE_SERIAL_DEBUG
    #include <Arduino.h>
    #define DEBUG1(msg) Serial.print(msg)
    #define DEBUG1_LN(msg) Serial.println(msg)
-   #if DEBUG_MESSAGES == 1
-       #define DEBUG2(msg)
-       #define DEBUG2_LN(msg)
-   #else
-       #define DEBUG2(msg) Serial.print(msg)
-       #define DEBUG2_LN(msg) Serial.println(msg)
-   #endif
-
+#else
+    #define DEBUG1(msg)
+    #define DEBUG1_LN(msg)
 #endif
 

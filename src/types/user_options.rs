@@ -15,7 +15,9 @@ validated_struct! {
     pub struct UserOptions {
         pub chord_delay: Delay,
         pub held_delay: Delay,
-        pub debug_messages: Verbosity,
+
+        #[serde(default = "return_false")]
+        pub debug_messages: bool,
         pub board_name: BoardName,
         pub row_pins: Vec<Pin>,
         pub column_pins: Vec<Pin>,
@@ -37,15 +39,6 @@ validated_struct! {
 
         #[serde(default = "return_true")]
         pub use_standby_interrupts: bool,
-    }
-}
-
-always_valid_enum! {
-    #[derive(Deserialize, Debug, Clone, Copy)]
-    pub enum Verbosity {
-        None,
-        Some,
-        All,
     }
 }
 
