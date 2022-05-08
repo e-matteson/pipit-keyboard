@@ -10,7 +10,7 @@ const std::array<uint8_t,8> column_pins = {
 const std::array<uint8_t,3> rgb_led_pins = {
  10, 11, 12, 
 };
-const HuffmanChar huffman_lookup[105] = {
+HuffmanChar const huffman_lookup[105] = {
  {
   HuffmanBits({6}), // bits
   3, // num_bits
@@ -580,162 +580,162 @@ const std::array<uint8_t,2> anagram_mod_numbers = {
 const std::array<uint8_t,4> plain_mod_keys = {
  static_cast<uint8_t>(MODIFIERKEY_ALT), static_cast<uint8_t>(MODIFIERKEY_CTRL), static_cast<uint8_t>(MODIFIERKEY_GUI), static_cast<uint8_t>(MODIFIERKEY_SHIFT), 
 };
-const ChordData kmap0_Plain_len3_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len3_anagram0_chords[1] = {
  ChordData({16, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len3_anagram0_seqs[1] = {
+uint8_t const kmap0_Plain_len3_anagram0_seqs[1] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len3_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len3_anagram0 = {
   LengthAndAnagram(3, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len3_anagram0_chords, // chords
   kmap0_Plain_len3_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len4_anagram0_chords[9] = {
+ChordData const kmap0_Plain_len4_anagram0_chords[9] = {
  ChordData({0, 0, 1}), ChordData({0, 0, 2}), ChordData({0, 0, 8}), ChordData({0, 0, 16}), 
  ChordData({0, 0, 64}), ChordData({0, 0, 128}), ChordData({0, 4, 0}), ChordData({2, 0, 0}), 
  ChordData({128, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len4_anagram0_seqs[5] = {
+uint8_t const kmap0_Plain_len4_anagram0_seqs[5] = {
  135, 186, 66, 63, 
  9, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len4_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len4_anagram0 = {
   LengthAndAnagram(4, 0), // seq_bit_len_and_anagram
   9, // num_chords
   kmap0_Plain_len4_anagram0_chords, // chords
   kmap0_Plain_len4_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len5_anagram0_chords[6] = {
+ChordData const kmap0_Plain_len5_anagram0_chords[6] = {
  ChordData({0, 8, 0}), ChordData({0, 32, 0}), ChordData({0, 64, 0}), ChordData({4, 0, 0}), 
  ChordData({32, 0, 0}), ChordData({32, 1, 0}), 
 };
 
-const uint8_t kmap0_Plain_len5_anagram0_seqs[4] = {
+uint8_t const kmap0_Plain_len5_anagram0_seqs[4] = {
  145, 133, 86, 33, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len5_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len5_anagram0 = {
   LengthAndAnagram(5, 0), // seq_bit_len_and_anagram
   6, // num_chords
   kmap0_Plain_len5_anagram0_chords, // chords
   kmap0_Plain_len5_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len6_anagram0_chords[5] = {
+ChordData const kmap0_Plain_len6_anagram0_chords[5] = {
  ChordData({0, 0, 18}), ChordData({0, 1, 0}), ChordData({0, 64, 2}), ChordData({32, 8, 0}), 
  ChordData({36, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len6_anagram0_seqs[4] = {
+uint8_t const kmap0_Plain_len6_anagram0_seqs[4] = {
  101, 7, 112, 61, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len6_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len6_anagram0 = {
   LengthAndAnagram(6, 0), // seq_bit_len_and_anagram
   5, // num_chords
   kmap0_Plain_len6_anagram0_chords, // chords
   kmap0_Plain_len6_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len7_anagram0_chords[2] = {
+ChordData const kmap0_Plain_len7_anagram0_chords[2] = {
  ChordData({0, 0, 130}), ChordData({0, 9, 0}), 
 };
 
-const uint8_t kmap0_Plain_len7_anagram0_seqs[2] = {
+uint8_t const kmap0_Plain_len7_anagram0_seqs[2] = {
  160, 34, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len7_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len7_anagram0 = {
   LengthAndAnagram(7, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Plain_len7_anagram0_chords, // chords
   kmap0_Plain_len7_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len8_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len8_anagram0_chords[1] = {
  ChordData({0, 0, 144}), 
 };
 
-const uint8_t kmap0_Plain_len8_anagram0_seqs[1] = {
+uint8_t const kmap0_Plain_len8_anagram0_seqs[1] = {
  224, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len8_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len8_anagram0 = {
   LengthAndAnagram(8, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len8_anagram0_chords, // chords
   kmap0_Plain_len8_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len9_anagram0_chords[2] = {
+ChordData const kmap0_Plain_len9_anagram0_chords[2] = {
  ChordData({0, 64, 128}), ChordData({4, 8, 0}), 
 };
 
-const uint8_t kmap0_Plain_len9_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len9_anagram0_seqs[3] = {
  133, 10, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len9_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len9_anagram0 = {
   LengthAndAnagram(9, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Plain_len9_anagram0_chords, // chords
   kmap0_Plain_len9_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len10_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len10_anagram0_chords[1] = {
  ChordData({0, 32, 128}), 
 };
 
-const uint8_t kmap0_Plain_len10_anagram0_seqs[2] = {
+uint8_t const kmap0_Plain_len10_anagram0_seqs[2] = {
  5, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len10_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len10_anagram0 = {
   LengthAndAnagram(10, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len10_anagram0_chords, // chords
   kmap0_Plain_len10_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len11_anagram0_chords[2] = {
+ChordData const kmap0_Plain_len11_anagram0_chords[2] = {
  ChordData({0, 64, 16}), ChordData({0, 128, 0}), 
 };
 
-const uint8_t kmap0_Plain_len11_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len11_anagram0_seqs[3] = {
  96, 40, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len11_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len11_anagram0 = {
   LengthAndAnagram(11, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Plain_len11_anagram0_chords, // chords
   kmap0_Plain_len11_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len12_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len12_anagram0_chords[1] = {
  ChordData({16, 0, 1}), 
 };
 
-const uint8_t kmap0_Plain_len12_anagram0_seqs[2] = {
+uint8_t const kmap0_Plain_len12_anagram0_seqs[2] = {
  133, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len12_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len12_anagram0 = {
   LengthAndAnagram(12, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len12_anagram0_chords, // chords
   kmap0_Plain_len12_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len13_anagram0_chords[20] = {
+ChordData const kmap0_Plain_len13_anagram0_chords[20] = {
  ChordData({0, 0, 9}), ChordData({0, 0, 65}), ChordData({0, 0, 72}), ChordData({0, 2, 32}), 
  ChordData({0, 32, 1}), ChordData({0, 32, 2}), ChordData({0, 32, 8}), ChordData({0, 32, 16}), 
  ChordData({0, 33, 0}), ChordData({0, 64, 8}), ChordData({0, 64, 64}), ChordData({0, 130, 0}), 
@@ -743,7 +743,7 @@ const ChordData kmap0_Plain_len13_anagram0_chords[20] = {
  ChordData({34, 0, 0}), ChordData({128, 4, 0}), ChordData({130, 0, 0}), ChordData({144, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len13_anagram0_seqs[33] = {
+uint8_t const kmap0_Plain_len13_anagram0_seqs[33] = {
  133, 29, 236, 23, 
  80, 176, 84, 64, 
  10, 79, 97, 0, 
@@ -755,21 +755,21 @@ const uint8_t kmap0_Plain_len13_anagram0_seqs[33] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len13_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len13_anagram0 = {
   LengthAndAnagram(13, 0), // seq_bit_len_and_anagram
   20, // num_chords
   kmap0_Plain_len13_anagram0_chords, // chords
   kmap0_Plain_len13_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len14_anagram0_chords[16] = {
+ChordData const kmap0_Plain_len14_anagram0_chords[16] = {
  ChordData({0, 0, 32}), ChordData({0, 0, 80}), ChordData({0, 1, 1}), ChordData({0, 2, 0}), 
  ChordData({0, 128, 16}), ChordData({0, 128, 128}), ChordData({0, 128, 216}), ChordData({0, 129, 72}), 
  ChordData({0, 161, 8}), ChordData({0, 192, 0}), ChordData({0, 224, 3}), ChordData({8, 0, 0}), 
  ChordData({18, 129, 0}), ChordData({54, 128, 0}), ChordData({128, 8, 0}), ChordData({130, 129, 0}), 
 };
 
-const uint8_t kmap0_Plain_len14_anagram0_seqs[28] = {
+uint8_t const kmap0_Plain_len14_anagram0_seqs[28] = {
  96, 107, 225, 87, 
  248, 130, 177, 96, 
  20, 216, 2, 86, 
@@ -779,77 +779,77 @@ const uint8_t kmap0_Plain_len14_anagram0_seqs[28] = {
  3, 246, 130, 145, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   16, // num_chords
   kmap0_Plain_len14_anagram0_chords, // chords
   kmap0_Plain_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len15_anagram0_chords[6] = {
+ChordData const kmap0_Plain_len15_anagram0_chords[6] = {
  ChordData({0, 128, 2}), ChordData({0, 129, 9}), ChordData({0, 129, 65}), ChordData({16, 133, 0}), 
  ChordData({128, 133, 0}), ChordData({144, 129, 0}), 
 };
 
-const uint8_t kmap0_Plain_len15_anagram0_seqs[12] = {
+uint8_t const kmap0_Plain_len15_anagram0_seqs[12] = {
  133, 143, 194, 75, 
  225, 170, 112, 81, 
  184, 46, 220, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len15_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len15_anagram0 = {
   LengthAndAnagram(15, 0), // seq_bit_len_and_anagram
   6, // num_chords
   kmap0_Plain_len15_anagram0_chords, // chords
   kmap0_Plain_len15_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len16_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len16_anagram0_chords[1] = {
  ChordData({2, 8, 0}), 
 };
 
-const uint8_t kmap0_Plain_len16_anagram0_seqs[2] = {
+uint8_t const kmap0_Plain_len16_anagram0_seqs[2] = {
  124, 129, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len16_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len16_anagram0 = {
   LengthAndAnagram(16, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len16_anagram0_chords, // chords
   kmap0_Plain_len16_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len17_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len17_anagram0_chords[1] = {
  ChordData({0, 8, 1}), 
 };
 
-const uint8_t kmap0_Plain_len17_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len17_anagram0_seqs[3] = {
  60, 24, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len17_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len17_anagram0 = {
   LengthAndAnagram(17, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len17_anagram0_chords, // chords
   kmap0_Plain_len17_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len18_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len18_anagram0_chords[1] = {
  ChordData({64, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len18_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len18_anagram0_seqs[3] = {
  60, 88, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len18_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len18_anagram0 = {
   LengthAndAnagram(18, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len18_anagram0_chords, // chords
   kmap0_Plain_len18_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len19_anagram0_chords[17] = {
+ChordData const kmap0_Plain_len19_anagram0_chords[17] = {
  ChordData({0, 0, 10}), ChordData({0, 0, 17}), ChordData({0, 0, 66}), ChordData({0, 32, 64}), 
  ChordData({0, 40, 0}), ChordData({0, 64, 1}), ChordData({2, 1, 0}), ChordData({2, 4, 0}), 
  ChordData({4, 0, 1}), ChordData({4, 4, 0}), ChordData({4, 32, 0}), ChordData({16, 1, 0}), 
@@ -857,7 +857,7 @@ const ChordData kmap0_Plain_len19_anagram0_chords[17] = {
  ChordData({160, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len19_anagram0_seqs[41] = {
+uint8_t const kmap0_Plain_len19_anagram0_seqs[41] = {
  124, 97, 228, 193, 
  52, 95, 192, 248, 
  194, 195, 131, 121, 
@@ -871,75 +871,75 @@ const uint8_t kmap0_Plain_len19_anagram0_seqs[41] = {
  7, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len19_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len19_anagram0 = {
   LengthAndAnagram(19, 0), // seq_bit_len_and_anagram
   17, // num_chords
   kmap0_Plain_len19_anagram0_chords, // chords
   kmap0_Plain_len19_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len20_anagram0_chords[2] = {
+ChordData const kmap0_Plain_len20_anagram0_chords[2] = {
  ChordData({0, 5, 0}), ChordData({32, 0, 1}), 
 };
 
-const uint8_t kmap0_Plain_len20_anagram0_seqs[5] = {
+uint8_t const kmap0_Plain_len20_anagram0_seqs[5] = {
  124, 225, 199, 23, 
  190, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len20_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len20_anagram0 = {
   LengthAndAnagram(20, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Plain_len20_anagram0_chords, // chords
   kmap0_Plain_len20_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len24_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len24_anagram0_chords[1] = {
  ChordData({1, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len24_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len24_anagram0_seqs[3] = {
  133, 3, 22, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len24_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len24_anagram0 = {
   LengthAndAnagram(24, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len24_anagram0_chords, // chords
   kmap0_Plain_len24_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len25_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len25_anagram0_chords[1] = {
  ChordData({0, 0, 4}), 
 };
 
-const uint8_t kmap0_Plain_len25_anagram0_seqs[4] = {
+uint8_t const kmap0_Plain_len25_anagram0_seqs[4] = {
  96, 13, 44, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len25_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len25_anagram0 = {
   LengthAndAnagram(25, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len25_anagram0_chords, // chords
   kmap0_Plain_len25_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len27_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len27_anagram0_chords[1] = {
  ChordData({0, 16, 0}), 
 };
 
-const uint8_t kmap0_Plain_len27_anagram0_seqs[4] = {
+uint8_t const kmap0_Plain_len27_anagram0_seqs[4] = {
  133, 119, 176, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len27_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len27_anagram0 = {
   LengthAndAnagram(27, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len27_anagram0_chords, // chords
   kmap0_Plain_len27_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Plain_lookups_array[21] = {
+LookupKmapTypeLenAnagram const* const kmap0_Plain_lookups_array[21] = {
  &kmap0_Plain_len3_anagram0, &kmap0_Plain_len4_anagram0, &kmap0_Plain_len5_anagram0, &kmap0_Plain_len6_anagram0, 
  &kmap0_Plain_len7_anagram0, &kmap0_Plain_len8_anagram0, &kmap0_Plain_len9_anagram0, &kmap0_Plain_len10_anagram0, 
  &kmap0_Plain_len11_anagram0, &kmap0_Plain_len12_anagram0, &kmap0_Plain_len13_anagram0, &kmap0_Plain_len14_anagram0, 
@@ -948,592 +948,592 @@ const LookupKmapTypeLenAnagram* kmap0_Plain_lookups_array[21] = {
  &kmap0_Plain_len27_anagram0, 
 };
 
-const LookupKmapType kmap0_Plain_lookups = {
+LookupKmapType const kmap0_Plain_lookups = {
   21, // num_lookups
   kmap0_Plain_lookups_array, // lookups
 };
 
-const ChordData kmap0_Macro_len16_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len16_anagram0_chords[1] = {
  ChordData({0, 132, 0}), 
 };
 
-const uint8_t kmap0_Macro_len16_anagram0_seqs[2] = {
+uint8_t const kmap0_Macro_len16_anagram0_seqs[2] = {
  133, 243, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len16_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len16_anagram0 = {
   LengthAndAnagram(16, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len16_anagram0_chords, // chords
   kmap0_Macro_len16_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len20_anagram0_chords[2] = {
+ChordData const kmap0_Macro_len20_anagram0_chords[2] = {
  ChordData({0, 96, 0}), ChordData({6, 0, 0}), 
 };
 
-const uint8_t kmap0_Macro_len20_anagram0_seqs[5] = {
+uint8_t const kmap0_Macro_len20_anagram0_seqs[5] = {
  96, 13, 84, 56, 
  56, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len20_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len20_anagram0 = {
   LengthAndAnagram(20, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Macro_len20_anagram0_chords, // chords
   kmap0_Macro_len20_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len25_anagram0_chords[3] = {
+ChordData const kmap0_Macro_len25_anagram0_chords[3] = {
  ChordData({0, 128, 8}), ChordData({0, 128, 64}), ChordData({36, 192, 2}), 
 };
 
-const uint8_t kmap0_Macro_len25_anagram0_seqs[10] = {
+uint8_t const kmap0_Macro_len25_anagram0_seqs[10] = {
  133, 3, 118, 11, 
  7, 44, 21, 158, 
  194, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len25_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len25_anagram0 = {
   LengthAndAnagram(25, 0), // seq_bit_len_and_anagram
   3, // num_chords
   kmap0_Macro_len25_anagram0_chords, // chords
   kmap0_Macro_len25_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len26_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len26_anagram0_chords[1] = {
  ChordData({6, 128, 0}), 
 };
 
-const uint8_t kmap0_Macro_len26_anagram0_seqs[4] = {
+uint8_t const kmap0_Macro_len26_anagram0_seqs[4] = {
  133, 131, 252, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len26_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len26_anagram0 = {
   LengthAndAnagram(26, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len26_anagram0_chords, // chords
   kmap0_Macro_len26_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len27_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len27_anagram0_chords[1] = {
  ChordData({16, 132, 1}), 
 };
 
-const uint8_t kmap0_Macro_len27_anagram0_seqs[4] = {
+uint8_t const kmap0_Macro_len27_anagram0_seqs[4] = {
  95, 128, 194, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len27_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len27_anagram0 = {
   LengthAndAnagram(27, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len27_anagram0_chords, // chords
   kmap0_Macro_len27_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len32_anagram0_chords[2] = {
+ChordData const kmap0_Macro_len32_anagram0_chords[2] = {
  ChordData({0, 192, 128}), ChordData({20, 132, 1}), 
 };
 
-const uint8_t kmap0_Macro_len32_anagram0_seqs[8] = {
+uint8_t const kmap0_Macro_len32_anagram0_seqs[8] = {
  133, 3, 42, 224, 
  95, 128, 194, 106, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len32_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len32_anagram0 = {
   LengthAndAnagram(32, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Macro_len32_anagram0_chords, // chords
   kmap0_Macro_len32_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len33_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len33_anagram0_chords[1] = {
  ChordData({80, 132, 1}), 
 };
 
-const uint8_t kmap0_Macro_len33_anagram0_seqs[5] = {
+uint8_t const kmap0_Macro_len33_anagram0_seqs[5] = {
  252, 23, 160, 176, 
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len33_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len33_anagram0 = {
   LengthAndAnagram(33, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len33_anagram0_chords, // chords
   kmap0_Macro_len33_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len38_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len38_anagram0_chords[1] = {
  ChordData({84, 132, 1}), 
 };
 
-const uint8_t kmap0_Macro_len38_anagram0_seqs[5] = {
+uint8_t const kmap0_Macro_len38_anagram0_seqs[5] = {
  252, 23, 160, 176, 
  26, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len38_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len38_anagram0 = {
   LengthAndAnagram(38, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len38_anagram0_chords, // chords
   kmap0_Macro_len38_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Macro_len43_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len43_anagram0_chords[1] = {
  ChordData({0, 132, 130}), 
 };
 
-const uint8_t kmap0_Macro_len43_anagram0_seqs[6] = {
+uint8_t const kmap0_Macro_len43_anagram0_seqs[6] = {
  133, 3, 42, 172, 
  194, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len43_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len43_anagram0 = {
   LengthAndAnagram(43, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len43_anagram0_chords, // chords
   kmap0_Macro_len43_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Macro_lookups_array[9] = {
+LookupKmapTypeLenAnagram const* const kmap0_Macro_lookups_array[9] = {
  &kmap0_Macro_len16_anagram0, &kmap0_Macro_len20_anagram0, &kmap0_Macro_len25_anagram0, &kmap0_Macro_len26_anagram0, 
  &kmap0_Macro_len27_anagram0, &kmap0_Macro_len32_anagram0, &kmap0_Macro_len33_anagram0, &kmap0_Macro_len38_anagram0, 
  &kmap0_Macro_len43_anagram0, 
 };
 
-const LookupKmapType kmap0_Macro_lookups = {
+LookupKmapType const kmap0_Macro_lookups = {
   9, // num_lookups
   kmap0_Macro_lookups_array, // lookups
 };
 
-const ChordData kmap0_Command_len14_anagram0_chords[6] = {
+ChordData const kmap0_Command_len14_anagram0_chords[6] = {
  ChordData({0, 32, 9}), ChordData({0, 192, 1}), ChordData({20, 128, 0}), ChordData({36, 128, 0}), 
  ChordData({36, 169, 0}), ChordData({146, 16, 0}), 
 };
 
-const uint8_t kmap0_Command_len14_anagram0_seqs[11] = {
+uint8_t const kmap0_Command_len14_anagram0_seqs[11] = {
  96, 14, 24, 1, 
  54, 128, 89, 96, 
  34, 216, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Command_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Command_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   6, // num_chords
   kmap0_Command_len14_anagram0_chords, // chords
   kmap0_Command_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Command_len15_anagram0_chords[7] = {
+ChordData const kmap0_Command_len15_anagram0_chords[7] = {
  ChordData({0, 192, 2}), ChordData({36, 73, 146}), ChordData({36, 137, 2}), ChordData({36, 137, 16}), 
  ChordData({146, 0, 0}), ChordData({146, 0, 4}), ChordData({210, 0, 0}), 
 };
 
-const uint8_t kmap0_Command_len15_anagram0_seqs[14] = {
+uint8_t const kmap0_Command_len15_anagram0_seqs[14] = {
  133, 237, 194, 77, 
  97, 171, 240, 89, 
  248, 47, 108, 22, 
  54, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Command_len15_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Command_len15_anagram0 = {
   LengthAndAnagram(15, 0), // seq_bit_len_and_anagram
   7, // num_chords
   kmap0_Command_len15_anagram0_chords, // chords
   kmap0_Command_len15_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Command_len28_anagram0_chords[2] = {
+ChordData const kmap0_Command_len28_anagram0_chords[2] = {
  ChordData({0, 64, 146}), ChordData({36, 9, 0}), 
 };
 
-const uint8_t kmap0_Command_len28_anagram0_seqs[7] = {
+uint8_t const kmap0_Command_len28_anagram0_seqs[7] = {
  133, 185, 112, 89, 
  152, 11, 175, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Command_len28_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Command_len28_anagram0 = {
   LengthAndAnagram(28, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap0_Command_len28_anagram0_chords, // chords
   kmap0_Command_len28_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Command_lookups_array[3] = {
+LookupKmapTypeLenAnagram const* const kmap0_Command_lookups_array[3] = {
  &kmap0_Command_len14_anagram0, &kmap0_Command_len15_anagram0, &kmap0_Command_len28_anagram0, 
 };
 
-const LookupKmapType kmap0_Command_lookups = {
+LookupKmapType const kmap0_Command_lookups = {
   3, // num_lookups
   kmap0_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap0_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap0_Word_lookups = {
+LookupKmapType const kmap0_Word_lookups = {
   0, // num_lookups
   kmap0_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap0_lookups_array[4] = {
+LookupKmapType const* const kmap0_lookups_array[4] = {
  &kmap0_Plain_lookups, &kmap0_Macro_lookups, &kmap0_Command_lookups, &kmap0_Word_lookups, 
 };
 
-const KmapStruct kmap0_lookups = {
+KmapStruct const kmap0_lookups = {
   kmap0_lookups_array, // lookups_for_kmap
 };
 
-const ChordData kmap1_Plain_len3_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len3_anagram0_chords[1] = {
  ChordData({4, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len3_anagram0_seqs[1] = {
+uint8_t const kmap1_Plain_len3_anagram0_seqs[1] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len3_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len3_anagram0 = {
   LengthAndAnagram(3, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len3_anagram0_chords, // chords
   kmap1_Plain_len3_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len4_anagram0_chords[2] = {
+ChordData const kmap1_Plain_len4_anagram0_chords[2] = {
  ChordData({16, 0, 0}), ChordData({128, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len4_anagram0_seqs[1] = {
+uint8_t const kmap1_Plain_len4_anagram0_seqs[1] = {
  242, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len4_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len4_anagram0 = {
   LengthAndAnagram(4, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap1_Plain_len4_anagram0_chords, // chords
   kmap1_Plain_len4_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len5_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len5_anagram0_chords[1] = {
  ChordData({2, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len5_anagram0_seqs[1] = {
+uint8_t const kmap1_Plain_len5_anagram0_seqs[1] = {
  1, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len5_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len5_anagram0 = {
   LengthAndAnagram(5, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len5_anagram0_chords, // chords
   kmap1_Plain_len5_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len6_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len6_anagram0_chords[1] = {
  ChordData({32, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len6_anagram0_seqs[1] = {
+uint8_t const kmap1_Plain_len6_anagram0_seqs[1] = {
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len6_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len6_anagram0 = {
   LengthAndAnagram(6, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len6_anagram0_chords, // chords
   kmap1_Plain_len6_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len9_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len9_anagram0_chords[1] = {
  ChordData({0, 1, 0}), 
 };
 
-const uint8_t kmap1_Plain_len9_anagram0_seqs[2] = {
+uint8_t const kmap1_Plain_len9_anagram0_seqs[2] = {
  133, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len9_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len9_anagram0 = {
   LengthAndAnagram(9, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len9_anagram0_chords, // chords
   kmap1_Plain_len9_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len11_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len11_anagram0_chords[1] = {
  ChordData({8, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len11_anagram0_seqs[2] = {
+uint8_t const kmap1_Plain_len11_anagram0_seqs[2] = {
  5, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len11_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len11_anagram0 = {
   LengthAndAnagram(11, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len11_anagram0_chords, // chords
   kmap1_Plain_len11_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len14_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len14_anagram0_chords[1] = {
  ChordData({0, 8, 0}), 
 };
 
-const uint8_t kmap1_Plain_len14_anagram0_seqs[2] = {
+uint8_t const kmap1_Plain_len14_anagram0_seqs[2] = {
  96, 47, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len14_anagram0_chords, // chords
   kmap1_Plain_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len18_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len18_anagram0_chords[1] = {
  ChordData({0, 4, 0}), 
 };
 
-const uint8_t kmap1_Plain_len18_anagram0_seqs[3] = {
+uint8_t const kmap1_Plain_len18_anagram0_seqs[3] = {
  60, 88, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len18_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len18_anagram0 = {
   LengthAndAnagram(18, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len18_anagram0_chords, // chords
   kmap1_Plain_len18_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Plain_len24_anagram0_chords[1] = {
+ChordData const kmap1_Plain_len24_anagram0_chords[1] = {
  ChordData({1, 0, 0}), 
 };
 
-const uint8_t kmap1_Plain_len24_anagram0_seqs[3] = {
+uint8_t const kmap1_Plain_len24_anagram0_seqs[3] = {
  133, 3, 22, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Plain_len24_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Plain_len24_anagram0 = {
   LengthAndAnagram(24, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Plain_len24_anagram0_chords, // chords
   kmap1_Plain_len24_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Plain_lookups_array[9] = {
+LookupKmapTypeLenAnagram const* const kmap1_Plain_lookups_array[9] = {
  &kmap1_Plain_len3_anagram0, &kmap1_Plain_len4_anagram0, &kmap1_Plain_len5_anagram0, &kmap1_Plain_len6_anagram0, 
  &kmap1_Plain_len9_anagram0, &kmap1_Plain_len11_anagram0, &kmap1_Plain_len14_anagram0, &kmap1_Plain_len18_anagram0, 
  &kmap1_Plain_len24_anagram0, 
 };
 
-const LookupKmapType kmap1_Plain_lookups = {
+LookupKmapType const kmap1_Plain_lookups = {
   9, // num_lookups
   kmap1_Plain_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Macro_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap1_Macro_lookups_array[0] = {
 };
 
-const LookupKmapType kmap1_Macro_lookups = {
+LookupKmapType const kmap1_Macro_lookups = {
   0, // num_lookups
   kmap1_Macro_lookups_array, // lookups
 };
 
-const ChordData kmap1_Command_len28_anagram0_chords[1] = {
+ChordData const kmap1_Command_len28_anagram0_chords[1] = {
  ChordData({0, 0, 1}), 
 };
 
-const uint8_t kmap1_Command_len28_anagram0_seqs[4] = {
+uint8_t const kmap1_Command_len28_anagram0_seqs[4] = {
  133, 185, 240, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Command_len28_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Command_len28_anagram0 = {
   LengthAndAnagram(28, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Command_len28_anagram0_chords, // chords
   kmap1_Command_len28_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Command_lookups_array[1] = {
+LookupKmapTypeLenAnagram const* const kmap1_Command_lookups_array[1] = {
  &kmap1_Command_len28_anagram0, 
 };
 
-const LookupKmapType kmap1_Command_lookups = {
+LookupKmapType const kmap1_Command_lookups = {
   1, // num_lookups
   kmap1_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap1_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap1_Word_lookups = {
+LookupKmapType const kmap1_Word_lookups = {
   0, // num_lookups
   kmap1_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap1_lookups_array[4] = {
+LookupKmapType const* const kmap1_lookups_array[4] = {
  &kmap1_Plain_lookups, &kmap1_Macro_lookups, &kmap1_Command_lookups, &kmap1_Word_lookups, 
 };
 
-const KmapStruct kmap1_lookups = {
+KmapStruct const kmap1_lookups = {
   kmap1_lookups_array, // lookups_for_kmap
 };
 
-const ChordData kmap2_Plain_len3_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len3_anagram0_chords[1] = {
  ChordData({16, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len3_anagram0_seqs[1] = {
+uint8_t const kmap2_Plain_len3_anagram0_seqs[1] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len3_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len3_anagram0 = {
   LengthAndAnagram(3, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len3_anagram0_chords, // chords
   kmap2_Plain_len3_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len4_anagram0_chords[9] = {
+ChordData const kmap2_Plain_len4_anagram0_chords[9] = {
  ChordData({0, 4, 0}), ChordData({2, 0, 0}), ChordData({64, 1, 0}), ChordData({64, 4, 0}), 
  ChordData({64, 8, 0}), ChordData({80, 0, 0}), ChordData({96, 0, 0}), ChordData({128, 0, 0}), 
  ChordData({192, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len4_anagram0_seqs[5] = {
+uint8_t const kmap2_Plain_len4_anagram0_seqs[5] = {
  63, 43, 116, 152, 
  10, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len4_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len4_anagram0 = {
   LengthAndAnagram(4, 0), // seq_bit_len_and_anagram
   9, // num_chords
   kmap2_Plain_len4_anagram0_chords, // chords
   kmap2_Plain_len4_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len5_anagram0_chords[6] = {
+ChordData const kmap2_Plain_len5_anagram0_chords[6] = {
  ChordData({0, 8, 0}), ChordData({4, 0, 0}), ChordData({32, 0, 0}), ChordData({32, 1, 0}), 
  ChordData({66, 0, 0}), ChordData({68, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len5_anagram0_seqs[4] = {
+uint8_t const kmap2_Plain_len5_anagram0_seqs[4] = {
  177, 85, 200, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len5_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len5_anagram0 = {
   LengthAndAnagram(5, 0), // seq_bit_len_and_anagram
   6, // num_chords
   kmap2_Plain_len5_anagram0_chords, // chords
   kmap2_Plain_len5_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len6_anagram0_chords[5] = {
+ChordData const kmap2_Plain_len6_anagram0_chords[5] = {
  ChordData({0, 1, 0}), ChordData({32, 8, 0}), ChordData({36, 0, 0}), ChordData({96, 1, 0}), 
  ChordData({100, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len6_anagram0_seqs[4] = {
+uint8_t const kmap2_Plain_len6_anagram0_seqs[4] = {
  29, 215, 151, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len6_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len6_anagram0 = {
   LengthAndAnagram(6, 0), // seq_bit_len_and_anagram
   5, // num_chords
   kmap2_Plain_len6_anagram0_chords, // chords
   kmap2_Plain_len6_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len7_anagram0_chords[2] = {
+ChordData const kmap2_Plain_len7_anagram0_chords[2] = {
  ChordData({0, 9, 0}), ChordData({96, 8, 0}), 
 };
 
-const uint8_t kmap2_Plain_len7_anagram0_seqs[2] = {
+uint8_t const kmap2_Plain_len7_anagram0_seqs[2] = {
  69, 16, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len7_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len7_anagram0 = {
   LengthAndAnagram(7, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap2_Plain_len7_anagram0_chords, // chords
   kmap2_Plain_len7_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len8_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len8_anagram0_chords[1] = {
  ChordData({64, 9, 0}), 
 };
 
-const uint8_t kmap2_Plain_len8_anagram0_seqs[1] = {
+uint8_t const kmap2_Plain_len8_anagram0_seqs[1] = {
  224, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len8_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len8_anagram0 = {
   LengthAndAnagram(8, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len8_anagram0_chords, // chords
   kmap2_Plain_len8_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len9_anagram0_chords[2] = {
+ChordData const kmap2_Plain_len9_anagram0_chords[2] = {
  ChordData({4, 8, 0}), ChordData({68, 8, 0}), 
 };
 
-const uint8_t kmap2_Plain_len9_anagram0_seqs[3] = {
+uint8_t const kmap2_Plain_len9_anagram0_seqs[3] = {
  5, 11, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len9_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len9_anagram0 = {
   LengthAndAnagram(9, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap2_Plain_len9_anagram0_chords, // chords
   kmap2_Plain_len9_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len10_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len10_anagram0_chords[1] = {
  ChordData({66, 8, 0}), 
 };
 
-const uint8_t kmap2_Plain_len10_anagram0_seqs[2] = {
+uint8_t const kmap2_Plain_len10_anagram0_seqs[2] = {
  5, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len10_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len10_anagram0 = {
   LengthAndAnagram(10, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len10_anagram0_chords, // chords
   kmap2_Plain_len10_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len11_anagram0_chords[2] = {
+ChordData const kmap2_Plain_len11_anagram0_chords[2] = {
  ChordData({64, 0, 0}), ChordData({68, 1, 0}), 
 };
 
-const uint8_t kmap2_Plain_len11_anagram0_seqs[3] = {
+uint8_t const kmap2_Plain_len11_anagram0_seqs[3] = {
  5, 0, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len11_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len11_anagram0 = {
   LengthAndAnagram(11, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap2_Plain_len11_anagram0_chords, // chords
   kmap2_Plain_len11_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len12_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len12_anagram0_chords[1] = {
  ChordData({19, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len12_anagram0_seqs[2] = {
+uint8_t const kmap2_Plain_len12_anagram0_seqs[2] = {
  133, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len12_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len12_anagram0 = {
   LengthAndAnagram(12, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len12_anagram0_chords, // chords
   kmap2_Plain_len12_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len13_anagram0_chords[19] = {
+ChordData const kmap2_Plain_len13_anagram0_chords[19] = {
  ChordData({1, 0, 0}), ChordData({4, 1, 0}), ChordData({6, 0, 0}), ChordData({16, 4, 0}), 
  ChordData({18, 0, 0}), ChordData({34, 0, 0}), ChordData({48, 0, 0}), ChordData({66, 1, 0}), 
  ChordData({68, 4, 0}), ChordData({80, 4, 0}), ChordData({82, 0, 0}), ChordData({98, 0, 0}), 
@@ -1541,7 +1541,7 @@ const ChordData kmap2_Plain_len13_anagram0_chords[19] = {
  ChordData({194, 0, 0}), ChordData({196, 0, 0}), ChordData({208, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len13_anagram0_seqs[31] = {
+uint8_t const kmap2_Plain_len13_anagram0_seqs[31] = {
  96, 29, 204, 131, 
  93, 176, 92, 192, 
  193, 14, 88, 2, 
@@ -1552,21 +1552,21 @@ const uint8_t kmap2_Plain_len13_anagram0_seqs[31] = {
  204, 20, 118, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len13_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len13_anagram0 = {
   LengthAndAnagram(13, 0), // seq_bit_len_and_anagram
   19, // num_chords
   kmap2_Plain_len13_anagram0_chords, // chords
   kmap2_Plain_len13_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len14_anagram0_chords[14] = {
+ChordData const kmap2_Plain_len14_anagram0_chords[14] = {
  ChordData({0, 2, 0}), ChordData({1, 1, 0}), ChordData({1, 8, 0}), ChordData({8, 0, 0}), 
  ChordData({18, 1, 0}), ChordData({33, 0, 0}), ChordData({54, 0, 0}), ChordData({64, 2, 0}), 
  ChordData({64, 5, 0}), ChordData({128, 8, 0}), ChordData({128, 13, 0}), ChordData({130, 1, 0}), 
  ChordData({192, 5, 0}), ChordData({194, 1, 0}), 
 };
 
-const uint8_t kmap2_Plain_len14_anagram0_seqs[25] = {
+uint8_t const kmap2_Plain_len14_anagram0_seqs[25] = {
  96, 44, 216, 2, 
  70, 129, 85, 96, 
  50, 24, 15, 246, 
@@ -1576,54 +1576,54 @@ const uint8_t kmap2_Plain_len14_anagram0_seqs[25] = {
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   14, // num_chords
   kmap2_Plain_len14_anagram0_chords, // chords
   kmap2_Plain_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len15_anagram0_chords[6] = {
+ChordData const kmap2_Plain_len15_anagram0_chords[6] = {
  ChordData({5, 0, 0}), ChordData({16, 5, 0}), ChordData({80, 5, 0}), ChordData({128, 5, 0}), 
  ChordData({144, 1, 0}), ChordData({208, 1, 0}), 
 };
 
-const uint8_t kmap2_Plain_len15_anagram0_seqs[12] = {
+uint8_t const kmap2_Plain_len15_anagram0_seqs[12] = {
  133, 143, 194, 69, 
  225, 170, 112, 93, 
  184, 45, 188, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len15_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len15_anagram0 = {
   LengthAndAnagram(15, 0), // seq_bit_len_and_anagram
   6, // num_chords
   kmap2_Plain_len15_anagram0_chords, // chords
   kmap2_Plain_len15_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len16_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len16_anagram0_chords[1] = {
  ChordData({2, 8, 0}), 
 };
 
-const uint8_t kmap2_Plain_len16_anagram0_seqs[2] = {
+uint8_t const kmap2_Plain_len16_anagram0_seqs[2] = {
  124, 129, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len16_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len16_anagram0 = {
   LengthAndAnagram(16, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len16_anagram0_chords, // chords
   kmap2_Plain_len16_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len19_anagram0_chords[13] = {
+ChordData const kmap2_Plain_len19_anagram0_chords[13] = {
  ChordData({2, 1, 0}), ChordData({2, 4, 0}), ChordData({4, 4, 0}), ChordData({16, 1, 0}), 
  ChordData({20, 0, 0}), ChordData({32, 4, 0}), ChordData({66, 4, 0}), ChordData({80, 1, 0}), 
  ChordData({84, 0, 0}), ChordData({96, 4, 0}), ChordData({132, 0, 0}), ChordData({160, 0, 0}), 
  ChordData({224, 0, 0}), 
 };
 
-const uint8_t kmap2_Plain_len19_anagram0_seqs[31] = {
+uint8_t const kmap2_Plain_len19_anagram0_seqs[31] = {
  60, 88, 225, 11, 
  56, 95, 152, 120, 
  176, 195, 23, 6, 
@@ -1634,301 +1634,301 @@ const uint8_t kmap2_Plain_len19_anagram0_seqs[31] = {
  207, 23, 70, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len19_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len19_anagram0 = {
   LengthAndAnagram(19, 0), // seq_bit_len_and_anagram
   13, // num_chords
   kmap2_Plain_len19_anagram0_chords, // chords
   kmap2_Plain_len19_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Plain_len20_anagram0_chords[1] = {
+ChordData const kmap2_Plain_len20_anagram0_chords[1] = {
  ChordData({0, 5, 0}), 
 };
 
-const uint8_t kmap2_Plain_len20_anagram0_seqs[3] = {
+uint8_t const kmap2_Plain_len20_anagram0_seqs[3] = {
  124, 225, 7, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Plain_len20_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Plain_len20_anagram0 = {
   LengthAndAnagram(20, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Plain_len20_anagram0_chords, // chords
   kmap2_Plain_len20_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap2_Plain_lookups_array[16] = {
+LookupKmapTypeLenAnagram const* const kmap2_Plain_lookups_array[16] = {
  &kmap2_Plain_len3_anagram0, &kmap2_Plain_len4_anagram0, &kmap2_Plain_len5_anagram0, &kmap2_Plain_len6_anagram0, 
  &kmap2_Plain_len7_anagram0, &kmap2_Plain_len8_anagram0, &kmap2_Plain_len9_anagram0, &kmap2_Plain_len10_anagram0, 
  &kmap2_Plain_len11_anagram0, &kmap2_Plain_len12_anagram0, &kmap2_Plain_len13_anagram0, &kmap2_Plain_len14_anagram0, 
  &kmap2_Plain_len15_anagram0, &kmap2_Plain_len16_anagram0, &kmap2_Plain_len19_anagram0, &kmap2_Plain_len20_anagram0, 
 };
 
-const LookupKmapType kmap2_Plain_lookups = {
+LookupKmapType const kmap2_Plain_lookups = {
   16, // num_lookups
   kmap2_Plain_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap2_Macro_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap2_Macro_lookups_array[0] = {
 };
 
-const LookupKmapType kmap2_Macro_lookups = {
+LookupKmapType const kmap2_Macro_lookups = {
   0, // num_lookups
   kmap2_Macro_lookups_array, // lookups
 };
 
-const ChordData kmap2_Command_len14_anagram0_chords[4] = {
+ChordData const kmap2_Command_len14_anagram0_chords[4] = {
  ChordData({1, 4, 0}), ChordData({3, 0, 0}), ChordData({17, 0, 0}), ChordData({129, 0, 0}), 
 };
 
-const uint8_t kmap2_Command_len14_anagram0_seqs[7] = {
+uint8_t const kmap2_Command_len14_anagram0_seqs[7] = {
  96, 35, 216, 4, 
  102, 131, 49, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Command_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Command_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   4, // num_chords
   kmap2_Command_len14_anagram0_chords, // chords
   kmap2_Command_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap2_Command_len28_anagram0_chords[1] = {
+ChordData const kmap2_Command_len28_anagram0_chords[1] = {
  ChordData({16, 0, 1}), 
 };
 
-const uint8_t kmap2_Command_len28_anagram0_seqs[4] = {
+uint8_t const kmap2_Command_len28_anagram0_seqs[4] = {
  133, 185, 240, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap2_Command_len28_anagram0 = {
+LookupKmapTypeLenAnagram const kmap2_Command_len28_anagram0 = {
   LengthAndAnagram(28, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap2_Command_len28_anagram0_chords, // chords
   kmap2_Command_len28_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap2_Command_lookups_array[2] = {
+LookupKmapTypeLenAnagram const* const kmap2_Command_lookups_array[2] = {
  &kmap2_Command_len14_anagram0, &kmap2_Command_len28_anagram0, 
 };
 
-const LookupKmapType kmap2_Command_lookups = {
+LookupKmapType const kmap2_Command_lookups = {
   2, // num_lookups
   kmap2_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap2_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap2_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap2_Word_lookups = {
+LookupKmapType const kmap2_Word_lookups = {
   0, // num_lookups
   kmap2_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap2_lookups_array[4] = {
+LookupKmapType const* const kmap2_lookups_array[4] = {
  &kmap2_Plain_lookups, &kmap2_Macro_lookups, &kmap2_Command_lookups, &kmap2_Word_lookups, 
 };
 
-const KmapStruct kmap2_lookups = {
+KmapStruct const kmap2_lookups = {
   kmap2_lookups_array, // lookups_for_kmap
 };
 
-const LookupKmapTypeLenAnagram* kmap3_Plain_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap3_Plain_lookups_array[0] = {
 };
 
-const LookupKmapType kmap3_Plain_lookups = {
+LookupKmapType const kmap3_Plain_lookups = {
   0, // num_lookups
   kmap3_Plain_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap3_Macro_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap3_Macro_lookups_array[0] = {
 };
 
-const LookupKmapType kmap3_Macro_lookups = {
+LookupKmapType const kmap3_Macro_lookups = {
   0, // num_lookups
   kmap3_Macro_lookups_array, // lookups
 };
 
-const ChordData kmap3_Command_len28_anagram0_chords[1] = {
+ChordData const kmap3_Command_len28_anagram0_chords[1] = {
  ChordData({36, 9, 0}), 
 };
 
-const uint8_t kmap3_Command_len28_anagram0_seqs[4] = {
+uint8_t const kmap3_Command_len28_anagram0_seqs[4] = {
  133, 185, 240, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap3_Command_len28_anagram0 = {
+LookupKmapTypeLenAnagram const kmap3_Command_len28_anagram0 = {
   LengthAndAnagram(28, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap3_Command_len28_anagram0_chords, // chords
   kmap3_Command_len28_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap3_Command_lookups_array[1] = {
+LookupKmapTypeLenAnagram const* const kmap3_Command_lookups_array[1] = {
  &kmap3_Command_len28_anagram0, 
 };
 
-const LookupKmapType kmap3_Command_lookups = {
+LookupKmapType const kmap3_Command_lookups = {
   1, // num_lookups
   kmap3_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap3_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap3_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap3_Word_lookups = {
+LookupKmapType const kmap3_Word_lookups = {
   0, // num_lookups
   kmap3_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap3_lookups_array[4] = {
+LookupKmapType const* const kmap3_lookups_array[4] = {
  &kmap3_Plain_lookups, &kmap3_Macro_lookups, &kmap3_Command_lookups, &kmap3_Word_lookups, 
 };
 
-const KmapStruct kmap3_lookups = {
+KmapStruct const kmap3_lookups = {
   kmap3_lookups_array, // lookups_for_kmap
 };
 
-const LookupKmapTypeLenAnagram* kmap4_Plain_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap4_Plain_lookups_array[0] = {
 };
 
-const LookupKmapType kmap4_Plain_lookups = {
+LookupKmapType const kmap4_Plain_lookups = {
   0, // num_lookups
   kmap4_Plain_lookups_array, // lookups
 };
 
-const ChordData kmap4_Macro_len21_anagram0_chords[1] = {
+ChordData const kmap4_Macro_len21_anagram0_chords[1] = {
  ChordData({0, 128, 192}), 
 };
 
-const uint8_t kmap4_Macro_len21_anagram0_seqs[3] = {
+uint8_t const kmap4_Macro_len21_anagram0_seqs[3] = {
  36, 96, 29, 
 };
 
-const LookupKmapTypeLenAnagram kmap4_Macro_len21_anagram0 = {
+LookupKmapTypeLenAnagram const kmap4_Macro_len21_anagram0 = {
   LengthAndAnagram(21, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap4_Macro_len21_anagram0_chords, // chords
   kmap4_Macro_len21_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap4_Macro_lookups_array[1] = {
+LookupKmapTypeLenAnagram const* const kmap4_Macro_lookups_array[1] = {
  &kmap4_Macro_len21_anagram0, 
 };
 
-const LookupKmapType kmap4_Macro_lookups = {
+LookupKmapType const kmap4_Macro_lookups = {
   1, // num_lookups
   kmap4_Macro_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap4_Command_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap4_Command_lookups_array[0] = {
 };
 
-const LookupKmapType kmap4_Command_lookups = {
+LookupKmapType const kmap4_Command_lookups = {
   0, // num_lookups
   kmap4_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap4_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap4_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap4_Word_lookups = {
+LookupKmapType const kmap4_Word_lookups = {
   0, // num_lookups
   kmap4_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap4_lookups_array[4] = {
+LookupKmapType const* const kmap4_lookups_array[4] = {
  &kmap4_Plain_lookups, &kmap4_Macro_lookups, &kmap4_Command_lookups, &kmap4_Word_lookups, 
 };
 
-const KmapStruct kmap4_lookups = {
+KmapStruct const kmap4_lookups = {
   kmap4_lookups_array, // lookups_for_kmap
 };
 
-const LookupKmapTypeLenAnagram* kmap5_Plain_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap5_Plain_lookups_array[0] = {
 };
 
-const LookupKmapType kmap5_Plain_lookups = {
+LookupKmapType const kmap5_Plain_lookups = {
   0, // num_lookups
   kmap5_Plain_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap5_Macro_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap5_Macro_lookups_array[0] = {
 };
 
-const LookupKmapType kmap5_Macro_lookups = {
+LookupKmapType const kmap5_Macro_lookups = {
   0, // num_lookups
   kmap5_Macro_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap5_Command_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap5_Command_lookups_array[0] = {
 };
 
-const LookupKmapType kmap5_Command_lookups = {
+LookupKmapType const kmap5_Command_lookups = {
   0, // num_lookups
   kmap5_Command_lookups_array, // lookups
 };
 
-const ChordData kmap5_Word_len4_anagram1_chords[3] = {
+ChordData const kmap5_Word_len4_anagram1_chords[3] = {
  ChordData({0, 0, 16}), ChordData({0, 0, 64}), ChordData({0, 4, 0}), 
 };
 
-const uint8_t kmap5_Word_len4_anagram1_seqs[2] = {
+uint8_t const kmap5_Word_len4_anagram1_seqs[2] = {
  43, 15, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len4_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len4_anagram1 = {
   LengthAndAnagram(4, 1), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len4_anagram1_chords, // chords
   kmap5_Word_len4_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len5_anagram1_chords[2] = {
+ChordData const kmap5_Word_len5_anagram1_chords[2] = {
  ChordData({0, 64, 0}), ChordData({32, 0, 0}), 
 };
 
-const uint8_t kmap5_Word_len5_anagram1_seqs[2] = {
+uint8_t const kmap5_Word_len5_anagram1_seqs[2] = {
  161, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len5_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len5_anagram1 = {
   LengthAndAnagram(5, 1), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len5_anagram1_chords, // chords
   kmap5_Word_len5_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len7_anagram0_chords[2] = {
+ChordData const kmap5_Word_len7_anagram0_chords[2] = {
  ChordData({16, 0, 8}), ChordData({16, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len7_anagram0_seqs[2] = {
+uint8_t const kmap5_Word_len7_anagram0_seqs[2] = {
  86, 47, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len7_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len7_anagram0 = {
   LengthAndAnagram(7, 0), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len7_anagram0_chords, // chords
   kmap5_Word_len7_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len7_anagram1_chords[3] = {
+ChordData const kmap5_Word_len7_anagram1_chords[3] = {
  ChordData({0, 0, 130}), ChordData({16, 0, 16}), ChordData({16, 0, 64}), 
 };
 
-const uint8_t kmap5_Word_len7_anagram1_seqs[3] = {
+uint8_t const kmap5_Word_len7_anagram1_seqs[3] = {
  160, 181, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len7_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len7_anagram1 = {
   LengthAndAnagram(7, 1), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len7_anagram1_chords, // chords
   kmap5_Word_len7_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len8_anagram0_chords[18] = {
+ChordData const kmap5_Word_len8_anagram0_chords[18] = {
  ChordData({0, 0, 136}), ChordData({0, 0, 192}), ChordData({0, 4, 1}), ChordData({0, 4, 2}), 
  ChordData({0, 4, 8}), ChordData({0, 4, 64}), ChordData({2, 0, 1}), ChordData({2, 0, 2}), 
  ChordData({2, 0, 8}), ChordData({2, 0, 64}), ChordData({16, 8, 0}), ChordData({16, 32, 0}), 
@@ -1936,7 +1936,7 @@ const ChordData kmap5_Word_len8_anagram0_chords[18] = {
  ChordData({128, 0, 16}), ChordData({128, 0, 64}), 
 };
 
-const uint8_t kmap5_Word_len8_anagram0_seqs[18] = {
+uint8_t const kmap5_Word_len8_anagram0_seqs[18] = {
  164, 36, 127, 143, 
  175, 47, 115, 131, 
  163, 35, 209, 204, 
@@ -1944,161 +1944,161 @@ const uint8_t kmap5_Word_len8_anagram0_seqs[18] = {
  185, 146, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len8_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len8_anagram0 = {
   LengthAndAnagram(8, 0), // seq_bit_len_and_anagram
   18, // num_chords
   kmap5_Word_len8_anagram0_chords, // chords
   kmap5_Word_len8_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len8_anagram1_chords[4] = {
+ChordData const kmap5_Word_len8_anagram1_chords[4] = {
  ChordData({0, 4, 128}), ChordData({16, 8, 0}), ChordData({16, 64, 0}), ChordData({128, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len8_anagram1_seqs[4] = {
+uint8_t const kmap5_Word_len8_anagram1_seqs[4] = {
  79, 142, 193, 154, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len8_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len8_anagram1 = {
   LengthAndAnagram(8, 1), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len8_anagram1_chords, // chords
   kmap5_Word_len8_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len9_anagram0_chords[12] = {
+ChordData const kmap5_Word_len9_anagram0_chords[12] = {
  ChordData({0, 8, 16}), ChordData({0, 12, 0}), ChordData({0, 36, 0}), ChordData({2, 32, 0}), 
  ChordData({4, 0, 64}), ChordData({16, 64, 2}), ChordData({32, 0, 8}), ChordData({32, 0, 64}), 
  ChordData({52, 0, 0}), ChordData({128, 32, 0}), ChordData({128, 64, 0}), ChordData({160, 1, 0}), 
 };
 
-const uint8_t kmap5_Word_len9_anagram0_seqs[14] = {
+uint8_t const kmap5_Word_len9_anagram0_seqs[14] = {
  27, 63, 62, 99, 
  211, 4, 112, 213, 
  42, 189, 147, 133, 
  132, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len9_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len9_anagram0 = {
   LengthAndAnagram(9, 0), // seq_bit_len_and_anagram
   12, // num_chords
   kmap5_Word_len9_anagram0_chords, // chords
   kmap5_Word_len9_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len9_anagram1_chords[6] = {
+ChordData const kmap5_Word_len9_anagram1_chords[6] = {
  ChordData({0, 36, 0}), ChordData({0, 64, 2}), ChordData({2, 8, 0}), ChordData({6, 0, 0}), 
  ChordData({32, 1, 8}), ChordData({132, 0, 0}), 
 };
 
-const uint8_t kmap5_Word_len9_anagram1_seqs[7] = {
+uint8_t const kmap5_Word_len9_anagram1_seqs[7] = {
  236, 49, 76, 108, 
  163, 48, 27, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len9_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len9_anagram1 = {
   LengthAndAnagram(9, 1), // seq_bit_len_and_anagram
   6, // num_chords
   kmap5_Word_len9_anagram1_chords, // chords
   kmap5_Word_len9_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len9_anagram2_chords[2] = {
+ChordData const kmap5_Word_len9_anagram2_chords[2] = {
  ChordData({4, 4, 0}), ChordData({6, 0, 0}), 
 };
 
-const uint8_t kmap5_Word_len9_anagram2_seqs[3] = {
+uint8_t const kmap5_Word_len9_anagram2_seqs[3] = {
  223, 166, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len9_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len9_anagram2 = {
   LengthAndAnagram(9, 2), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len9_anagram2_chords, // chords
   kmap5_Word_len9_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len9_anagram4_chords[1] = {
+ChordData const kmap5_Word_len9_anagram4_chords[1] = {
  ChordData({34, 1, 0}), 
 };
 
-const uint8_t kmap5_Word_len9_anagram4_seqs[2] = {
+uint8_t const kmap5_Word_len9_anagram4_seqs[2] = {
  112, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len9_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len9_anagram4 = {
   LengthAndAnagram(9, 4), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len9_anagram4_chords, // chords
   kmap5_Word_len9_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len10_anagram0_chords[5] = {
+ChordData const kmap5_Word_len10_anagram0_chords[5] = {
  ChordData({0, 0, 146}), ChordData({0, 1, 8}), ChordData({16, 0, 64}), ChordData({38, 0, 0}), 
  ChordData({128, 1, 0}), 
 };
 
-const uint8_t kmap5_Word_len10_anagram0_seqs[7] = {
+uint8_t const kmap5_Word_len10_anagram0_seqs[7] = {
  84, 118, 42, 118, 
  63, 217, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len10_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len10_anagram0 = {
   LengthAndAnagram(10, 0), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len10_anagram0_chords, // chords
   kmap5_Word_len10_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len10_anagram1_chords[8] = {
+ChordData const kmap5_Word_len10_anagram1_chords[8] = {
  ChordData({0, 0, 18}), ChordData({2, 0, 0}), ChordData({2, 1, 0}), ChordData({16, 0, 1}), 
  ChordData({16, 0, 130}), ChordData({32, 8, 1}), ChordData({32, 8, 64}), ChordData({36, 0, 0}), 
 };
 
-const uint8_t kmap5_Word_len10_anagram1_seqs[10] = {
+uint8_t const kmap5_Word_len10_anagram1_seqs[10] = {
  91, 242, 51, 221, 
  217, 6, 29, 199, 
  73, 109, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len10_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len10_anagram1 = {
   LengthAndAnagram(10, 1), // seq_bit_len_and_anagram
   8, // num_chords
   kmap5_Word_len10_anagram1_chords, // chords
   kmap5_Word_len10_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len10_anagram2_chords[1] = {
+ChordData const kmap5_Word_len10_anagram2_chords[1] = {
  ChordData({32, 8, 0}), 
 };
 
-const uint8_t kmap5_Word_len10_anagram2_seqs[2] = {
+uint8_t const kmap5_Word_len10_anagram2_seqs[2] = {
  53, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len10_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len10_anagram2 = {
   LengthAndAnagram(10, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len10_anagram2_chords, // chords
   kmap5_Word_len10_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len10_anagram3_chords[2] = {
+ChordData const kmap5_Word_len10_anagram3_chords[2] = {
  ChordData({32, 8, 0}), ChordData({34, 8, 0}), 
 };
 
-const uint8_t kmap5_Word_len10_anagram3_seqs[3] = {
+uint8_t const kmap5_Word_len10_anagram3_seqs[3] = {
  177, 114, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len10_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len10_anagram3 = {
   LengthAndAnagram(10, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len10_anagram3_chords, // chords
   kmap5_Word_len10_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len11_anagram0_chords[23] = {
+ChordData const kmap5_Word_len11_anagram0_chords[23] = {
  ChordData({0, 0, 131}), ChordData({0, 8, 18}), ChordData({0, 65, 0}), ChordData({0, 72, 2}), 
  ChordData({16, 0, 3}), ChordData({16, 0, 9}), ChordData({16, 0, 17}), ChordData({16, 0, 66}), 
  ChordData({16, 0, 129}), ChordData({16, 0, 136}), ChordData({16, 0, 144}), ChordData({16, 4, 1}), 
@@ -2107,7 +2107,7 @@ const ChordData kmap5_Word_len11_anagram0_chords[23] = {
  ChordData({144, 0, 1}), ChordData({144, 0, 2}), ChordData({144, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len11_anagram0_seqs[32] = {
+uint8_t const kmap5_Word_len11_anagram0_seqs[32] = {
  7, 138, 101, 23, 
  128, 232, 195, 179, 
  158, 87, 140, 228, 
@@ -2118,78 +2118,78 @@ const uint8_t kmap5_Word_len11_anagram0_seqs[32] = {
  105, 99, 166, 26, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len11_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len11_anagram0 = {
   LengthAndAnagram(11, 0), // seq_bit_len_and_anagram
   23, // num_chords
   kmap5_Word_len11_anagram0_chords, // chords
   kmap5_Word_len11_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len11_anagram1_chords[8] = {
+ChordData const kmap5_Word_len11_anagram1_chords[8] = {
  ChordData({16, 0, 9}), ChordData({16, 0, 65}), ChordData({16, 0, 80}), ChordData({16, 4, 1}), 
  ChordData({16, 4, 64}), ChordData({20, 0, 0}), ChordData({32, 1, 0}), ChordData({32, 8, 0}), 
 };
 
-const uint8_t kmap5_Word_len11_anagram1_seqs[11] = {
+uint8_t const kmap5_Word_len11_anagram1_seqs[11] = {
  234, 19, 223, 90, 
  254, 44, 254, 102, 
  119, 48, 114, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len11_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len11_anagram1 = {
   LengthAndAnagram(11, 1), // seq_bit_len_and_anagram
   8, // num_chords
   kmap5_Word_len11_anagram1_chords, // chords
   kmap5_Word_len11_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len11_anagram2_chords[3] = {
+ChordData const kmap5_Word_len11_anagram2_chords[3] = {
  ChordData({0, 0, 146}), ChordData({16, 0, 65}), ChordData({16, 4, 1}), 
 };
 
-const uint8_t kmap5_Word_len11_anagram2_seqs[5] = {
+uint8_t const kmap5_Word_len11_anagram2_seqs[5] = {
  11, 178, 220, 249, 
  1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len11_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len11_anagram2 = {
   LengthAndAnagram(11, 2), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len11_anagram2_chords, // chords
   kmap5_Word_len11_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len11_anagram3_chords[2] = {
+ChordData const kmap5_Word_len11_anagram3_chords[2] = {
  ChordData({16, 4, 16}), ChordData({144, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len11_anagram3_seqs[3] = {
+uint8_t const kmap5_Word_len11_anagram3_seqs[3] = {
  222, 87, 39, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len11_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len11_anagram3 = {
   LengthAndAnagram(11, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len11_anagram3_chords, // chords
   kmap5_Word_len11_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len11_anagram4_chords[1] = {
+ChordData const kmap5_Word_len11_anagram4_chords[1] = {
  ChordData({16, 4, 16}), 
 };
 
-const uint8_t kmap5_Word_len11_anagram4_seqs[2] = {
+uint8_t const kmap5_Word_len11_anagram4_seqs[2] = {
  254, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len11_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len11_anagram4 = {
   LengthAndAnagram(11, 4), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len11_anagram4_chords, // chords
   kmap5_Word_len11_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len12_anagram0_chords[50] = {
+ChordData const kmap5_Word_len12_anagram0_chords[50] = {
  ChordData({0, 0, 81}), ChordData({0, 0, 82}), ChordData({0, 0, 208}), ChordData({0, 4, 3}), 
  ChordData({0, 4, 9}), ChordData({0, 4, 10}), ChordData({0, 4, 17}), ChordData({0, 4, 24}), 
  ChordData({0, 4, 65}), ChordData({0, 4, 128}), ChordData({0, 4, 136}), ChordData({2, 0, 9}), 
@@ -2205,7 +2205,7 @@ const ChordData kmap5_Word_len12_anagram0_chords[50] = {
  ChordData({130, 0, 64}), ChordData({130, 0, 128}), 
 };
 
-const uint8_t kmap5_Word_len12_anagram0_seqs[75] = {
+uint8_t const kmap5_Word_len12_anagram0_seqs[75] = {
  114, 43, 139, 224, 
  130, 127, 175, 135, 
  175, 247, 187, 175, 
@@ -2227,14 +2227,14 @@ const uint8_t kmap5_Word_len12_anagram0_seqs[75] = {
  35, 153, 67, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len12_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len12_anagram0 = {
   LengthAndAnagram(12, 0), // seq_bit_len_and_anagram
   50, // num_chords
   kmap5_Word_len12_anagram0_chords, // chords
   kmap5_Word_len12_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len12_anagram1_chords[21] = {
+ChordData const kmap5_Word_len12_anagram1_chords[21] = {
  ChordData({0, 4, 3}), ChordData({0, 4, 9}), ChordData({0, 4, 17}), ChordData({0, 4, 18}), 
  ChordData({0, 4, 129}), ChordData({2, 0, 65}), ChordData({2, 0, 66}), ChordData({2, 0, 80}), 
  ChordData({16, 1, 0}), ChordData({16, 8, 1}), ChordData({16, 32, 16}), ChordData({20, 0, 16}), 
@@ -2243,7 +2243,7 @@ const ChordData kmap5_Word_len12_anagram1_chords[21] = {
  ChordData({144, 8, 0}), 
 };
 
-const uint8_t kmap5_Word_len12_anagram1_seqs[32] = {
+uint8_t const kmap5_Word_len12_anagram1_seqs[32] = {
  143, 167, 127, 191, 
  135, 191, 79, 55, 
  114, 130, 35, 179, 
@@ -2254,49 +2254,49 @@ const uint8_t kmap5_Word_len12_anagram1_seqs[32] = {
  138, 73, 142, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len12_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len12_anagram1 = {
   LengthAndAnagram(12, 1), // seq_bit_len_and_anagram
   21, // num_chords
   kmap5_Word_len12_anagram1_chords, // chords
   kmap5_Word_len12_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len12_anagram2_chords[10] = {
+ChordData const kmap5_Word_len12_anagram2_chords[10] = {
  ChordData({0, 4, 9}), ChordData({0, 4, 17}), ChordData({0, 4, 65}), ChordData({0, 4, 129}), 
  ChordData({2, 0, 9}), ChordData({2, 0, 65}), ChordData({16, 64, 8}), ChordData({48, 1, 64}), 
  ChordData({48, 1, 128}), ChordData({128, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len12_anagram2_seqs[15] = {
+uint8_t const kmap5_Word_len12_anagram2_seqs[15] = {
  247, 186, 127, 114, 
  79, 127, 55, 42, 
  115, 193, 42, 134, 
  208, 164, 169, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len12_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len12_anagram2 = {
   LengthAndAnagram(12, 2), // seq_bit_len_and_anagram
   10, // num_chords
   kmap5_Word_len12_anagram2_chords, // chords
   kmap5_Word_len12_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len12_anagram3_chords[1] = {
+ChordData const kmap5_Word_len12_anagram3_chords[1] = {
  ChordData({0, 4, 18}), 
 };
 
-const uint8_t kmap5_Word_len12_anagram3_seqs[2] = {
+uint8_t const kmap5_Word_len12_anagram3_seqs[2] = {
  191, 8, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len12_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len12_anagram3 = {
   LengthAndAnagram(12, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len12_anagram3_chords, // chords
   kmap5_Word_len12_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len13_anagram0_chords[71] = {
+ChordData const kmap5_Word_len13_anagram0_chords[71] = {
  ChordData({0, 12, 1}), ChordData({0, 12, 2}), ChordData({0, 12, 8}), ChordData({0, 12, 16}), 
  ChordData({0, 12, 128}), ChordData({0, 36, 64}), ChordData({0, 64, 65}), ChordData({0, 64, 129}), 
  ChordData({0, 64, 130}), ChordData({0, 68, 8}), ChordData({0, 68, 64}), ChordData({2, 8, 1}), 
@@ -2317,7 +2317,7 @@ const ChordData kmap5_Word_len13_anagram0_chords[71] = {
  ChordData({160, 1, 1}), ChordData({160, 1, 128}), ChordData({160, 5, 0}), 
 };
 
-const uint8_t kmap5_Word_len13_anagram0_seqs[116] = {
+uint8_t const kmap5_Word_len13_anagram0_seqs[116] = {
  241, 47, 62, 198, 
  215, 223, 24, 159, 
  216, 139, 92, 40, 
@@ -2349,14 +2349,14 @@ const uint8_t kmap5_Word_len13_anagram0_seqs[116] = {
  40, 225, 195, 4, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len13_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len13_anagram0 = {
   LengthAndAnagram(13, 0), // seq_bit_len_and_anagram
   71, // num_chords
   kmap5_Word_len13_anagram0_chords, // chords
   kmap5_Word_len13_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len13_anagram1_chords[30] = {
+ChordData const kmap5_Word_len13_anagram1_chords[30] = {
  ChordData({0, 12, 2}), ChordData({0, 12, 16}), ChordData({0, 32, 64}), ChordData({0, 36, 1}), 
  ChordData({0, 68, 2}), ChordData({2, 8, 64}), ChordData({2, 32, 64}), ChordData({2, 64, 16}), 
  ChordData({4, 4, 1}), ChordData({4, 4, 2}), ChordData({4, 4, 16}), ChordData({4, 4, 64}), 
@@ -2367,7 +2367,7 @@ const ChordData kmap5_Word_len13_anagram1_chords[30] = {
  ChordData({144, 64, 2}), ChordData({160, 1, 16}), 
 };
 
-const uint8_t kmap5_Word_len13_anagram1_seqs[49] = {
+uint8_t const kmap5_Word_len13_anagram1_seqs[49] = {
  248, 113, 63, 138, 
  48, 246, 135, 31, 
  70, 226, 8, 219, 
@@ -2383,47 +2383,47 @@ const uint8_t kmap5_Word_len13_anagram1_seqs[49] = {
  33, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len13_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len13_anagram1 = {
   LengthAndAnagram(13, 1), // seq_bit_len_and_anagram
   30, // num_chords
   kmap5_Word_len13_anagram1_chords, // chords
   kmap5_Word_len13_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len13_anagram2_chords[5] = {
+ChordData const kmap5_Word_len13_anagram2_chords[5] = {
  ChordData({0, 12, 64}), ChordData({4, 4, 64}), ChordData({16, 8, 0}), ChordData({48, 9, 0}), 
  ChordData({132, 0, 1}), 
 };
 
-const uint8_t kmap5_Word_len13_anagram2_seqs[9] = {
+uint8_t const kmap5_Word_len13_anagram2_seqs[9] = {
  47, 81, 218, 71, 
  71, 232, 152, 237, 
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len13_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len13_anagram2 = {
   LengthAndAnagram(13, 2), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len13_anagram2_chords, // chords
   kmap5_Word_len13_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len13_anagram3_chords[2] = {
+ChordData const kmap5_Word_len13_anagram3_chords[2] = {
  ChordData({6, 0, 64}), ChordData({128, 64, 2}), 
 };
 
-const uint8_t kmap5_Word_len13_anagram3_seqs[4] = {
+uint8_t const kmap5_Word_len13_anagram3_seqs[4] = {
  50, 13, 51, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len13_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len13_anagram3 = {
   LengthAndAnagram(13, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len13_anagram3_chords, // chords
   kmap5_Word_len13_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram0_chords[75] = {
+ChordData const kmap5_Word_len14_anagram0_chords[75] = {
  ChordData({0, 0, 19}), ChordData({0, 0, 90}), ChordData({0, 4, 26}), ChordData({0, 4, 82}), 
  ChordData({0, 4, 146}), ChordData({0, 5, 1}), ChordData({0, 5, 8}), ChordData({0, 5, 16}), 
  ChordData({0, 32, 129}), ChordData({0, 32, 192}), ChordData({0, 44, 0}), ChordData({0, 68, 0}), 
@@ -2445,7 +2445,7 @@ const ChordData kmap5_Word_len14_anagram0_chords[75] = {
  ChordData({160, 33, 0}), ChordData({160, 64, 0}), ChordData({166, 0, 0}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram0_seqs[132] = {
+uint8_t const kmap5_Word_len14_anagram0_seqs[132] = {
  183, 165, 148, 250, 
  90, 202, 151, 244, 
  101, 247, 215, 189, 
@@ -2481,14 +2481,14 @@ const uint8_t kmap5_Word_len14_anagram0_seqs[132] = {
  168, 217, 79, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   75, // num_chords
   kmap5_Word_len14_anagram0_chords, // chords
   kmap5_Word_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram1_chords[28] = {
+ChordData const kmap5_Word_len14_anagram1_chords[28] = {
  ChordData({0, 0, 82}), ChordData({0, 68, 0}), ChordData({0, 68, 66}), ChordData({2, 64, 3}), 
  ChordData({2, 72, 0}), ChordData({4, 4, 0}), ChordData({4, 12, 0}), ChordData({6, 32, 0}), 
  ChordData({16, 0, 17}), ChordData({16, 0, 131}), ChordData({16, 0, 144}), ChordData({16, 0, 194}), 
@@ -2498,7 +2498,7 @@ const ChordData kmap5_Word_len14_anagram1_chords[28] = {
  ChordData({128, 64, 0}), ChordData({128, 64, 3}), ChordData({128, 64, 10}), ChordData({160, 65, 0}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram1_seqs[49] = {
+uint8_t const kmap5_Word_len14_anagram1_seqs[49] = {
  82, 74, 248, 32, 
  15, 0, 115, 97, 
  226, 183, 246, 177, 
@@ -2514,20 +2514,20 @@ const uint8_t kmap5_Word_len14_anagram1_seqs[49] = {
  132, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram1 = {
   LengthAndAnagram(14, 1), // seq_bit_len_and_anagram
   28, // num_chords
   kmap5_Word_len14_anagram1_chords, // chords
   kmap5_Word_len14_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram2_chords[12] = {
+ChordData const kmap5_Word_len14_anagram2_chords[12] = {
  ChordData({0, 0, 18}), ChordData({0, 68, 18}), ChordData({16, 0, 9}), ChordData({16, 0, 129}), 
  ChordData({16, 65, 0}), ChordData({32, 1, 8}), ChordData({32, 8, 64}), ChordData({128, 1, 0}), 
  ChordData({132, 0, 0}), ChordData({160, 65, 0}), ChordData({164, 0, 1}), ChordData({164, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram2_seqs[21] = {
+uint8_t const kmap5_Word_len14_anagram2_seqs[21] = {
  184, 229, 62, 112, 
  182, 158, 201, 157, 
  3, 172, 26, 171, 
@@ -2536,63 +2536,63 @@ const uint8_t kmap5_Word_len14_anagram2_seqs[21] = {
  246, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram2 = {
   LengthAndAnagram(14, 2), // seq_bit_len_and_anagram
   12, // num_chords
   kmap5_Word_len14_anagram2_chords, // chords
   kmap5_Word_len14_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram3_chords[5] = {
+ChordData const kmap5_Word_len14_anagram3_chords[5] = {
  ChordData({32, 1, 8}), ChordData({32, 13, 0}), ChordData({34, 1, 0}), ChordData({128, 64, 10}), 
  ChordData({164, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram3_seqs[9] = {
+uint8_t const kmap5_Word_len14_anagram3_seqs[9] = {
  80, 107, 124, 8, 
  7, 2, 169, 125, 
  46, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram3 = {
   LengthAndAnagram(14, 3), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len14_anagram3_chords, // chords
   kmap5_Word_len14_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram4_chords[3] = {
+ChordData const kmap5_Word_len14_anagram4_chords[3] = {
  ChordData({0, 4, 18}), ChordData({128, 64, 2}), ChordData({164, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram4_seqs[6] = {
+uint8_t const kmap5_Word_len14_anagram4_seqs[6] = {
  251, 37, 38, 208, 
  111, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram4 = {
   LengthAndAnagram(14, 4), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len14_anagram4_chords, // chords
   kmap5_Word_len14_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len14_anagram7_chords[1] = {
+ChordData const kmap5_Word_len14_anagram7_chords[1] = {
  ChordData({0, 68, 18}), 
 };
 
-const uint8_t kmap5_Word_len14_anagram7_seqs[2] = {
+uint8_t const kmap5_Word_len14_anagram7_seqs[2] = {
  192, 47, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len14_anagram7 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len14_anagram7 = {
   LengthAndAnagram(14, 7), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len14_anagram7_chords, // chords
   kmap5_Word_len14_anagram7_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len15_anagram0_chords[77] = {
+ChordData const kmap5_Word_len15_anagram0_chords[77] = {
  ChordData({0, 4, 131}), ChordData({0, 8, 82}), ChordData({0, 8, 146}), ChordData({0, 9, 1}), 
  ChordData({0, 12, 18}), ChordData({0, 13, 64}), ChordData({0, 64, 18}), ChordData({0, 64, 82}), 
  ChordData({0, 96, 128}), ChordData({2, 0, 194}), ChordData({2, 9, 1}), ChordData({2, 9, 8}), 
@@ -2615,7 +2615,7 @@ const ChordData kmap5_Word_len15_anagram0_chords[77] = {
  ChordData({160, 0, 18}), 
 };
 
-const uint8_t kmap5_Word_len15_anagram0_seqs[145] = {
+uint8_t const kmap5_Word_len15_anagram0_seqs[145] = {
  247, 32, 41, 99, 
  25, 169, 187, 24, 
  191, 124, 41, 134, 
@@ -2655,14 +2655,14 @@ const uint8_t kmap5_Word_len15_anagram0_seqs[145] = {
  5, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len15_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len15_anagram0 = {
   LengthAndAnagram(15, 0), // seq_bit_len_and_anagram
   77, // num_chords
   kmap5_Word_len15_anagram0_chords, // chords
   kmap5_Word_len15_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len15_anagram1_chords[33] = {
+ChordData const kmap5_Word_len15_anagram1_chords[33] = {
  ChordData({0, 9, 1}), ChordData({0, 13, 2}), ChordData({0, 68, 18}), ChordData({0, 69, 0}), 
  ChordData({4, 32, 0}), ChordData({4, 72, 0}), ChordData({16, 0, 19}), ChordData({16, 0, 129}), 
  ChordData({16, 0, 145}), ChordData({16, 0, 192}), ChordData({16, 4, 16}), ChordData({16, 4, 18}), 
@@ -2674,7 +2674,7 @@ const ChordData kmap5_Word_len15_anagram1_chords[33] = {
  ChordData({160, 1, 0}), 
 };
 
-const uint8_t kmap5_Word_len15_anagram1_seqs[62] = {
+uint8_t const kmap5_Word_len15_anagram1_seqs[62] = {
  241, 186, 199, 98, 
  248, 178, 251, 208, 
  88, 139, 45, 172, 
@@ -2693,14 +2693,14 @@ const uint8_t kmap5_Word_len15_anagram1_seqs[62] = {
  93, 66, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len15_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len15_anagram1 = {
   LengthAndAnagram(15, 1), // seq_bit_len_and_anagram
   33, // num_chords
   kmap5_Word_len15_anagram1_chords, // chords
   kmap5_Word_len15_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len15_anagram2_chords[22] = {
+ChordData const kmap5_Word_len15_anagram2_chords[22] = {
  ChordData({0, 36, 18}), ChordData({2, 9, 64}), ChordData({16, 0, 25}), ChordData({16, 0, 72}), 
  ChordData({16, 0, 73}), ChordData({16, 0, 192}), ChordData({16, 4, 16}), ChordData({16, 4, 17}), 
  ChordData({16, 4, 18}), ChordData({16, 4, 65}), ChordData({16, 32, 1}), ChordData({18, 0, 17}), 
@@ -2709,7 +2709,7 @@ const ChordData kmap5_Word_len15_anagram2_chords[22] = {
  ChordData({144, 0, 8}), ChordData({144, 0, 192}), 
 };
 
-const uint8_t kmap5_Word_len15_anagram2_seqs[42] = {
+uint8_t const kmap5_Word_len15_anagram2_seqs[42] = {
  236, 75, 41, 206, 
  121, 85, 45, 162, 
  150, 19, 19, 237, 
@@ -2723,44 +2723,44 @@ const uint8_t kmap5_Word_len15_anagram2_seqs[42] = {
  36, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len15_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len15_anagram2 = {
   LengthAndAnagram(15, 2), // seq_bit_len_and_anagram
   22, // num_chords
   kmap5_Word_len15_anagram2_chords, // chords
   kmap5_Word_len15_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len15_anagram3_chords[1] = {
+ChordData const kmap5_Word_len15_anagram3_chords[1] = {
  ChordData({16, 0, 9}), 
 };
 
-const uint8_t kmap5_Word_len15_anagram3_seqs[2] = {
+uint8_t const kmap5_Word_len15_anagram3_seqs[2] = {
  103, 61, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len15_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len15_anagram3 = {
   LengthAndAnagram(15, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len15_anagram3_chords, // chords
   kmap5_Word_len15_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len15_anagram5_chords[1] = {
+ChordData const kmap5_Word_len15_anagram5_chords[1] = {
  ChordData({16, 4, 16}), 
 };
 
-const uint8_t kmap5_Word_len15_anagram5_seqs[2] = {
+uint8_t const kmap5_Word_len15_anagram5_seqs[2] = {
  235, 95, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len15_anagram5 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len15_anagram5 = {
   LengthAndAnagram(15, 5), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len15_anagram5_chords, // chords
   kmap5_Word_len15_anagram5_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len16_anagram0_chords[140] = {
+ChordData const kmap5_Word_len16_anagram0_chords[140] = {
  ChordData({0, 0, 147}), ChordData({0, 1, 18}), ChordData({0, 1, 146}), ChordData({0, 4, 19}), 
  ChordData({0, 4, 67}), ChordData({0, 4, 74}), ChordData({0, 4, 129}), ChordData({0, 4, 130}), 
  ChordData({0, 4, 144}), ChordData({0, 4, 193}), ChordData({0, 8, 130}), ChordData({0, 12, 130}), 
@@ -2798,7 +2798,7 @@ const ChordData kmap5_Word_len16_anagram0_chords[140] = {
  ChordData({164, 64, 2}), ChordData({176, 0, 16}), ChordData({176, 1, 8}), ChordData({176, 1, 64}), 
 };
 
-const uint8_t kmap5_Word_len16_anagram0_seqs[280] = {
+uint8_t const kmap5_Word_len16_anagram0_seqs[280] = {
  120, 75, 221, 150, 
  29, 149, 248, 123, 
  248, 114, 130, 175, 
@@ -2871,14 +2871,14 @@ const uint8_t kmap5_Word_len16_anagram0_seqs[280] = {
  48, 213, 48, 45, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len16_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len16_anagram0 = {
   LengthAndAnagram(16, 0), // seq_bit_len_and_anagram
   140, // num_chords
   kmap5_Word_len16_anagram0_chords, // chords
   kmap5_Word_len16_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len16_anagram1_chords[42] = {
+ChordData const kmap5_Word_len16_anagram1_chords[42] = {
  ChordData({0, 4, 65}), ChordData({0, 4, 81}), ChordData({0, 4, 130}), ChordData({0, 4, 193}), 
  ChordData({2, 0, 9}), ChordData({2, 0, 129}), ChordData({2, 4, 129}), ChordData({2, 4, 192}), 
  ChordData({6, 0, 130}), ChordData({16, 8, 64}), ChordData({16, 12, 1}), ChordData({16, 12, 8}), 
@@ -2892,7 +2892,7 @@ const ChordData kmap5_Word_len16_anagram1_chords[42] = {
  ChordData({148, 0, 16}), ChordData({148, 0, 128}), 
 };
 
-const uint8_t kmap5_Word_len16_anagram1_seqs[84] = {
+uint8_t const kmap5_Word_len16_anagram1_seqs[84] = {
  114, 127, 114, 191, 
  248, 132, 242, 116, 
  163, 115, 55, 116, 
@@ -2916,21 +2916,21 @@ const uint8_t kmap5_Word_len16_anagram1_seqs[84] = {
  155, 205, 45, 201, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len16_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len16_anagram1 = {
   LengthAndAnagram(16, 1), // seq_bit_len_and_anagram
   42, // num_chords
   kmap5_Word_len16_anagram1_chords, // chords
   kmap5_Word_len16_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len16_anagram2_chords[16] = {
+ChordData const kmap5_Word_len16_anagram2_chords[16] = {
  ChordData({0, 4, 3}), ChordData({2, 0, 193}), ChordData({16, 12, 1}), ChordData({16, 68, 16}), 
  ChordData({18, 64, 1}), ChordData({18, 64, 2}), ChordData({20, 4, 2}), ChordData({36, 0, 0}), 
  ChordData({36, 4, 18}), ChordData({48, 1, 8}), ChordData({48, 5, 16}), ChordData({128, 0, 129}), 
  ChordData({128, 64, 2}), ChordData({144, 64, 8}), ChordData({148, 0, 16}), ChordData({176, 1, 16}), 
 };
 
-const uint8_t kmap5_Word_len16_anagram2_seqs[32] = {
+uint8_t const kmap5_Word_len16_anagram2_seqs[32] = {
  247, 120, 66, 115, 
  209, 127, 225, 215, 
  55, 193, 97, 208, 
@@ -2941,30 +2941,30 @@ const uint8_t kmap5_Word_len16_anagram2_seqs[32] = {
  235, 150, 48, 215, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len16_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len16_anagram2 = {
   LengthAndAnagram(16, 2), // seq_bit_len_and_anagram
   16, // num_chords
   kmap5_Word_len16_anagram2_chords, // chords
   kmap5_Word_len16_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len16_anagram3_chords[4] = {
+ChordData const kmap5_Word_len16_anagram3_chords[4] = {
  ChordData({16, 8, 0}), ChordData({16, 12, 1}), ChordData({20, 4, 16}), ChordData({128, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len16_anagram3_seqs[8] = {
+uint8_t const kmap5_Word_len16_anagram3_seqs[8] = {
  209, 209, 209, 247, 
  235, 111, 154, 169, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len16_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len16_anagram3 = {
   LengthAndAnagram(16, 3), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len16_anagram3_chords, // chords
   kmap5_Word_len16_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len17_anagram0_chords[173] = {
+ChordData const kmap5_Word_len17_anagram0_chords[173] = {
  ChordData({0, 5, 130}), ChordData({0, 9, 82}), ChordData({0, 12, 17}), ChordData({0, 12, 64}), 
  ChordData({0, 12, 80}), ChordData({0, 36, 1}), ChordData({0, 36, 3}), ChordData({0, 36, 9}), 
  ChordData({0, 36, 10}), ChordData({0, 36, 18}), ChordData({0, 36, 66}), ChordData({0, 36, 128}), 
@@ -3011,7 +3011,7 @@ const ChordData kmap5_Word_len17_anagram0_chords[173] = {
  ChordData({180, 0, 8}), 
 };
 
-const uint8_t kmap5_Word_len17_anagram0_seqs[368] = {
+uint8_t const kmap5_Word_len17_anagram0_seqs[368] = {
  221, 131, 164, 88, 
  198, 223, 139, 47, 
  18, 127, 229, 216, 
@@ -3106,14 +3106,14 @@ const uint8_t kmap5_Word_len17_anagram0_seqs[368] = {
  228, 220, 167, 26, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len17_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len17_anagram0 = {
   LengthAndAnagram(17, 0), // seq_bit_len_and_anagram
   173, // num_chords
   kmap5_Word_len17_anagram0_chords, // chords
   kmap5_Word_len17_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len17_anagram1_chords[65] = {
+ChordData const kmap5_Word_len17_anagram1_chords[65] = {
  ChordData({0, 12, 130}), ChordData({0, 12, 144}), ChordData({0, 36, 18}), ChordData({2, 8, 8}), 
  ChordData({2, 8, 65}), ChordData({2, 12, 128}), ChordData({2, 32, 9}), ChordData({2, 32, 65}), 
  ChordData({2, 32, 128}), ChordData({2, 68, 128}), ChordData({4, 4, 18}), ChordData({4, 4, 72}), 
@@ -3133,7 +3133,7 @@ const ChordData kmap5_Word_len17_anagram1_chords[65] = {
  ChordData({180, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len17_anagram1_seqs[139] = {
+uint8_t const kmap5_Word_len17_anagram1_seqs[139] = {
  248, 20, 193, 63, 
  254, 34, 139, 163, 
  35, 55, 113, 226, 
@@ -3171,14 +3171,14 @@ const uint8_t kmap5_Word_len17_anagram1_seqs[139] = {
  125, 174, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len17_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len17_anagram1 = {
   LengthAndAnagram(17, 1), // seq_bit_len_and_anagram
   65, // num_chords
   kmap5_Word_len17_anagram1_chords, // chords
   kmap5_Word_len17_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len17_anagram2_chords[18] = {
+ChordData const kmap5_Word_len17_anagram2_chords[18] = {
  ChordData({0, 12, 130}), ChordData({0, 68, 130}), ChordData({2, 32, 65}), ChordData({4, 4, 17}), 
  ChordData({6, 0, 64}), ChordData({16, 0, 130}), ChordData({16, 64, 2}), ChordData({16, 68, 18}), 
  ChordData({34, 1, 144}), ChordData({36, 1, 0}), ChordData({48, 8, 8}), ChordData({48, 12, 128}), 
@@ -3186,7 +3186,7 @@ const ChordData kmap5_Word_len17_anagram2_chords[18] = {
  ChordData({132, 0, 65}), ChordData({132, 0, 128}), 
 };
 
-const uint8_t kmap5_Word_len17_anagram2_seqs[39] = {
+uint8_t const kmap5_Word_len17_anagram2_seqs[39] = {
  72, 31, 129, 7, 
  177, 145, 187, 253, 
  214, 70, 196, 32, 
@@ -3199,45 +3199,45 @@ const uint8_t kmap5_Word_len17_anagram2_seqs[39] = {
  90, 38, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len17_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len17_anagram2 = {
   LengthAndAnagram(17, 2), // seq_bit_len_and_anagram
   18, // num_chords
   kmap5_Word_len17_anagram2_chords, // chords
   kmap5_Word_len17_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len17_anagram3_chords[3] = {
+ChordData const kmap5_Word_len17_anagram3_chords[3] = {
  ChordData({16, 68, 18}), ChordData({20, 0, 16}), ChordData({128, 64, 18}), 
 };
 
-const uint8_t kmap5_Word_len17_anagram3_seqs[7] = {
+uint8_t const kmap5_Word_len17_anagram3_seqs[7] = {
  128, 127, 219, 186, 
  97, 110, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len17_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len17_anagram3 = {
   LengthAndAnagram(17, 3), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len17_anagram3_chords, // chords
   kmap5_Word_len17_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len17_anagram5_chords[1] = {
+ChordData const kmap5_Word_len17_anagram5_chords[1] = {
  ChordData({0, 68, 18}), 
 };
 
-const uint8_t kmap5_Word_len17_anagram5_seqs[3] = {
+uint8_t const kmap5_Word_len17_anagram5_seqs[3] = {
  248, 27, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len17_anagram5 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len17_anagram5 = {
   LengthAndAnagram(17, 5), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len17_anagram5_chords, // chords
   kmap5_Word_len17_anagram5_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len18_anagram0_chords[147] = {
+ChordData const kmap5_Word_len18_anagram0_chords[147] = {
  ChordData({0, 4, 83}), ChordData({0, 5, 3}), ChordData({0, 5, 65}), ChordData({0, 5, 128}), 
  ChordData({0, 5, 129}), ChordData({0, 32, 137}), ChordData({0, 40, 129}), ChordData({0, 44, 1}), 
  ChordData({0, 44, 16}), ChordData({0, 44, 64}), ChordData({0, 68, 11}), ChordData({0, 68, 26}), 
@@ -3277,7 +3277,7 @@ const ChordData kmap5_Word_len18_anagram0_chords[147] = {
  ChordData({166, 0, 64}), ChordData({176, 1, 0}), ChordData({176, 8, 0}), 
 };
 
-const uint8_t kmap5_Word_len18_anagram0_seqs[331] = {
+uint8_t const kmap5_Word_len18_anagram0_seqs[331] = {
  114, 95, 118, 143, 
  215, 189, 92, 247, 
  68, 29, 253, 105, 
@@ -3363,14 +3363,14 @@ const uint8_t kmap5_Word_len18_anagram0_seqs[331] = {
  25, 147, 51, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len18_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len18_anagram0 = {
   LengthAndAnagram(18, 0), // seq_bit_len_and_anagram
   147, // num_chords
   kmap5_Word_len18_anagram0_chords, // chords
   kmap5_Word_len18_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len18_anagram1_chords[40] = {
+ChordData const kmap5_Word_len18_anagram1_chords[40] = {
  ChordData({0, 0, 90}), ChordData({0, 4, 26}), ChordData({0, 4, 146}), ChordData({0, 5, 130}), 
  ChordData({0, 32, 128}), ChordData({0, 36, 64}), ChordData({0, 68, 130}), ChordData({2, 0, 19}), 
  ChordData({4, 12, 16}), ChordData({4, 12, 64}), ChordData({4, 12, 128}), ChordData({4, 32, 1}), 
@@ -3383,7 +3383,7 @@ const ChordData kmap5_Word_len18_anagram1_chords[40] = {
  ChordData({164, 0, 64}), ChordData({164, 0, 144}), ChordData({164, 1, 16}), ChordData({164, 4, 1}), 
 };
 
-const uint8_t kmap5_Word_len18_anagram1_seqs[90] = {
+uint8_t const kmap5_Word_len18_anagram1_seqs[90] = {
  82, 42, 150, 191, 
  250, 68, 37, 62, 
  117, 5, 18, 177, 
@@ -3409,21 +3409,21 @@ const uint8_t kmap5_Word_len18_anagram1_seqs[90] = {
  159, 127, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len18_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len18_anagram1 = {
   LengthAndAnagram(18, 1), // seq_bit_len_and_anagram
   40, // num_chords
   kmap5_Word_len18_anagram1_chords, // chords
   kmap5_Word_len18_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len18_anagram2_chords[15] = {
+ChordData const kmap5_Word_len18_anagram2_chords[15] = {
  ChordData({0, 4, 19}), ChordData({0, 4, 146}), ChordData({0, 64, 2}), ChordData({4, 12, 0}), 
  ChordData({16, 0, 131}), ChordData({16, 4, 192}), ChordData({16, 13, 0}), ChordData({16, 64, 130}), 
  ChordData({32, 8, 1}), ChordData({32, 69, 16}), ChordData({36, 4, 128}), ChordData({38, 0, 128}), 
  ChordData({50, 72, 0}), ChordData({128, 64, 130}), ChordData({128, 72, 0}), 
 };
 
-const uint8_t kmap5_Word_len18_anagram2_seqs[34] = {
+uint8_t const kmap5_Word_len18_anagram2_seqs[34] = {
  183, 95, 34, 125, 
  9, 0, 64, 193, 
  111, 38, 227, 145, 
@@ -3435,33 +3435,33 @@ const uint8_t kmap5_Word_len18_anagram2_seqs[34] = {
  50, 35, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len18_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len18_anagram2 = {
   LengthAndAnagram(18, 2), // seq_bit_len_and_anagram
   15, // num_chords
   kmap5_Word_len18_anagram2_chords, // chords
   kmap5_Word_len18_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len18_anagram3_chords[6] = {
+ChordData const kmap5_Word_len18_anagram3_chords[6] = {
  ChordData({0, 4, 146}), ChordData({16, 0, 81}), ChordData({16, 13, 128}), ChordData({18, 0, 129}), 
  ChordData({48, 1, 128}), ChordData({48, 9, 0}), 
 };
 
-const uint8_t kmap5_Word_len18_anagram3_seqs[14] = {
+uint8_t const kmap5_Word_len18_anagram3_seqs[14] = {
  224, 95, 202, 217, 
  75, 95, 180, 105, 
  206, 93, 53, 65, 
  187, 8, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len18_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len18_anagram3 = {
   LengthAndAnagram(18, 3), // seq_bit_len_and_anagram
   6, // num_chords
   kmap5_Word_len18_anagram3_chords, // chords
   kmap5_Word_len18_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len19_anagram0_chords[140] = {
+ChordData const kmap5_Word_len19_anagram0_chords[140] = {
  ChordData({0, 12, 26}), ChordData({0, 12, 146}), ChordData({0, 13, 9}), ChordData({0, 13, 10}), 
  ChordData({0, 13, 18}), ChordData({0, 13, 24}), ChordData({0, 13, 65}), ChordData({0, 13, 66}), 
  ChordData({0, 13, 129}), ChordData({0, 13, 130}), ChordData({0, 37, 128}), ChordData({0, 68, 146}), 
@@ -3499,7 +3499,7 @@ const ChordData kmap5_Word_len19_anagram0_chords[140] = {
  ChordData({164, 1, 128}), ChordData({164, 8, 0}), ChordData({164, 32, 1}), ChordData({164, 64, 128}), 
 };
 
-const uint8_t kmap5_Word_len19_anagram0_seqs[333] = {
+uint8_t const kmap5_Word_len19_anagram0_seqs[333] = {
  241, 181, 44, 63, 
  210, 189, 22, 245, 
  177, 184, 143, 197, 
@@ -3586,14 +3586,14 @@ const uint8_t kmap5_Word_len19_anagram0_seqs[333] = {
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len19_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len19_anagram0 = {
   LengthAndAnagram(19, 0), // seq_bit_len_and_anagram
   140, // num_chords
   kmap5_Word_len19_anagram0_chords, // chords
   kmap5_Word_len19_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len19_anagram1_chords[57] = {
+ChordData const kmap5_Word_len19_anagram1_chords[57] = {
  ChordData({0, 12, 64}), ChordData({0, 13, 3}), ChordData({0, 13, 16}), ChordData({0, 68, 10}), 
  ChordData({2, 4, 131}), ChordData({2, 9, 64}), ChordData({2, 9, 72}), ChordData({2, 9, 128}), 
  ChordData({2, 9, 192}), ChordData({2, 64, 10}), ChordData({2, 64, 130}), ChordData({4, 68, 18}), 
@@ -3611,7 +3611,7 @@ const ChordData kmap5_Word_len19_anagram1_chords[57] = {
  ChordData({164, 1, 128}), 
 };
 
-const uint8_t kmap5_Word_len19_anagram1_seqs[136] = {
+uint8_t const kmap5_Word_len19_anagram1_seqs[136] = {
  188, 124, 188, 199, 
  98, 247, 27, 195, 
  3, 122, 15, 154, 
@@ -3648,21 +3648,21 @@ const uint8_t kmap5_Word_len19_anagram1_seqs[136] = {
  100, 144, 178, 7, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len19_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len19_anagram1 = {
   LengthAndAnagram(19, 1), // seq_bit_len_and_anagram
   57, // num_chords
   kmap5_Word_len19_anagram1_chords, // chords
   kmap5_Word_len19_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len19_anagram2_chords[14] = {
+ChordData const kmap5_Word_len19_anagram2_chords[14] = {
  ChordData({4, 4, 18}), ChordData({16, 4, 19}), ChordData({16, 4, 24}), ChordData({16, 4, 146}), 
  ChordData({16, 32, 17}), ChordData({32, 1, 16}), ChordData({34, 8, 0}), ChordData({36, 0, 128}), 
  ChordData({128, 9, 18}), ChordData({128, 64, 10}), ChordData({144, 0, 73}), ChordData({160, 1, 16}), 
  ChordData({160, 1, 128}), ChordData({164, 64, 8}), 
 };
 
-const uint8_t kmap5_Word_len19_anagram2_seqs[34] = {
+uint8_t const kmap5_Word_len19_anagram2_seqs[34] = {
  109, 191, 188, 125, 
  244, 175, 245, 145, 
  252, 123, 108, 109, 
@@ -3674,19 +3674,19 @@ const uint8_t kmap5_Word_len19_anagram2_seqs[34] = {
  53, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len19_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len19_anagram2 = {
   LengthAndAnagram(19, 2), // seq_bit_len_and_anagram
   14, // num_chords
   kmap5_Word_len19_anagram2_chords, // chords
   kmap5_Word_len19_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len19_anagram3_chords[7] = {
+ChordData const kmap5_Word_len19_anagram3_chords[7] = {
  ChordData({0, 68, 18}), ChordData({16, 4, 19}), ChordData({16, 4, 65}), ChordData({16, 4, 138}), 
  ChordData({48, 1, 24}), ChordData({52, 8, 16}), ChordData({160, 1, 128}), 
 };
 
-const uint8_t kmap5_Word_len19_anagram3_seqs[17] = {
+uint8_t const kmap5_Word_len19_anagram3_seqs[17] = {
  97, 31, 192, 63, 
  239, 189, 156, 233, 
  21, 13, 173, 94, 
@@ -3694,30 +3694,30 @@ const uint8_t kmap5_Word_len19_anagram3_seqs[17] = {
  14, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len19_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len19_anagram3 = {
   LengthAndAnagram(19, 3), // seq_bit_len_and_anagram
   7, // num_chords
   kmap5_Word_len19_anagram3_chords, // chords
   kmap5_Word_len19_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len19_anagram4_chords[2] = {
+ChordData const kmap5_Word_len19_anagram4_chords[2] = {
  ChordData({0, 68, 18}), ChordData({16, 4, 145}), 
 };
 
-const uint8_t kmap5_Word_len19_anagram4_seqs[5] = {
+uint8_t const kmap5_Word_len19_anagram4_seqs[5] = {
  192, 111, 120, 242, 
  30, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len19_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len19_anagram4 = {
   LengthAndAnagram(19, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len19_anagram4_chords, // chords
   kmap5_Word_len19_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len20_anagram0_chords[155] = {
+ChordData const kmap5_Word_len20_anagram0_chords[155] = {
  ChordData({0, 4, 81}), ChordData({0, 4, 89}), ChordData({0, 4, 138}), ChordData({0, 4, 194}), 
  ChordData({0, 4, 200}), ChordData({0, 13, 16}), ChordData({0, 45, 2}), ChordData({0, 65, 74}), 
  ChordData({0, 77, 16}), ChordData({2, 0, 67}), ChordData({2, 1, 16}), ChordData({2, 4, 17}), 
@@ -3759,7 +3759,7 @@ const ChordData kmap5_Word_len20_anagram0_chords[155] = {
  ChordData({164, 64, 130}), ChordData({176, 0, 17}), ChordData({176, 0, 24}), 
 };
 
-const uint8_t kmap5_Word_len20_anagram0_seqs[388] = {
+uint8_t const kmap5_Word_len20_anagram0_seqs[388] = {
  114, 191, 119, 251, 
  42, 248, 250, 132, 
  244, 34, 250, 242, 
@@ -3859,14 +3859,14 @@ const uint8_t kmap5_Word_len20_anagram0_seqs[388] = {
  207, 234, 186, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len20_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len20_anagram0 = {
   LengthAndAnagram(20, 0), // seq_bit_len_and_anagram
   155, // num_chords
   kmap5_Word_len20_anagram0_chords, // chords
   kmap5_Word_len20_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len20_anagram1_chords[47] = {
+ChordData const kmap5_Word_len20_anagram1_chords[47] = {
  ChordData({0, 4, 19}), ChordData({0, 13, 64}), ChordData({0, 40, 19}), ChordData({2, 0, 193}), 
  ChordData({2, 0, 194}), ChordData({2, 4, 9}), ChordData({2, 4, 25}), ChordData({2, 4, 73}), 
  ChordData({2, 4, 137}), ChordData({2, 4, 144}), ChordData({2, 4, 145}), ChordData({2, 65, 2}), 
@@ -3881,7 +3881,7 @@ const ChordData kmap5_Word_len20_anagram1_chords[47] = {
  ChordData({164, 64, 130}), ChordData({176, 0, 17}), ChordData({176, 1, 64}), 
 };
 
-const uint8_t kmap5_Word_len20_anagram1_seqs[118] = {
+uint8_t const kmap5_Word_len20_anagram1_seqs[118] = {
  183, 143, 23, 95, 
  138, 177, 60, 38, 
  55, 68, 130, 67, 
@@ -3914,14 +3914,14 @@ const uint8_t kmap5_Word_len20_anagram1_seqs[118] = {
  83, 12, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len20_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len20_anagram1 = {
   LengthAndAnagram(20, 1), // seq_bit_len_and_anagram
   47, // num_chords
   kmap5_Word_len20_anagram1_chords, // chords
   kmap5_Word_len20_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len20_anagram2_chords[17] = {
+ChordData const kmap5_Word_len20_anagram2_chords[17] = {
  ChordData({0, 4, 193}), ChordData({2, 9, 128}), ChordData({16, 1, 16}), ChordData({16, 1, 129}), 
  ChordData({16, 36, 1}), ChordData({16, 36, 2}), ChordData({16, 36, 17}), ChordData({16, 64, 3}), 
  ChordData({18, 64, 18}), ChordData({20, 4, 66}), ChordData({20, 4, 80}), ChordData({20, 4, 144}), 
@@ -3929,7 +3929,7 @@ const ChordData kmap5_Word_len20_anagram2_chords[17] = {
  ChordData({180, 0, 64}), 
 };
 
-const uint8_t kmap5_Word_len20_anagram2_seqs[43] = {
+uint8_t const kmap5_Word_len20_anagram2_seqs[43] = {
  114, 79, 20, 135, 
  138, 235, 206, 219, 
  145, 125, 199, 124, 
@@ -3943,45 +3943,45 @@ const uint8_t kmap5_Word_len20_anagram2_seqs[43] = {
  217, 91, 12, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len20_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len20_anagram2 = {
   LengthAndAnagram(20, 2), // seq_bit_len_and_anagram
   17, // num_chords
   kmap5_Word_len20_anagram2_chords, // chords
   kmap5_Word_len20_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len20_anagram3_chords[2] = {
+ChordData const kmap5_Word_len20_anagram3_chords[2] = {
  ChordData({16, 36, 17}), ChordData({32, 1, 128}), 
 };
 
-const uint8_t kmap5_Word_len20_anagram3_seqs[5] = {
+uint8_t const kmap5_Word_len20_anagram3_seqs[5] = {
  204, 191, 7, 43, 
  117, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len20_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len20_anagram3 = {
   LengthAndAnagram(20, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len20_anagram3_chords, // chords
   kmap5_Word_len20_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len20_anagram6_chords[1] = {
+ChordData const kmap5_Word_len20_anagram6_chords[1] = {
  ChordData({48, 8, 80}), 
 };
 
-const uint8_t kmap5_Word_len20_anagram6_seqs[3] = {
+uint8_t const kmap5_Word_len20_anagram6_seqs[3] = {
  156, 87, 12, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len20_anagram6 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len20_anagram6 = {
   LengthAndAnagram(20, 6), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len20_anagram6_chords, // chords
   kmap5_Word_len20_anagram6_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram0_chords[171] = {
+ChordData const kmap5_Word_len21_anagram0_chords[171] = {
  ChordData({0, 12, 81}), ChordData({0, 12, 144}), ChordData({0, 12, 192}), ChordData({0, 36, 19}), 
  ChordData({0, 36, 26}), ChordData({0, 36, 81}), ChordData({0, 36, 82}), ChordData({0, 36, 192}), 
  ChordData({0, 64, 209}), ChordData({0, 68, 16}), ChordData({0, 68, 73}), ChordData({0, 68, 192}), 
@@ -4027,7 +4027,7 @@ const ChordData kmap5_Word_len21_anagram0_chords[171] = {
  ChordData({178, 8, 2}), ChordData({178, 8, 128}), ChordData({180, 0, 136}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram0_seqs[449] = {
+uint8_t const kmap5_Word_len21_anagram0_seqs[449] = {
  18, 127, 239, 233, 
  55, 74, 124, 34, 
  100, 191, 183, 175, 
@@ -4143,14 +4143,14 @@ const uint8_t kmap5_Word_len21_anagram0_seqs[449] = {
  100, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram0 = {
   LengthAndAnagram(21, 0), // seq_bit_len_and_anagram
   171, // num_chords
   kmap5_Word_len21_anagram0_chords, // chords
   kmap5_Word_len21_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram1_chords[44] = {
+ChordData const kmap5_Word_len21_anagram1_chords[44] = {
  ChordData({0, 36, 3}), ChordData({0, 36, 192}), ChordData({2, 12, 8}), ChordData({2, 64, 0}), 
  ChordData({2, 65, 0}), ChordData({4, 4, 17}), ChordData({4, 4, 65}), ChordData({4, 4, 82}), 
  ChordData({16, 0, 27}), ChordData({16, 0, 146}), ChordData({16, 4, 146}), ChordData({16, 100, 0}), 
@@ -4164,7 +4164,7 @@ const ChordData kmap5_Word_len21_anagram1_chords[44] = {
  ChordData({144, 64, 19}), ChordData({160, 0, 17}), ChordData({164, 8, 0}), ChordData({176, 9, 8}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram1_seqs[116] = {
+uint8_t const kmap5_Word_len21_anagram1_seqs[116] = {
  248, 135, 76, 232, 
  133, 197, 215, 121, 
  126, 248, 16, 166, 
@@ -4196,20 +4196,20 @@ const uint8_t kmap5_Word_len21_anagram1_seqs[116] = {
  123, 168, 25, 13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram1 = {
   LengthAndAnagram(21, 1), // seq_bit_len_and_anagram
   44, // num_chords
   kmap5_Word_len21_anagram1_chords, // chords
   kmap5_Word_len21_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram2_chords[12] = {
+ChordData const kmap5_Word_len21_anagram2_chords[12] = {
  ChordData({0, 12, 18}), ChordData({6, 0, 192}), ChordData({36, 0, 18}), ChordData({48, 8, 24}), 
  ChordData({48, 9, 16}), ChordData({52, 0, 80}), ChordData({128, 9, 16}), ChordData({128, 32, 65}), 
  ChordData({132, 0, 17}), ChordData({160, 0, 17}), ChordData({160, 0, 18}), ChordData({176, 8, 16}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram2_seqs[32] = {
+uint8_t const kmap5_Word_len21_anagram2_seqs[32] = {
  252, 199, 82, 218, 
  16, 109, 237, 75, 
  173, 209, 203, 121, 
@@ -4220,63 +4220,63 @@ const uint8_t kmap5_Word_len21_anagram2_seqs[32] = {
  221, 77, 206, 11, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram2 = {
   LengthAndAnagram(21, 2), // seq_bit_len_and_anagram
   12, // num_chords
   kmap5_Word_len21_anagram2_chords, // chords
   kmap5_Word_len21_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram3_chords[4] = {
+ChordData const kmap5_Word_len21_anagram3_chords[4] = {
  ChordData({16, 0, 130}), ChordData({16, 4, 82}), ChordData({48, 8, 8}), ChordData({176, 1, 16}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram3_seqs[11] = {
+uint8_t const kmap5_Word_len21_anagram3_seqs[11] = {
  6, 161, 201, 34, 
  95, 114, 214, 234, 
  77, 88, 13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram3 = {
   LengthAndAnagram(21, 3), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len21_anagram3_chords, // chords
   kmap5_Word_len21_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram4_chords[2] = {
+ChordData const kmap5_Word_len21_anagram4_chords[2] = {
  ChordData({16, 4, 146}), ChordData({176, 1, 16}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram4_seqs[6] = {
+uint8_t const kmap5_Word_len21_anagram4_seqs[6] = {
  107, 250, 114, 179, 
  66, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram4 = {
   LengthAndAnagram(21, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len21_anagram4_chords, // chords
   kmap5_Word_len21_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len21_anagram5_chords[3] = {
+ChordData const kmap5_Word_len21_anagram5_chords[3] = {
  ChordData({16, 68, 18}), ChordData({128, 64, 2}), ChordData({128, 64, 18}), 
 };
 
-const uint8_t kmap5_Word_len21_anagram5_seqs[8] = {
+uint8_t const kmap5_Word_len21_anagram5_seqs[8] = {
  15, 252, 154, 15, 
  9, 96, 230, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len21_anagram5 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len21_anagram5 = {
   LengthAndAnagram(21, 5), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len21_anagram5_chords, // chords
   kmap5_Word_len21_anagram5_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram0_chords[191] = {
+ChordData const kmap5_Word_len22_anagram0_chords[191] = {
  ChordData({0, 1, 16}), ChordData({0, 4, 18}), ChordData({0, 4, 80}), ChordData({0, 4, 91}), 
  ChordData({0, 5, 19}), ChordData({0, 44, 3}), ChordData({0, 44, 18}), ChordData({0, 44, 80}), 
  ChordData({0, 68, 10}), ChordData({0, 72, 0}), ChordData({0, 76, 16}), ChordData({2, 0, 210}), 
@@ -4327,7 +4327,7 @@ const ChordData kmap5_Word_len22_anagram0_chords[191] = {
  ChordData({178, 72, 0}), ChordData({180, 0, 16}), ChordData({180, 8, 16}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram0_seqs[526] = {
+uint8_t const kmap5_Word_len22_anagram0_seqs[526] = {
  252, 242, 221, 239, 
  126, 201, 203, 239, 
  235, 203, 149, 184, 
@@ -4462,14 +4462,14 @@ const uint8_t kmap5_Word_len22_anagram0_seqs[526] = {
  57, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram0 = {
   LengthAndAnagram(22, 0), // seq_bit_len_and_anagram
   191, // num_chords
   kmap5_Word_len22_anagram0_chords, // chords
   kmap5_Word_len22_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram1_chords[44] = {
+ChordData const kmap5_Word_len22_anagram1_chords[44] = {
  ChordData({0, 4, 82}), ChordData({0, 5, 129}), ChordData({0, 44, 18}), ChordData({0, 109, 2}), 
  ChordData({2, 0, 146}), ChordData({4, 8, 0}), ChordData({16, 0, 83}), ChordData({16, 4, 131}), 
  ChordData({16, 8, 18}), ChordData({16, 13, 72}), ChordData({16, 33, 192}), ChordData({16, 64, 136}), 
@@ -4483,7 +4483,7 @@ const ChordData kmap5_Word_len22_anagram1_chords[44] = {
  ChordData({176, 1, 16}), ChordData({176, 9, 16}), ChordData({176, 72, 16}), ChordData({180, 1, 128}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram1_seqs[121] = {
+uint8_t const kmap5_Word_len22_anagram1_seqs[121] = {
  130, 191, 101, 247, 
  247, 132, 236, 55, 
  178, 7, 138, 84, 
@@ -4517,20 +4517,20 @@ const uint8_t kmap5_Word_len22_anagram1_seqs[121] = {
  222, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram1 = {
   LengthAndAnagram(22, 1), // seq_bit_len_and_anagram
   44, // num_chords
   kmap5_Word_len22_anagram1_chords, // chords
   kmap5_Word_len22_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram2_chords[12] = {
+ChordData const kmap5_Word_len22_anagram2_chords[12] = {
  ChordData({0, 4, 18}), ChordData({6, 0, 1}), ChordData({16, 0, 27}), ChordData({16, 0, 81}), 
  ChordData({16, 4, 82}), ChordData({16, 4, 138}), ChordData({16, 13, 128}), ChordData({18, 65, 8}), 
  ChordData({48, 8, 18}), ChordData({52, 1, 16}), ChordData({52, 4, 64}), ChordData({160, 64, 130}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram2_seqs[33] = {
+uint8_t const kmap5_Word_len22_anagram2_seqs[33] = {
  248, 187, 101, 155, 
  54, 135, 214, 243, 
  202, 173, 125, 184, 
@@ -4542,62 +4542,62 @@ const uint8_t kmap5_Word_len22_anagram2_seqs[33] = {
  13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram2 = {
   LengthAndAnagram(22, 2), // seq_bit_len_and_anagram
   12, // num_chords
   kmap5_Word_len22_anagram2_chords, // chords
   kmap5_Word_len22_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram3_chords[4] = {
+ChordData const kmap5_Word_len22_anagram3_chords[4] = {
  ChordData({16, 4, 18}), ChordData({16, 4, 145}), ChordData({16, 4, 146}), ChordData({36, 1, 0}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram3_seqs[11] = {
+uint8_t const kmap5_Word_len22_anagram3_seqs[11] = {
  248, 107, 239, 154, 
  254, 188, 166, 7, 
  181, 218, 117, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram3 = {
   LengthAndAnagram(22, 3), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len22_anagram3_chords, // chords
   kmap5_Word_len22_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram4_chords[2] = {
+ChordData const kmap5_Word_len22_anagram4_chords[2] = {
  ChordData({16, 4, 65}), ChordData({48, 9, 16}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram4_seqs[6] = {
+uint8_t const kmap5_Word_len22_anagram4_seqs[6] = {
  150, 251, 115, 103, 
  206, 11, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram4 = {
   LengthAndAnagram(22, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len22_anagram4_chords, // chords
   kmap5_Word_len22_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len22_anagram6_chords[1] = {
+ChordData const kmap5_Word_len22_anagram6_chords[1] = {
  ChordData({16, 68, 18}), 
 };
 
-const uint8_t kmap5_Word_len22_anagram6_seqs[3] = {
+uint8_t const kmap5_Word_len22_anagram6_seqs[3] = {
  193, 248, 37, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len22_anagram6 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len22_anagram6 = {
   LengthAndAnagram(22, 6), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len22_anagram6_chords, // chords
   kmap5_Word_len22_anagram6_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram0_chords[162] = {
+ChordData const kmap5_Word_len23_anagram0_chords[162] = {
  ChordData({0, 13, 19}), ChordData({0, 13, 26}), ChordData({0, 13, 67}), ChordData({0, 13, 146}), 
  ChordData({0, 13, 194}), ChordData({0, 32, 91}), ChordData({0, 37, 65}), ChordData({0, 37, 192}), 
  ChordData({0, 69, 16}), ChordData({0, 69, 17}), ChordData({2, 9, 19}), ChordData({2, 9, 67}), 
@@ -4641,7 +4641,7 @@ const ChordData kmap5_Word_len23_anagram0_chords[162] = {
  ChordData({180, 12, 0}), ChordData({180, 64, 130}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram0_seqs[466] = {
+uint8_t const kmap5_Word_len23_anagram0_seqs[466] = {
  183, 143, 69, 220, 
  215, 162, 220, 99, 
  17, 252, 177, 40, 
@@ -4761,14 +4761,14 @@ const uint8_t kmap5_Word_len23_anagram0_seqs[466] = {
  148, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram0 = {
   LengthAndAnagram(23, 0), // seq_bit_len_and_anagram
   162, // num_chords
   kmap5_Word_len23_anagram0_chords, // chords
   kmap5_Word_len23_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram1_chords[52] = {
+ChordData const kmap5_Word_len23_anagram1_chords[52] = {
  ChordData({0, 12, 1}), ChordData({0, 12, 18}), ChordData({0, 13, 18}), ChordData({0, 36, 19}), 
  ChordData({0, 68, 26}), ChordData({0, 100, 3}), ChordData({2, 68, 18}), ChordData({16, 0, 81}), 
  ChordData({16, 4, 9}), ChordData({16, 4, 66}), ChordData({16, 4, 137}), ChordData({16, 4, 138}), 
@@ -4784,7 +4784,7 @@ const ChordData kmap5_Word_len23_anagram1_chords[52] = {
  ChordData({164, 32, 1}), ChordData({164, 64, 8}), ChordData({164, 64, 128}), ChordData({164, 68, 16}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram1_seqs[150] = {
+uint8_t const kmap5_Word_len23_anagram1_seqs[150] = {
  124, 252, 59, 62, 
  254, 34, 238, 99, 
  177, 124, 100, 135, 
@@ -4825,14 +4825,14 @@ const uint8_t kmap5_Word_len23_anagram1_seqs[150] = {
  252, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram1 = {
   LengthAndAnagram(23, 1), // seq_bit_len_and_anagram
   52, // num_chords
   kmap5_Word_len23_anagram1_chords, // chords
   kmap5_Word_len23_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram2_chords[20] = {
+ChordData const kmap5_Word_len23_anagram2_chords[20] = {
  ChordData({0, 68, 26}), ChordData({2, 68, 18}), ChordData({2, 96, 3}), ChordData({4, 4, 82}), 
  ChordData({16, 4, 81}), ChordData({16, 4, 131}), ChordData({16, 4, 145}), ChordData({18, 0, 25}), 
  ChordData({18, 0, 89}), ChordData({18, 0, 131}), ChordData({18, 4, 145}), ChordData({20, 4, 192}), 
@@ -4840,7 +4840,7 @@ const ChordData kmap5_Word_len23_anagram2_chords[20] = {
  ChordData({48, 8, 192}), ChordData({128, 12, 18}), ChordData({160, 33, 1}), ChordData({164, 0, 17}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram2_seqs[58] = {
+uint8_t const kmap5_Word_len23_anagram2_seqs[58] = {
  251, 26, 202, 48, 
  191, 37, 48, 135, 
  76, 218, 126, 249, 
@@ -4858,19 +4858,19 @@ const uint8_t kmap5_Word_len23_anagram2_seqs[58] = {
  246, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram2 = {
   LengthAndAnagram(23, 2), // seq_bit_len_and_anagram
   20, // num_chords
   kmap5_Word_len23_anagram2_chords, // chords
   kmap5_Word_len23_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram3_chords[6] = {
+ChordData const kmap5_Word_len23_anagram3_chords[6] = {
  ChordData({20, 0, 19}), ChordData({32, 69, 16}), ChordData({48, 1, 16}), ChordData({48, 9, 16}), 
  ChordData({48, 12, 128}), ChordData({128, 12, 18}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram3_seqs[18] = {
+uint8_t const kmap5_Word_len23_anagram3_seqs[18] = {
  107, 116, 59, 88, 
  127, 3, 15, 215, 
  208, 209, 11, 205, 
@@ -4878,60 +4878,60 @@ const uint8_t kmap5_Word_len23_anagram3_seqs[18] = {
  230, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram3 = {
   LengthAndAnagram(23, 3), // seq_bit_len_and_anagram
   6, // num_chords
   kmap5_Word_len23_anagram3_chords, // chords
   kmap5_Word_len23_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram4_chords[2] = {
+ChordData const kmap5_Word_len23_anagram4_chords[2] = {
  ChordData({128, 64, 18}), ChordData({160, 33, 1}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram4_seqs[6] = {
+uint8_t const kmap5_Word_len23_anagram4_seqs[6] = {
  184, 9, 132, 203, 
  10, 25, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram4 = {
   LengthAndAnagram(23, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len23_anagram4_chords, // chords
   kmap5_Word_len23_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram5_chords[1] = {
+ChordData const kmap5_Word_len23_anagram5_chords[1] = {
  ChordData({16, 4, 146}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram5_seqs[3] = {
+uint8_t const kmap5_Word_len23_anagram5_seqs[3] = {
  124, 249, 100, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram5 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram5 = {
   LengthAndAnagram(23, 5), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len23_anagram5_chords, // chords
   kmap5_Word_len23_anagram5_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len23_anagram6_chords[1] = {
+ChordData const kmap5_Word_len23_anagram6_chords[1] = {
  ChordData({0, 68, 18}), 
 };
 
-const uint8_t kmap5_Word_len23_anagram6_seqs[3] = {
+uint8_t const kmap5_Word_len23_anagram6_seqs[3] = {
  15, 252, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len23_anagram6 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len23_anagram6 = {
   LengthAndAnagram(23, 6), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len23_anagram6_chords, // chords
   kmap5_Word_len23_anagram6_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram0_chords[164] = {
+ChordData const kmap5_Word_len24_anagram0_chords[164] = {
  ChordData({0, 5, 26}), ChordData({0, 45, 9}), ChordData({0, 45, 80}), ChordData({0, 68, 3}), 
  ChordData({2, 0, 82}), ChordData({2, 0, 83}), ChordData({2, 0, 138}), ChordData({2, 1, 72}), 
  ChordData({2, 4, 3}), ChordData({2, 4, 11}), ChordData({2, 4, 65}), ChordData({2, 4, 67}), 
@@ -4975,7 +4975,7 @@ const ChordData kmap5_Word_len24_anagram0_chords[164] = {
  ChordData({176, 5, 24}), ChordData({176, 9, 8}), ChordData({178, 1, 24}), ChordData({180, 9, 16}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram0_seqs[492] = {
+uint8_t const kmap5_Word_len24_anagram0_seqs[492] = {
  221, 43, 150, 199, 
  94, 139, 194, 126, 
  139, 60, 240, 119, 
@@ -5101,14 +5101,14 @@ const uint8_t kmap5_Word_len24_anagram0_seqs[492] = {
  215, 253, 102, 209, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram0 = {
   LengthAndAnagram(24, 0), // seq_bit_len_and_anagram
   164, // num_chords
   kmap5_Word_len24_anagram0_chords, // chords
   kmap5_Word_len24_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram1_chords[36] = {
+ChordData const kmap5_Word_len24_anagram1_chords[36] = {
  ChordData({0, 5, 65}), ChordData({2, 1, 130}), ChordData({2, 4, 81}), ChordData({2, 4, 89}), 
  ChordData({2, 4, 146}), ChordData({2, 96, 3}), ChordData({4, 4, 146}), ChordData({16, 12, 81}), 
  ChordData({16, 68, 82}), ChordData({18, 12, 24}), ChordData({18, 64, 8}), ChordData({18, 64, 9}), 
@@ -5120,7 +5120,7 @@ const ChordData kmap5_Word_len24_anagram1_chords[36] = {
  ChordData({148, 8, 8}), ChordData({176, 0, 24}), ChordData({176, 0, 82}), ChordData({178, 1, 24}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram1_seqs[108] = {
+uint8_t const kmap5_Word_len24_anagram1_seqs[108] = {
  114, 223, 117, 72, 
  211, 117, 191, 55, 
  114, 114, 251, 163, 
@@ -5150,19 +5150,19 @@ const uint8_t kmap5_Word_len24_anagram1_seqs[108] = {
  197, 107, 56, 169, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram1 = {
   LengthAndAnagram(24, 1), // seq_bit_len_and_anagram
   36, // num_chords
   kmap5_Word_len24_anagram1_chords, // chords
   kmap5_Word_len24_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram2_chords[8] = {
+ChordData const kmap5_Word_len24_anagram2_chords[8] = {
  ChordData({2, 0, 19}), ChordData({18, 64, 19}), ChordData({20, 4, 130}), ChordData({22, 0, 81}), 
  ChordData({48, 5, 17}), ChordData({128, 4, 146}), ChordData({128, 64, 18}), ChordData({144, 64, 2}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram2_seqs[24] = {
+uint8_t const kmap5_Word_len24_anagram2_seqs[24] = {
  184, 115, 131, 97, 
  214, 120, 237, 233, 
  209, 109, 199, 114, 
@@ -5171,61 +5171,61 @@ const uint8_t kmap5_Word_len24_anagram2_seqs[24] = {
  150, 193, 152, 193, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram2 = {
   LengthAndAnagram(24, 2), // seq_bit_len_and_anagram
   8, // num_chords
   kmap5_Word_len24_anagram2_chords, // chords
   kmap5_Word_len24_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram3_chords[2] = {
+ChordData const kmap5_Word_len24_anagram3_chords[2] = {
  ChordData({22, 8, 16}), ChordData({48, 8, 80}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram3_seqs[6] = {
+uint8_t const kmap5_Word_len24_anagram3_seqs[6] = {
  142, 109, 214, 107, 
  169, 209, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram3 = {
   LengthAndAnagram(24, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len24_anagram3_chords, // chords
   kmap5_Word_len24_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram4_chords[2] = {
+ChordData const kmap5_Word_len24_anagram4_chords[2] = {
  ChordData({16, 68, 18}), ChordData({16, 68, 146}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram4_seqs[6] = {
+uint8_t const kmap5_Word_len24_anagram4_seqs[6] = {
  191, 248, 193, 184, 
  31, 200, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram4 = {
   LengthAndAnagram(24, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len24_anagram4_chords, // chords
   kmap5_Word_len24_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len24_anagram5_chords[1] = {
+ChordData const kmap5_Word_len24_anagram5_chords[1] = {
  ChordData({48, 8, 80}), 
 };
 
-const uint8_t kmap5_Word_len24_anagram5_seqs[3] = {
+uint8_t const kmap5_Word_len24_anagram5_seqs[3] = {
  226, 229, 188, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len24_anagram5 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len24_anagram5 = {
   LengthAndAnagram(24, 5), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len24_anagram5_chords, // chords
   kmap5_Word_len24_anagram5_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len25_anagram0_chords[179] = {
+ChordData const kmap5_Word_len25_anagram0_chords[179] = {
  ChordData({0, 36, 80}), ChordData({2, 9, 18}), ChordData({2, 12, 136}), ChordData({2, 40, 128}), 
  ChordData({2, 68, 144}), ChordData({2, 68, 193}), ChordData({2, 68, 200}), ChordData({2, 73, 16}), 
  ChordData({2, 96, 128}), ChordData({4, 36, 18}), ChordData({6, 0, 10}), ChordData({6, 0, 83}), 
@@ -5273,7 +5273,7 @@ const ChordData kmap5_Word_len25_anagram0_chords[179] = {
  ChordData({180, 1, 72}), ChordData({180, 1, 192}), ChordData({180, 8, 2}), 
 };
 
-const uint8_t kmap5_Word_len25_anagram0_seqs[560] = {
+uint8_t const kmap5_Word_len25_anagram0_seqs[560] = {
  236, 247, 69, 248, 
  29, 44, 190, 78, 
  124, 226, 167, 192, 
@@ -5416,14 +5416,14 @@ const uint8_t kmap5_Word_len25_anagram0_seqs[560] = {
  245, 198, 140, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len25_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len25_anagram0 = {
   LengthAndAnagram(25, 0), // seq_bit_len_and_anagram
   179, // num_chords
   kmap5_Word_len25_anagram0_chords, // chords
   kmap5_Word_len25_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len25_anagram1_chords[38] = {
+ChordData const kmap5_Word_len25_anagram1_chords[38] = {
  ChordData({0, 68, 89}), ChordData({6, 0, 81}), ChordData({16, 0, 74}), ChordData({16, 13, 128}), 
  ChordData({16, 64, 130}), ChordData({18, 1, 11}), ChordData({18, 64, 17}), ChordData({18, 76, 8}), 
  ChordData({20, 4, 16}), ChordData({20, 36, 80}), ChordData({22, 8, 0}), ChordData({22, 8, 16}), 
@@ -5436,7 +5436,7 @@ const ChordData kmap5_Word_len25_anagram1_chords[38] = {
  ChordData({176, 8, 16}), ChordData({180, 0, 64}), 
 };
 
-const uint8_t kmap5_Word_len25_anagram1_seqs[119] = {
+uint8_t const kmap5_Word_len25_anagram1_seqs[119] = {
  114, 251, 26, 164, 
  205, 206, 89, 196, 
  138, 238, 28, 159, 
@@ -5469,19 +5469,19 @@ const uint8_t kmap5_Word_len25_anagram1_seqs[119] = {
  90, 86, 49, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len25_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len25_anagram1 = {
   LengthAndAnagram(25, 1), // seq_bit_len_and_anagram
   38, // num_chords
   kmap5_Word_len25_anagram1_chords, // chords
   kmap5_Word_len25_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len25_anagram2_chords[8] = {
+ChordData const kmap5_Word_len25_anagram2_chords[8] = {
  ChordData({0, 36, 3}), ChordData({16, 0, 139}), ChordData({16, 4, 136}), ChordData({16, 4, 152}), 
  ChordData({18, 64, 27}), ChordData({20, 4, 128}), ChordData({52, 4, 129}), ChordData({148, 0, 64}), 
 };
 
-const uint8_t kmap5_Word_len25_anagram2_seqs[25] = {
+uint8_t const kmap5_Word_len25_anagram2_seqs[25] = {
  127, 247, 200, 12, 
  58, 235, 241, 79, 
  100, 229, 193, 95, 
@@ -5491,48 +5491,48 @@ const uint8_t kmap5_Word_len25_anagram2_seqs[25] = {
  197, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len25_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len25_anagram2 = {
   LengthAndAnagram(25, 2), // seq_bit_len_and_anagram
   8, // num_chords
   kmap5_Word_len25_anagram2_chords, // chords
   kmap5_Word_len25_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len25_anagram3_chords[4] = {
+ChordData const kmap5_Word_len25_anagram3_chords[4] = {
  ChordData({0, 12, 18}), ChordData({48, 1, 17}), ChordData({48, 5, 16}), ChordData({160, 65, 0}), 
 };
 
-const uint8_t kmap5_Word_len25_anagram3_seqs[13] = {
+uint8_t const kmap5_Word_len25_anagram3_seqs[13] = {
  124, 252, 45, 215, 
  93, 61, 195, 223, 
  135, 230, 67, 86, 
  8, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len25_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len25_anagram3 = {
   LengthAndAnagram(25, 3), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len25_anagram3_chords, // chords
   kmap5_Word_len25_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len25_anagram4_chords[2] = {
+ChordData const kmap5_Word_len25_anagram4_chords[2] = {
  ChordData({16, 4, 19}), ChordData({20, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len25_anagram4_seqs[7] = {
+uint8_t const kmap5_Word_len25_anagram4_seqs[7] = {
  191, 231, 45, 155, 
  91, 243, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len25_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len25_anagram4 = {
   LengthAndAnagram(25, 4), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len25_anagram4_chords, // chords
   kmap5_Word_len25_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len26_anagram0_chords[154] = {
+ChordData const kmap5_Word_len26_anagram0_chords[154] = {
  ChordData({0, 4, 210}), ChordData({0, 36, 139}), ChordData({0, 44, 129}), ChordData({0, 72, 16}), 
  ChordData({0, 109, 2}), ChordData({2, 5, 9}), ChordData({2, 5, 80}), ChordData({2, 32, 201}), 
  ChordData({4, 12, 10}), ChordData({4, 12, 192}), ChordData({6, 4, 130}), ChordData({6, 9, 26}), 
@@ -5574,7 +5574,7 @@ const ChordData kmap5_Word_len26_anagram0_chords[154] = {
  ChordData({180, 64, 136}), ChordData({182, 8, 128}), 
 };
 
-const uint8_t kmap5_Word_len26_anagram0_seqs[501] = {
+uint8_t const kmap5_Word_len26_anagram0_seqs[501] = {
  242, 244, 91, 226, 
  107, 129, 119, 236, 
  233, 35, 31, 23, 
@@ -5703,14 +5703,14 @@ const uint8_t kmap5_Word_len26_anagram0_seqs[501] = {
  12, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len26_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len26_anagram0 = {
   LengthAndAnagram(26, 0), // seq_bit_len_and_anagram
   154, // num_chords
   kmap5_Word_len26_anagram0_chords, // chords
   kmap5_Word_len26_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len26_anagram1_chords[23] = {
+ChordData const kmap5_Word_len26_anagram1_chords[23] = {
  ChordData({0, 13, 10}), ChordData({0, 64, 16}), ChordData({0, 72, 80}), ChordData({2, 68, 3}), 
  ChordData({16, 4, 153}), ChordData({16, 65, 8}), ChordData({16, 68, 18}), ChordData({16, 76, 8}), 
  ChordData({18, 0, 74}), ChordData({18, 0, 202}), ChordData({20, 0, 131}), ChordData({22, 0, 146}), 
@@ -5719,7 +5719,7 @@ const ChordData kmap5_Word_len26_anagram1_chords[23] = {
  ChordData({132, 0, 146}), ChordData({144, 8, 16}), ChordData({148, 9, 16}), 
 };
 
-const uint8_t kmap5_Word_len26_anagram1_seqs[75] = {
+uint8_t const kmap5_Word_len26_anagram1_seqs[75] = {
  69, 125, 44, 242, 
  97, 193, 192, 71, 
  1, 195, 135, 48, 
@@ -5741,21 +5741,21 @@ const uint8_t kmap5_Word_len26_anagram1_seqs[75] = {
  109, 22, 52, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len26_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len26_anagram1 = {
   LengthAndAnagram(26, 1), // seq_bit_len_and_anagram
   23, // num_chords
   kmap5_Word_len26_anagram1_chords, // chords
   kmap5_Word_len26_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len26_anagram2_chords[16] = {
+ChordData const kmap5_Word_len26_anagram2_chords[16] = {
  ChordData({2, 4, 73}), ChordData({4, 12, 128}), ChordData({16, 32, 18}), ChordData({16, 37, 17}), 
  ChordData({16, 96, 19}), ChordData({48, 1, 24}), ChordData({48, 8, 80}), ChordData({48, 13, 64}), 
  ChordData({50, 8, 8}), ChordData({52, 0, 17}), ChordData({52, 0, 129}), ChordData({52, 8, 16}), 
  ChordData({128, 0, 154}), ChordData({128, 4, 26}), ChordData({144, 0, 81}), ChordData({176, 9, 16}), 
 };
 
-const uint8_t kmap5_Word_len26_anagram2_seqs[52] = {
+uint8_t const kmap5_Word_len26_anagram2_seqs[52] = {
  188, 252, 232, 53, 
  250, 130, 143, 204, 
  187, 101, 247, 199, 
@@ -5771,45 +5771,45 @@ const uint8_t kmap5_Word_len26_anagram2_seqs[52] = {
  53, 220, 76, 206, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len26_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len26_anagram2 = {
   LengthAndAnagram(26, 2), // seq_bit_len_and_anagram
   16, // num_chords
   kmap5_Word_len26_anagram2_chords, // chords
   kmap5_Word_len26_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len26_anagram3_chords[2] = {
+ChordData const kmap5_Word_len26_anagram3_chords[2] = {
  ChordData({36, 0, 18}), ChordData({48, 5, 136}), 
 };
 
-const uint8_t kmap5_Word_len26_anagram3_seqs[7] = {
+uint8_t const kmap5_Word_len26_anagram3_seqs[7] = {
  173, 182, 86, 118, 
  244, 10, 13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len26_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len26_anagram3 = {
   LengthAndAnagram(26, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len26_anagram3_chords, // chords
   kmap5_Word_len26_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len26_anagram4_chords[1] = {
+ChordData const kmap5_Word_len26_anagram4_chords[1] = {
  ChordData({48, 8, 80}), 
 };
 
-const uint8_t kmap5_Word_len26_anagram4_seqs[4] = {
+uint8_t const kmap5_Word_len26_anagram4_seqs[4] = {
  82, 99, 244, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len26_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len26_anagram4 = {
   LengthAndAnagram(26, 4), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len26_anagram4_chords, // chords
   kmap5_Word_len26_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len27_anagram0_chords[153] = {
+ChordData const kmap5_Word_len27_anagram0_chords[153] = {
  ChordData({0, 12, 19}), ChordData({0, 13, 3}), ChordData({2, 12, 192}), ChordData({2, 32, 82}), 
  ChordData({2, 33, 72}), ChordData({2, 33, 138}), ChordData({2, 69, 16}), ChordData({2, 96, 67}), 
  ChordData({4, 12, 18}), ChordData({4, 44, 16}), ChordData({4, 72, 0}), ChordData({4, 96, 0}), 
@@ -5851,7 +5851,7 @@ const ChordData kmap5_Word_len27_anagram0_chords[153] = {
  ChordData({180, 64, 128}), 
 };
 
-const uint8_t kmap5_Word_len27_anagram0_seqs[517] = {
+uint8_t const kmap5_Word_len27_anagram0_seqs[517] = {
  241, 247, 202, 253, 
  187, 199, 34, 63, 
  66, 31, 121, 100, 
@@ -5984,14 +5984,14 @@ const uint8_t kmap5_Word_len27_anagram0_seqs[517] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len27_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len27_anagram0 = {
   LengthAndAnagram(27, 0), // seq_bit_len_and_anagram
   153, // num_chords
   kmap5_Word_len27_anagram0_chords, // chords
   kmap5_Word_len27_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len27_anagram1_chords[25] = {
+ChordData const kmap5_Word_len27_anagram1_chords[25] = {
  ChordData({0, 13, 146}), ChordData({0, 36, 80}), ChordData({2, 36, 10}), ChordData({16, 4, 90}), 
  ChordData({16, 4, 155}), ChordData({16, 13, 16}), ChordData({16, 36, 10}), ChordData({16, 36, 17}), 
  ChordData({16, 36, 129}), ChordData({18, 64, 138}), ChordData({32, 32, 18}), ChordData({34, 8, 65}), 
@@ -6001,7 +6001,7 @@ const ChordData kmap5_Word_len27_anagram1_chords[25] = {
  ChordData({176, 8, 128}), 
 };
 
-const uint8_t kmap5_Word_len27_anagram1_seqs[85] = {
+uint8_t const kmap5_Word_len27_anagram1_seqs[85] = {
  29, 125, 177, 228, 
  229, 247, 25, 143, 
  108, 244, 5, 95, 
@@ -6026,19 +6026,19 @@ const uint8_t kmap5_Word_len27_anagram1_seqs[85] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len27_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len27_anagram1 = {
   LengthAndAnagram(27, 1), // seq_bit_len_and_anagram
   25, // num_chords
   kmap5_Word_len27_anagram1_chords, // chords
   kmap5_Word_len27_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len27_anagram2_chords[7] = {
+ChordData const kmap5_Word_len27_anagram2_chords[7] = {
  ChordData({16, 0, 147}), ChordData({16, 13, 16}), ChordData({16, 68, 146}), ChordData({48, 5, 152}), 
  ChordData({52, 4, 16}), ChordData({148, 64, 18}), ChordData({164, 68, 16}), 
 };
 
-const uint8_t kmap5_Word_len27_anagram2_seqs[24] = {
+uint8_t const kmap5_Word_len27_anagram2_seqs[24] = {
  252, 149, 228, 93, 
  199, 223, 98, 48, 
  210, 175, 173, 244, 
@@ -6047,45 +6047,45 @@ const uint8_t kmap5_Word_len27_anagram2_seqs[24] = {
  126, 191, 249, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len27_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len27_anagram2 = {
   LengthAndAnagram(27, 2), // seq_bit_len_and_anagram
   7, // num_chords
   kmap5_Word_len27_anagram2_chords, // chords
   kmap5_Word_len27_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len27_anagram3_chords[2] = {
+ChordData const kmap5_Word_len27_anagram3_chords[2] = {
  ChordData({16, 68, 146}), ChordData({52, 0, 80}), 
 };
 
-const uint8_t kmap5_Word_len27_anagram3_seqs[7] = {
+uint8_t const kmap5_Word_len27_anagram3_seqs[7] = {
  244, 64, 233, 149, 
  218, 188, 61, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len27_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len27_anagram3 = {
   LengthAndAnagram(27, 3), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len27_anagram3_chords, // chords
   kmap5_Word_len27_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len27_anagram7_chords[1] = {
+ChordData const kmap5_Word_len27_anagram7_chords[1] = {
  ChordData({48, 8, 80}), 
 };
 
-const uint8_t kmap5_Word_len27_anagram7_seqs[4] = {
+uint8_t const kmap5_Word_len27_anagram7_seqs[4] = {
  107, 206, 43, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len27_anagram7 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len27_anagram7 = {
   LengthAndAnagram(27, 7), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len27_anagram7_chords, // chords
   kmap5_Word_len27_anagram7_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len28_anagram0_chords[134] = {
+ChordData const kmap5_Word_len28_anagram0_chords[134] = {
  ChordData({0, 45, 73}), ChordData({0, 68, 210}), ChordData({0, 72, 210}), ChordData({2, 4, 73}), 
  ChordData({2, 4, 89}), ChordData({2, 4, 137}), ChordData({2, 4, 201}), ChordData({2, 5, 17}), 
  ChordData({2, 12, 147}), ChordData({2, 32, 128}), ChordData({2, 40, 65}), ChordData({6, 13, 8}), 
@@ -6122,7 +6122,7 @@ const ChordData kmap5_Word_len28_anagram0_chords[134] = {
  ChordData({180, 9, 24}), ChordData({180, 64, 26}), 
 };
 
-const uint8_t kmap5_Word_len28_anagram0_seqs[469] = {
+uint8_t const kmap5_Word_len28_anagram0_seqs[469] = {
  199, 94, 139, 242, 
  4, 124, 41, 177, 
  148, 66, 52, 42, 
@@ -6243,14 +6243,14 @@ const uint8_t kmap5_Word_len28_anagram0_seqs[469] = {
  13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len28_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len28_anagram0 = {
   LengthAndAnagram(28, 0), // seq_bit_len_and_anagram
   134, // num_chords
   kmap5_Word_len28_anagram0_chords, // chords
   kmap5_Word_len28_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len28_anagram1_chords[28] = {
+ChordData const kmap5_Word_len28_anagram1_chords[28] = {
  ChordData({2, 4, 194}), ChordData({2, 5, 16}), ChordData({2, 64, 66}), ChordData({16, 4, 195}), 
  ChordData({16, 68, 66}), ChordData({18, 8, 192}), ChordData({18, 12, 18}), ChordData({18, 32, 25}), 
  ChordData({18, 65, 8}), ChordData({18, 68, 3}), ChordData({22, 4, 16}), ChordData({34, 33, 129}), 
@@ -6260,7 +6260,7 @@ const ChordData kmap5_Word_len28_anagram1_chords[28] = {
  ChordData({150, 0, 25}), ChordData({164, 0, 18}), ChordData({164, 64, 18}), ChordData({176, 8, 18}), 
 };
 
-const uint8_t kmap5_Word_len28_anagram1_seqs[98] = {
+uint8_t const kmap5_Word_len28_anagram1_seqs[98] = {
  72, 47, 50, 248, 
  93, 247, 179, 188, 
  0, 35, 194, 159, 
@@ -6288,20 +6288,20 @@ const uint8_t kmap5_Word_len28_anagram1_seqs[98] = {
  228, 188, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len28_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len28_anagram1 = {
   LengthAndAnagram(28, 1), // seq_bit_len_and_anagram
   28, // num_chords
   kmap5_Word_len28_anagram1_chords, // chords
   kmap5_Word_len28_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len28_anagram2_chords[11] = {
+ChordData const kmap5_Word_len28_anagram2_chords[11] = {
  ChordData({0, 4, 26}), ChordData({2, 4, 147}), ChordData({20, 0, 19}), ChordData({20, 4, 16}), 
  ChordData({20, 4, 25}), ChordData({22, 8, 16}), ChordData({48, 1, 80}), ChordData({50, 1, 8}), 
  ChordData({52, 0, 16}), ChordData({52, 4, 19}), ChordData({176, 0, 17}), 
 };
 
-const uint8_t kmap5_Word_len28_anagram2_seqs[39] = {
+uint8_t const kmap5_Word_len28_anagram2_seqs[39] = {
  188, 190, 98, 201, 
  207, 61, 149, 205, 
  139, 110, 215, 214, 
@@ -6314,19 +6314,19 @@ const uint8_t kmap5_Word_len28_anagram2_seqs[39] = {
  123, 117, 13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len28_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len28_anagram2 = {
   LengthAndAnagram(28, 2), // seq_bit_len_and_anagram
   11, // num_chords
   kmap5_Word_len28_anagram2_chords, // chords
   kmap5_Word_len28_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len28_anagram3_chords[5] = {
+ChordData const kmap5_Word_len28_anagram3_chords[5] = {
  ChordData({0, 4, 19}), ChordData({48, 0, 147}), ChordData({48, 8, 24}), ChordData({48, 13, 64}), 
  ChordData({128, 4, 27}), 
 };
 
-const uint8_t kmap5_Word_len28_anagram3_seqs[18] = {
+uint8_t const kmap5_Word_len28_anagram3_seqs[18] = {
  127, 183, 143, 135, 
  84, 239, 188, 107, 
  206, 90, 205, 115, 
@@ -6334,29 +6334,29 @@ const uint8_t kmap5_Word_len28_anagram3_seqs[18] = {
  153, 10, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len28_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len28_anagram3 = {
   LengthAndAnagram(28, 3), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len28_anagram3_chords, // chords
   kmap5_Word_len28_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len28_anagram4_chords[1] = {
+ChordData const kmap5_Word_len28_anagram4_chords[1] = {
  ChordData({16, 36, 17}), 
 };
 
-const uint8_t kmap5_Word_len28_anagram4_seqs[4] = {
+uint8_t const kmap5_Word_len28_anagram4_seqs[4] = {
  204, 127, 204, 11, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len28_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len28_anagram4 = {
   LengthAndAnagram(28, 4), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len28_anagram4_chords, // chords
   kmap5_Word_len28_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len29_anagram0_chords[149] = {
+ChordData const kmap5_Word_len29_anagram0_chords[149] = {
  ChordData({0, 4, 219}), ChordData({0, 36, 83}), ChordData({0, 40, 19}), ChordData({0, 68, 154}), 
  ChordData({0, 72, 146}), ChordData({2, 12, 25}), ChordData({2, 12, 145}), ChordData({2, 12, 208}), 
  ChordData({2, 13, 146}), ChordData({2, 36, 17}), ChordData({2, 36, 66}), ChordData({2, 68, 18}), 
@@ -6397,7 +6397,7 @@ const ChordData kmap5_Word_len29_anagram0_chords[149] = {
  ChordData({180, 4, 136}), 
 };
 
-const uint8_t kmap5_Word_len29_anagram0_seqs[541] = {
+uint8_t const kmap5_Word_len29_anagram0_seqs[541] = {
  82, 234, 61, 72, 
  112, 255, 144, 45, 
  43, 143, 69, 62, 
@@ -6536,14 +6536,14 @@ const uint8_t kmap5_Word_len29_anagram0_seqs[541] = {
  1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len29_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len29_anagram0 = {
   LengthAndAnagram(29, 0), // seq_bit_len_and_anagram
   149, // num_chords
   kmap5_Word_len29_anagram0_chords, // chords
   kmap5_Word_len29_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len29_anagram1_chords[27] = {
+ChordData const kmap5_Word_len29_anagram1_chords[27] = {
  ChordData({2, 36, 19}), ChordData({2, 68, 146}), ChordData({18, 4, 136}), ChordData({18, 4, 208}), 
  ChordData({18, 64, 27}), ChordData({18, 76, 130}), ChordData({20, 4, 144}), ChordData({20, 36, 19}), 
  ChordData({32, 13, 0}), ChordData({36, 0, 9}), ChordData({36, 9, 0}), ChordData({48, 0, 147}), 
@@ -6553,7 +6553,7 @@ const ChordData kmap5_Word_len29_anagram1_chords[27] = {
  ChordData({178, 12, 129}), ChordData({180, 0, 129}), ChordData({180, 64, 130}), 
 };
 
-const uint8_t kmap5_Word_len29_anagram1_seqs[98] = {
+uint8_t const kmap5_Word_len29_anagram1_seqs[98] = {
  191, 199, 118, 112, 
  63, 12, 62, 241, 
  166, 31, 125, 126, 
@@ -6581,19 +6581,19 @@ const uint8_t kmap5_Word_len29_anagram1_seqs[98] = {
  247, 100, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len29_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len29_anagram1 = {
   LengthAndAnagram(29, 1), // seq_bit_len_and_anagram
   27, // num_chords
   kmap5_Word_len29_anagram1_chords, // chords
   kmap5_Word_len29_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len29_anagram2_chords[5] = {
+ChordData const kmap5_Word_len29_anagram2_chords[5] = {
  ChordData({16, 4, 153}), ChordData({16, 4, 155}), ChordData({36, 8, 0}), ChordData({48, 1, 16}), 
  ChordData({52, 12, 16}), 
 };
 
-const uint8_t kmap5_Word_len29_anagram2_seqs[19] = {
+uint8_t const kmap5_Word_len29_anagram2_seqs[19] = {
  60, 248, 171, 143, 
  254, 172, 88, 246, 
  181, 96, 193, 117, 
@@ -6601,31 +6601,31 @@ const uint8_t kmap5_Word_len29_anagram2_seqs[19] = {
  191, 230, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len29_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len29_anagram2 = {
   LengthAndAnagram(29, 2), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len29_anagram2_chords, // chords
   kmap5_Word_len29_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len29_anagram3_chords[3] = {
+ChordData const kmap5_Word_len29_anagram3_chords[3] = {
  ChordData({18, 0, 131}), ChordData({18, 64, 19}), ChordData({160, 33, 1}), 
 };
 
-const uint8_t kmap5_Word_len29_anagram3_seqs[11] = {
+uint8_t const kmap5_Word_len29_anagram3_seqs[11] = {
  103, 208, 13, 249, 
  128, 185, 243, 118, 
  89, 33, 59, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len29_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len29_anagram3 = {
   LengthAndAnagram(29, 3), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len29_anagram3_chords, // chords
   kmap5_Word_len29_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len30_anagram0_chords[117] = {
+ChordData const kmap5_Word_len30_anagram0_chords[117] = {
  ChordData({0, 0, 73}), ChordData({0, 4, 211}), ChordData({0, 72, 80}), ChordData({2, 4, 146}), 
  ChordData({2, 5, 67}), ChordData({4, 12, 144}), ChordData({6, 12, 137}), ChordData({6, 36, 64}), 
  ChordData({16, 8, 81}), ChordData({16, 12, 208}), ChordData({16, 13, 147}), ChordData({16, 32, 25}), 
@@ -6658,7 +6658,7 @@ const ChordData kmap5_Word_len30_anagram0_chords[117] = {
  ChordData({182, 8, 10}), 
 };
 
-const uint8_t kmap5_Word_len30_anagram0_seqs[439] = {
+uint8_t const kmap5_Word_len30_anagram0_seqs[439] = {
  188, 240, 199, 43, 
  110, 41, 247, 196, 
  199, 21, 48, 60, 
@@ -6771,14 +6771,14 @@ const uint8_t kmap5_Word_len30_anagram0_seqs[439] = {
  177, 31, 53, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len30_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len30_anagram0 = {
   LengthAndAnagram(30, 0), // seq_bit_len_and_anagram
   117, // num_chords
   kmap5_Word_len30_anagram0_chords, // chords
   kmap5_Word_len30_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len30_anagram1_chords[26] = {
+ChordData const kmap5_Word_len30_anagram1_chords[26] = {
  ChordData({0, 0, 192}), ChordData({2, 4, 147}), ChordData({16, 4, 27}), ChordData({16, 4, 147}), 
  ChordData({16, 9, 146}), ChordData({16, 37, 17}), ChordData({18, 4, 131}), ChordData({18, 4, 145}), 
  ChordData({18, 64, 0}), ChordData({20, 0, 147}), ChordData({34, 9, 8}), ChordData({48, 0, 27}), 
@@ -6788,7 +6788,7 @@ const ChordData kmap5_Word_len30_anagram1_chords[26] = {
  ChordData({162, 33, 9}), ChordData({180, 32, 17}), 
 };
 
-const uint8_t kmap5_Word_len30_anagram1_seqs[98] = {
+uint8_t const kmap5_Word_len30_anagram1_seqs[98] = {
  188, 240, 194, 19, 
  210, 239, 92, 105, 
  189, 125, 69, 27, 
@@ -6816,19 +6816,19 @@ const uint8_t kmap5_Word_len30_anagram1_seqs[98] = {
  204, 11, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len30_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len30_anagram1 = {
   LengthAndAnagram(30, 1), // seq_bit_len_and_anagram
   26, // num_chords
   kmap5_Word_len30_anagram1_chords, // chords
   kmap5_Word_len30_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len30_anagram2_chords[8] = {
+ChordData const kmap5_Word_len30_anagram2_chords[8] = {
  ChordData({34, 12, 136}), ChordData({48, 0, 147}), ChordData({48, 5, 146}), ChordData({50, 13, 9}), 
  ChordData({52, 0, 128}), ChordData({164, 64, 18}), ChordData({178, 1, 24}), ChordData({180, 0, 16}), 
 };
 
-const uint8_t kmap5_Word_len30_anagram2_seqs[30] = {
+uint8_t const kmap5_Word_len30_anagram2_seqs[30] = {
  220, 235, 16, 253, 
  25, 116, 117, 13, 
  159, 200, 91, 114, 
@@ -6839,14 +6839,14 @@ const uint8_t kmap5_Word_len30_anagram2_seqs[30] = {
  155, 205, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len30_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len30_anagram2 = {
   LengthAndAnagram(30, 2), // seq_bit_len_and_anagram
   8, // num_chords
   kmap5_Word_len30_anagram2_chords, // chords
   kmap5_Word_len30_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len31_anagram0_chords[106] = {
+ChordData const kmap5_Word_len31_anagram0_chords[106] = {
  ChordData({0, 64, 72}), ChordData({0, 68, 88}), ChordData({2, 36, 19}), ChordData({2, 69, 130}), 
  ChordData({4, 0, 3}), ChordData({4, 4, 152}), ChordData({4, 40, 0}), ChordData({4, 108, 16}), 
  ChordData({6, 0, 2}), ChordData({6, 0, 64}), ChordData({6, 1, 89}), ChordData({6, 4, 0}), 
@@ -6876,7 +6876,7 @@ const ChordData kmap5_Word_len31_anagram0_chords[106] = {
  ChordData({182, 8, 16}), ChordData({182, 72, 16}), 
 };
 
-const uint8_t kmap5_Word_len31_anagram0_seqs[411] = {
+uint8_t const kmap5_Word_len31_anagram0_seqs[411] = {
  124, 224, 149, 23, 
  94, 94, 195, 62, 
  178, 223, 185, 178, 
@@ -6982,14 +6982,14 @@ const uint8_t kmap5_Word_len31_anagram0_seqs[411] = {
  201, 77, 48, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len31_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len31_anagram0 = {
   LengthAndAnagram(31, 0), // seq_bit_len_and_anagram
   106, // num_chords
   kmap5_Word_len31_anagram0_chords, // chords
   kmap5_Word_len31_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len31_anagram1_chords[22] = {
+ChordData const kmap5_Word_len31_anagram1_chords[22] = {
  ChordData({0, 36, 9}), ChordData({0, 68, 8}), ChordData({6, 0, 64}), ChordData({6, 4, 147}), 
  ChordData({6, 12, 0}), ChordData({16, 36, 82}), ChordData({16, 64, 74}), ChordData({18, 4, 27}), 
  ChordData({22, 4, 11}), ChordData({32, 13, 16}), ChordData({34, 12, 9}), ChordData({48, 4, 19}), 
@@ -6998,7 +6998,7 @@ const ChordData kmap5_Word_len31_anagram1_chords[22] = {
  ChordData({180, 0, 17}), ChordData({180, 64, 82}), 
 };
 
-const uint8_t kmap5_Word_len31_anagram1_seqs[86] = {
+uint8_t const kmap5_Word_len31_anagram1_seqs[86] = {
  188, 254, 177, 87, 
  62, 240, 202, 63, 
  63, 188, 240, 237, 
@@ -7023,19 +7023,19 @@ const uint8_t kmap5_Word_len31_anagram1_seqs[86] = {
  241, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len31_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len31_anagram1 = {
   LengthAndAnagram(31, 1), // seq_bit_len_and_anagram
   22, // num_chords
   kmap5_Word_len31_anagram1_chords, // chords
   kmap5_Word_len31_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len31_anagram2_chords[5] = {
+ChordData const kmap5_Word_len31_anagram2_chords[5] = {
  ChordData({0, 68, 10}), ChordData({16, 0, 146}), ChordData({32, 0, 146}), ChordData({48, 5, 128}), 
  ChordData({54, 8, 192}), 
 };
 
-const uint8_t kmap5_Word_len31_anagram2_seqs[20] = {
+uint8_t const kmap5_Word_len31_anagram2_seqs[20] = {
  60, 190, 126, 120, 
  30, 220, 187, 37, 
  85, 80, 221, 146, 
@@ -7043,29 +7043,29 @@ const uint8_t kmap5_Word_len31_anagram2_seqs[20] = {
  181, 167, 137, 6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len31_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len31_anagram2 = {
   LengthAndAnagram(31, 2), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len31_anagram2_chords, // chords
   kmap5_Word_len31_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len31_anagram3_chords[1] = {
+ChordData const kmap5_Word_len31_anagram3_chords[1] = {
  ChordData({48, 8, 18}), 
 };
 
-const uint8_t kmap5_Word_len31_anagram3_seqs[4] = {
+uint8_t const kmap5_Word_len31_anagram3_seqs[4] = {
  209, 139, 117, 75, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len31_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len31_anagram3 = {
   LengthAndAnagram(31, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len31_anagram3_chords, // chords
   kmap5_Word_len31_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len32_anagram0_chords[111] = {
+ChordData const kmap5_Word_len32_anagram0_chords[111] = {
  ChordData({0, 0, 26}), ChordData({0, 5, 91}), ChordData({0, 33, 72}), ChordData({0, 45, 19}), 
  ChordData({0, 72, 64}), ChordData({0, 100, 203}), ChordData({2, 4, 147}), ChordData({2, 5, 18}), 
  ChordData({2, 5, 19}), ChordData({2, 5, 83}), ChordData({2, 76, 26}), ChordData({4, 32, 8}), 
@@ -7096,7 +7096,7 @@ const ChordData kmap5_Word_len32_anagram0_chords[111] = {
  ChordData({178, 1, 25}), ChordData({178, 1, 152}), ChordData({180, 8, 136}), 
 };
 
-const uint8_t kmap5_Word_len32_anagram0_seqs[444] = {
+uint8_t const kmap5_Word_len32_anagram0_seqs[444] = {
  188, 242, 37, 143, 
  221, 235, 189, 148, 
  93, 97, 40, 160, 
@@ -7210,21 +7210,21 @@ const uint8_t kmap5_Word_len32_anagram0_seqs[444] = {
  86, 206, 148, 205, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len32_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len32_anagram0 = {
   LengthAndAnagram(32, 0), // seq_bit_len_and_anagram
   111, // num_chords
   kmap5_Word_len32_anagram0_chords, // chords
   kmap5_Word_len32_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len32_anagram1_chords[16] = {
+ChordData const kmap5_Word_len32_anagram1_chords[16] = {
  ChordData({16, 8, 19}), ChordData({16, 8, 83}), ChordData({18, 12, 9}), ChordData({18, 68, 11}), 
  ChordData({22, 4, 19}), ChordData({22, 4, 147}), ChordData({32, 9, 64}), ChordData({34, 1, 0}), 
  ChordData({36, 0, 16}), ChordData({38, 4, 147}), ChordData({50, 5, 153}), ChordData({50, 8, 80}), 
  ChordData({144, 1, 9}), ChordData({160, 13, 144}), ChordData({160, 33, 1}), ChordData({180, 8, 19}), 
 };
 
-const uint8_t kmap5_Word_len32_anagram1_seqs[64] = {
+uint8_t const kmap5_Word_len32_anagram1_seqs[64] = {
  232, 232, 243, 150, 
  177, 148, 243, 150, 
  163, 55, 241, 207, 
@@ -7243,19 +7243,19 @@ const uint8_t kmap5_Word_len32_anagram1_seqs[64] = {
  45, 57, 239, 149, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len32_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len32_anagram1 = {
   LengthAndAnagram(32, 1), // seq_bit_len_and_anagram
   16, // num_chords
   kmap5_Word_len32_anagram1_chords, // chords
   kmap5_Word_len32_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len32_anagram2_chords[6] = {
+ChordData const kmap5_Word_len32_anagram2_chords[6] = {
  ChordData({16, 12, 81}), ChordData({36, 0, 2}), ChordData({48, 69, 24}), ChordData({128, 4, 27}), 
  ChordData({130, 4, 11}), ChordData({164, 4, 146}), 
 };
 
-const uint8_t kmap5_Word_len32_anagram2_seqs[24] = {
+uint8_t const kmap5_Word_len32_anagram2_seqs[24] = {
  241, 239, 214, 34, 
  60, 242, 141, 175, 
  214, 240, 10, 189, 
@@ -7264,14 +7264,14 @@ const uint8_t kmap5_Word_len32_anagram2_seqs[24] = {
  60, 248, 99, 246, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len32_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len32_anagram2 = {
   LengthAndAnagram(32, 2), // seq_bit_len_and_anagram
   6, // num_chords
   kmap5_Word_len32_anagram2_chords, // chords
   kmap5_Word_len32_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len33_anagram0_chords[87] = {
+ChordData const kmap5_Word_len33_anagram0_chords[87] = {
  ChordData({0, 69, 0}), ChordData({0, 69, 18}), ChordData({2, 12, 9}), ChordData({2, 12, 154}), 
  ChordData({2, 64, 18}), ChordData({2, 68, 26}), ChordData({2, 100, 2}), ChordData({4, 1, 2}), 
  ChordData({4, 1, 128}), ChordData({16, 4, 155}), ChordData({16, 5, 89}), ChordData({16, 44, 27}), 
@@ -7296,7 +7296,7 @@ const ChordData kmap5_Word_len33_anagram0_chords[87] = {
  ChordData({180, 1, 80}), ChordData({182, 0, 80}), ChordData({182, 0, 82}), 
 };
 
-const uint8_t kmap5_Word_len33_anagram0_seqs[359] = {
+uint8_t const kmap5_Word_len33_anagram0_seqs[359] = {
  124, 199, 7, 254, 
  187, 223, 15, 95, 
  198, 31, 189, 31, 
@@ -7389,21 +7389,21 @@ const uint8_t kmap5_Word_len33_anagram0_seqs[359] = {
  227, 100, 21, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len33_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len33_anagram0 = {
   LengthAndAnagram(33, 0), // seq_bit_len_and_anagram
   87, // num_chords
   kmap5_Word_len33_anagram0_chords, // chords
   kmap5_Word_len33_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len33_anagram1_chords[15] = {
+ChordData const kmap5_Word_len33_anagram1_chords[15] = {
  ChordData({4, 40, 0}), ChordData({18, 1, 9}), ChordData({18, 44, 10}), ChordData({18, 44, 130}), 
  ChordData({22, 0, 19}), ChordData({22, 4, 80}), ChordData({34, 4, 146}), ChordData({36, 0, 64}), 
  ChordData({36, 8, 2}), ChordData({36, 64, 64}), ChordData({50, 12, 3}), ChordData({50, 12, 153}), 
  ChordData({52, 8, 16}), ChordData({54, 1, 128}), ChordData({144, 0, 154}), 
 };
 
-const uint8_t kmap5_Word_len33_anagram1_seqs[62] = {
+uint8_t const kmap5_Word_len33_anagram1_seqs[62] = {
  124, 228, 27, 207, 
  70, 187, 209, 57, 
  71, 35, 123, 29, 
@@ -7422,47 +7422,47 @@ const uint8_t kmap5_Word_len33_anagram1_seqs[62] = {
  106, 34, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len33_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len33_anagram1 = {
   LengthAndAnagram(33, 1), // seq_bit_len_and_anagram
   15, // num_chords
   kmap5_Word_len33_anagram1_chords, // chords
   kmap5_Word_len33_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len33_anagram2_chords[2] = {
+ChordData const kmap5_Word_len33_anagram2_chords[2] = {
  ChordData({36, 9, 0}), ChordData({144, 8, 26}), 
 };
 
-const uint8_t kmap5_Word_len33_anagram2_seqs[9] = {
+uint8_t const kmap5_Word_len33_anagram2_seqs[9] = {
  124, 228, 27, 15, 
  209, 235, 152, 90, 
  2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len33_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len33_anagram2 = {
   LengthAndAnagram(33, 2), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len33_anagram2_chords, // chords
   kmap5_Word_len33_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len33_anagram3_chords[1] = {
+ChordData const kmap5_Word_len33_anagram3_chords[1] = {
  ChordData({20, 4, 25}), 
 };
 
-const uint8_t kmap5_Word_len33_anagram3_seqs[5] = {
+uint8_t const kmap5_Word_len33_anagram3_seqs[5] = {
  223, 218, 175, 245, 
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len33_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len33_anagram3 = {
   LengthAndAnagram(33, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len33_anagram3_chords, // chords
   kmap5_Word_len33_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len34_anagram0_chords[74] = {
+ChordData const kmap5_Word_len34_anagram0_chords[74] = {
  ChordData({0, 68, 89}), ChordData({2, 4, 218}), ChordData({6, 36, 74}), ChordData({16, 1, 26}), 
  ChordData({16, 4, 153}), ChordData({16, 5, 25}), ChordData({16, 64, 90}), ChordData({18, 4, 193}), 
  ChordData({18, 4, 201}), ChordData({18, 12, 18}), ChordData({18, 64, 27}), ChordData({18, 64, 154}), 
@@ -7484,7 +7484,7 @@ const ChordData kmap5_Word_len34_anagram0_chords[74] = {
  ChordData({182, 32, 144}), ChordData({182, 36, 16}), 
 };
 
-const uint8_t kmap5_Word_len34_anagram0_seqs[315] = {
+uint8_t const kmap5_Word_len34_anagram0_seqs[315] = {
  114, 175, 225, 55, 
  188, 62, 149, 50, 
  194, 70, 218, 235, 
@@ -7566,20 +7566,20 @@ const uint8_t kmap5_Word_len34_anagram0_seqs[315] = {
  150, 59, 15, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len34_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len34_anagram0 = {
   LengthAndAnagram(34, 0), // seq_bit_len_and_anagram
   74, // num_chords
   kmap5_Word_len34_anagram0_chords, // chords
   kmap5_Word_len34_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len34_anagram1_chords[12] = {
+ChordData const kmap5_Word_len34_anagram1_chords[12] = {
  ChordData({0, 4, 211}), ChordData({2, 5, 19}), ChordData({18, 4, 25}), ChordData({20, 0, 89}), 
  ChordData({48, 44, 18}), ChordData({50, 13, 9}), ChordData({52, 4, 193}), ChordData({52, 13, 16}), 
  ChordData({54, 12, 16}), ChordData({128, 4, 27}), ChordData({130, 1, 27}), ChordData({164, 4, 146}), 
 };
 
-const uint8_t kmap5_Word_len34_anagram1_seqs[51] = {
+uint8_t const kmap5_Word_len34_anagram1_seqs[51] = {
  248, 247, 84, 202, 
  253, 222, 116, 143, 
  103, 61, 239, 253, 
@@ -7595,47 +7595,47 @@ const uint8_t kmap5_Word_len34_anagram1_seqs[51] = {
  127, 73, 185, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len34_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len34_anagram1 = {
   LengthAndAnagram(34, 1), // seq_bit_len_and_anagram
   12, // num_chords
   kmap5_Word_len34_anagram1_chords, // chords
   kmap5_Word_len34_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len34_anagram2_chords[2] = {
+ChordData const kmap5_Word_len34_anagram2_chords[2] = {
  ChordData({38, 1, 0}), ChordData({48, 5, 136}), 
 };
 
-const uint8_t kmap5_Word_len34_anagram2_seqs[9] = {
+uint8_t const kmap5_Word_len34_anagram2_seqs[9] = {
  124, 199, 247, 252, 
  208, 43, 172, 15, 
  13, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len34_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len34_anagram2 = {
   LengthAndAnagram(34, 2), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len34_anagram2_chords, // chords
   kmap5_Word_len34_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len34_anagram4_chords[1] = {
+ChordData const kmap5_Word_len34_anagram4_chords[1] = {
  ChordData({20, 4, 25}), 
 };
 
-const uint8_t kmap5_Word_len34_anagram4_seqs[5] = {
+uint8_t const kmap5_Word_len34_anagram4_seqs[5] = {
  205, 234, 219, 63, 
  3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len34_anagram4 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len34_anagram4 = {
   LengthAndAnagram(34, 4), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len34_anagram4_chords, // chords
   kmap5_Word_len34_anagram4_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len35_anagram0_chords[67] = {
+ChordData const kmap5_Word_len35_anagram0_chords[67] = {
  ChordData({0, 68, 2}), ChordData({2, 13, 144}), ChordData({6, 4, 19}), ChordData({16, 4, 217}), 
  ChordData({16, 72, 27}), ChordData({18, 4, 89}), ChordData({18, 8, 27}), ChordData({18, 12, 137}), 
  ChordData({18, 44, 130}), ChordData({18, 72, 25}), ChordData({20, 68, 81}), ChordData({22, 0, 25}), 
@@ -7655,7 +7655,7 @@ const ChordData kmap5_Word_len35_anagram0_chords[67] = {
  ChordData({180, 68, 144}), ChordData({182, 8, 80}), ChordData({182, 33, 24}), 
 };
 
-const uint8_t kmap5_Word_len35_anagram0_seqs[294] = {
+uint8_t const kmap5_Word_len35_anagram0_seqs[294] = {
  129, 127, 30, 121, 
  236, 62, 14, 205, 
  47, 126, 123, 156, 
@@ -7732,20 +7732,20 @@ const uint8_t kmap5_Word_len35_anagram0_seqs[294] = {
  115, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len35_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len35_anagram0 = {
   LengthAndAnagram(35, 0), // seq_bit_len_and_anagram
   67, // num_chords
   kmap5_Word_len35_anagram0_chords, // chords
   kmap5_Word_len35_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len35_anagram1_chords[10] = {
+ChordData const kmap5_Word_len35_anagram1_chords[10] = {
  ChordData({2, 12, 147}), ChordData({18, 4, 89}), ChordData({36, 4, 83}), ChordData({48, 5, 145}), 
  ChordData({48, 37, 138}), ChordData({52, 72, 0}), ChordData({134, 0, 72}), ChordData({146, 4, 25}), 
  ChordData({176, 8, 9}), ChordData({180, 64, 64}), 
 };
 
-const uint8_t kmap5_Word_len35_anagram1_seqs[44] = {
+uint8_t const kmap5_Word_len35_anagram1_seqs[44] = {
  113, 104, 238, 183, 
  92, 203, 200, 189, 
  158, 212, 254, 246, 
@@ -7759,30 +7759,30 @@ const uint8_t kmap5_Word_len35_anagram1_seqs[44] = {
  218, 90, 138, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len35_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len35_anagram1 = {
   LengthAndAnagram(35, 1), // seq_bit_len_and_anagram
   10, // num_chords
   kmap5_Word_len35_anagram1_chords, // chords
   kmap5_Word_len35_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len35_anagram2_chords[1] = {
+ChordData const kmap5_Word_len35_anagram2_chords[1] = {
  ChordData({146, 0, 11}), 
 };
 
-const uint8_t kmap5_Word_len35_anagram2_seqs[5] = {
+uint8_t const kmap5_Word_len35_anagram2_seqs[5] = {
  152, 122, 163, 214, 
  3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len35_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len35_anagram2 = {
   LengthAndAnagram(35, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len35_anagram2_chords, // chords
   kmap5_Word_len35_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len36_anagram0_chords[54] = {
+ChordData const kmap5_Word_len36_anagram0_chords[54] = {
  ChordData({0, 68, 27}), ChordData({0, 77, 18}), ChordData({2, 5, 210}), ChordData({2, 100, 18}), 
  ChordData({2, 100, 74}), ChordData({6, 36, 210}), ChordData({16, 4, 90}), ChordData({16, 36, 19}), 
  ChordData({16, 68, 155}), ChordData({18, 36, 19}), ChordData({18, 36, 139}), ChordData({18, 65, 27}), 
@@ -7799,7 +7799,7 @@ const ChordData kmap5_Word_len36_anagram0_chords[54] = {
  ChordData({178, 8, 80}), ChordData({182, 44, 16}), 
 };
 
-const uint8_t kmap5_Word_len36_anagram0_seqs[243] = {
+uint8_t const kmap5_Word_len36_anagram0_seqs[243] = {
  192, 239, 190, 94, 
  249, 64, 17, 248, 
  13, 72, 47, 50, 
@@ -7863,20 +7863,20 @@ const uint8_t kmap5_Word_len36_anagram0_seqs[243] = {
  61, 55, 185, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len36_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len36_anagram0 = {
   LengthAndAnagram(36, 0), // seq_bit_len_and_anagram
   54, // num_chords
   kmap5_Word_len36_anagram0_chords, // chords
   kmap5_Word_len36_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len36_anagram1_chords[9] = {
+ChordData const kmap5_Word_len36_anagram1_chords[9] = {
  ChordData({2, 4, 67}), ChordData({2, 5, 147}), ChordData({16, 0, 139}), ChordData({16, 4, 83}), 
  ChordData({48, 5, 25}), ChordData({50, 12, 9}), ChordData({130, 0, 202}), ChordData({148, 4, 19}), 
  ChordData({148, 8, 11}), 
 };
 
-const uint8_t kmap5_Word_len36_anagram1_seqs[41] = {
+uint8_t const kmap5_Word_len36_anagram1_seqs[41] = {
  114, 127, 35, 55, 
  216, 61, 14, 205, 
  149, 6, 161, 137, 
@@ -7890,14 +7890,14 @@ const uint8_t kmap5_Word_len36_anagram1_seqs[41] = {
  7, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len36_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len36_anagram1 = {
   LengthAndAnagram(36, 1), // seq_bit_len_and_anagram
   9, // num_chords
   kmap5_Word_len36_anagram1_chords, // chords
   kmap5_Word_len36_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len37_anagram0_chords[66] = {
+ChordData const kmap5_Word_len37_anagram0_chords[66] = {
  ChordData({0, 69, 128}), ChordData({2, 8, 65}), ChordData({2, 8, 83}), ChordData({2, 36, 91}), 
  ChordData({2, 76, 130}), ChordData({4, 44, 18}), ChordData({6, 4, 147}), ChordData({6, 5, 2}), 
  ChordData({16, 100, 147}), ChordData({16, 108, 3}), ChordData({18, 4, 210}), ChordData({18, 5, 18}), 
@@ -7917,7 +7917,7 @@ const ChordData kmap5_Word_len37_anagram0_chords[66] = {
  ChordData({180, 8, 145}), ChordData({182, 13, 24}), 
 };
 
-const uint8_t kmap5_Word_len37_anagram0_seqs[306] = {
+uint8_t const kmap5_Word_len37_anagram0_seqs[306] = {
  124, 199, 63, 95, 
  72, 110, 98, 165, 
  63, 227, 206, 13, 
@@ -7997,19 +7997,19 @@ const uint8_t kmap5_Word_len37_anagram0_seqs[306] = {
  65, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len37_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len37_anagram0 = {
   LengthAndAnagram(37, 0), // seq_bit_len_and_anagram
   66, // num_chords
   kmap5_Word_len37_anagram0_chords, // chords
   kmap5_Word_len37_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len37_anagram1_chords[5] = {
+ChordData const kmap5_Word_len37_anagram1_chords[5] = {
  ChordData({18, 12, 138}), ChordData({22, 0, 154}), ChordData({22, 4, 138}), ChordData({52, 4, 208}), 
  ChordData({180, 64, 18}), 
 };
 
-const uint8_t kmap5_Word_len37_anagram1_seqs[24] = {
+uint8_t const kmap5_Word_len37_anagram1_seqs[24] = {
  124, 52, 104, 240, 
  181, 237, 40, 78, 
  35, 127, 107, 52, 
@@ -8018,46 +8018,46 @@ const uint8_t kmap5_Word_len37_anagram1_seqs[24] = {
  209, 161, 174, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len37_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len37_anagram1 = {
   LengthAndAnagram(37, 1), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len37_anagram1_chords, // chords
   kmap5_Word_len37_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len37_anagram2_chords[1] = {
+ChordData const kmap5_Word_len37_anagram2_chords[1] = {
  ChordData({18, 68, 11}), 
 };
 
-const uint8_t kmap5_Word_len37_anagram2_seqs[5] = {
+uint8_t const kmap5_Word_len37_anagram2_seqs[5] = {
  248, 26, 38, 252, 
  25, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len37_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len37_anagram2 = {
   LengthAndAnagram(37, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len37_anagram2_chords, // chords
   kmap5_Word_len37_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len37_anagram3_chords[1] = {
+ChordData const kmap5_Word_len37_anagram3_chords[1] = {
  ChordData({48, 5, 17}), 
 };
 
-const uint8_t kmap5_Word_len37_anagram3_seqs[5] = {
+uint8_t const kmap5_Word_len37_anagram3_seqs[5] = {
  15, 225, 26, 254, 
  25, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len37_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len37_anagram3 = {
   LengthAndAnagram(37, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len37_anagram3_chords, // chords
   kmap5_Word_len37_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len38_anagram0_chords[38] = {
+ChordData const kmap5_Word_len38_anagram0_chords[38] = {
  ChordData({2, 5, 75}), ChordData({2, 44, 75}), ChordData({2, 44, 83}), ChordData({6, 4, 154}), 
  ChordData({18, 1, 11}), ChordData({18, 12, 26}), ChordData({18, 12, 27}), ChordData({18, 32, 91}), 
  ChordData({18, 37, 90}), ChordData({18, 44, 74}), ChordData({32, 108, 16}), ChordData({38, 4, 153}), 
@@ -8070,7 +8070,7 @@ const ChordData kmap5_Word_len38_anagram0_chords[38] = {
  ChordData({164, 5, 192}), ChordData({178, 9, 11}), 
 };
 
-const uint8_t kmap5_Word_len38_anagram0_seqs[181] = {
+uint8_t const kmap5_Word_len38_anagram0_seqs[181] = {
  221, 235, 189, 220, 
  96, 124, 100, 163, 
  35, 135, 108, 71, 
@@ -8119,19 +8119,19 @@ const uint8_t kmap5_Word_len38_anagram0_seqs[181] = {
  12, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len38_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len38_anagram0 = {
   LengthAndAnagram(38, 0), // seq_bit_len_and_anagram
   38, // num_chords
   kmap5_Word_len38_anagram0_chords, // chords
   kmap5_Word_len38_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len38_anagram1_chords[5] = {
+ChordData const kmap5_Word_len38_anagram1_chords[5] = {
  ChordData({18, 32, 91}), ChordData({22, 0, 89}), ChordData({48, 5, 26}), ChordData({54, 0, 147}), 
  ChordData({178, 8, 137}), 
 };
 
-const uint8_t kmap5_Word_len38_anagram1_seqs[24] = {
+uint8_t const kmap5_Word_len38_anagram1_seqs[24] = {
  82, 234, 49, 203, 
  136, 245, 188, 109, 
  71, 220, 237, 195, 
@@ -8140,30 +8140,30 @@ const uint8_t kmap5_Word_len38_anagram1_seqs[24] = {
  146, 234, 77, 42, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len38_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len38_anagram1 = {
   LengthAndAnagram(38, 1), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len38_anagram1_chords, // chords
   kmap5_Word_len38_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len38_anagram2_chords[1] = {
+ChordData const kmap5_Word_len38_anagram2_chords[1] = {
  ChordData({50, 8, 9}), 
 };
 
-const uint8_t kmap5_Word_len38_anagram2_seqs[5] = {
+uint8_t const kmap5_Word_len38_anagram2_seqs[5] = {
  163, 87, 231, 134, 
  51, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len38_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len38_anagram2 = {
   LengthAndAnagram(38, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len38_anagram2_chords, // chords
   kmap5_Word_len38_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len39_anagram0_chords[35] = {
+ChordData const kmap5_Word_len39_anagram0_chords[35] = {
  ChordData({2, 12, 210}), ChordData({2, 65, 0}), ChordData({4, 44, 83}), ChordData({18, 5, 129}), 
  ChordData({18, 36, 18}), ChordData({18, 40, 83}), ChordData({18, 65, 25}), ChordData({20, 1, 26}), 
  ChordData({22, 0, 89}), ChordData({22, 13, 144}), ChordData({34, 41, 81}), ChordData({36, 4, 81}), 
@@ -8175,7 +8175,7 @@ const ChordData kmap5_Word_len39_anagram0_chords[35] = {
  ChordData({164, 4, 146}), ChordData({178, 1, 26}), ChordData({178, 13, 81}), 
 };
 
-const uint8_t kmap5_Word_len39_anagram0_seqs[171] = {
+uint8_t const kmap5_Word_len39_anagram0_seqs[171] = {
  50, 113, 232, 151, 
  202, 48, 93, 231, 
  181, 158, 148, 177, 
@@ -8221,32 +8221,32 @@ const uint8_t kmap5_Word_len39_anagram0_seqs[171] = {
  238, 156, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len39_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len39_anagram0 = {
   LengthAndAnagram(39, 0), // seq_bit_len_and_anagram
   35, // num_chords
   kmap5_Word_len39_anagram0_chords, // chords
   kmap5_Word_len39_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len39_anagram1_chords[3] = {
+ChordData const kmap5_Word_len39_anagram1_chords[3] = {
  ChordData({16, 68, 83}), ChordData({50, 1, 25}), ChordData({146, 0, 75}), 
 };
 
-const uint8_t kmap5_Word_len39_anagram1_seqs[15] = {
+uint8_t const kmap5_Word_len39_anagram1_seqs[15] = {
  165, 229, 188, 225, 
  203, 174, 174, 206, 
  213, 53, 166, 202, 
  200, 89, 15, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len39_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len39_anagram1 = {
   LengthAndAnagram(39, 1), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len39_anagram1_chords, // chords
   kmap5_Word_len39_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len40_anagram0_chords[29] = {
+ChordData const kmap5_Word_len40_anagram0_chords[29] = {
  ChordData({0, 4, 72}), ChordData({6, 12, 146}), ChordData({16, 0, 80}), ChordData({20, 68, 19}), 
  ChordData({22, 0, 154}), ChordData({22, 4, 11}), ChordData({34, 68, 155}), ChordData({36, 77, 18}), 
  ChordData({38, 4, 19}), ChordData({48, 4, 89}), ChordData({50, 4, 209}), ChordData({50, 8, 194}), 
@@ -8257,7 +8257,7 @@ const ChordData kmap5_Word_len40_anagram0_chords[29] = {
  ChordData({182, 9, 26}), 
 };
 
-const uint8_t kmap5_Word_len40_anagram0_seqs[145] = {
+uint8_t const kmap5_Word_len40_anagram0_seqs[145] = {
  188, 242, 207, 11, 
  255, 109, 39, 254, 
  14, 149, 107, 73, 
@@ -8297,47 +8297,47 @@ const uint8_t kmap5_Word_len40_anagram0_seqs[145] = {
  208, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len40_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len40_anagram0 = {
   LengthAndAnagram(40, 0), // seq_bit_len_and_anagram
   29, // num_chords
   kmap5_Word_len40_anagram0_chords, // chords
   kmap5_Word_len40_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len40_anagram1_chords[2] = {
+ChordData const kmap5_Word_len40_anagram1_chords[2] = {
  ChordData({54, 8, 192}), ChordData({132, 12, 26}), 
 };
 
-const uint8_t kmap5_Word_len40_anagram1_seqs[10] = {
+uint8_t const kmap5_Word_len40_anagram1_seqs[10] = {
  19, 91, 37, 25, 
  206, 143, 152, 177, 
  189, 150, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len40_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len40_anagram1 = {
   LengthAndAnagram(40, 1), // seq_bit_len_and_anagram
   2, // num_chords
   kmap5_Word_len40_anagram1_chords, // chords
   kmap5_Word_len40_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len40_anagram2_chords[1] = {
+ChordData const kmap5_Word_len40_anagram2_chords[1] = {
  ChordData({22, 4, 19}), 
 };
 
-const uint8_t kmap5_Word_len40_anagram2_seqs[5] = {
+uint8_t const kmap5_Word_len40_anagram2_seqs[5] = {
  223, 218, 26, 231, 
  207, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len40_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len40_anagram2 = {
   LengthAndAnagram(40, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len40_anagram2_chords, // chords
   kmap5_Word_len40_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len41_anagram0_chords[37] = {
+ChordData const kmap5_Word_len41_anagram0_chords[37] = {
  ChordData({6, 76, 146}), ChordData({16, 44, 11}), ChordData({18, 1, 75}), ChordData({18, 76, 210}), 
  ChordData({20, 4, 216}), ChordData({20, 76, 25}), ChordData({22, 4, 210}), ChordData({22, 12, 153}), 
  ChordData({22, 36, 144}), ChordData({22, 64, 202}), ChordData({32, 4, 154}), ChordData({32, 45, 8}), 
@@ -8350,7 +8350,7 @@ const ChordData kmap5_Word_len41_anagram0_chords[37] = {
  ChordData({182, 4, 25}), 
 };
 
-const uint8_t kmap5_Word_len41_anagram0_seqs[190] = {
+uint8_t const kmap5_Word_len41_anagram0_seqs[190] = {
  173, 220, 143, 19, 
  158, 254, 238, 145, 
  69, 235, 9, 142, 
@@ -8401,32 +8401,32 @@ const uint8_t kmap5_Word_len41_anagram0_seqs[190] = {
  38, 21, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len41_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len41_anagram0 = {
   LengthAndAnagram(41, 0), // seq_bit_len_and_anagram
   37, // num_chords
   kmap5_Word_len41_anagram0_chords, // chords
   kmap5_Word_len41_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len41_anagram1_chords[3] = {
+ChordData const kmap5_Word_len41_anagram1_chords[3] = {
  ChordData({34, 13, 24}), ChordData({130, 68, 27}), ChordData({178, 8, 11}), 
 };
 
-const uint8_t kmap5_Word_len41_anagram1_seqs[16] = {
+uint8_t const kmap5_Word_len41_anagram1_seqs[16] = {
  60, 55, 11, 71, 
  231, 49, 245, 246, 
  195, 224, 97, 42, 
  103, 189, 73, 5, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len41_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len41_anagram1 = {
   LengthAndAnagram(41, 1), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len41_anagram1_chords, // chords
   kmap5_Word_len41_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len42_anagram0_chords[32] = {
+ChordData const kmap5_Word_len42_anagram0_chords[32] = {
  ChordData({2, 5, 147}), ChordData({2, 65, 2}), ChordData({2, 65, 128}), ChordData({4, 65, 130}), 
  ChordData({18, 44, 3}), ChordData({18, 65, 26}), ChordData({22, 8, 155}), ChordData({22, 36, 73}), 
  ChordData({34, 65, 131}), ChordData({34, 69, 17}), ChordData({36, 1, 72}), ChordData({38, 4, 147}), 
@@ -8437,7 +8437,7 @@ const ChordData kmap5_Word_len42_anagram0_chords[32] = {
  ChordData({166, 8, 82}), ChordData({178, 8, 153}), ChordData({180, 5, 136}), ChordData({182, 0, 27}), 
 };
 
-const uint8_t kmap5_Word_len42_anagram0_seqs[168] = {
+uint8_t const kmap5_Word_len42_anagram0_seqs[168] = {
  191, 55, 221, 224, 
  60, 133, 233, 58, 
  175, 21, 29, 166, 
@@ -8482,30 +8482,30 @@ const uint8_t kmap5_Word_len42_anagram0_seqs[168] = {
  222, 78, 95, 207, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len42_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len42_anagram0 = {
   LengthAndAnagram(42, 0), // seq_bit_len_and_anagram
   32, // num_chords
   kmap5_Word_len42_anagram0_chords, // chords
   kmap5_Word_len42_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len42_anagram1_chords[1] = {
+ChordData const kmap5_Word_len42_anagram1_chords[1] = {
  ChordData({134, 0, 25}), 
 };
 
-const uint8_t kmap5_Word_len42_anagram1_seqs[6] = {
+uint8_t const kmap5_Word_len42_anagram1_seqs[6] = {
  109, 179, 229, 222, 
  164, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len42_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len42_anagram1 = {
   LengthAndAnagram(42, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len42_anagram1_chords, // chords
   kmap5_Word_len42_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len43_anagram0_chords[25] = {
+ChordData const kmap5_Word_len43_anagram0_chords[25] = {
  ChordData({4, 72, 64}), ChordData({4, 73, 2}), ChordData({18, 12, 11}), ChordData({32, 8, 144}), 
  ChordData({36, 1, 129}), ChordData({36, 9, 130}), ChordData({48, 12, 155}), ChordData({50, 1, 137}), 
  ChordData({52, 8, 81}), ChordData({52, 12, 152}), ChordData({54, 0, 65}), ChordData({54, 4, 130}), 
@@ -8515,7 +8515,7 @@ const ChordData kmap5_Word_len43_anagram0_chords[25] = {
  ChordData({182, 76, 130}), 
 };
 
-const uint8_t kmap5_Word_len43_anagram0_seqs[135] = {
+uint8_t const kmap5_Word_len43_anagram0_seqs[135] = {
  124, 227, 3, 31, 
  121, 9, 145, 111, 
  124, 199, 99, 252, 
@@ -8552,14 +8552,14 @@ const uint8_t kmap5_Word_len43_anagram0_seqs[135] = {
  24, 124, 2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len43_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len43_anagram0 = {
   LengthAndAnagram(43, 0), // seq_bit_len_and_anagram
   25, // num_chords
   kmap5_Word_len43_anagram0_chords, // chords
   kmap5_Word_len43_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len44_anagram0_chords[18] = {
+ChordData const kmap5_Word_len44_anagram0_chords[18] = {
  ChordData({0, 44, 9}), ChordData({2, 100, 83}), ChordData({18, 5, 19}), ChordData({34, 8, 146}), 
  ChordData({48, 65, 154}), ChordData({50, 1, 75}), ChordData({50, 5, 17}), ChordData({50, 8, 91}), 
  ChordData({50, 12, 131}), ChordData({50, 12, 153}), ChordData({52, 5, 18}), ChordData({52, 12, 17}), 
@@ -8567,7 +8567,7 @@ const ChordData kmap5_Word_len44_anagram0_chords[18] = {
  ChordData({146, 12, 11}), ChordData({146, 68, 73}), 
 };
 
-const uint8_t kmap5_Word_len44_anagram0_seqs[99] = {
+uint8_t const kmap5_Word_len44_anagram0_seqs[99] = {
  124, 124, 101, 127, 
  247, 26, 74, 249, 
  61, 182, 243, 232, 
@@ -8595,37 +8595,37 @@ const uint8_t kmap5_Word_len44_anagram0_seqs[99] = {
  250, 55, 169, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len44_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len44_anagram0 = {
   LengthAndAnagram(44, 0), // seq_bit_len_and_anagram
   18, // num_chords
   kmap5_Word_len44_anagram0_chords, // chords
   kmap5_Word_len44_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len44_anagram1_chords[1] = {
+ChordData const kmap5_Word_len44_anagram1_chords[1] = {
  ChordData({2, 100, 83}), 
 };
 
-const uint8_t kmap5_Word_len44_anagram1_seqs[6] = {
+uint8_t const kmap5_Word_len44_anagram1_seqs[6] = {
  161, 148, 223, 99, 
  59, 8, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len44_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len44_anagram1 = {
   LengthAndAnagram(44, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len44_anagram1_chords, // chords
   kmap5_Word_len44_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len45_anagram0_chords[15] = {
+ChordData const kmap5_Word_len45_anagram0_chords[15] = {
  ChordData({0, 4, 145}), ChordData({18, 108, 90}), ChordData({22, 4, 19}), ChordData({34, 76, 136}), 
  ChordData({50, 8, 8}), ChordData({52, 4, 211}), ChordData({54, 8, 83}), ChordData({144, 0, 89}), 
  ChordData({150, 8, 11}), ChordData({150, 97, 194}), ChordData({178, 8, 25}), ChordData({178, 8, 75}), 
  ChordData({178, 68, 153}), ChordData({180, 4, 147}), ChordData({182, 0, 216}), 
 };
 
-const uint8_t kmap5_Word_len45_anagram0_seqs[85] = {
+uint8_t const kmap5_Word_len45_anagram0_seqs[85] = {
  183, 15, 110, 188, 
  220, 50, 122, 145, 
  189, 134, 17, 183, 
@@ -8650,37 +8650,37 @@ const uint8_t kmap5_Word_len45_anagram0_seqs[85] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len45_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len45_anagram0 = {
   LengthAndAnagram(45, 0), // seq_bit_len_and_anagram
   15, // num_chords
   kmap5_Word_len45_anagram0_chords, // chords
   kmap5_Word_len45_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len45_anagram3_chords[1] = {
+ChordData const kmap5_Word_len45_anagram3_chords[1] = {
  ChordData({38, 4, 147}), 
 };
 
-const uint8_t kmap5_Word_len45_anagram3_seqs[6] = {
+uint8_t const kmap5_Word_len45_anagram3_seqs[6] = {
  248, 237, 251, 161, 
  185, 18, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len45_anagram3 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len45_anagram3 = {
   LengthAndAnagram(45, 3), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len45_anagram3_chords, // chords
   kmap5_Word_len45_anagram3_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len46_anagram0_chords[16] = {
+ChordData const kmap5_Word_len46_anagram0_chords[16] = {
  ChordData({2, 8, 73}), ChordData({6, 4, 27}), ChordData({6, 36, 83}), ChordData({38, 68, 82}), 
  ChordData({50, 5, 147}), ChordData({50, 76, 137}), ChordData({52, 0, 25}), ChordData({134, 4, 139}), 
  ChordData({134, 32, 210}), ChordData({144, 76, 3}), ChordData({146, 1, 11}), ChordData({148, 13, 26}), 
  ChordData({150, 4, 17}), ChordData({150, 4, 83}), ChordData({160, 8, 2}), ChordData({178, 12, 11}), 
 };
 
-const uint8_t kmap5_Word_len46_anagram0_seqs[92] = {
+uint8_t const kmap5_Word_len46_anagram0_seqs[92] = {
  114, 19, 43, 253, 
  77, 106, 251, 189, 
  193, 105, 175, 215, 
@@ -8706,37 +8706,37 @@ const uint8_t kmap5_Word_len46_anagram0_seqs[92] = {
  88, 117, 240, 207, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len46_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len46_anagram0 = {
   LengthAndAnagram(46, 0), // seq_bit_len_and_anagram
   16, // num_chords
   kmap5_Word_len46_anagram0_chords, // chords
   kmap5_Word_len46_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len46_anagram1_chords[1] = {
+ChordData const kmap5_Word_len46_anagram1_chords[1] = {
  ChordData({32, 8, 18}), 
 };
 
-const uint8_t kmap5_Word_len46_anagram1_seqs[6] = {
+uint8_t const kmap5_Word_len46_anagram1_seqs[6] = {
  124, 201, 71, 62, 
  242, 28, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len46_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len46_anagram1 = {
   LengthAndAnagram(46, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len46_anagram1_chords, // chords
   kmap5_Word_len46_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len47_anagram0_chords[13] = {
+ChordData const kmap5_Word_len47_anagram0_chords[13] = {
  ChordData({22, 12, 154}), ChordData({34, 5, 75}), ChordData({38, 4, 201}), ChordData({50, 12, 90}), 
  ChordData({50, 13, 11}), ChordData({52, 64, 201}), ChordData({130, 13, 25}), ChordData({132, 4, 18}), 
  ChordData({150, 4, 19}), ChordData({160, 12, 147}), ChordData({164, 12, 146}), ChordData({176, 8, 91}), 
  ChordData({176, 64, 202}), 
 };
 
-const uint8_t kmap5_Word_len47_anagram0_seqs[77] = {
+uint8_t const kmap5_Word_len47_anagram0_seqs[77] = {
  109, 77, 19, 71, 
  127, 75, 25, 168, 
  211, 13, 190, 158, 
@@ -8759,18 +8759,18 @@ const uint8_t kmap5_Word_len47_anagram0_seqs[77] = {
  6, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len47_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len47_anagram0 = {
   LengthAndAnagram(47, 0), // seq_bit_len_and_anagram
   13, // num_chords
   kmap5_Word_len47_anagram0_chords, // chords
   kmap5_Word_len47_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len48_anagram0_chords[4] = {
+ChordData const kmap5_Word_len48_anagram0_chords[4] = {
  ChordData({48, 13, 27}), ChordData({130, 5, 154}), ChordData({164, 8, 16}), ChordData({182, 72, 26}), 
 };
 
-const uint8_t kmap5_Word_len48_anagram0_seqs[24] = {
+uint8_t const kmap5_Word_len48_anagram0_seqs[24] = {
  241, 181, 118, 143, 
  87, 215, 60, 62, 
  77, 151, 171, 243, 
@@ -8779,21 +8779,21 @@ const uint8_t kmap5_Word_len48_anagram0_seqs[24] = {
  228, 38, 88, 209, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len48_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len48_anagram0 = {
   LengthAndAnagram(48, 0), // seq_bit_len_and_anagram
   4, // num_chords
   kmap5_Word_len48_anagram0_chords, // chords
   kmap5_Word_len48_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len49_anagram0_chords[14] = {
+ChordData const kmap5_Word_len49_anagram0_chords[14] = {
  ChordData({0, 13, 2}), ChordData({4, 4, 82}), ChordData({18, 76, 91}), ChordData({50, 12, 91}), 
  ChordData({54, 1, 137}), ChordData({144, 12, 147}), ChordData({150, 12, 147}), ChordData({150, 36, 67}), 
  ChordData({160, 8, 10}), ChordData({166, 0, 27}), ChordData({166, 0, 211}), ChordData({176, 5, 155}), 
  ChordData({176, 77, 138}), ChordData({178, 12, 91}), 
 };
 
-const uint8_t kmap5_Word_len49_anagram0_seqs[86] = {
+uint8_t const kmap5_Word_len49_anagram0_seqs[86] = {
  143, 69, 77, 128, 
  28, 160, 249, 229, 
  145, 47, 76, 188, 
@@ -8818,35 +8818,35 @@ const uint8_t kmap5_Word_len49_anagram0_seqs[86] = {
  77, 42, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len49_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len49_anagram0 = {
   LengthAndAnagram(49, 0), // seq_bit_len_and_anagram
   14, // num_chords
   kmap5_Word_len49_anagram0_chords, // chords
   kmap5_Word_len49_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len49_anagram1_chords[1] = {
+ChordData const kmap5_Word_len49_anagram1_chords[1] = {
  ChordData({0, 0, 146}), 
 };
 
-const uint8_t kmap5_Word_len49_anagram1_seqs[7] = {
+uint8_t const kmap5_Word_len49_anagram1_seqs[7] = {
  109, 45, 184, 211, 
  110, 82, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len49_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len49_anagram1 = {
   LengthAndAnagram(49, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len49_anagram1_chords, // chords
   kmap5_Word_len49_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len50_anagram0_chords[5] = {
+ChordData const kmap5_Word_len50_anagram0_chords[5] = {
  ChordData({2, 4, 66}), ChordData({4, 4, 66}), ChordData({32, 68, 130}), ChordData({162, 68, 203}), 
  ChordData({178, 12, 201}), 
 };
 
-const uint8_t kmap5_Word_len50_anagram0_seqs[32] = {
+uint8_t const kmap5_Word_len50_anagram0_seqs[32] = {
  252, 243, 194, 35, 
  63, 252, 240, 141, 
  71, 190, 48, 241, 
@@ -8857,18 +8857,18 @@ const uint8_t kmap5_Word_len50_anagram0_seqs[32] = {
  189, 58, 171, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len50_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len50_anagram0 = {
   LengthAndAnagram(50, 0), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len50_anagram0_chords, // chords
   kmap5_Word_len50_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len51_anagram0_chords[3] = {
+ChordData const kmap5_Word_len51_anagram0_chords[3] = {
  ChordData({6, 8, 1}), ChordData({38, 8, 211}), ChordData({164, 0, 17}), 
 };
 
-const uint8_t kmap5_Word_len51_anagram0_seqs[20] = {
+uint8_t const kmap5_Word_len51_anagram0_seqs[20] = {
  19, 91, 37, 25, 
  110, 174, 156, 216, 
  42, 201, 112, 115, 
@@ -8876,35 +8876,35 @@ const uint8_t kmap5_Word_len51_anagram0_seqs[20] = {
  31, 154, 43, 1, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len51_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len51_anagram0 = {
   LengthAndAnagram(51, 0), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len51_anagram0_chords, // chords
   kmap5_Word_len51_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len51_anagram1_chords[1] = {
+ChordData const kmap5_Word_len51_anagram1_chords[1] = {
  ChordData({128, 0, 10}), 
 };
 
-const uint8_t kmap5_Word_len51_anagram1_seqs[7] = {
+uint8_t const kmap5_Word_len51_anagram1_seqs[7] = {
  152, 170, 198, 27, 
  110, 174, 4, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len51_anagram1 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len51_anagram1 = {
   LengthAndAnagram(51, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len51_anagram1_chords, // chords
   kmap5_Word_len51_anagram1_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len52_anagram0_chords[5] = {
+ChordData const kmap5_Word_len52_anagram0_chords[5] = {
  ChordData({54, 64, 209}), ChordData({130, 64, 81}), ChordData({150, 32, 83}), ChordData({166, 64, 89}), 
  ChordData({178, 12, 202}), 
 };
 
-const uint8_t kmap5_Word_len52_anagram0_seqs[33] = {
+uint8_t const kmap5_Word_len52_anagram0_seqs[33] = {
  109, 189, 46, 84, 
  71, 230, 28, 70, 
  110, 167, 175, 55, 
@@ -8916,66 +8916,66 @@ const uint8_t kmap5_Word_len52_anagram0_seqs[33] = {
  2, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len52_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len52_anagram0 = {
   LengthAndAnagram(52, 0), // seq_bit_len_and_anagram
   5, // num_chords
   kmap5_Word_len52_anagram0_chords, // chords
   kmap5_Word_len52_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len52_anagram2_chords[1] = {
+ChordData const kmap5_Word_len52_anagram2_chords[1] = {
  ChordData({38, 4, 147}), 
 };
 
-const uint8_t kmap5_Word_len52_anagram2_seqs[7] = {
+uint8_t const kmap5_Word_len52_anagram2_seqs[7] = {
  237, 247, 6, 43, 
  253, 82, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len52_anagram2 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len52_anagram2 = {
   LengthAndAnagram(52, 2), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len52_anagram2_chords, // chords
   kmap5_Word_len52_anagram2_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len53_anagram0_chords[1] = {
+ChordData const kmap5_Word_len53_anagram0_chords[1] = {
  ChordData({54, 72, 144}), 
 };
 
-const uint8_t kmap5_Word_len53_anagram0_seqs[7] = {
+uint8_t const kmap5_Word_len53_anagram0_seqs[7] = {
  46, 84, 135, 166, 
  223, 169, 17, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len53_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len53_anagram0 = {
   LengthAndAnagram(53, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len53_anagram0_chords, // chords
   kmap5_Word_len53_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len55_anagram0_chords[1] = {
+ChordData const kmap5_Word_len55_anagram0_chords[1] = {
  ChordData({2, 13, 0}), 
 };
 
-const uint8_t kmap5_Word_len55_anagram0_seqs[7] = {
+uint8_t const kmap5_Word_len55_anagram0_seqs[7] = {
  252, 243, 29, 255, 
  252, 240, 69, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len55_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len55_anagram0 = {
   LengthAndAnagram(55, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len55_anagram0_chords, // chords
   kmap5_Word_len55_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len57_anagram0_chords[3] = {
+ChordData const kmap5_Word_len57_anagram0_chords[3] = {
  ChordData({22, 76, 219}), ChordData({32, 40, 66}), ChordData({34, 5, 219}), 
 };
 
-const uint8_t kmap5_Word_len57_anagram0_seqs[22] = {
+uint8_t const kmap5_Word_len57_anagram0_seqs[22] = {
  188, 0, 115, 5, 
  189, 244, 26, 120, 
  142, 199, 194, 195, 
@@ -8984,116 +8984,116 @@ const uint8_t kmap5_Word_len57_anagram0_seqs[22] = {
  168, 4, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len57_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len57_anagram0 = {
   LengthAndAnagram(57, 0), // seq_bit_len_and_anagram
   3, // num_chords
   kmap5_Word_len57_anagram0_chords, // chords
   kmap5_Word_len57_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len58_anagram0_chords[1] = {
+ChordData const kmap5_Word_len58_anagram0_chords[1] = {
  ChordData({54, 12, 218}), 
 };
 
-const uint8_t kmap5_Word_len58_anagram0_seqs[8] = {
+uint8_t const kmap5_Word_len58_anagram0_seqs[8] = {
  124, 179, 170, 148, 
  196, 189, 206, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len58_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len58_anagram0 = {
   LengthAndAnagram(58, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len58_anagram0_chords, // chords
   kmap5_Word_len58_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len60_anagram0_chords[1] = {
+ChordData const kmap5_Word_len60_anagram0_chords[1] = {
  ChordData({182, 0, 219}), 
 };
 
-const uint8_t kmap5_Word_len60_anagram0_seqs[8] = {
+uint8_t const kmap5_Word_len60_anagram0_seqs[8] = {
  107, 105, 169, 50, 
  253, 208, 92, 9, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len60_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len60_anagram0 = {
   LengthAndAnagram(60, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len60_anagram0_chords, // chords
   kmap5_Word_len60_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len71_anagram0_chords[1] = {
+ChordData const kmap5_Word_len71_anagram0_chords[1] = {
  ChordData({164, 36, 9}), 
 };
 
-const uint8_t kmap5_Word_len71_anagram0_seqs[9] = {
+uint8_t const kmap5_Word_len71_anagram0_seqs[9] = {
  124, 207, 43, 159, 
  5, 164, 48, 22, 
  70, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len71_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len71_anagram0 = {
   LengthAndAnagram(71, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len71_anagram0_chords, // chords
   kmap5_Word_len71_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len79_anagram0_chords[1] = {
+ChordData const kmap5_Word_len79_anagram0_chords[1] = {
  ChordData({34, 65, 82}), 
 };
 
-const uint8_t kmap5_Word_len79_anagram0_seqs[10] = {
+uint8_t const kmap5_Word_len79_anagram0_seqs[10] = {
  60, 192, 151, 188, 
  240, 195, 3, 124, 
  201, 67, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len79_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len79_anagram0 = {
   LengthAndAnagram(79, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len79_anagram0_chords, // chords
   kmap5_Word_len79_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len102_anagram0_chords[1] = {
+ChordData const kmap5_Word_len102_anagram0_chords[1] = {
  ChordData({16, 1, 144}), 
 };
 
-const uint8_t kmap5_Word_len102_anagram0_seqs[13] = {
+uint8_t const kmap5_Word_len102_anagram0_seqs[13] = {
  235, 142, 140, 55, 
  169, 5, 152, 216, 
  42, 201, 112, 115, 
  37, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len102_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len102_anagram0 = {
   LengthAndAnagram(102, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len102_anagram0_chords, // chords
   kmap5_Word_len102_anagram0_seqs, // sequences
 };
 
-const ChordData kmap5_Word_len105_anagram0_chords[1] = {
+ChordData const kmap5_Word_len105_anagram0_chords[1] = {
  ChordData({2, 5, 0}), 
 };
 
-const uint8_t kmap5_Word_len105_anagram0_seqs[14] = {
+uint8_t const kmap5_Word_len105_anagram0_seqs[14] = {
  47, 5, 232, 126, 
  11, 240, 82, 0, 
  126, 10, 80, 212, 
  4, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap5_Word_len105_anagram0 = {
+LookupKmapTypeLenAnagram const kmap5_Word_len105_anagram0 = {
   LengthAndAnagram(105, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap5_Word_len105_anagram0_chords, // chords
   kmap5_Word_len105_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap5_Word_lookups_array[174] = {
+LookupKmapTypeLenAnagram const* const kmap5_Word_lookups_array[174] = {
  &kmap5_Word_len4_anagram1, &kmap5_Word_len5_anagram1, &kmap5_Word_len7_anagram0, &kmap5_Word_len7_anagram1, 
  &kmap5_Word_len8_anagram0, &kmap5_Word_len8_anagram1, &kmap5_Word_len9_anagram0, &kmap5_Word_len9_anagram1, 
  &kmap5_Word_len9_anagram2, &kmap5_Word_len9_anagram4, &kmap5_Word_len10_anagram0, &kmap5_Word_len10_anagram1, 
@@ -9140,32 +9140,32 @@ const LookupKmapTypeLenAnagram* kmap5_Word_lookups_array[174] = {
  &kmap5_Word_len102_anagram0, &kmap5_Word_len105_anagram0, 
 };
 
-const LookupKmapType kmap5_Word_lookups = {
+LookupKmapType const kmap5_Word_lookups = {
   174, // num_lookups
   kmap5_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap5_lookups_array[4] = {
+LookupKmapType const* const kmap5_lookups_array[4] = {
  &kmap5_Plain_lookups, &kmap5_Macro_lookups, &kmap5_Command_lookups, &kmap5_Word_lookups, 
 };
 
-const KmapStruct kmap5_lookups = {
+KmapStruct const kmap5_lookups = {
   kmap5_lookups_array, // lookups_for_kmap
 };
 
-const KmapStruct* default_mode_kmaps_array[3] = {
+KmapStruct const* const default_mode_kmaps_array[3] = {
  &kmap4_lookups, &kmap5_lookups, &kmap0_lookups, 
 };
 
-const ChordData default_mode_mod_chord[10] = {
+ChordData const default_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData default_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const default_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct default_mode_struct = {
+ModeStruct const default_mode_struct = {
   0, // is_gaming
   3, // num_kmaps
   default_mode_kmaps_array, // kmaps
@@ -9173,19 +9173,19 @@ const ModeStruct default_mode_struct = {
   default_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* gaming_mode_kmaps_array[1] = {
+KmapStruct const* const gaming_mode_kmaps_array[1] = {
  &kmap1_lookups, 
 };
 
-const ChordData gaming_mode_mod_chord[10] = {
+ChordData const gaming_mode_mod_chord[10] = {
  ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), 
  ChordData({0, 4, 0}), ChordData({0, 0, 0}), 
 };
 
-const ChordData gaming_mode_anagram_mask = ChordData({0, 0, 0});
+ChordData const gaming_mode_anagram_mask = ChordData({0, 0, 0});
 
-const ModeStruct gaming_mode_struct = {
+ModeStruct const gaming_mode_struct = {
   1, // is_gaming
   1, // num_kmaps
   gaming_mode_kmaps_array, // kmaps
@@ -9193,19 +9193,19 @@ const ModeStruct gaming_mode_struct = {
   gaming_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* left_hand_mode_kmaps_array[1] = {
+KmapStruct const* const left_hand_mode_kmaps_array[1] = {
  &kmap2_lookups, 
 };
 
-const ChordData left_hand_mode_mod_chord[10] = {
+ChordData const left_hand_mode_mod_chord[10] = {
  ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), 
  ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), ChordData({0, 0, 0}), 
  ChordData({0, 0, 0}), ChordData({0, 0, 0}), 
 };
 
-const ChordData left_hand_mode_anagram_mask = ChordData({0, 0, 0});
+ChordData const left_hand_mode_anagram_mask = ChordData({0, 0, 0});
 
-const ModeStruct left_hand_mode_struct = {
+ModeStruct const left_hand_mode_struct = {
   0, // is_gaming
   1, // num_kmaps
   left_hand_mode_kmaps_array, // kmaps
@@ -9213,19 +9213,19 @@ const ModeStruct left_hand_mode_struct = {
   left_hand_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* windows_mode_kmaps_array[4] = {
+KmapStruct const* const windows_mode_kmaps_array[4] = {
  &kmap3_lookups, &kmap4_lookups, &kmap5_lookups, &kmap0_lookups, 
 };
 
-const ChordData windows_mode_mod_chord[10] = {
+ChordData const windows_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData windows_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const windows_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct windows_mode_struct = {
+ModeStruct const windows_mode_struct = {
   0, // is_gaming
   4, // num_kmaps
   windows_mode_kmaps_array, // kmaps
@@ -9233,7 +9233,7 @@ const ModeStruct windows_mode_struct = {
   windows_mode_anagram_mask, // anagram_mask
 };
 
-const std::array<const ModeStruct*,4> mode_structs = {
+const std::array<ModeStruct const*,4> mode_structs = {
  &default_mode_struct, &gaming_mode_struct, &left_hand_mode_struct, &windows_mode_struct, 
 };
 

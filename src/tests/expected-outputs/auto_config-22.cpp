@@ -10,7 +10,7 @@ const std::array<uint8_t,8> column_pins = {
 const std::array<uint8_t,3> rgb_led_pins = {
  10, 11, 12, 
 };
-const HuffmanChar huffman_lookup[73] = {
+HuffmanChar const huffman_lookup[73] = {
  {
   HuffmanBits({2}), // bits
   4, // num_bits
@@ -412,57 +412,57 @@ const std::array<uint8_t,2> anagram_mod_numbers = {
 const std::array<uint8_t,4> plain_mod_keys = {
  static_cast<uint8_t>(MODIFIERKEY_ALT), static_cast<uint8_t>(MODIFIERKEY_CTRL), static_cast<uint8_t>(MODIFIERKEY_GUI), static_cast<uint8_t>(MODIFIERKEY_SHIFT), 
 };
-const ChordData kmap0_Plain_len4_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len4_anagram0_chords[1] = {
  ChordData({0, 0, 1}), 
 };
 
-const uint8_t kmap0_Plain_len4_anagram0_seqs[1] = {
+uint8_t const kmap0_Plain_len4_anagram0_seqs[1] = {
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len4_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len4_anagram0 = {
   LengthAndAnagram(4, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len4_anagram0_chords, // chords
   kmap0_Plain_len4_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len5_anagram0_chords[4] = {
+ChordData const kmap0_Plain_len5_anagram0_chords[4] = {
  ChordData({0, 0, 64}), ChordData({0, 32, 0}), ChordData({16, 0, 0}), ChordData({144, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len5_anagram0_seqs[3] = {
+uint8_t const kmap0_Plain_len5_anagram0_seqs[3] = {
  42, 229, 8, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len5_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len5_anagram0 = {
   LengthAndAnagram(5, 0), // seq_bit_len_and_anagram
   4, // num_chords
   kmap0_Plain_len5_anagram0_chords, // chords
   kmap0_Plain_len5_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len6_anagram0_chords[16] = {
+ChordData const kmap0_Plain_len6_anagram0_chords[16] = {
  ChordData({0, 0, 16}), ChordData({0, 0, 18}), ChordData({0, 0, 128}), ChordData({0, 0, 130}), 
  ChordData({0, 0, 144}), ChordData({0, 4, 0}), ChordData({0, 32, 1}), ChordData({0, 32, 8}), 
  ChordData({0, 64, 128}), ChordData({2, 0, 0}), ChordData({4, 0, 0}), ChordData({8, 0, 0}), 
  ChordData({18, 0, 0}), ChordData({36, 0, 0}), ChordData({128, 4, 0}), ChordData({130, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len6_anagram0_seqs[12] = {
+uint8_t const kmap0_Plain_len6_anagram0_seqs[12] = {
  110, 240, 152, 60, 
  237, 105, 14, 231, 
  99, 3, 101, 172, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len6_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len6_anagram0 = {
   LengthAndAnagram(6, 0), // seq_bit_len_and_anagram
   16, // num_chords
   kmap0_Plain_len6_anagram0_chords, // chords
   kmap0_Plain_len6_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len7_anagram0_chords[17] = {
+ChordData const kmap0_Plain_len7_anagram0_chords[17] = {
  ChordData({0, 0, 2}), ChordData({0, 0, 8}), ChordData({0, 0, 9}), ChordData({0, 0, 65}), 
  ChordData({0, 0, 72}), ChordData({0, 1, 0}), ChordData({0, 8, 0}), ChordData({0, 9, 0}), 
  ChordData({0, 64, 0}), ChordData({0, 64, 2}), ChordData({0, 128, 0}), ChordData({4, 8, 0}), 
@@ -470,208 +470,208 @@ const ChordData kmap0_Plain_len7_anagram0_chords[17] = {
  ChordData({128, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len7_anagram0_seqs[15] = {
+uint8_t const kmap0_Plain_len7_anagram0_seqs[15] = {
  247, 255, 114, 122, 
  238, 125, 70, 215, 
  70, 171, 61, 169, 
  117, 75, 51, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len7_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len7_anagram0 = {
   LengthAndAnagram(7, 0), // seq_bit_len_and_anagram
   17, // num_chords
   kmap0_Plain_len7_anagram0_chords, // chords
   kmap0_Plain_len7_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len10_anagram0_chords[1] = {
+ChordData const kmap0_Plain_len10_anagram0_chords[1] = {
  ChordData({0, 0, 4}), 
 };
 
-const uint8_t kmap0_Plain_len10_anagram0_seqs[2] = {
+uint8_t const kmap0_Plain_len10_anagram0_seqs[2] = {
  186, 0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len10_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len10_anagram0 = {
   LengthAndAnagram(10, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Plain_len10_anagram0_chords, // chords
   kmap0_Plain_len10_anagram0_seqs, // sequences
 };
 
-const ChordData kmap0_Plain_len11_anagram0_chords[3] = {
+ChordData const kmap0_Plain_len11_anagram0_chords[3] = {
  ChordData({0, 16, 0}), ChordData({1, 0, 0}), ChordData({64, 0, 0}), 
 };
 
-const uint8_t kmap0_Plain_len11_anagram0_seqs[5] = {
+uint8_t const kmap0_Plain_len11_anagram0_seqs[5] = {
  117, 169, 72, 89, 
  0, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Plain_len11_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Plain_len11_anagram0 = {
   LengthAndAnagram(11, 0), // seq_bit_len_and_anagram
   3, // num_chords
   kmap0_Plain_len11_anagram0_chords, // chords
   kmap0_Plain_len11_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Plain_lookups_array[6] = {
+LookupKmapTypeLenAnagram const* const kmap0_Plain_lookups_array[6] = {
  &kmap0_Plain_len4_anagram0, &kmap0_Plain_len5_anagram0, &kmap0_Plain_len6_anagram0, &kmap0_Plain_len7_anagram0, 
  &kmap0_Plain_len10_anagram0, &kmap0_Plain_len11_anagram0, 
 };
 
-const LookupKmapType kmap0_Plain_lookups = {
+LookupKmapType const kmap0_Plain_lookups = {
   6, // num_lookups
   kmap0_Plain_lookups_array, // lookups
 };
 
-const ChordData kmap0_Macro_len18_anagram0_chords[1] = {
+ChordData const kmap0_Macro_len18_anagram0_chords[1] = {
  ChordData({0, 128, 192}), 
 };
 
-const uint8_t kmap0_Macro_len18_anagram0_seqs[3] = {
+uint8_t const kmap0_Macro_len18_anagram0_seqs[3] = {
  143, 234, 3, 
 };
 
-const LookupKmapTypeLenAnagram kmap0_Macro_len18_anagram0 = {
+LookupKmapTypeLenAnagram const kmap0_Macro_len18_anagram0 = {
   LengthAndAnagram(18, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap0_Macro_len18_anagram0_chords, // chords
   kmap0_Macro_len18_anagram0_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Macro_lookups_array[1] = {
+LookupKmapTypeLenAnagram const* const kmap0_Macro_lookups_array[1] = {
  &kmap0_Macro_len18_anagram0, 
 };
 
-const LookupKmapType kmap0_Macro_lookups = {
+LookupKmapType const kmap0_Macro_lookups = {
   1, // num_lookups
   kmap0_Macro_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Command_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap0_Command_lookups_array[0] = {
 };
 
-const LookupKmapType kmap0_Command_lookups = {
+LookupKmapType const kmap0_Command_lookups = {
   0, // num_lookups
   kmap0_Command_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap0_Word_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap0_Word_lookups_array[0] = {
 };
 
-const LookupKmapType kmap0_Word_lookups = {
+LookupKmapType const kmap0_Word_lookups = {
   0, // num_lookups
   kmap0_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap0_lookups_array[4] = {
+LookupKmapType const* const kmap0_lookups_array[4] = {
  &kmap0_Plain_lookups, &kmap0_Macro_lookups, &kmap0_Command_lookups, &kmap0_Word_lookups, 
 };
 
-const KmapStruct kmap0_lookups = {
+KmapStruct const kmap0_lookups = {
   kmap0_lookups_array, // lookups_for_kmap
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Plain_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap1_Plain_lookups_array[0] = {
 };
 
-const LookupKmapType kmap1_Plain_lookups = {
+LookupKmapType const kmap1_Plain_lookups = {
   0, // num_lookups
   kmap1_Plain_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Macro_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap1_Macro_lookups_array[0] = {
 };
 
-const LookupKmapType kmap1_Macro_lookups = {
+LookupKmapType const kmap1_Macro_lookups = {
   0, // num_lookups
   kmap1_Macro_lookups_array, // lookups
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Command_lookups_array[0] = {
+LookupKmapTypeLenAnagram const* const kmap1_Command_lookups_array[0] = {
 };
 
-const LookupKmapType kmap1_Command_lookups = {
+LookupKmapType const kmap1_Command_lookups = {
   0, // num_lookups
   kmap1_Command_lookups_array, // lookups
 };
 
-const ChordData kmap1_Word_len14_anagram0_chords[1] = {
+ChordData const kmap1_Word_len14_anagram0_chords[1] = {
  ChordData({16, 32, 1}), 
 };
 
-const uint8_t kmap1_Word_len14_anagram0_seqs[2] = {
+uint8_t const kmap1_Word_len14_anagram0_seqs[2] = {
  144, 50, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Word_len14_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Word_len14_anagram0 = {
   LengthAndAnagram(14, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Word_len14_anagram0_chords, // chords
   kmap1_Word_len14_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Word_len22_anagram0_chords[1] = {
+ChordData const kmap1_Word_len22_anagram0_chords[1] = {
  ChordData({146, 0, 0}), 
 };
 
-const uint8_t kmap1_Word_len22_anagram0_seqs[3] = {
+uint8_t const kmap1_Word_len22_anagram0_seqs[3] = {
  67, 140, 43, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Word_len22_anagram0 = {
+LookupKmapTypeLenAnagram const kmap1_Word_len22_anagram0 = {
   LengthAndAnagram(22, 0), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Word_len22_anagram0_chords, // chords
   kmap1_Word_len22_anagram0_seqs, // sequences
 };
 
-const ChordData kmap1_Word_len23_anagram1_chords[1] = {
+ChordData const kmap1_Word_len23_anagram1_chords[1] = {
  ChordData({16, 32, 1}), 
 };
 
-const uint8_t kmap1_Word_len23_anagram1_seqs[3] = {
+uint8_t const kmap1_Word_len23_anagram1_seqs[3] = {
  144, 51, 36, 
 };
 
-const LookupKmapTypeLenAnagram kmap1_Word_len23_anagram1 = {
+LookupKmapTypeLenAnagram const kmap1_Word_len23_anagram1 = {
   LengthAndAnagram(23, 1), // seq_bit_len_and_anagram
   1, // num_chords
   kmap1_Word_len23_anagram1_chords, // chords
   kmap1_Word_len23_anagram1_seqs, // sequences
 };
 
-const LookupKmapTypeLenAnagram* kmap1_Word_lookups_array[3] = {
+LookupKmapTypeLenAnagram const* const kmap1_Word_lookups_array[3] = {
  &kmap1_Word_len14_anagram0, &kmap1_Word_len22_anagram0, &kmap1_Word_len23_anagram1, 
 };
 
-const LookupKmapType kmap1_Word_lookups = {
+LookupKmapType const kmap1_Word_lookups = {
   3, // num_lookups
   kmap1_Word_lookups_array, // lookups
 };
 
-const LookupKmapType* kmap1_lookups_array[4] = {
+LookupKmapType const* const kmap1_lookups_array[4] = {
  &kmap1_Plain_lookups, &kmap1_Macro_lookups, &kmap1_Command_lookups, &kmap1_Word_lookups, 
 };
 
-const KmapStruct kmap1_lookups = {
+KmapStruct const kmap1_lookups = {
   kmap1_lookups_array, // lookups_for_kmap
 };
 
-const KmapStruct* default_mode_kmaps_array[2] = {
+KmapStruct const* const default_mode_kmaps_array[2] = {
  &kmap1_lookups, &kmap0_lookups, 
 };
 
-const ChordData default_mode_mod_chord[10] = {
+ChordData const default_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData default_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const default_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct default_mode_struct = {
+ModeStruct const default_mode_struct = {
   0, // is_gaming
   2, // num_kmaps
   default_mode_kmaps_array, // kmaps
@@ -679,19 +679,19 @@ const ModeStruct default_mode_struct = {
   default_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* gaming_mode_kmaps_array[1] = {
+KmapStruct const* const gaming_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const ChordData gaming_mode_mod_chord[10] = {
+ChordData const gaming_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData gaming_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const gaming_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct gaming_mode_struct = {
+ModeStruct const gaming_mode_struct = {
   0, // is_gaming
   1, // num_kmaps
   gaming_mode_kmaps_array, // kmaps
@@ -699,19 +699,19 @@ const ModeStruct gaming_mode_struct = {
   gaming_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* left_hand_mode_kmaps_array[1] = {
+KmapStruct const* const left_hand_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const ChordData left_hand_mode_mod_chord[10] = {
+ChordData const left_hand_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData left_hand_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const left_hand_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct left_hand_mode_struct = {
+ModeStruct const left_hand_mode_struct = {
   0, // is_gaming
   1, // num_kmaps
   left_hand_mode_kmaps_array, // kmaps
@@ -719,19 +719,19 @@ const ModeStruct left_hand_mode_struct = {
   left_hand_mode_anagram_mask, // anagram_mask
 };
 
-const KmapStruct* windows_mode_kmaps_array[1] = {
+KmapStruct const* const windows_mode_kmaps_array[1] = {
  &kmap0_lookups, 
 };
 
-const ChordData windows_mode_mod_chord[10] = {
+ChordData const windows_mode_mod_chord[10] = {
  ChordData({0, 0, 4}), ChordData({8, 0, 0}), ChordData({8, 128, 0}), ChordData({64, 0, 0}), 
  ChordData({1, 0, 0}), ChordData({1, 0, 0}), ChordData({0, 16, 0}), ChordData({0, 0, 4}), 
  ChordData({64, 0, 0}), ChordData({0, 16, 0}), 
 };
 
-const ChordData windows_mode_anagram_mask = ChordData({8, 128, 0});
+ChordData const windows_mode_anagram_mask = ChordData({8, 128, 0});
 
-const ModeStruct windows_mode_struct = {
+ModeStruct const windows_mode_struct = {
   0, // is_gaming
   1, // num_kmaps
   windows_mode_kmaps_array, // kmaps
@@ -739,7 +739,7 @@ const ModeStruct windows_mode_struct = {
   windows_mode_anagram_mask, // anagram_mask
 };
 
-const std::array<const ModeStruct*,4> mode_structs = {
+const std::array<ModeStruct const*,4> mode_structs = {
  &default_mode_struct, &gaming_mode_struct, &left_hand_mode_struct, &windows_mode_struct, 
 };
 

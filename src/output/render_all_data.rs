@@ -158,7 +158,7 @@ impl AllData {
             name: "mode_structs".to_c(),
             values: CCode::map_prepend("&", &mode_struct_names),
             c_type: CType::Pointer(Box::new(CType::Custom(
-                "const ModeStruct".to_c(),
+                "ModeStruct".to_c(),
             ))),
             is_extern: true,
             use_std_array: true,

@@ -1,12 +1,12 @@
 #pragma once
 namespace conf {
-const uint8_t NUM_MATRIX_POSITIONS = 24;
+uint8_t const NUM_MATRIX_POSITIONS = 24;
 
-const uint8_t MAX_ALLOWED_ANAGRAM = 15;
+uint8_t const MAX_ALLOWED_ANAGRAM = 15;
 
-const uint16_t MAX_ALLOWED_SEQUENCE_BIT_LENGTH = 4095;
+uint16_t const MAX_ALLOWED_SEQUENCE_BIT_LENGTH = 4095;
 
-const uint8_t MAX_HUFFMAN_CODE_BIT_LEN = 7;
+uint8_t const MAX_HUFFMAN_CODE_BIT_LEN = 7;
 
 enum class Mode : uint8_t {
   default_mode = 0,
@@ -15,7 +15,7 @@ enum class Mode : uint8_t {
   windows_mode = 3,
 };
 
-const Mode DEFAULT_MODE = Mode::default_mode;
+Mode const DEFAULT_MODE = Mode::default_mode;
 
 enum class Mod : uint8_t {
   mod_alt = 0,
@@ -30,7 +30,7 @@ enum class Mod : uint8_t {
   mod_shorten = 9,
 };
 
-const uint8_t NUM_MODIFIERS = 10;
+uint8_t const NUM_MODIFIERS = 10;
 
 enum class SeqType : uint8_t {
   Plain = 0,

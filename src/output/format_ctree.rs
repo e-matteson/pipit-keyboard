@@ -158,7 +158,7 @@ fn format_public_const(
     c_type: &CType,
 ) -> CFilePair {
     CFilePair {
-        h: CCode(format!("const {} {} = {};\n\n", c_type.to_c(), name, value)),
+        h: CCode(format!("{} const {} = {};\n\n", c_type.to_c(), name, value)),
         c: CCode::new(),
     }
 }
@@ -169,7 +169,7 @@ fn format_private_const(
 ) -> CFilePair {
     CFilePair {
         h: CCode::new(),
-        c: CCode(format!("const {} {} = {};\n\n", c_type.to_c(), name, value)),
+        c: CCode(format!("{} const {} = {};\n\n", c_type.to_c(), name, value)),
     }
 }
 
@@ -208,7 +208,7 @@ fn format_array(
                 name,
             )
         } else {
-            format!("extern const {} {}[{}];\n", c_type.to_c(), name, length)
+            format!("extern {} const {}[{}];\n", c_type.to_c(), name, length)
         }
         .to_c()
     } else {
@@ -225,7 +225,7 @@ fn format_array(
         )
     } else {
         format!(
-            "const {} {}[{}] = {};\n\n",
+            "{} const {}[{}] = {};\n\n",
             c_type.to_c(),
             name,
             length,
@@ -381,7 +381,7 @@ impl ToC for CType {
             CType::U32 => "uint32_t".to_c(),
             CType::Bool => "bool".to_c(),
             CType::Custom(contents) => contents,
-            CType::Pointer(ctype) => ctype.to_c() + "*",
+            CType::Pointer(ctype) => ctype.to_c() + " const*",
         }
     }
 }

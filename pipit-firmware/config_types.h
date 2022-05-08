@@ -83,12 +83,12 @@ struct LookupKmapTypeLenAnagram {
 struct LookupKmapType {
   // TODO or just make the last element NULL?
   uint32_t num_lookups;
-  const LookupKmapTypeLenAnagram** lookups;
+  LookupKmapTypeLenAnagram const* const* lookups;
   BitSlice<uint8_t> find(const Chord* chord) const;
 };
 
 struct KmapStruct {
-  const LookupKmapType** lookups_for_kmap;
+  LookupKmapType const* const* lookups_for_kmap;
 
   constexpr const LookupKmapType* get(conf::SeqType seq_type) const;
 };
@@ -96,7 +96,7 @@ struct KmapStruct {
 struct ModeStruct {
   bool is_gaming;
   uint8_t num_kmaps;
-  const KmapStruct** kmaps;
+  KmapStruct const* const* kmaps;
   const ChordData* mod_chords;
   ChordData anagram_mask;
 

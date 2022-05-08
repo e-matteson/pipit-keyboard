@@ -4,24 +4,24 @@
 #include "config_types.h"
 typedef void (*voidFuncPtr)(void);
 namespace conf {
-const uint32_t CHORD_DELAY = 30;
+uint32_t const CHORD_DELAY = 30;
 
-const uint32_t HELD_DELAY = 200;
+uint32_t const HELD_DELAY = 200;
 
-const WordSpacePosition SPACE_POS = WordSpacePosition::Before;
+WordSpacePosition const SPACE_POS = WordSpacePosition::Before;
 
 #define TEENSY_LC 
 extern const std::array<uint8_t,3> row_pins;
 extern const std::array<uint8_t,8> column_pins;
 #define ENABLE_LED_TYPING_FEEDBACK 
-const bool USE_STANDBY_INTERRUPTS = 1;
+bool const USE_STANDBY_INTERRUPTS = 1;
 
 extern const std::array<uint8_t,3> rgb_led_pins;
 #define ENABLE_RGB_LED 
-const uint8_t MIN_HUFFMAN_CODE_BIT_LEN = 3;
+uint8_t const MIN_HUFFMAN_CODE_BIT_LEN = 3;
 
-extern const HuffmanChar huffman_lookup[105];
-const uint8_t MAX_ANAGRAM_NUM = 7;
+extern HuffmanChar const huffman_lookup[105];
+uint8_t const MAX_ANAGRAM_NUM = 7;
 
 extern const std::array<Mod,4> word_mods;
 extern const std::array<Mod,4> plain_mods;
@@ -55,9 +55,9 @@ enum class Command : uint8_t {
   command_windows_mode = 23,
 };
 
-const uint8_t MAX_KEYS_IN_SEQUENCE = 22;
+uint8_t const MAX_KEYS_IN_SEQUENCE = 22;
 
-extern const std::array<const ModeStruct*,4> mode_structs;
+extern const std::array<ModeStruct const*,4> mode_structs;
 
 } // end namespace conf
 
