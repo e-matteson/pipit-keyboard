@@ -4,8 +4,8 @@ use time::*;
 
 use error::Error;
 use types::{
-    AllData, CCode, CEnumVariant, CTree, CType, Command, LayerName, ModeName,
-    Modifier, Name, SeqType, ToC,
+    AllData, CEnumVariant, CIdent, CLiteral, CTree, CType, Command, LayerName,
+    ModeName, Modifier, Name, SeqType,
 };
 
 use output::{KmapBuilder, ModeBuilder};
@@ -35,20 +35,17 @@ impl AllData {
         file_name_base: &str,
         with_message: bool,
     ) -> Result<(), Error> {
-        let main_files =
-            self.render_main(with_message)?.format(file_name_base)?;
+        let main_file = self.render_main(with_message)?.format()?;
 
         let early_name_base = format!("{}_early", file_name_base);
-        let early_files = self
-            .render_early_config(with_message)?
-            .format(&early_name_base)?;
+        let early_file = self.render_early_config(with_message)?.format()?;
 
-        let mut file_names =
-            main_files.save(&self.output_directory, file_name_base)?;
+        let mut file_names = Vec::new();
+        file_names
+            .push(main_file.save(&self.output_directory, file_name_base)?);
 
-        file_names.extend(
-            early_files.save(&self.output_directory, &early_name_base)?,
-        );
+        file_names
+            .push(early_file.save(&self.output_directory, &early_name_base)?);
 
         let file_name_list = file_names
             .into_iter()
@@ -65,9 +62,9 @@ impl AllData {
     fn render_early_config(&self, with_message: bool) -> Result<CTree, Error> {
         let mut group = Vec::new();
         if with_message {
-            group.push(CTree::LiteralH(autogen_message()));
+            group.push(CTree::Comment(autogen_message()));
         }
-        group.push(CTree::LiteralH("#pragma once\n".to_c()));
+        group.push(CTree::Quote("#pragma once\n".to_string()));
 
         let mut namespace = Vec::new();
         namespace.extend(self.user_options.render_early());
@@ -82,10 +79,12 @@ impl AllData {
                 container: "mode list".into(),
             });
         }
-        namespace.push(CTree::PublicConst {
-            name: "DEFAULT_MODE".to_c(),
-            value: format!("Mode::{}", default_mode_name).to_c(),
-            c_type: CType::Custom("Mode".to_c()),
+        namespace.push(CTree::ConstDef {
+            name: "DEFAULT_MODE".into(),
+            value: Box::new(
+                CIdent(format!("Mode::{}", default_mode_name)).into(),
+            ),
+            c_type: CType::custom("Mode"),
         });
 
         let all_mods: Vec<_> = self
@@ -95,15 +94,17 @@ impl AllData {
             .collect();
 
         namespace.push(Modifier::render_c_enum(all_mods.iter()));
-        namespace.push(CTree::PublicConst {
-            name: "NUM_MODIFIERS".to_c(),
-            value: all_mods.len().to_c(),
+        namespace.push(CTree::ConstDef {
+            name: "NUM_MODIFIERS".into(),
+            value: Box::new(CTree::Literal(CLiteral(
+                all_mods.len().to_string(),
+            ))),
             c_type: CType::U8,
         });
         namespace.push(SeqType::render_c_enum(self.sequences.seq_types()));
 
         group.push(CTree::Namespace {
-            name: "conf".to_c(),
+            name: "conf".into(),
             contents: Box::new(CTree::Group(namespace)),
         });
 
@@ -114,12 +115,12 @@ impl AllData {
         Ok(CTree::Group(vec![
             intro(with_message)?,
             CTree::Namespace {
-                name: "conf".to_c(),
+                name: "conf".into(),
                 contents: Box::new(CTree::Group(vec![
                     self.user_options.render(),
+                    Command::render_c_enum(self.commands.iter()),
                     self.huffman_table.render()?,
                     self.render_modifiers()?,
-                    Command::render_c_enum(self.commands.iter()),
                     self.render_modes()?,
                 ])),
             },
@@ -130,9 +131,11 @@ impl AllData {
     fn render_modes(&self) -> Result<CTree, Error> {
         let mut g = Vec::new();
 
-        g.push(CTree::PublicConst {
-            name: "MAX_KEYS_IN_SEQUENCE".to_c(),
-            value: usize_to_u8(self.sequences.max_seq_length())?.to_c(),
+        g.push(CTree::ConstDef {
+            name: "MAX_KEYS_IN_SEQUENCE".into(),
+            value: Box::new(
+                usize_to_u8(self.sequences.max_seq_length())?.into(),
+            ),
             c_type: CType::U8,
         });
 
@@ -154,21 +157,26 @@ impl AllData {
             mode_struct_names.push(name);
         }
 
-        g.push(CTree::Array {
-            name: "mode_structs".to_c(),
-            values: CCode::map_prepend("&", &mode_struct_names),
-            c_type: CType::Pointer(Box::new(CType::Custom(
-                "ModeStruct".to_c(),
-            ))),
-            is_extern: true,
-            use_std_array: true,
+        let num_mode_struct_names = mode_struct_names.len();
+        g.push(CTree::ConstDef {
+            name: "mode_structs".into(),
+            c_type: CType::std_array(
+                CType::pointer(CType::custom("ModeStruct")),
+                num_mode_struct_names,
+            ),
+            value: Box::new(CTree::ArrayInit {
+                values: mode_struct_names
+                    .into_iter()
+                    .map(|ident| CTree::Address(ident))
+                    .collect(),
+            }),
         });
         Ok(CTree::Group(g))
     }
 
     fn render_layers(
         &self,
-    ) -> Result<(CTree, BTreeMap<LayerName, CCode>), Error> {
+    ) -> Result<(CTree, BTreeMap<LayerName, CIdent>), Error> {
         // Render all layer structs as CTrees, and return their names
         let mut layer_struct_names = BTreeMap::new();
         let mut g = Vec::new();
@@ -188,78 +196,95 @@ impl AllData {
     }
 
     fn render_modifiers(&self) -> Result<CTree, Error> {
-        fn to_variants(mod_names: &[Name]) -> Vec<CCode> {
+        fn to_variants(mod_names: &[Name]) -> Vec<CTree> {
             mod_names
                 .iter()
-                .map(|name| Modifier::new(name).qualified_enum_variant())
+                .map(|name| {
+                    CTree::Ident(Modifier::new(name).qualified_enum_variant())
+                })
                 .collect()
         }
 
         let mut group = Vec::new();
 
-        group.push(CTree::PublicConst {
-            name: "MAX_ANAGRAM_NUM".to_c(),
-            value: self.chords.max_anagram_num().to_c(),
+        group.push(CTree::ConstDef {
+            name: "MAX_ANAGRAM_NUM".into(),
+            value: Box::new(self.chords.max_anagram_num().into()),
             c_type: CType::U8,
         });
 
-        group.push(CTree::Array {
-            name: "word_mods".to_c(),
-            values: to_variants(&self.word_mods),
-            c_type: Modifier::enum_type(),
-            is_extern: true,
-            use_std_array: true,
+        group.push(CTree::ConstDef {
+            name: "word_mods".into(),
+            c_type: CType::std_array(
+                CType::custom(Modifier::enum_type().to_string()),
+                self.word_mods.len(),
+            ),
+            value: Box::new(CTree::ArrayInit {
+                values: to_variants(&self.word_mods),
+            }),
         });
 
-        group.push(CTree::Array {
-            name: "plain_mods".to_c(),
-            values: to_variants(&self.plain_mods),
-            c_type: Modifier::enum_type(),
-            is_extern: true,
-            use_std_array: true,
+        group.push(CTree::ConstDef {
+            name: "plain_mods".into(),
+            c_type: CType::std_array(
+                CType::custom(Modifier::enum_type().to_string()),
+                self.plain_mods.len(),
+            ),
+            value: Box::new(CTree::ArrayInit {
+                values: to_variants(&self.plain_mods),
+            }),
         });
 
-        group.push(CTree::Array {
-            name: "anagram_mods".to_c(),
-            values: to_variants(&self.anagram_mods),
-            c_type: Modifier::enum_type(),
-            is_extern: true,
-            use_std_array: true,
+        group.push(CTree::ConstDef {
+            name: "anagram_mods".into(),
+            c_type: CType::std_array(
+                CType::custom(Modifier::enum_type().to_string()),
+                self.anagram_mods.len(),
+            ),
+            value: Box::new(CTree::ArrayInit {
+                values: to_variants(&self.anagram_mods),
+            }),
         });
 
-        group.push(CTree::Array {
-            name: "anagram_mod_numbers".to_c(),
-            values: self
-                .get_anagram_mod_numbers()?
-                .iter()
-                .map(|num| num.to_c())
-                .collect(),
-            c_type: CType::U8,
-            is_extern: true,
-            use_std_array: true,
+        let anagram_mod_numbers: Vec<CTree> = self
+            .get_anagram_mod_numbers()?
+            .iter()
+            .map(|num| (*num).into())
+            .collect();
+
+        group.push(CTree::ConstDef {
+            name: "anagram_mod_numbers".into(),
+            c_type: CType::std_array(CType::U8, anagram_mod_numbers.len()),
+            value: Box::new(CTree::ArrayInit {
+                values: anagram_mod_numbers,
+            }),
         });
 
-        group.push(CTree::Array {
-            name: "plain_mod_keys".to_c(),
-            values: self.get_plain_mod_codes()?,
-            c_type: CType::U8,
-            is_extern: true,
-            use_std_array: true,
+        let plain_mod_codes = self.get_plain_mod_codes()?;
+        group.push(CTree::ConstDef {
+            name: "plain_mod_keys".into(),
+            c_type: CType::std_array(CType::U8, plain_mod_codes.len()),
+            value: Box::new(CTree::ArrayInit {
+                values: plain_mod_codes,
+            }),
         });
 
         Ok(CTree::Group(group))
     }
 
-    fn get_plain_mod_codes(&self) -> Result<Vec<CCode>, Error> {
-        // TODO this should be easier...
+    fn get_plain_mod_codes(&self) -> Result<Vec<CTree>, Error> {
         self.plain_mods
             .iter()
             .map(|name| {
-                Ok(self
+                let ident = self
                     .sequences
                     .get_seq_of_any_type(name)?
                     .lone_keypress()?
-                    .format_mods())
+                    .lone_mod()?;
+                Ok(CTree::Cast {
+                    value: Box::new(ident.into()),
+                    new_type: CType::U8,
+                })
             })
             .collect()
     }
@@ -270,40 +295,50 @@ impl AllData {
 fn intro(with_message: bool) -> Result<CTree, Error> {
     let mut group = Vec::new();
     if with_message {
-        let msg = autogen_message();
-        group.push(CTree::LiteralC(msg.clone()));
-        group.push(CTree::LiteralH(msg));
+        group.push(CTree::Comment(autogen_message()));
     }
-    group.push(CTree::LiteralH("#pragma once\n".to_c()));
-    group.push(CTree::IncludeSelf);
+    group.push(CTree::Quote("#pragma once\n".to_string()));
 
-    group.push(CTree::IncludeH {
-        path: "<Arduino.h>".to_c(),
+    group.push(CTree::Include {
+        path: "<Arduino.h>".to_string(),
     });
-    group.push(CTree::IncludeH {
-        path: "<stdint.h>".to_c(),
+    group.push(CTree::Include {
+        path: "<stdint.h>".to_string(),
     });
-    group.push(CTree::IncludeH {
-        path: "\"config_types.h\"".to_c(),
+    group.push(CTree::Include {
+        path: "\"config_types.h\"".to_string(),
     });
 
-    group.push(CTree::LiteralH(
-        "typedef void (*voidFuncPtr)(void);\n".to_c(),
+    group.push(CTree::Comment(
+    "Hacky way to be able to write the type of C-style arrays as `c_array_t<int,\
+    42>`, in which the type is entirely before the variable name. Otherwise it's\
+    harder to auto-generate the code because the type information is split\
+    across either side of the variable name.".to_string()
+    ));
+    group.push(CTree::Quote(
+        "\n#include <type_traits>
+template<class T, size_t N>
+using c_array_t = T[N];\n\n"
+            .to_string(),
+    ));
+
+    group.push(CTree::Quote(
+        "typedef void (*voidFuncPtr)(void);\n".to_string(),
     ));
 
     Ok(CTree::Group(group))
 }
 
-fn autogen_message() -> CCode {
+fn autogen_message() -> String {
     const AUTHOR: &str = "pipit-keyboard";
 
     let mut s = format!(
-        "/**\n * Automatically generated by {} on:  {}\n",
+        "Automatically generated by {} on:  {}\n",
         AUTHOR,
         now().strftime("%c").unwrap()
     );
-    s += " * Do not make changes here, they will be overwritten.\n */\n\n";
-    s.to_c()
+    s += "Do not make changes here, they will be overwritten.";
+    s
 }
 
 fn make_debug_macros() -> CTree {
@@ -319,5 +354,5 @@ fn make_debug_macros() -> CTree {
     s += "    #define DEBUG1(msg)\n";
     s += "    #define DEBUG1_LN(msg)\n";
     s += "#endif\n\n";
-    CTree::LiteralH(CCode(s))
+    CTree::Quote(s)
 }

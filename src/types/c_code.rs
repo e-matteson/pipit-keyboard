@@ -1,29 +1,19 @@
-use std::borrow::Borrow;
 use std::fmt;
-use std::ops::{Add, AddAssign};
-
-use types::{AnagramNum, ModeName, Name, SeqType};
-
-#[derive(
-    Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize,
-)]
-#[serde(deny_unknown_fields)]
-pub struct CCode(pub String);
-
-pub trait ToC {
-    fn to_c(self) -> CCode;
-}
 
 pub trait CEnumVariant: Sized {
     /// The type name of C++ enum
-    fn enum_type() -> CType;
+    fn enum_type() -> CIdent;
 
     /// The unqualified name of this variant in the C++ enum
-    fn enum_variant(&self) -> CCode;
+    fn enum_variant(&self) -> CIdent;
 
     /// The qualified name of this variant in the C++ enum
-    fn qualified_enum_variant(&self) -> CCode {
-        format!("{}::{}", Self::enum_type().to_c(), self.enum_variant()).to_c()
+    fn qualified_enum_variant(&self) -> CIdent {
+        CIdent(format!(
+            "{}::{}",
+            Self::enum_type().0,
+            self.enum_variant().0
+        ))
     }
 
     /// The underlying type determining the size of the C++ enum
@@ -39,282 +29,169 @@ pub trait CEnumVariant: Sized {
     {
         // TODO ensure variants are unique?
         CTree::EnumDecl {
-            name: Self::enum_type().to_c(),
-            size: Self::underlying_type().map(|t| t.to_c()),
+            enum_type: Self::enum_type(),
+            underlying_type: Self::underlying_type(),
             variants: variants.map(|x| x.enum_variant()).collect(),
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CType {
     U8,
     U16,
     U32,
     Bool,
-    Custom(CCode),
+    Custom(String),
     Pointer(Box<CType>),
+    Array(Box<CType>, usize),
+    StdArray(Box<CType>, usize),
 }
 
-#[derive(Debug, Clone)]
+impl CType {
+    pub fn pointer(pointed_to: CType) -> CType {
+        CType::Pointer(Box::new(pointed_to))
+    }
+
+    pub fn array(element_type: CType, length: usize) -> CType {
+        CType::Array(Box::new(element_type), length)
+    }
+
+    pub fn std_array(element_type: CType, length: usize) -> CType {
+        CType::StdArray(Box::new(element_type), length)
+    }
+
+    pub fn custom<T>(name: T) -> CType
+    where
+        T: ToString,
+    {
+        CType::Custom(name.to_string())
+    }
+}
+
+#[derive(
+    Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize,
+)]
+#[serde(deny_unknown_fields)]
+pub struct CIdent(pub String);
+
+#[derive(
+    Clone, Hash, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Deserialize,
+)]
+#[serde(deny_unknown_fields)]
+pub struct CLiteral(pub String);
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CTree {
     /// Define a preprocessor macro (with no value) if `is_defined` is true.
     DefineIf {
-        name: CCode,
+        name: CIdent,
         is_defined: bool,
     },
-    PublicConst {
-        name: CCode,
-        value: CCode,
+    ConstDef {
+        name: CIdent,
         c_type: CType,
-    },
-    PrivateConst {
-        name: CCode,
-        value: CCode,
-        c_type: CType,
-    },
-    Array {
-        name: CCode,
-        values: Vec<CCode>,
-        c_type: CType,
-        is_extern: bool,
-        use_std_array: bool,
+        value: Box<CTree>,
     },
     EnumDecl {
-        name: CCode,
-        variants: Vec<CCode>,
-        size: Option<CCode>,
+        enum_type: CIdent,
+        variants: Vec<CIdent>,
+        underlying_type: Option<CType>,
     },
-    StructInstance {
-        name: CCode,
-        fields: Vec<Field>,
-        c_type: CType,
+    ArrayInit {
+        values: Vec<CTree>,
+    },
+    StructInit {
+        struct_type: CType,
+        values: Vec<CTree>,
     },
     /// Wrap the given CTree in a namespace block.
     Namespace {
-        name: CCode,
+        name: CIdent,
         contents: Box<CTree>,
     },
     /// Include the given file (with quotes or angle brackets included) in the
     /// header file.
-    IncludeH {
-        path: CCode,
+    Include {
+        path: String,
     },
-    /// Include the name of this header file in this cpp file.
-    IncludeSelf,
-    LiteralH(CCode),
-    LiteralC(CCode),
+    Quote(String),
+    Ident(CIdent),
+    Type(CType),
+    Literal(CLiteral),
+    Address(CIdent),
+    Comment(String),
     Group(Vec<CTree>),
+    Cast {
+        value: Box<CTree>,
+        new_type: CType,
+    },
 }
 
-#[derive(Debug, Clone)]
-pub struct Field {
-    pub name: CCode,
-    pub value: CCode,
-}
-
-impl CCode {
-    pub fn new() -> Self {
-        CCode(String::new())
+impl CTree {
+    pub fn array_def(
+        name: CIdent,
+        element_type: CType,
+        values: Vec<CTree>,
+    ) -> CTree {
+        CTree::ConstDef {
+            name,
+            c_type: CType::array(element_type, values.len()),
+            value: Box::new(CTree::ArrayInit { values }),
+        }
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn to_uppercase(&self) -> Self {
-        CCode(self.0.to_uppercase())
-    }
-
-    pub fn join(v: &[Self], separator: &str) -> Self {
-        CCode(v.join(separator))
-    }
-
-    pub fn vec<T>(v: &[T]) -> Vec<Self>
-    where
-        T: ToC + Clone,
-    {
-        v.iter().map(|ref item| item.to_c()).collect()
-    }
-
-    pub fn map_prepend<T>(prefix: T, v: &[Self]) -> Vec<Self>
-    where
-        T: ToC + Clone,
-    {
-        let prefix = prefix.to_c();
-        v.iter()
-            .map(|c| format!("{}{}", prefix, c).to_c())
-            .collect()
+    pub fn std_array_def(
+        name: CIdent,
+        element_type: CType,
+        values: Vec<CTree>,
+    ) -> CTree {
+        CTree::ConstDef {
+            name,
+            c_type: CType::std_array(element_type, values.len()),
+            value: Box::new(CTree::ArrayInit { values }),
+        }
     }
 }
 
-impl<'a> Borrow<str> for CCode {
-    fn borrow(&self) -> &str {
-        &(self.0)
+impl<'a> Into<CTree> for &'a CTree {
+    fn into(self) -> CTree {
+        self.to_owned()
     }
 }
 
-impl<'a> Borrow<str> for &'a CCode {
-    fn borrow(&self) -> &str {
-        &(self.0)
+impl Into<CTree> for CIdent {
+    fn into(self) -> CTree {
+        CTree::Ident(self)
     }
 }
 
-impl fmt::Display for CCode {
+impl Into<CTree> for CLiteral {
+    fn into(self) -> CTree {
+        CTree::Literal(self)
+    }
+}
+
+impl Into<CIdent> for String {
+    fn into(self) -> CIdent {
+        CIdent(self)
+    }
+}
+
+impl<'a> Into<CIdent> for &'a str {
+    fn into(self) -> CIdent {
+        CIdent(self.to_owned())
+    }
+}
+
+impl fmt::Display for CIdent {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl AddAssign<CCode> for CCode {
-    fn add_assign(&mut self, rhs: CCode) {
-        self.0 += &rhs.0;
-    }
-}
-
-impl<'a> AddAssign<&'a CCode> for CCode {
-    fn add_assign(&mut self, rhs: &'a CCode) {
-        self.0 += &rhs.0;
-    }
-}
-
-impl AddAssign<String> for CCode {
-    fn add_assign(&mut self, rhs: String) {
-        self.0 += &rhs;
-    }
-}
-
-impl<'a> AddAssign<&'a str> for CCode {
-    fn add_assign(&mut self, rhs: &'a str) {
-        self.0 += rhs;
-    }
-}
-
-impl<'a> Add<&'a str> for CCode {
-    type Output = CCode;
-    fn add(mut self, rhs: &'a str) -> CCode {
-        self += rhs;
-        self
-    }
-}
-
-impl<'a, T> ToC for &'a T
-where
-    T: ToC + Clone,
-{
-    fn to_c(self) -> CCode {
-        self.to_owned().to_c()
-    }
-}
-
-impl<'a, T> ToC for &'a mut T
-where
-    T: ToC + Clone,
-{
-    fn to_c(self) -> CCode {
-        self.to_owned().to_c()
-    }
-}
-
-impl ToC for String {
-    fn to_c(self) -> CCode {
-        CCode(self)
-    }
-}
-
-impl<'a> ToC for &'a str {
-    fn to_c(self) -> CCode {
-        CCode(self.to_owned())
-    }
-}
-
-impl ToC for CCode {
-    fn to_c(self) -> CCode {
-        self.clone()
-    }
-}
-
-impl ToC for Name {
-    fn to_c(self) -> CCode {
-        CCode(self.0.to_owned())
-    }
-}
-
-impl ToC for ModeName {
-    fn to_c(self) -> CCode {
-        CCode(self.0.to_owned())
-    }
-}
-
-impl ToC for SeqType {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl ToC for AnagramNum {
-    fn to_c(self) -> CCode {
-        self.get().to_c()
-    }
-}
-
-impl ToC for bool {
-    fn to_c(self) -> CCode {
-        let s = if self { "1" } else { "0" };
-        CCode(s.to_owned())
-    }
-}
-
-impl ToC for i32 {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl ToC for u8 {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl ToC for u32 {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl ToC for u16 {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl ToC for usize {
-    fn to_c(self) -> CCode {
-        CCode(self.to_string())
-    }
-}
-
-impl<T> ToC for Vec<T>
-where
-    T: ToC,
-{
-    /// Format the Vec like a c array initializer.
-    fn to_c(self) -> CCode {
-        let strings: Vec<String> =
-            self.into_iter().map(|x| x.to_c().into()).collect();
-        CCode(format!("{{ {} }}", strings.join(", ")))
-    }
-}
-
-impl Into<String> for CCode {
-    fn into(self) -> String {
-        self.0
-    }
-}
-
-impl<'a> Into<String> for &'a CCode {
-    fn into(self) -> String {
-        (&self.0).to_owned()
+impl fmt::Display for CLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }

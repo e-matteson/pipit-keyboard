@@ -1,22 +1,18 @@
 use error::{Error, ResultExt};
-use types::{CCode, Spelling, ToC, Validate};
+use types::{CIdent, CLiteral, Spelling, Validate};
 
 use std::collections::BTreeMap;
 use std::str::FromStr;
 use std::string::ToString;
-
-// Used for when a keypress contains only modifiers and no key.
-pub const BLANK_KEY: &str =
-    "0 /* blank key, when a keypress contains only modifiers and no key */";
 
 // TODO KeyPress is also used to store command codes, which is kinda a hack.
 // Rename?
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct KeyPress {
-    pub key: Option<CCode>,
+    pub key: Option<CIdent>,
     #[serde(default = "Vec::new")]
-    pub mods: Vec<CCode>,
+    pub mods: Vec<CIdent>,
 }
 
 #[derive(Debug)]
@@ -188,62 +184,66 @@ lazy_static! {
 impl KeyPress {
     pub fn new_key<T>(keycode: T) -> Self
     where
-        T: ToC,
+        T: Into<CIdent>,
     {
         Self {
-            key: Some(keycode.to_c()),
+            key: Some(keycode.into()),
             mods: Vec::new(),
         }
     }
 
     fn new_cap<T>(keycode: T) -> Self
     where
-        T: ToC,
+        T: Into<CIdent>,
     {
         Self {
-            key: Some(keycode.to_c()),
-            mods: vec!["MODIFIERKEY_SHIFT".to_c()],
+            key: Some(keycode.into()),
+            mods: vec!["MODIFIERKEY_SHIFT".into()],
         }
     }
 
     fn new_mod<T>(modifier: T) -> Self
     where
-        T: ToC,
+        T: Into<CIdent>,
     {
         Self {
             key: None,
-            mods: vec![modifier.to_c()],
+            mods: vec![modifier.into()],
         }
     }
 
-    pub fn new_fake(non_key_data: CCode) -> Self {
+    pub fn new_fake(non_key_data: CIdent) -> Self {
         // We also use KeyPresses to store command codes and args
         KeyPress::new_key(non_key_data)
     }
 
-    pub fn key_or_blank(&self) -> CCode {
+    pub fn key_or_blank(&self) -> CIdent {
         if let Some(key_code) = &self.key {
             key_code.to_owned()
         } else {
-            Self::blank()
+            Self::blank_ident()
         }
     }
 
     /// Blanks are used in the huffman encoded sequences, to represent when a
     /// keypress contains only a mod - the key is stored as BLANK_KEY.
-    pub fn blank() -> CCode {
-        BLANK_KEY.to_c()
+    pub fn blank_ident() -> CIdent {
+        CIdent("BLANK_KEY".to_string())
+    }
+
+    pub fn blank_value() -> CLiteral {
+        CLiteral(0.to_string())
     }
 
     fn capitalize(&mut self) {
-        let shift = "MODIFIERKEY_SHIFT".to_c();
+        let shift = CIdent("MODIFIERKEY_SHIFT".to_string());
         if !self.mods.contains(&shift) {
             self.mods.push(shift);
         }
     }
 
     pub fn uncapitalize(&mut self) {
-        let shift = "MODIFIERKEY_SHIFT".to_c();
+        let shift = CIdent("MODIFIERKEY_SHIFT".to_string());
         if let Some(index) = self.mods.iter().position(|m| m == &shift) {
             self.mods.remove(index);
         }
@@ -261,7 +261,7 @@ impl KeyPress {
         }
     }
 
-    fn lone_mod(&self) -> Result<CCode, Error> {
+    pub fn lone_mod(&self) -> Result<CIdent, Error> {
         if self.mods.len() == 1 {
             Ok(self.mods[0].clone())
         } else {
@@ -314,11 +314,11 @@ impl KeyDef {
         self.spelling.map_or(false, |x| x == spelling)
     }
 
-    fn has_mod(&self, modifier: &CCode) -> bool {
+    fn has_mod(&self, modifier: &CIdent) -> bool {
         self.keypress.mods.contains(modifier)
     }
 
-    fn has_keycode_or_mod(&self, keycode: &CCode) -> bool {
+    fn has_keycode_or_mod(&self, keycode: &CIdent) -> bool {
         if let Some(x) = self.keypress.key.as_ref() {
             x == keycode
         } else {
@@ -385,9 +385,9 @@ impl KeyDefs {
     /// Get the c-preprocessor names of all keycodes/modifiers and their
     /// scancodes. Doesn't distinguish between keycodes and modifiers
     #[allow(dead_code)]
-    pub fn scancode_table() -> &'static BTreeMap<&'static CCode, u8> {
+    pub fn scancode_table() -> &'static BTreeMap<&'static CIdent, u8> {
         lazy_static! {
-            static ref SCANCODES: BTreeMap<&'static CCode, u8> = TABLE
+            static ref SCANCODES: BTreeMap<&'static CIdent, u8> = TABLE
                 .iter()
                 .filter_map(|def| def.scancode.map(|scancode| {
                     // TODO clean up?
@@ -414,13 +414,13 @@ impl KeyDefs {
         &SCANCODES
     }
 
-    fn ensure_defined_key_or_mod(keycode: &CCode) -> Result<(), Error> {
+    fn ensure_defined_key_or_mod(keycode: &CIdent) -> Result<(), Error> {
         if TABLE.iter().any(|def| def.has_keycode_or_mod(keycode)) {
             Ok(())
         } else {
             Err(Error::BadValueErr {
                 thing: "keycode or mod".to_owned(),
-                value: keycode.into(),
+                value: keycode.to_string(),
             })
             .context("Not defined in the firmware")
         }

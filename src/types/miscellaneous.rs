@@ -5,8 +5,8 @@ use std::fmt::Debug;
 
 use error::Error;
 use types::{
-    CCode, Chord, ChordSpec, KmapOrder, ModeName, Name, SeqMap, SpellingTable,
-    ToC, Validate, WordSpacePosition,
+    CIdent, Chord, ChordSpec, KmapOrder, ModeName, Name, SeqMap, SpellingTable,
+    Validate, WordSpacePosition,
 };
 
 #[derive(Deserialize, Debug, Clone, Copy)]
@@ -24,11 +24,14 @@ pub struct TutorData {
     pub word_space_position: WordSpacePosition,
 }
 
-impl ToC for BoardName {
-    fn to_c(self) -> CCode {
-        match self {
-            BoardName::TeensyLC => "TEENSY_LC".to_c(),
-        }
+impl Into<CIdent> for BoardName {
+    fn into(self) -> CIdent {
+        CIdent(
+            match self {
+                BoardName::TeensyLC => "TEENSY_LC",
+            }
+            .to_string(),
+        )
     }
 }
 

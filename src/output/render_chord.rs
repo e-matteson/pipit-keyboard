@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use types::{CCode, CType, Chord, FirmwareOrder, ToC};
+use types::{CLiteral, CTree, CType, Chord, FirmwareOrder};
 
 impl Ord for Chord<FirmwareOrder> {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -9,27 +9,25 @@ impl Ord for Chord<FirmwareOrder> {
 }
 
 impl Chord<FirmwareOrder> {
-    /// Convert the chord into CCode strings containing the byte representation
+    /// Convert the chord into strings containing the byte representation
     /// used in the firmware.
-    fn to_c_bytes(&self) -> Vec<CCode> {
-        self.switches().blocks().map(|x| x.to_c()).collect()
+    fn to_c_bytes(&self) -> Vec<CTree> {
+        self.switches()
+            .blocks()
+            .map(|x| CTree::Literal(CLiteral(x.to_string())))
+            .collect()
     }
 
-    fn to_c_initializer(&self) -> CCode {
-        format!("{{{}}}", self.to_c_bytes().join(", ")).to_c()
-    }
-
-    pub fn to_c_constructor(&self) -> CCode {
-        // TODO there are a bunch of extra allocations here...
-        format!(
-            "{}({})",
-            Self::c_type_name().to_c(),
-            self.to_c_initializer()
-        )
-        .to_c()
+    pub fn to_struct_initializer(&self) -> CTree {
+        CTree::StructInit {
+            struct_type: Self::c_type_name(),
+            values: vec![CTree::ArrayInit {
+                values: self.to_c_bytes(),
+            }],
+        }
     }
 
     pub fn c_type_name() -> CType {
-        CType::Custom("ChordData".to_c())
+        CType::custom("ChordData")
     }
 }

@@ -7,7 +7,7 @@ use input::Settings;
 
 use error::{Error, ResultExt};
 use types::{
-    AllChordMaps, AllData, AllSeqMaps, CCode, CEnumVariant, Chord, Command,
+    AllChordMaps, AllData, AllSeqMaps, CEnumVariant, CIdent, Chord, Command,
     HuffmanTable, KeyDefs, KeyPress, KmapOrder, LayerInfo, LayerName, Name,
     SeqMap, SeqType, Sequence, SpellingTable, Validate, Wordlike,
 };
@@ -293,10 +293,11 @@ fn load_commands(
 /// Create a sequence for this command. The command variants will be
 /// collected separately.
 // TODO don't take sequences? just return stuff
+// TODO are args actually idents, or could they be literals?
 fn add_command(
     name: Name,
     variant: Command,
-    args: &[CCode],
+    args: &[CIdent],
     sequences: &mut AllSeqMaps,
 ) -> Result<(), Error> {
     // Commands don't have actual key sequences, just a byte containing an

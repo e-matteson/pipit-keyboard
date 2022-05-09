@@ -4,11 +4,11 @@ use std::collections::binary_heap::BinaryHeap;
 use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
-use types::{CCode, KeyPress};
+use types::{CIdent, KeyPress};
 use util::ensure_u8;
 
 #[derive(Debug, Clone)]
-pub struct HuffmanTable(pub BTreeMap<CCode, HuffmanEntry>);
+pub struct HuffmanTable(pub BTreeMap<CIdent, HuffmanEntry>);
 
 #[derive(Debug, Clone)]
 pub struct HuffmanEntry {
@@ -20,7 +20,7 @@ pub struct HuffmanEntry {
 enum HuffmanNode {
     Leaf {
         count: usize,
-        key: CCode,
+        key: CIdent,
         is_mod: bool,
     },
     Branch {
@@ -51,13 +51,13 @@ impl HuffmanTable {
         Ok(HuffmanTable(map))
     }
 
-    pub fn bits(&self, key: &CCode) -> Result<&BitVec<u8>, Error> {
+    pub fn bits(&self, key: &CIdent) -> Result<&BitVec<u8>, Error> {
         Ok(&self.get(key)?.bits)
     }
 
-    pub fn get(&self, key: &CCode) -> Result<&HuffmanEntry, Error> {
+    pub fn get(&self, key: &CIdent) -> Result<&HuffmanEntry, Error> {
         self.0.get(key).ok_or_else(|| Error::LookupErr {
-            key: key.into(),
+            key: key.to_string(),
             container: "huffman code table".into(),
         })
     }
@@ -104,7 +104,7 @@ impl PartialOrd for HuffmanNode {
 fn make_codes(
     node: &HuffmanNode,
     prefix: BitVec<u8>,
-    out: &mut BTreeMap<CCode, HuffmanEntry>,
+    out: &mut BTreeMap<CIdent, HuffmanEntry>,
 ) -> Result<(), Error> {
     match node {
         HuffmanNode::Branch {
@@ -134,7 +134,7 @@ fn make_codes(
     Ok(())
 }
 
-fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
+fn make_tree(counts: BTreeMap<CIdent, (usize, bool)>) -> Option<HuffmanNode> {
     let mut queue = BinaryHeap::new();
     for (key, (count, is_mod)) in counts {
         queue.push(HuffmanNode::Leaf { key, is_mod, count });
@@ -150,8 +150,8 @@ fn make_tree(counts: BTreeMap<CCode, (usize, bool)>) -> Option<HuffmanNode> {
     queue.pop()
 }
 
-fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
-    let mut counts: BTreeMap<CCode, (usize, bool)> = BTreeMap::new();
+fn count(keys: Vec<KeyPress>) -> BTreeMap<CIdent, (usize, bool)> {
+    let mut counts: BTreeMap<CIdent, (usize, bool)> = BTreeMap::new();
     for keypress in keys {
         increment(&mut counts, keypress.key_or_blank(), false);
         for modifier in keypress.mods {
@@ -162,8 +162,8 @@ fn count(keys: Vec<KeyPress>) -> BTreeMap<CCode, (usize, bool)> {
 }
 // TODO closure
 fn increment(
-    map: &mut BTreeMap<CCode, (usize, bool)>,
-    key: CCode,
+    map: &mut BTreeMap<CIdent, (usize, bool)>,
+    key: CIdent,
     is_mod: bool,
 ) {
     let count = map.entry(key).or_insert((0, is_mod));

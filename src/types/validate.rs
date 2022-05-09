@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use error::{Error, ResultExt};
-use types::CCode;
+use types::{CIdent, CLiteral};
 
 // require Deserialize?
 
@@ -86,7 +86,14 @@ impl Validate for bool {
 //     }
 // }
 
-impl Validate for CCode {
+impl Validate for CLiteral {
+    fn validate(&self) -> Result<(), Error> {
+        // TODO sanitize?
+        Ok(())
+    }
+}
+
+impl Validate for CIdent {
     fn validate(&self) -> Result<(), Error> {
         // TODO sanitize?
         Ok(())

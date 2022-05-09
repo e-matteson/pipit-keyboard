@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use error::{Error, ResultExt};
 use types::{
-    AllSeqMaps, AnagramNum, CCode, CTree, CType, Chord, ChordMap, ChordSpec,
-    Field, HuffmanTable, Name, SeqType, Sequence, ToC,
+    AllSeqMaps, AnagramNum, CIdent, CTree, CType, Chord, ChordMap, ChordSpec,
+    HuffmanTable, Name, SeqType, Sequence,
 };
 use util::usize_to_u16;
 
@@ -28,30 +28,30 @@ pub struct KmapBuilder<'a> {
 
 c_struct!(
     struct KmapStruct {
-        lookups_for_kmap: CCode,
+        lookups_for_kmap: CIdent,
     }
 );
 
 c_struct!(
     struct LookupKmapType {
         num_lookups: usize,
-        lookups: CCode,
+        lookups: CIdent,
     }
 );
 
 c_struct!(
     struct LookupKmapTypeLenAnagram {
-        seq_bit_len_and_anagram: CCode,
+        seq_bit_len_and_anagram: CTree,
         num_chords: u16,
-        chords: CCode,
-        sequences: CCode,
+        chords: CIdent,
+        sequences: CIdent,
     }
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl<'a> KmapBuilder<'a> {
-    pub fn render(&self) -> Result<(CTree, CCode), Error> {
+    pub fn render(&self) -> Result<(CTree, CIdent), Error> {
         let mut g = Vec::new();
         let mut seq_type_names = Vec::new();
 
@@ -77,20 +77,20 @@ impl<'a> KmapBuilder<'a> {
         Ok((CTree::Group(g), kmap_struct_name))
     }
 
-    fn make_kmap(&self, seq_type_names: &[CCode]) -> (CTree, CCode) {
-        let kmap_struct_name = format!("{}_lookups", self.kmap_nickname).to_c();
-        let array_name = format!("{}_array", kmap_struct_name).to_c();
+    fn make_kmap(&self, seq_type_names: &[CIdent]) -> (CTree, CIdent) {
+        let kmap_struct_name =
+            CIdent(format!("{}_lookups", self.kmap_nickname));
+        let array_name = CIdent(format!("{}_array", kmap_struct_name));
 
         let mut g = Vec::new();
-        g.push(CTree::Array {
-            name: array_name.clone(),
-            values: CCode::map_prepend("&", &seq_type_names),
-            c_type: CType::Pointer(Box::new(CType::Custom(
-                "LookupKmapType".to_c(),
-            ))),
-            is_extern: false,
-            use_std_array: false,
-        });
+        g.push(CTree::array_def(
+            array_name.clone(),
+            CType::pointer(CType::custom("LookupKmapType")),
+            seq_type_names
+                .iter()
+                .map(|ident| CTree::Address(ident.to_owned()))
+                .collect(),
+        ));
         g.push(
             KmapStruct {
                 lookups_for_kmap: array_name,
@@ -103,25 +103,23 @@ impl<'a> KmapBuilder<'a> {
     fn make_lookups_of_seq_type(
         &self,
         seq_type: SeqType,
-        lookups_of_length: &[CCode],
-    ) -> (CTree, CCode) {
+        lookups_of_length: &[CIdent],
+    ) -> (CTree, CIdent) {
         let mut g = Vec::new();
 
         let num_lookups = lookups_of_length.len();
         let struct_name =
-            format!("{}_{}_lookups", self.kmap_nickname, seq_type).to_c();
-        let array_name = format!("{}_array", struct_name).to_c();
+            CIdent(format!("{}_{}_lookups", self.kmap_nickname, seq_type));
+        let array_name = CIdent(format!("{}_array", struct_name));
 
-        g.push(CTree::Array {
-            name: array_name.clone(),
-            values: CCode::map_prepend("&", &lookups_of_length),
-            // TODO no literal type name
-            c_type: CType::Pointer(Box::new(CType::Custom(
-                "LookupKmapTypeLenAnagram".to_c(),
-            ))),
-            is_extern: false,
-            use_std_array: false,
-        });
+        g.push(CTree::array_def(
+            array_name.clone(),
+            CType::pointer(CType::custom("LookupKmapTypeLenAnagram")),
+            lookups_of_length
+                .into_iter()
+                .map(|ident| CTree::Address(ident.to_owned()))
+                .collect(),
+        ));
 
         g.push(
             LookupKmapType {
@@ -138,20 +136,19 @@ impl<'a> KmapBuilder<'a> {
         &self,
         seq_type: SeqType,
         grouped_names: &LenMap,
-    ) -> Result<(CTree, Vec<CCode>), Error> {
+    ) -> Result<(CTree, Vec<CIdent>), Error> {
         // TODO split into smaller functions?
         let mut g = Vec::new();
         let mut struct_names = Vec::new();
 
         for (&info, names) in grouped_names {
-            let struct_name = format!(
+            let struct_name = CIdent(format!(
                 "{}_{}_len{}_anagram{}",
                 self.kmap_nickname,
                 seq_type,
                 info.length,
                 info.anagram.get()
-            )
-            .to_c();
+            ));
 
             let chords = names
                 .iter()
@@ -175,30 +172,22 @@ impl<'a> KmapBuilder<'a> {
             // TODO lots of allocations!
             let (chord_bytes, seqs): (Vec<_>, Vec<_>) = chords_and_seqs
                 .into_iter()
-                .map(|(c, s)| (c.to_c_constructor(), s))
+                .map(|(c, s)| (c.to_struct_initializer(), s))
                 .unzip();
 
             let seq_bytes =
                 Sequence::flatten(&seqs).as_bytes(&self.huffman_table)?;
 
-            let chords_name = format!("{}_chords", struct_name).to_c();
-            let seqs_name = format!("{}_seqs", struct_name).to_c();
+            let chords_name = CIdent(format!("{}_chords", struct_name.0));
+            let seqs_name = CIdent(format!("{}_seqs", struct_name.0));
 
-            g.push(CTree::Array {
-                name: chords_name.clone(),
-                values: chord_bytes,
-                c_type: Chord::c_type_name(),
-                is_extern: false,
-                use_std_array: false,
-            });
+            g.push(CTree::array_def(
+                chords_name.clone(),
+                Chord::c_type_name(),
+                chord_bytes,
+            ));
 
-            g.push(CTree::Array {
-                name: seqs_name.clone(),
-                values: seq_bytes,
-                c_type: CType::U8,
-                is_extern: false,
-                use_std_array: false,
-            });
+            g.push(CTree::array_def(seqs_name.clone(), CType::U8, seq_bytes));
 
             let lookup_struct = LookupKmapTypeLenAnagram::new(
                 chords_name,
@@ -253,14 +242,14 @@ impl<'a> KmapBuilder<'a> {
     /// limits should have been.
     pub fn render_limits() -> CTree {
         CTree::Group(vec![
-            CTree::PublicConst {
-                name: "MAX_ALLOWED_ANAGRAM".to_c(),
-                value: AnagramNum::max_allowed().to_c(),
+            CTree::ConstDef {
+                name: "MAX_ALLOWED_ANAGRAM".into(),
+                value: Box::new(AnagramNum::max_allowed().into()),
                 c_type: CType::U8,
             },
-            CTree::PublicConst {
-                name: "MAX_ALLOWED_SEQUENCE_BIT_LENGTH".to_c(),
-                value: Self::max_allowed_bit_length().to_c(),
+            CTree::ConstDef {
+                name: "MAX_ALLOWED_SEQUENCE_BIT_LENGTH".into(),
+                value: Box::new(Self::max_allowed_bit_length().into()),
                 c_type: CType::U16,
             },
         ])
@@ -270,8 +259,8 @@ impl<'a> KmapBuilder<'a> {
 impl LookupKmapTypeLenAnagram {
     // TODO use a builder pattern instead of taking so many unnamed arguments?
     fn new(
-        chords: CCode,
-        sequences: CCode,
+        chords: CIdent,
+        sequences: CIdent,
         num_chords: usize,
         info: LengthAndAnagram,
     ) -> Result<Self, Error> {
@@ -298,11 +287,14 @@ impl LengthAndAnagram {
         Ok(LengthAndAnagram { length, anagram })
     }
 
-    fn initializer(&self) -> CCode {
-        format!("{}({}, {})", Self::c_type(), self.length, self.anagram).to_c()
+    fn initializer(&self) -> CTree {
+        CTree::StructInit {
+            struct_type: Self::c_type(),
+            values: vec![self.length.into(), self.anagram.into()],
+        }
     }
 
-    fn c_type() -> CCode {
-        "LengthAndAnagram".to_c()
+    fn c_type() -> CType {
+        CType::custom("LengthAndAnagram")
     }
 }

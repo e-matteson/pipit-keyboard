@@ -1,28 +1,9 @@
 use bit_vec::BitVec;
 
 use error::Error;
-use types::{CCode, HuffmanTable, KeyPress, Sequence, ToC};
+use types::{CLiteral, CTree, HuffmanTable, KeyPress, Sequence};
 
 impl KeyPress {
-    pub fn truncate(contents: &CCode) -> CCode {
-        // CCode(format!("({})&0xff", contents))
-        // TODO don't cast everything? Just enums.
-        CCode(format!("static_cast<uint8_t>({})", contents))
-    }
-
-    pub fn format_mods(&self) -> CCode {
-        // TODO think about this
-        if self.mods.is_empty() {
-            Self::empty_code()
-        } else {
-            Self::truncate(&CCode::join(&self.mods, "|"))
-        }
-    }
-
-    fn empty_code() -> CCode {
-        "0".to_c()
-    }
-
     fn huffman(&self, table: &HuffmanTable) -> Result<BitVec<u8>, Error> {
         self.ensure_non_empty()?;
 
@@ -40,12 +21,12 @@ impl KeyPress {
 }
 
 impl Sequence {
-    pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CCode>, Error> {
+    pub fn as_bytes(&self, table: &HuffmanTable) -> Result<Vec<CTree>, Error> {
         // TODO different name for "bytes"?
         Ok(self
             .as_bits(table)?
             .blocks()
-            .map(|x: u8| x.to_c())
+            .map(|x: u8| CTree::Literal(CLiteral(x.to_string())))
             .collect())
     }
 

@@ -1,7 +1,6 @@
 use error::Error;
 use types::{
-    CCode, CEnumVariant, CTree, CType, Delay, Pin, ToC, UserOptions,
-    WordSpacePosition,
+    CEnumVariant, CIdent, CTree, CType, UserOptions, WordSpacePosition,
 };
 
 impl UserOptions {
@@ -18,9 +17,9 @@ impl UserOptions {
     /// Get options that must be written to a separate config file that will be
     /// loaded earlier than the main one.
     pub fn render_early(&self) -> Result<CTree, Error> {
-        let group = vec![CTree::PublicConst {
-            name: "NUM_MATRIX_POSITIONS".to_c(),
-            value: self.num_matrix_positions()?.to_c(),
+        let group = vec![CTree::ConstDef {
+            name: "NUM_MATRIX_POSITIONS".into(),
+            value: Box::new(self.num_matrix_positions()?.into()),
             c_type: CType::U8,
         }];
         Ok(CTree::Group(group))
@@ -50,66 +49,62 @@ impl UserOptions {
 
     fn get_literal_ops(&self) -> Vec<CTree> {
         let mut ops = vec![
-            CTree::PublicConst {
-                name: "CHORD_DELAY".to_c(),
-                value: self.chord_delay.to_c(),
+            CTree::ConstDef {
+                name: "CHORD_DELAY".into(),
+                value: Box::new(self.chord_delay.into()),
                 c_type: CType::U32,
             },
-            CTree::PublicConst {
-                name: "HELD_DELAY".to_c(),
-                value: self.held_delay.to_c(),
+            CTree::ConstDef {
+                name: "HELD_DELAY".into(),
+                value: Box::new(self.held_delay.into()),
                 c_type: CType::U32,
             },
             CTree::DefineIf {
-                name: "DEBUG_MESSAGES".to_c(),
+                name: "DEBUG_MESSAGES".into(),
                 is_defined: self.debug_messages,
             },
-            CTree::PublicConst {
-                name: "SPACE_POS".to_c(),
-                value: self.word_space_position.qualified_enum_variant(),
-                c_type: WordSpacePosition::enum_type(),
+            CTree::ConstDef {
+                name: "SPACE_POS".into(),
+                value: Box::new(
+                    self.word_space_position.qualified_enum_variant().into(),
+                ),
+                c_type: CType::custom(WordSpacePosition::enum_type().0),
             },
             CTree::DefineIf {
-                name: self.board_name.to_c(),
+                name: self.board_name.into(),
                 is_defined: true,
             },
-            CTree::Array {
-                name: "row_pins".to_c(),
-                values: Pin::c_vec(&self.row_pins),
-                c_type: CType::U8,
-                is_extern: true,
-                use_std_array: true,
-            },
-            CTree::Array {
-                name: "column_pins".to_c(),
-                values: Pin::c_vec(&self.column_pins),
-                c_type: CType::U8,
-                is_extern: true,
-                use_std_array: true,
-            },
+            CTree::std_array_def(
+                "row_pins".into(),
+                CType::U8,
+                self.row_pins.iter().map(|pin| (*pin).into()).collect(),
+            ),
+            CTree::std_array_def(
+                "column_pins".into(),
+                CType::U8,
+                self.column_pins.iter().map(|pin| (*pin).into()).collect(),
+            ),
             CTree::DefineIf {
-                name: "ENABLE_LED_TYPING_FEEDBACK".to_c(),
+                name: "ENABLE_LED_TYPING_FEEDBACK".into(),
                 is_defined: self.enable_led_typing_feedback,
             },
             CTree::DefineIf {
-                name: "ENABLE_AUDIO_TYPING_FEEDBACK".to_c(),
+                name: "ENABLE_AUDIO_TYPING_FEEDBACK".into(),
                 is_defined: self.enable_audio_typing_feedback,
             },
-            CTree::PublicConst {
-                name: "USE_STANDBY_INTERRUPTS".to_c(),
-                value: self.use_standby_interrupts.to_c(),
+            CTree::ConstDef {
+                name: "USE_STANDBY_INTERRUPTS".into(),
+                value: Box::new(self.use_standby_interrupts.into()),
                 c_type: CType::Bool,
             },
         ];
 
         if let Some(ref pins) = self.rgb_led_pins {
-            ops.push(CTree::Array {
-                name: "rgb_led_pins".to_c(),
-                values: Pin::c_vec(pins),
-                c_type: CType::U8,
-                is_extern: true,
-                use_std_array: true,
-            });
+            ops.push(CTree::std_array_def(
+                "rgb_led_pins".into(),
+                CType::U8,
+                pins.iter().map(|pin| (*pin).into()).collect(),
+            ));
         }
 
         ops
@@ -120,49 +115,30 @@ impl UserOptions {
     fn get_auto_ops(&self) -> Vec<CTree> {
         let enable_rgb_led = self.rgb_led_pins.is_some();
         vec![CTree::DefineIf {
-            name: "ENABLE_RGB_LED".to_c(),
+            name: "ENABLE_RGB_LED".into(),
             is_defined: enable_rgb_led,
         }]
     }
 }
 
-impl ToC for Delay {
-    fn to_c(self) -> CCode {
-        self.0.to_c()
-    }
-}
-
 impl CEnumVariant for WordSpacePosition {
     /// The type name of C++ enum
-    fn enum_type() -> CType {
-        CType::Custom("WordSpacePosition".to_c())
+    fn enum_type() -> CIdent {
+        "WordSpacePosition".into()
     }
 
     /// The variant name of this SeqType in the C++ enum
-    fn enum_variant(&self) -> CCode {
+    fn enum_variant(&self) -> CIdent {
         match self {
             WordSpacePosition::Before => "Before",
             WordSpacePosition::After => "After",
             WordSpacePosition::None => "None",
         }
-        .to_c()
+        .into()
     }
 
     /// The underlying type determining the size of the C++ enum
     fn underlying_type() -> Option<CType> {
         None
-    }
-}
-
-// TODO  should Pin stuff be in a different file?
-impl Pin {
-    pub fn c_vec(pin_vec: &[Self]) -> Vec<CCode> {
-        pin_vec.iter().map(|pin| pin.to_c()).collect()
-    }
-}
-
-impl ToC for Pin {
-    fn to_c(self) -> CCode {
-        self.0.to_c()
     }
 }

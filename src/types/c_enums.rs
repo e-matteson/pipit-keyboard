@@ -1,7 +1,7 @@
 use std::fmt;
 
 use error::Error;
-use types::{CCode, CEnumVariant, CType, Name, ToC, Validate};
+use types::{CEnumVariant, CIdent, CType, Name, Validate};
 
 #[derive(
     Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deserialize, Serialize,
@@ -30,16 +30,16 @@ pub enum SeqType {
 }
 
 impl CEnumVariant for ModeName {
-    fn enum_type() -> CType {
-        CType::Custom("Mode".to_c())
+    fn enum_type() -> CIdent {
+        "Mode".into()
     }
 
     fn underlying_type() -> Option<CType> {
         Some(CType::U8)
     }
 
-    fn enum_variant(&self) -> CCode {
-        self.to_c()
+    fn enum_variant(&self) -> CIdent {
+        CIdent(self.0.to_owned())
     }
 }
 
@@ -93,16 +93,16 @@ impl Command {
 }
 
 impl CEnumVariant for Command {
-    fn enum_type() -> CType {
-        CType::Custom("Command".to_c())
+    fn enum_type() -> CIdent {
+        "Command".into()
     }
 
     fn underlying_type() -> Option<CType> {
         Some(CType::U8)
     }
 
-    fn enum_variant(&self) -> CCode {
-        self.name().to_c()
+    fn enum_variant(&self) -> CIdent {
+        CIdent(self.name().to_string())
     }
 }
 
@@ -121,28 +121,28 @@ impl Modifier {
 }
 
 impl CEnumVariant for Modifier {
-    fn enum_type() -> CType {
-        CType::Custom("Mod".to_c())
+    fn enum_type() -> CIdent {
+        "Mod".into()
     }
 
     fn underlying_type() -> Option<CType> {
         Some(CType::U8)
     }
 
-    fn enum_variant(&self) -> CCode {
-        (&self.name).to_c()
+    fn enum_variant(&self) -> CIdent {
+        CIdent(self.name.to_string())
     }
 }
 
 impl CEnumVariant for SeqType {
     /// The type name of C++ enum
-    fn enum_type() -> CType {
-        CType::Custom("SeqType".to_c())
+    fn enum_type() -> CIdent {
+        "SeqType".into()
     }
 
     /// The variant name of this SeqType in the C++ enum
-    fn enum_variant(&self) -> CCode {
-        self.to_c()
+    fn enum_variant(&self) -> CIdent {
+        CIdent(self.to_string())
     }
 
     /// The underlying type determining the size of the C++ enum

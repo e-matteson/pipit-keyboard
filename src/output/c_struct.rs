@@ -9,34 +9,29 @@ macro_rules! c_struct {
             $($field: $field_type,)*
         }
         impl $struct_type {
-            // TODO inline for efficiency?
-            // TODO optionally extern?
-            // TODO whats up with semicolons? diff between kmap and mode?
-            fn render(&self, name: CCode) -> CTree {
-                CTree::StructInstance{
+            #[allow(dead_code)]
+            fn render(&self, name: CIdent) -> CTree {
+                CTree::ConstDef {
                     name: name,
-                    fields: vec![
-                        $( Field{name: stringify!($field).to_c(), value: (&self.$field).to_c()}, )*
-                    ],
                     c_type: Self::c_type(),
+                    value: Box::new(
+                        self.initializer()
+                        )
                 }
             }
 
-            #[allow(dead_code)]
-            fn initializer(&self) -> CCode {
-                 self.render(CCode::new()).initializer()
+            fn initializer(&self) -> CTree {
+                CTree::StructInit{
+                    values: vec![
+                        $( (&self.$field).to_owned().into(), )*
+                    ],
+                    struct_type: Self::c_type(),
+                }
             }
 
             fn c_type() -> CType {
-                CType::Custom(stringify!($struct_type).to_c())
+                CType::Custom(stringify!($struct_type).to_string())
             }
         }
     };
 }
-
-// c_struct!(
-//     struct ModeStruct {
-//         foo : i64,
-//         bar : bool
-//     }
-// );

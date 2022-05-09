@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use error::{Error, ResultExt};
 use types::{
-    CCode, CTree, CType, Chord, ChordSpec, Field, KmapOrder, LayerName,
-    ModeInfo, ModeName, ToC,
+    CIdent, CTree, CType, Chord, ChordSpec, KmapOrder, LayerName, ModeInfo,
+    ModeName,
 };
 
 use util::usize_to_u8;
@@ -11,7 +11,7 @@ use util::usize_to_u8;
 pub struct ModeBuilder<'a> {
     pub mode_name: &'a ModeName,
     pub info: &'a ModeInfo,
-    pub layer_struct_names: &'a BTreeMap<LayerName, CCode>,
+    pub layer_struct_names: &'a BTreeMap<LayerName, CIdent>,
     pub mod_chords: Vec<Chord<KmapOrder>>,
     pub anagram_mask: Chord<KmapOrder>,
     pub chord_spec: ChordSpec,
@@ -21,16 +21,16 @@ c_struct!(
     struct ModeStruct {
         is_gaming: bool,
         num_kmaps: u8,
-        kmaps: CCode,
-        mod_chords: CCode,
-        anagram_mask: CCode,
+        kmaps: CIdent,
+        mod_chords: CIdent,
+        anagram_mask: CIdent,
     }
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 
 impl<'a> ModeBuilder<'a> {
-    pub fn render(&self) -> Result<(CTree, CCode), Error> {
+    pub fn render(&self) -> Result<(CTree, CIdent), Error> {
         let mut g = Vec::new();
         let (tree, kmap_array_name, num_kmaps) = self.render_layer_array()?;
         g.push(tree);
@@ -49,15 +49,15 @@ impl<'a> ModeBuilder<'a> {
             anagram_mask: anagram_mask_name,
             is_gaming: self.info.gaming,
         };
-        let mode_struct_name = format!("{}_struct", self.mode_name).to_c();
+        let mode_struct_name = CIdent(format!("{}_struct", self.mode_name));
         g.push(mode_struct.render(mode_struct_name.clone()));
         Ok((CTree::Group(g), mode_struct_name))
     }
 
-    fn render_layer_array(&self) -> Result<(CTree, CCode, usize), Error> {
+    fn render_layer_array(&self) -> Result<(CTree, CIdent, usize), Error> {
         let mut g = Vec::new();
 
-        let array_name = format!("{}_kmaps_array", self.mode_name).to_c();
+        let array_name = CIdent(format!("{}_kmaps_array", self.mode_name));
 
         let contents: Vec<_> = self
             .info
@@ -70,54 +70,54 @@ impl<'a> ModeBuilder<'a> {
                     .to_owned()
             })
             .collect();
+        let length = contents.len();
+        g.push(CTree::array_def(
+            array_name.clone(),
+            CType::pointer(CType::custom("KmapStruct")),
+            contents
+                .into_iter()
+                .map(|ident| CTree::Address(ident))
+                .collect(),
+        ));
 
-        g.push(CTree::Array {
-            name: array_name.clone(),
-            values: CCode::map_prepend("&", &contents),
-            c_type: CType::Pointer(Box::new(CType::Custom(
-                "KmapStruct".to_c(),
-            ))),
-            is_extern: false,
-            use_std_array: false,
-        });
-
-        Ok((CTree::Group(g), array_name, contents.len()))
+        Ok((CTree::Group(g), array_name, length))
     }
 
-    fn render_anagram_mask(&self) -> Result<(CTree, CCode), Error> {
-        let array_name_out = format!("{}_anagram_mask", self.mode_name).to_c();
-        let tree = CTree::PrivateConst {
+    fn render_anagram_mask(&self) -> Result<(CTree, CIdent), Error> {
+        let array_name_out = CIdent(format!("{}_anagram_mask", self.mode_name));
+        let tree = CTree::ConstDef {
             name: array_name_out.clone(),
-            value: self
-                .chord_spec
-                .to_firmware(&self.anagram_mask)?
-                .to_c_constructor(),
+            value: Box::new(
+                self.chord_spec
+                    .to_firmware(&self.anagram_mask)?
+                    .to_struct_initializer(),
+            ),
             c_type: Chord::c_type_name(),
         };
         Ok((tree, array_name_out))
     }
 
-    fn render_modifier_array(&self) -> Result<(CTree, CCode), Error> {
-        self.render_chord_array_helper(&self.mod_chords, &"mod_chord".to_c())
+    fn render_modifier_array(&self) -> Result<(CTree, CIdent), Error> {
+        self.render_chord_array_helper(&self.mod_chords, "mod_chord")
     }
 
     fn render_chord_array_helper(
         &self,
         chords: &[Chord<KmapOrder>],
-        label: &CCode,
-    ) -> Result<(CTree, CCode), Error> {
+        label: &str,
+    ) -> Result<(CTree, CIdent), Error> {
         // TODO share code with stuff in kmap_builder? get rid of this helper?
-        let array_name_out = format!("{}_{}", self.mode_name, label).to_c();
-        let tree = CTree::Array {
-            name: array_name_out.clone(),
-            values: chords
+        let array_name_out = CIdent(format!("{}_{}", self.mode_name, label));
+        let tree = CTree::array_def(
+            array_name_out.clone(),
+            Chord::c_type_name(),
+            chords
                 .iter()
-                .map(|c| Ok(self.chord_spec.to_firmware(c)?.to_c_constructor()))
-                .collect::<Result<Vec<CCode>, Error>>()?,
-            c_type: Chord::c_type_name(),
-            is_extern: false,
-            use_std_array: false,
-        };
+                .map(|c| {
+                    Ok(self.chord_spec.to_firmware(c)?.to_struct_initializer())
+                })
+                .collect::<Result<Vec<CTree>, Error>>()?,
+        );
         Ok((tree, array_name_out))
     }
 }
