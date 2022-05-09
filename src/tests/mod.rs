@@ -14,6 +14,9 @@ fn actual_dir() -> PathBuf {
     PathBuf::from("src/tests/actual-outputs/")
 }
 
+// TODO delete old files in actual_dir before running the tests. Otherwise they
+// can pass using old copies if the current code writes nothing.
+
 #[test]
 fn big_settings_output() {
     let all_data =
@@ -47,10 +50,6 @@ fn assert_firmware_config_eq(name_base: &str) {
     let expected_dir = expected_dir();
     let actual_dir = actual_dir();
 
-    assert_files_eq(
-        &expected_dir.join(name_base).with_extension("cpp"),
-        &actual_dir.join(name_base).with_extension("cpp"),
-    );
     assert_files_eq(
         &expected_dir.join(name_base).with_extension("h"),
         &actual_dir.join(name_base).with_extension("h"),
