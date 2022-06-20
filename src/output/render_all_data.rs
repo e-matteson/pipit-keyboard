@@ -35,17 +35,36 @@ impl AllData {
         file_name_base: &str,
         with_message: bool,
     ) -> Result<(), Error> {
-        let main_file = self.render_main(with_message)?.format()?;
-
         let early_name_base = format!("{}_early", file_name_base);
-        let early_file = self.render_early_config(with_message)?.format()?;
+
+        let use_cpp = true;
+        let main_file;
+        let early_file;
+        let extension;
+        if use_cpp {
+            main_file = self.render_main(with_message)?.format_to_cpp()?;
+            early_file =
+                self.render_early_config(with_message)?.format_to_cpp()?;
+            extension = "h";
+        } else {
+            main_file = self.render_main(with_message)?.format_to_rust()?;
+            early_file =
+                self.render_early_config(with_message)?.format_to_rust()?;
+            extension = "rs";
+        }
 
         let mut file_names = Vec::new();
-        file_names
-            .push(main_file.save(&self.output_directory, file_name_base)?);
+        file_names.push(main_file.save(
+            &self.output_directory,
+            file_name_base,
+            extension,
+        )?);
 
-        file_names
-            .push(early_file.save(&self.output_directory, &early_name_base)?);
+        file_names.push(early_file.save(
+            &self.output_directory,
+            &early_name_base,
+            extension,
+        )?);
 
         let file_name_list = file_names
             .into_iter()

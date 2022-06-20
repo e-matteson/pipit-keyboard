@@ -4,7 +4,9 @@
 #[macro_use]
 mod c_struct;
 
-mod format_ctree;
+mod format_ctree_cpp;
+mod format_ctree_rust;
+mod format_ctree_shared;
 mod render_all_data;
 mod render_chord;
 mod render_huffman;
