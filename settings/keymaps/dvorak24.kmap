@@ -86,11 +86,11 @@ key_y          key_x          key_j
 
 ##### double-switch punctuation and special keys #####
 
-key_esc       key_bang        key_question
-....   ....   ....   ....     ....   ....
-..*.   .*..   *..*   ....     ....   *..*
- .     .        .     .         .     .
-  ... ...       ... ...         ... ...
+key_esc        key_bang        key_question
+....   ....    ....   ....     ....   ....
+..*.   .*..    *..*   ....     ....   *..*
+ .     .         .     .         .     .
+  ... ...        ... ...         ... ...
 
 key_left_paren   key_left_curly      key_left_brace    key_left_angle
 ...*   ....		    ..*.   ....   	   .*..   ....	     *...   ....
@@ -158,7 +158,6 @@ key_tab
 .*..   ....
  .     .
   ... ...
-
 
 ## pinky ##
 
@@ -243,8 +242,8 @@ key_home       key_end        key_page_up   key_page_down
   ... .*.       ... .*.         ... .*.  	    ... ...
 
 key_delete    key_printscreen  key_caps_lock
-....	 *..*   ...*   ....      ....   .*.*
-....   ....		....   ...*      ....   ....
+..**	 ....   ....   ..**      ....   **..
+..**   ....		....   ..**      ....   **..
   .     .       .     .          .     .
   ... .*.  	    ... .*.          ... .*.
 
