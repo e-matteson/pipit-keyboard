@@ -155,7 +155,7 @@ impl Chord<KmapOrder> {
 
     // An iterator over the switch booleans (in kmap order). The type signature
     // says u8, but the iterator's Item is actually a bool.
-    pub fn iter(&self) -> bit_vec::Iter<u8> {
+    pub fn iter(&self) -> bit_vec::Iter<'_, u8> {
         self.switches.iter()
     }
 }

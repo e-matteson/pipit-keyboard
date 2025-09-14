@@ -64,6 +64,7 @@ pub trait Wordlike {
     fn anagram_num(&self) -> AnagramNum;
     fn name_prefix() -> &'static str;
 
+    #[allow(dead_code)]
     fn has_alternate_chord(&self) -> bool {
         self.chord_field().is_some()
     }
@@ -75,7 +76,7 @@ pub trait Wordlike {
             .collect()
     }
 
-    fn chord_string(&self) -> Cow<str> {
+    fn chord_string(&self) -> Cow<'_, str> {
         // If an alternate chord string was given, use that. Otherwise, use the
         // sequence string.
 

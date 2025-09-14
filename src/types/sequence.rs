@@ -35,7 +35,7 @@ impl Sequence {
         self.0.len()
     }
 
-    pub fn keypresses(&self) -> Iter<KeyPress> {
+    pub fn keypresses(&self) -> Iter<'_, KeyPress> {
         self.0.iter()
     }
 
