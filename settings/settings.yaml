@@ -51,14 +51,14 @@ layers:
     # chord, for example to capitalize the first letter of the word.
     type: "WordLayer"
     word_list_name: "english_words"
-    kmap_file_for_chord_generation: "settings/keymaps/dvorak24_evan.kmap"
+    kmap_file_for_chord_generation: "settings/keymaps/dvorak24.kmap"
 
   layer_english_snippets:
     # A SnippetLayer is like a WordLayer, but snippets can't be modified by
     # anagram_modifiers or word_modifiers.
     type: "SnippetLayer"
     snippet_list_name: "english_snippets"
-    kmap_file_for_chord_generation: "settings/keymaps/dvorak24_evan.kmap"
+    kmap_file_for_chord_generation: "settings/keymaps/dvorak24.kmap"
 
   layer_left_hand_keys:
     type: "KmapLayer"
